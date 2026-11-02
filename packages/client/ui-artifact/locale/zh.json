@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Artifact 预览界面",
+    "description": "在会话中隔离展示 HTML Artifact，并在用户确认后发送操作。"
+  }
+}

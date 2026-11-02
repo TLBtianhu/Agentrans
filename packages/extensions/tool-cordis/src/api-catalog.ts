@@ -460,6 +460,33 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
     ],
   },
   {
+    key: 'artifacts',
+    summary: '`ctx.artifacts`: validated artifact snapshots and user-action routing.',
+    description: '`ctx.artifacts`: validated artifact snapshots and user-action routing.',
+    methods: [
+      {
+        signature: 'prepare(agent: Agent, input: ArtifactPrepareInput): ArtifactSnapshot',
+        description: 'Validate and normalize one complete create or update without committing it.',
+        parameters: [{ name: 'agent', description: 'Agent whose Session supplies the current artifact revision.' }, { name: 'input', description: 'Complete new values and, for update, the observed base revision.' }],
+        returns: 'The snapshot to commit after the enclosing operation succeeds.',
+        throws: ['{ArtifactError} `ARTIFACT_EXISTS`, `ARTIFACT_NOT_FOUND`, `STALE_REVISION`, `BAD_SOURCE`, or `BAD_INPUT`; no Session event is appended.'],
+      },
+      {
+        signature: 'commit(agent: Agent, snapshot: ArtifactSnapshot): void',
+        description: 'Append one validated complete snapshot and perform no other operation.',
+        parameters: [{ name: 'agent', description: 'Agent owning the Session log.' }, { name: 'snapshot', description: 'Prepared complete artifact value.' }],
+        throws: ['{ArtifactError} when the snapshot violates the same persistent validation as `prepare`.'],
+      },
+      {
+        signature: '@Remote record( agent: Agent, artifactId: ArtifactId, revision: number, action: string, payload: JsonValue, wake: boolean, ): ArtifactRecordResult',
+        description: 'Encode one user-reviewed artifact intent as a single-text-block UserMessage. The message is input, never an authorization to perform the named action.',
+        parameters: [{ name: 'agent', description: 'Exact live root Agent owning the artifact Session.' }, { name: 'artifactId', description: 'Existing artifact identity.' }, { name: 'revision', description: 'Current artifact revision reviewed by the user.' }, { name: 'action', description: 'Trimmed 1-64 character action name matching `[A-Za-z][A-Za-z0-9._-]*`.' }, { name: 'payload', description: 'Lossless JSON payload included in the bounded text message.' }, { name: 'wake', description: '`false` injects without waking; `true` steers the Agent.' }],
+        returns: 'Acceptance and the revision carried by the message.',
+        throws: ['{ArtifactError} for a non-root caller, unknown or stale artifact, invalid action/payload, or an oversized complete message; no message is routed on validation failure.'],
+      },
+    ],
+  },
+  {
     key: 'attachments',
     summary: 'Immutable binary attachment service.',
     description: 'Immutable binary attachment service. Implementations validate bytes before publishing a reference.',
@@ -2747,6 +2774,13 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         description: 'Fork one cold-readable exact event prefix into a new Session. An omitted boundary selects the latest completed-turn prefix; an open cut receives synthetic fork closers.',
         parameters: [{ name: 'request', description: 'source Session, optional exact inclusive event boundary, and migration preflight choice.' }],
         returns: 'the new Session identity.',
+      },
+      {
+        signature: '@Remote({ name: \'returnBranchResult\', resources: { session: (request: SessionBranchResultRequest) => [request.sessionId, request.branchSessionId], }, }) async returnBranchResult(request: SessionBranchResultRequest): Promise<SessionBranchResultValue>',
+        description: 'Return one user-confirmed assistant conclusion to the direct parent without starting a model turn. A repeated `(parent, branch, resultSeq)` request returns the existing parent event.',
+        parameters: [{ name: 'request', description: 'direct parent, ordinary branch, and child-owned durable assistant seq.' }],
+        returns: 'the parent-local user/message receipt after its durability checkpoint.',
+        throws: ['RemoteError when lineage or the result is invalid, or the parent is running or under maintenance.'],
       },
       {
         signature: '@Remote(\'prompt\') async prompt(request: SessionPromptRequest, signal: AbortSignal): Promise<SessionPromptValue>',
@@ -5592,6 +5626,30 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface ArchiveSessionOptions {\n    readonly stopActivity?: boolean;\n}',
   },
   {
+    name: 'ArtifactFormat',
+    declaration: 'export type ArtifactFormat = \'html\';',
+  },
+  {
+    name: 'ArtifactId',
+    declaration: 'export type ArtifactId = Branded<\'ArtifactId\'>;',
+  },
+  {
+    name: 'ArtifactPrepareInput',
+    declaration: 'export interface ArtifactPrepareInput {\n    readonly action: \'create\' | \'update\';\n    readonly artifactId: string;\n    readonly title: string;\n    readonly source: string;\n    readonly presentation: ArtifactPresentation;\n    readonly baseRevision?: number;\n}',
+  },
+  {
+    name: 'ArtifactPresentation',
+    declaration: 'export type ArtifactPresentation = \'inline\' | \'focus\';',
+  },
+  {
+    name: 'ArtifactRecordResult',
+    declaration: 'export interface ArtifactRecordResult {\n    readonly accepted: true;\n    readonly revision: number;\n}',
+  },
+  {
+    name: 'ArtifactSnapshot',
+    declaration: 'export interface ArtifactSnapshot {\n    readonly artifactId: ArtifactId;\n    readonly revision: number;\n    readonly format: ArtifactFormat;\n    readonly title: string;\n    readonly source: string;\n    readonly presentation: ArtifactPresentation;\n}',
+  },
+  {
     name: 'AskOptions',
     declaration: 'export interface AskOptions {\n    options?: readonly string[];\n    header?: string;\n    multiSelect?: true;\n}',
   },
@@ -8234,6 +8292,14 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'SessionAvailability',
     declaration: 'export type SessionAvailability = \'live\' | \'persisted\';',
+  },
+  {
+    name: 'SessionBranchResultRequest',
+    declaration: 'export interface SessionBranchResultRequest {\n    readonly sessionId: SessionId;\n    readonly branchSessionId: SessionId;\n    readonly resultSeq: number;\n}',
+  },
+  {
+    name: 'SessionBranchResultValue',
+    declaration: 'export interface SessionBranchResultValue {\n    readonly parentSessionId: SessionId;\n    readonly eventSeq: SessionSeq;\n    readonly messageId: MessageId;\n}',
   },
   {
     name: 'SessionCancelRequest',

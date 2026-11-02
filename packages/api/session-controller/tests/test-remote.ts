@@ -44,6 +44,8 @@ import type {
   SessionCreateValue,
   SessionForkRequest,
   SessionForkValue,
+  SessionBranchResultRequest,
+  SessionBranchResultValue,
   SessionFollowFrame,
   SessionFollowRequest,
   SessionListRequest,
@@ -79,6 +81,7 @@ export interface TestSessionRemote {
   modelCatalog(): Promise<RemoteResult<ModelCatalog>>
   rename(request: SessionRenameRequest): Promise<RemoteResult<SessionRenameValue>>
   fork(request: SessionForkRequest): Promise<RemoteResult<SessionForkValue>>
+  returnBranchResult(request: SessionBranchResultRequest): Promise<RemoteResult<SessionBranchResultValue>>
   prompt(request: SessionPromptRequest, signal?: AbortSignal): Promise<RemoteResult<SessionPromptValue>>
   attachment(request: SessionAttachmentRequest): Promise<RemoteResult<SessionAttachmentValue>>
   updateQueue(request: SessionUpdateQueueRequest): Promise<RemoteResult<SessionUpdateQueueValue>>
@@ -123,6 +126,7 @@ export const TEST_IMAGE_LIMITS: ImageAttachmentLimits = Object.freeze({
 interface TestSessionInspection {
   readonly meta: SessionHeader
   readonly events: readonly SessionEvent[]
+  readonly inheritedEventCount?: SessionLogOffset
 }
 
 type LegacyTestPersistence = Record<string, unknown> & {
@@ -151,7 +155,7 @@ function testReadHandle(
   return {
     id: sessionId,
     header: inspection.meta,
-    inheritedEventCount: SessionLogOffset(0),
+    inheritedEventCount: inspection.inheritedEventCount ?? SessionLogOffset(0),
     access: 'read',
     read: (offset = 0, length?: number, options?: SessionHandleReadOptions) => {
       options?.signal?.throwIfAborted()
@@ -376,6 +380,7 @@ export async function createSessionTestRemote(
     modelCatalog: () => remoteResult(() => direct.modelCatalog()),
     rename: request => remoteResult(() => direct.rename(request)),
     fork: request => remoteResult(() => direct.fork(request)),
+    returnBranchResult: request => remoteResult(() => direct.returnBranchResult(request)),
     prompt: (request, signal = new AbortController().signal) => remoteResult(
       () => direct.prompt(request, signal),
       signal,

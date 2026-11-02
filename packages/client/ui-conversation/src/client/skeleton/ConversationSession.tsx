@@ -72,7 +72,7 @@ interface Breadcrumb {
   readonly subagent: boolean
 }
 
-function deriveAncestry(list: SessionListState, id: SessionId): readonly Breadcrumb[] {
+export function deriveAncestry(list: SessionListState, id: SessionId): readonly Breadcrumb[] {
   const chain: Breadcrumb[] = []
   const seen = new Set<SessionId>()
   let cursor: SessionId | undefined = id
@@ -86,7 +86,6 @@ function deriveAncestry(list: SessionListState, id: SessionId): readonly Breadcr
       displayTitle: summary.displayTitle,
       subagent: summary.origin === 'subagent',
     })
-    if (summary.origin !== 'subagent') break
     cursor = summary.parentId
   }
   return chain

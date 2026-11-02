@@ -1,0 +1,16 @@
+# Bilingual-pair consistency record for branch.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write docs/subsystems/branch.md
+/manual-branch:
+  en: 9f49cebe1f7d5fa4
+  zh: 7a1959510be98c2e
+/manual-branch/fork-and-lineage:
+  en: 8429d02844a0aa05
+  zh: 464d277e7d019fe8
+/manual-branch/confirmed-result-return:
+  en: aabdc4752bbf1aad
+  zh: b9ac474017143da9
+/manual-branch/limitations:
+  en: 65c9d3840654058e
+  zh: 7c21d9a0c45cbca0

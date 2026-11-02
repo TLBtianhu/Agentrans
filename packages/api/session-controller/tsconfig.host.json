@@ -53,6 +53,9 @@
       "path": "../../core/session"
     },
     {
+      "path": "../../session/session-branch"
+    },
+    {
       "path": "../../context/file-reference"
     },
     {

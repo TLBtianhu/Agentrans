@@ -133,6 +133,10 @@ describe('sessions.fork', () => {
       expect(open).toHaveBeenCalledWith(source.id, 'read', undefined)
       expect(ctx.sessions.get(source.id)).toBeUndefined()
       expect(ctx.sessions.get(response.value.sessionId)?.inheritedEventCount).toBe(2)
+      expect(ctx.sessions.get(response.value.sessionId)?.header).toMatchObject({
+        parentSession: source.id,
+        isSeeded: true,
+      })
     } finally {
       await ctx.fiber.dispose()
     }
@@ -328,7 +332,7 @@ describe('sessions.fork', () => {
     },
   )
 
-  it('cuts exactly at a completed turn and retains cwd without source lineage', async () => {
+  it('cuts exactly at a completed turn and retains cwd and direct source lineage', async () => {
     const ctx = await composed()
     const source = await liveAgent(ctx, 'session-source', 2)
     const response = await (await remote(ctx)).fork(request({ sessionId: source.id, atSeq: 2 }))
@@ -338,9 +342,30 @@ describe('sessions.fork', () => {
     expect(child?.snapshotEvents().map(event => event.type)).toEqual([
       'turn/start', 'user/message', 'turn/end', 'session/end-seed',
     ])
-    expect(child?.header.parentSession).toBeUndefined()
+    expect(child?.header.parentSession).toBe(source.id)
     expect(child?.header.cwd).toBe('/proj')
     await ctx.fiber.dispose()
+  })
+
+  it('records the immediate branch parent for a nested ordinary fork', async () => {
+    const ctx = await composed()
+    try {
+      const root = await liveAgent(ctx, 'session-root', 1)
+      const proxy = await remote(ctx)
+      const first = await proxy.fork({ sessionId: root.id })
+      if (!first.ok) throw first.error
+      const second = await proxy.fork({ sessionId: first.value.sessionId })
+
+      if (!second.ok) throw second.error
+      expect(ctx.sessions.get(second.value.sessionId)?.header).toMatchObject({
+        parentSession: first.value.sessionId,
+        isSeeded: true,
+      })
+      expect(ctx.sessions.get(second.value.sessionId)?.header.parentSession).not.toBe(root.id)
+      expect(ctx.sessions.get(second.value.sessionId)?.header.origin).toBeUndefined()
+    } finally {
+      await ctx.fiber.dispose()
+    }
   })
 
   it('attaches a subagent fork to its nearest workspace-owning ancestor', async () => {
@@ -382,7 +407,7 @@ describe('sessions.fork', () => {
       cwd: '/proj',
     })
     expect(ctx.sessions.get(response.value.sessionId)?.header.origin).toBeUndefined()
-    expect(ctx.sessions.get(response.value.sessionId)?.header.parentSession).toBeUndefined()
+    expect(ctx.sessions.get(response.value.sessionId)?.header.parentSession).toBe(grandchild.id)
     await ctx.fiber.dispose()
   })
 
@@ -438,7 +463,7 @@ describe('sessions.fork', () => {
       cwd: '/proj',
     })
     expect(ctx.sessions.get(response.value.sessionId)?.header.origin).toBeUndefined()
-    expect(ctx.sessions.get(response.value.sessionId)?.header.parentSession).toBeUndefined()
+    expect(ctx.sessions.get(response.value.sessionId)?.header.parentSession).toBe(sourceId)
     await ctx.fiber.dispose()
   })
 

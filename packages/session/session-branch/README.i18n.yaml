@@ -1,0 +1,43 @@
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write packages/session/session-branch/README.md
+/:
+  en: 5a616ab27703e3f9
+  zh: 70ed7244b997cf25
+/deepseek-ai-dsh-session-branch:
+  en: e51e2e4962d6322c
+  zh: 574e4864d3c23b73
+/deepseek-ai-dsh-session-branch/summary:
+  en: 8cfd864a04efcdfb
+  zh: c4c883d232a62494
+/deepseek-ai-dsh-session-branch/table-of-contents:
+  en: ebe0529e07753162
+  zh: 0215c7836038f504
+/deepseek-ai-dsh-session-branch/api:
+  en: 897fc27aafd08764
+  zh: fae0bda3fc6be96a
+/deepseek-ai-dsh-session-branch/model-experience:
+  en: 215e7ba838619b7b
+  zh: a311da3843709f90
+/deepseek-ai-dsh-session-branch/model-experience/branch-result-history:
+  en: da02e70a5d1fe6cf
+  zh: 1ccebcd378e28039
+/deepseek-ai-dsh-session-branch/model-experience/branch-result-history/what-the-model-sees:
+  en: 726e3258395655fd
+  zh: d054a610aa59c7c0
+/deepseek-ai-dsh-session-branch/model-experience/branch-result-history/token-effect:
+  en: e528bfd3379f2984
+  zh: ac3194ffad3e8ef0
+/deepseek-ai-dsh-session-branch/model-experience/branch-result-history/kv-cache-effect:
+  en: e5ea84eb57fb6f56
+  zh: c52c1bb4a59b11ad
+/deepseek-ai-dsh-session-branch/model-experience/branch-result-history/kv-cache-effect/selection-boundary:
+  en: e23c2f6db367307e
+  zh: ac182349aa66b4b0
+/deepseek-ai-dsh-session-branch/known-limitations-and-deferred-work:
+  en: ee3f8cb7955c9ae9
+  zh: 995b3efda511f888
+/deepseek-ai-dsh-session-branch/known-limitations-and-deferred-work/dev-note:
+  en: 0a1253c6f7b5e8b9
+  zh: 9f56528562c7c914

@@ -636,6 +636,14 @@ const SERVICE_ROLES: ServiceRole[] = [
     note: 'UI front ends provide the active human-answer provider; tool-ask-user pauses a tool call on the provider-neutral ask() promise.',
   },
   {
+    key: 'artifacts',
+    pkg: 'artifact',
+    title: 'Executable Artifact lifecycle',
+    mode: 'seam',
+    consumers: ['ui-artifact'],
+    note: 'Stores complete Artifact snapshots and compare-and-set revisions, exposes the artifact tool, and turns confirmed user actions into ordinary text input.',
+  },
+  {
     key: 'planMode',
     pkg: 'plan-mode',
     title: 'Plan collaboration state',

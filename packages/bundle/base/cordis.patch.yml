@@ -79,6 +79,9 @@
     - id: user-questions
       name: '@deepseek-ai/dsh-user-questions'
 
+    - id: artifacts
+      name: '@deepseek-ai/dsh-artifact'
+
     - id: agent
       name: '@deepseek-ai/dsh-agent'
 

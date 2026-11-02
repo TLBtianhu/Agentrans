@@ -75,6 +75,7 @@
     {
       "path": "../../interaction/user-questions"
     },
+    { "path": "../../artifact/artifact" },
     {
       "path": "../job-controller/tsconfig.client.json"
     },

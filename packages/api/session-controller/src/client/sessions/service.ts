@@ -5,6 +5,7 @@ import { SessionSeq, type SessionId } from '@deepseek-ai/dsh-session/types'
 import { workspaceTitleOf } from '@deepseek-ai/dsh-util-workspace-path'
 import type { WorkspaceId } from '@deepseek-ai/dsh-workspace/types'
 import { SESSION_SEARCH_RESULT_LIMIT } from '../../types.ts'
+import type { SessionBranchResultRequest, SessionBranchResultValue } from '../../types.ts'
 import type { SessionProjectionSummaryValues } from '@deepseek-ai/dsh-session-projection/types'
 import {
   createSnapshotStore, notifySubscribers, type ObservableSnapshot, type SnapshotStore,
@@ -98,6 +99,16 @@ export class SessionForkError extends Error {
     readonly sourceSessionId: SessionId,
   ) {
     super(`session fork failed: ${rpcError.code}: ${rpcError.message}`)
+  }
+}
+
+/** Structured branch-result return failure. */
+export class SessionBranchResultError extends Error {
+  override readonly name = 'SessionBranchResultError'
+
+  /** @param rpcError - Host business or folded transport error. @param request - rejected return request. */
+  constructor(readonly rpcError: RemoteFailure, readonly request: SessionBranchResultRequest) {
+    super(`branch result return failed: ${rpcError.code}: ${rpcError.message}`)
   }
 }
 
@@ -484,6 +495,18 @@ export class ClientSessions implements ISessions {
       if (!renamed.ok) throw new Error(`fork child rename failed: ${renamed.error.code}: ${renamed.error.message}`)
     }
     return childId
+  }
+
+  /**
+   * Return one confirmed branch result without retaining or opening either Session locally.
+   * @param request - direct parent, branch, and child-owned assistant event seq.
+   * @returns the committed parent-local event, including an idempotent replay.
+   * @throws {SessionBranchResultError} with the rejected request.
+   */
+  async returnBranchResult(request: SessionBranchResultRequest): Promise<SessionBranchResultValue> {
+    const result = await this.manager.returnBranchResult(request)
+    if (!result.ok) throw new SessionBranchResultError(result.error, request)
+    return result.value
   }
 
   /**

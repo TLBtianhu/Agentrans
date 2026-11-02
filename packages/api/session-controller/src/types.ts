@@ -8,7 +8,8 @@ import type {
 import type { Branded } from '@deepseek-ai/dsh-brand'
 import type { LlmAttemptId, MessageId } from '@deepseek-ai/dsh-llm/brand'
 import type { LlmModelBadge, TextBlock } from '@deepseek-ai/dsh-llm'
-import type { SessionId, SessionSeqCursor } from '@deepseek-ai/dsh-session/types'
+import type { SessionId, SessionSeq, SessionSeqCursor } from '@deepseek-ai/dsh-session/types'
+import type { BranchResultSelectionFailure } from '@deepseek-ai/dsh-session-branch/types'
 import type { SessionProjectionMap, SessionProjectionSummaryExcluded, SessionProjectionSummaryValues } from '@deepseek-ai/dsh-session-projection/types'
 import type { Principal } from '@deepseek-ai/dsh-typert-protocol'
 import type { JsonValue } from '@deepseek-ai/dsh-util-values'
@@ -203,6 +204,12 @@ declare module '@deepseek-ai/dsh-typert-protocol' {
     'session/steer-unavailable': { readonly itemId: MessageId }
     'session/title-invalid': { readonly sessionId: SessionId }
     'session/fork-unavailable': { readonly sessionId: SessionId }
+    'session/branch-result-unavailable': {
+      readonly parentSessionId: SessionId
+      readonly branchSessionId: SessionId
+      readonly resultSeq: number
+      readonly reason: BranchResultSelectionFailure
+    }
     'session/migration-required': { readonly sessionId: SessionId }
     'subagent/not-found': {
       readonly parentSessionId: SessionId
@@ -315,6 +322,21 @@ export interface SessionForkRequest {
 /** Identity of a newly forked Session. */
 export interface SessionForkValue {
   readonly sessionId: SessionId
+}
+
+/** Request to return one user-confirmed child conclusion to its direct parent. */
+export interface SessionBranchResultRequest {
+  readonly sessionId: SessionId
+  readonly branchSessionId: SessionId
+  /** Exact child-owned durable assistant/message seq; no message text crosses the wire. */
+  readonly resultSeq: number
+}
+
+/** Parent-local event committed by a branch-result return, or found by an idempotent retry. */
+export interface SessionBranchResultValue {
+  readonly parentSessionId: SessionId
+  readonly eventSeq: SessionSeq
+  readonly messageId: MessageId
 }
 
 /** Session prompt request. */

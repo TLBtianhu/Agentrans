@@ -39,6 +39,7 @@ The group splits into four families: durable storage (persistence seam, backends
 | [`session-persistence-jsonl/`](session-persistence-jsonl/README.md) | Shipped backend: immutable canonical generation filenames per Session with exclusive successor publication, optionally Zstandard-compressed | registers on `ctx.sessionPersistence` |
 | [`session-checkpoint-policy/`](session-checkpoint-policy/README.md) | Makes model requests, top-level tool side effects, and completed steps durable before the next action | wraps `ctx.llm` and `ctx.tools` |
 | [`session-log-deepseek/`](session-log-deepseek/README.md) | Uploads the incremental canonical log as optional official DeepSeek request metadata | contributes `dsh_session_log` |
+| [`session-branch/`](session-branch/README.md) | Selects and constructs user-confirmed manual-branch results with direct-parent validation and idempotent lookup | pure library — no ctx key |
 
 ### Projection
 
@@ -74,6 +75,7 @@ Only one title provider may register at a time; without one, the title service k
 ## Related documentation
 
 - [Session persistence subsystem](../../docs/subsystems/persistence.md) — backend-neutral service semantics, the flush checkpoint, and crash recovery.
+- [Manual branch subsystem](../../docs/subsystems/branch.md) — direct lineage and confirmed result return.
 - [Working directory subsystem](../../docs/subsystems/working-directory.md) — effective directory and recovery.
 - [Session projections subsystem](../../docs/subsystems/session-projection.md) — the projection unit contract and drive semantics.
 - [Session titles subsystem](../../docs/subsystems/session-title.md) — title eligibility, fallback, and provider flow.

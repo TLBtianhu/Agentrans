@@ -957,6 +957,15 @@ workspaceDesktop(): { name: string; available: boolean; fileManager: 'finder' | 
 @Remote('fork') async fork(request: SessionForkRequest): Promise<SessionForkValue>
 
 /**
+ * Return one user-confirmed assistant conclusion to the direct parent without starting a model turn.
+ * A repeated `(parent, branch, resultSeq)` request returns the existing parent event.
+ * @param request - direct parent, ordinary branch, and child-owned durable assistant seq.
+ * @returns the parent-local user/message receipt after its durability checkpoint.
+ * @throws RemoteError when lineage or the result is invalid, or the parent is running or under maintenance.
+ */
+@Remote({ name: 'returnBranchResult', resources: { session: (request: SessionBranchResultRequest) => [request.sessionId, request.branchSessionId], }, }) async returnBranchResult(request: SessionBranchResultRequest): Promise<SessionBranchResultValue>
+
+/**
  * Admit one prompt after explicitly resuming its Session.
  * @param request - Session identity, prompt content, source metadata, and delivery mode.
  * @param signal - caller cancellation before prompt admission begins.
@@ -1058,7 +1067,7 @@ workspaceDesktop(): { name: string; available: boolean; fileManager: 'finder' | 
 @Remote({ mode: 'stream' }) async *control(signal: AbortSignal): AsyncIterable<SessionControlFrame>
 ```
 
-Types: [SessionId](core.zh.md) · [SessionSearchRequest](session-query.zh.md)
+Types: [SessionBranchResultRequest](branch.zh.md) · [SessionBranchResultValue](branch.zh.md) · [SessionId](core.zh.md) · [SessionSearchRequest](session-query.zh.md)
 
 Source: [`packages/api/session-controller/src/index.ts`](../../packages/api/session-controller/src/index.ts)
 

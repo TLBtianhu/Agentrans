@@ -10,8 +10,13 @@ import { errorChain, ReasoningEffortId, type MessageSource } from '@deepseek-ai/
 import type {} from '@deepseek-ai/dsh-client-file-upload'
 import { canOpenNativePath, nativeFileManager, nativeFileApplications, openNativeFileApplication, openNativeAssociatedPath, revealNativePath } from '@deepseek-ai/dsh-native-command'
 import type { SessionId } from '@deepseek-ai/dsh-session'
+import { SessionSeq } from '@deepseek-ai/dsh-session'
+import {
+  createBranchResultMessage, findBranchResult, selectBranchResult,
+} from '@deepseek-ai/dsh-session-branch'
+import type { BranchResultSelectionFailure } from '@deepseek-ai/dsh-session-branch/types'
 import type {} from '@deepseek-ai/dsh-session-projection-cache'
-import type { SessionObservation } from '@deepseek-ai/dsh-session-query'
+import { SessionQueryError, type SessionObservation } from '@deepseek-ai/dsh-session-query'
 import { Remote, RemoteError, TypertRemoteService, principalOf, type TypertResourceResolveInput } from '@deepseek-ai/dsh-typert-protocol'
 import { canonicalClientTimeZone } from '@deepseek-ai/dsh-util-time'
 import { assertNever } from '@deepseek-ai/dsh-util-values'
@@ -46,6 +51,8 @@ import type {
   SessionFollowRequest,
   SessionForkRequest,
   SessionForkValue,
+  SessionBranchResultRequest,
+  SessionBranchResultValue,
   SessionListRequest,
   SessionListValue,
   SessionOpenWorkspacePathRequest,
@@ -104,6 +111,19 @@ function resolveSessionResource({ args, parameters }: TypertResourceResolveInput
       : address.kind === 'session' ? address.sessionId : address.childSessionId)
   }
   return undefined
+}
+
+/** Stable rejection for a result that does not satisfy direct-branch lineage or child-owned text rules. */
+function branchResultUnavailable(
+  request: SessionBranchResultRequest,
+  reason: BranchResultSelectionFailure,
+): RemoteError<'session/branch-result-unavailable'> {
+  return new RemoteError('session/branch-result-unavailable', `branch result is unavailable: ${reason}`, {
+    parentSessionId: request.sessionId,
+    branchSessionId: request.branchSessionId,
+    resultSeq: request.resultSeq,
+    reason,
+  })
 }
 
 /** Session Controller deployment policy. */
@@ -169,6 +189,7 @@ export class SessionController extends TypertRemoteService {
   private readonly canOpenPath: () => boolean
   private readonly listWorkSliceMs: number
   private readonly promotions = new Set<Promise<void>>()
+  private readonly branchResults = new Map<string, Promise<SessionBranchResultValue>>()
 
   /**
    * @param ctx - Host context containing the Session capability assembly.
@@ -453,6 +474,81 @@ export class SessionController extends TypertRemoteService {
       }
     }
     return this.commands.fork(request)
+  }
+
+  /**
+   * Return one user-confirmed assistant conclusion to the direct parent without starting a model turn.
+   * A repeated `(parent, branch, resultSeq)` request returns the existing parent event.
+   * @param request - direct parent, ordinary branch, and child-owned durable assistant seq.
+   * @returns the parent-local user/message receipt after its durability checkpoint.
+   * @throws RemoteError when lineage or the result is invalid, or the parent is running or under maintenance.
+   */
+  @Remote({
+    name: 'returnBranchResult',
+    resources: {
+      session: (request: SessionBranchResultRequest) => [request.sessionId, request.branchSessionId],
+    },
+  })
+  async returnBranchResult(request: SessionBranchResultRequest): Promise<SessionBranchResultValue> {
+    let resultSeq: ReturnType<typeof SessionSeq>
+    try {
+      resultSeq = SessionSeq(request.resultSeq)
+    } catch {
+      throw new RemoteError('gateway/bad-request', 'resultSeq must be a non-negative safe integer', {})
+    }
+    const key = JSON.stringify([request.sessionId, request.branchSessionId, resultSeq])
+    const existing = this.branchResults.get(key)
+    if (existing !== undefined) return existing
+    const operation = this.commitBranchResult(request, resultSeq)
+    this.branchResults.set(key, operation)
+    try {
+      return await operation
+    } finally {
+      if (this.branchResults.get(key) === operation) this.branchResults.delete(key)
+    }
+  }
+
+  private async commitBranchResult(
+    request: SessionBranchResultRequest,
+    resultSeq: ReturnType<typeof SessionSeq>,
+  ): Promise<SessionBranchResultValue> {
+    let observed: SessionObservation
+    try {
+      observed = await this.ctx.sessionQuery.observeSession(request.branchSessionId, { projectionMode: 'none' })
+    } catch (error) {
+      if (error instanceof SessionQueryError && error.code === 'SESSION_QUERY_SESSION_NOT_FOUND') {
+        throw new RemoteError('session/not-found', `session "${request.branchSessionId}" not found`, {
+          sessionId: request.branchSessionId,
+        })
+      }
+      throw error
+    }
+    const selection = (() => {
+      using child = observed
+      return selectBranchResult(child, request.sessionId, resultSeq)
+    })()
+    if (!selection.ok) throw branchResultUnavailable(request, selection.reason)
+    const resolved = await this.agents.resolveAgent(request.sessionId)
+    if ('error' in resolved) throw resolved.error
+    const parent = resolved.agent
+    try {
+      return await parent.runMaintenance(async (signal) => {
+        using current = await this.ctx.sessionQuery.observeSession(parent.id, { projectionMode: 'none', signal })
+        const existing = findBranchResult(current.events, selection.value.reference)
+        if (existing !== undefined) {
+          await this.ctx.sessions.flush(parent.session)
+          return { parentSessionId: parent.id, ...existing }
+        }
+        const message = createBranchResultMessage(selection.value)
+        const event = parent.session.append('user/message', message, { surfaceOp: 'append' })
+        await this.ctx.sessions.flush(parent.session)
+        return { parentSessionId: parent.id, eventSeq: event.seq, messageId: event.data.id }
+      })
+    } catch (error) {
+      throw new RemoteError('session/agent-busy', 'The parent branch is running; retry when it becomes idle.', {
+        reason: 'branch-result-parent-busy',
+      }, { cause: error })
+    }
   }
 
   /**

@@ -11,6 +11,7 @@ import type { WorkspaceId } from '@deepseek-ai/dsh-workspace/types'
 import type { RemoteResult } from '@deepseek-ai/dsh-typert-protocol'
 import type { AgentContext } from '../scope.ts'
 import type { SessionSearchResultItem } from '../sessions/manager.ts'
+import type { SessionBranchResultRequest, SessionBranchResultValue } from '../../types.ts'
 import type { SessionBinding, SessionListState } from '../sessions/service.ts'
 import type { SessionFace } from './session.ts'
 import type { ObservableSnapshot } from '@deepseek-ai/dsh-client-store'
@@ -140,6 +141,14 @@ export interface ISessions {
     /** False refuses source migration; omission preserves the Host default. */
     allowMigration?: boolean
   }): Promise<SessionId>
+  /**
+   * Return one user-confirmed branch conclusion to its direct parent.
+   * The Host rereads the durable child text and enforces idempotency; no model turn starts.
+   * @param request - direct parent, branch, and child-owned assistant event seq.
+   * @returns the new or previously committed parent-local event.
+   * @throws SessionBranchResultError when the Host rejects or cannot reach the operation.
+   */
+  returnBranchResult(request: SessionBranchResultRequest): Promise<SessionBranchResultValue>
   /**
    * Borrow an already-retained Agent-scoped Context without extending its lifetime.
    * @param id - session id.

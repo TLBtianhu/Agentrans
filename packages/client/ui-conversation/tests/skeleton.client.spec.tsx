@@ -24,7 +24,7 @@ import { en, zh } from '../src/client/locales.ts'
 import { ConversationContent } from '../src/client/skeleton/ConversationContent.tsx'
 import { ConversationHeader } from '../src/client/skeleton/ConversationHeader.tsx'
 import { ConversationMainPanel } from '../src/client/skeleton/ConversationMainPanel.tsx'
-import { ConversationSession, ConversationSessionHeader } from '../src/client/skeleton/ConversationSession.tsx'
+import { ConversationSession, ConversationSessionHeader, deriveAncestry } from '../src/client/skeleton/ConversationSession.tsx'
 import { conversationPhase } from '../src/client/contract/snapshot.ts'
 import { HeroShell } from '../src/client/skeleton/EmptyHero.tsx'
 import type { HeroShellProps } from '../src/client/skeleton/EmptyHero.tsx'
@@ -138,6 +138,8 @@ function mount(
     summaryOrigin?: 'subagent'
     /** Insert a first-level subagent between the root and selected child. */
     nestedSubagent?: boolean
+    /** Give the selected row ordinary manual-branch lineage. */
+    ordinaryBranch?: boolean
     /** A composer block another plugin raised for this session. */
     composerBlock?: { reason: string }
     /** Mutable view ledger used by registration-order regressions. */
@@ -159,7 +161,10 @@ function mount(
     running: false, retainedBy: {}, blank: false, updatedAt: 2,
   }
   const childRow = {
-    id: SID, displayTitle: 'Child', parentId: options.nestedSubagent === true ? parent : root,
+    id: SID, displayTitle: 'Child',
+    ...(options.summaryOrigin !== undefined || options.ordinaryBranch === true
+      ? { parentId: options.nestedSubagent === true ? parent : root }
+      : {}),
     cwd: '/projects/one', running: false, retainedBy: { mainView: 1 }, blank: options.summaryBlank ?? false, updatedAt: 3,
     ...(options.summaryOrigin === undefined ? {} : { origin: options.summaryOrigin }),
   }
@@ -514,6 +519,32 @@ describe('ConversationRoot resident composer', () => {
     expect(b.view.getByText('Child').tagName).toBe('SPAN')
     fireEvent.click(root)
     expect(b.open).toHaveBeenCalledWith(sid('root'))
+  })
+
+  it('shows ordinary manual-branch ancestry and opens its direct parent', () => {
+    const b = mount(sessionSnapshotOf(), undefined, undefined, { ordinaryBranch: true })
+    const root = b.view.getByRole('button', { name: 'Root' })
+    expect(b.view.getByText('Child').tagName).toBe('SPAN')
+    fireEvent.click(root)
+    expect(b.open).toHaveBeenCalledWith(sid('root'))
+  })
+
+  it('derives nested ordinary branches and stops at lineage cycles', () => {
+    const row = (id: string, parentId?: SessionId) => ({
+      id: sid(id), displayTitle: id, running: false, retainedBy: {}, blank: false, updatedAt: 1,
+      ...parentId === undefined ? {} : { parentId },
+    })
+    const list = (rows: Record<string, ReturnType<typeof row>>): SessionListState => ({
+      ids: Object.keys(rows) as SessionId[], byId: rows, phase: 'ready', projectionsBySession: {},
+    })
+    const nested = list({
+      root: row('root'), child: row('child', sid('root')), grandchild: row('grandchild', sid('child')),
+    })
+    expect(deriveAncestry(nested, sid('grandchild')).map(item => item.id)).toEqual([
+      sid('root'), sid('child'), sid('grandchild'),
+    ])
+    const cycle = list({ root: row('root', sid('child')), child: row('child', sid('root')) })
+    expect(deriveAncestry(cycle, sid('child')).map(item => item.id)).toEqual([sid('root'), sid('child')])
   })
 
   it('keeps intermediate subagent breadcrumbs at the compact title size', () => {

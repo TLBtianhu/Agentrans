@@ -105,9 +105,8 @@ export interface SessionHeader {
   /** Absolute working directory the session was created in (if any). */
   readonly cwd?: string
   /**
-   * Direct creator of a subagent Session. Ordinary forks omit this field;
-   * historical ordinary forks may retain their source id here. Presence alone
-   * does not classify a Session as a subagent; use `origin` for that distinction.
+   * Direct creator of a subagent Session, or direct source of an ordinary manual fork.
+   * Presence alone does not classify a Session as a subagent; use `origin` for that distinction.
    */
   readonly parentSession?: SessionId
   /**

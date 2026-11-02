@@ -357,6 +357,12 @@
     - id: ui-deliverables
       name: '@deepseek-ai/dsh-client-ui-deliverables'
 
+    - id: ui-artifact
+      name: '@deepseek-ai/dsh-client-ui-artifact'
+
+    - id: ui-branch
+      name: '@deepseek-ai/dsh-client-ui-branch'
+
     # Records each top-level turn's changed files from git working-tree
     # snapshots; the changed-files card above renders its events.
     - id: workspace-changes

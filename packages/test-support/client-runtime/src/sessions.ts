@@ -11,7 +11,7 @@ import type {
   SessionSnapshot, SessionSummary, SessionTarget, SubmissionHandle,
 } from '@deepseek-ai/dsh-api-session-controller/client'
 import { scopeIdentityOf } from '@deepseek-ai/dsh-api-session-controller/src/client/scope.ts'
-import type { SessionRequestId } from '@deepseek-ai/dsh-api-session-controller/types'
+import type { SessionBranchResultRequest, SessionBranchResultValue, SessionRequestId } from '@deepseek-ai/dsh-api-session-controller/types'
 import type { SubagentAddress } from '@deepseek-ai/dsh-subagent/client'
 import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
 import type { ObservableSnapshot, SnapshotStore } from '@deepseek-ai/dsh-client-store'
@@ -321,6 +321,7 @@ export class TestSessions implements ISessions {
   /** Replaceable search behavior (see {@link TestSessions.stubSearch}). */
   private searchStub: ((query: string, signal: AbortSignal) => { items: SessionSearchResultItem[]; hasMore: boolean }) | undefined
   private createStub: ((opts: Parameters<ISessions['create']>[0]) => Promise<SessionId>) | undefined
+  private returnBranchResultStub: ((request: SessionBranchResultRequest) => Promise<SessionBranchResultValue>) | undefined
 
   /**
    * @param stabilize - the owning runtime's act wrapper.
@@ -680,6 +681,26 @@ export class TestSessions implements ISessions {
   fork(opts: Parameters<ISessions['fork']>[0]): Promise<SessionId> {
     this.calls.push({ method: 'fork', args: [opts] })
     return Promise.resolve(opts.sessionId)
+  }
+
+  /**
+   * Install the only accepted branch-result behavior for a test.
+   * @param impl - operation that produces the test's parent-local receipt.
+   */
+  stubReturnBranchResult(impl: (request: SessionBranchResultRequest) => Promise<SessionBranchResultValue>): void {
+    this.returnBranchResultStub = impl
+  }
+
+  /**
+   * Return a result only through the declared stub; never invent a durable receipt.
+   * @param request - parent, branch, and child result sequence supplied by the test.
+   * @returns the stubbed parent-local receipt.
+   */
+  returnBranchResult(request: SessionBranchResultRequest): Promise<SessionBranchResultValue> {
+    if (this.returnBranchResultStub === undefined) {
+      throw new Error('test sessions: returnBranchResult is not stubbed — call stubReturnBranchResult() first')
+    }
+    return this.returnBranchResultStub(request)
   }
 
   /**

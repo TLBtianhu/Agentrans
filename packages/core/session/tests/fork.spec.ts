@@ -66,7 +66,7 @@ describe('SessionStore.fork', () => {
     const child = sessions.fork(source, undefined, SessionId('empty-child'))
 
     expect(inherited(child)).toEqual([])
-    expect(child.header).not.toHaveProperty('parentSession')
+    expect(child.header.parentSession).toBe(source.id)
     expect(child.header).toMatchObject({
       id: SessionId('empty-child'),
       cwd: '/workspace',
@@ -91,13 +91,26 @@ describe('SessionStore.fork', () => {
     }).toThrow(TypeError)
     expect(firstUserMessage(source.snapshotEvents()).data.content).toEqual([{ type: 'text', text: 'hello' }])
     expect(firstUserMessage(child.snapshotEvents()).data.content).toEqual([{ type: 'text', text: 'hello' }])
-    expect(child.header).not.toHaveProperty('parentSession')
+    expect(child.header.parentSession).toBe(source.id)
     expect(child.header).toMatchObject({
       id: SessionId('child'),
       cwd: '/workspace',
       isSeeded: true,
     })
     expect(child.inheritedEventCount).toBe(source.seq)
+  })
+
+  it('records the immediate source for an ordinary nested fork without adding an origin', async () => {
+    const { ctx, sessions } = await setup()
+    const root = ctx.sessions.create(SessionId('lineage-root'))
+    appendClosedTurn(root, 1)
+    const child = sessions.fork(root, undefined, SessionId('lineage-child'))
+    const grandchild = sessions.fork(child, undefined, SessionId('lineage-grandchild'))
+
+    expect(child.header.parentSession).toBe(root.id)
+    expect(grandchild.header.parentSession).toBe(child.id)
+    expect(grandchild.header.parentSession).not.toBe(root.id)
+    expect(grandchild.header.origin).toBeUndefined()
   })
 
   it('includes stable log-only events appended after a closed turn', async () => {

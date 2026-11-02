@@ -24,6 +24,7 @@ function content(input: ReasoningContentInput) {
 export const renderReasoningSlot: AssistantMarkdownProps['renderSlot'] = (key: string, input: object) => {
   if (key !== 'conversation.chat.reasoning.body') throw new Error(`Unexpected reasoning Slot: ${key}`)
   return createElement(DefaultReasoningBody, {
+    rawText: '', text: '', running: false,
     ...input, renderFactorySlot: renderReasoningFactory,
   } as ComponentProps<typeof DefaultReasoningBody>)
 }

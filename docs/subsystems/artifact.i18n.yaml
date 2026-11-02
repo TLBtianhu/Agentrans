@@ -1,0 +1,19 @@
+# Bilingual-pair consistency record for artifact.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write docs/subsystems/artifact.md
+/artifact:
+  en: 81c7098f8f1dec0d
+  zh: 1d9ca64a6d69f541
+/artifact/protocol-values:
+  en: 2a189b5e5a5ac4bc
+  zh: 8fa3944e48233c30
+/artifact/mutation-and-action-semantics:
+  en: 1866d8702ef9f217
+  zh: dff69cecd392c8a5
+/artifact/presentation-and-recovery:
+  en: 48ba6d176ea3f023
+  zh: 3b905df8ed7a71a7
+/artifact/limitations:
+  en: 6022aee78382a085
+  zh: 70bb09dd043d9615

@@ -262,7 +262,7 @@ describe('Chat inject API', () => {
     b.runtime.ctx.provide('productAnalytics', { track } as never)
     const forkCreated = vi.spyOn(b.runtime.sessions, 'fork').mockImplementation(async (input) => { input.onCreated?.(ROOT); return ROOT })
     injected.forkAt(17)
-    expect(track).toHaveBeenCalledWith('branch_session_click', { session_id: ROOT, parent_session_id: ROOT, click_position: 'footer' })
+    expect(track).not.toHaveBeenCalled()
     await b.runtime.sessions.replaceEvents(ROOT, [
       { type: 'event', event: { type: 'turn/start', seq: SessionSeq(10), time: 10, data: { turn: 1 } } },
       { type: 'event', event: { type: 'step/start', seq: SessionSeq(11), time: 11, data: { turn: 1, step: 1 } } },

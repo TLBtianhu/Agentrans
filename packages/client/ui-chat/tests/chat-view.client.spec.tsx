@@ -453,7 +453,8 @@ function makeHarness(
     return imageSlotOverride?.(owner) ?? options?.fallback ?? null
   }
   const renderAssistantSlot: React.ComponentProps<typeof AssistantNodeView>['renderSlot'] = (name, owner, options) =>
-    name === 'conversation.chat.message.images' ? renderImages(name, owner, options) : renderReasoningSlot(name, owner, options)
+    name === 'conversation.chat.assistant.details' ? null
+      : name === 'conversation.chat.message.images' ? renderImages(name, owner, options) : renderReasoningSlot(name, { rawText: '', text: '', running: false, ...owner }, options)
   const renderNodeSlot: NodeRenderer = (key, owner, opts) => {
     if (nodeSlotOverride !== undefined) return nodeSlotOverride(key, owner, opts)
     return <HarnessChatNode standard={props} owner={owner}
@@ -2036,12 +2037,13 @@ describe('ChatView', () => {
     })
     expect(view.getAllByText('interrupt now')).toHaveLength(1)
     expect(view.container.querySelector('[data-pending-steering]')).toBeNull()
-    // Only the durable steering bubble: the turn is still running, so its
-    // assistant narration owns no footer yet, and a steering bubble never
-    // carries a branch action.
+    // Only the durable steering bubble carries its own branch action; the
+    // pending bubble above had no persistent seq to fork.
     expect(view.getAllByRole('button', { name: '复制' })).toHaveLength(1)
     const durableBubble = view.getByText('interrupt now').closest('[class*="userRow"]') as HTMLElement
-    expect(within(durableBubble).queryByRole('button', { name: '在新对话中分支' })).toBeNull()
+    const durableBranch = within(durableBubble).getByRole('button', { name: '在新对话中分支' })
+    fireEvent.click(durableBranch)
+    expect(h.forkAt).toHaveBeenCalledWith(2)
 
     act(() => {
       h.setSession({ running: false })
@@ -2050,9 +2052,11 @@ describe('ChatView', () => {
     // The Turn Tail belongs to the closed Turn, independently of a later
     // steering bubble's placement in the Chat list.
     const branchButtons = view.getAllByRole('button', { name: '在新对话中分支' })
-    expect(branchButtons).toHaveLength(1)
-    expect(branchButtons[0]!.getAttribute('aria-disabled')).toBeNull()
-    fireEvent.click(branchButtons[0]!)
+    expect(branchButtons).toHaveLength(2)
+    const footer = view.container.querySelector<HTMLElement>('[data-turn-tail="1"]')!
+    const footerBranch = within(footer).getByRole('button', { name: '在新对话中分支' })
+    expect(footerBranch.getAttribute('aria-disabled')).toBeNull()
+    fireEvent.click(footerBranch)
     // The branch action sends the real turn/end seq (the exact inclusive
     // Host boundary), not the assistant node seq.
     expect(h.forkAt).toHaveBeenCalledWith(3)
@@ -2655,7 +2659,7 @@ describe('ChatView', () => {
     expect(h.openView).toHaveBeenCalledWith('trajectory', 'a')
   })
 
-  it('shows assistant IconActions only on the last content message of each turn', () => {
+  it('shows branch actions on durable user rows and completed Turn footers', () => {
     const h = makeHarness({
       nodes: [
         user(1, 'hi'),
@@ -2668,11 +2672,12 @@ describe('ChatView', () => {
       turnEnds: new Map([[1, 4], [2, 6]]),
     })
     const view = render(<h.ChatView {...h.props} />)
-    // Branch renders only under assistant answers; user bubbles keep copy alone.
+    // These legacy Assistant fixtures omit messageId, so their rows add no
+    // message-level branch action; each durable user row and Turn footer has one.
     expect(view.getAllByRole('button', { name: '复制' })).toHaveLength(4)
     const branchButtons = view.getAllByRole('button', { name: '在新对话中分支' })
-    expect(branchButtons).toHaveLength(2)
-    expect(branchButtons.map(button => button.getAttribute('aria-disabled'))).toEqual([null, null])
+    expect(branchButtons).toHaveLength(4)
+    expect(branchButtons.map(button => button.getAttribute('aria-disabled'))).toEqual([null, null, null, null])
   })
 
   it('keeps every Assistant reply visible while the whole Turn folds its process', () => {
@@ -3638,18 +3643,37 @@ describe('ChatView', () => {
     expect(view.queryByText(/用时/)).toBeNull()
   })
 
-  it('enables fork only on the finalized assistant at the completed transcript tail', () => {
+  it('hides message-level fork for streaming and synthetic assistant nodes', () => {
     const h = makeHarness({
-      nodes: [user(1, 'question'), assistant(2, 'answer')],
+      partial: { turn: 1, step: 1, blocks: [{ kind: 'text', text: 'streaming' }] },
+    }, { running: true })
+    const view = render(<h.ChatView {...h.props} />)
+    expect(view.queryByRole('button', { name: '在新对话中分支' })).toBeNull()
+
+    act(() => {
+      h.setChat({
+        partial: null,
+        nodes: [{ ...assistant(2, 'interrupted'), interrupted: true }],
+      })
+    })
+    expect(view.getByText('已停止')).toBeTruthy()
+    expect(view.queryByRole('button', { name: '在新对话中分支' })).toBeNull()
+  })
+
+  it('forks durable user and assistant rows at their exact seq and retains the Turn footer entry', () => {
+    const durableAssistant = { ...assistant(2, 'answer'), messageId: MessageId('answer') }
+    const h = makeHarness({
+      nodes: [user(1, 'question'), durableAssistant],
       turnEnds: new Map([[1, 3]]),
     })
     const view = render(<h.ChatView {...h.props} />)
-    // The user bubble offers no branch; the settled answer's is live.
     const buttons = view.getAllByRole('button', { name: '在新对话中分支' })
-    expect(buttons).toHaveLength(1)
-    expect(buttons[0]!.getAttribute('aria-disabled')).toBeNull()
-    fireEvent.click(buttons[0]!)
-    expect(h.forkAt.mock.calls).toEqual([[3]])
+    expect(buttons).toHaveLength(3)
+    for (const [index, seq] of [1, 2, 3].entries()) {
+      expect(buttons[index]!.getAttribute('aria-disabled')).toBeNull()
+      fireEvent.click(buttons[index]!)
+      expect(h.forkAt).toHaveBeenLastCalledWith(seq)
+    }
   })
 
   it('disables fork when the indexed Turn has a later steering Node', () => {
@@ -3669,7 +3693,8 @@ describe('ChatView', () => {
     const view = render(<h.ChatView {...h.props} />)
     expect(view.getByText('change direction')).toBeTruthy()
     expect(chat.locations.getTurn(1)).toContain(later.key)
-    const branch = view.getByRole('button', { name: '在新对话中分支' })
+    const footer = view.container.querySelector<HTMLElement>('[data-turn-tail="1"]')!
+    const branch = within(footer).getByRole('button', { name: '在新对话中分支' })
     expect(branch.getAttribute('aria-disabled')).toBe('true')
     fireEvent.pointerDown(branch, { pointerType: 'touch' })
     fireEvent.click(branch)
@@ -3692,14 +3717,17 @@ describe('ChatView', () => {
     const view = render(<h.ChatView {...h.props} />)
     expect(view.getAllByRole('button', { name: '复制' })).toHaveLength(2)
     const buttons = view.getAllByRole('button', { name: '在新对话中分支' })
-    expect(buttons).toHaveLength(1)
-    expect(buttons[0]!.getAttribute('aria-disabled')).toBe('true')
-    fireEvent.click(buttons[0]!)
+    expect(buttons).toHaveLength(2)
+    expect(buttons[1]!.getAttribute('aria-disabled')).toBe('true')
+    fireEvent.click(buttons[1]!)
     expect(h.forkAt).not.toHaveBeenCalled()
   })
 
   it('omits the Turn Tail branch action when the Session access snapshot excludes session/fork', () => {
-    const h = makeHarness({ nodes: [user(1, 'question'), assistant(2, 'answer')], turnEnds: new Map([[1, 3]]) })
+    const h = makeHarness({
+      nodes: [user(1, 'question'), { ...assistant(2, 'answer'), messageId: MessageId('answer') }],
+      turnEnds: new Map([[1, 3]]),
+    })
     const useAccess = vi.fn((endpoint: string) => endpoint !== 'session/fork')
     // Chat Node renderers read the harness's standard props object, so the override goes there.
     Object.assign(h.props, { useAccess })

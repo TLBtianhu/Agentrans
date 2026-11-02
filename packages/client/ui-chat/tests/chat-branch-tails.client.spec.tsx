@@ -2,7 +2,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
-import { bindSnapshotSelector, makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
+import { allowAllAccess, bindSnapshotSelector, makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
 import type { PropsRenderSlots } from '@deepseek-ai/dsh-client-ui-slots'
 import { zh as commonZh } from '@deepseek-ai/dsh-client-locale/src/locales/zh.ts'
 import type {
@@ -83,7 +83,7 @@ function MessageItem({ node, t: translate, referenceLabels, skillNames }: Messag
   }
   const props: Partial<Omit<ChatNodeViewProps, 'node'>> & { node: ChatConversationViewNode } = {
     node: viewNode, t: translate, loadImage: unusedImageLoader, renderFactorySlot: renderUserFactory,
-    openFile: vi.fn(), useChat: useDetachedChat,
+    openFile: vi.fn(), useChat: useDetachedChat, forkAt: vi.fn(), ...allowAllAccess,
   }
   switch (node.kind) {
     case 'user':
@@ -175,7 +175,7 @@ describe('MessageItem arms', () => {
     expect(resolved.container.textContent).toContain('/123 then ')
   })
 
-  it('user bubbles expose clock / copy and neither branch nor edit; copy writes the text', () => {
+  it('user bubbles expose clock, copy, and branch actions; copy writes the text', () => {
     const writeText = vi.fn().mockResolvedValue(undefined)
     Object.defineProperty(navigator, 'clipboard', {
       configurable: true,
@@ -199,7 +199,7 @@ describe('MessageItem arms', () => {
     expect(stack?.contains(screen.getByText('14:24'))).toBe(false)
     expect(stack?.contains(screen.getByRole('button', { name: '复制' }))).toBe(false)
     expect(stack?.nextElementSibling?.contains(screen.getByRole('button', { name: '复制' }))).toBe(true)
-    expect(screen.queryByRole('button', { name: '在新对话中分支' })).toBeNull()
+    expect(screen.getByRole('button', { name: '在新对话中分支' })).toBeTruthy()
     expect(screen.queryByRole('button', { name: '编辑' })).toBeNull()
     fireEvent.click(screen.getByRole('button', { name: '复制' }))
     expect(writeText).toHaveBeenCalledWith('hello bubble')
@@ -328,7 +328,7 @@ describe('MessageItem arms', () => {
     expect(vi.getTimerCount()).toBe(0)
   })
 
-  it('consumed steering renders as a plain user bubble and keeps copy without branch', () => {
+  it('consumed steering renders as a plain durable user bubble with copy and branch actions', () => {
     const writeText = vi.fn().mockResolvedValue(undefined)
     Object.defineProperty(navigator, 'clipboard', {
       configurable: true,
@@ -346,7 +346,7 @@ describe('MessageItem arms', () => {
     expect(view.getByText(/附加内容块/)).toBeTruthy()
     fireEvent.click(view.getByRole('button', { name: '复制' }))
     expect(writeText).toHaveBeenCalledWith('steer!')
-    expect(view.queryByRole('button', { name: '在新对话中分支' })).toBeNull()
+    expect(view.getByRole('button', { name: '在新对话中分支' })).toBeTruthy()
   })
 
   it('context uses the Tool calls disclosure chrome and keeps its body collapsed by default', () => {

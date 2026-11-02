@@ -68,6 +68,13 @@ export interface AssistantActionOwnerProps {
   messageId: MessageId
 }
 
+/** Durable assistant identity and visible text offered to message-level detail entries. */
+export interface AssistantDetailsOwnerProps {
+  readonly messageId: MessageId
+  readonly seq: number
+  readonly text: string
+}
+
 /** Stable quota failure codes retained in the Session log; both raise the frame-wide notice. */
 export type QuotaNoticeCode = 'QUOTA' | 'ACCOUNT_QUOTA'
 
@@ -491,6 +498,8 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
      * that entry. With no entries, the standard action row remains unchanged.
      */
     'conversation.chat.assistant-actions': { kind: 'list'; scope: 'session'; owner: AssistantActionOwnerProps }
+    /** Message-level detail and confirmation entries below one durable assistant row. */
+    'conversation.chat.assistant.details': { kind: 'list'; scope: 'session'; owner: AssistantDetailsOwnerProps }
     /**
      * Frame-wide quota notice chain. The Chat-owned host in `shell.overlay`
      * offers the one live notice; the first entry whose selector claims its

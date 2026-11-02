@@ -7,6 +7,8 @@ import type { WorkspaceId } from '@deepseek-ai/dsh-workspace/types'
 import type {
   SessionControlBaseline,
   SessionControlFrame,
+  SessionBranchResultRequest,
+  SessionBranchResultValue,
   SessionProjectionHints,
   SessionRenameValue,
   SessionSummary,
@@ -552,9 +554,9 @@ export class SessionManager {
    * Contract session.fork; on success merge the child into summaries
    * immediately (same synchronous-addressability guarantee as create).
    * Blankness starts provisionally true so the authoritative Host summary can
-   * preserve it or lower it after an exact cut before the first `turn/start`;
-   * the fork has no durable source relationship. A child published before Workspace
-   * attachment fails is also reconciled into the list.
+   * preserve it or lower it after an exact cut before the first `turn/start`.
+   * The child records the source as its direct parent without becoming a subagent.
+   * A child published before Workspace attachment fails is also reconciled into the list.
    * @param opts - source session, optional exact inclusive boundary seq, and permission to start migration.
    * @returns the fork result (the child session id).
    */
@@ -573,10 +575,20 @@ export class SessionManager {
     if (childId !== undefined) {
       this.recordMutation({ kind: 'placeholder', summary: { agentAvailable: true,
         sessionId: childId, updatedAt: Date.now(), running: false, blank: true,
+        parentSessionId: opts.sessionId,
         ...(source?.cwd !== undefined ? { cwd: source.cwd } : {}),
       } })
     }
     return result
+  }
+
+  /**
+   * Forward one confirmed branch result without submitting its text from the Client.
+   * @param request - direct parent, branch, and child-owned assistant event seq.
+   * @returns the new or existing parent-local event, or the Host failure.
+   */
+  async returnBranchResult(request: SessionBranchResultRequest): Promise<RemoteResult<SessionBranchResultValue>> {
+    return this.remote.session.returnBranchResult(request)
   }
 
   /**

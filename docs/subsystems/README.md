@@ -16,6 +16,8 @@ One page per subsystem of the DeepSeek Harness: what it is, the data structures 
 | [schedule.md](schedule.md) | Host-owned reminder records, durable transitions, active and ended views, and ordinary-conversation delivery |
 | [todo.md](todo.md) | the todo package's whole-list item type, durable event ownership, and projection |
 | [deliverables.md](deliverables.md) | what a turn hands to the user: `PresentedFile` deliveries from `present` and the Host-served `WorkspaceChangesSummary` of changed files from git snapshots |
+| [artifact.md](artifact.md) | versioned code-generated interactive explanations: complete Artifact snapshots, revisions, and user-confirmed semantic actions |
+| [branch.md](branch.md) | manual prefix branches, direct lineage, and user-confirmed result return without replaying sibling history |
 | [commands.md](commands.md) | the human-command registry service: definitions, adapter discovery, direct invocation, results, and parsing views |
 | [session.md](session.md) | the full `SessionEventMap` variant catalog, `TurnEndReason`, `deriveMessages()`, execution enclosure, and standalone events |
 | [working-directory.md](working-directory.md) | Session execution directories, durable changes, recovery, and user context |

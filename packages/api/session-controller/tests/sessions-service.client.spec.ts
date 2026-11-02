@@ -7,9 +7,10 @@ import { RemoteError } from '@deepseek-ai/dsh-typert-protocol'
 import { LlmAttemptId } from '@deepseek-ai/dsh-llm'
 import { RemoteStreamCarrierError } from '@deepseek-ai/dsh-api-gateway/client'
 import { SESSION_FORMAT_VERSION, SessionSeq } from '@deepseek-ai/dsh-session/types'
+import { MessageId } from '@deepseek-ai/dsh-llm/brand'
 import { ok, streamHandle, type RemoteMock } from '@deepseek-ai/dsh-remote-mock'
 import { createClientTest, webApp } from '@deepseek-ai/dsh-client-test-runtime/src/assembly/index.ts'
-import { ClientSessions, SessionCreateError, SessionForkError } from '../src/client/sessions/service.ts'
+import { ClientSessions, SessionCreateError, SessionForkError, SessionBranchResultError } from '../src/client/sessions/service.ts'
 import { scopeOf } from '../src/client/scope.ts'
 import type {
   SessionAssistantStreamBaseline, SessionFollowFrame, SessionFollowRequest, SessionHistoryRecord,
@@ -1003,8 +1004,8 @@ describe('fork', () => {
     expect(b.svc.binding(sid('child'))).toBeUndefined()
     expect(b.svc.retainInfo(sid('child')).getSnapshot().referenceCount).toBe(0)
     await Promise.resolve()
-    expect(b.svc.list.getSnapshot().byId[sid('child')]).not.toHaveProperty('parentId')
     expect(b.svc.list.getSnapshot().byId[sid('child')]).toMatchObject({
+      parentId: 'source',
       title: childTitle,
       displayTitle: childTitle,
     })
@@ -1168,5 +1169,30 @@ describe('coverage tails (branch duals)', () => {
     await reference.ready
     expect(b.svc.binding(sid('ghost'))).toBeUndefined()
     expect(b.svc.binding(sid('s1'))).toBe(reference.binding)
+  })
+})
+
+describe('returnBranchResult', () => {
+  it('forwards ids and seq without text and returns the parent receipt', async ({ bench }) => {
+    const b = bench()
+    const request = { sessionId: sid('parent'), branchSessionId: sid('child'), resultSeq: 6 }
+    const receipt = { parentSessionId: sid('parent'), eventSeq: SessionSeq(9), messageId: MessageId('parent-message') }
+    b.mock.remote.session.returnBranchResult.mockResolvedValueOnce(ok(receipt))
+
+    await expect(b.svc.returnBranchResult(request)).resolves.toEqual(receipt)
+    expect(b.mock.remote.session.returnBranchResult).toHaveBeenCalledExactlyOnceWith(request)
+    expect(b.mock.log.requests(FOLLOW)).toHaveLength(0)
+  })
+
+  it('preserves the rejected request in a structured Client error', async ({ bench }) => {
+    const b = bench()
+    const request = { sessionId: sid('parent'), branchSessionId: sid('child'), resultSeq: 6 }
+    const error = new RemoteError('session/agent-busy', 'running', { reason: 'branch-result-parent-busy' })
+    b.mock.remote.session.returnBranchResult.mockResolvedValueOnce(err(error))
+
+    const failure = await b.svc.returnBranchResult(request).catch((cause: unknown) => cause)
+    expect(failure).toBeInstanceOf(SessionBranchResultError)
+    expect(failure).toMatchObject({ request, rpcError: error })
+    expect(b.mock.log.requests(FOLLOW)).toHaveLength(0)
   })
 })

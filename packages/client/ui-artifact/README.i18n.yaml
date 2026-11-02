@@ -1,0 +1,55 @@
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write packages/client/ui-artifact/README.md
+/:
+  en: cd0b7310a6eb5463
+  zh: b916c441fddec73d
+/deepseek-ai-dsh-client-ui-artifact:
+  en: 263e31bb58f43e77
+  zh: d57032db7316d631
+/deepseek-ai-dsh-client-ui-artifact/summary:
+  en: 70f1dbf7f82b58e9
+  zh: 0ae9aeeaae39f041
+/deepseek-ai-dsh-client-ui-artifact/table-of-contents:
+  en: d152484eb41ac6b4
+  zh: 0bfab96e4723c4cc
+/deepseek-ai-dsh-client-ui-artifact/use-this-package:
+  en: 0914b05bc3b6b67f
+  zh: ef6d9d7eb71d388f
+/deepseek-ai-dsh-client-ui-artifact/use-this-package/reading-and-acting-on-an-artifact:
+  en: 00a9470ff30f916f
+  zh: c95cbb5fa67cb6b6
+/deepseek-ai-dsh-client-ui-artifact/use-this-package/isolation-and-input-limits:
+  en: ff695dfe66250439
+  zh: 36175d71b70d4a2c
+/deepseek-ai-dsh-client-ui-artifact/understand-the-implementation:
+  en: 82c98b1dbc0f1f24
+  zh: 40e9814f4cf193ce
+/deepseek-ai-dsh-client-ui-artifact/further-exploration:
+  en: ee9685117d429c3b
+  zh: e3d41c5e9c6a0f57
+/deepseek-ai-dsh-client-ui-artifact/model-experience:
+  en: 215e7ba838619b7b
+  zh: a311da3843709f90
+/deepseek-ai-dsh-client-ui-artifact/model-experience/artifact-presentation-and-actions:
+  en: e2fee25fb8f2bf11
+  zh: 6aa56d3bfd50af80
+/deepseek-ai-dsh-client-ui-artifact/model-experience/artifact-presentation-and-actions/what-the-model-sees:
+  en: ab608b42ae73785d
+  zh: 4f08431ae54433b4
+/deepseek-ai-dsh-client-ui-artifact/model-experience/artifact-presentation-and-actions/token-effect:
+  en: b06eba5aa2bdf54d
+  zh: d39f6b888da3dcec
+/deepseek-ai-dsh-client-ui-artifact/model-experience/artifact-presentation-and-actions/kv-cache-effect:
+  en: 7924f61c12551b70
+  zh: 82e733bda0b9e968
+/deepseek-ai-dsh-client-ui-artifact/model-experience/artifact-presentation-and-actions/kv-cache-effect/browser-boundary:
+  en: 7a612ab4dd822064
+  zh: 3563585b54d6921e
+/deepseek-ai-dsh-client-ui-artifact/known-limitations-and-deferred-work:
+  en: e13eaef85fa0c2fd
+  zh: d6fb5749e0bb6ea6
+/deepseek-ai-dsh-client-ui-artifact/known-limitations-and-deferred-work/dev-note:
+  en: a845d048847e75c7
+  zh: 1d189a09ef991b8b

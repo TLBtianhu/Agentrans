@@ -39,6 +39,7 @@ session 组让对话持久保存，恢复已发布的日志格式，并使已提
 | [`session-persistence-jsonl/`](session-persistence-jsonl/README.zh.md) | 随产品交付的后端：逐 Session 使用不可变规范 generation 文件名并排他发布后继；可选 Zstandard 压缩 | 注册到 `ctx.sessionPersistence` |
 | [`session-checkpoint-policy/`](session-checkpoint-policy/README.zh.md) | 让模型请求、顶层工具副作用与已完成步骤在下一步动作前持久化 | 包装 `ctx.llm` 与 `ctx.tools` |
 | [`session-log-deepseek/`](session-log-deepseek/README.zh.md) | 把增量规范日志作为可选的官方 DeepSeek 请求元数据上传 | 贡献 `dsh_session_log` |
+| [`session-branch/`](session-branch/README.zh.md) | 选择并构造用户确认的手动分支结论，校验直接父级并支持幂等查找 | 纯库，不使用 ctx key |
 
 ### 投影
 
@@ -74,6 +75,7 @@ session 组让对话持久保存，恢复已发布的日志格式，并使已提
 ## 相关文档
 
 - [会话持久化子系统](../../docs/subsystems/persistence.zh.md)——后端无关的服务语义、flush 检查点与崩溃恢复。
+- [手动分支子系统](../../docs/subsystems/branch.zh.md)——直接谱系与确认后的结论回流。
 - [工作目录子系统](../../docs/subsystems/working-directory.zh.md) — 有效目录与恢复。
 - [会话投影子系统](../../docs/subsystems/session-projection.zh.md)——投影单元约定与驱动语义。
 - [会话标题子系统](../../docs/subsystems/session-title.zh.md)——标题资格、回退与提供方流程。

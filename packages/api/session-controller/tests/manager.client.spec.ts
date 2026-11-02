@@ -8,6 +8,7 @@ import { Context } from '@deepseek-ai/cordis'
 import type { SessionId } from '@deepseek-ai/dsh-api-remotes/client'
 import type { SubagentAddress } from '@deepseek-ai/dsh-subagent/client'
 import { SessionSeq } from '@deepseek-ai/dsh-session/types'
+import { MessageId } from '@deepseek-ai/dsh-llm/brand'
 import { RemoteError } from '@deepseek-ai/dsh-typert-protocol'
 import { ok, type RemoteMock } from '@deepseek-ai/dsh-remote-mock'
 import {
@@ -1261,8 +1262,19 @@ describe('remaining branches', () => {
 
     expect(remote.session.fork).toHaveBeenCalledExactlyOnceWith({ sessionId: S1, atSeq: 7, ...permission })
     expect(remote.session.follow).not.toHaveBeenCalled()
-    expect(manager.getListSnapshot().items[0]).toMatchObject({ sessionId: S2 })
-    expect(manager.getListSnapshot().items[0]).not.toHaveProperty('parentSessionId')
+    expect(manager.getListSnapshot().items[0]).toMatchObject({ sessionId: S2, parentSessionId: S1 })
+  })
+
+  it('forwards branch-result ids and seq without opening a Session', async ({ mock, remote }) => {
+    const manager = makeManager(mock, remote)
+    onTestFinished(() => manager.dispose())
+    const request = { sessionId: S1, branchSessionId: S2, resultSeq: 6 }
+    const receipt = { parentSessionId: S1, eventSeq: SessionSeq(9), messageId: MessageId('parent-message') }
+    remote.session.returnBranchResult.mockResolvedValueOnce(ok(receipt))
+
+    await expect(manager.returnBranchResult(request)).resolves.toEqual(ok(receipt))
+    expect(remote.session.returnBranchResult).toHaveBeenCalledExactlyOnceWith(request)
+    expect(remote.session.follow).not.toHaveBeenCalled()
   })
 
   it('reconciles a fork child published before workspace attachment fails', async ({ mock, remote }) => {
