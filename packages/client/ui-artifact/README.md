@@ -94,4 +94,4 @@ Rendering does not make Artifact source model-visible; only a Host-admitted acti
 <a id="dev-note"></a>
 ### Dev Note
 
-jsdom tests verify attributes, parsing, listener ownership, and component behavior; `tests/browser-smoke.mjs` checks iframe isolation and network denial. The keyless [Artifact interaction scenario](../../../apps/web/tests/artifact-interaction.e2e.ts) additionally verifies model-driven create/update, a real browser counter click, and confirmation-only action admission through the shipped Web composition.
+jsdom tests verify attributes, parsing, listener ownership, and component behavior; `tests/browser-smoke.mjs` checks iframe isolation and network denial. The keyless [Artifact interaction scenario](../../../apps/web/tests/artifact-interaction.e2e.ts) additionally verifies model-driven create/update, a real browser counter click, and confirmation-only action admission through the shipped Web composition. The [teaching Artifact scenario](../../../apps/web/tests/teaching-artifact.e2e.ts) covers prediction, launch, result comparison, and Agent feedback.

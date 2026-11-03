@@ -25,6 +25,7 @@
   "exclude": [
     "tests/artifact-interaction.e2e.ts",
     "tests/branch-result.e2e.ts",
+    "tests/teaching-artifact.e2e.ts",
     "tests/sidebar-drawer.e2e.ts",
     "tests/creation-recommendations.e2e.ts",
     "tests/plugin-recommendations.e2e.ts",

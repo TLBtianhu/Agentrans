@@ -37,6 +37,8 @@ Client 按 `artifactId` 关联快照，跨修订保持 Conversation 身份。修
 
 keyless [Artifact 交互场景](../../apps/web/tests/artifact-interaction.e2e.ts) 使用 [session.v4.jsonl](../../snapshots/web/artifact-interaction/session.v4.jsonl) 中记录的模型流驱动实际 Web 组合。它创建并更新一个交互计数器，展开已完成的过程组，在真实浏览器中点击计数器，然后确认待发送操作。测试检查修订号 1 和 2、确认前没有 Artifact 操作或第二轮，以及确认后出现一条父级本地 `artifact-action` 和第二轮。
 
+[教学型 Artifact 场景](../../apps/web/tests/teaching-artifact.e2e.ts) 将同一路径用于预测实验。用户选择角度、预测命中、发射并比较实际结果，再确认语义操作。Agent 随后把 Artifact 更新为带预测反馈的 revision 2。这验证了观察、预测、操作和反馈，而不只是可视化。
+
 <!-- BEGIN GENERATED cordis-surface (gen-cordis-catalog.ts) — do not edit between markers -->
 
 <a id="cordis-surface"></a>
