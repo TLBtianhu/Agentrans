@@ -2411,6 +2411,12 @@ importers:
         specifier: ^7.8.0
         version: 7.8.0
 
+  packages/boot/product-layout:
+    devDependencies:
+      '@deepseek-ai/cordis':
+        specifier: workspace:~
+        version: link:../../../vendor/cordis
+
   packages/browser-use/browser-use:
     devDependencies:
       '@deepseek-ai/cordis':
