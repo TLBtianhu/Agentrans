@@ -46,6 +46,8 @@ The [teaching Artifact scenario](../../apps/web/tests/teaching-artifact.e2e.ts) 
 
 The [comparison Artifact scenario](../../apps/web/tests/comparison-artifacts.e2e.ts) groups control and variant parameter explorers under `damping-study`. It verifies two iframes, synchronized step/play/pause/reset, independent damping values, and one confirmed `comparison.completed` action containing both current states.
 
+The [function-plot scenario](../../apps/web/tests/function-plot.e2e.ts) verifies a SceneSpec-driven mathematical scene: two functions, parameter sweep, zoom, derivative, integral, and one confirmed `plot.inspected` action with numeric tolerance for numerical analysis.
+
 <!-- BEGIN GENERATED cordis-surface (gen-cordis-catalog.ts) — do not edit between markers -->
 
 <a id="cordis-surface"></a>

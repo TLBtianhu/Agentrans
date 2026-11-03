@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Function plot lab</title>
+  <style>
+:root {
+  color-scheme: light dark;
+  --art-bg: #f5f7fb;
+  --art-surface: rgba(255, 255, 255, 0.92);
+  --art-surface-raised: #ffffff;
+  --art-ink: #17202b;
+  --art-muted: #647184;
+  --art-accent: #5b5bd6;
+  --art-accent-strong: #4343b8;
+  --art-accent-soft: rgba(91, 91, 214, 0.13);
+  --art-good: #16805c;
+  --art-good-soft: rgba(22, 128, 92, 0.11);
+  --art-warn: #a86500;
+  --art-warn-soft: rgba(168, 101, 0, 0.12);
+  --art-bad: #b84955;
+  --art-bad-soft: rgba(184, 73, 85, 0.11);
+  --art-border: rgba(68, 83, 112, 0.14);
+  --art-grid: rgba(82, 96, 128, 0.07);
+  --art-radius: 20px;
+  --art-radius-sm: 12px;
+  --art-shadow: 0 18px 50px rgba(36, 47, 72, 0.09);
+  --art-font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --art-bg: #11151d;
+    --art-surface: rgba(25, 31, 42, 0.94);
+    --art-surface-raised: #1d2532;
+    --art-ink: #edf2fb;
+    --art-muted: #a1aec2;
+    --art-accent: #9b9bf7;
+    --art-accent-strong: #b7b7ff;
+    --art-accent-soft: rgba(155, 155, 247, 0.16);
+    --art-good: #62d5a8;
+    --art-good-soft: rgba(98, 213, 168, 0.13);
+    --art-warn: #f1bc65;
+    --art-warn-soft: rgba(241, 188, 101, 0.14);
+    --art-bad: #f38a96;
+    --art-bad-soft: rgba(243, 138, 150, 0.14);
+    --art-border: rgba(184, 202, 232, 0.14);
+    --art-grid: rgba(185, 202, 231, 0.08);
+    --art-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
+  }
+}
+
+* { box-sizing: border-box; }
+html { background: var(--art-bg); }
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 8% 0%, var(--art-accent-soft), transparent 34rem),
+    radial-gradient(circle at 96% 96%, var(--art-good-soft), transparent 30rem),
+    var(--art-bg);
+  color: var(--art-ink);
+  font-family: var(--art-font);
+  font-size: 14px;
+  line-height: 1.5;
+}
+button, select, input { font: inherit; }
+button, select { color: var(--art-ink); }
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; opacity: 0.58; }
+button:focus-visible, select:focus-visible, input:focus-visible {
+  outline: 3px solid var(--art-accent-soft);
+  outline-offset: 2px;
+}
+.lab {
+  width: min(1100px, 100%);
+  margin: 0 auto;
+  padding: 28px;
+  display: grid;
+  gap: 18px;
+}
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(180px, 0.6fr);
+  gap: 18px;
+  align-items: end;
+}
+.eyebrow {
+  margin: 0 0 7px;
+  color: var(--art-accent);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+h1, h2, h3, p { margin-top: 0; }
+h1 {
+  margin-bottom: 8px;
+  font-size: clamp(28px, 4vw, 40px);
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+}
+h2 { margin-bottom: 0; font-size: 16px; letter-spacing: -0.01em; }
+.subtitle { margin-bottom: 0; max-width: 62ch; color: var(--art-muted); line-height: 1.65; }
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: fit-content;
+  padding: 7px 11px;
+  border: 1px solid var(--art-border);
+  border-radius: 999px;
+  background: var(--art-surface);
+  color: var(--art-muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.pill::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--art-accent); }
+.workspace { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(250px, 0.75fr); gap: 16px; align-items: stretch; }
+.stage, .panel, .timeline {
+  border: 1px solid var(--art-border);
+  border-radius: var(--art-radius);
+  background: var(--art-surface);
+  box-shadow: var(--art-shadow);
+  backdrop-filter: blur(14px);
+}
+.stage { position: relative; min-height: 330px; padding: 22px; overflow: hidden; }
+.stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image: linear-gradient(var(--art-grid) 1px, transparent 1px), linear-gradient(90deg, var(--art-grid) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: linear-gradient(to bottom, black, transparent 88%);
+}
+.panel { padding: 18px; display: grid; gap: 14px; align-content: start; }
+.panel h2 { margin-bottom: 2px; }
+.field { display: grid; gap: 7px; }
+.field label, .field-label { color: var(--art-muted); font-size: 12px; font-weight: 650; }
+select, input[type='range'] {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid var(--art-border);
+  border-radius: var(--art-radius-sm);
+  background: var(--art-surface-raised);
+  padding: 9px 11px;
+}
+input[type='range'] { padding: 0; accent-color: var(--art-accent); }
+.button-row { display: flex; flex-wrap: wrap; gap: 8px; }
+button {
+  min-height: 40px;
+  padding: 9px 13px;
+  border: 1px solid var(--art-border);
+  border-radius: var(--art-radius-sm);
+  background: var(--art-surface-raised);
+  color: var(--art-ink);
+  font-weight: 650;
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+}
+button:hover:not(:disabled) { transform: translateY(-1px); border-color: var(--art-accent); box-shadow: 0 7px 18px var(--art-accent-soft); }
+button:active:not(:disabled) { transform: translateY(0); }
+button[data-active='true'], button.primary {
+  border-color: transparent;
+  background: var(--art-accent);
+  color: #fff;
+}
+button[data-active='true']:hover, button.primary:hover { background: var(--art-accent-strong); }
+.metric-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
+.metric { padding: 12px; border: 1px solid var(--art-border); border-radius: var(--art-radius-sm); background: var(--art-surface-raised); }
+.metric strong { display: block; margin-bottom: 3px; font-size: 20px; letter-spacing: -0.02em; }
+.metric span { color: var(--art-muted); font-size: 11px; }
+.result {
+  min-height: 54px;
+  padding: 13px 14px;
+  border: 1px solid var(--art-border);
+  border-radius: var(--art-radius-sm);
+  background: var(--art-surface-raised);
+  color: var(--art-muted);
+}
+.result[data-tone='good'] { border-color: transparent; background: var(--art-good-soft); color: var(--art-good); }
+.result[data-tone='warn'] { border-color: transparent; background: var(--art-warn-soft); color: var(--art-warn); }
+.result[data-tone='bad'] { border-color: transparent; background: var(--art-bad-soft); color: var(--art-bad); }
+.feedback {
+  padding: 14px 16px;
+  border-left: 3px solid var(--art-good);
+  border-radius: var(--art-radius-sm);
+  background: var(--art-good-soft);
+  color: var(--art-good);
+  font-weight: 650;
+}
+.timeline { padding: 16px 18px; display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+.step { display: inline-flex; align-items: center; gap: 7px; color: var(--art-muted); font-size: 12px; }
+.step::before { content: ''; width: 8px; height: 8px; border: 1px solid var(--art-muted); border-radius: 50%; }
+.step[data-state='done'] { color: var(--art-good); }
+.step[data-state='done']::before { border-color: var(--art-good); background: var(--art-good); }
+.step[data-state='current'] { color: var(--art-accent); }
+.step[data-state='current']::before { border-color: var(--art-accent); background: var(--art-accent); box-shadow: 0 0 0 4px var(--art-accent-soft); }
+.chart { display: block; width: 100%; height: 230px; border-radius: var(--art-radius-sm); background: var(--art-surface-raised); }
+.motion-enter { animation: art-enter 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.motion-highlight { animation: art-highlight 560ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+@keyframes art-enter { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes art-highlight { 0% { box-shadow: 0 0 0 0 var(--art-accent-soft); } 45% { box-shadow: 0 0 0 8px var(--art-accent-soft); } 100% { box-shadow: 0 0 0 0 var(--art-accent-soft); } }
+@media (max-width: 780px) {
+  .lab { padding: 18px; }
+  .hero, .workspace { grid-template-columns: 1fr; }
+  .stage { min-height: 290px; }
+  .metric-row { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 1ms !important; transition-duration: 1ms !important; scroll-behavior: auto !important; }
+}
+
+</style>
+</head>
+<body>
+  <main class="lab">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Mathematical scene</p>
+        <h1>Function plot lab</h1>
+        <p class="subtitle">Trace two functions, inspect local change, and sweep a parameter. Every visible value comes from the same SceneSpec.</p>
+      </div>
+      <span class="pill">Live model</span>
+    </header>
+
+    <section class="workspace" aria-label="Function plot workspace">
+      <div class="stage">
+        <div class="metric-row" aria-label="Current analysis">
+          <div class="metric"><strong id="parameter-value">1.00</strong><span>Parameter a</span></div>
+          <div class="metric"><strong id="trace-value">1.00</strong><span>Trace x</span></div>
+          <div class="metric"><strong id="zoom-value">1.00×</strong><span>Viewport scale</span></div>
+        </div>
+        <canvas id="plot" class="chart" width="640" height="300" role="img" aria-label="Interactive function plot"></canvas>
+        <output id="readout" class="result" role="status" aria-live="polite">Move over the plot to inspect a point.</output>
+      </div>
+
+      <aside class="panel" aria-label="Function controls">
+        <h2>Controls</h2>
+        <div class="field">
+          <label for="function">Trace function</label>
+          <select id="function">
+            <option value="quadratic">a·x²/4</option>
+            <option value="sine">sin(x)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="parameter">Parameter a <output id="parameter-label">1.00</output></label>
+          <input id="parameter" type="range" min="-2" max="2" step="0.05" value="1">
+        </div>
+        <div class="button-row">
+          <button id="derivative" type="button" data-active="true" aria-pressed="true">Derivative</button>
+          <button id="integral" type="button" data-active="false" aria-pressed="false">Integral</button>
+        </div>
+        <div class="button-row">
+          <button id="zoom-out" type="button" aria-label="Zoom out">−</button>
+          <button id="zoom-in" type="button" aria-label="Zoom in">+</button>
+          <button id="trace-reset" type="button">Reset view</button>
+        </div>
+        <div class="button-row">
+          <button id="play" class="primary" type="button">Play sweep</button>
+          <button id="step" type="button">Step</button>
+          <button id="reset" type="button">Reset</button>
+        </div>
+        <button id="confirm" type="button">Confirm analysis</button>
+        <p class="subtitle">Drag to pan, wheel to zoom, and move the pointer to trace. The derivative and integral are computed numerically.</p>
+      </aside>
+    </section>
+
+    <footer class="timeline">
+      <span class="step">Observe</span>
+      <span class="step">Trace</span>
+      <span class="step">Analyze</span>
+      <span class="step">Confirm</span>
+    </footer>
+  </main>
+
+  <script>
+/* Small, one-shot motion primitives. Inline this file into an Artifact; no imports. */
+function reducedMotion() {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+}
+
+function beat(elements, { staggerMs = 70 } = {}) {
+  const list = Array.from(elements)
+  if (reducedMotion()) {
+    for (const element of list) element.dataset.beat = 'done'
+    return
+  }
+  for (const [index, element] of list.entries()) {
+    element.classList.add('motion-enter')
+    element.style.animationDelay = `${index * staggerMs}ms`
+    element.addEventListener('animationend', () => { element.dataset.beat = 'done' }, { once: true })
+  }
+}
+
+function highlight(element) {
+  if (!element) return
+  if (reducedMotion()) return
+  element.classList.remove('motion-highlight')
+  void element.offsetWidth
+  element.classList.add('motion-highlight')
+}
+
+function tween({ from, to, duration = 420, update, done }) {
+  if (reducedMotion()) {
+    update(to)
+    done?.()
+    return () => {}
+  }
+  const start = performance.now()
+  let frame = 0
+  const step = (now) => {
+    const progress = Math.min(1, (now - start) / duration)
+    const eased = 1 - Math.pow(1 - progress, 3)
+    update(from + (to - from) * eased)
+    if (progress < 1) frame = requestAnimationFrame(step)
+    else done?.()
+  }
+  frame = requestAnimationFrame(step)
+  return () => cancelAnimationFrame(frame)
+}
+
+</script>
+  <script>
+    const sceneSpec = {
+      kind: 'function-plot',
+      functions: [
+        { id: 'sine', label: 'sin(x)', expression: 'sin' },
+        { id: 'quadratic', label: 'a·x²/4', expression: 'quadratic', parameter: 'a' },
+      ],
+      parameters: { a: 1 },
+      viewport: { centerX: 0, centerY: 0, scale: 1 },
+      trace: { x: 1, derivative: true, integral: false },
+    }
+
+    const canvas = document.getElementById('plot')
+    const context = canvas.getContext('2d')
+    const readout = document.getElementById('readout')
+    const parameterInput = document.getElementById('parameter')
+    const playButton = document.getElementById('play')
+    let parameter = sceneSpec.parameters.a
+    let centerX = sceneSpec.viewport.centerX
+    let centerY = sceneSpec.viewport.centerY
+    let scale = sceneSpec.viewport.scale
+    let traceX = sceneSpec.trace.x
+    let showDerivative = sceneSpec.trace.derivative
+    let showIntegral = sceneSpec.trace.integral
+    let selectedFunction = 'quadratic'
+    let playing = false
+    let frame = 0
+    let previous = 0
+    let dragging = false
+    let dragX = 0
+
+    function evaluate(id, x) {
+      return id === 'sine' ? Math.sin(x) : parameter * x * x / 4
+    }
+
+    function derivativeAt(x) {
+      const h = 0.001
+      return (evaluate(selectedFunction, x + h) - evaluate(selectedFunction, x - h)) / (2 * h)
+    }
+
+    function integralAt(x) {
+      const steps = 200
+      const width = x / steps
+      let total = 0
+      for (let index = 0; index <= steps; index++) {
+        const weight = index === 0 || index === steps ? 0.5 : 1
+        total += evaluate(selectedFunction, index * width) * weight
+      }
+      return total * width
+    }
+
+    function xToPixel(x) { return canvas.width / 2 + (x - centerX) * 40 * scale }
+    function yToPixel(y) { return canvas.height / 2 - (y - centerY) * 40 * scale }
+    function pixelToX(pixel) { return centerX + (pixel - canvas.width / 2) / (40 * scale) }
+
+    function draw() {
+      const style = getComputedStyle(document.documentElement)
+      const ink = style.getPropertyValue('--art-ink').trim()
+      const muted = style.getPropertyValue('--art-muted').trim()
+      const accent = style.getPropertyValue('--art-accent').trim()
+      const good = style.getPropertyValue('--art-good').trim()
+      const grid = style.getPropertyValue('--art-grid').trim()
+      context.clearRect(0, 0, canvas.width, canvas.height)
+      context.lineWidth = 1
+      context.strokeStyle = grid
+      for (let x = Math.floor(centerX - 12 / scale); x <= centerX + 12 / scale; x++) {
+        context.beginPath(); context.moveTo(xToPixel(x), 0); context.lineTo(xToPixel(x), canvas.height); context.stroke()
+      }
+      for (let y = Math.floor(centerY - 6 / scale); y <= centerY + 6 / scale; y++) {
+        context.beginPath(); context.moveTo(0, yToPixel(y)); context.lineTo(canvas.width, yToPixel(y)); context.stroke()
+      }
+      context.strokeStyle = muted
+      context.globalAlpha = 0.65
+      context.beginPath(); context.moveTo(0, yToPixel(0)); context.lineTo(canvas.width, yToPixel(0)); context.stroke()
+      context.beginPath(); context.moveTo(xToPixel(0), 0); context.lineTo(xToPixel(0), canvas.height); context.stroke()
+      context.globalAlpha = 1
+
+      if (showIntegral) {
+        context.fillStyle = good
+        context.globalAlpha = 0.12
+        context.beginPath()
+        context.moveTo(xToPixel(0), yToPixel(0))
+        for (let x = 0; x <= traceX; x += 0.02) context.lineTo(xToPixel(x), yToPixel(evaluate(selectedFunction, x)))
+        context.lineTo(xToPixel(traceX), yToPixel(0))
+        context.closePath()
+        context.fill()
+        context.globalAlpha = 1
+      }
+
+      for (const [index, fn] of sceneSpec.functions.entries()) {
+        context.strokeStyle = index === 0 ? accent : good
+        context.lineWidth = fn.id === selectedFunction ? 3 : 2
+        context.globalAlpha = fn.id === selectedFunction ? 1 : 0.52
+        context.beginPath()
+        for (let pixel = 0; pixel <= canvas.width; pixel++) {
+          const x = pixelToX(pixel)
+          const y = evaluate(fn.id, x)
+          if (pixel === 0) context.moveTo(pixel, yToPixel(y))
+          else context.lineTo(pixel, yToPixel(y))
+        }
+        context.stroke()
+      }
+      context.globalAlpha = 1
+
+      if (showDerivative) {
+        const slope = derivativeAt(traceX)
+        context.strokeStyle = accent
+        context.setLineDash([5, 5])
+        context.beginPath()
+        for (let pixel = 0; pixel <= canvas.width; pixel++) {
+          const x = pixelToX(pixel)
+          const y = evaluate(selectedFunction, traceX) + slope * (x - traceX)
+          if (pixel === 0) context.moveTo(pixel, yToPixel(y))
+          else context.lineTo(pixel, yToPixel(y))
+        }
+        context.stroke()
+        context.setLineDash([])
+      }
+
+      context.strokeStyle = muted
+      context.globalAlpha = 0.45
+      context.beginPath(); context.moveTo(xToPixel(traceX), 0); context.lineTo(xToPixel(traceX), canvas.height); context.stroke()
+      context.globalAlpha = 1
+      context.fillStyle = good
+      context.beginPath(); context.arc(xToPixel(traceX), yToPixel(evaluate(selectedFunction, traceX)), 6, 0, Math.PI * 2); context.fill()
+      context.fillStyle = ink
+      context.font = '12px system-ui'
+      context.fillText('x = ' + traceX.toFixed(2), Math.min(canvas.width - 72, xToPixel(traceX) + 10), yToPixel(evaluate(selectedFunction, traceX)) - 12)
+
+      const derivative = derivativeAt(traceX)
+      const integral = integralAt(traceX)
+      readout.textContent = `x=${traceX.toFixed(2)} · f(x)=${evaluate(selectedFunction, traceX).toFixed(3)} · f′(x)=${derivative.toFixed(3)} · ∫=${integral.toFixed(3)}`
+      document.getElementById('parameter-value').textContent = parameter.toFixed(2)
+      document.getElementById('parameter-label').textContent = parameter.toFixed(2)
+      document.getElementById('trace-value').textContent = traceX.toFixed(2)
+      document.getElementById('zoom-value').textContent = `${scale.toFixed(2)}×`
+      parameterInput.value = String(parameter)
+      parent.postMessage({ kind: 'artifact-state', state: { x: traceX, parameter, derivative, integral, zoom: scale, playing } }, '*')
+    }
+
+    function setPlaying(next) {
+      playing = next
+      playButton.textContent = playing ? 'Pause sweep' : 'Play sweep'
+      playButton.setAttribute('aria-pressed', String(playing))
+      previous = 0
+      if (playing) frame = requestAnimationFrame(tick)
+      else cancelAnimationFrame(frame)
+      draw()
+    }
+
+    function tick(now) {
+      if (!playing) return
+      const delta = previous === 0 ? 0 : Math.min(0.05, (now - previous) / 1000)
+      previous = now
+      parameter += delta * 0.55
+      if (parameter > 2) parameter = -2
+      draw()
+      frame = requestAnimationFrame(tick)
+    }
+
+    function reset() {
+      setPlaying(false)
+      parameter = sceneSpec.parameters.a
+      centerX = sceneSpec.viewport.centerX
+      centerY = sceneSpec.viewport.centerY
+      scale = sceneSpec.viewport.scale
+      traceX = sceneSpec.trace.x
+      showDerivative = sceneSpec.trace.derivative
+      showIntegral = sceneSpec.trace.integral
+      selectedFunction = 'quadratic'
+      document.getElementById('function').value = selectedFunction
+      document.getElementById('derivative').dataset.active = 'true'
+      document.getElementById('integral').dataset.active = 'false'
+      draw()
+    }
+
+    parameterInput.addEventListener('input', () => { parameter = Number(parameterInput.value); draw() })
+    document.getElementById('function').addEventListener('change', event => { selectedFunction = event.target.value; draw() })
+    document.getElementById('derivative').addEventListener('click', event => {
+      showDerivative = !showDerivative
+      event.currentTarget.dataset.active = String(showDerivative)
+      event.currentTarget.setAttribute('aria-pressed', String(showDerivative))
+      draw()
+    })
+    document.getElementById('integral').addEventListener('click', event => {
+      showIntegral = !showIntegral
+      event.currentTarget.dataset.active = String(showIntegral)
+      event.currentTarget.setAttribute('aria-pressed', String(showIntegral))
+      draw()
+    })
+    document.getElementById('zoom-in').addEventListener('click', () => { scale = Math.min(8, scale * 1.25); draw() })
+    document.getElementById('zoom-out').addEventListener('click', () => { scale = Math.max(0.25, scale / 1.25); draw() })
+    document.getElementById('trace-reset').addEventListener('click', reset)
+    document.getElementById('reset').addEventListener('click', reset)
+    playButton.addEventListener('click', () => { setPlaying(!playing) })
+    document.getElementById('step').addEventListener('click', () => { parameter = parameter >= 2 ? -2 : parameter + 0.1; draw() })
+    document.getElementById('confirm').addEventListener('click', () => {
+      parent.postMessage({
+        kind: 'artifact-action', artifactId: 'function-plot', revision: 1,
+        action: 'plot.inspected',
+        payload: { x: traceX, parameter, derivative: derivativeAt(traceX), integral: integralAt(traceX), zoom: scale },
+      }, '*')
+    })
+    canvas.addEventListener('pointerdown', event => { dragging = true; dragX = event.clientX; canvas.setPointerCapture(event.pointerId) })
+    canvas.addEventListener('pointerup', () => { dragging = false })
+    canvas.addEventListener('pointermove', event => {
+      if (dragging) {
+        centerX -= (event.clientX - dragX) / (40 * scale)
+        dragX = event.clientX
+      }
+      const rect = canvas.getBoundingClientRect()
+      traceX = pixelToX((event.clientX - rect.left) * canvas.width / rect.width)
+      draw()
+    })
+    canvas.addEventListener('wheel', event => {
+      event.preventDefault()
+      scale = Math.max(0.25, Math.min(8, scale * Math.exp(-event.deltaY * 0.001)))
+      draw()
+    }, { passive: false })
+    window.addEventListener('message', event => {
+      if (event.source !== parent || event.data?.kind !== 'artifact-command') return
+      if (event.data.command === 'play') setPlaying(true)
+      else if (event.data.command === 'pause') setPlaying(false)
+      else if (event.data.command === 'step') {
+        parameter = parameter >= 2 ? -2 : parameter + 0.1
+        draw()
+      } else if (event.data.command === 'reset') reset()
+    })
+
+    draw()
+    beat(document.querySelectorAll('.hero, .workspace, .timeline'))
+  </script>
+</body>
+</html>

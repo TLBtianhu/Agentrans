@@ -28,6 +28,8 @@ The design smoke writes:
 
 - `C:\agent制作\artifacts\design-prediction-lab.png`
 - `C:\agent制作\artifacts\design-parameter-explorer.png`
+- `C:\agent制作\artifacts\design-function-plot.png`
+- `C:\agent制作\artifacts\function-plot-scene.png`
 
 The replay screenshot for the teaching scenario writes:
 

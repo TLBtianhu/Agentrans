@@ -46,6 +46,8 @@ keyless [Artifact 交互场景](../../apps/web/tests/artifact-interaction.e2e.ts
 
 [比较型 Artifact 场景](../../apps/web/tests/comparison-artifacts.e2e.ts) 将 control 和 variant 参数探索器归入 `damping-study`。它验证两个 iframe、同步单步/播放/暂停/重置、独立 damping 值，以及一条包含两侧当前状态的确认 `comparison.completed` 操作。
 
+[函数绘图场景](../../apps/web/tests/function-plot.e2e.ts) 验证 SceneSpec 驱动的数学场景：两个函数、参数扫掠、缩放、导数、积分，以及一条带数值容差的确认 `plot.inspected` 操作。
+
 <!-- BEGIN GENERATED cordis-surface (gen-cordis-catalog.ts) — do not edit between markers -->
 
 <a id="cordis-surface"></a>

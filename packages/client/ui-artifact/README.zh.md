@@ -45,6 +45,10 @@ iframe 操作先进入卡片内的有界待发送队列。点击“发送给 Age
 
 带 `comparison: { group, role }` 的快照使用独立 Conversation Definition。control 和 variant 并排呈现，同时保留独立参数和修订。共享 `artifact-command` 消息同步播放、暂停、单步和重置。本地 `artifact-state` 报告提供当前参数，但不会唤醒 Agent。“比较结果”通过 control Artifact 准入一条包含两侧当前状态的 `comparison.completed` 操作。
 
+### SceneSpec 原语
+
+[函数绘图模板](../../../.agents/skills/artifact-design/references/function-plot.html) 展示了声明式数学 SceneSpec：两个函数、参数扫掠、视口平移/缩放、描点、导数和积分。它用本地状态支持比较，并且只在用户确认后准入 `plot.inspected`。新增原语应参考这一模板，而不是为每个学科创建独立插件。
+
 -----
 
 <a id="understand-the-implementation"></a>

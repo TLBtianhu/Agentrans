@@ -10,7 +10,7 @@ const browser = await chromium.launch({ channel: 'msedge', headless: true, args:
 const evidence = []
 
 try {
-  for (const name of ['prediction-lab', 'parameter-explorer']) {
+  for (const name of ['prediction-lab', 'parameter-explorer', 'function-plot']) {
     const page = await browser.newPage({ viewport: { width: 1440, height: 960 }, colorScheme: 'light' })
     const errors = []
     const failedRequests = []
@@ -24,6 +24,15 @@ try {
       await page.click('#predict-hit')
       await page.click('#launch')
       await page.waitForFunction(() => document.getElementById('result')?.textContent?.includes('prediction matched'))
+    } else if (name === 'function-plot') {
+      await page.click('#integral')
+      await page.click('#zoom-in')
+      await page.mouse.move(400, 400)
+      await page.waitForFunction(() => document.getElementById('readout')?.textContent?.includes('f′'))
+      await page.click('#step')
+      await page.waitForFunction(() => document.getElementById('parameter-value')?.textContent !== '1.00')
+      await page.click('#reset')
+      await page.waitForFunction(() => document.getElementById('parameter-value')?.textContent === '1.00')
     } else {
       await page.click('#step')
       await page.waitForFunction(() => document.getElementById('summary')?.textContent?.includes('t = 0.10 s'))

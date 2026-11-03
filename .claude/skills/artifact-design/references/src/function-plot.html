@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Function plot lab</title>
+  <!-- @artifact-theme -->
+</head>
+<body>
+  <main class="lab">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Mathematical scene</p>
+        <h1>Function plot lab</h1>
+        <p class="subtitle">Trace two functions, inspect local change, and sweep a parameter. Every visible value comes from the same SceneSpec.</p>
+      </div>
+      <span class="pill">Live model</span>
+    </header>
+
+    <section class="workspace" aria-label="Function plot workspace">
+      <div class="stage">
+        <div class="metric-row" aria-label="Current analysis">
+          <div class="metric"><strong id="parameter-value">1.00</strong><span>Parameter a</span></div>
+          <div class="metric"><strong id="trace-value">1.00</strong><span>Trace x</span></div>
+          <div class="metric"><strong id="zoom-value">1.00×</strong><span>Viewport scale</span></div>
+        </div>
+        <canvas id="plot" class="chart" width="640" height="300" role="img" aria-label="Interactive function plot"></canvas>
+        <output id="readout" class="result" role="status" aria-live="polite">Move over the plot to inspect a point.</output>
+      </div>
+
+      <aside class="panel" aria-label="Function controls">
+        <h2>Controls</h2>
+        <div class="field">
+          <label for="function">Trace function</label>
+          <select id="function">
+            <option value="quadratic">a·x²/4</option>
+            <option value="sine">sin(x)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="parameter">Parameter a <output id="parameter-label">1.00</output></label>
+          <input id="parameter" type="range" min="-2" max="2" step="0.05" value="1">
+        </div>
+        <div class="button-row">
+          <button id="derivative" type="button" data-active="true" aria-pressed="true">Derivative</button>
+          <button id="integral" type="button" data-active="false" aria-pressed="false">Integral</button>
+        </div>
+        <div class="button-row">
+          <button id="zoom-out" type="button" aria-label="Zoom out">−</button>
+          <button id="zoom-in" type="button" aria-label="Zoom in">+</button>
+          <button id="trace-reset" type="button">Reset view</button>
+        </div>
+        <div class="button-row">
+          <button id="play" class="primary" type="button">Play sweep</button>
+          <button id="step" type="button">Step</button>
+          <button id="reset" type="button">Reset</button>
+        </div>
+        <button id="confirm" type="button">Confirm analysis</button>
+        <p class="subtitle">Drag to pan, wheel to zoom, and move the pointer to trace. The derivative and integral are computed numerically.</p>
+      </aside>
+    </section>
+
+    <footer class="timeline">
+      <span class="step">Observe</span>
+      <span class="step">Trace</span>
+      <span class="step">Analyze</span>
+      <span class="step">Confirm</span>
+    </footer>
+  </main>
+
+  <!-- @artifact-motion -->
+  <script>
+    const sceneSpec = {
+      kind: 'function-plot',
+      functions: [
+        { id: 'sine', label: 'sin(x)', expression: 'sin' },
+        { id: 'quadratic', label: 'a·x²/4', expression: 'quadratic', parameter: 'a' },
+      ],
+      parameters: { a: 1 },
+      viewport: { centerX: 0, centerY: 0, scale: 1 },
+      trace: { x: 1, derivative: true, integral: false },
+    }
+
+    const canvas = document.getElementById('plot')
+    const context = canvas.getContext('2d')
+    const readout = document.getElementById('readout')
+    const parameterInput = document.getElementById('parameter')
+    const playButton = document.getElementById('play')
+    let parameter = sceneSpec.parameters.a
+    let centerX = sceneSpec.viewport.centerX
+    let centerY = sceneSpec.viewport.centerY
+    let scale = sceneSpec.viewport.scale
+    let traceX = sceneSpec.trace.x
+    let showDerivative = sceneSpec.trace.derivative
+    let showIntegral = sceneSpec.trace.integral
+    let selectedFunction = 'quadratic'
+    let playing = false
+    let frame = 0
+    let previous = 0
+    let dragging = false
+    let dragX = 0
+
+    function evaluate(id, x) {
+      return id === 'sine' ? Math.sin(x) : parameter * x * x / 4
+    }
+
+    function derivativeAt(x) {
+      const h = 0.001
+      return (evaluate(selectedFunction, x + h) - evaluate(selectedFunction, x - h)) / (2 * h)
+    }
+
+    function integralAt(x) {
+      const steps = 200
+      const width = x / steps
+      let total = 0
+      for (let index = 0; index <= steps; index++) {
+        const weight = index === 0 || index === steps ? 0.5 : 1
+        total += evaluate(selectedFunction, index * width) * weight
+      }
+      return total * width
+    }
+
+    function xToPixel(x) { return canvas.width / 2 + (x - centerX) * 40 * scale }
+    function yToPixel(y) { return canvas.height / 2 - (y - centerY) * 40 * scale }
+    function pixelToX(pixel) { return centerX + (pixel - canvas.width / 2) / (40 * scale) }
+
+    function draw() {
+      const style = getComputedStyle(document.documentElement)
+      const ink = style.getPropertyValue('--art-ink').trim()
+      const muted = style.getPropertyValue('--art-muted').trim()
+      const accent = style.getPropertyValue('--art-accent').trim()
+      const good = style.getPropertyValue('--art-good').trim()
+      const grid = style.getPropertyValue('--art-grid').trim()
+      context.clearRect(0, 0, canvas.width, canvas.height)
+      context.lineWidth = 1
+      context.strokeStyle = grid
+      for (let x = Math.floor(centerX - 12 / scale); x <= centerX + 12 / scale; x++) {
+        context.beginPath(); context.moveTo(xToPixel(x), 0); context.lineTo(xToPixel(x), canvas.height); context.stroke()
+      }
+      for (let y = Math.floor(centerY - 6 / scale); y <= centerY + 6 / scale; y++) {
+        context.beginPath(); context.moveTo(0, yToPixel(y)); context.lineTo(canvas.width, yToPixel(y)); context.stroke()
+      }
+      context.strokeStyle = muted
+      context.globalAlpha = 0.65
+      context.beginPath(); context.moveTo(0, yToPixel(0)); context.lineTo(canvas.width, yToPixel(0)); context.stroke()
+      context.beginPath(); context.moveTo(xToPixel(0), 0); context.lineTo(xToPixel(0), canvas.height); context.stroke()
+      context.globalAlpha = 1
+
+      if (showIntegral) {
+        context.fillStyle = good
+        context.globalAlpha = 0.12
+        context.beginPath()
+        context.moveTo(xToPixel(0), yToPixel(0))
+        for (let x = 0; x <= traceX; x += 0.02) context.lineTo(xToPixel(x), yToPixel(evaluate(selectedFunction, x)))
+        context.lineTo(xToPixel(traceX), yToPixel(0))
+        context.closePath()
+        context.fill()
+        context.globalAlpha = 1
+      }
+
+      for (const [index, fn] of sceneSpec.functions.entries()) {
+        context.strokeStyle = index === 0 ? accent : good
+        context.lineWidth = fn.id === selectedFunction ? 3 : 2
+        context.globalAlpha = fn.id === selectedFunction ? 1 : 0.52
+        context.beginPath()
+        for (let pixel = 0; pixel <= canvas.width; pixel++) {
+          const x = pixelToX(pixel)
+          const y = evaluate(fn.id, x)
+          if (pixel === 0) context.moveTo(pixel, yToPixel(y))
+          else context.lineTo(pixel, yToPixel(y))
+        }
+        context.stroke()
+      }
+      context.globalAlpha = 1
+
+      if (showDerivative) {
+        const slope = derivativeAt(traceX)
+        context.strokeStyle = accent
+        context.setLineDash([5, 5])
+        context.beginPath()
+        for (let pixel = 0; pixel <= canvas.width; pixel++) {
+          const x = pixelToX(pixel)
+          const y = evaluate(selectedFunction, traceX) + slope * (x - traceX)
+          if (pixel === 0) context.moveTo(pixel, yToPixel(y))
+          else context.lineTo(pixel, yToPixel(y))
+        }
+        context.stroke()
+        context.setLineDash([])
+      }
+
+      context.strokeStyle = muted
+      context.globalAlpha = 0.45
+      context.beginPath(); context.moveTo(xToPixel(traceX), 0); context.lineTo(xToPixel(traceX), canvas.height); context.stroke()
+      context.globalAlpha = 1
+      context.fillStyle = good
+      context.beginPath(); context.arc(xToPixel(traceX), yToPixel(evaluate(selectedFunction, traceX)), 6, 0, Math.PI * 2); context.fill()
+      context.fillStyle = ink
+      context.font = '12px system-ui'
+      context.fillText('x = ' + traceX.toFixed(2), Math.min(canvas.width - 72, xToPixel(traceX) + 10), yToPixel(evaluate(selectedFunction, traceX)) - 12)
+
+      const derivative = derivativeAt(traceX)
+      const integral = integralAt(traceX)
+      readout.textContent = `x=${traceX.toFixed(2)} · f(x)=${evaluate(selectedFunction, traceX).toFixed(3)} · f′(x)=${derivative.toFixed(3)} · ∫=${integral.toFixed(3)}`
+      document.getElementById('parameter-value').textContent = parameter.toFixed(2)
+      document.getElementById('parameter-label').textContent = parameter.toFixed(2)
+      document.getElementById('trace-value').textContent = traceX.toFixed(2)
+      document.getElementById('zoom-value').textContent = `${scale.toFixed(2)}×`
+      parameterInput.value = String(parameter)
+      parent.postMessage({ kind: 'artifact-state', state: { x: traceX, parameter, derivative, integral, zoom: scale, playing } }, '*')
+    }
+
+    function setPlaying(next) {
+      playing = next
+      playButton.textContent = playing ? 'Pause sweep' : 'Play sweep'
+      playButton.setAttribute('aria-pressed', String(playing))
+      previous = 0
+      if (playing) frame = requestAnimationFrame(tick)
+      else cancelAnimationFrame(frame)
+      draw()
+    }
+
+    function tick(now) {
+      if (!playing) return
+      const delta = previous === 0 ? 0 : Math.min(0.05, (now - previous) / 1000)
+      previous = now
+      parameter += delta * 0.55
+      if (parameter > 2) parameter = -2
+      draw()
+      frame = requestAnimationFrame(tick)
+    }
+
+    function reset() {
+      setPlaying(false)
+      parameter = sceneSpec.parameters.a
+      centerX = sceneSpec.viewport.centerX
+      centerY = sceneSpec.viewport.centerY
+      scale = sceneSpec.viewport.scale
+      traceX = sceneSpec.trace.x
+      showDerivative = sceneSpec.trace.derivative
+      showIntegral = sceneSpec.trace.integral
+      selectedFunction = 'quadratic'
+      document.getElementById('function').value = selectedFunction
+      document.getElementById('derivative').dataset.active = 'true'
+      document.getElementById('integral').dataset.active = 'false'
+      draw()
+    }
+
+    parameterInput.addEventListener('input', () => { parameter = Number(parameterInput.value); draw() })
+    document.getElementById('function').addEventListener('change', event => { selectedFunction = event.target.value; draw() })
+    document.getElementById('derivative').addEventListener('click', event => {
+      showDerivative = !showDerivative
+      event.currentTarget.dataset.active = String(showDerivative)
+      event.currentTarget.setAttribute('aria-pressed', String(showDerivative))
+      draw()
+    })
+    document.getElementById('integral').addEventListener('click', event => {
+      showIntegral = !showIntegral
+      event.currentTarget.dataset.active = String(showIntegral)
+      event.currentTarget.setAttribute('aria-pressed', String(showIntegral))
+      draw()
+    })
+    document.getElementById('zoom-in').addEventListener('click', () => { scale = Math.min(8, scale * 1.25); draw() })
+    document.getElementById('zoom-out').addEventListener('click', () => { scale = Math.max(0.25, scale / 1.25); draw() })
+    document.getElementById('trace-reset').addEventListener('click', reset)
+    document.getElementById('reset').addEventListener('click', reset)
+    playButton.addEventListener('click', () => { setPlaying(!playing) })
+    document.getElementById('step').addEventListener('click', () => { parameter = parameter >= 2 ? -2 : parameter + 0.1; draw() })
+    document.getElementById('confirm').addEventListener('click', () => {
+      parent.postMessage({
+        kind: 'artifact-action', artifactId: 'function-plot', revision: 1,
+        action: 'plot.inspected',
+        payload: { x: traceX, parameter, derivative: derivativeAt(traceX), integral: integralAt(traceX), zoom: scale },
+      }, '*')
+    })
+    canvas.addEventListener('pointerdown', event => { dragging = true; dragX = event.clientX; canvas.setPointerCapture(event.pointerId) })
+    canvas.addEventListener('pointerup', () => { dragging = false })
+    canvas.addEventListener('pointermove', event => {
+      if (dragging) {
+        centerX -= (event.clientX - dragX) / (40 * scale)
+        dragX = event.clientX
+      }
+      const rect = canvas.getBoundingClientRect()
+      traceX = pixelToX((event.clientX - rect.left) * canvas.width / rect.width)
+      draw()
+    })
+    canvas.addEventListener('wheel', event => {
+      event.preventDefault()
+      scale = Math.max(0.25, Math.min(8, scale * Math.exp(-event.deltaY * 0.001)))
+      draw()
+    }, { passive: false })
+    window.addEventListener('message', event => {
+      if (event.source !== parent || event.data?.kind !== 'artifact-command') return
+      if (event.data.command === 'play') setPlaying(true)
+      else if (event.data.command === 'pause') setPlaying(false)
+      else if (event.data.command === 'step') {
+        parameter = parameter >= 2 ? -2 : parameter + 0.1
+        draw()
+      } else if (event.data.command === 'reset') reset()
+    })
+
+    draw()
+    beat(document.querySelectorAll('.hero, .workspace, .timeline'))
+  </script>
+</body>
+</html>

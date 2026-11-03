@@ -21,6 +21,8 @@ Use this skill when an Artifact should feel like a designed explanation, not an 
 
 - [Prediction lab](references/prediction-lab.html) — guided observation → prediction → manipulation → feedback. It includes a trajectory stage, angle control, prediction buttons, launch result, and the `shot.completed` action used by Agentrans. Preserve the `artifact-action` fields and revision when adapting its semantics.
 - [Parameter explorer](references/parameter-explorer.html) — a live damped-oscillator chart with amplitude/frequency/damping sliders, play, pause, step, and reset. It also accepts host `artifact-command` messages for synchronized comparison controls and reports local `artifact-state` for confirmed comparison results. Use it for simulations that need parameter manipulation and immediate visual feedback.
+- [Function plot](references/function-plot.html) — a SceneSpec-driven mathematical scene with two functions, parameter sweep, pan/zoom, trace, derivative, integral, and confirmed `plot.inspected` analysis. Use it for function comparison and local-change explanations.
+- [SceneSpec reference](references/scene-spec.ts) — declarative function, parameter, viewport, trace, and state types. Start from the spec before adding a new primitive.
 - [Theme source](references/theme.css) — shared light/dark tokens, layout, controls, metrics, charts, and responsive rules. Edit this when changing the visual system rather than forking colors per Artifact.
 - [Motion source](references/motion.js) — small one-shot `beat`, `highlight`, and `tween` helpers. Inline them into custom Artifacts; no import or package is required.
 

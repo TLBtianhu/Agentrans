@@ -45,6 +45,10 @@ Action messages must match the mounted Artifact id and positive revision and con
 
 Snapshots with `comparison: { group, role }` use a separate Conversation Definition. Control and variant render side by side while keeping independent parameters and revisions. Shared `artifact-command` messages synchronize play, pause, step, and reset. Local `artifact-state` reports supply current parameters for comparison; they do not wake the Agent. **Compare results** admits one `comparison.completed` action through the control Artifact with both current states.
 
+### SceneSpec primitives
+
+The [function-plot template](../../../.agents/skills/artifact-design/references/function-plot.html) demonstrates a declarative mathematical SceneSpec: two functions, parameter sweep, viewport pan/zoom, trace, derivative, and integral. It reports local state for comparison and admits `plot.inspected` only after user confirmation. Use this as the reference for adding primitives rather than creating a separate plugin per subject.
+
 -----
 
 <a id="understand-the-implementation"></a>
