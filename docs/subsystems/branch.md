@@ -31,6 +31,10 @@ The child seq is not placed in `sourceEventSeqs`, which accepts only earlier eve
 
 Selection rejects a non-branch, subagent, wrong parent, inherited event, missing result, or empty visible text. An idle parent accepts the append through maintenance serialization and a durability flush; a running parent reports busy instead of receiving an implicit steer.
 
+## Verification
+
+The keyless [branch-result scenario](../../apps/web/tests/branch-result.e2e.ts) replays a parent answer and an independent child answer through the shipped Web composition. The browser forks the parent, opens the child-owned result preview, cancels once without a return, then confirms. The test checks that the preview excludes reasoning, the parent gains exactly one `branch-result` user message with the child reference and visible text only, and no parent model turn starts before or after confirmation.
+
 <!-- BEGIN GENERATED cordis-surface (gen-cordis-catalog.ts) — do not edit between markers -->
 <a id="cordis-surface"></a>
 ## Cordis API

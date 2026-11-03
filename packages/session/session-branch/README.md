@@ -59,4 +59,4 @@ Only selected visible text blocks become parent history; child and sibling trans
 
 ### Dev Note
 
-None.
+Package rules are covered by `tests/branch-result.spec.ts`. The shipped UI path is documented in the [manual branch verification](../../../docs/subsystems/branch.md#verification).

@@ -55,8 +55,8 @@ Only confirmed visible text becomes parent history; preview, cancellation, and f
 
 <a id="known-limitations-and-deferred-work"></a>
 
-- 只有直接普通手动分支可使用此入口。subagent settlement、自动回流、分支图和浏览器端到端验证不属于本包当前行为与测试证据。
+- 只有直接普通手动分支可使用此入口。subagent settlement、自动回流和分支图不属于本包当前行为。
 
 ### 开发备注
 
-无。
+keyless [branch-result 场景](../../../apps/web/tests/branch-result.e2e.ts) 验证实际浏览器流程：开岔、子级自有结论预览、取消不回流，以及确认后写入父级本地结论且不启动新模型轮次。

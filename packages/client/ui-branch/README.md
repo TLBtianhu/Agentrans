@@ -55,8 +55,8 @@ Only confirmed visible text becomes parent history; preview, cancellation, and f
 
 <a id="known-limitations-and-deferred-work"></a>
 
-- Only direct ordinary manual branches are eligible. Subagent settlement, automatic return, branch graphs, and browser end-to-end validation are outside this package's current behavior and test evidence.
+- Only direct ordinary manual branches are eligible. Subagent settlement, automatic return, and branch graphs are outside this package's current behavior.
 
 ### Dev Note
 
-None.
+The keyless [branch-result scenario](../../../apps/web/tests/branch-result.e2e.ts) verifies the shipped browser flow: fork, child-owned preview, cancel without a return, and confirmed parent-local result without a new model turn.

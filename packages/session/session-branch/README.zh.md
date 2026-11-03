@@ -59,4 +59,4 @@ Only selected visible text blocks become parent history; child and sibling trans
 
 ### 开发备注
 
-无。
+包内规则由 `tests/branch-result.spec.ts` 覆盖。实际 UI 路径见[手动分支验证](../../../docs/subsystems/branch.zh.md#verification)。
