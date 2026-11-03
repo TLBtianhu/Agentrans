@@ -23,7 +23,7 @@ import { AccountQuotaNotice } from '../src/client/AccountQuotaNotice.tsx'
 import type { AccountQuotaNoticeInjected } from '../src/client/AccountQuotaNotice.tsx'
 
 const SELF = '@deepseek-ai/dsh-client-ui-settings-account'
-const testRoster = ClientRoster.of([...webApp.rows, { name: SELF, inject: [] }])
+const testRoster = ClientRoster.of([...webApp.rows, { name: SELF, inject: [], immediately: false }])
 const it = createClientTest({ roster: testRoster })
 const withoutAccountAccess = createClientTest({ roster: testRoster }, { access: action => action !== 'account/watch' })
 const view: AccountView = {
