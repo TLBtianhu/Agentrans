@@ -72,7 +72,11 @@ export function parseArtifactAction(data: unknown, artifactId: ArtifactId, revis
   return { artifactId, revision: data.revision, action: data.action, payload: data.payload }
 }
 
-/** Validate one local-only Artifact state report; source ownership is checked by the comparison host. */
+/**
+ * Validate one local-only Artifact state report; source ownership is checked by the comparison host.
+ * @param data - Candidate postMessage value.
+ * @returns The validated state message, or null when it is malformed or oversized.
+ */
 export function parseArtifactState(data: unknown): ArtifactStateMessage | null {
   if (!isRecord(data) || Object.keys(data).length !== 2 || data.kind !== 'artifact-state' || !isJsonValue(data.state)) return null
   const serialized = JSON.stringify(data)

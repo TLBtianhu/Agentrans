@@ -3,6 +3,7 @@ import { memo, useCallback, useEffect, useMemo, useReducer, useRef, useState } f
 import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
 import { createArtifactDocument } from './document.ts'
+import { FunctionPlotView } from './FunctionPlotView.tsx'
 import { parseArtifactAction, type PendingArtifactAction } from './messages.ts'
 import type { ArtifactNodeInjected, ArtifactPlacement, ArtifactSnapshot, ViewRequest } from './protocol.ts'
 import css from './ArtifactNodeView.module.css'
@@ -59,7 +60,7 @@ export function ArtifactCard({ snapshot, origin, recordAction, t, placementContr
   const sceneRef = useRef<HTMLElement>(null)
   const mountedRef = useRef(true)
   const sendingRef = useRef(false)
-  const document = useMemo(() => createArtifactDocument(snapshot.source), [snapshot.source])
+  const document = useMemo(() => snapshot.format === 'html' ? createArtifactDocument(snapshot.source) : '', [snapshot])
   const setFrame = useCallback((element: HTMLIFrameElement | null): void => {
     iframeRef.current = element
     onFrame?.(element)
@@ -83,7 +84,7 @@ export function ArtifactCard({ snapshot, origin, recordAction, t, placementContr
   }, [placement, placementControls])
 
   useEffect(() => {
-    if (showSource) return
+    if (showSource || snapshot.format !== 'html') return
     const frame = iframeRef.current as HTMLIFrameElement
     const onMessage = (event: MessageEvent): void => {
       if (event.source !== frame.contentWindow) return
@@ -93,7 +94,7 @@ export function ArtifactCard({ snapshot, origin, recordAction, t, placementContr
     }
     window.addEventListener('message', onMessage)
     return () => { window.removeEventListener('message', onMessage) }
-  }, [showSource, snapshot.artifactId, snapshot.revision])
+  }, [showSource, snapshot.artifactId, snapshot.revision, snapshot.format])
 
   const pending = pendingActions[0]
   const send = async (submitted: PendingArtifactAction): Promise<void> => {
@@ -152,9 +153,12 @@ export function ArtifactCard({ snapshot, origin, recordAction, t, placementContr
       </header>
       <div className={css.body}>
         {showSource
-          ? <pre className={css.source} aria-label={t('source.label')}>{snapshot.source}</pre>
-          : <iframe ref={setFrame} className={css.frame} srcDoc={document} sandbox="allow-scripts"
-            title={t('preview.frame', { title: snapshot.title })} data-artifact-frame />}
+          ? <pre className={css.source} aria-label={t('source.label')}>{snapshot.format === 'html' ? snapshot.source : JSON.stringify(snapshot.spec, null, 2)}</pre>
+          : snapshot.format === 'scene'
+            ? <FunctionPlotView spec={snapshot.spec} artifactId={snapshot.artifactId} revision={snapshot.revision}
+              recordAction={recordAction} t={t} />
+            : <iframe ref={setFrame} className={css.frame} srcDoc={document} sandbox="allow-scripts"
+              title={t('preview.frame', { title: snapshot.title })} data-artifact-frame />}
       </div>
       {pending === undefined ? null : (
         <div className={css.pending}>

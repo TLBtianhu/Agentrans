@@ -1,5 +1,5 @@
 ---
-description: "Web GUI 的沙箱 HTML Artifact 卡片：版本替换、源码查看，以及用户确认后发送给所属 Agent 的操作。"
+description: "Web GUI 的沙箱 HTML 和原生 SceneSpec Artifact 卡片：版本替换、源码查看，以及用户确认后发送给所属 Agent 的操作。"
 kind: "package-reference"
 ---
 
@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-在产生 Artifact 的对话旁阅读交互 HTML。每个 checkpoint 都能独立呈现，即使历史里只有最新修订。你可以在行内与展开视图间切换、检查 HTML 源码，并且只在明确确认后发送 Artifact 操作。预览无法访问父应用或远程依赖。
+在产生 Artifact 的对话旁阅读交互 HTML。每个 checkpoint 都能独立呈现，即使历史里只有最新修订。你可以在行内与展开视图间切换、检查 HTML 源码，并且只在明确确认后发送 Artifact 操作。预览无法访问父应用或远程依赖。`function-plot` SceneSpec 通过共享安全表达式解析器原生渲染，并直接确认当前分析。
 
 ## 目录
 

@@ -26,6 +26,7 @@ export interface ArtifactComparisonSnapshot {
 
 /** Host-to-Artifact commands synchronize behavior without changing parameters. */
 export type ArtifactCommand = 'play' | 'pause' | 'step' | 'reset'
+/** Host-to-Artifact command message with no parameter mutation. */
 export interface ArtifactCommandMessage {
   readonly kind: 'artifact-command'
   readonly command: ArtifactCommand

@@ -302,7 +302,9 @@ describe('artifact resource limits and configuration', () => {
     const bytes = Buffer.byteLength(source, 'utf8')
     const { agent, service } = await setup({ maxSourceBytes: bytes })
     service.commit(agent, service.prepare(agent, { ...createInput(), source }))
-    expect(upserts(agent)[0]?.source).toBe(source)
+    const snapshot = upserts(agent)[0]
+    expect(snapshot?.format).toBe('html')
+    if (snapshot?.format === 'html') expect(snapshot.source).toBe(source)
     expect(() => service.prepare(agent, {
       ...createInput(), action: 'update', baseRevision: 1, source: `${source}é`,
     })).toThrow(expect.objectContaining({ code: 'BAD_SOURCE' }))

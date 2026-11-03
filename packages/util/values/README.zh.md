@@ -37,6 +37,10 @@ if (!isJsonValue(input)) throw new TypeError('expected lossless JSON')
 const snapshot = snapshotJsonValue(input) as JsonValue
 ```
 
+### 计算 SceneSpec 表达式
+
+`parseExpression` 和 `evaluateExpression` 为浏览器安全的 SceneSpec 渲染解析并计算有界数学表达式白名单。它们只接受已声明变量、受支持函数和有限结果，绝不执行源码文本。接受模型生成的表达式前先调用 `parseExpression`。
+
 ### 读取流式参数
 
 `PartialArguments` 懒读取 JSON 对象的顶层字段。`append()` 分别保留分片，不扫描也不拼接。读器为新的键值范围建立索引，跳过未请求的内容；仅在请求时解码或计数字符串，仅在请求时解析已完整的非字符串值。`complete()` 表示结束分隔符已到达，不代表内容已校验；`invalid` 报告索引或内容读取已经发现的错误。它不能替代工具入参校验。

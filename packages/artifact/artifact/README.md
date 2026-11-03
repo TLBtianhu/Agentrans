@@ -1,5 +1,5 @@
 ---
-description: "Session-backed HTML artifacts, their model-facing create/update tool, and user-confirmed interaction messages."
+description: "Session-backed HTML and SceneSpec artifacts, model-facing create/update tools, and user-confirmed interaction messages."
 kind: "package-reference"
 ---
 
@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-This package owns durable HTML Artifacts: complete snapshots with a stable id, compare-and-set revisions, semantic presentation, and a model-facing `artifact` tool. Its Remote `record` method converts a user-confirmed iframe action into an ordinary text `UserMessage`; actions never grant filesystem, network, or approval authority.
+This package owns durable HTML and SceneSpec Artifacts: complete snapshots with a stable id, compare-and-set revisions, semantic presentation, and model-facing `artifact` and `scene` tools. Its Remote `record` method converts a user-confirmed action into an ordinary text `UserMessage`; actions never grant filesystem, network, or approval authority.
 
 ## Table of Contents
 
@@ -25,7 +25,7 @@ This package owns durable HTML Artifacts: complete snapshots with a stable id, c
 <a id="use-this-package"></a>
 ## Use this package
 
-Mount the service as `@deepseek-ai/dsh-artifact` and the tool as `@deepseek-ai/dsh-artifact/tool`. The service owns validation, current-revision lookup, and Session commits. The tool prepares a snapshot but commits it only after its authoritative successful tool result.
+Mount the service as `@deepseek-ai/dsh-artifact`, the HTML tool as `@deepseek-ai/dsh-artifact/tool`, and the SceneSpec tool as `@deepseek-ai/dsh-artifact/scene-tool`. The service owns validation, current-revision lookup, and Session commits. Each tool prepares a snapshot but commits it only after its authoritative successful tool result. SceneSpec validation uses the versioned SceneCatalog and a safe expression parser, never `eval`.
 
 | Config | Default | Meaning |
 |---|---|---|
@@ -41,6 +41,8 @@ A create starts at revision 1. An update supplies `baseRevision` and succeeds on
 
 An Artifact can post `{ kind: 'artifact-action', artifactId, revision, action, payload }` to its parent. The Host validates the current revision and complete message size before routing the action. `wake: false` uses `agent.inject`; `wake: true` uses `agent.steer`. UI policy decides when a human review is required.
 
+Scene snapshots use `format: 'scene'` and a complete `spec`. The current catalog supports `function-plot` with functions, bounded parameters, viewport, and trace settings. Unknown variables or functions, invalid parameter ranges, and non-finite expression results are rejected before commit.
+
 -----
 
 <a id="further-exploration"></a>
@@ -54,6 +56,12 @@ An Artifact can post `{ kind: 'artifact-action', artifactId, revision, action, p
 
 <a id="model-experience"></a>
 ## Model Experience
+
+### scene
+
+#### What the model sees
+
+The `scene` tool accepts `action`, `kind`, `sceneId`, `title`, a complete `spec`, `presentation`, and update-only `baseRevision`. Its result repeats only `sceneId`, `revision`, `title`, `kind`, and `presentation`. SceneSpec JSON is validated before commit; it is not HTML and does not execute model-generated JavaScript.
 
 ### artifact
 
@@ -79,7 +87,7 @@ A confirmed action becomes one bounded user message; it grants no additional aut
 
 <a id="known-limitations-and-deferred-work"></a>
 
-- Only self-contained HTML is supported. Other media formats and remote renderer providers require separate protocols.
+- The current SceneCatalog supports only `function-plot`; flowchart and particle-system remain reference HTML templates until their native SceneSpec migrations.
 - Durable state covers source, revision, and semantic action messages, not iframe JavaScript heap, canvas pixels, scroll position, or unconfirmed pending actions.
 - Revision checks are serialized by the enclosing Agent operation; they are not a cross-process transaction.
 - The service does not execute or sanitize HTML. Execution belongs to the Client's opaque iframe and content policy.

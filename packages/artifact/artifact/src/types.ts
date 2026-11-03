@@ -2,12 +2,14 @@
 
 import type { Branded } from '@deepseek-ai/dsh-brand'
 import type { JsonValue } from '@deepseek-ai/dsh-util-values'
+import type { SceneSpec } from './scene.ts'
 
 /** Stable identity of one artifact within a Session. */
 export type ArtifactId = Branded<'ArtifactId'>
 
 /** Serialized artifact representation supported by this protocol version. */
-export type ArtifactFormat = 'html'
+export type ArtifactFormat = 'html' | 'scene'
+export type { SceneSpec } from './scene.ts'
 
 /** Client placement requested for an artifact. */
 export type ArtifactPresentation = 'inline' | 'focus'
@@ -20,28 +22,45 @@ export interface ArtifactComparison {
   readonly role: 'control' | 'variant'
 }
 
-/** Complete durable value carried by every artifact update. */
-export interface ArtifactSnapshot {
+/** Complete durable values shared by HTML and SceneSpec snapshots. */
+export interface ArtifactSnapshotBase {
   readonly artifactId: ArtifactId
   /** Positive safe integer, starting at 1 and increasing by one per update. */
   readonly revision: number
   readonly format: ArtifactFormat
   /** Trimmed, non-empty display title of at most 120 characters. */
   readonly title: string
-  /** Complete self-contained HTML document. */
-  readonly source: string
   readonly presentation: ArtifactPresentation
   readonly comparison?: ArtifactComparison
 }
+
+/** Complete self-contained HTML snapshot. */
+export interface HtmlArtifactSnapshot extends ArtifactSnapshotBase {
+  readonly format: 'html'
+  readonly source: string
+}
+
+/** Complete declarative SceneSpec snapshot. */
+export interface SceneArtifactSnapshot extends ArtifactSnapshotBase {
+  readonly format: 'scene'
+  readonly spec: SceneSpec
+}
+
+/** Complete durable value carried by every artifact update. */
+export type ArtifactSnapshot = HtmlArtifactSnapshot | SceneArtifactSnapshot
 
 /** Complete new values accepted for a create or compare-and-set update. */
 export interface ArtifactPrepareInput {
   readonly action: 'create' | 'update'
   readonly artifactId: string
   readonly title: string
-  readonly source: string
   readonly presentation: ArtifactPresentation
   readonly comparison?: ArtifactComparison
+  readonly format?: ArtifactFormat
+  /** Required for HTML snapshots. */
+  readonly source?: string
+  /** Required for SceneSpec snapshots. */
+  readonly spec?: SceneSpec
   /** Required for update; must equal the current durable revision. */
   readonly baseRevision?: number
 }

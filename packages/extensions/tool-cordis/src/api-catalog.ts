@@ -5631,7 +5631,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'ArtifactFormat',
-    declaration: 'export type ArtifactFormat = \'html\';',
+    declaration: 'export type ArtifactFormat = \'html\' | \'scene\';',
   },
   {
     name: 'ArtifactId',
@@ -5639,7 +5639,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'ArtifactPrepareInput',
-    declaration: 'export interface ArtifactPrepareInput {\n    readonly action: \'create\' | \'update\';\n    readonly artifactId: string;\n    readonly title: string;\n    readonly source: string;\n    readonly presentation: ArtifactPresentation;\n    readonly comparison?: ArtifactComparison;\n    readonly baseRevision?: number;\n}',
+    declaration: 'export interface ArtifactPrepareInput {\n    readonly action: \'create\' | \'update\';\n    readonly artifactId: string;\n    readonly title: string;\n    readonly presentation: ArtifactPresentation;\n    readonly comparison?: ArtifactComparison;\n    readonly format?: ArtifactFormat;\n    readonly source?: string;\n    readonly spec?: SceneSpec;\n    readonly baseRevision?: number;\n}',
   },
   {
     name: 'ArtifactPresentation',
@@ -5651,7 +5651,11 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'ArtifactSnapshot',
-    declaration: 'export interface ArtifactSnapshot {\n    readonly artifactId: ArtifactId;\n    readonly revision: number;\n    readonly format: ArtifactFormat;\n    readonly title: string;\n    readonly source: string;\n    readonly presentation: ArtifactPresentation;\n    readonly comparison?: ArtifactComparison;\n}',
+    declaration: 'export type ArtifactSnapshot = HtmlArtifactSnapshot | SceneArtifactSnapshot;',
+  },
+  {
+    name: 'ArtifactSnapshotBase',
+    declaration: 'export interface ArtifactSnapshotBase {\n    readonly artifactId: ArtifactId;\n    readonly revision: number;\n    readonly format: ArtifactFormat;\n    readonly title: string;\n    readonly presentation: ArtifactPresentation;\n    readonly comparison?: ArtifactComparison;\n}',
   },
   {
     name: 'AskOptions',
@@ -6634,6 +6638,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface FsWriteOutcome {\n    operation: \'create\' | \'update\';\n    version: FsVersion;\n    before: string | null;\n    after: string;\n}',
   },
   {
+    name: 'FunctionPlotSpec',
+    declaration: 'export interface FunctionPlotSpec {\n    readonly kind: \'function-plot\';\n    readonly functions: readonly SceneFunctionSpec[];\n    readonly parameters: Readonly<Record<string, SceneParameterSpec>>;\n    readonly viewport: {\n        readonly x: readonly [\n            number,\n            number\n        ];\n        readonly y: readonly [\n            number,\n            number\n        ];\n    };\n    readonly trace: {\n        readonly x: number;\n        readonly derivative: boolean;\n        readonly integral: boolean;\n    };\n    readonly timeline?: {\n        readonly duration: number;\n        readonly fps: number;\n    };\n}',
+  },
+  {
     name: 'GenerateOptions',
     declaration: 'export interface GenerateOptions<Purpose extends string = LlmRequestPurpose> {\n    provider: string;\n    model: string;\n    reasoningEffort?: ReasoningEffortId;\n    messages: RequestMessage[];\n    system?: string;\n    tools?: ToolSchema[];\n    toolHistory?: ToolHistory;\n    temperature?: number;\n    maxTokens?: number;\n    stop?: string[];\n    signal?: AbortSignal;\n    sessionId?: Branded<\'SessionId\'>;\n    purpose?: Purpose;\n}',
   },
@@ -6720,6 +6728,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'HostConnectionRpc',
     declaration: 'export interface HostConnectionRpc {\n    handle(channel: string, handler: ConnectionRpcHandler): () => Promise<void>;\n    intercept(channel: \'/api\', matches: ConnectionRpcEndpointMatcher, handler: ConnectionRpcHandler): () => Promise<void>;\n}',
+  },
+  {
+    name: 'HtmlArtifactSnapshot',
+    declaration: 'export interface HtmlArtifactSnapshot extends ArtifactSnapshotBase {\n    readonly format: \'html\';\n    readonly source: string;\n}',
   },
   {
     name: 'ImageAttachmentLimits',
@@ -8080,6 +8092,22 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'SaveTextSpill',
     declaration: 'export interface SaveTextSpill {\n    owner: SpillOwner;\n    source: SpillSource;\n    suggestedName: string;\n    content: string;\n}',
+  },
+  {
+    name: 'SceneArtifactSnapshot',
+    declaration: 'export interface SceneArtifactSnapshot extends ArtifactSnapshotBase {\n    readonly format: \'scene\';\n    readonly spec: SceneSpec;\n}',
+  },
+  {
+    name: 'SceneFunctionSpec',
+    declaration: 'export interface SceneFunctionSpec {\n    readonly id: string;\n    readonly label: string;\n    readonly expression: string;\n}',
+  },
+  {
+    name: 'SceneParameterSpec',
+    declaration: 'export interface SceneParameterSpec {\n    readonly value: number;\n    readonly min: number;\n    readonly max: number;\n    readonly step: number;\n}',
+  },
+  {
+    name: 'SceneSpec',
+    declaration: 'export type SceneSpec = FunctionPlotSpec;',
   },
   {
     name: 'ScheduleCatalogEntry',

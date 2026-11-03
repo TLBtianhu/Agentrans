@@ -1,6 +1,6 @@
 {
   "name": "@deepseek-ai/dsh-artifact",
-  "description": "Session-backed interactive HTML artifacts and their model-facing tool",
+  "description": "Session-backed interactive HTML and SceneSpec artifacts and their model-facing tools",
   "version": "0.2.2-alpha.2",
   "publishConfig": {
     "access": "public"
@@ -22,6 +22,14 @@
       "types": "./lib/types/tool.d.ts",
       "default": "./lib/tool.js"
     },
+    "./scene": {
+      "types": "./lib/types/scene.d.ts",
+      "default": "./lib/scene.js"
+    },
+    "./scene-tool": {
+      "types": "./lib/types/scene-tool.d.ts",
+      "default": "./lib/scene-tool.js"
+    },
     "./types": {
       "types": "./lib/types/types.d.ts",
       "default": "./lib/types/types.js"
@@ -40,6 +48,8 @@
   "files": [
     "lib/index.js",
     "lib/tool.js",
+    "lib/scene.js",
+    "lib/scene-tool.js",
     "lib/types/**/*.js",
     "lib/types/**/*.d.ts",
     "lib/typert.host.js",

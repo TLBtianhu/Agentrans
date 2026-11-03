@@ -3,29 +3,35 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/artifact/artifact/README.md
 /:
-  en: 02395d26584bbdc5
-  zh: 85f8cc3ca34b8253
+  en: 0aa9a3a6fd0cd8fc
+  zh: 6b74df5466114f3c
 /deepseek-ai-dsh-artifact:
   en: 6d25826657d03561
   zh: b162827299c85504
 /deepseek-ai-dsh-artifact/summary:
-  en: dfbee7282affc845
-  zh: 781b9cb9d9ac99d5
+  en: 7c0f291addf362c6
+  zh: 294160c1bf9e7647
 /deepseek-ai-dsh-artifact/table-of-contents:
   en: d152484eb41ac6b4
   zh: 0bfab96e4723c4cc
 /deepseek-ai-dsh-artifact/use-this-package:
-  en: 74de7f38f75d438d
-  zh: f714eb16974fb934
+  en: f89f293a8131e2af
+  zh: 0a5e987571c06c25
 /deepseek-ai-dsh-artifact/understand-the-implementation:
-  en: c21a5a65f2296c9f
-  zh: 79551aac2e6206a3
+  en: 933188df3ec1fcaf
+  zh: 6e9d88826da6e5c4
 /deepseek-ai-dsh-artifact/further-exploration:
   en: 512a3f7c5296bac8
   zh: 8c5ab75f797471a7
 /deepseek-ai-dsh-artifact/model-experience:
   en: 215e7ba838619b7b
   zh: a311da3843709f90
+/deepseek-ai-dsh-artifact/model-experience/scene:
+  en: e60e50e682a04f31
+  zh: e60e50e682a04f31
+/deepseek-ai-dsh-artifact/model-experience/scene/what-the-model-sees:
+  en: 07d0f9355675c705
+  zh: 734695afaed5fbef
 /deepseek-ai-dsh-artifact/model-experience/artifact:
   en: b10efad9bb61e0e2
   zh: b10efad9bb61e0e2
@@ -42,8 +48,8 @@
   en: d89d23aadfd10fb9
   zh: bbbe5b6299f5fae8
 /deepseek-ai-dsh-artifact/known-limitations-and-deferred-work:
-  en: 2220f334cd53a960
-  zh: 9ab5998e897a1c4b
+  en: 1950ccfe7fed68e9
+  zh: d3a940c06f042e0e
 /deepseek-ai-dsh-artifact/known-limitations-and-deferred-work/dev-note:
   en: 0a1253c6f7b5e8b9
   zh: 9f56528562c7c914

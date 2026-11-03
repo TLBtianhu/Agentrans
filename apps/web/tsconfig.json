@@ -30,6 +30,7 @@
     "tests/function-plot.e2e.ts",
     "tests/flowchart.e2e.ts",
     "tests/particle-system.e2e.ts",
+    "tests/scene-function-plot.e2e.ts",
     "tests/custom-provider.e2e.ts",
     "tests/sidebar-drawer.e2e.ts",
     "tests/creation-recommendations.e2e.ts",

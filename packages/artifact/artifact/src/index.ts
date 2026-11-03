@@ -15,6 +15,7 @@ import { snapshotJsonValue, type JsonValue } from '@deepseek-ai/dsh-util-values'
 import type {
   ArtifactId, ArtifactComparison, ArtifactPrepareInput, ArtifactRecordResult, ArtifactSnapshot,
 } from './types.ts'
+import { normalizeSceneSpec } from './scene.ts'
 
 export type * from './types.ts'
 
@@ -92,19 +93,26 @@ function comparisonOf(value: unknown): ArtifactComparison {
 
 function snapshotOf(value: unknown, maxSourceBytes?: number): ArtifactSnapshot {
   if (!isRecord(value)) return badInput('artifact snapshot must be an object')
-  if (value.format !== 'html') return badInput('artifact format must be html')
+  if (value.format !== 'html' && value.format !== 'scene') return badInput('artifact format must be html or scene')
   if (value.presentation !== 'inline' && value.presentation !== 'focus') {
     return badInput('presentation must be inline or focus')
   }
-  return {
+  const presentation = value.presentation as 'inline' | 'focus'
+  const common = {
     artifactId: artifactIdOf(value.artifactId),
     revision: revisionOf(value.revision),
-    format: 'html',
     title: titleOf(value.title),
-    source: sourceOf(value.source, maxSourceBytes),
-    presentation: value.presentation,
+    presentation,
     ...value.comparison === undefined ? {} : { comparison: comparisonOf(value.comparison) },
   }
+  if (value.format === 'scene') {
+    try {
+      return { ...common, format: 'scene', spec: normalizeSceneSpec(value.spec) }
+    } catch (error) {
+      throw new ArtifactError(error instanceof Error ? error.message : 'invalid SceneSpec', 'BAD_SCENE_SPEC')
+    }
+  }
+  return { ...common, format: 'html', source: sourceOf(value.source, maxSourceBytes) }
 }
 
 function positiveLimit(value: number, name: string): number {
@@ -182,9 +190,10 @@ export class ArtifactService extends TypertRemoteService {
     return snapshotOf({
       artifactId,
       revision,
-      format: 'html',
+      format: input.format ?? 'html',
       title: input.title,
       source: input.source,
+      spec: input.spec,
       presentation: input.presentation,
       comparison: input.comparison,
     }, this.maxSourceBytes)

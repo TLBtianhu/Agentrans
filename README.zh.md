@@ -9,6 +9,7 @@ Agent + Trans：一个通用编程 Agent 工作台，把解释转化为可执行
 - **可执行 Artifact**——自包含 HTML、完整快照、compare-and-set 修订号、不透明 origin 的沙箱 iframe，以及用户确认的语义操作。Agent 更新 Artifact 时不必把源码重复粘贴进对话。
 - **Artifact 设计系统**——按需加载的 [artifact-design 技能](.agents/skills/artifact-design/SKILL.md) 提供设计 Token、精美的预测实验和参数探索模板、克制的动效原语，以及真实浏览器截图评审。
 - **SceneHost 与比较**——内联、并排、聚焦和画中画保留 Artifact 状态与对话来源。独立的 control/variant 场景可以同步命令，并回流一条确认的比较结果。
+- **原生 SceneSpec 生成**——`scene` 工具接受模型生成的 SceneSpec，通过版本化 SceneCatalog 校验，持久化 `format: 'scene'` 快照，并用安全表达式解析器原生渲染函数图。本地真实模型已通过这条路径生成新的阻尼振荡场景；回放 fixture 仍不需要密钥。
 - **SceneSpec 原语**——[函数绘图](.agents/skills/artifact-design/references/function-plot.html)、[流程图](.agents/skills/artifact-design/references/flowchart.html)和[粒子系统](.agents/skills/artifact-design/references/particle-system.html)模板展示声明式函数、参数、描点、导数、积分、节点、边和确定性物理模拟。
 - **确认的交互**——浏览器操作先保持待发送，只有用户发送后才成为普通用户输入；不授予文件、网络或批准权限。
 - **探究分支**——从 assistant 结论开岔为独立 Session，再预览并确认可见结论回流到直接父级。不复制子对话全文或 reasoning，也不隐式启动父级模型轮次。

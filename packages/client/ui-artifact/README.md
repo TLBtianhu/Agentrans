@@ -1,5 +1,5 @@
 ---
-description: "Sandboxed HTML Artifact cards for the Web GUI: revision replacement, source inspection, and user-confirmed actions sent to the owning Agent."
+description: "Sandboxed HTML and native SceneSpec Artifact cards for the Web GUI: revision replacement, source inspection, and user-confirmed actions sent to the owning Agent."
 kind: "package-reference"
 ---
 
@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-Read interactive HTML Artifacts beside the conversation that produced them. Each checkpoint renders independently, including when history contains only the latest revision. You can switch between inline and expanded views, inspect the HTML source, and send an Artifact action only after explicit confirmation. The preview runs without access to the parent application or remote dependencies.
+Read interactive HTML Artifacts beside the conversation that produced them. Each checkpoint renders independently, including when history contains only the latest revision. You can switch between inline and expanded views, inspect the HTML source, and send an Artifact action only after explicit confirmation. The preview runs without access to the parent application or remote dependencies. A `function-plot` SceneSpec renders natively through the shared safe expression parser, with direct confirmation of the current analysis.
 
 ## Table of Contents
 

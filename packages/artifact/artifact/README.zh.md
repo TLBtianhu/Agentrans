@@ -1,5 +1,5 @@
 ---
-description: "Session 持久化 HTML Artifact、模型创建/更新工具，以及用户确认后的交互消息。"
+description: "Session 持久化 HTML 和 SceneSpec Artifact、模型创建/更新工具，以及用户确认后的交互消息。"
 kind: "package-reference"
 ---
 
@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-本包负责持久化 HTML Artifact：以稳定 id、compare-and-set 修订号和语义呈现方式保存完整快照，并提供模型侧 `artifact` 工具。Remote `record` 方法把用户确认的 iframe 操作转换为普通文本 `UserMessage`；操作不授予文件、网络或批准权限。
+本包负责持久化 HTML 和 SceneSpec Artifact：以稳定 id、compare-and-set 修订号和语义呈现方式保存完整快照，并提供模型侧 `artifact` 和 `scene` 工具。Remote `record` 方法把用户确认的操作转换为普通文本 `UserMessage`；操作不授予文件、网络或批准权限。
 
 ## 目录
 
@@ -25,7 +25,7 @@ kind: "package-reference"
 <a id="use-this-package"></a>
 ## 使用
 
-以 `@deepseek-ai/dsh-artifact` 挂载服务，以 `@deepseek-ai/dsh-artifact/tool` 挂载工具。服务负责校验、读取当前修订号和提交 Session；工具先准备快照，只有最终工具结果成功才提交。
+以 `@deepseek-ai/dsh-artifact` 挂载服务，以 `@deepseek-ai/dsh-artifact/tool` 挂载 HTML 工具，以 `@deepseek-ai/dsh-artifact/scene-tool` 挂载 SceneSpec 工具。服务负责校验、读取当前修订号和提交 Session；每个工具先准备快照，只有最终工具结果成功才提交。SceneSpec 使用版本化 SceneCatalog 和安全表达式解析器校验，不使用 `eval`。
 
 | 配置 | 默认值 | 含义 |
 |---|---|---|
@@ -41,6 +41,8 @@ kind: "package-reference"
 
 Artifact 可以向父页面发送 `{ kind: 'artifact-action', artifactId, revision, action, payload }`。Host 在投递前校验当前修订号和完整消息大小。`wake: false` 使用 `agent.inject`；`wake: true` 使用 `agent.steer`。是否需要人工确认由 UI 政策决定。
 
+Scene 快照使用 `format: 'scene'` 和完整 `spec`。当前 catalog 支持 `function-plot`，包含函数、有界参数、视口和描点设置。未知变量或函数、非法参数范围和非有限表达式结果都会在提交前拒绝。
+
 -----
 
 <a id="further-exploration"></a>
@@ -54,6 +56,12 @@ Artifact 可以向父页面发送 `{ kind: 'artifact-action', artifactId, revisi
 
 <a id="model-experience"></a>
 ## 模型体验
+
+### scene
+
+#### 模型看到什么
+
+`scene` 工具接受 `action`、`kind`、`sceneId`、`title`、完整 `spec`、`presentation`，以及仅更新使用的 `baseRevision`。结果只重复 `sceneId`、`revision`、`title`、`kind` 和 `presentation`。SceneSpec JSON 在提交前校验，不是 HTML，也不执行模型生成的 JavaScript。
 
 ### artifact
 
@@ -79,7 +87,7 @@ A confirmed action becomes one bounded user message; it grants no additional aut
 
 <a id="known-limitations-and-deferred-work"></a>
 
-- 当前只支持自包含 HTML。其他媒体格式和远程渲染 Provider 需要独立协议。
+- 当前 SceneCatalog 只支持 `function-plot`；流程图和粒子系统在迁移为原生 SceneSpec 前仍是参考 HTML 模板。
 - 持久事实包括源码、修订号和语义操作消息，不包括 iframe JavaScript 堆、Canvas 像素、滚动位置或未确认的待发送操作。
 - 修订检查由所属 Agent 操作串行化，不是跨进程事务。
 - 服务不执行或清理 HTML。执行由 Client 的不透明 origin iframe 与内容策略负责。

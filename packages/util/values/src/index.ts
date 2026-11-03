@@ -291,3 +291,4 @@ export class WeakMapWithValues<Key extends object, Value> {
 }
 
 export { PartialArguments, type LengthReadOptions } from './partial-json.ts'
+export { parseExpression, evaluateExpression, type ExpressionNode, type ExpressionVariables } from './scene-expression.ts'

@@ -43,7 +43,6 @@ describe('tsdown client artifact', () => {
     ;(window as Win).__ModuleLoader__ = { load: (h) => { handoff = h } }
     // The implied-eval ban targets accidental string execution, not this
     // deliberate built-bundle fixture running in the window scope.
-    // oxlint-disable-next-line typescript/no-implied-eval, typescript/no-unsafe-call
     new Function(code!)()
     expect(handoff).toBeDefined()
     const modules = new Map<string, unknown>([
@@ -52,6 +51,7 @@ describe('tsdown client artifact', () => {
       ['react-dom', await import('react-dom')],
       ['@tanstack/react-virtual', await import('@tanstack/react-virtual')],
       ['@deepseek-ai/dsh-client-store', await import('@deepseek-ai/dsh-client-store')],
+      ['@deepseek-ai/dsh-util-values', await import('@deepseek-ai/dsh-util-values')],
       ['@deepseek-ai/dsh-client-ui-conversation/client', await import('@deepseek-ai/dsh-client-ui-conversation/client')],
       ['@deepseek-ai/dsh-client-ui-primitives', await import('@deepseek-ai/dsh-client-ui-primitives')],
     ])

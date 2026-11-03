@@ -37,6 +37,10 @@ if (!isJsonValue(input)) throw new TypeError('expected lossless JSON')
 const snapshot = snapshotJsonValue(input) as JsonValue
 ```
 
+### Evaluate SceneSpec expressions
+
+`parseExpression` and `evaluateExpression` parse and evaluate a bounded whitelist of mathematical expressions for browser-safe SceneSpec rendering. They accept only declared variables, supported functions, and finite results; source text is never executed. Use `parseExpression` before accepting model-generated expressions.
+
 ### Read streamed arguments
 
 `PartialArguments` reads a JSON object's top-level fields lazily. `append()` retains separate fragments without scanning or concatenating them. Readers index new key/value ranges, skipping unrequested contents; only requested strings are decoded or counted, and only requested complete non-string values are parsed. `complete()` reports a closing delimiter, not validated contents; `invalid` reports errors already discovered by indexing or content reads. It is not a substitute for tool-input validation.
