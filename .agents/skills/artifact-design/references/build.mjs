@@ -4,7 +4,7 @@ const root = new URL('./', import.meta.url)
 const theme = await readFile(new URL('theme.css', root), 'utf8')
 const motion = await readFile(new URL('motion.js', root), 'utf8')
 
-for (const name of ['prediction-lab', 'parameter-explorer', 'function-plot']) {
+for (const name of ['prediction-lab', 'parameter-explorer', 'function-plot', 'flowchart']) {
   const source = await readFile(new URL(`src/${name}.html`, root), 'utf8')
   if (!source.includes('<!-- @artifact-theme -->') || !source.includes('<!-- @artifact-motion -->')) {
     throw new Error(`${name}: template placeholders are missing`)

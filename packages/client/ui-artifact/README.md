@@ -47,7 +47,7 @@ Snapshots with `comparison: { group, role }` use a separate Conversation Definit
 
 ### SceneSpec primitives
 
-The [function-plot template](../../../.agents/skills/artifact-design/references/function-plot.html) demonstrates a declarative mathematical SceneSpec: two functions, parameter sweep, viewport pan/zoom, trace, derivative, and integral. It reports local state for comparison and admits `plot.inspected` only after user confirmation. Use this as the reference for adding primitives rather than creating a separate plugin per subject.
+The [function-plot template](../../../.agents/skills/artifact-design/references/function-plot.html) demonstrates a declarative mathematical SceneSpec: two functions, parameter sweep, viewport pan/zoom, trace, derivative, and integral. It reports local state for comparison and admits `plot.inspected` only after user confirmation. The [flowchart template](../../../.agents/skills/artifact-design/references/flowchart.html) applies the same pattern to nodes, edges, selectable concepts, and path advancement, with confirmed `flow.inspected` state. Use these as references for adding primitives rather than creating a separate plugin per subject.
 
 -----
 

@@ -26,7 +26,30 @@ export interface FunctionPlotSpec {
   readonly trace: TraceSpec
 }
 
-export type SceneSpec = FunctionPlotSpec
+export interface FlowNodeSpec {
+  readonly id: string
+  readonly label: string
+  readonly x: number
+  readonly y: number
+  readonly tone: 'accent' | 'good' | 'warn' | 'muted'
+}
+
+export interface FlowEdgeSpec {
+  readonly from: string
+  readonly to: string
+  readonly label?: string
+}
+
+export interface FlowchartSpec {
+  readonly kind: 'flowchart'
+  readonly nodes: readonly FlowNodeSpec[]
+  readonly edges: readonly FlowEdgeSpec[]
+  readonly steps: readonly string[]
+  readonly viewport: ViewportSpec
+  readonly selected: string
+}
+
+export type SceneSpec = FunctionPlotSpec | FlowchartSpec
 export type SceneCommand = 'play' | 'pause' | 'step' | 'reset'
 
 export interface FunctionPlotState {
@@ -34,6 +57,13 @@ export interface FunctionPlotState {
   readonly parameter: number
   readonly derivative: number
   readonly integral: number
+  readonly zoom: number
+  readonly playing: boolean
+}
+
+export interface FlowchartState {
+  readonly selected: string
+  readonly step: number
   readonly zoom: number
   readonly playing: boolean
 }

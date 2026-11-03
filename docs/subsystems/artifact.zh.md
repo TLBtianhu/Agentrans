@@ -48,6 +48,8 @@ keyless [Artifact 交互场景](../../apps/web/tests/artifact-interaction.e2e.ts
 
 [函数绘图场景](../../apps/web/tests/function-plot.e2e.ts) 验证 SceneSpec 驱动的数学场景：两个函数、参数扫掠、缩放、导数、积分，以及一条带数值容差的确认 `plot.inspected` 操作。
 
+[流程图场景](../../apps/web/tests/flowchart.e2e.ts) 验证 SceneSpec 驱动的概念图：节点选择、路径推进、缩放，以及一条包含所选概念和当前步骤的确认 `flow.inspected` 操作。
+
 <!-- BEGIN GENERATED cordis-surface (gen-cordis-catalog.ts) — do not edit between markers -->
 
 <a id="cordis-surface"></a>

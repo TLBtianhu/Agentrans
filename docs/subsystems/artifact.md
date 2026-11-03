@@ -48,6 +48,8 @@ The [comparison Artifact scenario](../../apps/web/tests/comparison-artifacts.e2e
 
 The [function-plot scenario](../../apps/web/tests/function-plot.e2e.ts) verifies a SceneSpec-driven mathematical scene: two functions, parameter sweep, zoom, derivative, integral, and one confirmed `plot.inspected` action with numeric tolerance for numerical analysis.
 
+The [flowchart scenario](../../apps/web/tests/flowchart.e2e.ts) verifies a SceneSpec-driven concept map: node selection, path advancement, zoom, and one confirmed `flow.inspected` action containing the selected concept and current step.
+
 <!-- BEGIN GENERATED cordis-surface (gen-cordis-catalog.ts) — do not edit between markers -->
 
 <a id="cordis-surface"></a>

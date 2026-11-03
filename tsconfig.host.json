@@ -13,6 +13,7 @@
     "apps/web/tests/teaching-artifact.e2e.ts",
     "apps/web/tests/comparison-artifacts.e2e.ts",
     "apps/web/tests/function-plot.e2e.ts",
+    "apps/web/tests/flowchart.e2e.ts",
     "apps/web/tests/custom-provider.e2e.ts",
     "apps/web/tests/sidebar-drawer.e2e.ts",
     "apps/web/tests/creation-recommendations.e2e.ts",

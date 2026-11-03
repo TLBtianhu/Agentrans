@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Concept flow map</title>
+  <!-- @artifact-theme -->
+</head>
+<body>
+  <main class="lab">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Concept map</p>
+        <h1>Concept flow map</h1>
+        <p class="subtitle">Trace an explanation as a living process. Select a concept, advance the flow, and inspect how each step connects.</p>
+      </div>
+      <span class="pill">SceneSpec</span>
+    </header>
+
+    <section class="workspace" aria-label="Concept flow workspace">
+      <div class="stage">
+        <div class="metric-row" aria-label="Current flow state">
+          <div class="metric"><strong id="selected-value">Observe</strong><span>Selected concept</span></div>
+          <div class="metric"><strong id="step-value">1 / 6</strong><span>Flow step</span></div>
+          <div class="metric"><strong id="zoom-value">1.00×</strong><span>Viewport scale</span></div>
+        </div>
+        <svg id="flow" class="chart" viewBox="0 0 640 300" role="img" aria-label="Interactive concept flow map"></svg>
+        <output id="readout" class="result" role="status" aria-live="polite">Select a concept to inspect its role.</output>
+      </div>
+
+      <aside class="panel" aria-label="Flow controls">
+        <h2>Controls</h2>
+        <div class="field">
+          <label for="selected">Selected concept</label>
+          <select id="selected"></select>
+        </div>
+        <div class="button-row">
+          <button id="zoom-out" type="button" aria-label="Zoom out">−</button>
+          <button id="zoom-in" type="button" aria-label="Zoom in">+</button>
+          <button id="view-reset" type="button">Reset view</button>
+        </div>
+        <div class="button-row">
+          <button id="play" class="primary" type="button">Play flow</button>
+          <button id="step" type="button">Step</button>
+          <button id="reset" type="button">Reset</button>
+        </div>
+        <button id="confirm" type="button">Confirm map</button>
+        <p class="subtitle">Click a node or use the selector. The active path follows the current step without changing the underlying graph.</p>
+      </aside>
+    </section>
+
+    <footer class="timeline">
+      <span class="step">Observe</span>
+      <span class="step">Predict</span>
+      <span class="step">Manipulate</span>
+      <span class="step">Feedback</span>
+      <span class="step">Compare</span>
+      <span class="step">Explain</span>
+    </footer>
+  </main>
+
+  <!-- @artifact-motion -->
+  <script>
+    const sceneSpec = {
+      kind: 'flowchart',
+      nodes: [
+        { id: 'observe', label: 'Observe', x: 90, y: 70, tone: 'accent' },
+        { id: 'predict', label: 'Predict', x: 320, y: 70, tone: 'accent' },
+        { id: 'manipulate', label: 'Manipulate', x: 550, y: 70, tone: 'warn' },
+        { id: 'feedback', label: 'Feedback', x: 550, y: 225, tone: 'good' },
+        { id: 'compare', label: 'Compare', x: 320, y: 225, tone: 'good' },
+        { id: 'explain', label: 'Explain', x: 90, y: 225, tone: 'muted' },
+      ],
+      edges: [
+        { from: 'observe', to: 'predict' },
+        { from: 'predict', to: 'manipulate' },
+        { from: 'manipulate', to: 'feedback' },
+        { from: 'feedback', to: 'compare' },
+        { from: 'compare', to: 'explain' },
+        { from: 'explain', to: 'observe' },
+        { from: 'compare', to: 'predict', label: 'revise' },
+      ],
+      steps: ['observe', 'predict', 'manipulate', 'feedback', 'compare', 'explain'],
+      viewport: { centerX: 0, centerY: 0, scale: 1 },
+      selected: 'observe',
+    }
+
+    const svg = document.getElementById('flow')
+    const readout = document.getElementById('readout')
+    const selectedInput = document.getElementById('selected')
+    const playButton = document.getElementById('play')
+    const nodes = new Map(sceneSpec.nodes.map(node => [node.id, node]))
+    let selected = sceneSpec.selected
+    let currentIndex = 0
+    let scale = sceneSpec.viewport.scale
+    let centerX = sceneSpec.viewport.centerX
+    let centerY = sceneSpec.viewport.centerY
+    let playing = false
+    let frame = 0
+    let previous = 0
+    let dragging = false
+    let dragX = 0
+    let dragY = 0
+
+    for (const node of sceneSpec.nodes) {
+      const option = document.createElement('option')
+      option.value = node.id
+      option.textContent = node.label
+      selectedInput.appendChild(option)
+    }
+    selectedInput.value = selected
+
+    function color(name, fallback) {
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback
+    }
+
+    function render() {
+      const ink = color('--art-ink', '#17202b')
+      const muted = color('--art-muted', '#647184')
+      const accent = color('--art-accent', '#5b5bd6')
+      const accentSoft = color('--art-accent-soft', 'rgba(91,91,214,.13)')
+      const good = color('--art-good', '#16805c')
+      const border = color('--art-border', 'rgba(68,83,112,.14)')
+      const surface = color('--art-surface-raised', '#fff')
+      const viewWidth = 640 / scale
+      const viewHeight = 300 / scale
+      svg.setAttribute('viewBox', `${320 - centerX - viewWidth / 2} ${150 - centerY - viewHeight / 2} ${viewWidth} ${viewHeight}`)
+      svg.innerHTML = ''
+
+      const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs')
+      const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker')
+      marker.setAttribute('id', 'arrow')
+      marker.setAttribute('markerWidth', '8')
+      marker.setAttribute('markerHeight', '8')
+      marker.setAttribute('refX', '7')
+      marker.setAttribute('refY', '3')
+      marker.setAttribute('orient', 'auto')
+      const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+      arrow.setAttribute('d', 'M0,0 L0,6 L7,3 z')
+      arrow.setAttribute('fill', accent)
+      marker.appendChild(arrow)
+      defs.appendChild(marker)
+      svg.appendChild(defs)
+
+      for (const edge of sceneSpec.edges) {
+        const from = nodes.get(edge.from)
+        const to = nodes.get(edge.to)
+        if (!from || !to) continue
+        const active = selected === edge.from || selected === edge.to
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
+        line.setAttribute('x1', String(from.x))
+        line.setAttribute('y1', String(from.y))
+        line.setAttribute('x2', String(to.x))
+        line.setAttribute('y2', String(to.y))
+        line.setAttribute('stroke', active ? accent : muted)
+        line.setAttribute('stroke-width', active ? '3' : '1.5')
+        line.setAttribute('opacity', active ? '1' : '0.48')
+        line.setAttribute('marker-end', 'url(#arrow)')
+        svg.appendChild(line)
+        if (edge.label) {
+          const text = document.createElementNS('http://www.w3.org/2000/svg', 'text')
+          text.setAttribute('x', String((from.x + to.x) / 2))
+          text.setAttribute('y', String((from.y + to.y) / 2 - 8))
+          text.setAttribute('fill', muted)
+          text.setAttribute('font-size', '11')
+          text.setAttribute('text-anchor', 'middle')
+          text.textContent = edge.label
+          svg.appendChild(text)
+        }
+      }
+
+      for (const node of sceneSpec.nodes) {
+        const isSelected = selected === node.id
+        const isCurrent = sceneSpec.steps[currentIndex] === node.id
+        const group = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+        group.setAttribute('data-node-id', node.id)
+        group.setAttribute('tabindex', '0')
+        group.setAttribute('role', 'button')
+        group.setAttribute('aria-label', `Select ${node.label}`)
+        group.style.cursor = 'pointer'
+        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+        rect.setAttribute('x', String(node.x - 70))
+        rect.setAttribute('y', String(node.y - 26))
+        rect.setAttribute('width', '140')
+        rect.setAttribute('height', '52')
+        rect.setAttribute('rx', '14')
+        rect.setAttribute('fill', isSelected ? accentSoft : surface)
+        rect.setAttribute('stroke', isCurrent ? accent : isSelected ? good : border)
+        rect.setAttribute('stroke-width', isCurrent ? '3' : isSelected ? '2' : '1')
+        group.appendChild(rect)
+        const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
+        dot.setAttribute('cx', String(node.x - 51))
+        dot.setAttribute('cy', String(node.y))
+        dot.setAttribute('r', '5')
+        dot.setAttribute('fill', node.tone === 'good' ? good : node.tone === 'warn' ? color('--art-warn', '#a86500') : node.tone === 'muted' ? muted : accent)
+        group.appendChild(dot)
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text')
+        text.setAttribute('x', String(node.x + 5))
+        text.setAttribute('y', String(node.y + 5))
+        text.setAttribute('fill', ink)
+        text.setAttribute('font-size', '13')
+        text.setAttribute('text-anchor', 'middle')
+        text.textContent = node.label
+        group.appendChild(text)
+        const select = () => {
+          selected = node.id
+          const index = sceneSpec.steps.indexOf(node.id)
+          if (index >= 0) currentIndex = index
+          selectedInput.value = selected
+          render()
+        }
+        group.addEventListener('click', select)
+        group.addEventListener('keydown', event => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault()
+            select()
+          }
+        })
+        svg.appendChild(group)
+      }
+
+      const current = nodes.get(selected)
+      readout.textContent = current
+        ? `${current.label} · step ${currentIndex + 1}/${sceneSpec.steps.length} · ${sceneSpec.edges.filter(edge => edge.from === selected || edge.to === selected).length} connections`
+        : 'Select a concept to inspect its role.'
+      document.getElementById('selected-value').textContent = current?.label ?? selected
+      document.getElementById('step-value').textContent = `${currentIndex + 1} / ${sceneSpec.steps.length}`
+      document.getElementById('zoom-value').textContent = `${scale.toFixed(2)}×`
+      parent.postMessage({ kind: 'artifact-state', state: { selected, step: currentIndex, zoom: scale, playing } }, '*')
+    }
+
+    function stepFlow() {
+      currentIndex = (currentIndex + 1) % sceneSpec.steps.length
+      selected = sceneSpec.steps[currentIndex]
+      selectedInput.value = selected
+      render()
+    }
+
+    function setPlaying(next) {
+      playing = next
+      playButton.textContent = playing ? 'Pause flow' : 'Play flow'
+      playButton.setAttribute('aria-pressed', String(playing))
+      previous = 0
+      if (playing) frame = requestAnimationFrame(tick)
+      else cancelAnimationFrame(frame)
+      render()
+    }
+
+    function tick(now) {
+      if (!playing) return
+      if (previous === 0) previous = now
+      if (now - previous >= 650) {
+        previous = now
+        stepFlow()
+      }
+      frame = requestAnimationFrame(tick)
+    }
+
+    function reset() {
+      setPlaying(false)
+      selected = sceneSpec.selected
+      currentIndex = 0
+      scale = sceneSpec.viewport.scale
+      centerX = sceneSpec.viewport.centerX
+      centerY = sceneSpec.viewport.centerY
+      selectedInput.value = selected
+      render()
+    }
+
+    selectedInput.addEventListener('change', () => {
+      selected = selectedInput.value
+      const index = sceneSpec.steps.indexOf(selected)
+      if (index >= 0) currentIndex = index
+      render()
+    })
+    document.getElementById('zoom-in').addEventListener('click', () => { scale = Math.min(4, scale * 1.25); render() })
+    document.getElementById('zoom-out').addEventListener('click', () => { scale = Math.max(0.5, scale / 1.25); render() })
+    document.getElementById('view-reset').addEventListener('click', reset)
+    document.getElementById('reset').addEventListener('click', reset)
+    document.getElementById('step').addEventListener('click', stepFlow)
+    playButton.addEventListener('click', () => { setPlaying(!playing) })
+    document.getElementById('confirm').addEventListener('click', () => {
+      parent.postMessage({
+        kind: 'artifact-action', artifactId: 'concept-flow', revision: 1,
+        action: 'flow.inspected', payload: { selected, step: currentIndex, zoom: scale },
+      }, '*')
+    })
+    svg.addEventListener('click', event => {
+      const target = document.elementFromPoint(event.clientX, event.clientY)?.closest('[data-node-id]')
+      if (!target) return
+      selected = target.getAttribute('data-node-id')
+      const index = sceneSpec.steps.indexOf(selected)
+      if (index >= 0) currentIndex = index
+      selectedInput.value = selected
+      render()
+    })
+    svg.addEventListener('pointerdown', event => {
+      dragging = true
+      dragX = event.clientX
+      dragY = event.clientY
+      svg.setPointerCapture(event.pointerId)
+    })
+    svg.addEventListener('pointerup', () => { dragging = false })
+    svg.addEventListener('pointermove', event => {
+      if (!dragging) return
+      centerX -= (event.clientX - dragX) / scale
+      centerY -= (event.clientY - dragY) / scale
+      dragX = event.clientX
+      dragY = event.clientY
+      render()
+    })
+    svg.addEventListener('wheel', event => {
+      event.preventDefault()
+      scale = Math.max(0.5, Math.min(4, scale * Math.exp(-event.deltaY * 0.001)))
+      render()
+    }, { passive: false })
+    window.addEventListener('message', event => {
+      if (event.source !== parent || event.data?.kind !== 'artifact-command') return
+      if (event.data.command === 'play') setPlaying(true)
+      else if (event.data.command === 'pause') setPlaying(false)
+      else if (event.data.command === 'step') stepFlow()
+      else if (event.data.command === 'reset') reset()
+    })
+
+    render()
+    beat(document.querySelectorAll('.hero, .workspace, .timeline'))
+  </script>
+</body>
+</html>
