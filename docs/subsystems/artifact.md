@@ -37,7 +37,7 @@ Durable recovery covers snapshots and admitted action messages. Iframe JavaScrip
 
 The keyless [Artifact interaction scenario](../../apps/web/tests/artifact-interaction.e2e.ts) drives the shipped Web composition with the recorded model stream in [session.v4.jsonl](../../snapshots/web/artifact-interaction/session.v4.jsonl). It creates and updates an interactive counter, expands the completed process group, clicks the counter in a real browser, and confirms the pending action. The test checks revisions 1 and 2, no Artifact action or second turn before confirmation, and one parent-local `artifact-action` plus a second turn after confirmation.
 
-The [teaching Artifact scenario](../../apps/web/tests/teaching-artifact.e2e.ts) applies the same path to a prediction lab. The user selects an angle, predicts a hit, launches, compares the actual result, and confirms the semantic action. The Agent then updates the Artifact to revision 2 with prediction feedback. This exercises observation, prediction, manipulation, and feedback rather than visualization alone.
+The [teaching Artifact scenario](../../apps/web/tests/teaching-artifact.e2e.ts) applies the same path to a prediction lab. The user selects an angle, predicts a hit, launches, compares the actual result, and confirms the semantic action. The Agent then updates the Artifact to revision 2 with prediction feedback. This exercises observation, prediction, manipulation, and feedback rather than visualization alone. The replay also mounts a user-declared `custom-provider` model route, so the model picker shows `Custom Lab Model` instead of a built-in DeepSeek route.
 
 <!-- BEGIN GENERATED cordis-surface (gen-cordis-catalog.ts) — do not edit between markers -->
 

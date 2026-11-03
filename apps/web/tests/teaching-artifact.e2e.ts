@@ -20,7 +20,17 @@ describe.skipIf(MODE === 'record')('web e2e: teaching Artifact', () => {
   let tripwire: ReturnType<typeof watchConsole>
 
   beforeAll(async () => {
-    scaffold = await launchWebScaffold({ replayFixture: FIXTURE, compareReplaySession: false, paceMs: 10 })
+    process.env.AGENTRANS_TEST_CUSTOM_KEY = 'local-test-key'
+    scaffold = await launchWebScaffold({
+      replayFixture: FIXTURE,
+      compareReplaySession: false,
+      paceMs: 10,
+      extraOverlayPath: fileURLToPath(new URL('./teaching-custom-provider.overlay.yml', import.meta.url)),
+      replayProviders: [{
+        id: 'custom-provider', name: 'Custom Lab',
+        models: [{ id: 'user-model', name: 'Custom Lab Model', contextWindow: 8192 }],
+      }],
+    })
     const executablePath = process.env.DSH_PLAYWRIGHT_EXECUTABLE_PATH
     browser = await chromium.launch(executablePath === undefined ? {} : { executablePath })
     page = await browser.newPage({ viewport: { width: 1440, height: 960 }, locale: 'en-US' })
@@ -34,7 +44,11 @@ describe.skipIf(MODE === 'record')('web e2e: teaching Artifact', () => {
     try {
       await browser?.close()
     } finally {
-      await scaffold?.close()
+      try {
+        await scaffold?.close()
+      } finally {
+        delete process.env.AGENTRANS_TEST_CUSTOM_KEY
+      }
     }
   })
 

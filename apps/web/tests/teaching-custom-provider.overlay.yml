@@ -1,0 +1,9 @@
+# llm-replay supplies the custom-provider stream and model metadata, so the actual
+# pi-ai adapter stays disabled and no endpoint is contacted.
+- id: agent-default-model
+  config:
+    provider: custom-provider
+    model: user-model
+
+- id: llm-pi-ai
+  disabled: true
