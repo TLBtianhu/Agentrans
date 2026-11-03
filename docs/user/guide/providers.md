@@ -2,7 +2,7 @@
 
 English | [中文](providers.zh.md)
 
-This guide assumes you started the Web UI through the [root README](../../../README.md#run). Model changes take effect on the next request without restarting the server.
+This guide assumes you started the Web UI through the [root README](../../../README.md#run). Model changes take effect on the next request without restarting the server. Agentrans has no DeepSeek account login or server-side account binding; providers and credentials are user-configured. Custom endpoints and model ids can change without an upstream source update.
 
 ## Configure DeepSeek
 

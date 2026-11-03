@@ -26,6 +26,10 @@ pnpm dsh web --no-open --port 58910
 
 便携版与安装版的程序路径和数据路径必须彼此分离，并与上游 DSH 分离。打包前必须完成的外部身份审计见 [DISTRIBUTION.md](DISTRIBUTION.md)。
 
+## 模型配置
+
+Agentrans 不提供 DeepSeek 账号登录或服务端账号绑定。用户自行配置提供商与凭据：端点 URL、协议格式、模型 id 和模型元数据。自定义提供商可使用 `openai-completions`、`openai-responses` 或 `anthropic-messages`；新增模型不需要更新上游源码。参见 [custom-provider.cordis.yml](apps/cli/config/examples/custom-provider.cordis.yml) 和[提供商指南](docs/user/guide/providers.zh.md)。凭据只保存在本地凭据存储或环境变量中，绝不写入仓库。
+
 ## 验证
 
 ```sh

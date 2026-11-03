@@ -185,4 +185,4 @@ None.
 
 </details>
 
-The Web composition includes the account Remote controller and Account settings section.
+The Web composition omits account login and bound-account routes. Model access is configured by users through provider settings and credentials.

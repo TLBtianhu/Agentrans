@@ -2,7 +2,7 @@
 
 [English](providers.md) | 中文
 
-本指南假定你已按照[根 README](../../../README.zh.md#run)启动 Web UI。模型变更会在下一次请求时生效，不需要重启服务器。
+本指南假定你已按照[根 README](../../../README.zh.md#run)启动 Web UI。模型变更会在下一次请求时生效，不需要重启服务器。Agentrans 不提供 DeepSeek 账号登录或服务端账号绑定；提供商与凭据由用户自行配置。自定义端点和模型 id 不需要更新上游源码。
 
 ## 配置 DeepSeek
 

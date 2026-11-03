@@ -1,0 +1,17 @@
+# Example: a user-declared OpenAI-compatible provider. Copy this overlay into your
+# own profile and replace the endpoint, credential reference, and model list.
+# Secrets stay in the credentials store or environment, never in this file.
+- id: llm-pi-ai
+  config:
+    providers:
+      custom-provider:
+        displayName: Custom Provider
+        apiKeyEnv: CUSTOM_PROVIDER_API_KEY
+        api: openai-completions
+        baseURL: https://gateway.example/v1
+        models:
+          - id: user-model
+            name: User Model
+            contextWindow: 8192
+            maxTokens: 1024
+            input: [text]
