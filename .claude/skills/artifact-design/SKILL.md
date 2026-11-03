@@ -34,6 +34,7 @@ Run `node .agents/skills/artifact-design/references/build.mjs` after editing the
 
 - Establish one main idea per screen: concept and prediction first, simulation second, controls beside it, result and feedback last. Do not fill every region with decoration.
 - Use the shared accent, ink, muted text, surface, border, spacing, and radius tokens. Do not introduce arbitrary colors or shadows for each answer. Both light and dark themes must remain readable.
+- Prefer an instrument/editorial style over a marketing-card style: neutral backgrounds, thin rules, compact titles, tabular measurements, one primary action, and color only for data or status. Avoid large gradients, pill-heavy controls, oversized heroes, and nested cards.
 - Keep the main stage stable. Animate only the object being explained, using `beat` for staged entry, `highlight` for a changed result, and `tween` for a short state change. Avoid infinite animation and autoplay that cannot be paused.
 - Use SVG/Canvas for trajectories, charts, and diagrams. Use CSS for transitions. Add a larger animation library only when the scene genuinely needs it, and bundle it locally instead of linking a CDN.
 - Support keyboard focus, `aria-pressed` for toggles, `role="status"` for results, and `prefers-reduced-motion`. Never make motion the only way to understand the result.

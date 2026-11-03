@@ -19,6 +19,7 @@ Look for these defects before delivery:
 - Result hidden below the fold or disconnected from the action that produced it.
 - Excess decoration, moving backgrounds, or animation that distracts from the model.
 - A plain white card with buttons where a designed lab was requested.
+- Generic AI styling: large gradients, pill-heavy controls, oversized hero text, nested cards, excessive shadows, or low information density.
 
 If any defect remains, revise the template and capture the same view again. Do not describe an Artifact as polished from source alone.
 

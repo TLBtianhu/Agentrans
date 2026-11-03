@@ -70,6 +70,7 @@ try {
     const screenshot = `C:/agent制作/artifacts/design-${name}.png`
     await page.setViewportSize({ width: 1440, height: 960 })
     await page.emulateMedia({ colorScheme: 'light' })
+    await page.waitForTimeout(500)
     await page.screenshot({ path: screenshot, fullPage: true })
     assert.deepEqual(errors, [], `${name}: page errors`)
     assert.deepEqual(failedRequests, [], `${name}: external requests`)
