@@ -7,6 +7,7 @@ Agent + Trans：一个通用编程 Agent 工作台，把解释转化为可执行
 ## 当前垂直切片
 
 - **可执行 Artifact**——自包含 HTML、完整快照、compare-and-set 修订号、不透明 origin 的沙箱 iframe，以及用户确认的语义操作。Agent 更新 Artifact 时不必把源码重复粘贴进对话。
+- **Artifact 设计系统**——按需加载的 [artifact-design 技能](.agents/skills/artifact-design/SKILL.md) 提供设计 Token、精美的预测实验和参数探索模板、克制的动效原语，以及真实浏览器截图评审。
 - **确认的交互**——浏览器操作先保持待发送，只有用户发送后才成为普通用户输入；不授予文件、网络或批准权限。
 - **探究分支**——从 assistant 结论开岔为独立 Session，再预览并确认可见结论回流到直接父级。不复制子对话全文或 reasoning，也不隐式启动父级模型轮次。
 

@@ -7,6 +7,7 @@ Agent + Trans: a general programming Agent workbench that turns explanations int
 ## Current vertical slices
 
 - **Executable Artifacts** — self-contained HTML with complete snapshots, compare-and-set revisions, an opaque sandboxed iframe, and confirmed semantic actions. The Agent can update an Artifact without pasting its source back into the conversation.
+- **Artifact design system** — the on-demand [artifact-design skill](.agents/skills/artifact-design/SKILL.md) supplies design tokens, polished prediction and parameter-explorer templates, restrained motion primitives, and real-browser screenshot review.
 - **Confirmed interaction** — browser actions stay pending until the user sends them. Only then do they become ordinary user input; they grant no filesystem, network, or approval authority.
 - **Inquiry branches** — fork an assistant conclusion into an independent Session, then preview and confirm a visible result back to the direct parent. No child transcript or reasoning is copied, and no parent model turn starts implicitly.
 

@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Parameter explorer</title>
+  <!-- @artifact-theme -->
+</head>
+<body>
+  <main class="lab">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Parameter study</p>
+        <h1>Parameter explorer</h1>
+        <p class="subtitle">Change amplitude, frequency, and damping. Pause, step, or reset the model and watch how the curve responds.</p>
+      </div>
+      <span class="pill">Live simulation</span>
+    </header>
+
+    <section class="workspace" aria-label="Damped oscillator explorer">
+      <div class="stage">
+        <div class="metric-row" aria-label="Current parameters">
+          <div class="metric"><strong id="amplitude-value">1.0</strong><span>Amplitude</span></div>
+          <div class="metric"><strong id="frequency-value">1.2</strong><span>Frequency · Hz</span></div>
+          <div class="metric"><strong id="damping-value">0.20</strong><span>Damping</span></div>
+        </div>
+        <canvas id="chart" class="chart" width="640" height="230" role="img" aria-label="Damped oscillator chart"></canvas>
+        <output id="summary" class="result" role="status" aria-live="polite">t = 0.00 s · paused</output>
+      </div>
+
+      <aside class="panel" aria-label="Simulation controls">
+        <h2>Controls</h2>
+        <div class="field">
+          <label for="amplitude">Amplitude <output id="amplitude-label">1.0</output></label>
+          <input id="amplitude" type="range" min="0.2" max="1.5" step="0.1" value="1">
+        </div>
+        <div class="field">
+          <label for="frequency">Frequency <output id="frequency-label">1.2</output></label>
+          <input id="frequency" type="range" min="0.5" max="3" step="0.1" value="1.2">
+        </div>
+        <div class="field">
+          <label for="damping">Damping <output id="damping-label">0.20</output></label>
+          <input id="damping" type="range" min="0" max="0.8" step="0.05" value="0.2">
+        </div>
+        <div class="button-row">
+          <button id="play" class="primary" type="button">Play</button>
+          <button id="step" type="button">Step</button>
+          <button id="reset" type="button">Reset</button>
+        </div>
+        <p class="subtitle">y(t) = A · e<sup>−dt</sup> · sin(2πft)</p>
+      </aside>
+    </section>
+
+    <footer class="timeline">
+      <span class="step">Adjust</span>
+      <span class="step">Observe</span>
+      <span class="step">Explain</span>
+    </footer>
+  </main>
+
+  <!-- @artifact-motion -->
+  <script>
+    const chart = document.getElementById('chart')
+    const context = chart.getContext('2d')
+    const summary = document.getElementById('summary')
+    const playButton = document.getElementById('play')
+    let amplitude = 1
+    let frequency = 1.2
+    let damping = 0.2
+    let time = 0
+    let playing = false
+    let frame = 0
+    let previous = 0
+
+    function valueAt(t) {
+      return amplitude * Math.exp(-damping * t) * Math.sin(2 * Math.PI * frequency * t)
+    }
+
+    function draw() {
+      const style = getComputedStyle(document.documentElement)
+      const ink = style.getPropertyValue('--art-ink').trim()
+      const accent = style.getPropertyValue('--art-accent').trim()
+      const muted = style.getPropertyValue('--art-muted').trim()
+      const good = style.getPropertyValue('--art-good').trim()
+      const width = chart.width
+      const height = chart.height
+      context.clearRect(0, 0, width, height)
+      context.strokeStyle = muted
+      context.globalAlpha = 0.22
+      context.lineWidth = 1
+      for (let y = 30; y < height; y += 40) {
+        context.beginPath(); context.moveTo(0, y); context.lineTo(width, y); context.stroke()
+      }
+      context.globalAlpha = 1
+      context.strokeStyle = accent
+      context.lineWidth = 3
+      context.beginPath()
+      for (let x = 0; x <= width; x++) {
+        const t = time - 4 + (x / width) * 4
+        const y = height / 2 - valueAt(t) * (height * 0.34)
+        if (x === 0) context.moveTo(x, y)
+        else context.lineTo(x, y)
+      }
+      context.stroke()
+      context.fillStyle = good
+      context.beginPath(); context.arc(width - 8, height / 2 - valueAt(time) * (height * 0.34), 5, 0, Math.PI * 2); context.fill()
+      context.fillStyle = ink
+      context.font = '12px system-ui'
+      context.fillText('now', width - 42, height / 2 - valueAt(time) * (height * 0.34) - 12)
+      summary.textContent = `t = ${time.toFixed(2)} s · ${playing ? 'playing' : 'paused'}`
+    }
+
+    function tick(now) {
+      if (!playing) return
+      const delta = previous === 0 ? 0 : Math.min(0.05, (now - previous) / 1000)
+      previous = now
+      time += delta
+      draw()
+      frame = requestAnimationFrame(tick)
+    }
+
+    function setPlaying(next) {
+      playing = next
+      playButton.textContent = playing ? 'Pause' : 'Play'
+      playButton.setAttribute('aria-pressed', String(playing))
+      previous = 0
+      if (playing) frame = requestAnimationFrame(tick)
+      else cancelAnimationFrame(frame)
+      draw()
+    }
+
+    function bindRange(id, label, setter) {
+      const input = document.getElementById(id)
+      const output = document.getElementById(label)
+      input.addEventListener('input', () => {
+        const value = Number(input.value)
+        output.textContent = id === 'damping' ? value.toFixed(2) : value.toFixed(1)
+        setter(value)
+        draw()
+      })
+    }
+
+    bindRange('amplitude', 'amplitude-label', value => { amplitude = value; document.getElementById('amplitude-value').textContent = value.toFixed(1) })
+    bindRange('frequency', 'frequency-label', value => { frequency = value; document.getElementById('frequency-value').textContent = value.toFixed(1) })
+    bindRange('damping', 'damping-label', value => { damping = value; document.getElementById('damping-value').textContent = value.toFixed(2) })
+    playButton.addEventListener('click', () => { setPlaying(!playing) })
+    document.getElementById('step').addEventListener('click', () => { time += 0.1; draw(); highlight(summary) })
+    document.getElementById('reset').addEventListener('click', () => {
+      setPlaying(false)
+      time = 0
+      amplitude = 1
+      frequency = 1.2
+      damping = 0.2
+      for (const [id, value] of [['amplitude', 1], ['frequency', 1.2], ['damping', 0.2]]) {
+        const input = document.getElementById(id)
+        input.value = String(value)
+        input.dispatchEvent(new Event('input'))
+      }
+      draw()
+    })
+
+    draw()
+    beat(document.querySelectorAll('.hero, .workspace, .timeline'))
+  </script>
+</body>
+</html>

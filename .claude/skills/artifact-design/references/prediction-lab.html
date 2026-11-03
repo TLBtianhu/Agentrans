@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Projectile prediction lab</title>
+  <style>
+:root {
+  color-scheme: light dark;
+  --art-bg: #f5f7fb;
+  --art-surface: rgba(255, 255, 255, 0.92);
+  --art-surface-raised: #ffffff;
+  --art-ink: #17202b;
+  --art-muted: #647184;
+  --art-accent: #5b5bd6;
+  --art-accent-strong: #4343b8;
+  --art-accent-soft: rgba(91, 91, 214, 0.13);
+  --art-good: #16805c;
+  --art-good-soft: rgba(22, 128, 92, 0.11);
+  --art-warn: #a86500;
+  --art-warn-soft: rgba(168, 101, 0, 0.12);
+  --art-bad: #b84955;
+  --art-bad-soft: rgba(184, 73, 85, 0.11);
+  --art-border: rgba(68, 83, 112, 0.14);
+  --art-grid: rgba(82, 96, 128, 0.07);
+  --art-radius: 20px;
+  --art-radius-sm: 12px;
+  --art-shadow: 0 18px 50px rgba(36, 47, 72, 0.09);
+  --art-font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --art-bg: #11151d;
+    --art-surface: rgba(25, 31, 42, 0.94);
+    --art-surface-raised: #1d2532;
+    --art-ink: #edf2fb;
+    --art-muted: #a1aec2;
+    --art-accent: #9b9bf7;
+    --art-accent-strong: #b7b7ff;
+    --art-accent-soft: rgba(155, 155, 247, 0.16);
+    --art-good: #62d5a8;
+    --art-good-soft: rgba(98, 213, 168, 0.13);
+    --art-warn: #f1bc65;
+    --art-warn-soft: rgba(241, 188, 101, 0.14);
+    --art-bad: #f38a96;
+    --art-bad-soft: rgba(243, 138, 150, 0.14);
+    --art-border: rgba(184, 202, 232, 0.14);
+    --art-grid: rgba(185, 202, 231, 0.08);
+    --art-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
+  }
+}
+
+* { box-sizing: border-box; }
+html { background: var(--art-bg); }
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 8% 0%, var(--art-accent-soft), transparent 34rem),
+    radial-gradient(circle at 96% 96%, var(--art-good-soft), transparent 30rem),
+    var(--art-bg);
+  color: var(--art-ink);
+  font-family: var(--art-font);
+  font-size: 14px;
+  line-height: 1.5;
+}
+button, select, input { font: inherit; }
+button, select { color: var(--art-ink); }
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; opacity: 0.58; }
+button:focus-visible, select:focus-visible, input:focus-visible {
+  outline: 3px solid var(--art-accent-soft);
+  outline-offset: 2px;
+}
+.lab {
+  width: min(1100px, 100%);
+  margin: 0 auto;
+  padding: 28px;
+  display: grid;
+  gap: 18px;
+}
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(180px, 0.6fr);
+  gap: 18px;
+  align-items: end;
+}
+.eyebrow {
+  margin: 0 0 7px;
+  color: var(--art-accent);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+h1, h2, h3, p { margin-top: 0; }
+h1 {
+  margin-bottom: 8px;
+  font-size: clamp(28px, 4vw, 40px);
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+}
+h2 { margin-bottom: 0; font-size: 16px; letter-spacing: -0.01em; }
+.subtitle { margin-bottom: 0; max-width: 62ch; color: var(--art-muted); line-height: 1.65; }
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: fit-content;
+  padding: 7px 11px;
+  border: 1px solid var(--art-border);
+  border-radius: 999px;
+  background: var(--art-surface);
+  color: var(--art-muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.pill::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--art-accent); }
+.workspace { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(250px, 0.75fr); gap: 16px; align-items: stretch; }
+.stage, .panel, .timeline {
+  border: 1px solid var(--art-border);
+  border-radius: var(--art-radius);
+  background: var(--art-surface);
+  box-shadow: var(--art-shadow);
+  backdrop-filter: blur(14px);
+}
+.stage { position: relative; min-height: 330px; padding: 22px; overflow: hidden; }
+.stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image: linear-gradient(var(--art-grid) 1px, transparent 1px), linear-gradient(90deg, var(--art-grid) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: linear-gradient(to bottom, black, transparent 88%);
+}
+.panel { padding: 18px; display: grid; gap: 14px; align-content: start; }
+.panel h2 { margin-bottom: 2px; }
+.field { display: grid; gap: 7px; }
+.field label, .field-label { color: var(--art-muted); font-size: 12px; font-weight: 650; }
+select, input[type='range'] {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid var(--art-border);
+  border-radius: var(--art-radius-sm);
+  background: var(--art-surface-raised);
+  padding: 9px 11px;
+}
+input[type='range'] { padding: 0; accent-color: var(--art-accent); }
+.button-row { display: flex; flex-wrap: wrap; gap: 8px; }
+button {
+  min-height: 40px;
+  padding: 9px 13px;
+  border: 1px solid var(--art-border);
+  border-radius: var(--art-radius-sm);
+  background: var(--art-surface-raised);
+  color: var(--art-ink);
+  font-weight: 650;
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+}
+button:hover:not(:disabled) { transform: translateY(-1px); border-color: var(--art-accent); box-shadow: 0 7px 18px var(--art-accent-soft); }
+button:active:not(:disabled) { transform: translateY(0); }
+button[data-active='true'], button.primary {
+  border-color: transparent;
+  background: var(--art-accent);
+  color: #fff;
+}
+button[data-active='true']:hover, button.primary:hover { background: var(--art-accent-strong); }
+.metric-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
+.metric { padding: 12px; border: 1px solid var(--art-border); border-radius: var(--art-radius-sm); background: var(--art-surface-raised); }
+.metric strong { display: block; margin-bottom: 3px; font-size: 20px; letter-spacing: -0.02em; }
+.metric span { color: var(--art-muted); font-size: 11px; }
+.result {
+  min-height: 54px;
+  padding: 13px 14px;
+  border: 1px solid var(--art-border);
+  border-radius: var(--art-radius-sm);
+  background: var(--art-surface-raised);
+  color: var(--art-muted);
+}
+.result[data-tone='good'] { border-color: transparent; background: var(--art-good-soft); color: var(--art-good); }
+.result[data-tone='warn'] { border-color: transparent; background: var(--art-warn-soft); color: var(--art-warn); }
+.result[data-tone='bad'] { border-color: transparent; background: var(--art-bad-soft); color: var(--art-bad); }
+.feedback {
+  padding: 14px 16px;
+  border-left: 3px solid var(--art-good);
+  border-radius: var(--art-radius-sm);
+  background: var(--art-good-soft);
+  color: var(--art-good);
+  font-weight: 650;
+}
+.timeline { padding: 16px 18px; display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+.step { display: inline-flex; align-items: center; gap: 7px; color: var(--art-muted); font-size: 12px; }
+.step::before { content: ''; width: 8px; height: 8px; border: 1px solid var(--art-muted); border-radius: 50%; }
+.step[data-state='done'] { color: var(--art-good); }
+.step[data-state='done']::before { border-color: var(--art-good); background: var(--art-good); }
+.step[data-state='current'] { color: var(--art-accent); }
+.step[data-state='current']::before { border-color: var(--art-accent); background: var(--art-accent); box-shadow: 0 0 0 4px var(--art-accent-soft); }
+.chart { display: block; width: 100%; height: 230px; border-radius: var(--art-radius-sm); background: var(--art-surface-raised); }
+.motion-enter { animation: art-enter 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.motion-highlight { animation: art-highlight 560ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+@keyframes art-enter { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes art-highlight { 0% { box-shadow: 0 0 0 0 var(--art-accent-soft); } 45% { box-shadow: 0 0 0 8px var(--art-accent-soft); } 100% { box-shadow: 0 0 0 0 var(--art-accent-soft); } }
+@media (max-width: 780px) {
+  .lab { padding: 18px; }
+  .hero, .workspace { grid-template-columns: 1fr; }
+  .stage { min-height: 290px; }
+  .metric-row { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 1ms !important; transition-duration: 1ms !important; scroll-behavior: auto !important; }
+}
+
+</style>
+</head>
+<body>
+  <main class="lab">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Guided experiment</p>
+        <h1>Projectile prediction lab</h1>
+        <p class="subtitle">Choose an angle, make a prediction, then launch. Compare what you expected with what actually happened.</p>
+      </div>
+      <span class="pill">Interactive model</span>
+    </header>
+
+    <nav class="timeline" aria-label="Experiment steps">
+      <span class="step" data-state="current">1 Predict</span>
+      <span class="step">2 Launch</span>
+      <span class="step">3 Compare</span>
+    </nav>
+
+    <section class="workspace" aria-label="Projectile experiment">
+      <div class="stage">
+        <div class="metric-row" aria-label="Experiment constants">
+          <div class="metric"><strong>45°</strong><span>Reference angle</span></div>
+          <div class="metric"><strong>9.8</strong><span>Gravity · m/s²</span></div>
+          <div class="metric"><strong>1.0</strong><span>Target distance · m</span></div>
+        </div>
+        <svg class="chart" viewBox="0 0 600 230" role="img" aria-label="Projectile trajectory preview">
+          <defs>
+            <linearGradient id="trajectory" x1="0" x2="1" y1="0" y2="0">
+              <stop offset="0" stop-color="#5b5bd6" stop-opacity="0.2"/>
+              <stop offset="1" stop-color="#5b5bd6" stop-opacity="0.95"/>
+            </linearGradient>
+          </defs>
+          <path d="M38 190 H560" stroke="currentColor" stroke-opacity="0.18"/>
+          <path d="M56 184 C160 38 302 38 474 184" fill="none" stroke="url(#trajectory)" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 10"/>
+          <circle cx="56" cy="184" r="7" fill="#5b5bd6"/>
+          <circle cx="474" cy="184" r="13" fill="none" stroke="#16805c" stroke-width="3"/>
+          <circle cx="474" cy="184" r="4" fill="#16805c"/>
+          <text x="42" y="211" fill="currentColor" font-size="12">launch</text>
+          <text x="447" y="211" fill="currentColor" font-size="12">target</text>
+        </svg>
+        <output id="result" class="result" role="status" aria-live="polite">Make a prediction, then launch.</output>
+      </div>
+
+      <aside class="panel" aria-label="Experiment controls">
+        <h2>Controls</h2>
+        <div class="field">
+          <label for="angle">Launch angle</label>
+          <select id="angle">
+            <option value="30">30°</option>
+            <option value="45" selected>45°</option>
+            <option value="60">60°</option>
+          </select>
+        </div>
+        <div class="field">
+          <span class="field-label">Your prediction</span>
+          <div class="button-row">
+            <button id="predict-hit" type="button" aria-pressed="false">Predict hit</button>
+            <button id="predict-miss" type="button" aria-pressed="false">Predict miss</button>
+          </div>
+        </div>
+        <button id="launch" class="primary" type="button">Launch</button>
+        <p class="subtitle">The model is deterministic. Your prediction is the only unknown.</p>
+      </aside>
+    </section>
+
+    <!-- artifact-feedback -->
+    <footer class="timeline">
+      <span class="step">Observe</span>
+      <span class="step">Predict</span>
+      <span class="step">Manipulate</span>
+      <span class="step">Feedback</span>
+    </footer>
+  </main>
+
+  <script>
+/* Small, one-shot motion primitives. Inline this file into an Artifact; no imports. */
+function reducedMotion() {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+}
+
+function beat(elements, { staggerMs = 70 } = {}) {
+  const list = Array.from(elements)
+  if (reducedMotion()) {
+    for (const element of list) element.dataset.beat = 'done'
+    return
+  }
+  for (const [index, element] of list.entries()) {
+    element.classList.add('motion-enter')
+    element.style.animationDelay = `${index * staggerMs}ms`
+    element.addEventListener('animationend', () => { element.dataset.beat = 'done' }, { once: true })
+  }
+}
+
+function highlight(element) {
+  if (!element) return
+  if (reducedMotion()) return
+  element.classList.remove('motion-highlight')
+  void element.offsetWidth
+  element.classList.add('motion-highlight')
+}
+
+function tween({ from, to, duration = 420, update, done }) {
+  if (reducedMotion()) {
+    update(to)
+    done?.()
+    return () => {}
+  }
+  const start = performance.now()
+  let frame = 0
+  const step = (now) => {
+    const progress = Math.min(1, (now - start) / duration)
+    const eased = 1 - Math.pow(1 - progress, 3)
+    update(from + (to - from) * eased)
+    if (progress < 1) frame = requestAnimationFrame(step)
+    else done?.()
+  }
+  frame = requestAnimationFrame(step)
+  return () => cancelAnimationFrame(frame)
+}
+
+</script>
+  <script>
+    let angle = 45
+    let prediction = null
+    const result = document.getElementById('result')
+    const angleInput = document.getElementById('angle')
+    const hitButton = document.getElementById('predict-hit')
+    const missButton = document.getElementById('predict-miss')
+
+    function setPrediction(value) {
+      prediction = value
+      hitButton.dataset.active = String(value === true)
+      missButton.dataset.active = String(value === false)
+      hitButton.setAttribute('aria-pressed', String(value === true))
+      missButton.setAttribute('aria-pressed', String(value === false))
+      result.dataset.tone = ''
+      result.textContent = `Prediction: ${value ? 'hit' : 'miss'}`
+      highlight(result)
+    }
+
+    hitButton.addEventListener('click', () => { setPrediction(true) })
+    missButton.addEventListener('click', () => { setPrediction(false) })
+    angleInput.addEventListener('change', () => { angle = Number(angleInput.value) })
+    document.getElementById('launch').addEventListener('click', () => {
+      if (prediction === null) {
+        result.dataset.tone = 'warn'
+        result.textContent = 'Choose a prediction first'
+        highlight(result)
+        return
+      }
+      const actualHit = angle === 45
+      const matched = prediction === actualHit
+      result.dataset.tone = matched ? 'good' : 'warn'
+      result.textContent = `Actual: ${actualHit ? 'hit' : 'miss'} — ${matched ? 'prediction matched' : 'prediction differed'}`
+      for (const step of document.querySelectorAll('.timeline .step')) step.dataset.state = 'done'
+      highlight(result)
+      parent.postMessage({
+        kind: 'artifact-action', artifactId: 'projectile-lab', revision: 1,
+        action: 'shot.completed', payload: { angle, predictedHit: prediction, actualHit },
+      }, '*')
+    })
+
+    beat(document.querySelectorAll('.hero, .workspace, .timeline'))
+  </script>
+</body>
+</html>

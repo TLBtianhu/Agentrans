@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Projectile prediction lab</title>
+  <!-- @artifact-theme -->
+</head>
+<body>
+  <main class="lab">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Guided experiment</p>
+        <h1>Projectile prediction lab</h1>
+        <p class="subtitle">Choose an angle, make a prediction, then launch. Compare what you expected with what actually happened.</p>
+      </div>
+      <span class="pill">Interactive model</span>
+    </header>
+
+    <nav class="timeline" aria-label="Experiment steps">
+      <span class="step" data-state="current">1 Predict</span>
+      <span class="step">2 Launch</span>
+      <span class="step">3 Compare</span>
+    </nav>
+
+    <section class="workspace" aria-label="Projectile experiment">
+      <div class="stage">
+        <div class="metric-row" aria-label="Experiment constants">
+          <div class="metric"><strong>45°</strong><span>Reference angle</span></div>
+          <div class="metric"><strong>9.8</strong><span>Gravity · m/s²</span></div>
+          <div class="metric"><strong>1.0</strong><span>Target distance · m</span></div>
+        </div>
+        <svg class="chart" viewBox="0 0 600 230" role="img" aria-label="Projectile trajectory preview">
+          <defs>
+            <linearGradient id="trajectory" x1="0" x2="1" y1="0" y2="0">
+              <stop offset="0" stop-color="#5b5bd6" stop-opacity="0.2"/>
+              <stop offset="1" stop-color="#5b5bd6" stop-opacity="0.95"/>
+            </linearGradient>
+          </defs>
+          <path d="M38 190 H560" stroke="currentColor" stroke-opacity="0.18"/>
+          <path d="M56 184 C160 38 302 38 474 184" fill="none" stroke="url(#trajectory)" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 10"/>
+          <circle cx="56" cy="184" r="7" fill="#5b5bd6"/>
+          <circle cx="474" cy="184" r="13" fill="none" stroke="#16805c" stroke-width="3"/>
+          <circle cx="474" cy="184" r="4" fill="#16805c"/>
+          <text x="42" y="211" fill="currentColor" font-size="12">launch</text>
+          <text x="447" y="211" fill="currentColor" font-size="12">target</text>
+        </svg>
+        <output id="result" class="result" role="status" aria-live="polite">Make a prediction, then launch.</output>
+      </div>
+
+      <aside class="panel" aria-label="Experiment controls">
+        <h2>Controls</h2>
+        <div class="field">
+          <label for="angle">Launch angle</label>
+          <select id="angle">
+            <option value="30">30°</option>
+            <option value="45" selected>45°</option>
+            <option value="60">60°</option>
+          </select>
+        </div>
+        <div class="field">
+          <span class="field-label">Your prediction</span>
+          <div class="button-row">
+            <button id="predict-hit" type="button" aria-pressed="false">Predict hit</button>
+            <button id="predict-miss" type="button" aria-pressed="false">Predict miss</button>
+          </div>
+        </div>
+        <button id="launch" class="primary" type="button">Launch</button>
+        <p class="subtitle">The model is deterministic. Your prediction is the only unknown.</p>
+      </aside>
+    </section>
+
+    <!-- artifact-feedback -->
+    <footer class="timeline">
+      <span class="step">Observe</span>
+      <span class="step">Predict</span>
+      <span class="step">Manipulate</span>
+      <span class="step">Feedback</span>
+    </footer>
+  </main>
+
+  <!-- @artifact-motion -->
+  <script>
+    let angle = 45
+    let prediction = null
+    const result = document.getElementById('result')
+    const angleInput = document.getElementById('angle')
+    const hitButton = document.getElementById('predict-hit')
+    const missButton = document.getElementById('predict-miss')
+
+    function setPrediction(value) {
+      prediction = value
+      hitButton.dataset.active = String(value === true)
+      missButton.dataset.active = String(value === false)
+      hitButton.setAttribute('aria-pressed', String(value === true))
+      missButton.setAttribute('aria-pressed', String(value === false))
+      result.dataset.tone = ''
+      result.textContent = `Prediction: ${value ? 'hit' : 'miss'}`
+      highlight(result)
+    }
+
+    hitButton.addEventListener('click', () => { setPrediction(true) })
+    missButton.addEventListener('click', () => { setPrediction(false) })
+    angleInput.addEventListener('change', () => { angle = Number(angleInput.value) })
+    document.getElementById('launch').addEventListener('click', () => {
+      if (prediction === null) {
+        result.dataset.tone = 'warn'
+        result.textContent = 'Choose a prediction first'
+        highlight(result)
+        return
+      }
+      const actualHit = angle === 45
+      const matched = prediction === actualHit
+      result.dataset.tone = matched ? 'good' : 'warn'
+      result.textContent = `Actual: ${actualHit ? 'hit' : 'miss'} — ${matched ? 'prediction matched' : 'prediction differed'}`
+      for (const step of document.querySelectorAll('.timeline .step')) step.dataset.state = 'done'
+      highlight(result)
+      parent.postMessage({
+        kind: 'artifact-action', artifactId: 'projectile-lab', revision: 1,
+        action: 'shot.completed', payload: { angle, predictedHit: prediction, actualHit },
+      }, '*')
+    })
+
+    beat(document.querySelectorAll('.hero, .workspace, .timeline'))
+  </script>
+</body>
+</html>

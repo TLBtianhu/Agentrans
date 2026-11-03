@@ -94,4 +94,4 @@ Rendering does not make Artifact source model-visible; only a Host-admitted acti
 <a id="dev-note"></a>
 ### 开发备注
 
-jsdom 测试验证属性、解析、监听所有权和组件行为；`tests/browser-smoke.mjs` 检查 iframe 隔离和网络拒绝。keyless [Artifact 交互场景](../../../apps/web/tests/artifact-interaction.e2e.ts) 还通过实际 Web 组合验证模型驱动的创建/更新、真实浏览器计数器点击，以及仅在确认后准入操作。[教学型 Artifact 场景](../../../apps/web/tests/teaching-artifact.e2e.ts) 覆盖预测、发射、结果比较和 Agent 反馈。
+jsdom 测试验证属性、解析、监听所有权和组件行为；`tests/browser-smoke.mjs` 检查 iframe 隔离和网络拒绝。keyless [Artifact 交互场景](../../../apps/web/tests/artifact-interaction.e2e.ts) 还通过实际 Web 组合验证模型驱动的创建/更新、真实浏览器计数器点击，以及仅在确认后准入操作。[教学型 Artifact 场景](../../../apps/web/tests/teaching-artifact.e2e.ts) 覆盖预测、发射、结果比较和 Agent 反馈。[artifact-design 技能](../../../.agents/skills/artifact-design/SKILL.md) 提供共享设计 Token、模板、动效原语和截图评审清单。
