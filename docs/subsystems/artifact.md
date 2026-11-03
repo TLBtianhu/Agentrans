@@ -33,6 +33,10 @@ The Client correlates snapshots by `artifactId` and preserves Conversation ident
 
 Durable recovery covers snapshots and admitted action messages. Iframe JavaScript heap, canvas pixels, scroll position, source-view state, and unconfirmed pending actions are transient.
 
+## Verification
+
+The keyless [Artifact interaction scenario](../../apps/web/tests/artifact-interaction.e2e.ts) drives the shipped Web composition with the recorded model stream in [session.v4.jsonl](../../snapshots/web/artifact-interaction/session.v4.jsonl). It creates and updates an interactive counter, expands the completed process group, clicks the counter in a real browser, and confirms the pending action. The test checks revisions 1 and 2, no Artifact action or second turn before confirmation, and one parent-local `artifact-action` plus a second turn after confirmation.
+
 <!-- BEGIN GENERATED cordis-surface (gen-cordis-catalog.ts) — do not edit between markers -->
 
 <a id="cordis-surface"></a>
@@ -53,7 +57,8 @@ Generated from source by `scripts/gen-cordis-catalog.ts` (verified fresh by `pnp
  * @param agent - Agent whose Session supplies the current artifact revision.
  * @param input - Complete new values and, for update, the observed base revision.
  * @returns The snapshot to commit after the enclosing operation succeeds.
- * @throws {ArtifactError} `ARTIFACT_EXISTS`, `ARTIFACT_NOT_FOUND`, `STALE_REVISION`, `BAD_SOURCE`, or `BAD_INPUT`; no Session event is appended.
+ * @throws {ArtifactError} `ARTIFACT_EXISTS`, `ARTIFACT_NOT_FOUND`, `STALE_REVISION`,
+ * `BAD_SOURCE`, or `BAD_INPUT`; no Session event is appended.
  */
 prepare(agent: Agent, input: ArtifactPrepareInput): ArtifactSnapshot
 
@@ -75,7 +80,8 @@ commit(agent: Agent, snapshot: ArtifactSnapshot): void
  * @param payload - Lossless JSON payload included in the bounded text message.
  * @param wake - `false` injects without waking; `true` steers the Agent.
  * @returns Acceptance and the revision carried by the message.
- * @throws {ArtifactError} for a non-root caller, unknown or stale artifact, invalid action/payload, or an oversized complete message; no message is routed on validation failure.
+ * @throws {ArtifactError} for a non-root caller, unknown or stale artifact,
+ * invalid action/payload, or an oversized complete message; no message is routed on validation failure.
  */
 @Remote record( agent: Agent, artifactId: ArtifactId, revision: number, action: string, payload: JsonValue, wake: boolean, ): ArtifactRecordResult
 ```

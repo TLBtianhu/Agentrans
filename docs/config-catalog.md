@@ -371,7 +371,6 @@ export interface Config {
 
 ## `@deepseek-ai/dsh-artifact`
 
-- `inject`: `agents`
 - `source`: [`packages/artifact/artifact/src/index.ts:31`](../packages/artifact/artifact/src/index.ts)
 
 ```ts config-catalog

@@ -33,6 +33,10 @@ Client 按 `artifactId` 关联快照，跨修订保持 Conversation 身份。修
 
 持久恢复覆盖快照和已准入操作消息。iframe JavaScript 堆、Canvas 像素、滚动位置、源码查看状态和未确认的待发送操作都是瞬态。
 
+## 验证
+
+keyless [Artifact 交互场景](../../apps/web/tests/artifact-interaction.e2e.ts) 使用 [session.v4.jsonl](../../snapshots/web/artifact-interaction/session.v4.jsonl) 中记录的模型流驱动实际 Web 组合。它创建并更新一个交互计数器，展开已完成的过程组，在真实浏览器中点击计数器，然后确认待发送操作。测试检查修订号 1 和 2、确认前没有 Artifact 操作或第二轮，以及确认后出现一条父级本地 `artifact-action` 和第二轮。
+
 <!-- BEGIN GENERATED cordis-surface (gen-cordis-catalog.ts) — do not edit between markers -->
 
 <a id="cordis-surface"></a>
@@ -53,7 +57,8 @@ Generated from source by `scripts/gen-cordis-catalog.ts` (verified fresh by `pnp
  * @param agent - Agent whose Session supplies the current artifact revision.
  * @param input - Complete new values and, for update, the observed base revision.
  * @returns The snapshot to commit after the enclosing operation succeeds.
- * @throws {ArtifactError} `ARTIFACT_EXISTS`, `ARTIFACT_NOT_FOUND`, `STALE_REVISION`, `BAD_SOURCE`, or `BAD_INPUT`; no Session event is appended.
+ * @throws {ArtifactError} `ARTIFACT_EXISTS`, `ARTIFACT_NOT_FOUND`, `STALE_REVISION`,
+ * `BAD_SOURCE`, or `BAD_INPUT`; no Session event is appended.
  */
 prepare(agent: Agent, input: ArtifactPrepareInput): ArtifactSnapshot
 
@@ -75,7 +80,8 @@ commit(agent: Agent, snapshot: ArtifactSnapshot): void
  * @param payload - Lossless JSON payload included in the bounded text message.
  * @param wake - `false` injects without waking; `true` steers the Agent.
  * @returns Acceptance and the revision carried by the message.
- * @throws {ArtifactError} for a non-root caller, unknown or stale artifact, invalid action/payload, or an oversized complete message; no message is routed on validation failure.
+ * @throws {ArtifactError} for a non-root caller, unknown or stale artifact,
+ * invalid action/payload, or an oversized complete message; no message is routed on validation failure.
  */
 @Remote record( agent: Agent, artifactId: ArtifactId, revision: number, action: string, payload: JsonValue, wake: boolean, ): ArtifactRecordResult
 ```

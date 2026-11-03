@@ -94,4 +94,4 @@ Rendering does not make Artifact source model-visible; only a Host-admitted acti
 <a id="dev-note"></a>
 ### Dev Note
 
-jsdom tests verify attributes, parsing, listener ownership, and component behavior; they do not demonstrate browser script isolation. Exercise the assembled preview in a real browser after composition changes.
+jsdom tests verify attributes, parsing, listener ownership, and component behavior; `tests/browser-smoke.mjs` checks iframe isolation and network denial. The keyless [Artifact interaction scenario](../../../apps/web/tests/artifact-interaction.e2e.ts) additionally verifies model-driven create/update, a real browser counter click, and confirmation-only action admission through the shipped Web composition.
