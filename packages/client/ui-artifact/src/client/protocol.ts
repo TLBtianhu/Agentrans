@@ -17,6 +17,26 @@ export interface ViewRequest {
 export type ArtifactPayload = JsonValue
 export type { ArtifactId, ArtifactSnapshot }
 
+/** A pair of independent Artifact snapshots sharing one comparison group. */
+export interface ArtifactComparisonSnapshot {
+  readonly group: string
+  readonly control?: ArtifactSnapshot
+  readonly variant?: ArtifactSnapshot
+}
+
+/** Host-to-Artifact commands synchronize behavior without changing parameters. */
+export type ArtifactCommand = 'play' | 'pause' | 'step' | 'reset'
+export interface ArtifactCommandMessage {
+  readonly kind: 'artifact-command'
+  readonly command: ArtifactCommand
+}
+
+/** Local-only state report from an Artifact; it never wakes the Agent by itself. */
+export interface ArtifactStateMessage {
+  readonly kind: 'artifact-state'
+  readonly state: JsonValue
+}
+
 /** Narrow callback supplied to the keyed renderer; wake is explicit at every call site. */
 export type RecordArtifactAction = (
   artifactId: ArtifactId,

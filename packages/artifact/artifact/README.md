@@ -59,7 +59,7 @@ An Artifact can post `{ kind: 'artifact-action', artifactId, revision, action, p
 
 #### What the model sees
 
-The `artifact` tool accepts `action`, `artifactId`, `title`, `source`, `presentation`, and update-only `baseRevision`. Its result repeats only `artifactId`, `revision`, `title`, and `presentation`, not the HTML source. The tool description carries the iframe message format and the rule that actions are input rather than authorization.
+The `artifact` tool accepts `action`, `artifactId`, `title`, `source`, `presentation`, optional `comparison`, and update-only `baseRevision`. `comparison` is an optional `{ group, role: 'control' | 'variant' }` relation; it does not merge the two snapshots. Its result repeats only `artifactId`, `revision`, `title`, and `presentation`, not the HTML source. The tool description carries the iframe message format and the rule that actions are input rather than authorization.
 
 #### Token effect
 

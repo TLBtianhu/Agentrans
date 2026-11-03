@@ -108,6 +108,7 @@
       context.font = '12px system-ui'
       context.fillText('now', width - 42, height / 2 - valueAt(time) * (height * 0.34) - 12)
       summary.textContent = `t = ${time.toFixed(2)} s · ${playing ? 'playing' : 'paused'}`
+      parent.postMessage({ kind: 'artifact-state', state: { time, amplitude, frequency, damping } }, '*')
     }
 
     function tick(now) {
@@ -157,6 +158,19 @@
         input.dispatchEvent(new Event('input'))
       }
       draw()
+    })
+
+    window.addEventListener('message', event => {
+      if (event.source !== parent || event.data?.kind !== 'artifact-command') return
+      if (event.data.command === 'play') setPlaying(true)
+      else if (event.data.command === 'pause') setPlaying(false)
+      else if (event.data.command === 'step') {
+        time += 0.1
+        draw()
+        highlight(summary)
+      } else if (event.data.command === 'reset') {
+        document.getElementById('reset').click()
+      }
     })
 
     draw()

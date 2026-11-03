@@ -13,7 +13,7 @@ import { createUserMessage, HarnessError } from '@deepseek-ai/dsh-llm'
 import { Remote, TypertRemoteService } from '@deepseek-ai/dsh-typert-protocol'
 import { snapshotJsonValue, type JsonValue } from '@deepseek-ai/dsh-util-values'
 import type {
-  ArtifactId, ArtifactPrepareInput, ArtifactRecordResult, ArtifactSnapshot,
+  ArtifactId, ArtifactComparison, ArtifactPrepareInput, ArtifactRecordResult, ArtifactSnapshot,
 } from './types.ts'
 
 export type * from './types.ts'
@@ -79,6 +79,17 @@ function sourceOf(value: unknown, maxSourceBytes: number | undefined): string {
   return value
 }
 
+function comparisonOf(value: unknown): ArtifactComparison {
+  if (!isRecord(value)) return badInput('comparison must be an object')
+  if (typeof value.group !== 'string' || !ARTIFACT_ID_PATTERN.test(value.group)) {
+    return badInput('comparison.group must match [a-z][a-z0-9-]{0,63}')
+  }
+  if (value.role !== 'control' && value.role !== 'variant') {
+    return badInput('comparison.role must be control or variant')
+  }
+  return { group: value.group, role: value.role }
+}
+
 function snapshotOf(value: unknown, maxSourceBytes?: number): ArtifactSnapshot {
   if (!isRecord(value)) return badInput('artifact snapshot must be an object')
   if (value.format !== 'html') return badInput('artifact format must be html')
@@ -92,6 +103,7 @@ function snapshotOf(value: unknown, maxSourceBytes?: number): ArtifactSnapshot {
     title: titleOf(value.title),
     source: sourceOf(value.source, maxSourceBytes),
     presentation: value.presentation,
+    ...value.comparison === undefined ? {} : { comparison: comparisonOf(value.comparison) },
   }
 }
 
@@ -174,6 +186,7 @@ export class ArtifactService extends TypertRemoteService {
       title: input.title,
       source: input.source,
       presentation: input.presentation,
+      comparison: input.comparison,
     }, this.maxSourceBytes)
   }
 

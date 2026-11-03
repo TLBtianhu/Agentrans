@@ -161,6 +161,52 @@
   color: var(--dsw-alias-state-error-primary);
 }
 
+.comparison {
+  display: grid;
+  min-width: 0;
+  gap: 10px;
+  margin: 8px 0;
+  padding: 12px;
+  border: 0.5px solid var(--dsw-alias-border-l2);
+  border-radius: var(--dsw-radius-md);
+  background: var(--dsw-alias-bg-layer-1);
+}
+
+.comparisonHeader {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.comparisonGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.comparisonStatus {
+  margin: 0;
+  color: var(--dsw-alias-label-tertiary);
+  font: var(--dsw-font-xs-13);
+}
+
+.placeholder {
+  display: grid;
+  min-height: 180px;
+  place-items: center;
+  border: 0.5px dashed var(--dsw-alias-border-l2);
+  border-radius: var(--dsw-radius-md);
+  color: var(--dsw-alias-label-tertiary);
+  font: var(--dsw-font-xs-13);
+}
+
+@media (max-width: 780px) {
+  .comparisonGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .send {
   justify-self: start;
 }

@@ -26,6 +26,7 @@
     "tests/artifact-interaction.e2e.ts",
     "tests/branch-result.e2e.ts",
     "tests/teaching-artifact.e2e.ts",
+    "tests/comparison-artifacts.e2e.ts",
     "tests/custom-provider.e2e.ts",
     "tests/sidebar-drawer.e2e.ts",
     "tests/creation-recommendations.e2e.ts",

@@ -6,12 +6,14 @@ import type {} from '@deepseek-ai/dsh-client-locale/client'
 import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { ArtifactNodeView } from './ArtifactNodeView.tsx'
+import { ArtifactComparisonNodeView } from './ArtifactComparisonNodeView.tsx'
+import { artifactComparisonDefinition } from './comparison-definition.ts'
 import { artifactDefinition } from './definition.ts'
 import { en, ja, es, fr, de, ru, pt, zh, type ArtifactKey } from './locales.ts'
 import { recordArtifactAction, type ArtifactNodeInjected } from './protocol.ts'
 
 export type { ArtifactKey } from './locales.ts'
-export type { ArtifactId, ArtifactNodeInjected, ArtifactPayload, ArtifactSnapshot, RecordArtifactAction } from './protocol.ts'
+export type { ArtifactId, ArtifactComparisonSnapshot, ArtifactNodeInjected, ArtifactPayload, ArtifactSnapshot, RecordArtifactAction } from './protocol.ts'
 
 declare module '@deepseek-ai/dsh-client-ui-slots' {
   interface LocaleNamespaceMap {
@@ -32,6 +34,7 @@ export const inject = ['slots', 'remote', 'remote.artifacts', 'locale', 'uiConve
 export function apply(ctx: ClientContext): void {
   ctx.effect(() => ctx.locale.register(NS, { zh, en, ja, es, fr, de, ru, pt }), 'ui-artifact: dictionaries')
   ctx.effect(() => ctx.uiConversation.events.register(artifactDefinition), 'ui-artifact: conversation definition')
+  ctx.effect(() => ctx.uiConversation.events.register(artifactComparisonDefinition), 'ui-artifact: comparison definition')
   ctx.slots.inject('conversation.chat.node', () => ctx.slots.register({
     name: 'conversation.chat.node',
     key: 'artifact',
@@ -42,4 +45,14 @@ export function apply(ctx: ClientContext): void {
       ),
     }),
   }, ArtifactNodeView))
+  ctx.slots.inject('conversation.chat.node', () => ctx.slots.register({
+    name: 'conversation.chat.node',
+    key: 'artifact-comparison',
+    locale: NS,
+    inject: (sessionId: SessionId): ArtifactNodeInjected => ({
+      recordAction: (artifactId, revision, action, payload, wake) => recordArtifactAction(
+        ctx, sessionId, artifactId, revision, action, payload, wake,
+      ),
+    }),
+  }, ArtifactComparisonNodeView))
 }

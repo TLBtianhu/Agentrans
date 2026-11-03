@@ -43,6 +43,14 @@ export function apply(ctx: Context): void {
       title: { type: 'string', required: true, description: 'Display title, 1-120 characters after trimming.' },
       source: { type: 'string', required: true, description: 'Complete self-contained HTML document with no external dependencies.' },
       presentation: { type: 'string', required: true, enum: ['inline', 'focus'], description: 'Request inline placement or focused presentation.' },
+      comparison: {
+        type: 'object', additionalProperties: false,
+        description: 'Optional comparison relation. Use the same group for two independent Artifacts and assign one control and one variant.',
+        properties: {
+          group: { type: 'string', required: true, description: 'Stable comparison group id matching [a-z][a-z0-9-]{0,63}.' },
+          role: { type: 'string', required: true, enum: ['control', 'variant'], description: 'Independent role in the comparison.' },
+        },
+      },
       baseRevision: { type: 'integer', description: 'Required for update: current revision previously returned by this tool.' },
     },
     output: {

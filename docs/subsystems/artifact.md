@@ -16,6 +16,7 @@ An Artifact is a versioned, code-generated interactive explanation. It is not a 
 | `title` | Trimmed 1–120 character display title |
 | `source` | Complete self-contained HTML document |
 | `presentation` | Semantic placement request: `inline` or `focus` |
+| `comparison` | Optional `{ group, role: 'control' | 'variant' }` relation for independent comparison scenes |
 
 Every `artifact/upsert` Session event carries a complete snapshot. Later events for the same id supersede earlier revisions. A tail containing only the latest upsert still renders the current Artifact.
 
@@ -25,13 +26,15 @@ The `artifact` tool creates or updates a snapshot. Creation rejects an existing 
 
 `record` accepts an action only for the exact live root Agent and current revision. It validates the action name and complete UTF-8 message size, then creates an ordinary `UserMessage` with `source.kind = 'artifact-action'`. Its single text block contains bounded JSON with `kind: 'artifact_action'`, the id, revision, action, and payload. `wake` selects `agent.steer` or `agent.inject`.
 
-Artifact actions are user intent, not authority. They cannot approve a tool, read a file, open a socket, or bypass policy. The action payload is not a new LLM content block or Session event type.
+Artifact actions are user intent, not authority. They cannot approve a tool, read a file, open a socket, or bypass policy. The action payload is not a new LLM content block or Session event type. A comparison host may use local `artifact-command` messages for play/pause/step/reset and local `artifact-state` reports for current parameters. These messages do not wake the Agent; only the confirmed `comparison.completed` action includes both independent states.
 
 ## Presentation and recovery
 
 The Client correlates snapshots by `artifactId` and preserves Conversation identity across revisions. Revision changes replace the browsing context. The iframe uses an opaque origin and a restrictive content policy; the parent accepts only messages from the current frame with the current id/revision and a bounded JSON body.
 
 The SceneHost supports `inline`, `beside`, `focus`, and `pip` placements. A `ViewRequest` expresses placement intent rather than window authority. Users can change placement while retaining the same browsing context and pending actions. Overlay ancestors are marked visible so virtualized history does not hide a fixed scene. Scene origin shows the current conversation or parent branch title; **View in conversation** returns to inline and scrolls to the source anchor without resetting the Artifact.
+
+A comparison group uses its own Conversation Node to show control and variant side by side. Each Artifact keeps its own parameters and revision; shared commands synchronize behavior only. The comparison result is admitted through the control Artifact's current revision and contains both local states.
 
 Durable recovery covers snapshots and admitted action messages. Iframe JavaScript heap, canvas pixels, scroll position, source-view state, and unconfirmed pending actions are transient.
 
@@ -40,6 +43,8 @@ Durable recovery covers snapshots and admitted action messages. Iframe JavaScrip
 The keyless [Artifact interaction scenario](../../apps/web/tests/artifact-interaction.e2e.ts) drives the shipped Web composition with the recorded model stream in [session.v4.jsonl](../../snapshots/web/artifact-interaction/session.v4.jsonl). It creates and updates an interactive counter, expands the completed process group, clicks the counter in a real browser, and confirms the pending action. The test checks revisions 1 and 2, no Artifact action or second turn before confirmation, and one parent-local `artifact-action` plus a second turn after confirmation.
 
 The [teaching Artifact scenario](../../apps/web/tests/teaching-artifact.e2e.ts) applies the same path to a prediction lab. The user selects an angle, predicts a hit, launches, compares the actual result, and confirms the semantic action. The Agent then updates the Artifact to revision 2 with prediction feedback. This exercises observation, prediction, manipulation, and feedback rather than visualization alone. The replay also mounts a user-declared `custom-provider` model route, so the model picker shows `Custom Lab Model` instead of a built-in DeepSeek route.
+
+The [comparison Artifact scenario](../../apps/web/tests/comparison-artifacts.e2e.ts) groups control and variant parameter explorers under `damping-study`. It verifies two iframes, synchronized step/play/pause/reset, independent damping values, and one confirmed `comparison.completed` action containing both current states.
 
 <!-- BEGIN GENERATED cordis-surface (gen-cordis-catalog.ts) — do not edit between markers -->
 

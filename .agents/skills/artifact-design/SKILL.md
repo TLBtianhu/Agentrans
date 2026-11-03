@@ -20,7 +20,7 @@ Use this skill when an Artifact should feel like a designed explanation, not an 
 ## Choose a template
 
 - [Prediction lab](references/prediction-lab.html) — guided observation → prediction → manipulation → feedback. It includes a trajectory stage, angle control, prediction buttons, launch result, and the `shot.completed` action used by Agentrans. Preserve the `artifact-action` fields and revision when adapting its semantics.
-- [Parameter explorer](references/parameter-explorer.html) — a live damped-oscillator chart with amplitude/frequency/damping sliders, play, pause, step, and reset. Use it for simulations that need parameter manipulation and immediate visual feedback.
+- [Parameter explorer](references/parameter-explorer.html) — a live damped-oscillator chart with amplitude/frequency/damping sliders, play, pause, step, and reset. It also accepts host `artifact-command` messages for synchronized comparison controls and reports local `artifact-state` for confirmed comparison results. Use it for simulations that need parameter manipulation and immediate visual feedback.
 - [Theme source](references/theme.css) — shared light/dark tokens, layout, controls, metrics, charts, and responsive rules. Edit this when changing the visual system rather than forking colors per Artifact.
 - [Motion source](references/motion.js) — small one-shot `beat`, `highlight`, and `tween` helpers. Inline them into custom Artifacts; no import or package is required.
 

@@ -62,12 +62,12 @@ describe('Artifact plugin registration', () => {
     fireEvent.click(await slot.view.findByRole('button', { name: 'Send to Agent' }))
     await slot.view.findByText('Integrated')
     expect(record).toHaveBeenCalledExactlyOnceWith(sessionId, 'integrated', 3, 'publish', { path: 'index.html' }, true)
-    expect(register).toHaveBeenCalledOnce()
+    expect(register).toHaveBeenCalledTimes(2)
 
     await feature.dispose()
     slot.update(owner)
     expect(slot.container.querySelector('iframe')).toBeNull()
-    expect(unregisterDefinition).toHaveBeenCalledOnce()
+    expect(unregisterDefinition).toHaveBeenCalledTimes(2)
   })
 
   it('rejects a Host refusal so the card can retain and retry its pending action', async () => {

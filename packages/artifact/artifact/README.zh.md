@@ -59,7 +59,7 @@ Artifact 可以向父页面发送 `{ kind: 'artifact-action', artifactId, revisi
 
 #### 模型看到什么
 
-`artifact` 工具接受 `action`、`artifactId`、`title`、`source`、`presentation` 和仅更新使用的 `baseRevision`。结果只重复 `artifactId`、`revision`、`title` 和 `presentation`，不重复 HTML 源码。工具说明包含 iframe 消息格式，以及操作只是输入而非授权的规则。
+`artifact` 工具接受 `action`、`artifactId`、`title`、`source`、`presentation`、可选 `comparison`，以及仅更新使用的 `baseRevision`。`comparison` 是可选的 `{ group, role: 'control' | 'variant' }` 关系，不会合并两个快照。结果只重复 `artifactId`、`revision`、`title` 和 `presentation`，不重复 HTML 源码。工具说明包含 iframe 消息格式，以及操作只是输入而非授权的规则。
 
 #### Token 影响
 

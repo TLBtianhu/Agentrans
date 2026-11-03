@@ -102,6 +102,27 @@ describe('ArtifactService prepare and commit', () => {
     expect(upserts(agent)).toEqual([created, updated])
   })
 
+  it('keeps comparison metadata independent and validates group roles', async () => {
+    const { agent, service } = await setup()
+    const control = service.prepare(agent, {
+      ...createInput(), artifactId: 'control', comparison: { group: 'damping-study', role: 'control' },
+    })
+    const variant = service.prepare(agent, {
+      ...createInput(), artifactId: 'variant', comparison: { group: 'damping-study', role: 'variant' },
+    })
+    expect(control.comparison).toEqual({ group: 'damping-study', role: 'control' })
+    expect(variant.comparison).toEqual({ group: 'damping-study', role: 'variant' })
+    service.commit(agent, control)
+    service.commit(agent, variant)
+    expect(upserts(agent).map(snapshot => snapshot.comparison)).toEqual([control.comparison, variant.comparison])
+    expect(() => service.prepare(agent, mutation({
+      ...createInput(), artifactId: 'bad-role', comparison: { group: 'damping-study', role: 'other' },
+    }))).toThrow(expect.objectContaining({ code: 'BAD_INPUT' }))
+    expect(() => service.prepare(agent, mutation({
+      ...createInput(), artifactId: 'bad-group', comparison: { group: 'Invalid Group', role: 'control' },
+    }))).toThrow(expect.objectContaining({ code: 'BAD_INPUT' }))
+  })
+
   it('rejects duplicate ids, missing updates, and stale base revisions without committing', async () => {
     const { agent, service } = await setup()
     service.commit(agent, service.prepare(agent, createInput()))

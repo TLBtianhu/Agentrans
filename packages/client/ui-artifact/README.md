@@ -41,6 +41,10 @@ The preview uses `srcDoc` with `sandbox="allow-scripts"` and never grants same-o
 
 Action messages must match the mounted Artifact id and positive revision and contain the exact five-field schema with a JSON payload. The complete serialized message is limited to 16,384 UTF-8 bytes. Payloads are limited to 32 nested values and 2,048 total values; cards retain at most 32 pending actions.
 
+### Comparison groups
+
+Snapshots with `comparison: { group, role }` use a separate Conversation Definition. Control and variant render side by side while keeping independent parameters and revisions. Shared `artifact-command` messages synchronize play, pause, step, and reset. Local `artifact-state` reports supply current parameters for comparison; they do not wake the Agent. **Compare results** admits one `comparison.completed` action through the control Artifact with both current states.
+
 -----
 
 <a id="understand-the-implementation"></a>

@@ -41,6 +41,10 @@ iframe 操作先进入卡片内的有界待发送队列。点击“发送给 Age
 
 操作消息必须匹配当前 Artifact id 和正整数修订号，并符合精确五字段 schema 与 JSON payload。完整序列化消息最多 16,384 个 UTF-8 字节。payload 最多嵌套 32 层、包含 2,048 个值；卡片最多保留 32 条待发送操作。
 
+### 比较组
+
+带 `comparison: { group, role }` 的快照使用独立 Conversation Definition。control 和 variant 并排呈现，同时保留独立参数和修订。共享 `artifact-command` 消息同步播放、暂停、单步和重置。本地 `artifact-state` 报告提供当前参数，但不会唤醒 Agent。“比较结果”通过 control Artifact 准入一条包含两侧当前状态的 `comparison.completed` 操作。
+
 -----
 
 <a id="understand-the-implementation"></a>

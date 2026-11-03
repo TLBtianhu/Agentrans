@@ -21,7 +21,7 @@ function snapshotOf(event: SessionEventLike): ArtifactSnapshot {
 export const artifactDefinition: ConversationNodeDefinition<ArtifactSnapshot> = {
   kind: 'artifact',
   target: 'chat',
-  match: event => event.type === 'artifact/upsert'
+  match: event => event.type === 'artifact/upsert' && event.data.comparison === undefined
     ? { id: event.data.artifactId, role: 'start', exclusive: true }
     : null,
   start: (_context, match) => snapshotOf(match.event),

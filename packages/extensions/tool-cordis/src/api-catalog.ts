@@ -5626,6 +5626,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface ArchiveSessionOptions {\n    readonly stopActivity?: boolean;\n}',
   },
   {
+    name: 'ArtifactComparison',
+    declaration: 'export interface ArtifactComparison {\n    readonly group: string;\n    readonly role: \'control\' | \'variant\';\n}',
+  },
+  {
     name: 'ArtifactFormat',
     declaration: 'export type ArtifactFormat = \'html\';',
   },
@@ -5635,7 +5639,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'ArtifactPrepareInput',
-    declaration: 'export interface ArtifactPrepareInput {\n    readonly action: \'create\' | \'update\';\n    readonly artifactId: string;\n    readonly title: string;\n    readonly source: string;\n    readonly presentation: ArtifactPresentation;\n    readonly baseRevision?: number;\n}',
+    declaration: 'export interface ArtifactPrepareInput {\n    readonly action: \'create\' | \'update\';\n    readonly artifactId: string;\n    readonly title: string;\n    readonly source: string;\n    readonly presentation: ArtifactPresentation;\n    readonly comparison?: ArtifactComparison;\n    readonly baseRevision?: number;\n}',
   },
   {
     name: 'ArtifactPresentation',
@@ -5647,7 +5651,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'ArtifactSnapshot',
-    declaration: 'export interface ArtifactSnapshot {\n    readonly artifactId: ArtifactId;\n    readonly revision: number;\n    readonly format: ArtifactFormat;\n    readonly title: string;\n    readonly source: string;\n    readonly presentation: ArtifactPresentation;\n}',
+    declaration: 'export interface ArtifactSnapshot {\n    readonly artifactId: ArtifactId;\n    readonly revision: number;\n    readonly format: ArtifactFormat;\n    readonly title: string;\n    readonly source: string;\n    readonly presentation: ArtifactPresentation;\n    readonly comparison?: ArtifactComparison;\n}',
   },
   {
     name: 'AskOptions',

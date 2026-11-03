@@ -11,6 +11,7 @@
     "apps/web/tests/artifact-interaction.e2e.ts",
     "apps/web/tests/branch-result.e2e.ts",
     "apps/web/tests/teaching-artifact.e2e.ts",
+    "apps/web/tests/comparison-artifacts.e2e.ts",
     "apps/web/tests/custom-provider.e2e.ts",
     "apps/web/tests/sidebar-drawer.e2e.ts",
     "apps/web/tests/creation-recommendations.e2e.ts",

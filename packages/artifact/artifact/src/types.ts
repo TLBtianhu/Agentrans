@@ -12,6 +12,14 @@ export type ArtifactFormat = 'html'
 /** Client placement requested for an artifact. */
 export type ArtifactPresentation = 'inline' | 'focus'
 
+/** Optional comparison relation between two independent Artifact snapshots. */
+export interface ArtifactComparison {
+  /** Stable comparison group id within one Session. */
+  readonly group: string
+  /** Independent role in the comparison; parameters never merge across roles. */
+  readonly role: 'control' | 'variant'
+}
+
 /** Complete durable value carried by every artifact update. */
 export interface ArtifactSnapshot {
   readonly artifactId: ArtifactId
@@ -23,6 +31,7 @@ export interface ArtifactSnapshot {
   /** Complete self-contained HTML document. */
   readonly source: string
   readonly presentation: ArtifactPresentation
+  readonly comparison?: ArtifactComparison
 }
 
 /** Complete new values accepted for a create or compare-and-set update. */
@@ -32,6 +41,7 @@ export interface ArtifactPrepareInput {
   readonly title: string
   readonly source: string
   readonly presentation: ArtifactPresentation
+  readonly comparison?: ArtifactComparison
   /** Required for update; must equal the current durable revision. */
   readonly baseRevision?: number
 }

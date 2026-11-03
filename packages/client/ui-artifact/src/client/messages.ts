@@ -1,6 +1,6 @@
 /** Strict JSON validation for actions crossing from an opaque Artifact iframe. */
 import type { ArtifactId } from '@deepseek-ai/dsh-artifact/types'
-import type { ArtifactPayload } from './protocol.ts'
+import type { ArtifactPayload, ArtifactStateMessage } from './protocol.ts'
 
 /** Complete serialized message limit in UTF-8 bytes. */
 export const ARTIFACT_ACTION_MAX_BYTES = 16_384
@@ -70,4 +70,12 @@ export function parseArtifactAction(data: unknown, artifactId: ArtifactId, revis
   const serialized = JSON.stringify(data)
   if (new TextEncoder().encode(serialized).byteLength > ARTIFACT_ACTION_MAX_BYTES) return null
   return { artifactId, revision: data.revision, action: data.action, payload: data.payload }
+}
+
+/** Validate one local-only Artifact state report; source ownership is checked by the comparison host. */
+export function parseArtifactState(data: unknown): ArtifactStateMessage | null {
+  if (!isRecord(data) || Object.keys(data).length !== 2 || data.kind !== 'artifact-state' || !isJsonValue(data.state)) return null
+  const serialized = JSON.stringify(data)
+  if (new TextEncoder().encode(serialized).byteLength > ARTIFACT_ACTION_MAX_BYTES) return null
+  return { kind: 'artifact-state', state: data.state }
 }

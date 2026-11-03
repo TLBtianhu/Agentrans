@@ -1,5 +1,5 @@
 /** Isolated Artifact preview, source inspection, and confirmed action delivery. */
-import { memo, useEffect, useMemo, useReducer, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
 import { createArtifactDocument } from './document.ts'
@@ -12,13 +12,15 @@ type ArtifactNodeViewProps =
   & PropsLocale<'artifact'>
   & InjectFace<ArtifactNodeInjected>
 
-type SceneOrigin =
+export type SceneOrigin =
   | { readonly kind: 'current' }
   | { readonly kind: 'branch'; readonly title: string }
 
 type ArtifactCardProps = Pick<ArtifactNodeViewProps, 'recordAction' | 't'> & {
   readonly snapshot: ArtifactSnapshot
   readonly origin: SceneOrigin
+  readonly placementControls?: boolean
+  readonly onFrame?: (frame: HTMLIFrameElement | null) => void
 }
 
 type SendPhase = 'idle' | 'sending' | 'failed'
@@ -48,16 +50,20 @@ function updatePending(state: PendingState, update: PendingUpdate): PendingState
   return { actions: [...state.actions, update.action], overflow: state.overflow }
 }
 
-function ArtifactCard({ snapshot, origin, recordAction, t }: ArtifactCardProps) {
+export function ArtifactCard({ snapshot, origin, recordAction, t, placementControls = true, onFrame }: ArtifactCardProps) {
   const [placement, setPlacement] = useState<ViewRequest['placement']>(snapshot.presentation === 'focus' ? 'focus' : 'inline')
   const [showSource, setShowSource] = useState(false)
   const [{ actions: pendingActions, overflow }, dispatchPending] = useReducer(updatePending, { actions: [], overflow: false })
   const [phase, setPhase] = useState<SendPhase>('idle')
-  const iframeRef = useRef<HTMLIFrameElement>(null)
+  const iframeRef = useRef<HTMLIFrameElement | null>(null)
   const sceneRef = useRef<HTMLElement>(null)
   const mountedRef = useRef(true)
   const sendingRef = useRef(false)
   const document = useMemo(() => createArtifactDocument(snapshot.source), [snapshot.source])
+  const setFrame = useCallback((element: HTMLIFrameElement | null): void => {
+    iframeRef.current = element
+    onFrame?.(element)
+  }, [onFrame])
 
   useEffect(() => {
     mountedRef.current = true
@@ -65,6 +71,7 @@ function ArtifactCard({ snapshot, origin, recordAction, t }: ArtifactCardProps) 
   }, [])
 
   useEffect(() => {
+    if (!placementControls) return
     const flowItem = sceneRef.current?.closest('[data-chat-flow-item]')
     if (!flowItem) return
     if (placement === 'inline') {
@@ -73,7 +80,7 @@ function ArtifactCard({ snapshot, origin, recordAction, t }: ArtifactCardProps) 
     }
     flowItem.setAttribute('data-artifact-overlay', placement)
     return () => { flowItem.removeAttribute('data-artifact-overlay') }
-  }, [placement])
+  }, [placement, placementControls])
 
   useEffect(() => {
     if (showSource) return
@@ -116,9 +123,9 @@ function ArtifactCard({ snapshot, origin, recordAction, t }: ArtifactCardProps) 
     <section
       ref={sceneRef}
       className={css.card}
-      data-placement={placement}
-      role={placement === 'focus' ? 'dialog' : 'complementary'}
-      aria-modal={placement === 'focus' ? true : undefined}
+      data-placement={placementControls ? placement : 'inline'}
+      role={placementControls && placement === 'focus' ? 'dialog' : 'complementary'}
+      aria-modal={placementControls && placement === 'focus' ? true : undefined}
       aria-label={t('card.label', { title: snapshot.title })}
     >
       <header className={css.header}>
@@ -128,10 +135,10 @@ function ArtifactCard({ snapshot, origin, recordAction, t }: ArtifactCardProps) 
           <span className={css.origin}>{origin.kind === 'current' ? t('origin.current') : t('origin.branch', { parent: origin.title })}</span>
         </div>
         <div className={css.controls}>
-          {placement !== 'inline' && (
+          {placementControls && placement !== 'inline' && (
             <Button size="sm" variant="outline" onClick={revealSource}>{t('view.origin')}</Button>
           )}
-          {PLACEMENTS.map(option => (
+          {placementControls && PLACEMENTS.map(option => (
             <Button key={option} size="sm" variant="outline" aria-pressed={placement === option}
               onClick={() => { setPlacement(option) }}>
               {t(PLACEMENT_COPY[option])}
@@ -146,7 +153,7 @@ function ArtifactCard({ snapshot, origin, recordAction, t }: ArtifactCardProps) 
       <div className={css.body}>
         {showSource
           ? <pre className={css.source} aria-label={t('source.label')}>{snapshot.source}</pre>
-          : <iframe ref={iframeRef} className={css.frame} srcDoc={document} sandbox="allow-scripts"
+          : <iframe ref={setFrame} className={css.frame} srcDoc={document} sandbox="allow-scripts"
             title={t('preview.frame', { title: snapshot.title })} data-artifact-frame />}
       </div>
       {pending === undefined ? null : (

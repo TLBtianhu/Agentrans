@@ -33,4 +33,8 @@ The replay screenshot for the teaching scenario writes:
 
 - `C:\agent制作\artifacts\teaching-artifact-feedback.png`
 
+The comparison replay writes:
+
+- `C:\agent制作\artifacts\comparison-scenes.png`
+
 These are local review artifacts, not repository assets and not model-generated images.
