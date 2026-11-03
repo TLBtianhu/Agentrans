@@ -31,7 +31,7 @@ Mount this plugin with the Conversation, Chat, locale, and Artifact Remote servi
 
 The card shows the Artifact title and revision. An incoming revision replaces the rendered document and the iframe browsing context while retaining the Conversation Node identity. The presentation field selects the initial inline or expanded layout; local controls can switch layout or show the source instead.
 
-The SceneHost also supports beside and picture-in-picture placements. These are `ViewRequest` intents, not arbitrary window-control permissions. Users can move between inline, beside, focus, and PiP while keeping the same iframe, current revision, and pending actions. Overlay ancestors are marked visible so virtualized history cannot hide the scene.
+The SceneHost also supports beside and picture-in-picture placements. These are `ViewRequest` intents, not arbitrary window-control permissions. Users can move between inline, beside, focus, and PiP while keeping the same iframe, current revision, and pending actions. Overlay ancestors are marked visible so virtualized history cannot hide the scene. The scene shows its current conversation or parent branch origin; **View in conversation** returns to inline and scrolls to the source anchor without resetting the Artifact.
 
 An iframe action first enters a bounded pending queue in the card. Click **Send to Agent** to record the first pending action with `wake: true`. Nothing wakes the Agent merely because an iframe emitted a message. A failure keeps the action visible and offers a retry; a successful send removes only that submitted action. A full queue rejects additional actions with an inline explanation until a send frees capacity.
 

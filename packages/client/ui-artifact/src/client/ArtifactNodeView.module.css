@@ -30,9 +30,14 @@
 }
 
 .revision,
+.origin,
 .pendingCount {
   color: var(--dsw-alias-label-tertiary);
   font: var(--dsw-font-xs-13);
+}
+
+.origin {
+  display: block;
 }
 
 .body {

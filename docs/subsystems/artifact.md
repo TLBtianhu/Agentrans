@@ -31,7 +31,7 @@ Artifact actions are user intent, not authority. They cannot approve a tool, rea
 
 The Client correlates snapshots by `artifactId` and preserves Conversation identity across revisions. Revision changes replace the browsing context. The iframe uses an opaque origin and a restrictive content policy; the parent accepts only messages from the current frame with the current id/revision and a bounded JSON body.
 
-The SceneHost supports `inline`, `beside`, `focus`, and `pip` placements. A `ViewRequest` expresses placement intent rather than window authority. Users can change placement while retaining the same browsing context and pending actions. Overlay ancestors are marked visible so virtualized history does not hide a fixed scene.
+The SceneHost supports `inline`, `beside`, `focus`, and `pip` placements. A `ViewRequest` expresses placement intent rather than window authority. Users can change placement while retaining the same browsing context and pending actions. Overlay ancestors are marked visible so virtualized history does not hide a fixed scene. Scene origin shows the current conversation or parent branch title; **View in conversation** returns to inline and scrolls to the source anchor without resetting the Artifact.
 
 Durable recovery covers snapshots and admitted action messages. Iframe JavaScript heap, canvas pixels, scroll position, source-view state, and unconfirmed pending actions are transient.
 

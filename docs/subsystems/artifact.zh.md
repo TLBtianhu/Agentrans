@@ -31,7 +31,7 @@ Artifact 操作是用户意图，不是权限。它不能批准工具、读取�
 
 Client 按 `artifactId` 关联快照，跨修订保持 Conversation 身份。修订变化替换浏览上下文。iframe 使用不透明 origin 和严格内容政策；父页面只接受来自当前 frame、具有当前 id/修订号且有界 JSON 的消息。
 
-SceneHost 支持 `inline`、`beside`、`focus` 和 `pip` 呈现方式。`ViewRequest` 只表达呈现意图，不授予窗口控制权限。用户切换布局时保留同一浏览上下文和待发送操作。overlay 祖先会被标记为可见，避免虚拟化历史隐藏固定场景。
+SceneHost 支持 `inline`、`beside`、`focus` 和 `pip` 呈现方式。`ViewRequest` 只表达呈现意图，不授予窗口控制权限。用户切换布局时保留同一浏览上下文和待发送操作。overlay 祖先会被标记为可见，避免虚拟化历史隐藏固定场景。场景来源显示当前对话或父分支标题；“查看对话来源”返回 inline 并定位到原消息，不重置 Artifact。
 
 持久恢复覆盖快照和已准入操作消息。iframe JavaScript 堆、Canvas 像素、滚动位置、源码查看状态和未确认的待发送操作都是瞬态。
 

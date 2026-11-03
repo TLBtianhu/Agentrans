@@ -12,8 +12,13 @@ type ArtifactNodeViewProps =
   & PropsLocale<'artifact'>
   & InjectFace<ArtifactNodeInjected>
 
+type SceneOrigin =
+  | { readonly kind: 'current' }
+  | { readonly kind: 'branch'; readonly title: string }
+
 type ArtifactCardProps = Pick<ArtifactNodeViewProps, 'recordAction' | 't'> & {
   readonly snapshot: ArtifactSnapshot
+  readonly origin: SceneOrigin
 }
 
 type SendPhase = 'idle' | 'sending' | 'failed'
@@ -43,7 +48,7 @@ function updatePending(state: PendingState, update: PendingUpdate): PendingState
   return { actions: [...state.actions, update.action], overflow: state.overflow }
 }
 
-function ArtifactCard({ snapshot, recordAction, t }: ArtifactCardProps) {
+function ArtifactCard({ snapshot, origin, recordAction, t }: ArtifactCardProps) {
   const [placement, setPlacement] = useState<ViewRequest['placement']>(snapshot.presentation === 'focus' ? 'focus' : 'inline')
   const [showSource, setShowSource] = useState(false)
   const [{ actions: pendingActions, overflow }, dispatchPending] = useReducer(updatePending, { actions: [], overflow: false })
@@ -101,6 +106,12 @@ function ArtifactCard({ snapshot, recordAction, t }: ArtifactCardProps) {
     }
   }
 
+  const revealSource = (): void => {
+    const anchor = sceneRef.current?.closest('[data-chat-anchor-key]')
+    setPlacement('inline')
+    anchor?.scrollIntoView({ block: 'center' })
+  }
+
   return (
     <section
       ref={sceneRef}
@@ -114,8 +125,12 @@ function ArtifactCard({ snapshot, recordAction, t }: ArtifactCardProps) {
         <div className={css.heading}>
           <h3 className={css.title}>{snapshot.title}</h3>
           <span className={css.revision}>{t('revision', { revision: String(snapshot.revision) })}</span>
+          <span className={css.origin}>{origin.kind === 'current' ? t('origin.current') : t('origin.branch', { parent: origin.title })}</span>
         </div>
         <div className={css.controls}>
+          {placement !== 'inline' && (
+            <Button size="sm" variant="outline" onClick={revealSource}>{t('view.origin')}</Button>
+          )}
           {PLACEMENTS.map(option => (
             <Button key={option} size="sm" variant="outline" aria-pressed={placement === option}
               onClick={() => { setPlacement(option) }}>
@@ -153,7 +168,13 @@ function ArtifactCard({ snapshot, recordAction, t }: ArtifactCardProps) {
 }
 
 /** Render the latest checkpoint; revision changes remount the browsing context and transient action state. */
-export const ArtifactNodeView = memo(function ArtifactNodeView({ node, recordAction, t }: ArtifactNodeViewProps) {
+export const ArtifactNodeView = memo(function ArtifactNodeView({ node, sessionId, useSessions, recordAction, t }: ArtifactNodeViewProps) {
   const snapshot = node.data
-  return <ArtifactCard key={`${snapshot.artifactId}:${snapshot.revision}`} snapshot={snapshot} recordAction={recordAction} t={t} />
+  const origin = useSessions((state): SceneOrigin => {
+    const current = state.byId[sessionId]
+    if (current?.parentId === undefined) return { kind: 'current' }
+    const parent = state.byId[current.parentId]
+    return { kind: 'branch', title: parent?.displayTitle ?? current.parentId }
+  })
+  return <ArtifactCard key={`${snapshot.artifactId}:${snapshot.revision}`} snapshot={snapshot} origin={origin} recordAction={recordAction} t={t} />
 })

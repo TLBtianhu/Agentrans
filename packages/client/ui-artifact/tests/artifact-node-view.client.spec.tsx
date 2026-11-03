@@ -2,7 +2,9 @@
 import type { ComponentProps } from 'react'
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { makeTranslate, allowAllAccess } from '@deepseek-ai/dsh-client-test-runtime'
+import { makeTranslate, allowAllAccess, bindSnapshotSelector } from '@deepseek-ai/dsh-client-test-runtime'
+import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
+import type { SessionListState } from '@deepseek-ai/dsh-api-session-controller/client'
 import { SessionId } from '@deepseek-ai/dsh-session/types'
 import { ArtifactNodeView } from '../src/client/ArtifactNodeView.tsx'
 import { en } from '../src/client/locales.ts'
@@ -41,7 +43,7 @@ function props(revision = 1, recordAction: RecordArtifactAction = vi.fn().mockRe
       pruneAttachments: () => {},
       submit: () => {},
     },
-    useSessions: throwUnused,
+    useSessions: () => ({ byId: {} }),
     useSessionStatus: throwUnused,
     useSessionRetainInfo: throwUnused,
     useWorkspaces: throwUnused,
@@ -127,6 +129,31 @@ describe('ArtifactNodeView', () => {
     ]) post(iframe, data)
     expect(screen.queryByText(/Action:/)).toBeNull()
     expect(recordAction).not.toHaveBeenCalled()
+  })
+
+  it('shows branch lineage and returns to the source conversation', () => {
+    const parent = SessionId('parent')
+    const child = SessionId('artifact-a')
+    const sessions = createSnapshotStore<SessionListState>({
+      ids: [child, parent],
+      byId: {
+        [child]: { id: child, displayTitle: 'Child', running: false, retainedBy: {}, blank: false, updatedAt: 1, parentId: parent },
+        [parent]: { id: parent, displayTitle: 'Parent topic', running: false, retainedBy: {}, blank: false, updatedAt: 1 },
+      },
+      phase: 'ready', projectionsBySession: {},
+    })
+    const base = props(1)
+    base.useSessions = bindSnapshotSelector(sessions)
+    render(<ArtifactNodeView {...base} />)
+    expect(screen.getByText('Branched from Parent topic')).toBeTruthy()
+
+    const scene = screen.getByLabelText('Artifact: Report 1')
+    fireEvent.click(screen.getByRole('button', { name: 'Picture in picture' }))
+    expect(scene.getAttribute('data-placement')).toBe('pip')
+    expect(screen.getByText('Branched from Parent topic')).toBeTruthy()
+
+    fireEvent.click(screen.getByRole('button', { name: 'View in conversation' }))
+    expect(scene.getAttribute('data-placement')).toBe('inline')
   })
 
   it('moves the same scene through beside, focus, and PiP without losing pending actions', async () => {
