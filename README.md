@@ -1,77 +1,42 @@
-# DeepSeek Harness
+# Agentrans
 
 English | [中文](README.zh.md)
 
-DeepSeek Harness (`dsh`) is an open-source agent harness developed by [DeepSeek AI](https://deepseek.com).
+Agent + Trans: a general programming Agent workbench that turns explanations into executable Artifacts and supports auditable inquiry branches. Agentrans is an independently identified downstream project based on DeepSeek Harness; it is not an official DeepSeek product.
 
-It is built on an **everything-is-a-plugin** architecture and powered by [Cordis](https://github.com/cordiverse/cordis), whose design is described in [_A Programming Paradigm for Spatiotemporal Composability_](https://arxiv.org/abs/2608.25512).
+## Current vertical slices
 
-Documentation: [https://deepseek-harness.github.io/deepseek-harness/](https://deepseek-harness.github.io/deepseek-harness/)
+- **Executable Artifacts** — self-contained HTML with complete snapshots, compare-and-set revisions, an opaque sandboxed iframe, and confirmed semantic actions. The Agent can update an Artifact without pasting its source back into the conversation.
+- **Confirmed interaction** — browser actions stay pending until the user sends them. Only then do they become ordinary user input; they grant no filesystem, network, or approval authority.
+- **Inquiry branches** — fork an assistant conclusion into an independent Session, then preview and confirm a visible result back to the direct parent. No child transcript or reasoning is copied, and no parent model turn starts implicitly.
 
-## Developer preview
+The shipped replay scenarios exercise these flows through the real Web composition and a real browser, not only isolated components.
 
-DeepSeek Harness is in _developer preview_ and iterating rapidly. **THERE WILL BE COMPATIBILITY-BREAKING CHANGES.**
+## Development and user-state separation
 
-Review the [safety notice](SAFETY.md) before running the project.
+Build output is an intermediate for producing distributions, not a user home. Development runs use isolated data roots and never reuse the upstream DSH profile. Do not install or run this checkout over an existing DSH installation.
 
-## Run
-
-### Run from `npm`
-
-Install `Node.js`, then run:
-
-```sh
-npx @deepseek-ai/dsh web
-```
-
-The command starts the Web UI at `http://127.0.0.1:3080` by default and opens it in the default browser for a local launch. An SSH launch only prints the host URL because the SSH client or editor owns the local forwarded address. Pass `--no-open` to run the server without opening a browser. See [Web UI guide](docs/user/guide/index.md).
-
-### Run from source
-
-To run from a repository checkout:
-
-```sh
-git clone https://github.com/deepseek-ai/deepseek-harness.git
-cd deepseek-harness
+```powershell
 pnpm install
 pnpm run build
-pnpm dsh web
+$env:DSH_HOME = 'C:\agent制作\.dev-data\harness'
+$env:DSH_AGENTS_HOME = 'C:\agent制作\.dev-data\agents'
+pnpm dsh web --no-open --port 58910
 ```
 
-`pnpm run build` prepares the repository artifacts. `pnpm dsh web` uses those built artifacts without rebuilding.
+Portable and installed distributions must use separate program and data paths from each other and from upstream DSH. See [DISTRIBUTION.md](DISTRIBUTION.md) for the invariants and the external-identity audit required before packaging.
 
-## Community and support
+## Verification
 
-- Submit feedback or bug reports through [GitHub Discussions](https://github.com/deepseek-ai/deepseek-harness/discussions).
-- Add the [`dsh-plugin`](https://github.com/topics/dsh-plugin) topic to your plugin repository for discoverability.
-- Join <a href="https://discord.gg/4MrtZUhpxg">DeepSeek Harness Discord community</a>.
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## Development
-
-Start with the [development guide](docs/development.md) and [architecture documentation](docs/architecture.md).
-
-`pnpm run dev:web` builds, serves, and rebuilds client bundles on source edits in one terminal, and `make help` lists the matching Make targets for Web and Desktop; the guide's application commands section owns the full table.
-
-For agents, follow [AGENTS.md](AGENTS.md).
-
-## Citation
-
-```bibtex
-@misc{deepseek-harness2026,
-  title={DeepSeek Harness: Everything is a Plugin},
-  author={DeepSeek-AI},
-  year={2026},
-  publisher={GitHub},
-  howpublished={\url{https://github.com/deepseek-ai/deepseek-harness}},
-}
+```sh
+pnpm run build
+pnpm exec vitest run --config vitest.web.config.ts apps/web/tests/artifact-interaction.e2e.ts apps/web/tests/branch-result.e2e.ts
 ```
 
-## License
+Browser scenarios replay recorded model streams; they do not require provider credentials. Set `DSH_PLAYWRIGHT_EXECUTABLE_PATH` when Playwright must use an installed browser. The Artifact scenario covers create/update, counter interaction, and confirmation-only action admission. The branch scenario covers fork, preview, cancel, confirmed return, and no implicit parent turn.
 
-[MIT](LICENSE)
+## Upstream and license
 
-Third-party dependencies and their licenses are disclosed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+[UPSTREAM.md](UPSTREAM.md) records the exact upstream commit, archive hash, and source-synchronization role. `upstream` is not this product's update, account, signing, or telemetry endpoint.
+
+[MIT](LICENSE). Third-party notices are retained in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
