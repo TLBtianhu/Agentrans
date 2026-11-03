@@ -10,7 +10,7 @@ const browser = await chromium.launch({ channel: 'msedge', headless: true, args:
 const evidence = []
 
 try {
-  for (const name of ['prediction-lab', 'parameter-explorer', 'function-plot', 'flowchart']) {
+  for (const name of ['prediction-lab', 'parameter-explorer', 'function-plot', 'flowchart', 'particle-system']) {
     const page = await browser.newPage({ viewport: { width: 1440, height: 960 }, colorScheme: 'light' })
     const errors = []
     const failedRequests = []
@@ -41,6 +41,13 @@ try {
       await page.waitForFunction(() => document.getElementById('zoom-value')?.textContent === '1.25×')
       await page.click('#reset')
       await page.waitForFunction(() => document.getElementById('selected-value')?.textContent === 'Observe')
+    } else if (name === 'particle-system') {
+      await page.click('#step')
+      await page.waitForFunction(() => document.getElementById('time-value')?.textContent === '0.03')
+      await page.click('#zoom-in')
+      await page.waitForFunction(() => document.getElementById('zoom-value')?.textContent === '1.25×')
+      await page.click('#reset')
+      await page.waitForFunction(() => document.getElementById('time-value')?.textContent === '0.00')
     } else {
       await page.click('#step')
       await page.waitForFunction(() => document.getElementById('summary')?.textContent?.includes('t = 0.10 s'))

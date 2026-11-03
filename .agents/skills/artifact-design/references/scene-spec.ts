@@ -49,7 +49,26 @@ export interface FlowchartSpec {
   readonly selected: string
 }
 
-export type SceneSpec = FunctionPlotSpec | FlowchartSpec
+export interface ParticleSpec {
+  readonly id: 'alpha' | 'beta'
+  readonly label: string
+  readonly x: number
+  readonly y: number
+  readonly vx: number
+  readonly vy: number
+  readonly tone: 'accent' | 'good'
+}
+
+export interface ParticleSystemSpec {
+  readonly kind: 'particle-system'
+  readonly particles: readonly ParticleSpec[]
+  readonly gravity: number
+  readonly timeStep: number
+  readonly viewport: ViewportSpec
+  readonly selected: ParticleSpec['id']
+}
+
+export type SceneSpec = FunctionPlotSpec | FlowchartSpec | ParticleSystemSpec
 export type SceneCommand = 'play' | 'pause' | 'step' | 'reset'
 
 export interface FunctionPlotState {
@@ -65,5 +84,14 @@ export interface FlowchartState {
   readonly selected: string
   readonly step: number
   readonly zoom: number
+  readonly playing: boolean
+}
+
+export interface ParticleState {
+  readonly time: number
+  readonly selected: ParticleSpec['id']
+  readonly gravity: number
+  readonly position: { readonly x: number; readonly y: number }
+  readonly velocity: { readonly x: number; readonly y: number }
   readonly playing: boolean
 }

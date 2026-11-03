@@ -47,7 +47,7 @@ iframe 操作先进入卡片内的有界待发送队列。点击“发送给 Age
 
 ### SceneSpec 原语
 
-[函数绘图模板](../../../.agents/skills/artifact-design/references/function-plot.html) 展示了声明式数学 SceneSpec：两个函数、参数扫掠、视口平移/缩放、描点、导数和积分。它用本地状态支持比较，并且只在用户确认后准入 `plot.inspected`。[流程图模板](../../../.agents/skills/artifact-design/references/flowchart.html) 将同一模式用于节点、边、概念选择和路径推进，并支持确认的 `flow.inspected` 状态。新增原语应参考这些模板，而不是为每个学科创建独立插件。
+[函数绘图模板](../../../.agents/skills/artifact-design/references/function-plot.html) 展示了声明式数学 SceneSpec：两个函数、参数扫掠、视口平移/缩放、描点、导数和积分。它用本地状态支持比较，并且只在用户确认后准入 `plot.inspected`。[流程图模板](../../../.agents/skills/artifact-design/references/flowchart.html) 将同一模式用于节点、边、概念选择和路径推进，并支持确认的 `flow.inspected` 状态。[粒子系统模板](../../../.agents/skills/artifact-design/references/particle-system.html) 增加固定步长的确定性物理模拟，并支持确认的 `physics.inspected` 位置和速度。新增原语应参考这些模板，而不是为每个学科创建独立插件。
 
 -----
 

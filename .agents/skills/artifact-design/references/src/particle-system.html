@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Projectile motion lab</title>
+  <!-- @artifact-theme -->
+</head>
+<body>
+  <main class="lab">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Physical scene</p>
+        <h1>Projectile motion lab</h1>
+        <p class="subtitle">Advance time in fixed steps, inspect velocity vectors, and compare two particles under the same gravity.</p>
+      </div>
+      <span class="pill">Deterministic model</span>
+    </header>
+
+    <section class="workspace" aria-label="Projectile motion workspace">
+      <div class="stage">
+        <div class="metric-row" aria-label="Current physics state">
+          <div class="metric"><strong id="time-value">0.00</strong><span>Time · s</span></div>
+          <div class="metric"><strong id="gravity-value">9.80</strong><span>Gravity · m/s²</span></div>
+          <div class="metric"><strong id="zoom-value">1.00×</strong><span>Viewport scale</span></div>
+        </div>
+        <canvas id="world" class="chart" width="640" height="300" role="img" aria-label="Projectile motion canvas"></canvas>
+        <output id="readout" class="result" role="status" aria-live="polite">Step the model to inspect a particle.</output>
+      </div>
+
+      <aside class="panel" aria-label="Physics controls">
+        <h2>Controls</h2>
+        <div class="field">
+          <label for="selected">Selected particle</label>
+          <select id="selected">
+            <option value="alpha">Alpha</option>
+            <option value="beta">Beta</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="gravity">Gravity <output id="gravity-label">9.80</output></label>
+          <input id="gravity" type="range" min="0" max="20" step="0.1" value="9.8">
+        </div>
+        <div class="field">
+          <label for="time-scale">Time scale <output id="time-scale-label">1.00×</output></label>
+          <input id="time-scale" type="range" min="0.25" max="3" step="0.25" value="1">
+        </div>
+        <div class="button-row">
+          <button id="zoom-out" type="button" aria-label="Zoom out">−</button>
+          <button id="zoom-in" type="button" aria-label="Zoom in">+</button>
+          <button id="view-reset" type="button">Reset view</button>
+        </div>
+        <div class="button-row">
+          <button id="play" class="primary" type="button">Play</button>
+          <button id="step" type="button">Step</button>
+          <button id="reset" type="button">Reset</button>
+        </div>
+        <button id="confirm" type="button">Confirm experiment</button>
+        <p class="subtitle">Alpha and beta share gravity but start with different velocities. Each Step advances exactly 1/30 second.</p>
+      </aside>
+    </section>
+
+    <footer class="timeline">
+      <span class="step">Observe</span>
+      <span class="step">Advance</span>
+      <span class="step">Inspect</span>
+      <span class="step">Confirm</span>
+    </footer>
+  </main>
+
+  <!-- @artifact-motion -->
+  <script>
+    const sceneSpec = {
+      kind: 'particle-system',
+      particles: [
+        { id: 'alpha', label: 'Alpha', x: 1, y: 1, vx: 3, vy: 8, tone: 'accent' },
+        { id: 'beta', label: 'Beta', x: 1, y: 1, vx: 4, vy: 6, tone: 'good' },
+      ],
+      gravity: 9.8,
+      timeStep: 1 / 30,
+      viewport: { centerX: 0, centerY: 0, scale: 1 },
+      selected: 'alpha',
+    }
+
+    const canvas = document.getElementById('world')
+    const context = canvas.getContext('2d')
+    const readout = document.getElementById('readout')
+    const selectedInput = document.getElementById('selected')
+    const gravityInput = document.getElementById('gravity')
+    const timeScaleInput = document.getElementById('time-scale')
+    const playButton = document.getElementById('play')
+    let particles = []
+    let gravity = sceneSpec.gravity
+    let timeScale = 1
+    let time = 0
+    let selected = sceneSpec.selected
+    let scale = sceneSpec.viewport.scale
+    let playing = false
+    let frame = 0
+    let previous = 0
+    let accumulator = 0
+
+    function cloneParticles() {
+      return sceneSpec.particles.map(particle => ({ ...particle, trail: [] }))
+    }
+
+    function advance(dt) {
+      for (const particle of particles) {
+        particle.vy -= gravity * dt
+        particle.x += particle.vx * dt
+        particle.y += particle.vy * dt
+        if (particle.y < 0) {
+          particle.y = 0
+          particle.vy = Math.abs(particle.vy) * 0.65
+          particle.vx *= 0.8
+        }
+        particle.trail.push({ x: particle.x, y: particle.y })
+        if (particle.trail.length > 160) particle.trail.shift()
+      }
+      time += dt
+    }
+
+    function xToPixel(x) { return canvas.width / 2 + (x - 8) * 40 * scale }
+    function yToPixel(y) { return canvas.height / 2 - (y - 5) * 30 * scale }
+
+    function draw() {
+      const style = getComputedStyle(document.documentElement)
+      const ink = style.getPropertyValue('--art-ink').trim()
+      const muted = style.getPropertyValue('--art-muted').trim()
+      const accent = style.getPropertyValue('--art-accent').trim()
+      const good = style.getPropertyValue('--art-good').trim()
+      const grid = style.getPropertyValue('--art-grid').trim()
+      context.clearRect(0, 0, canvas.width, canvas.height)
+      context.strokeStyle = grid
+      context.lineWidth = 1
+      for (let x = 0; x <= 16; x++) {
+        context.beginPath(); context.moveTo(xToPixel(x), 0); context.lineTo(xToPixel(x), canvas.height); context.stroke()
+      }
+      for (let y = 0; y <= 10; y++) {
+        context.beginPath(); context.moveTo(0, yToPixel(y)); context.lineTo(canvas.width, yToPixel(y)); context.stroke()
+      }
+      context.strokeStyle = muted
+      context.globalAlpha = 0.55
+      context.beginPath(); context.moveTo(0, yToPixel(0)); context.lineTo(canvas.width, yToPixel(0)); context.stroke()
+      context.globalAlpha = 1
+
+      for (const particle of particles) {
+        const color = particle.tone === 'good' ? good : accent
+        if (particle.trail.length > 1) {
+          context.strokeStyle = color
+          context.globalAlpha = 0.35
+          context.lineWidth = 2
+          context.beginPath()
+          for (const [index, point] of particle.trail.entries()) {
+            if (index === 0) context.moveTo(xToPixel(point.x), yToPixel(point.y))
+            else context.lineTo(xToPixel(point.x), yToPixel(point.y))
+          }
+          context.stroke()
+          context.globalAlpha = 1
+        }
+        context.fillStyle = color
+        context.beginPath(); context.arc(xToPixel(particle.x), yToPixel(particle.y), 7, 0, Math.PI * 2); context.fill()
+        context.strokeStyle = color
+        context.lineWidth = 2
+        context.beginPath()
+        context.moveTo(xToPixel(particle.x), yToPixel(particle.y))
+        context.lineTo(xToPixel(particle.x + particle.vx * 0.35), yToPixel(particle.y + particle.vy * 0.35))
+        context.stroke()
+        context.fillStyle = ink
+        context.font = '12px system-ui'
+        context.fillText(particle.label, xToPixel(particle.x) + 12, yToPixel(particle.y) - 12)
+      }
+
+      const current = particles.find(particle => particle.id === selected) ?? particles[0]
+      readout.textContent = current
+        ? `t=${time.toFixed(2)}s · x=${current.x.toFixed(2)}m · y=${current.y.toFixed(2)}m · vx=${current.vx.toFixed(2)}m/s · vy=${current.vy.toFixed(2)}m/s`
+        : 'Step the model to inspect a particle.'
+      document.getElementById('time-value').textContent = time.toFixed(2)
+      document.getElementById('gravity-value').textContent = gravity.toFixed(2)
+      document.getElementById('gravity-label').textContent = gravity.toFixed(2)
+      document.getElementById('time-scale-label').textContent = `${timeScale.toFixed(2)}×`
+      document.getElementById('zoom-value').textContent = `${scale.toFixed(2)}×`
+      if (current) {
+        parent.postMessage({
+          kind: 'artifact-state',
+          state: {
+            time, selected, gravity, playing,
+            position: { x: current.x, y: current.y },
+            velocity: { x: current.vx, y: current.vy },
+          },
+        }, '*')
+      }
+    }
+
+    function setPlaying(next) {
+      playing = next
+      playButton.textContent = playing ? 'Pause' : 'Play'
+      playButton.setAttribute('aria-pressed', String(playing))
+      previous = 0
+      accumulator = 0
+      if (playing) frame = requestAnimationFrame(tick)
+      else cancelAnimationFrame(frame)
+      draw()
+    }
+
+    function tick(now) {
+      if (!playing) return
+      if (previous === 0) previous = now
+      accumulator += Math.min(0.1, (now - previous) / 1000) * timeScale
+      previous = now
+      while (accumulator >= sceneSpec.timeStep) {
+        advance(sceneSpec.timeStep)
+        accumulator -= sceneSpec.timeStep
+      }
+      draw()
+      frame = requestAnimationFrame(tick)
+    }
+
+    function reset() {
+      setPlaying(false)
+      particles = cloneParticles()
+      gravity = sceneSpec.gravity
+      timeScale = 1
+      time = 0
+      selected = sceneSpec.selected
+      scale = sceneSpec.viewport.scale
+      selectedInput.value = selected
+      gravityInput.value = String(gravity)
+      timeScaleInput.value = String(timeScale)
+      draw()
+    }
+
+    selectedInput.addEventListener('change', () => { selected = selectedInput.value; draw() })
+    gravityInput.addEventListener('input', () => { gravity = Number(gravityInput.value); draw() })
+    timeScaleInput.addEventListener('input', () => { timeScale = Number(timeScaleInput.value); draw() })
+    document.getElementById('zoom-in').addEventListener('click', () => { scale = Math.min(4, scale * 1.25); draw() })
+    document.getElementById('zoom-out').addEventListener('click', () => { scale = Math.max(0.5, scale / 1.25); draw() })
+    document.getElementById('view-reset').addEventListener('click', reset)
+    document.getElementById('reset').addEventListener('click', reset)
+    document.getElementById('step').addEventListener('click', () => { advance(sceneSpec.timeStep); draw() })
+    playButton.addEventListener('click', () => { setPlaying(!playing) })
+    document.getElementById('confirm').addEventListener('click', () => {
+      const current = particles.find(particle => particle.id === selected) ?? particles[0]
+      if (!current) return
+      parent.postMessage({
+        kind: 'artifact-action', artifactId: 'projectile-motion', revision: 1,
+        action: 'physics.inspected',
+        payload: {
+          selected, time, gravity,
+          position: { x: current.x, y: current.y },
+          velocity: { x: current.vx, y: current.vy },
+        },
+      }, '*')
+    })
+    window.addEventListener('message', event => {
+      if (event.source !== parent || event.data?.kind !== 'artifact-command') return
+      if (event.data.command === 'play') setPlaying(true)
+      else if (event.data.command === 'pause') setPlaying(false)
+      else if (event.data.command === 'step') { advance(sceneSpec.timeStep); draw() }
+      else if (event.data.command === 'reset') reset()
+    })
+
+    reset()
+    beat(document.querySelectorAll('.hero, .workspace, .timeline'))
+  </script>
+</body>
+</html>

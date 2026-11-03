@@ -50,6 +50,8 @@ The [function-plot scenario](../../apps/web/tests/function-plot.e2e.ts) verifies
 
 The [flowchart scenario](../../apps/web/tests/flowchart.e2e.ts) verifies a SceneSpec-driven concept map: node selection, path advancement, zoom, and one confirmed `flow.inspected` action containing the selected concept and current step.
 
+The [particle-system scenario](../../apps/web/tests/particle-system.e2e.ts) verifies a deterministic physical scene: two particles, fixed 1/30-second steps, gravity, trails, velocity vectors, and one confirmed `physics.inspected` action with position and velocity.
+
 <!-- BEGIN GENERATED cordis-surface (gen-cordis-catalog.ts) — do not edit between markers -->
 
 <a id="cordis-surface"></a>

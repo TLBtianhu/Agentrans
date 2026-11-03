@@ -50,6 +50,8 @@ keyless [Artifact 交互场景](../../apps/web/tests/artifact-interaction.e2e.ts
 
 [流程图场景](../../apps/web/tests/flowchart.e2e.ts) 验证 SceneSpec 驱动的概念图：节点选择、路径推进、缩放，以及一条包含所选概念和当前步骤的确认 `flow.inspected` 操作。
 
+[粒子系统场景](../../apps/web/tests/particle-system.e2e.ts) 验证确定性物理场景：两个粒子、固定 1/30 秒步长、重力、轨迹、速度向量，以及一条包含位置和速度的确认 `physics.inspected` 操作。
+
 <!-- BEGIN GENERATED cordis-surface (gen-cordis-catalog.ts) — do not edit between markers -->
 
 <a id="cordis-surface"></a>
