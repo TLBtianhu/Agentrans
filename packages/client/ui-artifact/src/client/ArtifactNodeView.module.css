@@ -47,8 +47,78 @@
   background: var(--dsw-alias-bg-base);
 }
 
-.card[data-focus='true'] .frame {
+:global([data-chat-flow-item][data-artifact-overlay]) {
+  content-visibility: visible;
+}
+
+.card[data-placement='focus'] {
+  position: fixed;
+  z-index: 50;
+  inset: 0;
+  margin: 0;
+  padding: 24px;
+  overflow: auto;
+  border-radius: 0;
+  background: var(--dsw-alias-bg-base);
+}
+
+.card[data-placement='beside'] {
+  position: fixed;
+  z-index: 40;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(460px, 46vw);
+  margin: 0;
+  overflow: auto;
+  border-radius: 0;
+  border-left: 0.5px solid var(--dsw-alias-border-l2);
+}
+
+.card[data-placement='pip'] {
+  position: fixed;
+  z-index: 40;
+  right: 16px;
+  bottom: 16px;
+  width: min(420px, 45vw);
+  max-height: 72vh;
+  margin: 0;
+  overflow: auto;
+  box-shadow: var(--dsw-elevation-prominent);
+}
+
+.card[data-placement='focus'] .frame {
   height: min(65vh, 720px);
+}
+
+.card[data-placement='beside'] .frame {
+  height: 340px;
+}
+
+.card[data-placement='pip'] .frame {
+  height: 220px;
+}
+
+@media (max-width: 780px) {
+  .card[data-placement='focus'] {
+    padding: 12px;
+  }
+
+  .card[data-placement='beside'],
+  .card[data-placement='pip'] {
+    right: 12px;
+    bottom: 12px;
+    left: 12px;
+    width: auto;
+    max-height: 70vh;
+  }
+
+  .card[data-placement='beside'] {
+    top: auto;
+    border-top: 0.5px solid var(--dsw-alias-border-l2);
+    border-left: 0;
+    border-radius: var(--dsw-radius-md);
+  }
 }
 
 .source {

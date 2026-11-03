@@ -31,6 +31,8 @@ kind: "package-reference"
 
 卡片显示 Artifact 标题和修订号。新修订会替换文档与 iframe 浏览上下文，同时保留 Conversation Node 身份。presentation 字段决定初始行内或展开布局；本地控件可切换布局或改为显示源码。
 
+SceneHost 还支持并排和画中画。它们是 `ViewRequest` 意图，不是任意窗口控制权限。用户可以在行内、并排、聚焦和画中画之间切换，同时保留同一 iframe、当前修订和待发送操作。overlay 祖先会被标记为可见，避免虚拟化历史隐藏场景。
+
 iframe 操作先进入卡片内的有界待发送队列。点击“发送给 Agent”才会以 `wake: true` 记录第一条待发送操作。iframe 发出消息本身不会唤醒 Agent。失败会保留操作并提供重试；成功只移除已提交项。队列满时，卡片会明确提示，发送释放容量后才继续接受新操作。
 
 ### 隔离与输入限制

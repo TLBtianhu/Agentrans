@@ -79,6 +79,16 @@ describe.skipIf(MODE === 'record')('web e2e: teaching Artifact', () => {
     await expect.poll(() => frame.locator('#result').textContent()).toContain('prediction matched')
     await page.getByText('Action: shot.completed', { exact: true }).waitFor({ state: 'visible' })
 
+    const scene = page.locator('section[data-placement]')
+    await page.getByRole('button', { name: 'Picture in picture', exact: true }).click()
+    expect(await scene.getAttribute('data-placement')).toBe('pip')
+    await page.getByText('Action: shot.completed', { exact: true }).waitFor({ state: 'visible' })
+    await page.getByRole('button', { name: 'Dock beside chat', exact: true }).click()
+    expect(await scene.getAttribute('data-placement')).toBe('beside')
+    await page.getByRole('button', { name: 'Expand artifact', exact: true }).click()
+    expect(await scene.getAttribute('data-placement')).toBe('focus')
+    await page.getByText('Action: shot.completed', { exact: true }).waitFor({ state: 'visible' })
+
     expect(session.snapshotEvents().flatMap(event => event.type === 'user/message' && event.data.source.kind === 'artifact-action' ? [event.data] : [])).toHaveLength(0)
     expect(session.snapshotEvents().filter(event => event.type === 'turn/start')).toHaveLength(1)
 

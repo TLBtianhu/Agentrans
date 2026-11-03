@@ -4,7 +4,7 @@ import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-cli
 import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
 import { createArtifactDocument } from './document.ts'
 import { parseArtifactAction, type PendingArtifactAction } from './messages.ts'
-import type { ArtifactNodeInjected, ArtifactSnapshot } from './protocol.ts'
+import type { ArtifactNodeInjected, ArtifactPlacement, ArtifactSnapshot, ViewRequest } from './protocol.ts'
 import css from './ArtifactNodeView.module.css'
 
 type ArtifactNodeViewProps =
@@ -19,6 +19,11 @@ type ArtifactCardProps = Pick<ArtifactNodeViewProps, 'recordAction' | 't'> & {
 type SendPhase = 'idle' | 'sending' | 'failed'
 
 const PENDING_ACTION_LIMIT = 32
+
+const PLACEMENTS: readonly ViewRequest['placement'][] = ['inline', 'beside', 'focus', 'pip']
+const PLACEMENT_COPY: Record<ArtifactPlacement, 'view.inline' | 'view.beside' | 'view.focus' | 'view.pip'> = {
+  inline: 'view.inline', beside: 'view.beside', focus: 'view.focus', pip: 'view.pip',
+}
 
 interface PendingState {
   readonly actions: readonly PendingArtifactAction[]
@@ -39,11 +44,12 @@ function updatePending(state: PendingState, update: PendingUpdate): PendingState
 }
 
 function ArtifactCard({ snapshot, recordAction, t }: ArtifactCardProps) {
-  const [focused, setFocused] = useState(snapshot.presentation === 'focus')
+  const [placement, setPlacement] = useState<ViewRequest['placement']>(snapshot.presentation === 'focus' ? 'focus' : 'inline')
   const [showSource, setShowSource] = useState(false)
   const [{ actions: pendingActions, overflow }, dispatchPending] = useReducer(updatePending, { actions: [], overflow: false })
   const [phase, setPhase] = useState<SendPhase>('idle')
   const iframeRef = useRef<HTMLIFrameElement>(null)
+  const sceneRef = useRef<HTMLElement>(null)
   const mountedRef = useRef(true)
   const sendingRef = useRef(false)
   const document = useMemo(() => createArtifactDocument(snapshot.source), [snapshot.source])
@@ -52,6 +58,17 @@ function ArtifactCard({ snapshot, recordAction, t }: ArtifactCardProps) {
     mountedRef.current = true
     return () => { mountedRef.current = false }
   }, [])
+
+  useEffect(() => {
+    const flowItem = sceneRef.current?.closest('[data-chat-flow-item]')
+    if (!flowItem) return
+    if (placement === 'inline') {
+      flowItem.removeAttribute('data-artifact-overlay')
+      return
+    }
+    flowItem.setAttribute('data-artifact-overlay', placement)
+    return () => { flowItem.removeAttribute('data-artifact-overlay') }
+  }, [placement])
 
   useEffect(() => {
     if (showSource) return
@@ -85,19 +102,29 @@ function ArtifactCard({ snapshot, recordAction, t }: ArtifactCardProps) {
   }
 
   return (
-    <section className={css.card} data-focus={focused} aria-label={t('card.label', { title: snapshot.title })}>
+    <section
+      ref={sceneRef}
+      className={css.card}
+      data-placement={placement}
+      role={placement === 'focus' ? 'dialog' : 'complementary'}
+      aria-modal={placement === 'focus' ? true : undefined}
+      aria-label={t('card.label', { title: snapshot.title })}
+    >
       <header className={css.header}>
         <div className={css.heading}>
           <h3 className={css.title}>{snapshot.title}</h3>
           <span className={css.revision}>{t('revision', { revision: String(snapshot.revision) })}</span>
         </div>
         <div className={css.controls}>
+          {PLACEMENTS.map(option => (
+            <Button key={option} size="sm" variant="outline" aria-pressed={placement === option}
+              onClick={() => { setPlacement(option) }}>
+              {t(PLACEMENT_COPY[option])}
+            </Button>
+          ))}
           <Button size="sm" variant="outline" aria-pressed={showSource}
             onClick={() => { setShowSource(value => !value) }}>
             {showSource ? t('view.preview') : t('view.source')}
-          </Button>
-          <Button size="sm" variant="outline" aria-pressed={focused} onClick={() => { setFocused(value => !value) }}>
-            {focused ? t('view.inline') : t('view.focus')}
           </Button>
         </div>
       </header>

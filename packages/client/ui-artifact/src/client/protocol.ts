@@ -5,6 +5,14 @@ import type { RemoteResult } from '@deepseek-ai/dsh-api-remotes/client'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type { JsonValue } from '@deepseek-ai/dsh-util-values'
 
+/** Semantic placement requested by the user or Agent; the host owns the actual layout. */
+export type ArtifactPlacement = 'inline' | 'beside' | 'focus' | 'pip'
+
+/** ViewRequest is an intent, never an arbitrary window-control authority. */
+export interface ViewRequest {
+  readonly placement: ArtifactPlacement
+}
+
 /** JSON value accepted in an Artifact action message. */
 export type ArtifactPayload = JsonValue
 export type { ArtifactId, ArtifactSnapshot }

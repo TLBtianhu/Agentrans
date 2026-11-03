@@ -87,7 +87,8 @@ describe('ArtifactNodeView', () => {
     expect(iframe.getAttribute('srcdoc')).toContain("connect-src 'none'")
     expect(screen.getByText('Report 1')).toBeTruthy()
     expect(screen.getByText('Revision 1')).toBeTruthy()
-    expect(screen.getByRole('button', { name: 'Use inline view' }).getAttribute('aria-pressed')).toBe('true')
+    expect(screen.getByRole('button', { name: 'Use inline view' }).getAttribute('aria-pressed')).toBe('false')
+    expect(screen.getByRole('button', { name: 'Expand artifact' }).getAttribute('aria-pressed')).toBe('true')
 
     fireEvent.click(screen.getByRole('button', { name: 'Use inline view' }))
     expect(screen.getByRole('button', { name: 'Expand artifact' }).getAttribute('aria-pressed')).toBe('false')
@@ -126,6 +127,33 @@ describe('ArtifactNodeView', () => {
     ]) post(iframe, data)
     expect(screen.queryByText(/Action:/)).toBeNull()
     expect(recordAction).not.toHaveBeenCalled()
+  })
+
+  it('moves the same scene through beside, focus, and PiP without losing pending actions', async () => {
+    const recordAction = vi.fn<RecordArtifactAction>().mockResolvedValue(undefined)
+    render(<ArtifactNodeView {...props(1, recordAction)} />)
+    const scene = screen.getByLabelText('Artifact: Report 1')
+    const firstFrame = frame()
+    post(firstFrame, action())
+    expect(await screen.findByText('Action: approve')).toBeTruthy()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Dock beside chat' }))
+    expect(scene.getAttribute('data-placement')).toBe('beside')
+    expect(screen.getByText('Action: approve')).toBeTruthy()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Picture in picture' }))
+    expect(scene.getAttribute('data-placement')).toBe('pip')
+    expect(frame()).toBe(firstFrame)
+    expect(screen.getByText('Action: approve')).toBeTruthy()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Expand artifact' }))
+    expect(scene.getAttribute('data-placement')).toBe('focus')
+    expect(frame()).toBe(firstFrame)
+    expect(screen.getByText('Action: approve')).toBeTruthy()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Send to Agent' }))
+    await waitFor(() => { expect(screen.queryByText('Action: approve')).toBeNull() })
+    expect(recordAction).toHaveBeenCalledExactlyOnceWith('artifact-a', 1, 'approve', { accepted: true }, true)
   })
 
   it('removes message listeners and transient state on revision update and unmount', async () => {
