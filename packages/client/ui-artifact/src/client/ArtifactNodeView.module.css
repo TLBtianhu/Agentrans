@@ -1,24 +1,42 @@
+/* The Artifact card is one surface in every placement: a header strip, a body,
+   and the pending-action footer. Placements change only how that surface is
+   positioned, never its internal composition. */
 .card {
   display: grid;
   min-width: 0;
-  gap: 8px;
-  margin: 8px 0;
-  padding: 12px;
-  border: 0.5px solid var(--dsw-alias-border-l2);
+  /* Rows follow their content; only the expanded card hands the remaining
+     window height to its body. */
+  align-content: start;
+  border: 0.5px solid var(--dsw-alias-border-l3);
   border-radius: var(--dsw-radius-md);
   background: var(--dsw-alias-bg-layer-1);
+  overflow: hidden;
 }
 
-.header,
-.controls {
+.card[data-placement='inline'] {
+  margin: 8px 0;
+}
+
+/* The flow anchor keeps a return target while the card is portalled away. */
+.anchor {
+  display: block;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.header {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 10px 12px;
+  border-bottom: 0.5px solid var(--dsw-alias-border-l2);
 }
 
 .heading {
-  flex: 1 1 180px;
+  flex: 1 1 220px;
   min-width: 0;
 }
 
@@ -29,108 +47,65 @@
   font: var(--dsw-font-s-strong-14);
 }
 
-.revision,
-.origin,
-.pendingCount {
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 2px 0 0;
   color: var(--dsw-alias-label-tertiary);
-  font: var(--dsw-font-xs-13);
+  font: var(--dsw-font-xxs-12);
 }
 
-.origin {
-  display: block;
+.dot {
+  flex: none;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  corner-shape: round;
+  background: currentColor;
+  opacity: 0.5;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+}
+
+/* A pressed placement reads as a selected instrument mode, not a raised pill. */
+.controls .placement[data-selected] {
+  background: var(--dsw-alias-interactive-bg-active);
+  color: var(--dsw-alias-label-primary);
+}
+
+.rule {
+  width: 0.5px;
+  height: 16px;
+  margin: 0 4px;
+  background: var(--dsw-alias-border-l3);
 }
 
 .body {
   min-width: 0;
+  padding: 12px;
 }
 
 .frame {
   display: block;
   width: 100%;
-  height: 280px;
+  height: 320px;
   border: 0;
   background: var(--dsw-alias-bg-base);
 }
 
-:global([data-chat-flow-item][data-artifact-overlay]) {
-  content-visibility: visible;
-}
-
-.card[data-placement='focus'] {
-  position: fixed;
-  z-index: 50;
-  inset: 0;
-  margin: 0;
-  padding: 24px;
-  overflow: auto;
-  border-radius: 0;
-  background: var(--dsw-alias-bg-base);
-}
-
-.card[data-placement='beside'] {
-  position: fixed;
-  z-index: 40;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: min(460px, 46vw);
-  margin: 0;
-  overflow: auto;
-  border-radius: 0;
-  border-left: 0.5px solid var(--dsw-alias-border-l2);
-}
-
-.card[data-placement='pip'] {
-  position: fixed;
-  z-index: 40;
-  right: 16px;
-  bottom: 16px;
-  width: min(420px, 45vw);
-  max-height: 72vh;
-  margin: 0;
-  overflow: auto;
-  box-shadow: var(--dsw-elevation-prominent);
-}
-
-.card[data-placement='focus'] .frame {
-  height: min(65vh, 720px);
-}
-
-.card[data-placement='beside'] .frame {
-  height: 340px;
-}
-
-.card[data-placement='pip'] .frame {
-  height: 220px;
-}
-
-@media (max-width: 780px) {
-  .card[data-placement='focus'] {
-    padding: 12px;
-  }
-
-  .card[data-placement='beside'],
-  .card[data-placement='pip'] {
-    right: 12px;
-    bottom: 12px;
-    left: 12px;
-    width: auto;
-    max-height: 70vh;
-  }
-
-  .card[data-placement='beside'] {
-    top: auto;
-    border-top: 0.5px solid var(--dsw-alias-border-l2);
-    border-left: 0;
-    border-radius: var(--dsw-radius-md);
-  }
-}
-
 .source {
-  max-height: 480px;
+  max-height: 420px;
   margin: 0;
-  padding: 8px;
+  padding: 10px 12px;
   overflow: auto;
+  border-radius: var(--dsw-radius-sm);
   background: var(--dsw-alias-bg-base);
   color: var(--dsw-alias-label-secondary);
   font: var(--dsw-font-xs-13);
@@ -141,7 +116,7 @@
 .pending {
   display: grid;
   gap: 6px;
-  padding-top: 8px;
+  padding: 10px 12px;
   border-top: 0.5px solid var(--dsw-alias-border-l2);
 }
 
@@ -157,8 +132,141 @@
   color: var(--dsw-alias-label-secondary);
 }
 
+.pendingCount {
+  color: var(--dsw-alias-label-tertiary);
+  font: var(--dsw-font-xs-13);
+}
+
 .error {
   color: var(--dsw-alias-state-error-primary);
+}
+
+.send {
+  justify-self: start;
+}
+
+/* Focus: the card becomes the window, below the platform chrome band, and its
+   own header stays reachable. */
+.card[data-placement='focus'] {
+  position: fixed;
+  z-index: 50;
+  top: var(--dsh-frame-top-clearance, 0px);
+  right: 0;
+  bottom: 0;
+  left: 0;
+  box-sizing: border-box;
+  width: 100vw;
+  height: calc(100vh - var(--dsh-frame-top-clearance, 0px));
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: var(--dsw-alias-bg-base);
+  overflow: auto;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.card[data-placement='focus'] .header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 14px 24px;
+  background: var(--dsw-alias-bg-base);
+}
+
+.card[data-placement='focus'] .body {
+  display: grid;
+  padding: 20px 24px 32px;
+}
+
+.card[data-placement='focus'] .frame {
+  height: min(72vh, 860px);
+}
+
+/* Dock: a persistent result pane beside the conversation. The measured top
+   keeps the Session header above it, and the reserved body width keeps the
+   transcript readable instead of covered. */
+.card[data-placement='beside'] {
+  position: fixed;
+  z-index: 40;
+  top: var(--artifact-dock-top, 0px);
+  right: 0;
+  bottom: 0;
+  width: min(520px, 46vw);
+  margin: 0;
+  overflow: auto;
+  border-width: 0 0 0 0.5px;
+  border-radius: 0;
+  background: var(--dsw-alias-bg-layer-1);
+}
+
+.card[data-placement='beside'] .header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 12px 16px;
+  background: var(--dsw-alias-bg-layer-1);
+}
+
+.card[data-placement='beside'] .body {
+  padding: 12px 16px 24px;
+}
+
+.card[data-placement='beside'] .frame {
+  height: 300px;
+}
+
+:global([data-conversation-content][data-artifact-dock]) {
+  padding-right: min(520px, 46vw);
+}
+
+/* Picture in picture: an auxiliary glance surface, below the dock's authority. */
+.card[data-placement='pip'] {
+  position: fixed;
+  z-index: 40;
+  right: 16px;
+  bottom: 16px;
+  width: min(420px, 45vw);
+  max-height: 72vh;
+  margin: 0;
+  overflow: auto;
+  box-shadow: var(--dsw-elevation-prominent);
+}
+
+.card[data-placement='pip'] .header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--dsw-alias-bg-layer-1);
+}
+
+.card[data-placement='pip'] .frame {
+  height: 220px;
+}
+
+@media (max-width: 900px) {
+  /* No room to reserve a column: the dock becomes a bottom sheet over the
+     transcript it can no longer sit beside. */
+  :global([data-conversation-content][data-artifact-dock]) {
+    padding-right: 0;
+  }
+
+  .card[data-placement='beside'] {
+    top: auto;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    width: auto;
+    max-height: 64vh;
+    border-width: 0.5px;
+    border-radius: var(--dsw-radius-md);
+    overflow: auto;
+  }
+
+  .card[data-placement='pip'] {
+    left: 12px;
+    width: auto;
+    max-height: 60vh;
+  }
 }
 
 .comparison {
@@ -205,8 +313,4 @@
   .comparisonGrid {
     grid-template-columns: 1fr;
   }
-}
-
-.send {
-  justify-self: start;
 }

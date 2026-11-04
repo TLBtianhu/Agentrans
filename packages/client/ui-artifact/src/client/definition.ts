@@ -36,6 +36,10 @@ export const artifactDefinition: ConversationNodeDefinition<ArtifactSnapshot> = 
       anchorSeq: context.start.event.seq,
       location: context.start.location,
       visibility: 'visible',
+      // A committed Artifact is a result of its Turn, not part of the process
+      // run: it keeps its own row so the inline card stays visible while the
+      // process group is folded.
+      groupTree: 'turn',
       data: context.state,
     }
   },

@@ -1,5 +1,6 @@
 /** Isolated Artifact preview, source inspection, and confirmed action delivery. */
-import { memo, useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useRef, useState, type CSSProperties } from 'react'
+import { createPortal } from 'react-dom'
 import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
 import { createArtifactDocument } from './document.ts'
@@ -56,11 +57,13 @@ export function ArtifactCard({ snapshot, origin, recordAction, t, placementContr
   const [showSource, setShowSource] = useState(false)
   const [{ actions: pendingActions, overflow }, dispatchPending] = useReducer(updatePending, { actions: [], overflow: false })
   const [phase, setPhase] = useState<SendPhase>('idle')
+  const [dockTop, setDockTop] = useState<number>()
   const iframeRef = useRef<HTMLIFrameElement | null>(null)
-  const sceneRef = useRef<HTMLElement>(null)
+  const anchorRef = useRef<HTMLSpanElement | null>(null)
+  const returnedRef = useRef(false)
   const mountedRef = useRef(true)
   const sendingRef = useRef(false)
-  const document = useMemo(() => snapshot.format === 'html' ? createArtifactDocument(snapshot.source) : '', [snapshot])
+  const artifactDocument = useMemo(() => snapshot.format === 'html' ? createArtifactDocument(snapshot.source) : '', [snapshot])
   const setFrame = useCallback((element: HTMLIFrameElement | null): void => {
     iframeRef.current = element
     onFrame?.(element)
@@ -71,16 +74,53 @@ export function ArtifactCard({ snapshot, origin, recordAction, t, placementContr
     return () => { mountedRef.current = false }
   }, [])
 
-  useEffect(() => {
-    if (!placementControls) return
-    const flowItem = sceneRef.current?.closest('[data-chat-flow-item]')
-    if (!flowItem) return
-    if (placement === 'inline') {
-      flowItem.removeAttribute('data-artifact-overlay')
+  // A docked Artifact owns the right edge of the conversation body: the same
+  // body reserves that width and reports its top so the Session header keeps
+  // its full width above the pane. This is a layout measurement that CSS
+  // cannot express (the pane is portalled outside the header's subtree), and
+  // it runs before paint so the pane never appears at the viewport top first.
+  useLayoutEffect(() => {
+    if (!placementControls || placement !== 'beside') {
+      setDockTop(undefined)
       return
     }
-    flowItem.setAttribute('data-artifact-overlay', placement)
-    return () => { flowItem.removeAttribute('data-artifact-overlay') }
+    const body = anchorRef.current?.closest<HTMLElement>('[data-conversation-content]')
+    if (body === undefined || body === null) return
+    body.setAttribute('data-artifact-dock', '')
+    const measure = (): void => { setDockTop(body.getBoundingClientRect().top) }
+    measure()
+    window.addEventListener('resize', measure)
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure)
+    observer?.observe(body)
+    return () => {
+      observer?.disconnect()
+      window.removeEventListener('resize', measure)
+      body.removeAttribute('data-artifact-dock')
+    }
+  }, [placement, placementControls])
+
+  // Escape leaves the full-screen view without closing the Artifact.
+  useEffect(() => {
+    if (!placementControls || placement !== 'focus') return
+    const onKeyDown = (event: KeyboardEvent): void => {
+      if (event.key === 'Escape') setPlacement('inline')
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => { window.removeEventListener('keydown', onKeyDown) }
+  }, [placement, placementControls])
+
+  // Returning to the flow brings the Artifact's own row back into view; the
+  // first render only records that return handling has not been armed yet.
+  useEffect(() => {
+    if (!placementControls) return
+    if (!returnedRef.current) {
+      returnedRef.current = true
+      return
+    }
+    const anchor = anchorRef.current
+    if (placement === 'inline' && anchor !== null && typeof anchor.scrollIntoView === 'function') {
+      anchor.scrollIntoView({ block: 'center' })
+    }
   }, [placement, placementControls])
 
   useEffect(() => {
@@ -114,16 +154,10 @@ export function ArtifactCard({ snapshot, origin, recordAction, t, placementContr
     }
   }
 
-  const revealSource = (): void => {
-    const anchor = sceneRef.current?.closest('[data-chat-anchor-key]')
-    setPlacement('inline')
-    anchor?.scrollIntoView({ block: 'center' })
-  }
-
-  return (
+  const card = (
     <section
-      ref={sceneRef}
       className={css.card}
+      style={dockTop === undefined ? undefined : { '--artifact-dock-top': `${String(dockTop)}px` } as CSSProperties}
       data-placement={placementControls ? placement : 'inline'}
       role={placementControls && placement === 'focus' ? 'dialog' : 'complementary'}
       aria-modal={placementControls && placement === 'focus' ? true : undefined}
@@ -132,20 +166,23 @@ export function ArtifactCard({ snapshot, origin, recordAction, t, placementContr
       <header className={css.header}>
         <div className={css.heading}>
           <h3 className={css.title}>{snapshot.title}</h3>
-          <span className={css.revision}>{t('revision', { revision: String(snapshot.revision) })}</span>
-          <span className={css.origin}>{origin.kind === 'current' ? t('origin.current') : t('origin.branch', { parent: origin.title })}</span>
+          <p className={css.meta}>
+            <span>{t('revision', { revision: String(snapshot.revision) })}</span>
+            <span className={css.dot} aria-hidden="true" />
+            <span>{origin.kind === 'current' ? t('origin.current') : t('origin.branch', { parent: origin.title })}</span>
+          </p>
         </div>
-        <div className={css.controls}>
-          {placementControls && placement !== 'inline' && (
-            <Button size="sm" variant="outline" onClick={revealSource}>{t('view.origin')}</Button>
-          )}
+        <div className={css.controls} role="group" aria-label={t('view.group')}>
           {placementControls && PLACEMENTS.map(option => (
-            <Button key={option} size="sm" variant="outline" aria-pressed={placement === option}
+            <Button key={option} size="sm" variant="ghost" className={css.placement}
+              data-selected={placement === option ? '' : undefined}
+              aria-pressed={placement === option}
               onClick={() => { setPlacement(option) }}>
               {t(PLACEMENT_COPY[option])}
             </Button>
           ))}
-          <Button size="sm" variant="outline" aria-pressed={showSource}
+          <span className={css.rule} aria-hidden="true" />
+          <Button size="sm" variant="ghost" className={css.placement} aria-pressed={showSource}
             onClick={() => { setShowSource(value => !value) }}>
             {showSource ? t('view.preview') : t('view.source')}
           </Button>
@@ -156,8 +193,8 @@ export function ArtifactCard({ snapshot, origin, recordAction, t, placementContr
           ? <pre className={css.source} aria-label={t('source.label')}>{snapshot.format === 'html' ? snapshot.source : JSON.stringify(snapshot.spec, null, 2)}</pre>
           : snapshot.format === 'scene'
             ? <FunctionPlotView spec={snapshot.spec} artifactId={snapshot.artifactId} revision={snapshot.revision}
-              recordAction={recordAction} t={t} />
-            : <iframe ref={setFrame} className={css.frame} srcDoc={document} sandbox="allow-scripts"
+              placement={placementControls ? placement : 'inline'} recordAction={recordAction} t={t} />
+            : <iframe ref={setFrame} className={css.frame} srcDoc={artifactDocument} sandbox="allow-scripts"
               title={t('preview.frame', { title: snapshot.title })} data-artifact-frame />}
       </div>
       {pending === undefined ? null : (
@@ -175,6 +212,15 @@ export function ArtifactCard({ snapshot, origin, recordAction, t, placementContr
         </div>
       )}
     </section>
+  )
+  // Comparison cells share one grid, so only a standalone Artifact owns the
+  // flow anchor that docked views return to.
+  if (!placementControls) return card
+  return (
+    <>
+      <span ref={anchorRef} className={css.anchor} aria-hidden="true" />
+      {placement === 'inline' ? card : createPortal(card, document.body)}
+    </>
   )
 }
 

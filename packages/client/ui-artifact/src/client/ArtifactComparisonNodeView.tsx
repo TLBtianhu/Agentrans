@@ -6,8 +6,7 @@ import type { JsonValue } from '@deepseek-ai/dsh-util-values'
 import { ArtifactCard, type SceneOrigin } from './ArtifactNodeView.tsx'
 import { parseArtifactState } from './messages.ts'
 import type {
-  ArtifactCommand, ArtifactCommandMessage, ArtifactComparisonSnapshot,
-  ArtifactNodeInjected,
+  ArtifactCommand, ArtifactCommandMessage, ArtifactNodeInjected,
 } from './protocol.ts'
 import css from './ArtifactNodeView.module.css'
 
@@ -21,7 +20,7 @@ type Phase = 'idle' | 'sending' | 'sent' | 'failed'
 
 /** Render one comparison group without merging the two Artifact parameter states. */
 export function ArtifactComparisonNodeView({ node, sessionId, useSessions, recordAction, t }: ArtifactComparisonNodeViewProps) {
-  const comparison = node.data as ArtifactComparisonSnapshot
+  const comparison = node.data
   const origin = useSessions((state): SceneOrigin => {
     const current = state.byId[sessionId]
     if (current?.parentId === undefined) return { kind: 'current' }

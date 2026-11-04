@@ -1,124 +1,226 @@
+/* One instrument surface: the plot owns the left column, the controls the
+   right one, separated by a hairline rule instead of nested cards. */
 .workspace {
   display: grid;
-  grid-template-columns: minmax(0, 1.7fr) minmax(240px, 0.7fr);
-  gap: 16px;
+  grid-template-columns: minmax(0, 1fr) minmax(196px, 232px);
+  gap: 0;
+  min-height: 260px;
 }
 
-.stage,
-.panel {
-  border: 0.5px solid var(--dsw-alias-border-l2);
-  border-radius: var(--dsw-radius-md);
-  background: var(--dsw-alias-bg-layer-1);
+.workspace[data-placement='focus'] {
+  min-height: min(62vh, 620px);
+}
+
+/* A docked or floating pane is narrow, so the controls move under the plot
+   rather than squeezing it. */
+.workspace[data-placement='beside'],
+.workspace[data-placement='pip'] {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.workspace[data-placement='beside'] {
+  min-height: 360px;
+}
+
+.workspace[data-placement='pip'] {
+  min-height: 260px;
 }
 
 .stage {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   min-width: 0;
-  padding: 16px;
+  padding-right: 16px;
 }
 
-.panel {
-  display: grid;
-  gap: 12px;
-  align-content: start;
-  padding: 16px;
+.workspace[data-placement='beside'] .stage,
+.workspace[data-placement='pip'] .stage {
+  padding-right: 0;
+  padding-bottom: 12px;
 }
 
-.panel h2 {
-  margin: 0;
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  color: var(--dsw-alias-label-tertiary);
+  font: var(--dsw-font-xxxs-11);
+}
+
+.legendItem {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.legendItem[data-current] {
   color: var(--dsw-alias-label-primary);
-  font: var(--dsw-font-s-strong-14);
 }
 
-.metricRow {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  margin-bottom: 12px;
+.swatchAccent,
+.swatchSecondary {
+  flex: none;
+  width: 12px;
+  height: 2px;
+  border-radius: 1px;
 }
 
-.metric {
-  padding-bottom: 8px;
+.swatchAccent {
+  background: var(--dsw-alias-state-business-primary);
+}
+
+.swatchSecondary {
+  background: var(--dsw-alias-state-success-primary);
+}
+
+.plot {
+  position: relative;
+  flex: 1;
+  min-height: 200px;
+  overflow: hidden;
+  border-top: 0.5px solid var(--dsw-alias-border-l2);
   border-bottom: 0.5px solid var(--dsw-alias-border-l2);
 }
 
-.metric strong {
-  display: block;
-  margin-bottom: 2px;
-  color: var(--dsw-alias-label-primary);
-  font: var(--dsw-font-s-strong-14);
-  font-family: var(--ds-font-family-code);
-  font-variant-numeric: tabular-nums;
-}
-
-.metric span,
-.subtitle {
-  color: var(--dsw-alias-label-tertiary);
-  font: var(--dsw-font-xs-13);
-}
-
 .chart {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
-  height: 260px;
-  border: 0.5px solid var(--dsw-alias-border-l2);
-  border-radius: var(--dsw-radius-sm);
-  background: var(--dsw-alias-bg-base);
+  height: 100%;
+  cursor: crosshair;
+  touch-action: none;
 }
 
-.result {
-  display: block;
-  margin-top: 8px;
-  padding: 8px 10px;
-  border: 0.5px solid var(--dsw-alias-border-l2);
-  border-radius: var(--dsw-radius-sm);
-  background: var(--dsw-alias-bg-base);
-  color: var(--dsw-alias-label-secondary);
-  font: var(--dsw-font-xs-13);
+.readout {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  min-width: 0;
+}
+
+.readoutItem {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.readoutLabel {
+  overflow: hidden;
+  color: var(--dsw-alias-label-tertiary);
+  font: var(--dsw-font-xxxs-11);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.readoutValue {
+  overflow: hidden;
+  color: var(--dsw-alias-label-primary);
+  font: var(--dsw-font-xs-strong-13);
   font-family: var(--ds-font-family-code);
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  padding-left: 16px;
+  border-left: 0.5px solid var(--dsw-alias-border-l2);
+}
+
+.workspace[data-placement='beside'] .panel,
+.workspace[data-placement='pip'] .panel {
+  padding-top: 12px;
+  padding-left: 0;
+  border-top: 0.5px solid var(--dsw-alias-border-l2);
+  border-left: 0;
 }
 
 .field {
   display: grid;
-  gap: 6px;
+  gap: 4px;
+  min-width: 0;
 }
 
-.field label {
-  color: var(--dsw-alias-label-secondary);
-  font: var(--dsw-font-xs-13);
+.field > label {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+  justify-content: space-between;
+  min-width: 0;
+  color: var(--dsw-alias-label-tertiary);
+  font: var(--dsw-font-xxxs-11);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.field output {
+  color: var(--dsw-alias-label-primary);
+  font: var(--dsw-font-xs-strong-13);
+  font-family: var(--ds-font-family-code);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .field select {
-  min-height: 32px;
-  padding: 6px 8px;
+  width: 100%;
+  min-height: 28px;
+  padding: 3px 6px;
   border: 0.5px solid var(--dsw-alias-border-l2);
-  border-radius: var(--dsw-radius-sm);
+  border-radius: var(--dsw-radius-xs);
   background: var(--dsw-alias-bg-base);
   color: var(--dsw-alias-label-primary);
-  font: inherit;
+  font: var(--dsw-font-xs-13);
 }
 
 .field input[type='range'] {
   width: 100%;
-  accent-color: var(--dsw-alias-brand-primary);
+  accent-color: var(--dsw-alias-state-business-primary);
 }
 
 .buttonRow {
   display: flex;
   flex-wrap: wrap;
-  gap: 7px;
+  gap: 4px;
 }
 
-.subtitle {
+.toggle {
+  padding: 0 8px;
+}
+
+.toggle[data-selected] {
+  background: var(--dsw-alias-interactive-bg-active);
+  color: var(--dsw-alias-label-primary);
+}
+
+.hint {
   margin: 0;
+  color: var(--dsw-alias-label-tertiary);
+  font: var(--dsw-font-xxxs-11);
   line-height: 1.5;
 }
 
-@media (max-width: 780px) {
-  .workspace {
-    grid-template-columns: 1fr;
+@media (max-width: 620px) {
+  .workspace,
+  .workspace[data-placement='focus'] {
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  .metricRow {
-    gap: 8px;
+  .stage {
+    padding-right: 0;
+    padding-bottom: 12px;
+  }
+
+  .panel {
+    padding-top: 12px;
+    padding-left: 0;
+    border-top: 0.5px solid var(--dsw-alias-border-l2);
+    border-left: 0;
   }
 }

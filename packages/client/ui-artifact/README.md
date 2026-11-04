@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-Read interactive HTML Artifacts beside the conversation that produced them. Each checkpoint renders independently, including when history contains only the latest revision. You can switch between inline and expanded views, inspect the HTML source, and send an Artifact action only after explicit confirmation. The preview runs without access to the parent application or remote dependencies. A `function-plot` SceneSpec renders natively through the shared safe expression parser, with direct confirmation of the current analysis.
+Read interactive HTML Artifacts in the conversation that produced them. Each checkpoint renders independently, including when history contains only the latest revision. A card stays in the message flow by default and can be docked as a persistent result pane, expanded over the window, or floated as an auxiliary view. You can inspect the HTML source and send an Artifact action only after explicit confirmation. The preview runs without access to the parent application or remote dependencies. A `function-plot` SceneSpec renders natively through the shared safe expression parser, with direct confirmation of the current analysis.
 
 ## Table of Contents
 
@@ -29,9 +29,9 @@ Mount this plugin with the Conversation, Chat, locale, and Artifact Remote servi
 
 ### Reading and acting on an Artifact
 
-The card shows the Artifact title and revision. An incoming revision replaces the rendered document and the iframe browsing context while retaining the Conversation Node identity. The presentation field selects the initial inline or expanded layout; local controls can switch layout or show the source instead.
+The card shows the Artifact title and revision. An incoming revision replaces the rendered document and the iframe browsing context while retaining the Conversation Node identity. The presentation field selects the initial placement; one control switches between the four views and shows the source instead.
 
-The SceneHost also supports beside and picture-in-picture placements. These are `ViewRequest` intents, not arbitrary window-control permissions. Users can move between inline, beside, focus, and PiP while keeping the same iframe, current revision, and pending actions. Overlay ancestors are marked visible so virtualized history cannot hide the scene. The scene shows its current conversation or parent branch origin; **View in conversation** returns to inline and scrolls to the source anchor without resetting the Artifact.
+**Inline** keeps the card in the message flow, so it scrolls and wraps with the conversation instead of covering it. **Dock** fixes a persistent result pane to the right edge: the conversation body reserves that width and the transcript narrows instead of being covered, and the pane starts below the Session header. **Expand** presents the card over the whole window, and Escape returns to inline. **Float** keeps a small auxiliary pane in the corner. Placements are `ViewRequest` intents, not window-control authority. Every placement keeps the current revision and the pending actions; the preview itself remounts when the card leaves the flow. Returning to inline scrolls the Artifact's own row back into view. The card also shows the current conversation or the parent branch title.
 
 An iframe action first enters a bounded pending queue in the card. Click **Send to Agent** to record the first pending action with `wake: true`. Nothing wakes the Agent merely because an iframe emitted a message. A failure keeps the action visible and offers a retry; a successful send removes only that submitted action. A full queue rejects additional actions with an inline explanation until a send frees capacity.
 
@@ -99,7 +99,9 @@ Rendering does not make Artifact source model-visible; only a Host-admitted acti
 
 - **Remote dependencies are unavailable** — self-contained HTML must use inline code and styles with permitted local data or Blob resources.
 - **Pending actions are transient** — a revision change, page reload, or unmount discards them before Host admission; the Artifact must emit the action again.
-- **Focus is card-local** — the expanded presentation does not create a separate dialog or persist a viewing preference.
+- **Leaving the flow remounts the preview** — inline is real flow content, while the other placements mount the card in a fixed layer, so iframe state, canvas interaction state, and scroll position restart from the current snapshot.
+- **One docked pane is not enforced** — each card owns its placement, so docking a second Artifact from the same history covers the first until one returns to inline.
+- **Focus is card-local** — the expanded placement does not create a separate dialog or persist a viewing preference.
 
 <a id="dev-note"></a>
 ### Dev Note

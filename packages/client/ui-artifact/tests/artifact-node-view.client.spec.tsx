@@ -77,6 +77,7 @@ const action = (revision = 1, name = 'approve') => ({
 afterEach(() => {
   cleanup()
   vi.restoreAllMocks()
+  vi.unstubAllGlobals()
 })
 
 describe('ArtifactNodeView', () => {
@@ -89,17 +90,59 @@ describe('ArtifactNodeView', () => {
     expect(iframe.getAttribute('srcdoc')).toContain("connect-src 'none'")
     expect(screen.getByText('Report 1')).toBeTruthy()
     expect(screen.getByText('Revision 1')).toBeTruthy()
-    expect(screen.getByRole('button', { name: 'Use inline view' }).getAttribute('aria-pressed')).toBe('false')
-    expect(screen.getByRole('button', { name: 'Expand artifact' }).getAttribute('aria-pressed')).toBe('true')
+    expect(screen.getByRole('button', { name: 'Inline' }).getAttribute('aria-pressed')).toBe('false')
+    expect(screen.getByRole('button', { name: 'Expand' }).getAttribute('aria-pressed')).toBe('true')
 
-    fireEvent.click(screen.getByRole('button', { name: 'Use inline view' }))
-    expect(screen.getByRole('button', { name: 'Expand artifact' }).getAttribute('aria-pressed')).toBe('false')
+    fireEvent.click(screen.getByRole('button', { name: 'Inline' }))
+    expect(screen.getByRole('button', { name: 'Expand' }).getAttribute('aria-pressed')).toBe('false')
     fireEvent.click(screen.getByRole('button', { name: 'View source' }))
     expect(screen.queryByTitle('Report 1 preview')).toBeNull()
     expect(screen.getByLabelText('HTML source').textContent).toContain('window.revision = 1')
     fireEvent.click(screen.getByRole('button', { name: 'Show preview' }))
     expect(frame()).toBeTruthy()
     view.unmount()
+  })
+
+  it('keeps inline placement in the flow and portals the other views outside it', () => {
+    const view = render(<div className="flowItem"><ArtifactNodeView {...props(1, undefined, 'focus')} /></div>)
+    const flowItem = view.container.querySelector('.flowItem')!
+    expect(screen.getByLabelText('Artifact: Report 1').parentElement).toBe(document.body)
+    expect(screen.getByLabelText('Artifact: Report 1').getAttribute('data-placement')).toBe('focus')
+    fireEvent.click(screen.getByRole('button', { name: 'Inline' }))
+    const inline = screen.getByLabelText('Artifact: Report 1')
+    expect(inline.getAttribute('data-placement')).toBe('inline')
+    expect(inline.closest('.flowItem')).toBe(flowItem)
+    expect(inline.parentElement).not.toBe(document.body)
+    view.unmount()
+  })
+
+  it('reserves the conversation body while docked and releases it on return', () => {
+    const observed: Element[] = []
+    class Observer {
+      observe(target: Element): void { observed.push(target) }
+      disconnect(): void { observed.length = 0 }
+    }
+    vi.stubGlobal('ResizeObserver', Observer)
+    const view = render(
+      <div data-conversation-content>
+        <div className="flowItem"><ArtifactNodeView {...props(1)} /></div>
+      </div>,
+    )
+    const body = view.container.querySelector('[data-conversation-content]')!
+    fireEvent.click(screen.getByRole('button', { name: 'Dock' }))
+    expect(body.hasAttribute('data-artifact-dock')).toBe(true)
+    expect(observed).toEqual([body])
+    expect(screen.getByLabelText('Artifact: Report 1').getAttribute('data-placement')).toBe('beside')
+    fireEvent.click(screen.getByRole('button', { name: 'Inline' }))
+    expect(body.hasAttribute('data-artifact-dock')).toBe(false)
+    expect(observed).toEqual([])
+    view.unmount()
+  })
+
+  it('leaves the full-screen view on Escape without closing the artifact', () => {
+    render(<ArtifactNodeView {...props(1, undefined, 'focus')} />)
+    fireEvent.keyDown(window, { key: 'Escape' })
+    expect(screen.getByLabelText('Artifact: Report 1').getAttribute('data-placement')).toBe('inline')
   })
 
   it('stages a valid action without Remote traffic and sends only after explicit confirmation', async () => {
@@ -147,35 +190,32 @@ describe('ArtifactNodeView', () => {
     render(<ArtifactNodeView {...base} />)
     expect(screen.getByText('Branched from Parent topic')).toBeTruthy()
 
-    const scene = screen.getByLabelText('Artifact: Report 1')
-    fireEvent.click(screen.getByRole('button', { name: 'Picture in picture' }))
-    expect(scene.getAttribute('data-placement')).toBe('pip')
+    fireEvent.click(screen.getByRole('button', { name: 'Float' }))
+    expect(screen.getByLabelText('Artifact: Report 1').getAttribute('data-placement')).toBe('pip')
     expect(screen.getByText('Branched from Parent topic')).toBeTruthy()
 
-    fireEvent.click(screen.getByRole('button', { name: 'View in conversation' }))
-    expect(scene.getAttribute('data-placement')).toBe('inline')
+    fireEvent.click(screen.getByRole('button', { name: 'Inline' }))
+    expect(screen.getByLabelText('Artifact: Report 1').getAttribute('data-placement')).toBe('inline')
   })
 
   it('moves the same scene through beside, focus, and PiP without losing pending actions', async () => {
     const recordAction = vi.fn<RecordArtifactAction>().mockResolvedValue(undefined)
     render(<ArtifactNodeView {...props(1, recordAction)} />)
-    const scene = screen.getByLabelText('Artifact: Report 1')
-    const firstFrame = frame()
-    post(firstFrame, action())
+    post(frame(), action())
     expect(await screen.findByText('Action: approve')).toBeTruthy()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Dock beside chat' }))
-    expect(scene.getAttribute('data-placement')).toBe('beside')
+    fireEvent.click(screen.getByRole('button', { name: 'Dock' }))
+    expect(screen.getByLabelText('Artifact: Report 1').getAttribute('data-placement')).toBe('beside')
     expect(screen.getByText('Action: approve')).toBeTruthy()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Picture in picture' }))
-    expect(scene.getAttribute('data-placement')).toBe('pip')
-    expect(frame()).toBe(firstFrame)
+    fireEvent.click(screen.getByRole('button', { name: 'Float' }))
+    expect(screen.getByLabelText('Artifact: Report 1').getAttribute('data-placement')).toBe('pip')
+    expect(frame().srcdoc).toContain('window.revision = 1')
     expect(screen.getByText('Action: approve')).toBeTruthy()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Expand artifact' }))
-    expect(scene.getAttribute('data-placement')).toBe('focus')
-    expect(frame()).toBe(firstFrame)
+    fireEvent.click(screen.getByRole('button', { name: 'Expand' }))
+    expect(screen.getByLabelText('Artifact: Report 1').getAttribute('data-placement')).toBe('focus')
+    expect(frame().srcdoc).toContain('window.revision = 1')
     expect(screen.getByText('Action: approve')).toBeTruthy()
 
     fireEvent.click(screen.getByRole('button', { name: 'Send to Agent' }))

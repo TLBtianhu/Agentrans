@@ -122,6 +122,8 @@ const NON_SOURCE_DIRECTORIES = new Set([
   '__pycache__',
   '.pytest_cache',
   '.artifacts',
+  // Packaged Electron output: bundled third-party READMEs are not repository docs.
+  'artifacts',
   'vendor',
 ])
 
@@ -143,6 +145,7 @@ export const TRANSLATION_SCOPE_GLOB_EXCLUDES = [
   '**/.pytest_cache/**',
   'apps/web/dist/**',
   '.artifacts/**',
+  'artifacts/**',
   'python/sdk-runtime/src/deepseek_harness_runtime/runtime/**',
   'vendor/**',
 ]

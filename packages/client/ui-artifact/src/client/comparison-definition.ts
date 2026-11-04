@@ -49,6 +49,9 @@ export const artifactComparisonDefinition: ConversationNodeDefinition<Comparison
       anchorSeq: context.start.event.seq,
       location: context.start.location,
       visibility: 'visible',
+      // The comparison is a Turn result with its own row, so folding the
+      // process run never hides it.
+      groupTree: 'turn',
       data: { group, ...context.state },
     }
   },
