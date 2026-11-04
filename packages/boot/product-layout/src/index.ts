@@ -48,3 +48,16 @@ export {
   type UninstallResult,
   type UninstallScope,
 } from './uninstall.ts'
+export {
+  canonicalReleaseContent,
+  computeReleaseDigest,
+  fingerprintPublicKey,
+  signReleaseManifest,
+  verifyReleaseManifest,
+  ReleaseVerificationError,
+  type ReleaseDigest,
+  type ReleaseManifest,
+  type ReleaseSignOptions,
+  type ReleaseVerification,
+  type ReleaseVerificationErrorCode,
+} from './release-manifest.ts'

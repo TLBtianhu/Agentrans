@@ -1,5 +1,5 @@
 ---
-description: "Single-root Agentrans installation layout, manifests, packaging, integration states, runtime activation, and scoped uninstall."
+description: "Single-root Agentrans installation layout, manifests, packaging, integration states, runtime activation, scoped uninstall, and ReleaseManifest signing."
 kind: "package-reference"
 ---
 
@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-This package owns the distribution-lifecycle slices for Agentrans: one complete installation root, derived `app`, `data`, `models`, `runtime-envs`, and `integrations` subdirectories, install manifests, four App/DSH integration states, runtime activation, file-level portable/installed packaging, and scoped uninstall execution. It does not modify DSH profiles or Windows registration directly.
+This package owns the distribution-lifecycle slices for Agentrans: one complete installation root, derived `app`, `data`, `models`, `runtime-envs`, and `integrations` subdirectories, install manifests, four App/DSH integration states, runtime activation, file-level portable/installed packaging, scoped uninstall execution, and signed ReleaseManifest verification. It does not modify DSH profiles or Windows registration directly.
 
 ## Table of Contents
 
@@ -31,6 +31,8 @@ Use `createInstallManifest()`, `writeInstallManifest()`, and `readInstallManifes
 Use `planInstall()` to preview an install, then `packPortable()` or `packInstalled()` to execute it from a clean application payload. Payloads containing `data`, `models`, `runtime-envs`, `integrations`, `.env`, credentials, or private keys are rejected. Upgrades replace only `app` and preserve existing data and assets. Installed packaging reports Windows registration operations separately; portable packaging reports none.
 
 Use `planUninstall()` to preview removal scope and `executeUninstallPlan()` to execute it. The default removes only `app` and regenerable cache. Full deletion requires confirmation. Integration removal happens before selected paths, followed by Windows registration cleanup through supplied callbacks.
+
+Use `signReleaseManifest()` with a caller-owned Ed25519 private key and `verifyReleaseManifest()` with the trusted public key. The manifest records the filename, version, size, SHA-256, algorithm, key fingerprint, and signature. Verification rejects modified manifests, modified files, wrong keys, and malformed manifests before installation.
 
 -----
 
@@ -64,7 +66,7 @@ No model context is created or changed.
 
 <a id="known-limitations-and-deferred-work"></a>
 
-- File-level packaging and uninstall are implemented, but there is no signed installer, native registration backend, or interactive uninstall UI yet.
+- File-level packaging, uninstall, and ReleaseManifest signing are implemented, but there is no native registration backend, signed installer, or interactive uninstall UI yet.
 - Pre-1.0 layout changes are not migrated; no old-structure backup or compatibility path is promised.
 - Asset downloads and hash computation are supplied by callers; this package owns activation order and state, not a network client.
 - DSH integration enablement and removal use the host's formal plugin-management API and are not mounted by this slice.

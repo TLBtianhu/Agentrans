@@ -26,7 +26,7 @@
 
 [product-layout](packages/boot/product-layout/README.md) 提供 `ProductLayout.fromRoot()`、安装清单、四种 App/DSH 集成状态、运行时激活、文件级便携/安装打包和范围卸载。所有应用、数据、模型、运行时和 DSH 路径都从同一个根目录派生；DSH_HOME 与 DSH_AGENTS_HOME 位于 `data/dsh/` 下。打包只替换 `app`，默认保留 `data`、`models`、`runtime-envs` 和 `integrations`；卸载默认只删除 `app` 和可重建 cache，完整删除需要确认，DSH 集成先于路径清理，Windows 注册最后处理。1.0 前不做旧结构迁移，也不跨实例共享资产。
 
-更新签名公钥位于 [distribution/keys](distribution/keys/README.md)，算法为 Ed25519。私钥只保存在仓库之外的当前用户受限目录，绝不进入源码、构建产物、fixture 或日志。该密钥用于更新清单和发布物验签，不替代 Windows Authenticode/EV 证书。
+更新签名公钥位于 [distribution/keys](distribution/keys/README.md)，算法为 Ed25519。私钥只保存在仓库之外的当前用户受限目录，绝不进入源码、构建产物、fixture 或日志。`signReleaseManifest()` 用本机私钥签署规范化清单，`verifyReleaseManifest()` 在安装前检查 keyId、签名和实际文件字节，任何篡改都拒绝安装。该密钥用于更新清单和发布物验签，不替代 Windows Authenticode/EV 证书。
 
 ## 身份审计
 
