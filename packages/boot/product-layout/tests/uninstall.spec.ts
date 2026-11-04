@@ -92,6 +92,29 @@ describe('uninstall execution', () => {
     expect(await exists(join(layout.dataDir, 'cache'))).toBe(false)
   })
 
+  it('removes actual DSH session and settings paths when selected', async () => {
+    const layout = ProductLayout.fromRoot(await tempRoot(), 'installed')
+    await mkdir(join(layout.dshHomeDir, 'sessions'), { recursive: true })
+    await mkdir(join(layout.dshHomeDir, 'profiles', 'desktop'), { recursive: true })
+    await mkdir(join(layout.dshHomeDir, 'storages'), { recursive: true })
+    await mkdir(layout.dshAgentsHomeDir, { recursive: true })
+    await writeFile(join(layout.dshHomeDir, 'sessions', 'session.jsonl'), 'session', 'utf8')
+    await writeFile(join(layout.dshHomeDir, 'profiles', 'desktop', 'cordis.yml'), '[]', 'utf8')
+    await writeFile(join(layout.dshHomeDir, '.credentials.yaml'), 'secret: local', 'utf8')
+    await writeFile(join(layout.dshHomeDir, '.anonymous-user-id'), 'id', 'utf8')
+    await writeFile(join(layout.dshHomeDir, 'storages', 'workspace.json'), '{}', 'utf8')
+    await writeFile(join(layout.dshAgentsHomeDir, 'agent.json'), '{}', 'utf8')
+    await executeUninstallPlan(planUninstall(layout, ALL_UNINSTALL_SCOPE, { allConfirmed: true }), {
+      removeRegistration: async () => {},
+    })
+    expect(await exists(join(layout.dshHomeDir, 'sessions'))).toBe(false)
+    expect(await exists(join(layout.dshHomeDir, 'profiles'))).toBe(false)
+    expect(await exists(join(layout.dshHomeDir, '.credentials.yaml'))).toBe(false)
+    expect(await exists(join(layout.dshHomeDir, '.anonymous-user-id'))).toBe(false)
+    expect(await exists(join(layout.dshHomeDir, 'storages'))).toBe(false)
+    expect(await exists(layout.dshAgentsHomeDir)).toBe(false)
+  })
+
   it('fails before deleting anything when the Windows registration hook is missing', async () => {
     const layout = ProductLayout.fromRoot(await tempRoot(), 'installed')
     await seed(layout)

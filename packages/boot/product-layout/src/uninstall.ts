@@ -98,10 +98,21 @@ export function planUninstall(
   } else {
     preserve.push(layout.appDir, join(layout.dataDir, 'cache'))
   }
-  if (scope.sessions) remove.push(join(layout.dataDir, 'sessions'))
-  else preserve.push(join(layout.dataDir, 'sessions'))
-  if (scope.settings) remove.push(join(layout.dataDir, 'settings'), join(layout.dataDir, 'install'))
-  else preserve.push(join(layout.dataDir, 'settings'), join(layout.dataDir, 'install'))
+  if (scope.sessions) remove.push(join(layout.dataDir, 'sessions'), join(layout.dshHomeDir, 'sessions'))
+  else preserve.push(join(layout.dataDir, 'sessions'), join(layout.dshHomeDir, 'sessions'))
+  if (scope.settings) {
+    remove.push(
+      join(layout.dataDir, 'settings'),
+      join(layout.dataDir, 'install'),
+      join(layout.dshHomeDir, 'profiles'),
+      join(layout.dshHomeDir, '.credentials.yaml'),
+      join(layout.dshHomeDir, '.anonymous-user-id'),
+      join(layout.dshHomeDir, 'storages'),
+      layout.dshAgentsHomeDir,
+    )
+  } else {
+    preserve.push(join(layout.dataDir, 'settings'), join(layout.dataDir, 'install'), layout.dshAgentsHomeDir)
+  }
   if (scope.models) remove.push(layout.modelsDir)
   else preserve.push(layout.modelsDir)
   if (scope.runtimes) remove.push(layout.runtimesDir)
