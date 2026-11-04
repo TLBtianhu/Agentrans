@@ -1,5 +1,5 @@
 ---
-description: "Single-root Agentrans installation layout, manifests, packaging, runtime activation, scoped uninstall, and ReleaseManifest signing."
+description: "Single-root Agentrans installation layout, manifests, packaging, runtime activation, scoped uninstall, ReleaseManifest signing, and Windows registration."
 kind: "package-reference"
 ---
 
@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-This package owns the distribution-lifecycle slices for Agentrans: one complete installation root, derived `app`, `data`, `models`, and `runtime-envs` subdirectories, install manifests, runtime activation, file-level portable/installed packaging, scoped uninstall execution, and signed ReleaseManifest verification. It does not modify DSH profiles or Windows registration directly.
+This package owns the distribution-lifecycle slices for Agentrans: one complete installation root, derived `app`, `data`, `models`, and `runtime-envs` subdirectories, install manifests, runtime activation, file-level portable/installed packaging, scoped uninstall execution, signed ReleaseManifest verification, and user-level Windows registration. It does not modify DSH profiles or require administrator privileges.
 
 ## Table of Contents
 
@@ -34,12 +34,14 @@ Use `planUninstall()` to preview removal scope and `executeUninstallPlan()` to e
 
 Use `signReleaseManifest()` with a caller-owned Ed25519 private key and `verifyReleaseManifest()` with the trusted public key. The manifest records the filename, version, size, SHA-256, algorithm, key fingerprint, and signature. Verification rejects modified manifests, modified files, wrong keys, and malformed manifests before installation.
 
+Use `planWindowsRegistration()` to preview uninstall and Start Menu registration, `registerWindowsRegistration()` to create them, `verifyWindowsRegistration()` to inspect them, and `removeWindowsRegistration()` to clean them up. The backend uses HKCU and needs no administrator privileges.
+
 -----
 
 <a id="understand-the-implementation"></a>
 ## Understand the implementation
 
-There is no external DSH integration phase. Install and uninstall operate only on the root's app, data, models, runtime-envs, and Windows registration.
+There is no external DSH integration phase. Install and uninstall operate only on the root's app, data, models, runtime-envs, and Windows registration. `registerWindowsRegistration()` writes the HKCU uninstall entry and Start Menu shortcut, `verifyWindowsRegistration()` reads them back, and `removeWindowsRegistration()` deletes them; failures report completed phases and attempt rollback.
 
 `activateRuntime()` verifies an asset, rewrites `pyvenv.cfg` to the actual runtime root, checks `Scripts/python.exe`, runs the supplied interpreter self-test, and only then writes `active-runtime.json`. Verification, relocation, or self-test failure prevents activation. Asset locations are root-relative so a portable root can move.
 
@@ -66,7 +68,7 @@ No model context is created or changed.
 
 <a id="known-limitations-and-deferred-work"></a>
 
-- File-level packaging, uninstall, and ReleaseManifest signing are implemented, but there is no native registration backend, signed installer, or interactive uninstall UI yet.
+- File-level packaging, uninstall, ReleaseManifest signing, and user-level Windows registration are implemented, but there is no signed installer or interactive uninstall UI yet.
 - Pre-1.0 layout changes are not migrated; no old-structure backup or compatibility path is promised.
 - Asset downloads and hash computation are supplied by callers; this package owns activation order and state, not a network client.
 

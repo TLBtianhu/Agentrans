@@ -55,3 +55,13 @@ export {
   type ReleaseVerification,
   type ReleaseVerificationErrorCode,
 } from './release-manifest.ts'
+export {
+  planWindowsRegistration,
+  registerWindowsRegistration,
+  removeWindowsRegistration,
+  verifyWindowsRegistration,
+  WindowsRegistrationError,
+  type WindowsCommandRunner,
+  type WindowsRegistrationOptions,
+  type WindowsRegistrationPlan,
+} from './windows-registration.ts'
