@@ -122,7 +122,7 @@ ManifestDPIAware true
 !macro customInstallerExtract Archive
   !insertmacro InstallerPublishStage 1
   System::Store /NOUNLOAD "S"
-  System::Call /NOUNLOAD '$PLUGINSDIR\window-frame.dll::InstallerExtract(p $HWNDPARENT, w "$PLUGINSDIR\dsh-7za.exe", w "${Archive}", w "$INSTDIR", w "$PLUGINSDIR\extract.log") i.s ?c'
+  System::Call /NOUNLOAD '$PLUGINSDIR\window-frame.dll::InstallerExtract(p $HWNDPARENT, w "$PLUGINSDIR\dsh-7za.exe", w "${Archive}", w "$INSTDIR\app", w "$PLUGINSDIR\extract.log") i.s ?c'
   System::Store "L"
   Pop $R0
   ; The failure report owns 7-Zip's UTF-8 output; the details view only needs the result code.
@@ -169,13 +169,13 @@ ManifestDPIAware true
     InitPluginsDir
     File "/oname=$PLUGINSDIR\window-frame.dll" "${INSTALLER_BUILD_DIR}\window-frame.dll"
   !endif
-  System::Call '$PLUGINSDIR\window-frame.dll::InstallerFindProcess(w "$INSTDIR\${APP_EXECUTABLE_FILENAME}") i.R0 ?c'
+  System::Call '$PLUGINSDIR\window-frame.dll::InstallerFindProcess(w "$INSTDIR\app\${APP_EXECUTABLE_FILENAME}") i.R0 ?c'
   ${If} $R0 == 0
     ${If} ${isUpdated}
       StrCpy $R1 0
       ${DoWhile} $R0 == 0
         Sleep 250
-        System::Call '$PLUGINSDIR\window-frame.dll::InstallerFindProcess(w "$INSTDIR\${APP_EXECUTABLE_FILENAME}") i.R0 ?c'
+        System::Call '$PLUGINSDIR\window-frame.dll::InstallerFindProcess(w "$INSTDIR\app\${APP_EXECUTABLE_FILENAME}") i.R0 ?c'
         IntOp $R1 $R1 + 1
         ${If} $R1 >= 40
           ${ExitDo}
@@ -238,6 +238,10 @@ ManifestDPIAware true
   ${EndIf}
   !insertmacro InstallerPublishStage 4
   !insertmacro dshFinishDirectories
+  File "/oname=$INSTDIR\Uninstall ${PRODUCT_FILENAME}.exe" "${UNINSTALLER_OUT_FILE}"
+  IfErrors 0 +3
+    SetErrorLevel 2
+    Quit
   ; Standard uninstall-entry metadata read by inventory tools; the upstream template records it only under its private key.
   WriteRegStr SHELL_CONTEXT "${UNINSTALL_REGISTRY_KEY}" InstallLocation "$INSTDIR"
   ${If} $0 == 1

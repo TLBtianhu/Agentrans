@@ -4,7 +4,8 @@ import { WINDOWS_TITLEBAR_HEIGHT } from './windows-layout.ts'
 /** Electron shell: desktop project ownership, custom protocol, windows, and lifecycle. */
 
 import { access, readFile, writeFile } from 'node:fs/promises'
-import { join } from 'node:path'
+import { mkdirSync } from 'node:fs'
+import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
   app,
@@ -67,6 +68,19 @@ import { DesktopUpdateOverlays } from './update-overlay.ts'
 import { DesktopQuitConfirmation } from './quit-confirmation.ts'
 import { DesktopTray } from './tray.ts'
 import { DesktopBackgroundNotice } from './background-notice.ts'
+
+/** Keep an installed Agentrans instance's Electron and DSH data below its own root. */
+function configureInstalledDataRoot(): void {
+  if (!app.isPackaged) return
+  const installRoot = dirname(dirname(process.resourcesPath))
+  const dshRoot = join(installRoot, 'data', 'dsh')
+  const userData = join(installRoot, 'data', 'settings', 'electron')
+  process.env.DSH_HOME = join(dshRoot, 'home')
+  process.env.DSH_AGENTS_HOME = join(dshRoot, 'agents')
+  mkdirSync(userData, { recursive: true })
+  app.setPath('userData', userData)
+}
+configureInstalledDataRoot()
 
 let focusPrimaryWindow = (): void => {}
 let stopForRecovery = async (): Promise<void> => { await stopOperationReports() }

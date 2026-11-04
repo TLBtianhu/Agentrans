@@ -262,6 +262,8 @@ The Windows uninstaller always removes the application and regenerable cache. Th
 
 Use `node apps/desktop/scripts/test-windows-installer.mjs --uninstall-only --compile-only` to compile isolated English and Chinese fixtures with a per-run scoped package name. Omit `--compile-only` to run the native remover regression and the interactive, silent, `--updated`, `/KEEP_APP_DATA` and `DSH_HOME`-inside-Electron-data checks against seeded data. Compilation does not establish installed-uninstall behavior.
 
+Build the Agentrans production candidate with `node apps/desktop/scripts/package-agentrans-installer.mjs`; it writes `artifacts/agentrans-installer/agentrans-<version>-win-x64.exe` with the Agentrans product identity, the real Electron application, the signed-release verification library, and the production uninstall entry. Installed Electron data is below `data/settings/electron`; `DSH_HOME` and `DSH_AGENTS_HOME` are below `data/dsh`. Upgrade staging replaces only `app` and preserves data. The local unsigned candidate has passed real installation, application launch, same-version upgrade, and silent uninstall smoke checks, including data and junction-target preservation. It is not signed release authorization.
+
 <a id="updates"></a>
 
 ## Updates

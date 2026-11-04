@@ -34,6 +34,8 @@ Windows 注册后端使用 HKCU 写入卸载项和开始菜单快捷方式，支
 
 [agentrans-installer.mjs](apps/desktop/installer/agentrans-installer.mjs) 是生产安装/卸载入口：安装使用验签后的签名安装，卸载复用同一个 `UninstallScope`，支持静默 app-only 和全量清理。原生卸载选项窗体位于 [uninstall-dialog.ps1](apps/desktop/installer/uninstall-dialog.ps1)，默认只删 app，支持全选、二次确认和取消；静默模式不会打开窗体。NSIS 保持默认 app-only，生产 CLI 的对话框负责可选范围。
 
+[package-agentrans-installer.mjs](apps/desktop/scripts/package-agentrans-installer.mjs) 构建真实 Agentrans Windows 安装器，输出 `artifacts/agentrans-installer/agentrans-<version>-win-x64.exe`。安装后的 Electron 数据和 DSH 数据都位于安装根目录内；升级 staging 只替换 `app`，不移动或删除 data。真实安装、应用启动、同版本升级、静默卸载和 junction 目标保护已通过本地未签名验证，不代表 Authenticode 发布授权。
+
 ## 身份审计
 
 不能只改产品标题和图标。每项外部身份都必须进入替换表并有行为验证：

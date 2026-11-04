@@ -1,6 +1,8 @@
 !include "LogicLib.nsh"
 
 Var dshFinalDirectory
+Var dshInstallRoot
+Var dshOldUninstallString
 Var dshNewDirectory
 Var dshOldDirectory
 Var dshOldMoved
@@ -97,14 +99,20 @@ Var dshRecoveryStopped
     ; electron-builder defines the cache name after including our function bodies, before this section expands.
     StrCpy $dshDirectoryLogDirectory "${DSH_INSTALLER_LOG_DIR}"
   !endif
-  StrCpy $dshFinalDirectory $INSTDIR
+  StrCpy $dshInstallRoot $INSTDIR
+  StrCpy $dshFinalDirectory "$dshInstallRoot\app"
+  ; App-only staging replaces the application itself and never invokes the old data-deleting uninstaller.
+  ReadRegStr $dshOldUninstallString SHELL_CONTEXT "Software\Microsoft\Windows\CurrentVersion\Uninstall\${UNINSTALL_APP_KEY}" UninstallString
+  ${If} $dshOldUninstallString != ""
+    DeleteRegValue SHELL_CONTEXT "Software\Microsoft\Windows\CurrentVersion\Uninstall\${UNINSTALL_APP_KEY}" UninstallString
+  ${EndIf}
   System::Call 'ole32::CoCreateGuid(g .r0) i .r1'
   ${If} $1 != 0
     SetErrorLevel 2
     Quit
   ${EndIf}
-  StrCpy $dshNewDirectory "$INSTDIR.new-$0"
-  StrCpy $dshOldDirectory "$INSTDIR.old-$0"
+  StrCpy $dshNewDirectory "$dshInstallRoot.new-$0"
+  StrCpy $dshOldDirectory "$dshInstallRoot.old-$0"
   StrCpy $dshOldMoved ""
   StrCpy $dshNewMoved ""
   StrCpy $dshDirectoryError 0
@@ -127,7 +135,7 @@ Var dshRecoveryStopped
   !ifdef UNINSTALLER_ICON
     File /oname=uninstallerIcon.ico "${UNINSTALLER_ICON}"
   !endif
-  StrCpy $INSTDIR $dshFinalDirectory
+  StrCpy $INSTDIR $dshInstallRoot
   SetOutPath $PLUGINSDIR
 !macroend
 
@@ -147,6 +155,9 @@ FunctionEnd
 ; Only directories created or renamed by this installer are removed during rollback.
 Function dshRollbackDirectories
   SetOutPath $PLUGINSDIR
+  ${If} $dshOldUninstallString != ""
+    WriteRegStr SHELL_CONTEXT "Software\Microsoft\Windows\CurrentVersion\Uninstall\${UNINSTALL_APP_KEY}" UninstallString "$dshOldUninstallString"
+  ${EndIf}
   ${If} $dshNewMoved == "1"
     RMDir /r "\\?\$dshFinalDirectory"
     StrCpy $dshNewMoved ""
@@ -164,7 +175,7 @@ Function dshRollbackDirectories
   ${If} $dshNewDirectory != ""
     RMDir /r "\\?\$dshNewDirectory"
   ${EndIf}
-  StrCpy $INSTDIR $dshFinalDirectory
+  StrCpy $INSTDIR $dshInstallRoot
 FunctionEnd
 
 Function dshPromoteDirectories
@@ -173,6 +184,15 @@ Function dshPromoteDirectories
   !endif
   ; SetOutPath opens a directory handle; release it before either rename.
   SetOutPath $PLUGINSDIR
+  ClearErrors
+  CopyFiles /SILENT "$dshNewDirectory\7zip-installer-COPYING.txt" "$dshInstallRoot\7zip-installer-COPYING.txt"
+  IfErrors 0 +3
+    SetErrorLevel 2
+    Quit
+  CopyFiles /SILENT "$dshNewDirectory\7zip-installer-LICENSE.txt" "$dshInstallRoot\7zip-installer-LICENSE.txt"
+  IfErrors 0 +3
+    SetErrorLevel 2
+    Quit
   ClearErrors
   ${If} ${FileExists} "$dshFinalDirectory\*.*"
     StrCpy $dshDirectorySource $dshFinalDirectory
@@ -198,7 +218,7 @@ Function dshPromoteDirectories
     ${EndIf}
   ${EndIf}
   ClearErrors
-  StrCpy $dshDirectorySource $dshNewDirectory
+  StrCpy $dshDirectorySource "$dshNewDirectory\app"
   StrCpy $dshDirectoryDestination $dshFinalDirectory
   !insertmacro dshDirectoryOperation "$dshDirectorySource" "$dshDirectoryDestination" $dshDirectoryError "promote"
   ${If} $dshDirectoryError != 0
@@ -221,4 +241,5 @@ FunctionEnd
     RMDir /r "\\?\$dshOldDirectory"
     StrCpy $dshOldMoved ""
   ${EndIf}
+  RMDir /r "\\?\$dshNewDirectory"
 !macroend

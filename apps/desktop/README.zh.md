@@ -262,6 +262,8 @@ Windows 卸载程序始终删除应用程序和可重建缓存。生产卸载 CL
 
 使用 `node apps/desktop/scripts/test-windows-installer.mjs --uninstall-only --compile-only` 以每次运行唯一的带作用域包名编译独立的中英文夹具。省略 `--compile-only` 可对预置数据运行原生删除器回归，以及交互、静默、`--updated`、`/KEEP_APP_DATA` 和 `DSH_HOME` 位于 Electron 数据内的检查。编译本身不能证明已安装卸载行为。
 
+使用 `node apps/desktop/scripts/package-agentrans-installer.mjs` 构建 Agentrans 生产候选安装器，输出 `artifacts/agentrans-installer/agentrans-<version>-win-x64.exe`，其中包含 Agentrans 产品身份、真实 Electron 应用、签名发布验签库和生产卸载入口。已安装应用的 Electron 数据位于 `data/settings/electron`，`DSH_HOME` 和 `DSH_AGENTS_HOME` 位于 `data/dsh`。升级 staging 只替换 `app`，保留数据。本地未签名候选安装器已通过真实安装、应用启动、同版本升级和静默卸载验证，包括数据与 junction 目标保留；它不代表签名发布授权。
+
 <a id="updates"></a>
 
 ## 更新

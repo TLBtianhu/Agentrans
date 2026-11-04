@@ -19,7 +19,24 @@ Function un.RemoveApp
 FunctionEnd
 
 !macro customRemoveFiles
+  SetOutPath $TEMP
   Call un.RemoveApp
+  Delete "$INSTDIR\7zip-installer-COPYING.txt"
+  Delete "$INSTDIR\7zip-installer-LICENSE.txt"
+  ${IfNot} ${isUpdated}
+    ${GetParameters} $R0
+    ClearErrors
+    ${GetOptions} $R0 "/KEEP_APP_DATA" $R1
+    ${If} ${Errors}
+      FileOpen $0 "$TEMP\agentrans-uninstall-cleanup.cmd" w
+      FileWrite $0 "@echo off$\r$\n"
+      FileWrite $0 "ping 127.0.0.1 -n 3 >nul$\r$\n"
+      FileWrite $0 'del /f /q "$INSTDIR\Uninstall ${PRODUCT_FILENAME}.exe"$\r$\n'
+      FileWrite $0 'del /f /q "%~f0"$\r$\n'
+      FileClose $0
+      Exec '"$SYSDIR\cmd.exe" /c "$TEMP\agentrans-uninstall-cleanup.cmd"'
+    ${EndIf}
+  ${EndIf}
 !macroend
 
 Function un.CleanData
