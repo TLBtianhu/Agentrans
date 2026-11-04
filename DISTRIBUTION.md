@@ -32,7 +32,7 @@ Windows 注册后端使用 HKCU 写入卸载项和开始菜单快捷方式，支
 
 `installSignedRelease()` 先验签，再在根目录内解包并安装，安装版随后执行 Windows 注册。验签失败不复制文件，注册失败保留已安装结果和注册错误；真实签名压缩包与真实 Windows 注册 smoke 已通过。
 
-[agentrans-installer.mjs](apps/desktop/installer/agentrans-installer.mjs) 是生产安装/卸载入口：安装使用验签后的签名安装，卸载复用同一个 `UninstallScope`，支持静默 app-only 和全量清理。原生卸载选项窗体位于 [uninstall-dialog.ps1](apps/desktop/installer/uninstall-dialog.ps1)，默认只删 app，支持全选、二次确认和取消；静默模式不会打开窗体。
+[agentrans-installer.mjs](apps/desktop/installer/agentrans-installer.mjs) 是生产安装/卸载入口：安装使用验签后的签名安装，卸载复用同一个 `UninstallScope`，支持静默 app-only 和全量清理。原生卸载选项窗体位于 [uninstall-dialog.ps1](apps/desktop/installer/uninstall-dialog.ps1)，默认只删 app，支持全选、二次确认和取消；静默模式不会打开窗体。NSIS 保持默认 app-only，生产 CLI 的对话框负责可选范围。
 
 ## 身份审计
 

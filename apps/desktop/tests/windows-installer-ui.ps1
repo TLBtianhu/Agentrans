@@ -1,4 +1,4 @@
-﻿Add-Type -AssemblyName System.Drawing
+Add-Type -AssemblyName System.Drawing
 if (-not ('InstallerCapture' -as [type])) {
     Add-Type -ReferencedAssemblies System.Drawing -TypeDefinition @'
 using System;
@@ -168,7 +168,7 @@ public static class InstallerCapture {
     [DllImport("user32.dll")] static extern IntPtr GetAncestor(IntPtr window, uint flags);
 
     public static void Click(IntPtr control) {
-        if (!PostMessage(control, 0xF5, IntPtr.Zero, IntPtr.Zero)) throw new InvalidOperationException("Could not click native button");
+        SendMessage(control, 0xF5, IntPtr.Zero, IntPtr.Zero);
     }
 
     public static IntPtr Find(int process) {

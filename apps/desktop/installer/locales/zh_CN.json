@@ -35,18 +35,6 @@
   },
   "uninstaller": {
     "welcome": "欢迎",
-    "finished": "已从你",
-    "UNINSTALL_OPTIONS_TITLE": "选择要删除的内容",
-    "UNINSTALL_OPTIONS_HINT": "始终删除应用程序，其他数据仅在选择后删除。",
-    "UNINSTALL_OPTIONS_APP": "应用程序",
-    "UNINSTALL_OPTIONS_SESSIONS": "会话和对话历史",
-    "UNINSTALL_OPTIONS_SETTINGS": "设置和安装元数据",
-    "UNINSTALL_OPTIONS_MODELS": "模型资源",
-    "UNINSTALL_OPTIONS_RUNTIMES": "独立运行时",
-    "UNINSTALL_OPTIONS_EXPORTS": "导出文件",
-    "UNINSTALL_OPTIONS_ALL": "全选",
-    "UNINSTALL_OPTIONS_ACCEPT": "卸载",
-    "UNINSTALL_OPTIONS_CANCEL": "取消",
-    "UNINSTALL_OPTIONS_CONFIRM": "确定删除所有选中的数据吗？此操作无法撤销。"
+    "finished": "已从你"
   }
 }

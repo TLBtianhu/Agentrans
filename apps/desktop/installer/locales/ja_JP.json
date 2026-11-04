@@ -35,18 +35,6 @@
   },
   "uninstaller": {
     "welcome": "アンインストール ウィザードへようこそ",
-    "finished": "アンインストールされました",
-    "UNINSTALL_OPTIONS_TITLE": "Choose what to remove",
-    "UNINSTALL_OPTIONS_HINT": "The application is always removed. Other data is removed only when selected.",
-    "UNINSTALL_OPTIONS_APP": "Application",
-    "UNINSTALL_OPTIONS_SESSIONS": "Sessions and conversation history",
-    "UNINSTALL_OPTIONS_SETTINGS": "Settings and install metadata",
-    "UNINSTALL_OPTIONS_MODELS": "Model resources",
-    "UNINSTALL_OPTIONS_RUNTIMES": "Independent runtimes",
-    "UNINSTALL_OPTIONS_EXPORTS": "Exported files",
-    "UNINSTALL_OPTIONS_ALL": "Select all data",
-    "UNINSTALL_OPTIONS_ACCEPT": "Uninstall",
-    "UNINSTALL_OPTIONS_CANCEL": "Cancel",
-    "UNINSTALL_OPTIONS_CONFIRM": "Remove all selected data? This cannot be undone."
+    "finished": "アンインストールされました"
   }
 }

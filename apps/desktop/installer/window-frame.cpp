@@ -70,6 +70,11 @@ extern "C" __declspec(dllexport) DWORD __cdecl UninstallRemoveData(LPCWSTR path,
     return uninstall_data::Remove(path, installation, protectedRoot);
 }
 
+// Returns a Win32 error code; root removal preserves only the protected root and never traverses linked descendants.
+extern "C" __declspec(dllexport) DWORD __cdecl UninstallRemoveRoot(LPCWSTR path, LPCWSTR protectedRoot) {
+    return uninstall_data::Remove(path, L"", protectedRoot);
+}
+
 // Returns a Win32 error code; only ordinary empty directories strictly below the stop directory are removed.
 extern "C" __declspec(dllexport) DWORD __cdecl UninstallRemoveEmptyParents(LPCWSTR path, LPCWSTR stop) {
     return uninstall_data::RemoveEmptyParents(path, stop);

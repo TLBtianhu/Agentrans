@@ -92,7 +92,7 @@ try {
   }
   await execute(cleanupTest, [join(output, 'ui', `cleanup-${id}`)], childOptions)
   const payloadSource = join(output, 'payload.nsi')
-  await writeFile(payloadSource, `Unicode true
+  await writeFile(payloadSource, `﻿Unicode true
 RequestExecutionLevel user
 ManifestDPIAware true
 Name "${productName}"

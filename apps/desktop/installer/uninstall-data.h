@@ -98,8 +98,8 @@ inline DWORD RemoveTree(const std::wstring& path) {
 // (the configured Harness home). Linked descendants are unlinked only.
 inline DWORD Remove(LPCWSTR input, LPCWSTR installation, LPCWSTR protectedRoot) {
     std::wstring path, install;
-    if (!Normalize(input, path) || !Normalize(installation, install)) return ERROR_INVALID_NAME;
-    if (Contains(path, install) || Contains(install, path)) return ERROR_ACCESS_DENIED;
+    if (!Normalize(input, path)) return ERROR_INVALID_NAME;
+    if (*installation && (!Normalize(installation, install) || Contains(path, install) || Contains(install, path))) return ERROR_ACCESS_DENIED;
     if (protectedRoot && *protectedRoot) {
         std::wstring home;
         // An unusable protected root cannot establish separation from retained data.
