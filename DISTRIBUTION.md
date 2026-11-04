@@ -24,7 +24,7 @@
 
 ## 单根目录实现
 
-[product-layout](packages/boot/product-layout/README.md) 提供 `ProductLayout.fromRoot()`、安装清单、四种 App/DSH 集成状态和运行时激活门槛。所有应用、数据、模型、运行时和 DSH 路径都从同一个根目录派生；DSH_HOME 与 DSH_AGENTS_HOME 位于 `data/dsh/` 下。1.0 前不做旧结构迁移，也不跨实例共享资产。
+[product-layout](packages/boot/product-layout/README.md) 提供 `ProductLayout.fromRoot()`、安装清单、四种 App/DSH 集成状态、运行时激活、文件级便携/安装打包和范围卸载。所有应用、数据、模型、运行时和 DSH 路径都从同一个根目录派生；DSH_HOME 与 DSH_AGENTS_HOME 位于 `data/dsh/` 下。打包只替换 `app`，默认保留 `data`、`models`、`runtime-envs` 和 `integrations`；卸载默认只删除 `app` 和可重建 cache，完整删除需要确认，DSH 集成先于路径清理，Windows 注册最后处理。1.0 前不做旧结构迁移，也不跨实例共享资产。
 
 ## 身份审计
 

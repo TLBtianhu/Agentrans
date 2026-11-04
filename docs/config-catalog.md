@@ -371,7 +371,7 @@ export interface Config {
 
 ## `@deepseek-ai/dsh-artifact`
 
-- `source`: [`packages/artifact/artifact/src/index.ts:31`](../packages/artifact/artifact/src/index.ts)
+- `source`: [`packages/artifact/artifact/src/index.ts:32`](../packages/artifact/artifact/src/index.ts)
 
 ```ts config-catalog
 /** Deployment limits for durable source and user-action messages. */
@@ -5043,6 +5043,7 @@ Imported as libraries by other packages; a `cordis.yml` cannot load them.
 | `@deepseek-ai/dsh-personalized-recommendations` | — | [`packages/experimental/personalized-recommendations/src/index.ts`](../packages/experimental/personalized-recommendations/src/index.ts) |
 | `@deepseek-ai/dsh-plugin-detail` | — | [`packages/util/plugin-detail/src/index.ts`](../packages/util/plugin-detail/src/index.ts) |
 | `@deepseek-ai/dsh-plugin-market-index` | — | [`packages/util/plugin-market-index/src/index.ts`](../packages/util/plugin-market-index/src/index.ts) |
+| `@deepseek-ai/dsh-product-layout` | — | [`packages/boot/product-layout/src/index.ts`](../packages/boot/product-layout/src/index.ts) |
 | `@deepseek-ai/dsh-remote-mock` | — | [`packages/test-support/remote-mock/src/index.ts`](../packages/test-support/remote-mock/src/index.ts) |
 | `@deepseek-ai/dsh-sandbox-windows-acl` | — | [`packages/sandbox/sandbox-windows-acl/src/index.ts`](../packages/sandbox/sandbox-windows-acl/src/index.ts) |
 | `@deepseek-ai/dsh-scope` | — | [`packages/core/scope/src/index.ts`](../packages/core/scope/src/index.ts) |

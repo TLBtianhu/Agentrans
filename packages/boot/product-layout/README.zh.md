@@ -1,6 +1,6 @@
 ---
-description: "Agentrans 单根目录安装布局、安装清单、集成状态与运行时激活。"
-kind: "package-library"
+description: "Agentrans 单根目录安装布局、安装清单、打包、集成状态、运行时激活与范围卸载。"
+kind: "package-reference"
 ---
 
 # @deepseek-ai/dsh-product-layout
@@ -9,7 +9,7 @@ kind: "package-library"
 
 ## 概述
 
-本包负责 Agentrans 分发生命周期的第一个切片：一个完整安装根目录，派生 `app`、`data`、`models`、`runtime-envs` 和 `integrations` 子目录，安装清单，四种 App/DSH 集成状态，以及运行时激活门槛。它不修改 DSH profile，也不负责安装应用。
+本包负责 Agentrans 分发生命周期切片：一个完整安装根目录，派生 `app`、`data`、`models`、`runtime-envs` 和 `integrations` 子目录，安装清单，四种 App/DSH 集成状态，运行时激活，文件级便携/安装打包，以及范围卸载执行。它不直接修改 DSH profile 或 Windows 注册信息。
 
 ## 目录
 
@@ -28,6 +28,10 @@ kind: "package-library"
 
 使用 `createInstallManifest()`、`writeInstallManifest()` 和 `readInstallManifest()` 管理持久安装状态。清单位于 `data/install/manifest.json`，包含 `layoutVersion`、产品身份、运行形态、根目录、应用版本、时间戳和资产记录。
 
+使用 `planInstall()` 预览安装，再用 `packPortable()` 或 `packInstalled()` 从纯净应用负载执行。负载包含 `data`、`models`、`runtime-envs`、`integrations`、`.env`、凭据或私钥时会被拒绝。升级只替换 `app`，保留已有数据和资产。安装版会单独报告 Windows 注册操作，便携版不报告注册操作。
+
+使用 `planUninstall()` 预览卸载范围，用 `executeUninstallPlan()` 执行。默认只删除 `app` 和可重建 cache。完整删除需要确认。先通过回调移除 DSH 集成，再清理所选路径，最后通过回调处理 Windows 注册。
+
 -----
 
 <a id="understand-the-implementation"></a>
@@ -42,13 +46,25 @@ kind: "package-library"
 <a id="model-experience"></a>
 ## 模型体验
 
-这是 Host 库，不是模型侧工具。它不提供 prompt section 或工具 schema，不增加 token 成本，也不进入 KV cache。安装和集成状态属于本地应用状态，不是模型输入。
+### 分发操作
+
+#### 模型看到什么
+
+没有模型侧内容。`ProductLayout`、`InstallManifest`、`packPortable`、`packInstalled` 和 `planUninstall` 是 Host API，不是模型工具。
+
+#### Token 影响
+
+不增加 prompt 或工具 schema。
+
+#### KV Cache 影响
+
+不创建或改变模型上下文。
 
 ## 已知限制与延期工作
 
 <a id="known-limitations-and-deferred-work"></a>
 
-- 尚未实现完整安装器、便携打包、签名更新器或交互式卸载器。
+- 文件级打包和卸载已实现，但还没有签名安装器、原生注册后端或交互式卸载界面。
 - 1.0 前的目录变化不做迁移，不承诺旧结构备份或兼容路径。
 - 资产下载和哈希计算由调用方提供；本包负责激活顺序和状态，不提供网络客户端。
 - DSH 集成启用和移除必须使用宿主的正式插件管理接口，本切片尚未挂载这些操作。

@@ -16,6 +16,7 @@ Agent + Trans: a general programming Agent workbench that turns explanations int
 
 The shipped replay scenarios exercise these flows through the real Web composition and a real browser, not only isolated components.
 
+<a id="run-from-source"></a>
 ## Development and user-state separation
 
 Build output is an intermediate for producing distributions, not a user home. Development runs use isolated data roots and never reuse the upstream DSH profile. Do not install or run this checkout over an existing DSH installation.
@@ -30,6 +31,7 @@ pnpm dsh web --no-open --port 58910
 
 Portable and installed distributions must use separate program and data paths from each other and from upstream DSH. See [DISTRIBUTION.md](DISTRIBUTION.md) for the invariants and the external-identity audit required before packaging.
 
+<a id="run"></a>
 ## Model configuration
 
 Agentrans has no DeepSeek account login or server-side account binding. Users configure providers and credentials themselves: endpoint URL, wire protocol, model ids, and model metadata. Custom providers can use `openai-completions`, `openai-responses`, or `anthropic-messages`; adding a new model does not require an upstream source update. See [custom-provider.cordis.yml](apps/cli/config/examples/custom-provider.cordis.yml) and the [provider guide](docs/user/guide/providers.md). Credentials stay in the local credential store or environment, never in the repository.

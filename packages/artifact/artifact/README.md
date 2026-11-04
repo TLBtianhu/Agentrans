@@ -63,6 +63,14 @@ Scene snapshots use `format: 'scene'` and a complete `spec`. The current catalog
 
 The `scene` tool accepts `action`, `kind`, `sceneId`, `title`, a complete `spec`, `presentation`, and update-only `baseRevision`. Its result repeats only `sceneId`, `revision`, `title`, `kind`, and `presentation`. SceneSpec JSON is validated before commit; it is not HTML and does not execute model-generated JavaScript.
 
+#### Token effect
+
+The scene tool adds one bounded JSON schema per selected preset. Results are short and contain no source.
+
+#### KV Cache effect
+
+Creating or updating a scene appends a log-only event and does not rewrite the model prefix.
+
 ### artifact
 
 #### What the model sees

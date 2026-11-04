@@ -29,7 +29,7 @@ Every package below exports a Cordis plugin that a bundle patch can name in a Lo
 
 | Package | Config | Description |
 |---|---|---|
-| `@deepseek-ai/dsh-artifact` | yes | Session-backed interactive HTML artifacts and their model-facing tool |
+| `@deepseek-ai/dsh-artifact` | yes | Session-backed interactive HTML and SceneSpec artifacts and their model-facing tools |
 
 ## attachment
 

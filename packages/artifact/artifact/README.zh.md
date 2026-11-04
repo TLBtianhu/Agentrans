@@ -63,6 +63,14 @@ Scene 快照使用 `format: 'scene'` 和完整 `spec`。当前 catalog 支持 `f
 
 `scene` 工具接受 `action`、`kind`、`sceneId`、`title`、完整 `spec`、`presentation`，以及仅更新使用的 `baseRevision`。结果只重复 `sceneId`、`revision`、`title`、`kind` 和 `presentation`。SceneSpec JSON 在提交前校验，不是 HTML，也不执行模型生成的 JavaScript。
 
+#### Token 影响
+
+每个启用的 preset 增加一份有界 JSON schema。结果很短，不包含源码。
+
+#### KV Cache 影响
+
+创建或修改 Scene 只追加 log-only 事件，不改写模型前缀。
+
 ### artifact
 
 #### 模型看到什么

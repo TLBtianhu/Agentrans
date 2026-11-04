@@ -16,6 +16,7 @@ Agent + Trans：一个通用编程 Agent 工作台，把解释转化为可执行
 
 随仓库提供的重放场景通过真实 Web 组合和真实浏览器验证这些流程，而不只是测试孤立组件。
 
+<a id="run-from-source"></a>
 ## 开发态与用户态分离
 
 编译产物只是产生分发物的中间结果，不是用户数据根。开发运行使用独立数据根，绝不复用上游 DSH profile。不要把本源码目录安装或运行覆盖到已有 DSH 上。
@@ -30,6 +31,7 @@ pnpm dsh web --no-open --port 58910
 
 便携版与安装版的程序路径和数据路径必须彼此分离，并与上游 DSH 分离。打包前必须完成的外部身份审计见 [DISTRIBUTION.md](DISTRIBUTION.md)。
 
+<a id="run"></a>
 ## 模型配置
 
 Agentrans 不提供 DeepSeek 账号登录或服务端账号绑定。用户自行配置提供商与凭据：端点 URL、协议格式、模型 id 和模型元数据。自定义提供商可使用 `openai-completions`、`openai-responses` 或 `anthropic-messages`；新增模型不需要更新上游源码。参见 [custom-provider.cordis.yml](apps/cli/config/examples/custom-provider.cordis.yml) 和[提供商指南](docs/user/guide/providers.zh.md)。凭据只保存在本地凭据存储或环境变量中，绝不写入仓库。

@@ -32,6 +32,12 @@
 /deepseek-ai-dsh-artifact/model-experience/scene/what-the-model-sees:
   en: 07d0f9355675c705
   zh: 734695afaed5fbef
+/deepseek-ai-dsh-artifact/model-experience/scene/token-effect:
+  en: 95423d8c44bbed25
+  zh: 5acc414466e3aacf
+/deepseek-ai-dsh-artifact/model-experience/scene/kv-cache-effect:
+  en: 6ff4a731fcfa075a
+  zh: 339c371f13679cfe
 /deepseek-ai-dsh-artifact/model-experience/artifact:
   en: b10efad9bb61e0e2
   zh: b10efad9bb61e0e2

@@ -31,6 +31,7 @@
 
 非分支、subagent、错误父级、继承事件、结果不存在或可见文本为空都会被拒绝。空闲父级通过 maintenance 串行化追加并 flush；运行中的父级返回 busy，不隐式 steer。
 
+<a id="verification"></a>
 ## 验证
 
 keyless [branch-result 场景](../../apps/web/tests/branch-result.e2e.ts) 通过实际 Web 组合重放父级回答和独立的子级回答。浏览器从父级开岔，打开子级自有结论的预览，先取消一次而不回流，然后再确认。测试检查预览不包含 reasoning、父级只新增一条携带子级引用和可见文本的 `branch-result` 用户消息，并且确认前后都不启动父级模型轮次。

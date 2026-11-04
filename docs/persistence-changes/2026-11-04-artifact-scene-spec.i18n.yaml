@@ -1,0 +1,28 @@
+# Bilingual-pair consistency record for 2026-11-04-artifact-scene-spec.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write docs/persistence-changes/2026-11-04-artifact-scene-spec.md
+/:
+  en: 3d5a424ae7d7e46b
+  zh: c22a8e4a62d8cc1a
+/2026-11-04-artifact-scene-spec:
+  en: 56099f24f4c25383
+  zh: 91e7b349767f071b
+/2026-11-04-artifact-scene-spec/summary:
+  en: 94c25c1a0d1b8290
+  zh: ae2e8bfe1f0de524
+/2026-11-04-artifact-scene-spec/table-of-contents:
+  en: 6cf314a069ceb451
+  zh: 9adff678e9ecab3b
+/2026-11-04-artifact-scene-spec/declaration:
+  en: 6907136f28e48c90
+  zh: 02f8298485f3d8e7
+/2026-11-04-artifact-scene-spec/compatibility:
+  en: 83c0908ba5c02799
+  zh: 3f3b7b775268681a
+/2026-11-04-artifact-scene-spec/verification:
+  en: 76b96ffab4ef7cf6
+  zh: c1a8ee979455aa05
+/2026-11-04-artifact-scene-spec/dev-note:
+  en: b75c8458928b72b9
+  zh: 003ba4e17b4b5269
