@@ -1,5 +1,5 @@
 ---
-description: "Single-root Agentrans installation layout, manifests, packaging, runtime activation, scoped uninstall, ReleaseManifest signing, and Windows registration."
+description: "Single-root Agentrans installation layout, manifests, packaging, runtime activation, scoped uninstall, ReleaseManifest signing, signed archive installation, and Windows registration."
 kind: "package-reference"
 ---
 
@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-This package owns the distribution-lifecycle slices for Agentrans: one complete installation root, derived `app`, `data`, `models`, and `runtime-envs` subdirectories, install manifests, runtime activation, file-level portable/installed packaging, scoped uninstall execution, signed ReleaseManifest verification, and user-level Windows registration. It does not modify DSH profiles or require administrator privileges.
+This package owns the distribution-lifecycle slices for Agentrans: one complete installation root, derived `app`, `data`, `models`, and `runtime-envs` subdirectories, install manifests, runtime activation, file-level portable/installed packaging, scoped uninstall execution, signed ReleaseManifest verification, signed archive installation, and user-level Windows registration. It does not modify DSH profiles or require administrator privileges.
 
 ## Table of Contents
 
@@ -35,6 +35,8 @@ Use `planUninstall()` to preview removal scope and `executeUninstallPlan()` to e
 Use `signReleaseManifest()` with a caller-owned Ed25519 private key and `verifyReleaseManifest()` with the trusted public key. The manifest records the filename, version, size, SHA-256, algorithm, key fingerprint, and signature. Verification rejects modified manifests, modified files, wrong keys, and malformed manifests before installation.
 
 Use `planWindowsRegistration()` to preview uninstall and Start Menu registration, `registerWindowsRegistration()` to create them, `verifyWindowsRegistration()` to inspect them, and `removeWindowsRegistration()` to clean them up. The backend uses HKCU and needs no administrator privileges.
+
+Use `installSignedRelease()` to verify a signed archive, unpack it inside the product root, install it, and optionally register Windows state. Verification failure changes no files. A registration failure returns the completed install and the registration error so partial state remains visible.
 
 -----
 
@@ -68,7 +70,7 @@ No model context is created or changed.
 
 <a id="known-limitations-and-deferred-work"></a>
 
-- File-level packaging, uninstall, ReleaseManifest signing, and user-level Windows registration are implemented, but there is no signed installer or interactive uninstall UI yet.
+- File-level packaging, uninstall, ReleaseManifest signing, signed archive installation, and user-level Windows registration are implemented, but there is no production installer or interactive uninstall UI yet.
 - Pre-1.0 layout changes are not migrated; no old-structure backup or compatibility path is promised.
 - Asset downloads and hash computation are supplied by callers; this package owns activation order and state, not a network client.
 

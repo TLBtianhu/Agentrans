@@ -65,3 +65,9 @@ export {
   type WindowsRegistrationOptions,
   type WindowsRegistrationPlan,
 } from './windows-registration.ts'
+export {
+  installSignedRelease,
+  SignedReleaseInstallError,
+  type SignedReleaseInstallOptions,
+  type SignedReleaseInstallResult,
+} from './signed-install.ts'

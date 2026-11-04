@@ -1,5 +1,5 @@
 ---
-description: "Agentrans 单根目录安装布局、安装清单、打包、运行时激活、范围卸载、ReleaseManifest 签名与 Windows 注册。"
+description: "Agentrans 单根目录安装布局、安装清单、打包、运行时激活、范围卸载、ReleaseManifest 签名、签名压缩包安装与 Windows 注册。"
 kind: "package-reference"
 ---
 
@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-本包负责 Agentrans 分发生命周期切片：一个完整安装根目录，派生 `app`、`data`、`models` 和 `runtime-envs` 子目录，安装清单，运行时激活，文件级便携/安装打包，范围卸载执行，ReleaseManifest 签名验证，以及用户级 Windows 注册。它不修改 DSH profile，也不要求管理员权限。
+本包负责 Agentrans 分发生命周期切片：一个完整安装根目录，派生 `app`、`data`、`models` 和 `runtime-envs` 子目录，安装清单，运行时激活，文件级便携/安装打包，范围卸载执行，ReleaseManifest 签名验证，签名压缩包安装，以及用户级 Windows 注册。它不修改 DSH profile，也不要求管理员权限。
 
 ## 目录
 
@@ -35,6 +35,8 @@ kind: "package-reference"
 使用 `signReleaseManifest()` 和调用方持有的 Ed25519 私钥签名，使用 `verifyReleaseManifest()` 和受信任的公钥验签。清单记录文件名、版本、大小、SHA-256、算法、密钥指纹和签名。安装前会拒绝被修改的清单、文件、错误密钥和非法清单。
 
 使用 `planWindowsRegistration()` 预览卸载项和开始菜单注册，使用 `registerWindowsRegistration()` 创建，使用 `verifyWindowsRegistration()` 验证，使用 `removeWindowsRegistration()` 清理。后端使用 HKCU，不需要管理员权限。
+
+使用 `installSignedRelease()` 验证签名压缩包，在根目录内解包、安装，并按需注册 Windows 状态。验签失败不会改变文件。注册失败会返回已完成的安装和注册错误，明确保留部分状态。
 
 -----
 
@@ -68,7 +70,7 @@ kind: "package-reference"
 
 <a id="known-limitations-and-deferred-work"></a>
 
-- 文件级打包、卸载、ReleaseManifest 签名和用户级 Windows 注册已实现，但还没有签名安装器或交互式卸载界面。
+- 文件级打包、卸载、ReleaseManifest 签名、签名压缩包安装和用户级 Windows 注册已实现，但还没有生产安装器或交互式卸载界面。
 - 1.0 前的目录变化不做迁移，不承诺旧结构备份或兼容路径。
 - 资产下载和哈希计算由调用方提供；本包负责激活顺序和状态，不提供网络客户端。
 
