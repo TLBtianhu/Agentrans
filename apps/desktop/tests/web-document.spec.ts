@@ -2,7 +2,7 @@ import { afterEach, expect, it, vi } from 'vitest'
 import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { authenticateWebHost, forwardWebRequest, serveWebDocument } from '../src/web-document.ts'
+import { authenticateWebHost, forwardWebRequest, serveWebDocument, withDesktopHostCookie } from '../src/web-document.ts'
 
 const roots: string[] = []
 afterEach(async () => {
@@ -33,6 +33,13 @@ it('requires the Host authentication exchange and retains only its cookie value'
   vi.stubGlobal('fetch', fetch)
   expect(await authenticateWebHost('http://127.0.0.1:1234/?token=owned')).toBe('session=owned')
   await expect(authenticateWebHost('http://127.0.0.1:1234/')).rejects.toThrow('authentication failed')
+})
+
+it('attaches the owned Host cookie to native welcome RPC requests', () => {
+  const init = withDesktopHostCookie({ method: 'POST', headers: { 'content-type': 'application/json' } }, 'session=owned')
+  expect(init.method).toBe('POST')
+  expect(new Headers(init.headers).get('content-type')).toBe('application/json')
+  expect(new Headers(init.headers).get('cookie')).toBe('session=owned')
 })
 
 it('forwards upload bytes and cancellation with Host credentials while keeping the response streaming', async () => {

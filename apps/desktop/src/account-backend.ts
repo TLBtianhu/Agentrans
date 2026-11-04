@@ -84,17 +84,31 @@ export interface DesktopAccountBackend {
  * @returns account operations; watch callers own their subscriptions.
  */
 export function desktopAccountBackend(origin: string, invoke: AccountInvoke, cookies: () => Promise<string>): DesktopAccountBackend {
-  const call = async (method: string, args: Record<string, unknown> = {}): Promise<AccountView> =>
-    accountView(await invoke({ namespace: 'account', method, args }))
+  let available = true
+  const inert = (): AccountView => ({ status: 'signed-out', links: { usageUrl: 'https://localhost/', topUpUrl: 'https://localhost/' }, attempt: null })
+  const call = async (method: string, args: Record<string, unknown> = {}): Promise<AccountView> => {
+    try {
+      return accountView(await invoke({ namespace: 'account', method, args }))
+    } catch (error) {
+      if (method === 'getState' && error instanceof Error && error.message.includes('Web request failed (404)')) {
+        available = false
+        return inert()
+      }
+      throw error
+    }
+  }
+  const unavailable = (): Promise<never> => Promise.reject(new Error('desktop account: account channels are unavailable'))
   return {
     state: () => call('getState'),
-    start: client => call('startSignIn', { client, callbackOrigin: new URL(origin).origin, loginSource: 'desktop' }),
-    cancel: attemptId => call('cancelSignIn', { attemptId }), signOut: client => call('signOut', { client }),
+    start: client => available ? call('startSignIn', { client, callbackOrigin: new URL(origin).origin, loginSource: 'desktop' }) : unavailable(),
+    cancel: attemptId => available ? call('cancelSignIn', { attemptId }) : unavailable(),
+    signOut: client => available ? call('signOut', { client }) : unavailable(),
     watch(listener, failed, expired, onAnalyticsEnabledChanged) {
       let closed = false
       let socket: WebSocket | undefined
       let retry: ReturnType<typeof setTimeout> | undefined
       const connect = (): void => {
+        if (closed || !available) return
         const streamId = randomUUID()
         const expiryStreamId = randomUUID()
         const analyticsPolicyStreamId = randomUUID()
@@ -127,7 +141,16 @@ export function desktopAccountBackend(origin: string, invoke: AccountInvoke, coo
           socket.on('close', () => { if (!closed) { onAnalyticsEnabledChanged?.(false); failed(); retry = setTimeout(connect, 1000) } })
         }).catch(() => { if (!closed) { onAnalyticsEnabledChanged?.(false); failed(); retry = setTimeout(connect, 1000) } })
       }
-      connect()
+      const state = (): Promise<AccountView> => call('getState')
+      const begin = (): void => {
+        void state().then(() => { if (!closed && available) connect() }).catch(() => {
+          if (closed) return
+          onAnalyticsEnabledChanged?.(false)
+          failed()
+          retry = setTimeout(begin, 1000)
+        })
+      }
+      begin()
       return () => { closed = true; onAnalyticsEnabledChanged?.(false); clearTimeout(retry); socket?.close() }
     },
   }

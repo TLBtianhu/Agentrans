@@ -55,12 +55,20 @@ export async function connectDesktopWelcome(
   ): Promise<unknown> => {
     const rpcId = randomUUID()
     const method = `${request.namespace}/${request.method}`
-    const response = await send(new URL(`/api/${method}`, origin).href, {
-      method: 'POST', credentials: 'include', redirect: 'error', ...(signal === undefined ? {} : { signal }),
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ type: 'client-request', rpcId, method, payload: { args: request.args } }),
-    })
-    if (!response.ok) throw new Error('desktop welcome: Web request failed')
+    let response: Response | undefined
+    for (let attempt = 0; attempt < 200; attempt++) {
+      response = await send(new URL(`/api/${method}`, origin).href, {
+        method: 'POST', credentials: 'include', redirect: 'error', ...(signal === undefined ? {} : { signal }),
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ type: 'client-request', rpcId, method, payload: { args: request.args } }),
+      })
+      // Host readiness can precede the Remote descriptor mount by a short interval.
+      if (response.ok || response.status !== 404) break
+      await response.body?.cancel().catch(() => undefined)
+      signal?.throwIfAborted()
+      await new Promise(resolve => setTimeout(resolve, 50))
+    }
+    if (response === undefined || !response.ok) throw new Error(`desktop welcome: Web request failed (${response?.status ?? 'unknown'})`)
     const envelope: unknown = await response.json()
     if (!record(envelope) || envelope.type !== 'server-response' || envelope.rpcId !== rpcId
       || !record(envelope.result) || envelope.result.ok !== true) {

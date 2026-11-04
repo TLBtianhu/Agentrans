@@ -50,6 +50,18 @@ export async function authenticateWebHost(url: string): Promise<string> {
 }
 
 /**
+ * Attach the authority-bound Host cookie to a native RPC request.
+ * @param init - Original native request options.
+ * @param cookie - Host-issued cookie returned by authenticateWebHost.
+ * @returns Request options with copied headers and the owned cookie.
+ */
+export function withDesktopHostCookie(init: RequestInit | undefined, cookie: string | undefined): RequestInit {
+  const headers = new Headers(init?.headers)
+  if (cookie !== undefined) headers.set('cookie', cookie)
+  return { ...init, headers }
+}
+
+/**
  * Response headers not relayed to the renderer. `set-cookie` would hand the
  * Host's authentication cookie to the page's cookie jar, which the shell owns
  * instead; the rest describe the Node `fetch` connection (its encoding, length,

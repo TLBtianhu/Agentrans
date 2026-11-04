@@ -44,6 +44,20 @@ it('does not replay an expiry reason from an account snapshot', () => {
   expect(accountView({ ...state, signOutReason: 'expired' })).toEqual(state)
 })
 
+it('treats an absent account namespace as signed out without opening a stream', async () => {
+  const backend = desktopAccountBackend('http://127.0.0.1:1234', (request) => {
+    if (request.method === 'getState') return Promise.reject(new Error('desktop welcome: Web request failed (404)'))
+    return Promise.reject(new Error('account operation must not start'))
+  }, () => Promise.resolve(''))
+  await expect(backend.state()).resolves.toMatchObject({ status: 'signed-out', attempt: null })
+  const failed = vi.fn()
+  const stop = backend.watch(vi.fn(), failed, vi.fn(), vi.fn())
+  await new Promise(resolve => setTimeout(resolve, 20))
+  expect(failed).not.toHaveBeenCalled()
+  stop()
+  await expect(backend.start({ version: '1.2.3', locale: 'en', timezoneOffsetSeconds: 28_800 })).rejects.toThrow('account channels are unavailable')
+})
+
 it('receives live expiry separately from account snapshots', async () => {
   const server = new WebSocketServer({ host: '127.0.0.1', port: 0 })
   await once(server, 'listening')
