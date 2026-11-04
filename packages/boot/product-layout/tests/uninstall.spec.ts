@@ -41,7 +41,6 @@ async function seed(layout: ProductLayout): Promise<void> {
   await mkdir(join(layout.dataDir, 'cache'), { recursive: true })
   await mkdir(layout.modelsDir, { recursive: true })
   await mkdir(layout.runtimesDir, { recursive: true })
-  await mkdir(layout.integrationPackageDir, { recursive: true })
   await writeFile(join(layout.appDir, 'index.js'), 'app', 'utf8')
   await writeFile(join(layout.dataDir, 'sessions', 'keep.txt'), 'session', 'utf8')
   await writeFile(join(layout.dataDir, 'settings', 'settings.json'), '{}', 'utf8')
@@ -49,7 +48,6 @@ async function seed(layout: ProductLayout): Promise<void> {
   await writeFile(join(layout.dataDir, 'cache', 'cache.txt'), 'cache', 'utf8')
   await writeFile(join(layout.modelsDir, 'model.bin'), 'model', 'utf8')
   await writeFile(join(layout.runtimesDir, 'runtime.bin'), 'runtime', 'utf8')
-  await writeFile(join(layout.integrationPackageDir, 'bundle.json'), '{}', 'utf8')
 }
 
 describe('uninstall planning', () => {
@@ -60,7 +58,6 @@ describe('uninstall planning', () => {
     expect(plan.preserve).toContain(join(layout.dataDir, 'sessions'))
     expect(plan.preserve).toContain(layout.modelsDir)
     expect(plan.preserve).toContain(layout.runtimesDir)
-    expect(plan.preserve).toContain(layout.integrationsDir)
     expect(plan.requiresConfirmation).toBe(false)
     expect(plan.externalOperations).toEqual(['windows:remove-uninstall-entry', 'windows:remove-start-menu-shortcut'])
   })
@@ -70,40 +67,37 @@ describe('uninstall planning', () => {
     expect(() => planUninstall(layout, ALL_UNINSTALL_SCOPE)).toThrow(UninstallConfirmationError)
     const plan = planUninstall(layout, ALL_UNINSTALL_SCOPE, { allConfirmed: true })
     expect(plan.requiresConfirmation).toBe(true)
-    expect(plan.externalOperations[0]).toBe('dsh:remove-integration')
+    expect(plan.externalOperations[0]).toBe('windows:remove-uninstall-entry')
     expect(plan.externalOperations).toContain('windows:remove-uninstall-entry')
   })
 })
 
 describe('uninstall execution', () => {
-  it('removes selected categories in integration, paths, registration order', async () => {
+  it('removes selected categories before Windows registration cleanup', async () => {
     const layout = ProductLayout.fromRoot(await tempRoot(), 'installed')
     await seed(layout)
     const operations: string[] = []
-    const plan = planUninstall(layout, { ...APP_ONLY_UNINSTALL_SCOPE, models: true, integrations: true })
+    const plan = planUninstall(layout, { ...APP_ONLY_UNINSTALL_SCOPE, models: true })
     const result = await executeUninstallPlan(plan, {
-      removeIntegration: async () => { operations.push('integration') },
       removeRegistration: async () => { operations.push('registration') },
     })
-    expect(operations).toEqual(['integration', 'registration'])
-    expect(result.completed[0]).toBe('dsh:remove-integration')
+    expect(operations).toEqual(['registration'])
+    expect(result.completed[0]).toBe(layout.appDir)
     expect(result.completed.at(-1)).toBe('windows:remove-registration')
     expect(await exists(layout.appDir)).toBe(false)
     expect(await exists(layout.modelsDir)).toBe(false)
-    expect(await exists(layout.integrationsDir)).toBe(false)
     expect(await exists(join(layout.dataDir, 'sessions', 'keep.txt'))).toBe(true)
     expect(await exists(join(layout.dataDir, 'settings', 'settings.json'))).toBe(true)
     expect(await exists(join(layout.dataDir, 'exports', 'result.txt'))).toBe(true)
     expect(await exists(join(layout.dataDir, 'cache'))).toBe(false)
   })
 
-  it('fails before deleting anything when the official integration hook is missing', async () => {
+  it('fails before deleting anything when the Windows registration hook is missing', async () => {
     const layout = ProductLayout.fromRoot(await tempRoot(), 'installed')
     await seed(layout)
-    const plan = planUninstall(layout, { ...APP_ONLY_UNINSTALL_SCOPE, integrations: true })
+    const plan = planUninstall(layout)
     await expect(executeUninstallPlan(plan)).rejects.toThrow(UninstallHookError)
     expect(await exists(layout.appDir)).toBe(true)
-    expect(await exists(layout.integrationPackageDir)).toBe(true)
   })
 
   it('reports completed operations when registration fails after app removal', async () => {

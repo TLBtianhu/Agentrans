@@ -14,7 +14,7 @@
 
 ### 安装版
 
-安装版进入一个用户选择的安装根目录，拥有本项目自己的注册表、文件关联和卸载能力。根目录内部固定为 `app/`、`data/`、`models/`、`runtime-envs/` 和 `integrations/`；数据保存在 `<root>/data`，卸载默认保留用户数据。解耦通过子目录的更新策略完成，不通过物理分散完成。
+安装版进入一个用户选择的安装根目录，拥有本项目自己的注册表、文件关联和卸载能力。根目录内部固定为 `app/`、`data/`、`models/` 和 `runtime-envs/`；数据保存在 `<root>/data`，卸载默认保留用户数据。解耦通过子目录的更新策略完成，不通过物理分散完成。
 
 安装、升级、卸载不得操作上游 DSH 或其他项目的目录、注册表、文件关联、凭证、插件、账号和更新记录。
 
@@ -24,7 +24,7 @@
 
 ## 单根目录实现
 
-[product-layout](packages/boot/product-layout/README.md) 提供 `ProductLayout.fromRoot()`、安装清单、四种 App/DSH 集成状态、运行时激活、文件级便携/安装打包和范围卸载。所有应用、数据、模型、运行时和 DSH 路径都从同一个根目录派生；DSH_HOME 与 DSH_AGENTS_HOME 位于 `data/dsh/` 下。打包只替换 `app`，默认保留 `data`、`models`、`runtime-envs` 和 `integrations`；卸载默认只删除 `app` 和可重建 cache，完整删除需要确认，DSH 集成先于路径清理，Windows 注册最后处理。1.0 前不做旧结构迁移，也不跨实例共享资产。
+[product-layout](packages/boot/product-layout/README.md) 提供 `ProductLayout.fromRoot()`、安装清单、运行时激活、文件级便携/安装打包和范围卸载。所有应用、数据、模型和运行时路径都从同一个根目录派生；DSH_HOME 与 DSH_AGENTS_HOME 位于 `data/dsh/` 下，它们只是 Agentrans 内部运行数据路径，不是外部 DSH 集成。打包只替换 `app`，默认保留 `data`、`models` 和 `runtime-envs`；卸载默认只删除 `app` 和可重建 cache，完整删除需要确认，Windows 注册最后处理。1.0 前不做旧结构迁移，也不跨实例共享资产。
 
 更新签名公钥位于 [distribution/keys](distribution/keys/README.md)，算法为 Ed25519。私钥只保存在仓库之外的当前用户受限目录，绝不进入源码、构建产物、fixture 或日志。`signReleaseManifest()` 用本机私钥签署规范化清单，`verifyReleaseManifest()` 在安装前检查 keyId、签名和实际文件字节，任何篡改都拒绝安装。该密钥用于更新清单和发布物验签，不替代 Windows Authenticode/EV 证书。
 

@@ -2,13 +2,11 @@
 import { cp, readdir, rename, rm, stat } from 'node:fs/promises'
 import { ensureProductLayout, type ProductLayout } from './layout.ts'
 import { createInstallManifest, readInstallManifest, writeInstallManifest, type InstallManifest } from './manifest.ts'
-import { assertIntegrationUsable, inspectIntegrationState, type IntegrationState } from './integration.ts'
 
 /** Preview of one install or upgrade operation before any file is changed. */
 export interface InstallPlan {
   readonly layout: ProductLayout
   readonly appVersion: string
-  readonly state: IntegrationState
   readonly create: readonly string[]
   readonly replace: readonly string[]
   readonly preserve: readonly string[]
@@ -27,30 +25,26 @@ export interface InstallExecutionOptions {
 /** Result of a completed file-level install, including external operations still to perform. */
 export interface InstallResult {
   readonly manifest: InstallManifest
-  readonly state: IntegrationState
   readonly externalOperations: readonly string[]
 }
 
 /**
- * Preview an install without touching the filesystem beyond reading integration state.
+ * Preview an install without changing files.
  * @param layout - Single-root destination layout.
  * @param appVersion - Version of the application payload to install.
  * @returns The paths to create, replace, preserve, and externally register.
  */
 export async function planInstall(layout: ProductLayout, appVersion: string): Promise<InstallPlan> {
   if (appVersion.trim().length === 0) throw new TypeError('Install appVersion must be non-empty')
-  const state = await inspectIntegrationState(layout)
-  assertIntegrationUsable(state)
   return {
     layout,
     appVersion,
-    state,
     create: [
-      layout.appDir, layout.dataDir, layout.modelsDir, layout.runtimesDir, layout.integrationsDir,
+      layout.appDir, layout.dataDir, layout.modelsDir, layout.runtimesDir,
       layout.dshHomeDir, layout.dshAgentsHomeDir,
     ],
     replace: [layout.appDir],
-    preserve: [layout.dataDir, layout.modelsDir, layout.runtimesDir, layout.integrationsDir],
+    preserve: [layout.dataDir, layout.modelsDir, layout.runtimesDir],
     remove: [],
     externalOperations: layout.channel === 'installed'
       ? ['windows:register-uninstall-entry', 'windows:register-start-menu-shortcut']
@@ -81,8 +75,6 @@ async function assertAppPayload(sourceDir: string): Promise<void> {
 export async function executeInstallPlan(plan: InstallPlan, options: InstallExecutionOptions): Promise<InstallResult> {
   const { layout } = plan
   await assertAppPayload(options.sourceDir)
-  const state = await inspectIntegrationState(layout)
-  assertIntegrationUsable(state)
 
   let previous: InstallManifest | undefined
   try {
@@ -113,7 +105,7 @@ export async function executeInstallPlan(plan: InstallPlan, options: InstallExec
       ...options.productId === undefined ? {} : { productId: options.productId },
     }
   await writeInstallManifest(layout.installManifestPath, manifest)
-  return { manifest, state, externalOperations: plan.externalOperations }
+  return { manifest, externalOperations: plan.externalOperations }
 }
 
 /**

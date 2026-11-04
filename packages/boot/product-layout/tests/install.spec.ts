@@ -46,16 +46,14 @@ describe('file-level install and upgrade', () => {
     expect(await readFile(join(layout.appDir, 'index.js'), 'utf8')).toContain('two')
   })
 
-  it('reports installed registration operations and preserves assets and integration state', async () => {
+  it('reports installed registration operations and preserves assets across upgrades', async () => {
     const layout = ProductLayout.fromRoot(await tempRoot(), 'installed')
     const first = await packInstalled(layout, '0.1.0', { sourceDir: await payload(layout.root, 'one'), now: new Date('2026-11-04T00:00:00.000Z') })
     expect(first.externalOperations).toEqual(['windows:register-uninstall-entry', 'windows:register-start-menu-shortcut'])
     await mkdir(join(layout.modelsDir), { recursive: true })
     await mkdir(join(layout.runtimesDir), { recursive: true })
-    await mkdir(layout.integrationPackageDir, { recursive: true })
     await writeFile(join(layout.modelsDir, 'model.bin'), 'model', 'utf8')
     await writeFile(join(layout.runtimesDir, 'runtime.bin'), 'runtime', 'utf8')
-    await writeFile(join(layout.integrationPackageDir, 'bundle.json'), '{}', 'utf8')
     await writeInstallManifest(layout.installManifestPath, {
       ...first.manifest,
       assets: { runtime: { id: 'runtime', version: '1.0.0', sha256: 'a'.repeat(64), location: 'runtime-envs/runtime', state: 'active' } },
@@ -67,7 +65,6 @@ describe('file-level install and upgrade', () => {
     expect(second.manifest.assets.runtime?.state).toBe('active')
     expect(await readFile(join(layout.modelsDir, 'model.bin'), 'utf8')).toBe('model')
     expect(await readFile(join(layout.runtimesDir, 'runtime.bin'), 'utf8')).toBe('runtime')
-    expect(await readFile(join(layout.integrationPackageDir, 'bundle.json'), 'utf8')).toBe('{}')
     expect((await readInstallManifest(layout.installManifestPath)).appVersion).toBe('0.2.0')
   })
 
@@ -81,18 +78,11 @@ describe('file-level install and upgrade', () => {
     expect(await readFile(join(layout.appDir, 'index.js'), 'utf8')).toContain('one')
   })
 
-  it('refuses to package when only the integration exists', async () => {
-    const layout = ProductLayout.fromRoot(await tempRoot(), 'installed')
-    await mkdir(layout.integrationPackageDir, { recursive: true })
-    await expect(packInstalled(layout, '0.1.0', { sourceDir: await payload(layout.root, 'one') }))
-      .rejects.toMatchObject({ code: 'INTEGRATION_WITHOUT_APP' })
-  })
-
   it('previews replacement and preservation without creating the app directory', async () => {
     const layout = ProductLayout.fromRoot(await tempRoot(), 'installed')
     const plan = await planInstall(layout, '0.1.0')
     expect(plan.replace).toEqual([layout.appDir])
-    expect(plan.preserve).toEqual([layout.dataDir, layout.modelsDir, layout.runtimesDir, layout.integrationsDir])
+    expect(plan.preserve).toEqual([layout.dataDir, layout.modelsDir, layout.runtimesDir])
     expect(plan.requiresAdmin).toBe(false)
     expect(plan.externalOperations).toContain('windows:register-uninstall-entry')
     await expect(readFile(join(layout.appDir, 'index.js'), 'utf8')).rejects.toThrow()

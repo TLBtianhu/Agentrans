@@ -3,23 +3,23 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/boot/product-layout/README.md
 /:
-  en: ff93fe98fa8d361c
-  zh: 116cd9ea328ba68c
+  en: 7ccdf2299982162d
+  zh: 30e9c23da47ef04a
 /deepseek-ai-dsh-product-layout:
   en: b9263febcae7d33e
   zh: 4429ef8265e7c2d9
 /deepseek-ai-dsh-product-layout/summary:
-  en: b77ec23dd61bd89d
-  zh: f37a0e47056ae17e
+  en: 80fac0769972e8cb
+  zh: 77dd16fecf8e8ed6
 /deepseek-ai-dsh-product-layout/table-of-contents:
   en: 76368b6b1da79c80
   zh: 52384aee991ac542
 /deepseek-ai-dsh-product-layout/use-this-package:
-  en: c18d74f59267c29c
-  zh: 6626181587377eaf
+  en: c75da7a874076d71
+  zh: 0214b73275bd971a
 /deepseek-ai-dsh-product-layout/understand-the-implementation:
-  en: 7b44f5609da5eb73
-  zh: 6bbb4cb41bbf057d
+  en: 52bedca94c75e238
+  zh: fd73502804803903
 /deepseek-ai-dsh-product-layout/model-experience:
   en: 215e7ba838619b7b
   zh: a311da3843709f90
@@ -36,8 +36,8 @@
   en: 3a158a4a3abfaccd
   zh: bc5ae65424976c50
 /deepseek-ai-dsh-product-layout/known-limitations-and-deferred-work:
-  en: c166d2cf46152950
-  zh: 98e95a8aa58cf07b
+  en: 7e287986ca0de385
+  zh: f1e0c07357a16c9e
 /deepseek-ai-dsh-product-layout/known-limitations-and-deferred-work/dev-note:
   en: 0a1253c6f7b5e8b9
   zh: 9f56528562c7c914

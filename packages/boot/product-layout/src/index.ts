@@ -14,12 +14,6 @@ export {
   type InstallManifest,
 } from './manifest.ts'
 export {
-  assertIntegrationUsable,
-  inspectIntegrationState,
-  IntegrationStateError,
-  type IntegrationState,
-} from './integration.ts'
-export {
   activateRuntime,
   relocatePyvenv,
   RuntimeActivationError,

@@ -4,10 +4,8 @@ import { join, relative } from 'node:path'
 import { tmpdir } from 'node:os'
 import {
   activateRuntime,
-  assertIntegrationUsable,
   createInstallManifest,
   ensureProductLayout,
-  inspectIntegrationState,
   ProductLayout,
   readInstallManifest,
   relocatePyvenv,
@@ -34,8 +32,6 @@ describe('ProductLayout', () => {
     expect(layout.dataDir).toBe(join(root, 'data'))
     expect(layout.modelsDir).toBe(join(root, 'models'))
     expect(layout.runtimesDir).toBe(join(root, 'runtime-envs'))
-    expect(layout.integrationsDir).toBe(join(root, 'integrations'))
-    expect(layout.integrationPackageDir).toBe(join(root, 'integrations', 'dsh-agentrans'))
     expect(layout.dshHomeDir).toBe(join(root, 'data', 'dsh', 'home'))
     expect(layout.dshAgentsHomeDir).toBe(join(root, 'data', 'dsh', 'agents'))
     expect(layout.installManifestPath).toBe(join(root, 'data', 'install', 'manifest.json'))
@@ -69,21 +65,6 @@ describe('InstallManifest', () => {
     expect(await readInstallManifest(layout.installManifestPath)).toEqual(manifest)
     await writeFile(layout.installManifestPath, JSON.stringify({ ...manifest, layoutVersion: 99 }), 'utf8')
     await expect(readInstallManifest(layout.installManifestPath)).rejects.toThrow('layoutVersion is unsupported')
-  })
-})
-
-describe('integration state', () => {
-  it('distinguishes empty, app-only, ready, and integration-only states', async () => {
-    const layout = ProductLayout.fromRoot(await tempRoot(), 'installed')
-    expect(await inspectIntegrationState(layout)).toBe('empty')
-    await mkdir(layout.appDir, { recursive: true })
-    expect(await inspectIntegrationState(layout)).toBe('app-only')
-    await mkdir(layout.integrationPackageDir, { recursive: true })
-    expect(await inspectIntegrationState(layout)).toBe('ready')
-    expect(() => assertIntegrationUsable('ready')).not.toThrow()
-    await rm(layout.appDir, { recursive: true })
-    expect(await inspectIntegrationState(layout)).toBe('integration-only')
-    expect(() => assertIntegrationUsable('integration-only')).toThrow(expect.objectContaining({ code: 'INTEGRATION_WITHOUT_APP' }))
   })
 })
 

@@ -17,7 +17,6 @@ export class ProductLayout {
     readonly dataDir: string,
     readonly modelsDir: string,
     readonly runtimesDir: string,
-    readonly integrationsDir: string,
     readonly dshHomeDir: string,
     readonly dshAgentsHomeDir: string,
   ) {}
@@ -42,15 +41,9 @@ export class ProductLayout {
       dataDir,
       join(absoluteRoot, 'models'),
       join(absoluteRoot, 'runtime-envs'),
-      join(absoluteRoot, 'integrations'),
       join(dataDir, 'dsh', 'home'),
       join(dataDir, 'dsh', 'agents'),
     )
-  }
-
-  /** Return the conventional DSH integration package directory inside this root. */
-  get integrationPackageDir(): string {
-    return join(this.integrationsDir, 'dsh-agentrans')
   }
 
   /** Return the install manifest path inside the data subdirectory. */
@@ -70,7 +63,6 @@ export async function ensureProductLayout(layout: ProductLayout): Promise<void> 
     layout.dataDir,
     layout.modelsDir,
     layout.runtimesDir,
-    layout.integrationsDir,
     layout.dshHomeDir,
     layout.dshAgentsHomeDir,
     join(layout.dataDir, 'install'),

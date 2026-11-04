@@ -10,18 +10,17 @@ export interface UninstallScope {
   readonly settings: boolean
   readonly models: boolean
   readonly runtimes: boolean
-  readonly integrations: boolean
   readonly exports: boolean
 }
 
 /** Default scope: remove the application and regenerable cache, preserve user data and assets. */
 export const APP_ONLY_UNINSTALL_SCOPE: UninstallScope = {
-  app: true, sessions: false, settings: false, models: false, runtimes: false, integrations: false, exports: false,
+  app: true, sessions: false, settings: false, models: false, runtimes: false, exports: false,
 }
 
 /** Scope that selects every removable category; execution requires explicit confirmation. */
 export const ALL_UNINSTALL_SCOPE: UninstallScope = {
-  app: true, sessions: true, settings: true, models: true, runtimes: true, integrations: true, exports: true,
+  app: true, sessions: true, settings: true, models: true, runtimes: true, exports: true,
 }
 
 /** Preview of one scoped uninstall before any deletion or external operation. */
@@ -36,8 +35,6 @@ export interface UninstallPlan {
 
 /** Formal host operations required by the selected scope. */
 export interface UninstallHooks {
-  /** Remove the DSH integration through the host's official plugin manager. */
-  readonly removeIntegration?: () => Promise<void>
   /** Remove Windows uninstall and shortcut registrations through the installer backend. */
   readonly removeRegistration?: () => Promise<void>
 }
@@ -81,7 +78,7 @@ export class UninstallExecutionError extends Error {
 }
 
 /**
- * Preview a scoped uninstall without touching files or DSH state.
+ * Preview a scoped uninstall without touching files or external registration state.
  * @param layout - Single-root installation to uninstall.
  * @param scope - Categories selected for deletion.
  * @param options - Confirmation for the all-categories scope.
@@ -109,13 +106,10 @@ export function planUninstall(
   else preserve.push(layout.modelsDir)
   if (scope.runtimes) remove.push(layout.runtimesDir)
   else preserve.push(layout.runtimesDir)
-  if (scope.integrations) remove.push(layout.integrationsDir)
-  else preserve.push(layout.integrationsDir)
   if (scope.exports) remove.push(join(layout.dataDir, 'exports'))
   else preserve.push(join(layout.dataDir, 'exports'))
 
   const externalOperations: string[] = []
-  if (scope.integrations) externalOperations.push('dsh:remove-integration')
   if (scope.app && layout.channel === 'installed') {
     externalOperations.push('windows:remove-uninstall-entry', 'windows:remove-start-menu-shortcut')
   }
@@ -125,32 +119,25 @@ export function planUninstall(
     remove,
     preserve,
     externalOperations,
-    requiresConfirmation: scope.sessions || scope.settings || scope.models || scope.runtimes || scope.integrations || scope.exports,
+    requiresConfirmation: scope.sessions || scope.settings || scope.models || scope.runtimes || scope.exports,
   }
 }
 
 /**
- * Execute an uninstall in integration → selected paths → registration order.
+ * Execute an uninstall in selected paths → registration order.
  * @param plan - Preview previously returned by planUninstall.
- * @param hooks - Official DSH and Windows operation callbacks required by the scope.
+ * @param hooks - Windows registration callback required by the installed app scope.
  * @returns Completed operations in execution order.
  * @throws {UninstallHookError} Before deletion when a required callback is missing.
  * @throws {UninstallExecutionError} With completed operations when a later operation fails.
  */
 export async function executeUninstallPlan(plan: UninstallPlan, hooks: UninstallHooks = {}): Promise<UninstallResult> {
-  if (plan.scope.integrations && hooks.removeIntegration === undefined) {
-    throw new UninstallHookError('DSH integration removal requires the host plugin-management callback')
-  }
   if (plan.scope.app && plan.layout.channel === 'installed' && hooks.removeRegistration === undefined) {
     throw new UninstallHookError('Windows registration removal requires the installer callback')
   }
 
   const completed: string[] = []
   try {
-    if (plan.scope.integrations) {
-      await hooks.removeIntegration?.()
-      completed.push('dsh:remove-integration')
-    }
     for (const path of plan.remove) {
       await rm(path, { recursive: true, force: true })
       completed.push(path)
