@@ -19,6 +19,8 @@ describe('scene animation export', () => {
     expect(html).toContain('Damped oscillator')
     expect(html).toContain('id="play"')
     expect(html).toContain('id="scrub"')
+    expect(html).toContain('id="record"')
+    expect(html).toContain('MediaRecorder')
     expect(html).toContain('spec = {"kind":"function-plot"')
     expect(html).not.toContain('<script src=')
   })

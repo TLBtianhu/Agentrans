@@ -52,6 +52,7 @@ input[type='range'] { flex:1; min-width:160px; accent-color:var(--accent); }
   <div class="readout" id="readout" role="status" aria-live="polite"></div>
   <div class="controls">
     <button id="play" type="button" data-active="false">Play</button>
+    <button id="record" type="button">Download WebM</button>
     <input id="scrub" type="range" min="0" max="1" step="0.001" value="0" aria-label="Timeline">
     <span id="time" class="meta">0.00 s</span>
   </div>
@@ -201,6 +202,29 @@ playButton.addEventListener('click', () => {
 scrub.addEventListener('input', () => {
   progress = Number(scrub.value)
   draw()
+})
+document.getElementById('record').addEventListener('click', () => {
+  if (typeof canvas.captureStream !== 'function' || typeof MediaRecorder === 'undefined') return
+  const stream = canvas.captureStream(timeline.fps)
+  const recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9' })
+  const chunks = []
+  recorder.ondataavailable = event => { if (event.data.size > 0) chunks.push(event.data) }
+  recorder.onstop = () => {
+    const blob = new Blob(chunks, { type: 'video/webm' })
+    const url = URL.createObjectURL(blob)
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = 'scene-animation.webm'
+    anchor.click()
+    URL.revokeObjectURL(url)
+    for (const track of stream.getTracks()) track.stop()
+  }
+  recorder.start()
+  if (!playing) playButton.click()
+  window.setTimeout(() => {
+    recorder.stop()
+    if (playing) playButton.click()
+  }, timeline.duration * 1000)
 })
 document.getElementById('legend').innerHTML = functions.map((fn, index) =>
   '<span><i class="' + (index === 0 ? '' : 'alt') + '"></i>' + fn.label + '</span>').join('')

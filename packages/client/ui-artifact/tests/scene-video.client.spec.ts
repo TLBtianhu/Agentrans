@@ -21,8 +21,8 @@ describe('scene video recording', () => {
   it('records the canvas stream into a WebM download', () => {
     const canvas = document.createElement('canvas')
     const tracks = [{ stop: vi.fn() }]
-    const stream = Object.assign(Object.create(MediaStream.prototype), { getTracks: () => tracks })
-    canvas.captureStream = vi.fn(() => stream)
+    const stream: unknown = { getTracks: () => tracks }
+    canvas.captureStream = vi.fn(() => stream as MediaStream)
     class Recorder {
       ondataavailable: ((event: { data: Blob }) => void) | undefined
       onstop: (() => void) | undefined
