@@ -136,6 +136,32 @@ describe('ArtifactNodeView', () => {
     view.unmount()
   })
 
+  it('exports a SceneSpec animation as a downloadable HTML document', () => {
+    const base = props(1)
+    base.node = {
+      ...base.node,
+      data: {
+        artifactId: 'artifact-a' as ArtifactId, revision: 1, format: 'scene', title: 'Plot', presentation: 'inline',
+        spec: {
+          kind: 'function-plot',
+          functions: [{ id: 'sine', label: 'sin(x)', expression: 'sin(x)' }],
+          parameters: { a: { value: 1, min: -2, max: 2, step: 0.1 } },
+          viewport: { x: [-6, 6], y: [-2, 2] },
+          trace: { x: 1, derivative: true, integral: false },
+        },
+      },
+    }
+    const create = vi.fn(() => 'blob:animation')
+    const revoke = vi.fn()
+    vi.stubGlobal('URL', { ...URL, createObjectURL: create, revokeObjectURL: revoke })
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+    render(<ArtifactNodeView {...base} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Export animation' }))
+    expect(click).toHaveBeenCalledOnce()
+    expect(create).toHaveBeenCalledOnce()
+    expect(revoke).toHaveBeenCalledWith('blob:animation')
+  })
+
   it('forks an inquiry branch from the Artifact checkpoint without changing placement', () => {
     const base = props(1)
     render(<ArtifactNodeView {...base} />)

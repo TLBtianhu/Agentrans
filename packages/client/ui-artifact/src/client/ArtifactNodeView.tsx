@@ -6,6 +6,7 @@ import type { PropsStore } from '@deepseek-ai/dsh-client-store'
 import { Button, IconBranchOutlineRegular, Tooltip } from '@deepseek-ai/dsh-client-ui-primitives'
 import { createArtifactDocument } from './document.ts'
 import { FunctionPlotView } from './FunctionPlotView.tsx'
+import { buildSceneAnimationHtml } from './scene-animation.ts'
 import { parseArtifactAction, type PendingArtifactAction } from './messages.ts'
 import { artifactPresentationStore, type ArtifactDockEntry } from './presentation.ts'
 import type { JsonValue } from '@deepseek-ai/dsh-util-values'
@@ -213,6 +214,20 @@ export function ArtifactCard({
             onClick={() => { setShowSource(value => !value) }}>
             {showSource ? t('view.preview') : t('view.source')}
           </Button>
+          {placementControls && snapshot.format === 'scene' && (
+            <Button size="sm" variant="ghost" className={css.placement} aria-label={t('action.exportAnimation')}
+              onClick={() => {
+                const blob = new Blob([buildSceneAnimationHtml(snapshot.spec, snapshot.title)], { type: 'text/html' })
+                const url = URL.createObjectURL(blob)
+                const anchor = document.createElement('a')
+                anchor.href = url
+                anchor.download = `${snapshot.artifactId}-animation.html`
+                anchor.click()
+                URL.revokeObjectURL(url)
+              }}>
+              {t('action.exportAnimation')}
+            </Button>
+          )}
           {placementControls && onBranch !== undefined && (
             <Tooltip label={t('action.branch')} portal>
               <Button size="sm" variant="ghost" className={css.placement} aria-label={t('action.branch')}
