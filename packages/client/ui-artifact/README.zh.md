@@ -45,7 +45,7 @@ iframe 操作先进入卡片内的有界待发送队列。点击“发送给 Age
 
 ### 比较组
 
-带 `comparison: { group, role }` 的快照使用独立 Conversation Definition。control 和 variant 并排呈现，同时保留独立参数和修订。共享 `artifact-command` 消息同步播放、暂停、单步和重置。本地 `artifact-state` 报告提供当前参数，但不会唤醒 Agent。“比较结果”通过 control Artifact 准入一条包含两侧当前状态的 `comparison.completed` 操作。
+带 `comparison: { group, role }` 的快照使用独立 Conversation Definition。control 和 variant 并排呈现，同时保留独立参数和修订。共享 `artifact-command` 消息同步播放、暂停、单步和重置。本地 `artifact-state` 报告提供当前参数，但不会唤醒 Agent。原生 SceneSpec 通过本地回调上报同一份状态，而不是 iframe 消息，因此没有 iframe 也能比较。“比较结果”通过 control Artifact 准入一条包含两侧当前状态的 `comparison.completed` 操作。
 
 ### SceneSpec 原语
 

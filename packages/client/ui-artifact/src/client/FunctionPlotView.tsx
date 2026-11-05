@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
-import { evaluateExpression, parseExpression } from '@deepseek-ai/dsh-util-values'
+import { evaluateExpression, parseExpression, type JsonValue } from '@deepseek-ai/dsh-util-values'
 import type { FunctionPlotSpec } from '@deepseek-ai/dsh-artifact/scene'
 import type { ArtifactId } from '@deepseek-ai/dsh-artifact/types'
 import type { ArtifactPlacement, RecordArtifactAction } from './protocol.ts'
@@ -14,6 +14,7 @@ interface FunctionPlotViewProps {
   readonly revision: number
   readonly placement: ArtifactPlacement
   readonly recordAction: RecordArtifactAction
+  readonly onStateChange?: ((state: JsonValue) => void) | undefined
   readonly t: PropsLocale<'artifact'>['t']
 }
 
@@ -38,7 +39,7 @@ const ROWS = 4
  * @param props - SceneSpec, Artifact identity, placement, confirmation callback, and locale seat.
  * @returns An interactive native function-plot editor.
  */
-export function FunctionPlotView({ spec, artifactId, revision, placement, recordAction, t }: FunctionPlotViewProps) {
+export function FunctionPlotView({ spec, artifactId, revision, placement, recordAction, onStateChange, t }: FunctionPlotViewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const plotRef = useRef<HTMLDivElement | null>(null)
   const dragRef = useRef({ active: false, x: 0 })
@@ -284,6 +285,16 @@ export function FunctionPlotView({ spec, artifactId, revision, placement, record
   const derivative = derivativeAt(traceX)
   const integral = integralAt(traceX)
   const currentValue = currentFunction ? evaluateAt(currentFunction, traceX) : 0
+
+  // A comparison host reads the current analysis as a local state report;
+  // reporting it never wakes the Agent by itself.
+  useEffect(() => {
+    onStateChange?.({
+      x: traceX, parameters, derivative, integral, zoom: scale,
+      ...(currentFunction === undefined ? {} : { function: currentFunction.id }),
+    })
+  }, [onStateChange, parameters, traceX, derivative, integral, scale, currentFunction])
+
   const readout: readonly { readonly symbol: string; readonly value: string }[] = [
     { symbol: t('scene.trace'), value: traceX.toFixed(2) },
     { symbol: 'f(x)', value: currentFunction ? currentValue.toFixed(3) : '—' },

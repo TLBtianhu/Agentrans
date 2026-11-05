@@ -8,6 +8,7 @@ import { createArtifactDocument } from './document.ts'
 import { FunctionPlotView } from './FunctionPlotView.tsx'
 import { parseArtifactAction, type PendingArtifactAction } from './messages.ts'
 import { artifactPresentationStore, type ArtifactDockEntry } from './presentation.ts'
+import type { JsonValue } from '@deepseek-ai/dsh-util-values'
 import type { ArtifactNodeInjected, ArtifactPlacement, ArtifactSnapshot, ViewRequest } from './protocol.ts'
 import css from './ArtifactNodeView.module.css'
 
@@ -32,6 +33,7 @@ type ArtifactCardProps = Pick<ArtifactNodeViewProps, 'recordAction' | 't'> & {
   readonly onActivateDock?: (artifactId: ArtifactSnapshot['artifactId']) => void
   readonly onCloseDock?: (artifactId: ArtifactSnapshot['artifactId']) => void
   readonly onBranch?: () => void
+  readonly onSceneState?: (state: JsonValue) => void
   readonly onFrame?: (frame: HTMLIFrameElement | null) => void
 }
 
@@ -65,7 +67,7 @@ function updatePending(state: PendingState, update: PendingUpdate): PendingState
 /** Pure Artifact surface: placement, dock tabs, and confirmation UI arrive as plain props. */
 export function ArtifactCard({
   snapshot, origin, recordAction, t, placement, placementControls = true,
-  docks = [], activeDockId = null, onPlacement, onActivateDock, onCloseDock, onBranch, onFrame,
+  docks = [], activeDockId = null, onPlacement, onActivateDock, onCloseDock, onBranch, onSceneState, onFrame,
 }: ArtifactCardProps) {
   const [showSource, setShowSource] = useState(false)
   const [{ actions: pendingActions, overflow }, dispatchPending] = useReducer(updatePending, { actions: [], overflow: false })
@@ -238,7 +240,7 @@ export function ArtifactCard({
           ? <pre className={css.source} aria-label={t('source.label')}>{snapshot.format === 'html' ? snapshot.source : JSON.stringify(snapshot.spec, null, 2)}</pre>
           : snapshot.format === 'scene'
             ? <FunctionPlotView spec={snapshot.spec} artifactId={snapshot.artifactId} revision={snapshot.revision}
-              placement={placementControls ? placement : 'inline'} recordAction={recordAction} t={t} />
+              placement={placementControls ? placement : 'inline'} recordAction={recordAction} onStateChange={onSceneState} t={t} />
             : <iframe ref={setFrame} className={css.frame} srcDoc={artifactDocument} sandbox="allow-scripts"
               title={t('preview.frame', { title: snapshot.title })} data-artifact-frame />}
       </div>

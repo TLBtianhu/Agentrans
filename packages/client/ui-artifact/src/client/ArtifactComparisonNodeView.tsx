@@ -34,6 +34,14 @@ export function ArtifactComparisonNodeView({ node, sessionId, useSessions, recor
 
   const onControlFrame = useCallback((frame: HTMLIFrameElement | null) => { controlRef.current = frame }, [])
   const onVariantFrame = useCallback((frame: HTMLIFrameElement | null) => { variantRef.current = frame }, [])
+  // A native SceneSpec has no iframe contentWindow, so it reports through the
+  // same local channel as the iframe's artifact-state message.
+  const onControlState = useCallback((state: JsonValue) => {
+    setStates(previous => ({ ...previous, control: state }))
+  }, [])
+  const onVariantState = useCallback((state: JsonValue) => {
+    setStates(previous => ({ ...previous, variant: state }))
+  }, [])
 
   useEffect(() => {
     const onMessage = (event: MessageEvent): void => {
@@ -99,11 +107,11 @@ export function ArtifactComparisonNodeView({ node, sessionId, useSessions, recor
         {comparison.control === undefined
           ? <div className={css.placeholder}>{t('comparison.waiting')}</div>
           : <ArtifactCard snapshot={comparison.control} origin={origin} recordAction={recordAction} t={t}
-            placement="inline" placementControls={false} onFrame={onControlFrame} />}
+            placement="inline" placementControls={false} onSceneState={onControlState} onFrame={onControlFrame} />}
         {comparison.variant === undefined
           ? <div className={css.placeholder}>{t('comparison.waiting')}</div>
           : <ArtifactCard snapshot={comparison.variant} origin={origin} recordAction={recordAction} t={t}
-            placement="inline" placementControls={false} onFrame={onVariantFrame} />}
+            placement="inline" placementControls={false} onSceneState={onVariantState} onFrame={onVariantFrame} />}
       </div>
       {!ready && <p className={css.comparisonStatus}>{t('comparison.waiting')}</p>}
       {phase === 'sent' && <p className={css.comparisonStatus}>{t('comparison.sent')}</p>}

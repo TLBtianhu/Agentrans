@@ -51,7 +51,7 @@ describe('FunctionPlotView', () => {
     view()
     fireEvent.click(screen.getByRole('button', { name: 'Step' }))
     expect(screen.getByText('0.50')).toBeTruthy()
-    fireEvent.click(screen.getByRole('button', { name: 'Reset', exact: true }))
+    fireEvent.click(screen.getByRole('button', { name: 'Reset' }))
     expect(screen.getByText('0.40')).toBeTruthy()
   })
 

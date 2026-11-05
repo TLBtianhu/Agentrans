@@ -71,4 +71,14 @@ describe('SceneSpec validation and persistence', () => {
       .toThrow(expect.objectContaining({ code: 'BAD_SCENE_SPEC' }))
     expect(agent.session.snapshotEvents().filter(event => event.type === 'artifact/upsert')).toHaveLength(0)
   })
+
+  it('preserves comparison metadata on a SceneSpec snapshot', async () => {
+    const ctx = new Context()
+    contexts.push(ctx)
+    await ctx.plugin(AgentRegistry)
+    await ctx.plugin(ArtifactService)
+    const agent = makeAgent(ctx)
+    const snapshot = ctx.artifacts.prepare(agent, input({ comparison: { group: 'damping-study', role: 'control' } }))
+    expect(snapshot.comparison).toEqual({ group: 'damping-study', role: 'control' })
+  })
 })
