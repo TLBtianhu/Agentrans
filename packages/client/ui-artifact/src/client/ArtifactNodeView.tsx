@@ -5,9 +5,7 @@ import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-cli
 import type { PropsStore } from '@deepseek-ai/dsh-client-store'
 import { Button, IconBranchOutlineRegular, Tooltip } from '@deepseek-ai/dsh-client-ui-primitives'
 import { createArtifactDocument } from './document.ts'
-import { FlowchartView } from './FlowchartView.tsx'
-import { FunctionPlotView } from './FunctionPlotView.tsx'
-import { ParticleSystemView } from './ParticleSystemView.tsx'
+import { SceneNodeView } from './SceneNodeView.tsx'
 import { buildSceneAnimationHtml } from './scene-animation.ts'
 import { parseArtifactAction, type PendingArtifactAction } from './messages.ts'
 import { artifactPresentationStore, type ArtifactDockEntry } from './presentation.ts'
@@ -256,14 +254,8 @@ export function ArtifactCard({
         {showSource
           ? <pre className={css.source} aria-label={t('source.label')}>{snapshot.format === 'html' ? snapshot.source : JSON.stringify(snapshot.spec, null, 2)}</pre>
           : snapshot.format === 'scene'
-            ? snapshot.spec.kind === 'flowchart'
-              ? <FlowchartView spec={snapshot.spec} artifactId={snapshot.artifactId} revision={snapshot.revision}
-                placement={placementControls ? placement : 'inline'} recordAction={recordAction} onStateChange={onSceneState} t={t} />
-              : snapshot.spec.kind === 'particle-system'
-                ? <ParticleSystemView spec={snapshot.spec} artifactId={snapshot.artifactId} revision={snapshot.revision}
-                  placement={placementControls ? placement : 'inline'} recordAction={recordAction} onStateChange={onSceneState} t={t} />
-                : <FunctionPlotView spec={snapshot.spec} artifactId={snapshot.artifactId} revision={snapshot.revision}
-                  placement={placementControls ? placement : 'inline'} recordAction={recordAction} onStateChange={onSceneState} t={t} />
+            ? <SceneNodeView spec={snapshot.spec} artifactId={snapshot.artifactId} revision={snapshot.revision}
+              placement={placementControls ? placement : 'inline'} recordAction={recordAction} onStateChange={onSceneState} t={t} />
             : <iframe ref={setFrame} className={css.frame} srcDoc={artifactDocument} sandbox="allow-scripts"
               title={t('preview.frame', { title: snapshot.title })} data-artifact-frame />}
       </div>

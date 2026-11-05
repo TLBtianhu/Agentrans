@@ -123,7 +123,7 @@ function simulateParticles(time) {
 function draw() {
   if (isFlowchart) {
     pathIndex = Math.min(path.length - 1, Math.floor(progress * path.length))
-    SceneRenderers.renderFlowchart(spec, canvas, canvas.width, canvas.height, { selected: path[pathIndex] ?? path[0], pathIndex })
+    SceneRenderers[SceneRenderers.scenePrimitives[spec.kind].rendererName](spec, canvas, canvas.width, canvas.height, { selected: path[pathIndex] ?? path[0], pathIndex })
     readout.innerHTML = [
       ['node', path[pathIndex] ?? '—'],
       ['path', path.length > 0 ? (pathIndex + 1) + '/' + path.length : '—'],
@@ -135,7 +135,7 @@ function draw() {
   }
   if (isParticleSystem) {
     const { particles, trails } = simulateParticles(progress * timeline.duration)
-    SceneRenderers.renderParticleSystem(spec, canvas, canvas.width, canvas.height, { time: progress * timeline.duration, particles, trails })
+    SceneRenderers[SceneRenderers.scenePrimitives[spec.kind].rendererName](spec, canvas, canvas.width, canvas.height, { time: progress * timeline.duration, particles, trails })
     readout.innerHTML = [
       ['time', (progress * timeline.duration).toFixed(2)],
       ['particles', String(particles.length)],
@@ -147,7 +147,7 @@ function draw() {
   }
   const [xMin, xMax] = spec.viewport.x
   const traceX = xMin + progress * (xMax - xMin)
-  SceneRenderers.renderFunctionPlot(spec, canvas, canvas.width, canvas.height, {
+  SceneRenderers[scenePrimitives[spec.kind].rendererName](spec, canvas, canvas.width, canvas.height, {
     traceX, scale: 1, pan: 0, parameters,
     showDerivative: spec.trace.derivative, showIntegral: spec.trace.integral,
   })

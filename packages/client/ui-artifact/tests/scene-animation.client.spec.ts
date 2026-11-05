@@ -38,7 +38,7 @@ describe('scene animation export', () => {
     }
     const html = buildSceneAnimationHtml(flowchart, 'Inquiry flow')
     expect(html).toContain('"kind":"flowchart"')
-    expect(html).toContain('SceneRenderers.renderFlowchart')
+    expect(html).toContain('scenePrimitives')
     expect(html).toContain('pathIndex')
     expect(html).toContain('id="record"')
   })
@@ -53,7 +53,7 @@ describe('scene animation export', () => {
     }
     const html = buildSceneAnimationHtml(system, 'Gravity lab')
     expect(html).toContain('"kind":"particle-system"')
-    expect(html).toContain('SceneRenderers.renderParticleSystem')
+    expect(html).toContain('scenePrimitives')
     expect(html).toContain('spec.timeStep')
     expect(html).toContain('isFlowchart || isParticleSystem ? [] : spec.functions.map')
     expect(html).toContain('id="record"')
