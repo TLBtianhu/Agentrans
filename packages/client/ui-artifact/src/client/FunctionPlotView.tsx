@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
 import { evaluateExpression, parseExpression, type JsonValue } from '@deepseek-ai/dsh-util-values'
+import { recordSceneVideo } from './scene-video.ts'
 import type { FunctionPlotSpec } from '@deepseek-ai/dsh-artifact/scene'
 import type { ArtifactId } from '@deepseek-ai/dsh-artifact/types'
 import type { ArtifactPlacement, RecordArtifactAction } from './protocol.ts'
@@ -54,6 +55,8 @@ export function FunctionPlotView({ spec, artifactId, revision, placement, record
   const [scale, setScale] = useState(1)
   const [pan, setPan] = useState(0)
   const [playing, setPlaying] = useState(false)
+  const [recording, setRecording] = useState(false)
+  const recordingRef = useRef<{ stop: () => void } | null>(null)
 
   const functions = useMemo<readonly ParsedFunction[]>(() => spec.functions.map(fn => ({
     id: fn.id, label: fn.label, node: parseExpression(fn.expression, Object.keys(spec.parameters)),
@@ -300,6 +303,30 @@ export function FunctionPlotView({ spec, artifactId, revision, placement, record
     }, true)
   }
 
+  const exportVideo = (): void => {
+    if (recording) {
+      recordingRef.current?.stop()
+      recordingRef.current = null
+      setRecording(false)
+      setPlaying(false)
+      return
+    }
+    const canvas = canvasRef.current
+    if (canvas === null) return
+    const handle = recordSceneVideo(spec, canvas)
+    if (handle === null) return
+    recordingRef.current = handle
+    setRecording(true)
+    setPlaying(true)
+    const duration = spec.timeline?.duration ?? 8
+    window.setTimeout(() => {
+      recordingRef.current?.stop()
+      recordingRef.current = null
+      setRecording(false)
+      setPlaying(false)
+    }, duration * 1000)
+  }
+
   const derivative = derivativeAt(traceX)
   const integral = integralAt(traceX)
   const currentValue = currentFunction ? evaluateAt(currentFunction, traceX) : 0
@@ -404,6 +431,8 @@ export function FunctionPlotView({ spec, artifactId, revision, placement, record
           <Button size="sm" variant="ghost" className={css.toggle} onClick={reset}>{t('scene.reset')}</Button>
         </div>
         <Button size="sm" variant="outline" onClick={() => { void confirm() }}>{t('scene.confirm')}</Button>
+        <Button size="sm" variant="ghost" className={css.toggle} data-selected={recording ? '' : undefined}
+          aria-pressed={recording} onClick={exportVideo}>{recording ? t('scene.stopRecording') : t('scene.exportVideo')}</Button>
         <p className={css.hint}>{t('scene.hint')}</p>
       </aside>
     </div>
