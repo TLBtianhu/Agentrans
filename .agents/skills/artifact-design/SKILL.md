@@ -7,7 +7,7 @@ description: Create or revise beautiful, interactive HTML Artifacts, simulations
 
 ## Summary
 
-Use this skill when an Artifact should feel like a designed explanation, not an HTML placeholder. Start from a complete template, keep its visual hierarchy and controls, and replace only the domain model, copy, and interaction semantics. Every Artifact remains self-contained: no CDN, remote font, image-generation model, video-generation model, or network dependency is allowed. Interactive explanations default to the Artifact system (SceneSpec or HTML cards in the conversation), not to workspace files; only write a workspace file when the user explicitly asks for a standalone HTML file or program.
+Use this skill when an Artifact should feel like a designed explanation, not an HTML placeholder. Start from a complete template, keep its visual hierarchy and controls, and replace only the domain model, copy, and interaction semantics. Every Artifact remains self-contained: no CDN, remote font, image-generation model, video-generation model, or network dependency is allowed. Interactive explanations default to the Artifact system (SceneSpec or HTML cards in the conversation), not to workspace files; only write a workspace file when the user explicitly asks for a standalone HTML file or program. The display layer is pure text and structured formatted code text (SceneSpec, HTML, or SVG): photos, searched images, and remote image URLs are not first-level display content. Use structured markup (SVG, charts, SceneSpec) instead of pixels.
 
 ## Table of Contents
 
