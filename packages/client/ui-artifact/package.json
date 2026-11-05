@@ -40,7 +40,7 @@
     }
   },
   "scripts": {
-    "bundle": "node scripts/build-scene-expr.mjs && tsdown",
+    "bundle": "node scripts/build-scene-expr.mjs && node scripts/build-scene-renderers.mjs && tsdown",
     "watch": "tsdown --watch"
   },
   "license": "MIT",

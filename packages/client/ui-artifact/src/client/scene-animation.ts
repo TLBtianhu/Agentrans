@@ -1,6 +1,7 @@
 /** Standalone HTML animation export for validated SceneSpec values. */
 import type { FunctionPlotSpec, FlowchartSpec, ParticleSystemSpec } from '@deepseek-ai/dsh-artifact/scene'
 import { sceneExprBundle } from './scene-expr.generated.ts'
+import { sceneRenderersBundle } from './scene-renderers.generated.ts'
 
 function escapeHtml(value: string): string {
   return value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
@@ -8,9 +9,9 @@ function escapeHtml(value: string): string {
 
 /**
  * Build a self-contained HTML animation program from a validated SceneSpec.
- * @param spec - Function-plot SceneSpec to replay.
+ * @param spec - SceneSpec to replay (function-plot, flowchart, or particle-system).
  * @param title - Document title for the exported page.
- * @returns A complete HTML document with an inline parser, scene data, and timeline player.
+ * @returns A complete HTML document with an inline parser, shared renderers, and timeline player.
  */
 export function buildSceneAnimationHtml(spec: FunctionPlotSpec | FlowchartSpec | ParticleSystemSpec, title: string): string {
   const specJson = JSON.stringify(spec)
@@ -48,7 +49,7 @@ input[type='range'] { flex:1; min-width:160px; accent-color:var(--accent); }
   <h1>${titleHtml}</h1>
   <p class="meta">SceneSpec animation · deterministic replay</p>
   <div class="legend" id="legend"></div>
-  <canvas id="plot" width="900" height="420" role="img" aria-label="Function plot animation"></canvas>
+  <canvas id="plot" width="900" height="420" role="img" aria-label="SceneSpec animation"></canvas>
   <div class="readout" id="readout" role="status" aria-live="polite"></div>
   <div class="controls">
     <button id="play" type="button" data-active="false">Play</button>
@@ -58,6 +59,7 @@ input[type='range'] { flex:1; min-width:160px; accent-color:var(--accent); }
   </div>
 </main>
 <script>${sceneExprBundle}</script>
+<script>${sceneRenderersBundle}</script>
 <script>
 const spec = ${specJson}
 const isFlowchart = spec.kind === 'flowchart'
@@ -73,7 +75,6 @@ const playButton = document.getElementById('play')
 const timeLabel = document.getElementById('time')
 const readout = document.getElementById('readout')
 const timeline = ${JSON.stringify(timeline)}
-const totalFrames = Math.max(1, Math.round(timeline.duration * timeline.fps))
 let progress = 0
 let playing = false
 let frame = 0
@@ -98,170 +99,7 @@ function integralAt(x) {
   }
   return total * width
 }
-function draw() {
-  if (isFlowchart) { drawFlowchart(); return }
-  if (isParticleSystem) { drawParticleSystem(); return }
-  const [xMin, xMax] = spec.viewport.x
-  const [yMin, yMax] = spec.viewport.y
-  const xToPixel = x => ((x - xMin) / (xMax - xMin)) * canvas.width
-  const yToPixel = y => canvas.height - ((y - yMin) / (yMax - yMin)) * canvas.height
-  const pixelToX = pixel => xMin + (pixel / canvas.width) * (xMax - xMin)
-  const traceX = xMin + progress * (xMax - xMin)
-  context.clearRect(0, 0, canvas.width, canvas.height)
-  context.strokeStyle = getComputedStyle(canvas).getPropertyValue('--grid')
-  context.lineWidth = 1
-  for (let index = 0; index <= 6; index++) {
-    const x = xMin + (index / 6) * (xMax - xMin)
-    context.beginPath(); context.moveTo(xToPixel(x), 0); context.lineTo(xToPixel(x), canvas.height); context.stroke()
-  }
-  for (let index = 0; index <= 4; index++) {
-    const y = yMin + (index / 4) * (yMax - yMin)
-    context.beginPath(); context.moveTo(0, yToPixel(y)); context.lineTo(canvas.width, yToPixel(y)); context.stroke()
-  }
-  const accent = getComputedStyle(canvas).getPropertyValue('--accent')
-  const good = getComputedStyle(canvas).getPropertyValue('--good')
-  if (spec.trace.integral) {
-    context.fillStyle = good
-    context.globalAlpha = 0.1
-    context.beginPath()
-    context.moveTo(xToPixel(xMin), yToPixel(0))
-    for (let pixel = 0; pixel <= canvas.width; pixel++) {
-      const x = pixelToX(pixel)
-      if (x > traceX) break
-      context.lineTo(pixel, yToPixel(evaluateAt(functions[0], x)))
-    }
-    context.lineTo(xToPixel(traceX), yToPixel(0))
-    context.closePath(); context.fill(); context.globalAlpha = 1
-  }
-  for (const [index, fn] of functions.entries()) {
-    context.strokeStyle = index === 0 ? accent : good
-    context.lineWidth = index === 0 ? 2.5 : 1.5
-    context.globalAlpha = index === 0 ? 1 : 0.5
-    context.beginPath()
-    let drawing = false
-    for (let pixel = 0; pixel <= canvas.width; pixel++) {
-      const y = evaluateAt(fn, pixelToX(pixel))
-      if (!Number.isFinite(y)) { drawing = false; continue }
-      if (drawing) context.lineTo(pixel, yToPixel(y))
-      else { context.moveTo(pixel, yToPixel(y)); drawing = true }
-    }
-    context.stroke()
-  }
-  context.globalAlpha = 1
-  if (spec.trace.derivative) {
-    const slope = derivativeAt(traceX)
-    const value = evaluateAt(functions[0], traceX)
-    context.strokeStyle = accent
-    context.setLineDash([4, 4])
-    context.beginPath()
-    for (let pixel = 0; pixel <= canvas.width; pixel++) {
-      const x = pixelToX(pixel)
-      const y = value + slope * (x - traceX)
-      if (pixel === 0) context.moveTo(pixel, yToPixel(y))
-      else context.lineTo(pixel, yToPixel(y))
-    }
-    context.stroke(); context.setLineDash([])
-  }
-  context.strokeStyle = getComputedStyle(canvas).getPropertyValue('--muted')
-  context.setLineDash([3, 3])
-  context.beginPath(); context.moveTo(xToPixel(traceX), 0); context.lineTo(xToPixel(traceX), canvas.height); context.stroke()
-  context.setLineDash([])
-  context.beginPath(); context.arc(xToPixel(traceX), yToPixel(evaluateAt(functions[0], traceX)), 4.5, 0, Math.PI * 2)
-  context.fillStyle = good; context.fill()
-  context.fillStyle = getComputedStyle(canvas).getPropertyValue('--muted')
-  context.font = '10px ui-monospace, monospace'
-  for (let index = 0; index <= 6; index++) {
-    const x = xMin + (index / 6) * (xMax - xMin)
-    context.fillText(x.toFixed(1), xToPixel(x) + 4, canvas.height - 4)
-  }
-  for (let index = 0; index <= 4; index++) {
-    const y = yMin + (index / 4) * (yMax - yMin)
-    context.fillText(y.toFixed(1), 5, yToPixel(y) - 7)
-  }
-  const value = evaluateAt(functions[0], traceX)
-  readout.innerHTML = [
-    ['x', traceX.toFixed(2)],
-    ['f(x)', value.toFixed(3)],
-    ['f′(x)', derivativeAt(traceX).toFixed(3)],
-    ['∫', integralAt(traceX).toFixed(3)],
-  ].map(([label, text]) => '<div><span>' + label + '</span><strong>' + text + '</strong></div>').join('')
-  timeLabel.textContent = (progress * timeline.duration).toFixed(2) + ' s'
-}
-function drawFlowchart() {
-  const nodes = spec.nodes
-  pathIndex = Math.min(path.length - 1, Math.floor(progress * path.length))
-  const xs = nodes.map(node => node.x)
-  const ys = nodes.map(node => node.y)
-  const minX = Math.min(...xs)
-  const maxX = Math.max(...xs)
-  const minY = Math.min(...ys)
-  const maxY = Math.max(...ys)
-  const spanX = maxX - minX || 1
-  const spanY = maxY - minY || 1
-  const position = node => ({
-    x: 70 + ((node.x - minX) / spanX) * (canvas.width - 140),
-    y: 60 + ((node.y - minY) / spanY) * (canvas.height - 120),
-  })
-  const currentId = path[pathIndex] ?? path[0]
-  const accent = getComputedStyle(canvas).getPropertyValue('--accent')
-  const good = getComputedStyle(canvas).getPropertyValue('--good')
-  const muted = getComputedStyle(canvas).getPropertyValue('--muted')
-  const ink = getComputedStyle(canvas).getPropertyValue('--ink')
-  const surface = getComputedStyle(canvas).getPropertyValue('--bg')
-  context.clearRect(0, 0, canvas.width, canvas.height)
-  for (const edge of spec.edges) {
-    const from = nodes.find(node => node.id === edge.from)
-    const to = nodes.find(node => node.id === edge.to)
-    if (!from || !to) continue
-    const a = position(from)
-    const b = position(to)
-    const active = currentId === edge.from || currentId === edge.to
-    context.strokeStyle = active ? accent : muted
-    context.globalAlpha = active ? 0.9 : 0.45
-    context.lineWidth = active ? 2 : 1
-    context.beginPath(); context.moveTo(a.x, a.y); context.lineTo(b.x, b.y); context.stroke()
-    const angle = Math.atan2(b.y - a.y, b.x - a.x)
-    context.beginPath()
-    context.moveTo(b.x, b.y)
-    context.lineTo(b.x - 10 * Math.cos(angle - Math.PI / 6), b.y - 10 * Math.sin(angle - Math.PI / 6))
-    context.lineTo(b.x - 10 * Math.cos(angle + Math.PI / 6), b.y - 10 * Math.sin(angle + Math.PI / 6))
-    context.closePath(); context.fillStyle = active ? accent : muted; context.fill()
-    if (edge.label) {
-      context.fillStyle = muted
-      context.font = '10px ui-sans-serif, system-ui'
-      context.fillText(edge.label, (a.x + b.x) / 2 + 6, (a.y + b.y) / 2 - 6)
-    }
-  }
-  context.globalAlpha = 1
-  for (const node of nodes) {
-    const { x, y } = position(node)
-    const isCurrent = node.id === currentId
-    const width = Math.max(88, node.label.length * 7 + 22)
-    const height = 38
-    context.beginPath()
-    context.roundRect(x - width / 2, y - height / 2, width, height, 8)
-    context.fillStyle = isCurrent ? accent : surface
-    context.fill()
-    context.lineWidth = isCurrent ? 2 : 1
-    context.strokeStyle = isCurrent ? accent : muted
-    context.stroke()
-    context.fillStyle = isCurrent ? surface : ink
-    context.font = '12px ui-sans-serif, system-ui'
-    context.textAlign = 'center'
-    context.textBaseline = 'middle'
-    context.fillText(node.label, x, y)
-  }
-  context.textAlign = 'start'
-  readout.innerHTML = [
-    ['node', currentId ?? '—'],
-    ['path', path.length > 0 ? (pathIndex + 1) + '/' + path.length : '—'],
-    ['nodes', String(nodes.length)],
-    ['edges', String(spec.edges.length)],
-  ].map(([label, text]) => '<div><span>' + label + '</span><strong>' + text + '</strong></div>').join('')
-  timeLabel.textContent = (progress * timeline.duration).toFixed(2) + ' s'
-}
-function drawParticleSystem() {
-  const time = progress * timeline.duration
+function simulateParticles(time) {
   const steps = Math.max(0, Math.floor(time / spec.timeStep))
   const particles = spec.particles.map(particle => {
     let x = particle.x
@@ -278,70 +116,48 @@ function drawParticleSystem() {
     }
     return { ...particle, x, y, vx, vy, trail }
   })
-  const xs = particles.map(particle => particle.x)
-  const ys = particles.map(particle => particle.y)
-  const minX = Math.min(...xs, 0)
-  const maxX = Math.max(...xs, 1)
-  const minY = Math.min(...ys, 0)
-  const maxY = Math.max(...ys, 1)
-  const spanX = maxX - minX || 1
-  const spanY = maxY - minY || 1
-  const xToPixel = x => 60 + ((x - minX) / spanX) * (canvas.width - 120)
-  const yToPixel = y => canvas.height - 60 - ((y - minY) / spanY) * (canvas.height - 120)
-  const accent = getComputedStyle(canvas).getPropertyValue('--accent')
-  const good = getComputedStyle(canvas).getPropertyValue('--good')
-  const muted = getComputedStyle(canvas).getPropertyValue('--muted')
-  const ink = getComputedStyle(canvas).getPropertyValue('--ink')
-  context.clearRect(0, 0, canvas.width, canvas.height)
-  context.strokeStyle = muted
-  context.globalAlpha = 0.25
-  for (let index = 0; index <= 6; index++) {
-    const x = minX + (index / 6) * spanX
-    context.beginPath(); context.moveTo(xToPixel(x), 0); context.lineTo(xToPixel(x), canvas.height); context.stroke()
+  const trails = {}
+  for (const particle of particles) trails[particle.id] = particle.trail
+  return { particles, trails }
+}
+function draw() {
+  if (isFlowchart) {
+    pathIndex = Math.min(path.length - 1, Math.floor(progress * path.length))
+    SceneRenderers.renderFlowchart(spec, canvas, canvas.width, canvas.height, { selected: path[pathIndex] ?? path[0], pathIndex })
+    readout.innerHTML = [
+      ['node', path[pathIndex] ?? '—'],
+      ['path', path.length > 0 ? (pathIndex + 1) + '/' + path.length : '—'],
+      ['nodes', String(spec.nodes.length)],
+      ['edges', String(spec.edges.length)],
+    ].map(([label, text]) => '<div><span>' + label + '</span><strong>' + text + '</strong></div>').join('')
+    timeLabel.textContent = (progress * timeline.duration).toFixed(2) + ' s'
+    return
   }
-  for (let index = 0; index <= 4; index++) {
-    const y = minY + (index / 4) * spanY
-    context.beginPath(); context.moveTo(0, yToPixel(y)); context.lineTo(canvas.width, yToPixel(y)); context.stroke()
+  if (isParticleSystem) {
+    const { particles, trails } = simulateParticles(progress * timeline.duration)
+    SceneRenderers.renderParticleSystem(spec, canvas, canvas.width, canvas.height, { time: progress * timeline.duration, particles, trails })
+    readout.innerHTML = [
+      ['time', (progress * timeline.duration).toFixed(2)],
+      ['particles', String(particles.length)],
+      ['gravity', spec.gravity.x.toFixed(2) + ', ' + spec.gravity.y.toFixed(2)],
+      ['dt', spec.timeStep.toFixed(3)],
+    ].map(([label, text]) => '<div><span>' + label + '</span><strong>' + text + '</strong></div>').join('')
+    timeLabel.textContent = (progress * timeline.duration).toFixed(2) + ' s'
+    return
   }
-  context.globalAlpha = 1
-  for (const particle of particles) {
-    if (spec.trails && particle.trail.length > 1) {
-      context.strokeStyle = accent
-      context.globalAlpha = 0.25
-      context.beginPath()
-      for (const [index, point] of particle.trail.entries()) {
-        if (index === 0) context.moveTo(xToPixel(point.x), yToPixel(point.y))
-        else context.lineTo(xToPixel(point.x), yToPixel(point.y))
-      }
-      context.stroke()
-      context.globalAlpha = 1
-    }
-    const x = xToPixel(particle.x)
-    const y = yToPixel(particle.y)
-    const speed = Math.hypot(particle.vx, particle.vy)
-    const angle = Math.atan2(particle.vy, particle.vx)
-    const length = Math.min(40, speed * 12)
-    context.strokeStyle = good
-    context.lineWidth = 1.5
-    context.beginPath()
-    context.moveTo(x, y)
-    context.lineTo(x + length * Math.cos(angle), y - length * Math.sin(angle))
-    context.stroke()
-    context.beginPath()
-    context.arc(x, y, Math.max(4, Math.min(12, particle.mass * 2)), 0, Math.PI * 2)
-    context.fillStyle = accent
-    context.fill()
-    context.fillStyle = ink
-    context.font = '10px ui-monospace, monospace'
-    context.fillText(particle.id, x + 8, y - 8)
-  }
+  const [xMin, xMax] = spec.viewport.x
+  const traceX = xMin + progress * (xMax - xMin)
+  SceneRenderers.renderFunctionPlot(spec, canvas, canvas.width, canvas.height, {
+    traceX, scale: 1, pan: 0, parameters,
+    showDerivative: spec.trace.derivative, showIntegral: spec.trace.integral,
+  })
   readout.innerHTML = [
-    ['time', time.toFixed(2)],
-    ['particles', String(particles.length)],
-    ['gravity', spec.gravity.x.toFixed(2) + ', ' + spec.gravity.y.toFixed(2)],
-    ['dt', spec.timeStep.toFixed(3)],
+    ['x', traceX.toFixed(2)],
+    ['f(x)', evaluateAt(functions[0], traceX).toFixed(3)],
+    ['f′(x)', derivativeAt(traceX).toFixed(3)],
+    ['∫', integralAt(traceX).toFixed(3)],
   ].map(([label, text]) => '<div><span>' + label + '</span><strong>' + text + '</strong></div>').join('')
-  timeLabel.textContent = time.toFixed(2) + ' s'
+  timeLabel.textContent = (progress * timeline.duration).toFixed(2) + ' s'
 }
 function tick(now) {
   if (!playing) return

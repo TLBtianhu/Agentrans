@@ -4,6 +4,7 @@ import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
 import { evaluateExpression, parseExpression, type JsonValue } from '@deepseek-ai/dsh-util-values'
 import { recordSceneVideo } from './scene-video.ts'
+import { renderFunctionPlot } from './renderers/function-plot.ts'
 import type { FunctionPlotSpec } from '@deepseek-ai/dsh-artifact/scene'
 import type { ArtifactId } from '@deepseek-ai/dsh-artifact/types'
 import type { ArtifactPlacement, RecordArtifactAction } from './protocol.ts'
@@ -32,8 +33,6 @@ interface CanvasSize {
 
 const FALLBACK_SIZE: CanvasSize = { width: 640, height: 300 }
 /** Grid lines per axis; the same counts label the axis ticks. */
-const COLUMNS = 6
-const ROWS = 4
 
 /**
  * Render a validated FunctionPlot SceneSpec without executing generated source.
@@ -107,145 +106,9 @@ export function FunctionPlotView({ spec, artifactId, revision, placement, record
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas || !currentFunction) return
-    const context = canvas.getContext('2d')
-    if (!context) return
-    const { width, height } = size
-    if (canvas.width !== width) canvas.width = width
-    if (canvas.height !== height) canvas.height = height
-    const style = getComputedStyle(canvas)
-    const ink = style.getPropertyValue('--dsw-alias-label-primary').trim()
-    const muted = style.getPropertyValue('--dsw-alias-label-tertiary').trim()
-    const accent = style.getPropertyValue('--dsw-alias-state-business-primary').trim()
-    const good = style.getPropertyValue('--dsw-alias-state-success-primary').trim()
-    const grid = style.getPropertyValue('--dsw-alias-border-l2').trim()
-    const surface = style.getPropertyValue('--dsw-alias-bg-base').trim()
-    const [xMin, xMax] = spec.viewport.x
-    const [yMin, yMax] = spec.viewport.y
-    const xRange = (xMax - xMin) / scale
-    const yRange = (yMax - yMin) / scale
-    const centerX = (xMin + xMax) / 2 + pan
-    const centerY = (yMin + yMax) / 2
-    const xToPixel = (x: number): number => ((x - (centerX - xRange / 2)) / xRange) * width
-    const yToPixel = (y: number): number => height - ((y - (centerY - yRange / 2)) / yRange) * height
-    const pixelToX = (pixel: number): number => centerX - xRange / 2 + (pixel / width) * xRange
-    const currentValue = evaluateAt(currentFunction, traceX)
-
-    context.clearRect(0, 0, width, height)
-    context.strokeStyle = grid
-    context.lineWidth = 1
-    for (let index = 0; index <= COLUMNS; index++) {
-      const x = centerX - xRange / 2 + (index / COLUMNS) * xRange
-      context.beginPath(); context.moveTo(xToPixel(x), 0); context.lineTo(xToPixel(x), height); context.stroke()
-    }
-    for (let index = 0; index <= ROWS; index++) {
-      const y = centerY - yRange / 2 + (index / ROWS) * yRange
-      context.beginPath(); context.moveTo(0, yToPixel(y)); context.lineTo(width, yToPixel(y)); context.stroke()
-    }
-    context.strokeStyle = muted
-    context.globalAlpha = 0.55
-    context.beginPath(); context.moveTo(0, yToPixel(0)); context.lineTo(width, yToPixel(0)); context.stroke()
-    context.beginPath(); context.moveTo(xToPixel(0), 0); context.lineTo(xToPixel(0), height); context.stroke()
-    context.globalAlpha = 1
-
-    if (showIntegral) {
-      context.fillStyle = good
-      context.globalAlpha = 0.1
-      context.beginPath()
-      context.moveTo(xToPixel(0), yToPixel(0))
-      for (let pixel = 0; pixel <= width; pixel++) {
-        const x = pixelToX(pixel)
-        if (x > traceX) break
-        const y = evaluateAt(currentFunction, x)
-        if (!Number.isFinite(y)) continue
-        context.lineTo(pixel, yToPixel(y))
-      }
-      context.lineTo(xToPixel(traceX), yToPixel(0))
-      context.closePath()
-      context.fill()
-      context.globalAlpha = 1
-    }
-
-    for (const [index, fn] of functions.entries()) {
-      context.strokeStyle = index === 0 ? accent : good
-      context.lineWidth = fn.id === currentFunction.id ? 2.5 : 1.5
-      context.globalAlpha = fn.id === currentFunction.id ? 1 : 0.45
-      context.beginPath()
-      let drawing = false
-      for (let pixel = 0; pixel <= width; pixel++) {
-        const y = evaluateAt(fn, pixelToX(pixel))
-        if (!Number.isFinite(y)) {
-          drawing = false
-          continue
-        }
-        if (drawing) context.lineTo(pixel, yToPixel(y))
-        else {
-          context.moveTo(pixel, yToPixel(y))
-          drawing = true
-        }
-      }
-      context.stroke()
-    }
-    context.globalAlpha = 1
-
-    if (showDerivative) {
-      const slope = derivativeAt(traceX)
-      context.strokeStyle = accent
-      context.globalAlpha = 0.7
-      context.setLineDash([4, 4])
-      context.beginPath()
-      for (let pixel = 0; pixel <= width; pixel++) {
-        const x = pixelToX(pixel)
-        const y = currentValue + slope * (x - traceX)
-        if (!Number.isFinite(y)) continue
-        if (pixel === 0) context.moveTo(pixel, yToPixel(y))
-        else context.lineTo(pixel, yToPixel(y))
-      }
-      context.stroke()
-      context.setLineDash([])
-      context.globalAlpha = 1
-    }
-
-    // Axis values are printed against the last row and column of the grid so
-    // the plot reads without a separate legend box.
-    context.font = '10px ui-monospace, SFMono-Regular, Menlo, monospace'
-    context.fillStyle = muted
-    context.textBaseline = 'bottom'
-    for (let index = 0; index <= COLUMNS; index++) {
-      const x = centerX - xRange / 2 + (index / COLUMNS) * xRange
-      const pixel = xToPixel(x)
-      if (pixel < 16 || pixel > width - 24) continue
-      context.fillText(x.toFixed(1), pixel + 4, height - 4)
-    }
-    context.textBaseline = 'middle'
-    for (let index = 0; index <= ROWS; index++) {
-      const y = centerY - yRange / 2 + (index / ROWS) * yRange
-      const pixel = yToPixel(y)
-      if (pixel < 14 || pixel > height - 14) continue
-      context.fillText(y.toFixed(1), 5, pixel - 7)
-    }
-
-    // Trace: a guide at the sampled x and a ringed marker on the curve.
-    context.strokeStyle = muted
-    context.globalAlpha = 0.5
-    context.setLineDash([3, 3])
-    context.beginPath(); context.moveTo(xToPixel(traceX), 0); context.lineTo(xToPixel(traceX), height); context.stroke()
-    context.setLineDash([])
-    context.globalAlpha = 1
-    if (Number.isFinite(currentValue)) {
-      context.beginPath()
-      context.arc(xToPixel(traceX), yToPixel(currentValue), 4.5, 0, Math.PI * 2)
-      context.fillStyle = good
-      context.fill()
-      context.lineWidth = 1.5
-      context.strokeStyle = surface
-      context.stroke()
-    }
-    context.fillStyle = ink
-    context.font = '11px ui-monospace, SFMono-Regular, Menlo, monospace'
-    context.textBaseline = 'middle'
-    const traceTag = `x ${traceX.toFixed(2)}`
-    const traceTagX = Math.min(width - 62, xToPixel(traceX) + 8)
-    context.fillText(traceTag, traceTagX, 14)
+    renderFunctionPlot(spec, canvas, size.width, size.height, {
+      traceX, scale, pan, parameters, currentFunctionId: currentFunction.id, showDerivative, showIntegral,
+    })
   }, [spec, currentFunction, functions, parameters, traceX, scale, pan, showDerivative, showIntegral, size])
 
   // React's onWheel is passive, so preventDefault cannot stop the page from

@@ -5,6 +5,7 @@ import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { JsonValue } from '@deepseek-ai/dsh-util-values'
 import type { FlowchartSpec } from '@deepseek-ai/dsh-artifact/scene'
 import type { ArtifactId } from '@deepseek-ai/dsh-artifact/types'
+import { renderFlowchart } from './renderers/flowchart.ts'
 import type { ArtifactPlacement, RecordArtifactAction } from './protocol.ts'
 import css from './FunctionPlotView.module.css'
 
@@ -59,79 +60,8 @@ export function FlowchartView({ spec, artifactId, revision, placement, recordAct
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    const context = canvas.getContext('2d')
-    if (!context) return
-    const width = 900
-    const height = 420
-    if (canvas.width !== width) canvas.width = width
-    if (canvas.height !== height) canvas.height = height
-    const style = getComputedStyle(canvas)
-    const ink = style.getPropertyValue('--dsw-alias-label-primary').trim()
-    const muted = style.getPropertyValue('--dsw-alias-label-tertiary').trim()
-    const accent = style.getPropertyValue('--dsw-alias-state-business-primary').trim()
-    const good = style.getPropertyValue('--dsw-alias-state-success-primary').trim()
-    const surface = style.getPropertyValue('--dsw-alias-bg-base').trim()
-    const position = (node: LayoutNode): { x: number; y: number } => ({
-      x: 70 + node.x * (width - 140),
-      y: 60 + node.y * (height - 120),
-    })
-    context.clearRect(0, 0, width, height)
-    for (const edge of spec.edges) {
-      const from = nodes.find(node => node.id === edge.from)
-      const to = nodes.find(node => node.id === edge.to)
-      if (!from || !to) continue
-      const a = position(from)
-      const b = position(to)
-      const active = currentId === edge.from || currentId === edge.to
-      context.strokeStyle = active ? accent : muted
-      context.globalAlpha = active ? 0.9 : 0.45
-      context.lineWidth = active ? 2 : 1
-      context.beginPath()
-      context.moveTo(a.x, a.y)
-      context.lineTo(b.x, b.y)
-      context.stroke()
-      const angle = Math.atan2(b.y - a.y, b.x - a.x)
-      context.beginPath()
-      context.moveTo(b.x, b.y)
-      context.lineTo(b.x - 10 * Math.cos(angle - Math.PI / 6), b.y - 10 * Math.sin(angle - Math.PI / 6))
-      context.lineTo(b.x - 10 * Math.cos(angle + Math.PI / 6), b.y - 10 * Math.sin(angle + Math.PI / 6))
-      context.closePath()
-      context.fillStyle = active ? accent : muted
-      context.fill()
-      if (edge.label) {
-        context.fillStyle = muted
-        context.font = '10px ui-sans-serif, system-ui'
-        context.fillText(edge.label, (a.x + b.x) / 2 + 6, (a.y + b.y) / 2 - 6)
-      }
-    }
-    context.globalAlpha = 1
-    for (const node of nodes) {
-      const { x, y } = position(node)
-      const isCurrent = node.id === currentId
-      const isSelected = node.id === selected
-      const width = Math.max(88, node.label.length * 7 + 22)
-      const height = 38
-      context.beginPath()
-      context.roundRect(x - width / 2, y - height / 2, width, height, 8)
-      context.fillStyle = isCurrent ? accent : surface
-      context.fill()
-      context.lineWidth = isSelected ? 2 : 1
-      context.strokeStyle = isCurrent ? accent : muted
-      context.stroke()
-      context.fillStyle = isCurrent ? surface : ink
-      context.font = '12px ui-sans-serif, system-ui'
-      context.textAlign = 'center'
-      context.textBaseline = 'middle'
-      context.fillText(node.label, x, y)
-      if (isCurrent && good) {
-        context.beginPath()
-        context.arc(x + width / 2 - 8, y - height / 2 + 8, 3.5, 0, Math.PI * 2)
-        context.fillStyle = good
-        context.fill()
-      }
-    }
-    context.textAlign = 'start'
-  }, [spec, nodes, currentId, selected])
+    renderFlowchart(spec, canvas, 900, 420, { selected, pathIndex })
+  }, [spec, selected, pathIndex])
 
   useEffect(() => {
     if (!playing || path.length === 0) return

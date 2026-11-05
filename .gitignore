@@ -50,6 +50,8 @@ worktrees/
 native/system/test/bin/
 packages/client/ui-artifact/src/client/scene-expr.generated.js
 packages/client/ui-artifact/src/client/scene-expr.generated.ts
+packages/client/ui-artifact/src/client/scene-renderers.generated.js
+packages/client/ui-artifact/src/client/scene-renderers.generated.ts
 
 # Generated company-signed CUA release record.
 /packages/experimental/cua-macos/cua-helper.json

@@ -5,6 +5,7 @@ import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { JsonValue } from '@deepseek-ai/dsh-util-values'
 import type { ParticleSystemSpec, ParticleSpec } from '@deepseek-ai/dsh-artifact/scene'
 import type { ArtifactId } from '@deepseek-ai/dsh-artifact/types'
+import { renderParticleSystem } from './renderers/particle-system.ts'
 import type { ArtifactPlacement, RecordArtifactAction } from './protocol.ts'
 import css from './FunctionPlotView.module.css'
 
@@ -73,75 +74,8 @@ export function ParticleSystemView({ spec, artifactId, revision, placement, reco
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    const context = canvas.getContext('2d')
-    if (!context) return
-    const width = 900
-    const height = 420
-    if (canvas.width !== width) canvas.width = width
-    if (canvas.height !== height) canvas.height = height
-    const style = getComputedStyle(canvas)
-    const ink = style.getPropertyValue('--dsw-alias-label-primary').trim()
-    const muted = style.getPropertyValue('--dsw-alias-label-tertiary').trim()
-    const accent = style.getPropertyValue('--dsw-alias-state-business-primary').trim()
-    const good = style.getPropertyValue('--dsw-alias-state-success-primary').trim()
-    const xs = particles.map(particle => particle.x)
-    const ys = particles.map(particle => particle.y)
-    const minX = Math.min(...xs, 0)
-    const maxX = Math.max(...xs, 1)
-    const minY = Math.min(...ys, 0)
-    const maxY = Math.max(...ys, 1)
-    const spanX = maxX - minX || 1
-    const spanY = maxY - minY || 1
-    const xToPixel = (x: number): number => 60 + ((x - minX) / spanX) * (width - 120)
-    const yToPixel = (y: number): number => height - 60 - ((y - minY) / spanY) * (height - 120)
-    context.clearRect(0, 0, width, height)
-    context.strokeStyle = muted
-    context.globalAlpha = 0.25
-    for (let index = 0; index <= 6; index++) {
-      const x = minX + (index / 6) * spanX
-      context.beginPath(); context.moveTo(xToPixel(x), 0); context.lineTo(xToPixel(x), height); context.stroke()
-    }
-    for (let index = 0; index <= 4; index++) {
-      const y = minY + (index / 4) * spanY
-      context.beginPath(); context.moveTo(0, yToPixel(y)); context.lineTo(width, yToPixel(y)); context.stroke()
-    }
-    context.globalAlpha = 1
-    if (spec.trails) {
-      for (const particle of particles) {
-        const points = trails[particle.id] ?? []
-        if (points.length < 2) continue
-        context.strokeStyle = accent
-        context.globalAlpha = 0.25
-        context.beginPath()
-        for (const [index, point] of points.entries()) {
-          if (index === 0) context.moveTo(xToPixel(point.x), yToPixel(point.y))
-          else context.lineTo(xToPixel(point.x), yToPixel(point.y))
-        }
-        context.stroke()
-      }
-      context.globalAlpha = 1
-    }
-    for (const particle of particles) {
-      const x = xToPixel(particle.x)
-      const y = yToPixel(particle.y)
-      const speed = Math.hypot(particle.vx, particle.vy)
-      const angle = Math.atan2(particle.vy, particle.vx)
-      const length = Math.min(40, speed * 12)
-      context.strokeStyle = good
-      context.lineWidth = 1.5
-      context.beginPath()
-      context.moveTo(x, y)
-      context.lineTo(x + length * Math.cos(angle), y - length * Math.sin(angle))
-      context.stroke()
-      context.beginPath()
-      context.arc(x, y, Math.max(4, Math.min(12, particle.mass * 2)), 0, Math.PI * 2)
-      context.fillStyle = accent
-      context.fill()
-      context.fillStyle = ink
-      context.font = '10px ui-monospace, monospace'
-      context.fillText(particle.id, x + 8, y - 8)
-    }
-  }, [spec, particles, trails])
+    renderParticleSystem(spec, canvas, 900, 420, { time, particles, trails })
+  }, [spec, time, particles, trails])
 
   useEffect(() => {
     onStateChange?.({
