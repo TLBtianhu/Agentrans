@@ -99,11 +99,11 @@ export function ArtifactComparisonNodeView({ node, sessionId, useSessions, recor
         {comparison.control === undefined
           ? <div className={css.placeholder}>{t('comparison.waiting')}</div>
           : <ArtifactCard snapshot={comparison.control} origin={origin} recordAction={recordAction} t={t}
-            placementControls={false} onFrame={onControlFrame} />}
+            placement="inline" placementControls={false} onFrame={onControlFrame} />}
         {comparison.variant === undefined
           ? <div className={css.placeholder}>{t('comparison.waiting')}</div>
           : <ArtifactCard snapshot={comparison.variant} origin={origin} recordAction={recordAction} t={t}
-            placementControls={false} onFrame={onVariantFrame} />}
+            placement="inline" placementControls={false} onFrame={onVariantFrame} />}
       </div>
       {!ready && <p className={css.comparisonStatus}>{t('comparison.waiting')}</p>}
       {phase === 'sent' && <p className={css.comparisonStatus}>{t('comparison.sent')}</p>}

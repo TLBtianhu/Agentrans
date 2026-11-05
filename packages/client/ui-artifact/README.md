@@ -33,6 +33,8 @@ The card shows the Artifact title and revision. An incoming revision replaces th
 
 **Inline** keeps the card in the message flow, so it scrolls and wraps with the conversation instead of covering it. **Dock** fixes a persistent result pane to the right edge: the conversation body reserves that width and the transcript narrows instead of being covered, and the pane starts below the Session header. **Expand** presents the card over the whole window, and Escape returns to inline. **Float** keeps a small auxiliary pane in the corner. Placements are `ViewRequest` intents, not window-control authority. Every placement keeps the current revision and the pending actions; the preview itself remounts when the card leaves the flow. Returning to inline scrolls the Artifact's own row back into view. The card also shows the current conversation or the parent branch title.
 
+Placement is shared per Session, not per card. Docking a second Artifact adds a background tab to the same pane instead of covering the first, closing the active tab selects its neighbour, and closing the last tab releases the reserved width. Only one float and one expanded view exist at a time, and one Artifact owns only one detached surface, so docking, floating, or expanding it moves it rather than opening another pane. Unmounting the Conversation Node releases every surface it owned.
+
 An iframe action first enters a bounded pending queue in the card. Click **Send to Agent** to record the first pending action with `wake: true`. Nothing wakes the Agent merely because an iframe emitted a message. A failure keeps the action visible and offers a retry; a successful send removes only that submitted action. A full queue rejects additional actions with an inline explanation until a send frees capacity.
 
 ### Isolation and input limits
@@ -100,7 +102,7 @@ Rendering does not make Artifact source model-visible; only a Host-admitted acti
 - **Remote dependencies are unavailable** — self-contained HTML must use inline code and styles with permitted local data or Blob resources.
 - **Pending actions are transient** — a revision change, page reload, or unmount discards them before Host admission; the Artifact must emit the action again.
 - **Leaving the flow remounts the preview** — inline is real flow content, while the other placements mount the card in a fixed layer, so iframe state, canvas interaction state, and scroll position restart from the current snapshot.
-- **One docked pane is not enforced** — each card owns its placement, so docking a second Artifact from the same history covers the first until one returns to inline.
+- **Background dock tabs stay mounted** — only the active tab is painted, so switching tabs does not rebuild the preview, but moving between inline and a detached surface still remounts it.
 - **Focus is card-local** — the expanded placement does not create a separate dialog or persist a viewing preference.
 
 <a id="dev-note"></a>

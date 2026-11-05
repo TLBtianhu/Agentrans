@@ -17,6 +17,60 @@
   margin: 8px 0;
 }
 
+/* Background dock tabs stay mounted but are never painted. */
+.card[hidden] {
+  display: none;
+}
+
+/* The active dock's tab strip; with a single dock it is not rendered. */
+.dockTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 6px 12px;
+  border-bottom: 0.5px solid var(--dsw-alias-border-l2);
+}
+
+.dockTab {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  border-radius: var(--dsw-radius-xs);
+  color: var(--dsw-alias-label-tertiary);
+  font: var(--dsw-font-xxs-12);
+}
+
+.dockTab[data-active] {
+  background: var(--dsw-alias-interactive-bg-active);
+  color: var(--dsw-alias-label-primary);
+}
+
+.dockTabSelect,
+.dockTabClose {
+  padding: 3px 8px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.dockTabSelect {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dockTabClose {
+  padding: 3px 6px;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.dockTabClose:hover {
+  color: var(--dsw-alias-label-primary);
+}
+
 /* The flow anchor keeps a return target while the card is portalled away. */
 .anchor {
   display: block;

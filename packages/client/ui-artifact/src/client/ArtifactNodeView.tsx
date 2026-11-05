@@ -2,16 +2,19 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useRef, useState, type CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
+import type { PropsStore } from '@deepseek-ai/dsh-client-store'
 import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
 import { createArtifactDocument } from './document.ts'
 import { FunctionPlotView } from './FunctionPlotView.tsx'
 import { parseArtifactAction, type PendingArtifactAction } from './messages.ts'
+import { artifactPresentationStore, type ArtifactDockEntry } from './presentation.ts'
 import type { ArtifactNodeInjected, ArtifactPlacement, ArtifactSnapshot, ViewRequest } from './protocol.ts'
 import css from './ArtifactNodeView.module.css'
 
 type ArtifactNodeViewProps =
   PropsRuntime<'conversation.chat.node', 'artifact'>
   & PropsLocale<'artifact'>
+  & PropsStore<typeof artifactPresentationStore>
   & InjectFace<ArtifactNodeInjected>
 
 export type SceneOrigin =
@@ -21,7 +24,13 @@ export type SceneOrigin =
 type ArtifactCardProps = Pick<ArtifactNodeViewProps, 'recordAction' | 't'> & {
   readonly snapshot: ArtifactSnapshot
   readonly origin: SceneOrigin
+  readonly placement: ArtifactPlacement
   readonly placementControls?: boolean
+  readonly docks?: readonly ArtifactDockEntry[]
+  readonly activeDockId?: ArtifactSnapshot['artifactId'] | null
+  readonly onPlacement?: (next: ArtifactPlacement) => void
+  readonly onActivateDock?: (artifactId: ArtifactSnapshot['artifactId']) => void
+  readonly onCloseDock?: (artifactId: ArtifactSnapshot['artifactId']) => void
   readonly onFrame?: (frame: HTMLIFrameElement | null) => void
 }
 
@@ -52,13 +61,17 @@ function updatePending(state: PendingState, update: PendingUpdate): PendingState
   return { actions: [...state.actions, update.action], overflow: state.overflow }
 }
 
-export function ArtifactCard({ snapshot, origin, recordAction, t, placementControls = true, onFrame }: ArtifactCardProps) {
-  const [placement, setPlacement] = useState<ViewRequest['placement']>(snapshot.presentation === 'focus' ? 'focus' : 'inline')
+/** Pure Artifact surface: placement, dock tabs, and confirmation UI arrive as plain props. */
+export function ArtifactCard({
+  snapshot, origin, recordAction, t, placement, placementControls = true,
+  docks = [], activeDockId = null, onPlacement, onActivateDock, onCloseDock, onFrame,
+}: ArtifactCardProps) {
   const [showSource, setShowSource] = useState(false)
   const [{ actions: pendingActions, overflow }, dispatchPending] = useReducer(updatePending, { actions: [], overflow: false })
   const [phase, setPhase] = useState<SendPhase>('idle')
   const [dockTop, setDockTop] = useState<number>()
   const iframeRef = useRef<HTMLIFrameElement | null>(null)
+  const cardRef = useRef<HTMLElement | null>(null)
   const anchorRef = useRef<HTMLSpanElement | null>(null)
   const returnedRef = useRef(false)
   const mountedRef = useRef(true)
@@ -95,7 +108,12 @@ export function ArtifactCard({ snapshot, origin, recordAction, t, placementContr
     return () => {
       observer?.disconnect()
       window.removeEventListener('resize', measure)
-      body.removeAttribute('data-artifact-dock')
+      // Another docked Artifact may still own the pane; only the last one
+      // releases the reserved width. This card's own section is about to
+      // move, so it must not count as another owner.
+      const others = [...document.querySelectorAll('section[data-placement="beside"]')]
+        .some(element => element !== cardRef.current)
+      if (!others) body.removeAttribute('data-artifact-dock')
     }
   }, [placement, placementControls])
 
@@ -103,11 +121,11 @@ export function ArtifactCard({ snapshot, origin, recordAction, t, placementContr
   useEffect(() => {
     if (!placementControls || placement !== 'focus') return
     const onKeyDown = (event: KeyboardEvent): void => {
-      if (event.key === 'Escape') setPlacement('inline')
+      if (event.key === 'Escape') onPlacement?.('inline')
     }
     window.addEventListener('keydown', onKeyDown)
     return () => { window.removeEventListener('keydown', onKeyDown) }
-  }, [placement, placementControls])
+  }, [placement, placementControls, onPlacement])
 
   // Returning to the flow brings the Artifact's own row back into view; the
   // first render only records that return handling has not been armed yet.
@@ -154,9 +172,15 @@ export function ArtifactCard({ snapshot, origin, recordAction, t, placementContr
     }
   }
 
+  // A docked but backgrounded Artifact stays mounted and keeps its preview
+  // state; only the active tab is painted.
+  const backgrounded = placementControls && placement === 'beside' && activeDockId !== snapshot.artifactId
+
   const card = (
     <section
+      ref={cardRef}
       className={css.card}
+      hidden={backgrounded}
       style={dockTop === undefined ? undefined : { '--artifact-dock-top': `${String(dockTop)}px` } as CSSProperties}
       data-placement={placementControls ? placement : 'inline'}
       role={placementControls && placement === 'focus' ? 'dialog' : 'complementary'}
@@ -177,7 +201,7 @@ export function ArtifactCard({ snapshot, origin, recordAction, t, placementContr
             <Button key={option} size="sm" variant="ghost" className={css.placement}
               data-selected={placement === option ? '' : undefined}
               aria-pressed={placement === option}
-              onClick={() => { setPlacement(option) }}>
+              onClick={() => { onPlacement?.(option) }}>
               {t(PLACEMENT_COPY[option])}
             </Button>
           ))}
@@ -188,6 +212,18 @@ export function ArtifactCard({ snapshot, origin, recordAction, t, placementContr
           </Button>
         </div>
       </header>
+      {placementControls && placement === 'beside' && !backgrounded && docks.length > 1 && (
+        <div className={css.dockTabs} role="group" aria-label={t('dock.tabs')}>
+          {docks.map(entry => (
+            <span key={entry.artifactId} className={css.dockTab} data-active={entry.artifactId === snapshot.artifactId ? '' : undefined}>
+              <button type="button" className={css.dockTabSelect} aria-pressed={entry.artifactId === snapshot.artifactId}
+                onClick={() => { onActivateDock?.(entry.artifactId) }}>{entry.title}</button>
+              <button type="button" className={css.dockTabClose} aria-label={t('dock.close', { title: entry.title })}
+                onClick={() => { onCloseDock?.(entry.artifactId) }}>×</button>
+            </span>
+          ))}
+        </div>
+      )}
       <div className={css.body}>
         {showSource
           ? <pre className={css.source} aria-label={t('source.label')}>{snapshot.format === 'html' ? snapshot.source : JSON.stringify(snapshot.spec, null, 2)}</pre>
@@ -224,14 +260,62 @@ export function ArtifactCard({ snapshot, origin, recordAction, t, placementContr
   )
 }
 
-/** Render the latest checkpoint; revision changes remount the browsing context and transient action state. */
-export const ArtifactNodeView = memo(function ArtifactNodeView({ node, sessionId, useSessions, recordAction, t }: ArtifactNodeViewProps) {
+/** Connect one Artifact Conversation Node to the Session's presentation store. */
+export const ArtifactNodeView = memo(function ArtifactNodeView({
+  node, sessionId, useSessions, useStore, actions, recordAction, t,
+}: ArtifactNodeViewProps) {
   const snapshot = node.data
+  const artifactId = snapshot.artifactId
   const origin = useSessions((state): SceneOrigin => {
     const current = state.byId[sessionId]
     if (current?.parentId === undefined) return { kind: 'current' }
     const parent = state.byId[current.parentId]
     return { kind: 'branch', title: parent?.displayTitle ?? current.parentId }
   })
-  return <ArtifactCard key={`${snapshot.artifactId}:${snapshot.revision}`} snapshot={snapshot} origin={origin} recordAction={recordAction} t={t} />
+  const placement = useStore((state): ArtifactPlacement => {
+    if (state.focusId === artifactId) return 'focus'
+    if (state.floatId === artifactId) return 'pip'
+    if (state.docks.some(entry => entry.artifactId === artifactId)) return 'beside'
+    return 'inline'
+  })
+  const docks = useStore(state => state.docks)
+  const activeDockId = useStore(state => state.activeDockId)
+
+  // A checkpoint that asks for the expanded view claims it once on mount.
+  useEffect(() => {
+    if (snapshot.presentation === 'focus') actions.focus(artifactId)
+  }, [])
+
+  // Dock tabs follow the checkpoint they show, including a new revision.
+  useEffect(() => {
+    actions.syncDock({ artifactId, revision: snapshot.revision, title: snapshot.title })
+  }, [actions, artifactId, snapshot.revision, snapshot.title])
+
+  // Unmounting the Node (Session switch or Node removal) releases its surfaces.
+  useEffect(() => () => { actions.inline(artifactId) }, [actions, artifactId])
+
+  const onPlacement = useCallback((next: ArtifactPlacement): void => {
+    switch (next) {
+      case 'inline': actions.inline(artifactId); break
+      case 'beside': actions.dock({ artifactId, revision: snapshot.revision, title: snapshot.title }); break
+      case 'focus': actions.focus(artifactId); break
+      case 'pip': actions.float(artifactId); break
+    }
+  }, [actions, artifactId, snapshot.revision, snapshot.title])
+
+  return (
+    <ArtifactCard
+      key={`${artifactId}:${snapshot.revision}`}
+      snapshot={snapshot}
+      origin={origin}
+      placement={placement}
+      docks={docks}
+      activeDockId={activeDockId}
+      onPlacement={onPlacement}
+      onActivateDock={actions.activateDock}
+      onCloseDock={actions.undock}
+      recordAction={recordAction}
+      t={t}
+    />
+  )
 })

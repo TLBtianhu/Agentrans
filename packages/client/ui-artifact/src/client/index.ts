@@ -10,6 +10,7 @@ import { ArtifactComparisonNodeView } from './ArtifactComparisonNodeView.tsx'
 import { artifactComparisonDefinition } from './comparison-definition.ts'
 import { artifactDefinition } from './definition.ts'
 import { en, ja, es, fr, de, ru, pt, zh, type ArtifactKey } from './locales.ts'
+import { artifactPresentationStore } from './presentation.ts'
 import { recordArtifactAction, type ArtifactNodeInjected } from './protocol.ts'
 
 export type { ArtifactKey } from './locales.ts'
@@ -39,6 +40,7 @@ export function apply(ctx: ClientContext): void {
     name: 'conversation.chat.node',
     key: 'artifact',
     locale: NS,
+    store: artifactPresentationStore,
     inject: (sessionId: SessionId): ArtifactNodeInjected => ({
       recordAction: (artifactId, revision, action, payload, wake) => recordArtifactAction(
         ctx, sessionId, artifactId, revision, action, payload, wake,

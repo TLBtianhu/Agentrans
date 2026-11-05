@@ -7,6 +7,7 @@ import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
 import type { SessionListState } from '@deepseek-ai/dsh-api-session-controller/client'
 import { SessionId } from '@deepseek-ai/dsh-session/types'
 import { ArtifactNodeView } from '../src/client/ArtifactNodeView.tsx'
+import { artifactPresentationStore } from '../src/client/presentation.ts'
 import { en } from '../src/client/locales.ts'
 import type { ArtifactId, ArtifactSnapshot, RecordArtifactAction } from '../src/client/protocol.ts'
 
@@ -20,12 +21,15 @@ const snapshot = (revision = 1, presentation: ArtifactSnapshot['presentation'] =
 type ViewProps = ComponentProps<typeof ArtifactNodeView>
 function props(revision = 1, recordAction: RecordArtifactAction = vi.fn().mockResolvedValue(undefined), presentation: ArtifactSnapshot['presentation'] = 'inline'): ViewProps {
   const data = snapshot(revision, presentation)
+  const store = artifactPresentationStore.create()
   return {
     node: {
       key: 'artifact:artifact-a', id: data.artifactId, kind: 'artifact', target: 'chat', anchorSeq: revision,
       location: { kind: 'session' }, visibility: 'visible', data,
     },
     sessionId: SessionId('artifact-a'),
+    useStore: bindSnapshotSelector(store.store),
+    actions: store.actions,
     useSession: throwUnused,
     useProjection: throwUnused,
     useConversation: throwUnused,
