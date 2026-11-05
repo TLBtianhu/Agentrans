@@ -34,7 +34,11 @@ Windows 注册后端使用 HKCU 写入卸载项和开始菜单快捷方式，支
 
 [agentrans-installer.mjs](apps/desktop/installer/agentrans-installer.mjs) 是生产安装/卸载入口：安装使用验签后的签名安装，卸载复用同一个 `UninstallScope`，支持静默 app-only 和全量清理。原生卸载选项窗体位于 [uninstall-dialog.ps1](apps/desktop/installer/uninstall-dialog.ps1)，默认只删 app，支持全选、二次确认和取消；静默模式不会打开窗体。NSIS 保持默认 app-only，生产 CLI 的对话框负责可选范围。
 
+卸载范围已在真实 CLI 上验证：静默 app-only 保留 `data/dsh` 下的会话、profiles、凭据、storages 和 agents；`--all` 删除这些路径；`--scope sessions` 只删会话目录；交互窗体已走通 app-only 和取消两条路径，全量交互确认（Select all + Yes/No）仍需要手动过一遍。
+
 [package-agentrans-installer.mjs](apps/desktop/scripts/package-agentrans-installer.mjs) 构建真实 Agentrans Windows 安装器，输出 `artifacts/agentrans-installer/agentrans-<version>-win-x64.exe`。安装后的 Electron 数据和 DSH 数据都位于安装根目录内；升级 staging 只替换 `app`，不移动或删除 data。真实安装、应用启动、同版本升级、静默卸载和 junction 目标保护已通过本地未签名验证，不代表 Authenticode 发布授权。
+
+模型通过设置里的提供商配置注入，用户填写提供商、协议、模型名和 API 密钥后可直接使用，不需要 DeepSeek 账号登录或服务器绑定通道。密钥只写入安装根的 `data/dsh/home/.credentials.yaml`，不进入仓库、构建产物或日志。
 
 ## 身份审计
 
