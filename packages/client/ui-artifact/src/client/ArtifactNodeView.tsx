@@ -7,6 +7,7 @@ import { Button, IconBranchOutlineRegular, Tooltip } from '@deepseek-ai/dsh-clie
 import { createArtifactDocument } from './document.ts'
 import { FlowchartView } from './FlowchartView.tsx'
 import { FunctionPlotView } from './FunctionPlotView.tsx'
+import { ParticleSystemView } from './ParticleSystemView.tsx'
 import { buildSceneAnimationHtml } from './scene-animation.ts'
 import { parseArtifactAction, type PendingArtifactAction } from './messages.ts'
 import { artifactPresentationStore, type ArtifactDockEntry } from './presentation.ts'
@@ -258,8 +259,11 @@ export function ArtifactCard({
             ? snapshot.spec.kind === 'flowchart'
               ? <FlowchartView spec={snapshot.spec} artifactId={snapshot.artifactId} revision={snapshot.revision}
                 placement={placementControls ? placement : 'inline'} recordAction={recordAction} onStateChange={onSceneState} t={t} />
-              : <FunctionPlotView spec={snapshot.spec} artifactId={snapshot.artifactId} revision={snapshot.revision}
-                placement={placementControls ? placement : 'inline'} recordAction={recordAction} onStateChange={onSceneState} t={t} />
+              : snapshot.spec.kind === 'particle-system'
+                ? <ParticleSystemView spec={snapshot.spec} artifactId={snapshot.artifactId} revision={snapshot.revision}
+                  placement={placementControls ? placement : 'inline'} recordAction={recordAction} onStateChange={onSceneState} t={t} />
+                : <FunctionPlotView spec={snapshot.spec} artifactId={snapshot.artifactId} revision={snapshot.revision}
+                  placement={placementControls ? placement : 'inline'} recordAction={recordAction} onStateChange={onSceneState} t={t} />
             : <iframe ref={setFrame} className={css.frame} srcDoc={artifactDocument} sandbox="allow-scripts"
               title={t('preview.frame', { title: snapshot.title })} data-artifact-frame />}
       </div>

@@ -50,8 +50,34 @@ export interface FlowchartSpec {
   readonly timeline?: { readonly duration: number; readonly fps: number }
 }
 
+/** One particle in a deterministic physical simulation. */
+export interface ParticleSpec {
+  readonly id: string
+  readonly x: number
+  readonly y: number
+  readonly vx: number
+  readonly vy: number
+  readonly mass: number
+}
+
+/** Gravity vector for a particle simulation. */
+export interface GravitySpec {
+  readonly x: number
+  readonly y: number
+}
+
+/** Declarative particle system with gravity, fixed time steps, and optional trails. */
+export interface ParticleSystemSpec {
+  readonly kind: 'particle-system'
+  readonly particles: readonly ParticleSpec[]
+  readonly gravity: GravitySpec
+  readonly timeStep: number
+  readonly trails: boolean
+  readonly timeline?: { readonly duration: number; readonly fps: number }
+}
+
 /** Union of all currently supported declarative SceneSpec primitives. */
-export type SceneSpec = FunctionPlotSpec | FlowchartSpec
+export type SceneSpec = FunctionPlotSpec | FlowchartSpec | ParticleSystemSpec
 
 /** Catalog entry owning one primitive's version and normalization. */
 export interface SceneCatalogEntry {
@@ -204,10 +230,53 @@ export function normalizeFlowchart(value: unknown): FlowchartSpec {
   return { kind: 'flowchart', nodes, edges, ...(path === undefined ? {} : { path }), ...(timeline === undefined ? {} : { timeline }) }
 }
 
+/**
+ * Validate and normalize a ParticleSystem SceneSpec.
+ * @param value - Untrusted model or Session snapshot value.
+ * @returns A normalized ParticleSystem SceneSpec.
+ * @throws {SceneValidationError} When particles, gravity, or time steps are invalid.
+ */
+export function normalizeParticleSystem(value: unknown): ParticleSystemSpec {
+  if (!isRecord(value) || value.kind !== 'particle-system') throw new SceneValidationError('/kind', 'must be particle-system')
+  if (!Array.isArray(value.particles) || value.particles.length < 1 || value.particles.length > 64) {
+    throw new SceneValidationError('/particles', 'must contain 1 to 64 particles')
+  }
+  const particles = value.particles.map((item, index) => {
+    const path = `/particles/${index}`
+    if (!isRecord(item)) throw new SceneValidationError(path, 'must be an object')
+    if (typeof item.id !== 'string' || !/^[a-z][a-z0-9-]{0,31}$/.test(item.id)) {
+      throw new SceneValidationError(`${path}/id`, 'must match [a-z][a-z0-9-]{0,31}')
+    }
+    const mass = numberAt(item.mass, `${path}/mass`)
+    if (mass <= 0) throw new SceneValidationError(`${path}/mass`, 'must be > 0')
+    return {
+      id: item.id,
+      x: numberAt(item.x, `${path}/x`), y: numberAt(item.y, `${path}/y`),
+      vx: numberAt(item.vx, `${path}/vx`), vy: numberAt(item.vy, `${path}/vy`), mass,
+    }
+  })
+  if (!isRecord(value.gravity)) throw new SceneValidationError('/gravity', 'must be an object')
+  const gravity = { x: numberAt(value.gravity.x, '/gravity/x'), y: numberAt(value.gravity.y, '/gravity/y') }
+  const timeStep = numberAt(value.timeStep, '/timeStep')
+  if (timeStep <= 0) throw new SceneValidationError('/timeStep', 'must be > 0')
+  if (typeof value.trails !== 'boolean') throw new SceneValidationError('/trails', 'must be a boolean')
+  let timeline: ParticleSystemSpec['timeline']
+  if (value.timeline !== undefined) {
+    if (!isRecord(value.timeline)) throw new SceneValidationError('/timeline', 'must be an object')
+    const duration = numberAt(value.timeline.duration, '/timeline/duration')
+    const fps = numberAt(value.timeline.fps, '/timeline/fps')
+    if (duration <= 0) throw new SceneValidationError('/timeline/duration', 'must be > 0')
+    if (!Number.isSafeInteger(fps) || fps < 1 || fps > 120) throw new SceneValidationError('/timeline/fps', 'must be an integer in [1,120]')
+    timeline = { duration, fps }
+  }
+  return { kind: 'particle-system', particles, gravity, timeStep, trails: value.trails, ...(timeline === undefined ? {} : { timeline }) }
+}
+
 /** Versioned catalog of SceneSpec primitives available to model generation. */
 export const sceneCatalog: Readonly<Record<SceneSpec['kind'], SceneCatalogEntry>> = {
   'function-plot': { kind: 'function-plot', catalogVersion: 1, normalize: normalizeFunctionPlot },
   'flowchart': { kind: 'flowchart', catalogVersion: 1, normalize: normalizeFlowchart },
+  'particle-system': { kind: 'particle-system', catalogVersion: 1, normalize: normalizeParticleSystem },
 }
 
 /**

@@ -42,4 +42,20 @@ describe('scene animation export', () => {
     expect(html).toContain('pathIndex')
     expect(html).toContain('id="record"')
   })
+
+  it('exports a particle-system replay with deterministic physics', () => {
+    const system = {
+      kind: 'particle-system' as const,
+      particles: [{ id: 'p1', x: 0, y: 10, vx: 1, vy: 0, mass: 2 }],
+      gravity: { x: 0, y: -9.8 },
+      timeStep: 0.02,
+      trails: true,
+    }
+    const html = buildSceneAnimationHtml(system, 'Gravity lab')
+    expect(html).toContain('"kind":"particle-system"')
+    expect(html).toContain('drawParticleSystem')
+    expect(html).toContain('spec.timeStep')
+    expect(html).toContain('isFlowchart || isParticleSystem ? [] : spec.functions.map')
+    expect(html).toContain('id="record"')
+  })
 })
