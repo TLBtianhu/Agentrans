@@ -37,7 +37,8 @@ export function apply(ctx: Context): void {
   ctx.tools.register(defineTool({
     name: 'scene',
     description: 'Create or update a declarative interactive scene. Use SceneSpec JSON, not HTML. '
-      + 'For function-plot, provide functions, parameters, viewport, and trace. The host validates the spec before committing it. '
+      + 'For function-plot, provide functions, parameters, viewport, and trace. For flowchart, provide nodes, edges, and an optional path. The host validates the spec before committing it. '
+      + 'Follow the artifact-design style reference for the visual idiom appropriate to the content. '
       + 'Two Scenes may share one comparison group with independent control and variant roles.',
     parameters: {
       action: { type: 'string', required: true, enum: ['create', 'update'], description: 'Create a new scene or replace an existing scene at its next revision.' },
