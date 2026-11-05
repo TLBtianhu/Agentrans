@@ -120,6 +120,14 @@ describe('ArtifactNodeView', () => {
     view.unmount()
   })
 
+  it('forks an inquiry branch from the Artifact checkpoint without changing placement', () => {
+    const base = props(1)
+    render(<ArtifactNodeView {...base} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Branch inquiry' }))
+    expect(base.forkAt).toHaveBeenCalledExactlyOnceWith(1)
+    expect(screen.getByLabelText('Artifact: Report 1').getAttribute('data-placement')).toBe('inline')
+  })
+
   it('reserves the conversation body while docked and releases it on return', () => {
     const observed: Element[] = []
     class Observer {

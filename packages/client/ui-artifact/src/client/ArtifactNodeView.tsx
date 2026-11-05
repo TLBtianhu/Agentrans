@@ -3,7 +3,7 @@ import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useReducer, use
 import { createPortal } from 'react-dom'
 import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { PropsStore } from '@deepseek-ai/dsh-client-store'
-import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
+import { Button, IconBranchOutlineRegular, Tooltip } from '@deepseek-ai/dsh-client-ui-primitives'
 import { createArtifactDocument } from './document.ts'
 import { FunctionPlotView } from './FunctionPlotView.tsx'
 import { parseArtifactAction, type PendingArtifactAction } from './messages.ts'
@@ -31,6 +31,7 @@ type ArtifactCardProps = Pick<ArtifactNodeViewProps, 'recordAction' | 't'> & {
   readonly onPlacement?: (next: ArtifactPlacement) => void
   readonly onActivateDock?: (artifactId: ArtifactSnapshot['artifactId']) => void
   readonly onCloseDock?: (artifactId: ArtifactSnapshot['artifactId']) => void
+  readonly onBranch?: () => void
   readonly onFrame?: (frame: HTMLIFrameElement | null) => void
 }
 
@@ -64,7 +65,7 @@ function updatePending(state: PendingState, update: PendingUpdate): PendingState
 /** Pure Artifact surface: placement, dock tabs, and confirmation UI arrive as plain props. */
 export function ArtifactCard({
   snapshot, origin, recordAction, t, placement, placementControls = true,
-  docks = [], activeDockId = null, onPlacement, onActivateDock, onCloseDock, onFrame,
+  docks = [], activeDockId = null, onPlacement, onActivateDock, onCloseDock, onBranch, onFrame,
 }: ArtifactCardProps) {
   const [showSource, setShowSource] = useState(false)
   const [{ actions: pendingActions, overflow }, dispatchPending] = useReducer(updatePending, { actions: [], overflow: false })
@@ -210,6 +211,14 @@ export function ArtifactCard({
             onClick={() => { setShowSource(value => !value) }}>
             {showSource ? t('view.preview') : t('view.source')}
           </Button>
+          {placementControls && onBranch !== undefined && (
+            <Tooltip label={t('action.branch')} portal>
+              <Button size="sm" variant="ghost" className={css.placement} aria-label={t('action.branch')}
+                onClick={onBranch}>
+                <IconBranchOutlineRegular size={14} />
+              </Button>
+            </Tooltip>
+          )}
         </div>
       </header>
       {placementControls && placement === 'beside' && !backgrounded && docks.length > 1 && (
@@ -262,7 +271,7 @@ export function ArtifactCard({
 
 /** Connect one Artifact Conversation Node to the Session's presentation store. */
 export const ArtifactNodeView = memo(function ArtifactNodeView({
-  node, sessionId, useSessions, useStore, actions, recordAction, t,
+  node, sessionId, useSessions, useStore, actions, recordAction, forkAt, t,
 }: ArtifactNodeViewProps) {
   const snapshot = node.data
   const artifactId = snapshot.artifactId
@@ -314,6 +323,7 @@ export const ArtifactNodeView = memo(function ArtifactNodeView({
       onPlacement={onPlacement}
       onActivateDock={actions.activateDock}
       onCloseDock={actions.undock}
+      onBranch={() => { forkAt(node.anchorSeq) }}
       recordAction={recordAction}
       t={t}
     />
