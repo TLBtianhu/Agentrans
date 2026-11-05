@@ -245,6 +245,24 @@ export function FunctionPlotView({ spec, artifactId, revision, placement, record
     context.fillText(traceTag, traceTagX, 14)
   }, [spec, currentFunction, functions, parameters, traceX, scale, pan, showDerivative, showIntegral, size])
 
+  // React's onWheel is passive, so preventDefault cannot stop the page from
+  // scrolling. A native non-passive listener is required for an explicit zoom.
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (canvas === null) return
+    function handleWheel(event: WheelEvent): void {
+      if (!event.ctrlKey && !event.metaKey) return
+      event.preventDefault()
+      const factor = Math.exp(-event.deltaY * 0.001)
+      setScale((current) => {
+        const next = current * factor
+        return next < 0.25 ? 0.25 : next > 8 ? 8 : next
+      })
+    }
+    canvas.addEventListener('wheel', handleWheel, { passive: false })
+    return () => { canvas.removeEventListener('wheel', handleWheel) }
+  }, [])
+
   useEffect(() => {
     if (!playing || sweepKey === undefined || sweep === undefined) return
     let frame = 0
@@ -333,10 +351,6 @@ export function FunctionPlotView({ spec, artifactId, revision, placement, record
                 dragRef.current.x = event.clientX
               }
               setTraceX(center - range / 2 + ((event.clientX - rect.left) / rect.width) * range)
-            }}
-            onWheel={(event) => {
-              event.preventDefault()
-              setScale(current => Math.max(0.25, Math.min(8, current * Math.exp(-event.deltaY * 0.001))))
             }} />
         </div>
         <div className={css.readout} role="status" aria-live="polite">

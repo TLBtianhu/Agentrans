@@ -101,4 +101,18 @@ describe('FunctionPlotView', () => {
       expect(recordAction).toHaveBeenLastCalledWith('a', 1, 'plot.inspected', expect.objectContaining({ zoom: 1 }), true)
     })
   })
+
+  it('zooms only on an explicit Ctrl+wheel gesture', () => {
+    const recordAction = vi.fn<RecordArtifactAction>().mockResolvedValue(undefined)
+    view(recordAction)
+    const canvas = screen.getByRole('img', { name: 'Interactive function plot' })
+    fireEvent.wheel(canvas, { deltaY: -100 })
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm analysis' }))
+    expect(recordAction).toHaveBeenLastCalledWith('a', 1, 'plot.inspected', expect.objectContaining({ zoom: 1 }), true)
+
+    fireEvent.wheel(canvas, { deltaY: -100, ctrlKey: true })
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm analysis' }))
+    const payload = recordAction.mock.calls.at(-1)?.[3] as { zoom: number }
+    expect(payload.zoom).toBeCloseTo(Math.exp(0.1), 5)
+  })
 })

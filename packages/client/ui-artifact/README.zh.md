@@ -31,7 +31,7 @@ kind: "package-reference"
 
 卡片显示 Artifact 标题和修订号。新修订会替换文档与 iframe 浏览上下文，同时保留 Conversation Node 身份。presentation 字段决定初始布局；同一个控件在四种视图间切换，并可改为显示源码。
 
-**内联**让卡片留在消息流里，随对话滚动和换行，而不是盖住对话。**并排**把常驻结果栏固定在右边缘：对话主体让出这段宽度，正文因此变窄而不是被覆盖，结果栏从会话标题下方开始。**展开**把卡片铺满整个窗口，按 Esc 回到内联。**浮窗**在角落保留一个小型辅助视图。这些布局是 `ViewRequest` 意图，不是窗口控制权限。布局切换保留当前修订和待发送操作；卡片离开消息流时预览会重新挂载。回到内联会把 Artifact 自身那一行滚回视野。卡片同时显示当前对话或父分支来源。
+**内联**让卡片留在消息流里，随对话滚动和换行，而不是盖住对话。**并排**把常驻结果栏固定在右边缘：对话主体让出这段宽度，正文因此变窄而不是被覆盖，结果栏从会话标题下方开始。**展开**把卡片铺满整个窗口，按 Esc 回到内联。**浮窗**在角落保留一个小型辅助视图。这些布局是 `ViewRequest` 意图，不是窗口控制权限。布局切换保留当前修订和待发送操作；卡片离开消息流时预览会重新挂载。回到内联会把 Artifact 自身那一行滚回视野。卡片同时显示当前对话或父分支来源。恢复出来的 checkpoint 不会在挂载时自动展开，只有正在进行的轮次才能请求展开呈现。
 
 布局按会话共享，而不是每张卡片各自持有。并排第二个 Artifact 会在同一个结果栏里新增一个后台页签，不会盖住第一个；关闭当前页签会选中相邻页签，关闭最后一个会释放预留宽度。浮窗和展开视图各自同时只存在一个；同一个 Artifact 只持有一个脱离对话的表面，所以并排、浮窗、展开是在移动它，而不是再开一块。节点卸载时，它持有的表面会全部释放。分支操作会从 Artifact 的 checkpoint 开出一条独立探究分支，卡片继续保留父级来源。
 
@@ -49,7 +49,7 @@ iframe 操作先进入卡片内的有界待发送队列。点击“发送给 Age
 
 ### SceneSpec 原语
 
-[函数绘图模板](../../../.agents/skills/artifact-design/references/function-plot.html) 展示了声明式数学 SceneSpec：两个函数、参数扫掠、视口平移/缩放、描点、导数和积分。它用本地状态支持比较，并且只在用户确认后准入 `plot.inspected`。[流程图模板](../../../.agents/skills/artifact-design/references/flowchart.html) 将同一模式用于节点、边、概念选择和路径推进，并支持确认的 `flow.inspected` 状态。[粒子系统模板](../../../.agents/skills/artifact-design/references/particle-system.html) 增加固定步长的确定性物理模拟，并支持确认的 `physics.inspected` 位置和速度。新增原语应参考这些模板，而不是为每个学科创建独立插件。
+[函数绘图模板](../../../.agents/skills/artifact-design/references/function-plot.html) 展示了声明式数学 SceneSpec：两个函数、参数扫掠、视口平移/缩放、描点、导数和积分。它用本地状态支持比较，并且只在用户确认后准入 `plot.inspected`。[流程图模板](../../../.agents/skills/artifact-design/references/flowchart.html) 将同一模式用于节点、边、概念选择和路径推进，并支持确认的 `flow.inspected` 状态。[粒子系统模板](../../../.agents/skills/artifact-design/references/particle-system.html) 增加固定步长的确定性物理模拟，并支持确认的 `physics.inspected` 位置和速度。新增原语应参考这些模板，而不是为每个学科创建独立插件。内联函数图上的滚轮不会劫持对话滚动：缩放需要 Ctrl/Cmd+滚轮，普通滚轮仍然滚动消息流。
 
 -----
 

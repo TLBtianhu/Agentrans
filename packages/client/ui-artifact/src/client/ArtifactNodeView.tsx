@@ -292,9 +292,12 @@ export const ArtifactNodeView = memo(function ArtifactNodeView({
   const docks = useStore(state => state.docks)
   const activeDockId = useStore(state => state.activeDockId)
 
-  // A checkpoint that asks for the expanded view claims it once on mount.
+  const running = useSessions(state => state.byId[sessionId]?.running === true)
+
+  // A restored checkpoint never takes over the window: only a live turn may
+  // request the expanded presentation.
   useEffect(() => {
-    if (snapshot.presentation === 'focus') actions.focus(artifactId)
+    if (running && snapshot.presentation === 'focus') actions.focus(artifactId)
   }, [])
 
   // Dock tabs follow the checkpoint they show, including a new revision.

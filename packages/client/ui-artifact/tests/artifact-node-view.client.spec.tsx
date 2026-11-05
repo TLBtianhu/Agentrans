@@ -47,7 +47,7 @@ function props(revision = 1, recordAction: RecordArtifactAction = vi.fn().mockRe
       pruneAttachments: () => {},
       submit: () => {},
     },
-    useSessions: () => ({ byId: {} }),
+    useSessions: selector => selector({ byId: {} } as SessionListState),
     useSessionStatus: throwUnused,
     useSessionRetainInfo: throwUnused,
     useWorkspaces: throwUnused,
@@ -86,7 +86,15 @@ afterEach(() => {
 
 describe('ArtifactNodeView', () => {
   it('renders an opaque srcDoc iframe, revision, local focus, and source inspection', () => {
-    const view = render(<ArtifactNodeView {...props(1, undefined, 'focus')} />)
+    const base = props(1, undefined, 'focus')
+    base.useSessions = bindSnapshotSelector(createSnapshotStore<SessionListState>({
+      ids: [SessionId('artifact-a')],
+      byId: {
+        [SessionId('artifact-a')]: { id: SessionId('artifact-a'), displayTitle: 'A', running: true, retainedBy: {}, blank: false, updatedAt: 1 },
+      },
+      phase: 'ready', projectionsBySession: {},
+    }))
+    const view = render(<ArtifactNodeView {...base} />)
     const iframe = frame()
     expect(iframe.getAttribute('sandbox')).toBe('allow-scripts')
     expect(iframe.getAttribute('sandbox')).not.toContain('allow-same-origin')
@@ -108,7 +116,15 @@ describe('ArtifactNodeView', () => {
   })
 
   it('keeps inline placement in the flow and portals the other views outside it', () => {
-    const view = render(<div className="flowItem"><ArtifactNodeView {...props(1, undefined, 'focus')} /></div>)
+    const base = props(1, undefined, 'focus')
+    base.useSessions = bindSnapshotSelector(createSnapshotStore<SessionListState>({
+      ids: [SessionId('artifact-a')],
+      byId: {
+        [SessionId('artifact-a')]: { id: SessionId('artifact-a'), displayTitle: 'A', running: true, retainedBy: {}, blank: false, updatedAt: 1 },
+      },
+      phase: 'ready', projectionsBySession: {},
+    }))
+    const view = render(<div className="flowItem"><ArtifactNodeView {...base} /></div>)
     const flowItem = view.container.querySelector('.flowItem')!
     expect(screen.getByLabelText('Artifact: Report 1').parentElement).toBe(document.body)
     expect(screen.getByLabelText('Artifact: Report 1').getAttribute('data-placement')).toBe('focus')
@@ -152,8 +168,21 @@ describe('ArtifactNodeView', () => {
   })
 
   it('leaves the full-screen view on Escape without closing the artifact', () => {
-    render(<ArtifactNodeView {...props(1, undefined, 'focus')} />)
+    const base = props(1, undefined, 'focus')
+    base.useSessions = bindSnapshotSelector(createSnapshotStore<SessionListState>({
+      ids: [SessionId('artifact-a')],
+      byId: {
+        [SessionId('artifact-a')]: { id: SessionId('artifact-a'), displayTitle: 'A', running: true, retainedBy: {}, blank: false, updatedAt: 1 },
+      },
+      phase: 'ready', projectionsBySession: {},
+    }))
+    render(<ArtifactNodeView {...base} />)
     fireEvent.keyDown(window, { key: 'Escape' })
+    expect(screen.getByLabelText('Artifact: Report 1').getAttribute('data-placement')).toBe('inline')
+  })
+
+  it('does not expand a restored checkpoint on mount', () => {
+    render(<ArtifactNodeView {...props(1, undefined, 'focus')} />)
     expect(screen.getByLabelText('Artifact: Report 1').getAttribute('data-placement')).toBe('inline')
   })
 
