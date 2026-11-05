@@ -41,12 +41,16 @@ export interface FlowchartEdgeSpec {
   readonly label?: string
 }
 
+/** Visual idiom for a SceneSpec. */
+export type SceneStyle = 'editorial' | 'transit-map' | 'blueprint'
+
 /** Declarative flowchart with nodes, directed edges, and an optional path to advance. */
 export interface FlowchartSpec {
   readonly kind: 'flowchart'
   readonly nodes: readonly FlowchartNodeSpec[]
   readonly edges: readonly FlowchartEdgeSpec[]
   readonly path?: readonly string[]
+  readonly style?: SceneStyle
   readonly timeline?: { readonly duration: number; readonly fps: number }
 }
 
@@ -227,7 +231,12 @@ export function normalizeFlowchart(value: unknown): FlowchartSpec {
     if (!Number.isSafeInteger(fps) || fps < 1 || fps > 120) throw new SceneValidationError('/timeline/fps', 'must be an integer in [1,120]')
     timeline = { duration, fps }
   }
-  return { kind: 'flowchart', nodes, edges, ...(path === undefined ? {} : { path }), ...(timeline === undefined ? {} : { timeline }) }
+  return { kind: 'flowchart', nodes, edges, ...(path === undefined ? {} : { path }), ...(timeline === undefined ? {} : { timeline }), style: value.style === undefined ? 'editorial' : normalizeStyle(value.style) }
+}
+
+function normalizeStyle(value: unknown): SceneStyle {
+  if (value === 'editorial' || value === 'transit-map' || value === 'blueprint') return value
+  throw new SceneValidationError('/style', 'must be editorial, transit-map, or blueprint')
 }
 
 /**

@@ -92,11 +92,14 @@ describe('SceneSpec validation and persistence', () => {
       ],
       edges: [{ from: 'a', to: 'b', label: 'data' }],
       path: ['a', 'b'],
+      style: 'transit-map',
     }
     const normalized = normalizeSceneSpec(flowchart)
     if (normalized.kind !== 'flowchart') throw new Error('expected a flowchart spec')
     expect(normalized.nodes.map(node => node.id)).toEqual(['a', 'b'])
     expect(normalized.path).toEqual(['a', 'b'])
+    expect(normalized.style).toBe('transit-map')
+    expect(() => normalizeSceneSpec({ ...flowchart, style: 'unknown-style' })).toThrow('must be editorial, transit-map, or blueprint')
     expect(() => normalizeSceneSpec({ ...flowchart, edges: [{ from: 'a', to: 'missing' }] })).toThrow('must reference an existing node')
     expect(() => normalizeSceneSpec({ ...flowchart, path: ['a', 'missing'] })).toThrow('must reference an existing node')
   })

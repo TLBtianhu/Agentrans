@@ -50,7 +50,16 @@ export function renderFlowchart(
   const accent = style.getPropertyValue('--dsw-alias-state-business-primary').trim()
   const good = style.getPropertyValue('--dsw-alias-state-success-primary').trim()
   const surface = style.getPropertyValue('--dsw-alias-bg-base').trim()
-  context.clearRect(0, 0, width, height)
+  const isTransitMap = spec.style === 'transit-map'
+  const isBlueprint = spec.style === 'blueprint'
+  const background = isTransitMap ? '#f4f0e6' : isBlueprint ? '#17508c' : surface
+  const primaryInk = isTransitMap ? '#1d1d22' : isBlueprint ? '#eef4fb' : ink
+  const secondaryInk = isTransitMap ? '#6f6a60' : isBlueprint ? 'rgba(238,244,251,0.45)' : muted
+  const routeColor = isTransitMap ? '#d9774f' : accent
+  const alternateColor = isTransitMap ? '#23408e' : good
+  const highlightColor = isBlueprint ? '#ffd166' : accent
+  context.fillStyle = background
+  context.fillRect(0, 0, width, height)
   for (const edge of spec.edges) {
     const from = nodes.find(node => node.id === edge.from)
     const to = nodes.find(node => node.id === edge.to)
@@ -58,9 +67,9 @@ export function renderFlowchart(
     const a = position(from)
     const b = position(to)
     const active = currentId === edge.from || currentId === edge.to
-    context.strokeStyle = active ? accent : muted
+    context.strokeStyle = active ? routeColor : secondaryInk
     context.globalAlpha = active ? 0.9 : 0.45
-    context.lineWidth = active ? 2 : 1
+    context.lineWidth = isTransitMap ? (active ? 4 : 2) : (active ? 2 : 1)
     context.beginPath()
     context.moveTo(a.x, a.y)
     context.lineTo(b.x, b.y)
@@ -71,39 +80,71 @@ export function renderFlowchart(
     context.lineTo(b.x - 10 * Math.cos(angle - Math.PI / 6), b.y - 10 * Math.sin(angle - Math.PI / 6))
     context.lineTo(b.x - 10 * Math.cos(angle + Math.PI / 6), b.y - 10 * Math.sin(angle + Math.PI / 6))
     context.closePath()
-    context.fillStyle = active ? accent : muted
+    context.fillStyle = active ? routeColor : secondaryInk
     context.fill()
     if (edge.label) {
-      context.fillStyle = muted
+      context.fillStyle = secondaryInk
       context.font = '10px ui-sans-serif, system-ui'
       context.fillText(edge.label, (a.x + b.x) / 2 + 6, (a.y + b.y) / 2 - 6)
     }
   }
   context.globalAlpha = 1
-  for (const node of nodes) {
+  for (const [index, node] of nodes.entries()) {
     const { x, y } = position(node)
     const isCurrent = node.id === currentId
     const isSelected = node.id === selected
+    if (isTransitMap) {
+      context.beginPath()
+      context.arc(x, y, 10, 0, Math.PI * 2)
+      context.fillStyle = isCurrent ? routeColor : background
+      context.fill()
+      context.lineWidth = isCurrent ? 3 : 2
+      context.strokeStyle = isCurrent ? routeColor : secondaryInk
+      context.stroke()
+      context.fillStyle = primaryInk
+      context.font = '11px ui-sans-serif, system-ui'
+      context.textAlign = 'center'
+      context.textBaseline = 'top'
+      context.fillText(node.label, x, y + 16)
+      continue
+    }
     const nodeWidth = Math.max(88, node.label.length * 7 + 22)
     const nodeHeight = 38
     context.beginPath()
-    context.roundRect(x - nodeWidth / 2, y - nodeHeight / 2, nodeWidth, nodeHeight, 8)
-    context.fillStyle = isCurrent ? accent : surface
+    context.roundRect(x - nodeWidth / 2, y - nodeHeight / 2, nodeWidth, nodeHeight, isBlueprint ? 0 : 8)
+    context.fillStyle = isCurrent ? highlightColor : background
     context.fill()
     context.lineWidth = isSelected ? 2 : 1
-    context.strokeStyle = isCurrent ? accent : muted
+    context.strokeStyle = isCurrent ? highlightColor : secondaryInk
     context.stroke()
-    context.fillStyle = isCurrent ? surface : ink
-    context.font = '12px ui-sans-serif, system-ui'
+    context.fillStyle = isCurrent ? background : primaryInk
+    context.font = isBlueprint ? '12px ui-monospace, monospace' : '12px ui-sans-serif, system-ui'
     context.textAlign = 'center'
     context.textBaseline = 'middle'
     context.fillText(node.label, x, y)
-    if (isCurrent && good) {
+    if (isBlueprint) {
+      context.beginPath()
+      context.arc(x - nodeWidth / 2 + 10, y - nodeHeight / 2 - 10, 10, 0, Math.PI * 2)
+      context.strokeStyle = highlightColor
+      context.lineWidth = 1
+      context.stroke()
+      context.fillStyle = highlightColor
+      context.font = '10px ui-monospace, monospace'
+      context.textBaseline = 'middle'
+      context.fillText(String(index + 1).padStart(2, '0'), x - nodeWidth / 2 + 4, y - nodeHeight / 2 - 10)
+    } else if (isCurrent && alternateColor) {
       context.beginPath()
       context.arc(x + nodeWidth / 2 - 8, y - nodeHeight / 2 + 8, 3.5, 0, Math.PI * 2)
-      context.fillStyle = good
+      context.fillStyle = alternateColor
       context.fill()
     }
   }
   context.textAlign = 'start'
+  if (isBlueprint) {
+    context.fillStyle = secondaryInk
+    context.font = '10px ui-monospace, monospace'
+    context.textAlign = 'right'
+    context.fillText(`DWG ${spec.nodes.length} NODES / ${spec.edges.length} EDGES · REV A`, width - 12, height - 12)
+    context.textAlign = 'start'
+  }
 }
