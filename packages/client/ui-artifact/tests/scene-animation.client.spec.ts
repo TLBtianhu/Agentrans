@@ -24,4 +24,22 @@ describe('scene animation export', () => {
     expect(html).toContain('spec = {"kind":"function-plot"')
     expect(html).not.toContain('<script src=')
   })
+
+  it('exports a flowchart replay with path advancement', () => {
+    const flowchart = {
+      kind: 'flowchart' as const,
+      nodes: [
+        { id: 'a', label: 'Collect', x: 0, y: 0 },
+        { id: 'b', label: 'Analyze', x: 1, y: 0 },
+        { id: 'c', label: 'Decide', x: 2, y: 0 },
+      ],
+      edges: [{ from: 'a', to: 'b', label: 'data' }, { from: 'b', to: 'c', label: 'insight' }],
+      path: ['a', 'b', 'c'],
+    }
+    const html = buildSceneAnimationHtml(flowchart, 'Inquiry flow')
+    expect(html).toContain('"kind":"flowchart"')
+    expect(html).toContain('drawFlowchart')
+    expect(html).toContain('pathIndex')
+    expect(html).toContain('id="record"')
+  })
 })

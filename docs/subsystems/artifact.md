@@ -36,6 +36,8 @@ The SceneHost supports `inline`, `beside`, `focus`, and `pip` placements. A `Vie
 
 A comparison group uses its own Conversation Node to show control and variant side by side. Each Artifact keeps its own parameters and revision; shared commands synchronize behavior only. A native SceneSpec reports the same local state through a callback as an iframe's `artifact-state` message, so comparisons work without an iframe. The comparison result is admitted through the control Artifact's current revision and contains both local states.
 
+The SceneCatalog supports `function-plot` and `flowchart` primitives: function plots use the shared safe expression parser for native rendering, while flowcharts render nodes, directed edges, and an advancing path with a confirmed `flow.inspected` action. Both export a standalone HTML animation and a WebM recording of the same replay.
+
 Durable recovery covers snapshots and admitted action messages. Iframe JavaScript heap, canvas pixels, scroll position, source-view state, and unconfirmed pending actions are transient.
 
 ## Verification

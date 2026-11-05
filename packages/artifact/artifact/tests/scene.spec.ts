@@ -47,7 +47,7 @@ describe('SceneSpec validation and persistence', () => {
     const snapshot = ctx.artifacts.prepare(agent, input())
     expect(snapshot.format).toBe('scene')
     if (snapshot.format === 'scene') expect(snapshot.spec.kind).toBe('function-plot')
-    if (snapshot.format === 'scene') expect(snapshot.spec.functions.map(fn => fn.label)).toEqual(['sin(x)', 'a*x^2/4'])
+    if (snapshot.format === 'scene' && snapshot.spec.kind === 'function-plot') expect(snapshot.spec.functions.map(fn => fn.label)).toEqual(['sin(x)', 'a*x^2/4'])
     ctx.artifacts.commit(agent, snapshot)
     const events = agent.session.snapshotEvents().filter(event => event.type === 'artifact/upsert')
     expect(events).toHaveLength(1)
@@ -80,5 +80,24 @@ describe('SceneSpec validation and persistence', () => {
     const agent = makeAgent(ctx)
     const snapshot = ctx.artifacts.prepare(agent, input({ comparison: { group: 'damping-study', role: 'control' } }))
     expect(snapshot.comparison).toEqual({ group: 'damping-study', role: 'control' })
+  })
+
+  it('normalizes a flowchart spec and rejects dangling references', async () => {
+    const { normalizeSceneSpec } = await import('../src/scene.ts')
+    const flowchart = {
+      kind: 'flowchart',
+      nodes: [
+        { id: 'a', label: 'Collect', x: 0, y: 0 },
+        { id: 'b', label: 'Analyze', x: 1, y: 0 },
+      ],
+      edges: [{ from: 'a', to: 'b', label: 'data' }],
+      path: ['a', 'b'],
+    }
+    const normalized = normalizeSceneSpec(flowchart)
+    if (normalized.kind !== 'flowchart') throw new Error('expected a flowchart spec')
+    expect(normalized.nodes.map(node => node.id)).toEqual(['a', 'b'])
+    expect(normalized.path).toEqual(['a', 'b'])
+    expect(() => normalizeSceneSpec({ ...flowchart, edges: [{ from: 'a', to: 'missing' }] })).toThrow('must reference an existing node')
+    expect(() => normalizeSceneSpec({ ...flowchart, path: ['a', 'missing'] })).toThrow('must reference an existing node')
   })
 })

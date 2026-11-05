@@ -21,7 +21,7 @@ interface SceneToolResult {
   readonly sceneId: ArtifactSnapshot['artifactId']
   readonly revision: number
   readonly title: string
-  readonly kind: 'function-plot'
+  readonly kind: 'function-plot' | 'flowchart'
   readonly presentation: 'inline' | 'focus'
 }
 
@@ -41,7 +41,7 @@ export function apply(ctx: Context): void {
       + 'Two Scenes may share one comparison group with independent control and variant roles.',
     parameters: {
       action: { type: 'string', required: true, enum: ['create', 'update'], description: 'Create a new scene or replace an existing scene at its next revision.' },
-      kind: { type: 'string', required: true, enum: ['function-plot'], description: 'Scene primitive supported by the current SceneCatalog.' },
+      kind: { type: 'string', required: true, enum: ['function-plot', 'flowchart'], description: 'Scene primitive supported by the current SceneCatalog.' },
       sceneId: { type: 'string', required: true, description: 'Stable scene id matching [a-z][a-z0-9-]{0,63}.' },
       title: { type: 'string', required: true, description: 'Display title, 1-120 characters after trimming.' },
       spec: {
@@ -74,7 +74,7 @@ export function apply(ctx: Context): void {
     },
     async execute(args, exec): Promise<SceneToolResult> {
       if (exec.agent === undefined) throw new ArtifactError('scene requires an agent Session', 'BAD_INPUT')
-      if (args.kind !== 'function-plot') throw new ArtifactError(`unsupported scene kind: ${String(args.kind)}`, 'BAD_SCENE_SPEC')
+      if (args.kind !== 'function-plot' && args.kind !== 'flowchart') throw new ArtifactError(`unsupported scene kind: ${String(args.kind)}`, 'BAD_SCENE_SPEC')
       const snapshot = artifacts.prepare(exec.agent, {
         action: args.action as 'create' | 'update',
         artifactId: String(args.sceneId),
@@ -91,7 +91,7 @@ export function apply(ctx: Context): void {
         sceneId: snapshot.artifactId,
         revision: snapshot.revision,
         title: snapshot.title,
-        kind: 'function-plot',
+        kind: snapshot.format === 'scene' ? snapshot.spec.kind : 'function-plot',
         presentation: snapshot.presentation,
       }
     },

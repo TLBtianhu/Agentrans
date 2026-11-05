@@ -26,8 +26,32 @@ export interface FunctionPlotSpec {
   readonly timeline?: { readonly duration: number; readonly fps: number }
 }
 
+/** One node in a flowchart. */
+export interface FlowchartNodeSpec {
+  readonly id: string
+  readonly label: string
+  readonly x: number
+  readonly y: number
+}
+
+/** One directed edge in a flowchart. */
+export interface FlowchartEdgeSpec {
+  readonly from: string
+  readonly to: string
+  readonly label?: string
+}
+
+/** Declarative flowchart with nodes, directed edges, and an optional path to advance. */
+export interface FlowchartSpec {
+  readonly kind: 'flowchart'
+  readonly nodes: readonly FlowchartNodeSpec[]
+  readonly edges: readonly FlowchartEdgeSpec[]
+  readonly path?: readonly string[]
+  readonly timeline?: { readonly duration: number; readonly fps: number }
+}
+
 /** Union of all currently supported declarative SceneSpec primitives. */
-export type SceneSpec = FunctionPlotSpec
+export type SceneSpec = FunctionPlotSpec | FlowchartSpec
 
 /** Catalog entry owning one primitive's version and normalization. */
 export interface SceneCatalogEntry {
@@ -126,9 +150,64 @@ export function normalizeFunctionPlot(value: unknown): FunctionPlotSpec {
   return { kind: 'function-plot', functions, parameters, viewport, trace: { x, derivative: value.trace.derivative, integral: value.trace.integral }, ...timeline === undefined ? {} : { timeline } }
 }
 
+/**
+ * Validate and normalize a Flowchart SceneSpec.
+ * @param value - Untrusted model or Session snapshot value.
+ * @returns A normalized Flowchart SceneSpec.
+ * @throws {SceneValidationError} When nodes, edges, references, or the path are invalid.
+ */
+export function normalizeFlowchart(value: unknown): FlowchartSpec {
+  if (!isRecord(value) || value.kind !== 'flowchart') throw new SceneValidationError('/kind', 'must be flowchart')
+  if (!Array.isArray(value.nodes) || value.nodes.length < 1 || value.nodes.length > 24) {
+    throw new SceneValidationError('/nodes', 'must contain 1 to 24 nodes')
+  }
+  const nodes = value.nodes.map((item, index) => {
+    const path = `/nodes/${index}`
+    if (!isRecord(item)) throw new SceneValidationError(path, 'must be an object')
+    if (typeof item.id !== 'string' || !/^[a-z][a-z0-9-]{0,31}$/.test(item.id)) {
+      throw new SceneValidationError(`${path}/id`, 'must match [a-z][a-z0-9-]{0,31}')
+    }
+    if (typeof item.label !== 'string' || item.label.trim().length === 0) {
+      throw new SceneValidationError(`${path}/label`, 'must be a non-empty label')
+    }
+    return { id: item.id, label: item.label.trim(), x: numberAt(item.x, `${path}/x`), y: numberAt(item.y, `${path}/y`) }
+  })
+  const ids = new Set(nodes.map(node => node.id))
+  if (!Array.isArray(value.edges)) throw new SceneValidationError('/edges', 'must be an array')
+  const edges = value.edges.map((item, index) => {
+    const path = `/edges/${index}`
+    if (!isRecord(item)) throw new SceneValidationError(path, 'must be an object')
+    if (typeof item.from !== 'string' || !ids.has(item.from)) throw new SceneValidationError(`${path}/from`, 'must reference an existing node')
+    if (typeof item.to !== 'string' || !ids.has(item.to)) throw new SceneValidationError(`${path}/to`, 'must reference an existing node')
+    if (item.label !== undefined && (typeof item.label !== 'string' || item.label.trim().length === 0)) {
+      throw new SceneValidationError(`${path}/label`, 'must be empty when omitted or a non-empty string')
+    }
+    return { from: item.from, to: item.to, ...(item.label === undefined ? {} : { label: item.label.trim() }) }
+  })
+  let path: FlowchartSpec['path']
+  if (value.path !== undefined) {
+    if (!Array.isArray(value.path)) throw new SceneValidationError('/path', 'must be an array of node ids')
+    for (const [index, id] of value.path.entries()) {
+      if (typeof id !== 'string' || !ids.has(id)) throw new SceneValidationError(`/path/${index}`, 'must reference an existing node')
+    }
+    path = value.path as readonly string[]
+  }
+  let timeline: FlowchartSpec['timeline']
+  if (value.timeline !== undefined) {
+    if (!isRecord(value.timeline)) throw new SceneValidationError('/timeline', 'must be an object')
+    const duration = numberAt(value.timeline.duration, '/timeline/duration')
+    const fps = numberAt(value.timeline.fps, '/timeline/fps')
+    if (duration <= 0) throw new SceneValidationError('/timeline/duration', 'must be > 0')
+    if (!Number.isSafeInteger(fps) || fps < 1 || fps > 120) throw new SceneValidationError('/timeline/fps', 'must be an integer in [1,120]')
+    timeline = { duration, fps }
+  }
+  return { kind: 'flowchart', nodes, edges, ...(path === undefined ? {} : { path }), ...(timeline === undefined ? {} : { timeline }) }
+}
+
 /** Versioned catalog of SceneSpec primitives available to model generation. */
-export const sceneCatalog: Readonly<Record<FunctionPlotSpec['kind'], SceneCatalogEntry>> = {
+export const sceneCatalog: Readonly<Record<SceneSpec['kind'], SceneCatalogEntry>> = {
   'function-plot': { kind: 'function-plot', catalogVersion: 1, normalize: normalizeFunctionPlot },
+  'flowchart': { kind: 'flowchart', catalogVersion: 1, normalize: normalizeFlowchart },
 }
 
 /**

@@ -1,5 +1,5 @@
-/** Standalone HTML animation export for a validated FunctionPlot SceneSpec. */
-import type { FunctionPlotSpec } from '@deepseek-ai/dsh-artifact/scene'
+/** Standalone HTML animation export for validated SceneSpec values. */
+import type { FunctionPlotSpec, FlowchartSpec } from '@deepseek-ai/dsh-artifact/scene'
 import { sceneExprBundle } from './scene-expr.generated.ts'
 
 function escapeHtml(value: string): string {
@@ -12,7 +12,7 @@ function escapeHtml(value: string): string {
  * @param title - Document title for the exported page.
  * @returns A complete HTML document with an inline parser, scene data, and timeline player.
  */
-export function buildSceneAnimationHtml(spec: FunctionPlotSpec, title: string): string {
+export function buildSceneAnimationHtml(spec: FunctionPlotSpec | FlowchartSpec, title: string): string {
   const specJson = JSON.stringify(spec)
   const titleHtml = escapeHtml(title)
   const timeline = spec.timeline ?? { duration: 8, fps: 30 }
@@ -60,8 +60,11 @@ input[type='range'] { flex:1; min-width:160px; accent-color:var(--accent); }
 <script>${sceneExprBundle}</script>
 <script>
 const spec = ${specJson}
-const parameters = Object.fromEntries(Object.entries(spec.parameters).map(([key, value]) => [key, value.value]))
-const functions = spec.functions.map(fn => ({ ...fn, node: SceneExpr.parseExpression(fn.expression, Object.keys(spec.parameters)) }))
+const isFlowchart = spec.kind === 'flowchart'
+const path = isFlowchart ? (spec.path ?? []) : []
+let pathIndex = 0
+const parameters = Object.fromEntries(Object.entries(spec.parameters ?? {}).map(([key, value]) => [key, value.value]))
+const functions = isFlowchart ? [] : spec.functions.map(fn => ({ ...fn, node: SceneExpr.parseExpression(fn.expression, Object.keys(spec.parameters)) }))
 const canvas = document.getElementById('plot')
 const context = canvas.getContext('2d')
 const scrub = document.getElementById('scrub')
@@ -95,6 +98,7 @@ function integralAt(x) {
   return total * width
 }
 function draw() {
+  if (isFlowchart) { drawFlowchart(); return }
   const [xMin, xMax] = spec.viewport.x
   const [yMin, yMax] = spec.viewport.y
   const xToPixel = x => ((x - xMin) / (xMax - xMin)) * canvas.width
@@ -178,6 +182,79 @@ function draw() {
     ['f(x)', value.toFixed(3)],
     ['f′(x)', derivativeAt(traceX).toFixed(3)],
     ['∫', integralAt(traceX).toFixed(3)],
+  ].map(([label, text]) => '<div><span>' + label + '</span><strong>' + text + '</strong></div>').join('')
+  timeLabel.textContent = (progress * timeline.duration).toFixed(2) + ' s'
+}
+function drawFlowchart() {
+  const nodes = spec.nodes
+  pathIndex = Math.min(path.length - 1, Math.floor(progress * path.length))
+  const xs = nodes.map(node => node.x)
+  const ys = nodes.map(node => node.y)
+  const minX = Math.min(...xs)
+  const maxX = Math.max(...xs)
+  const minY = Math.min(...ys)
+  const maxY = Math.max(...ys)
+  const spanX = maxX - minX || 1
+  const spanY = maxY - minY || 1
+  const position = node => ({
+    x: 70 + ((node.x - minX) / spanX) * (canvas.width - 140),
+    y: 60 + ((node.y - minY) / spanY) * (canvas.height - 120),
+  })
+  const currentId = path[pathIndex] ?? path[0]
+  const accent = getComputedStyle(canvas).getPropertyValue('--accent')
+  const good = getComputedStyle(canvas).getPropertyValue('--good')
+  const muted = getComputedStyle(canvas).getPropertyValue('--muted')
+  const ink = getComputedStyle(canvas).getPropertyValue('--ink')
+  const surface = getComputedStyle(canvas).getPropertyValue('--bg')
+  context.clearRect(0, 0, canvas.width, canvas.height)
+  for (const edge of spec.edges) {
+    const from = nodes.find(node => node.id === edge.from)
+    const to = nodes.find(node => node.id === edge.to)
+    if (!from || !to) continue
+    const a = position(from)
+    const b = position(to)
+    const active = currentId === edge.from || currentId === edge.to
+    context.strokeStyle = active ? accent : muted
+    context.globalAlpha = active ? 0.9 : 0.45
+    context.lineWidth = active ? 2 : 1
+    context.beginPath(); context.moveTo(a.x, a.y); context.lineTo(b.x, b.y); context.stroke()
+    const angle = Math.atan2(b.y - a.y, b.x - a.x)
+    context.beginPath()
+    context.moveTo(b.x, b.y)
+    context.lineTo(b.x - 10 * Math.cos(angle - Math.PI / 6), b.y - 10 * Math.sin(angle - Math.PI / 6))
+    context.lineTo(b.x - 10 * Math.cos(angle + Math.PI / 6), b.y - 10 * Math.sin(angle + Math.PI / 6))
+    context.closePath(); context.fillStyle = active ? accent : muted; context.fill()
+    if (edge.label) {
+      context.fillStyle = muted
+      context.font = '10px ui-sans-serif, system-ui'
+      context.fillText(edge.label, (a.x + b.x) / 2 + 6, (a.y + b.y) / 2 - 6)
+    }
+  }
+  context.globalAlpha = 1
+  for (const node of nodes) {
+    const { x, y } = position(node)
+    const isCurrent = node.id === currentId
+    const width = Math.max(88, node.label.length * 7 + 22)
+    const height = 38
+    context.beginPath()
+    context.roundRect(x - width / 2, y - height / 2, width, height, 8)
+    context.fillStyle = isCurrent ? accent : surface
+    context.fill()
+    context.lineWidth = isCurrent ? 2 : 1
+    context.strokeStyle = isCurrent ? accent : muted
+    context.stroke()
+    context.fillStyle = isCurrent ? surface : ink
+    context.font = '12px ui-sans-serif, system-ui'
+    context.textAlign = 'center'
+    context.textBaseline = 'middle'
+    context.fillText(node.label, x, y)
+  }
+  context.textAlign = 'start'
+  readout.innerHTML = [
+    ['node', currentId ?? '—'],
+    ['path', path.length > 0 ? (pathIndex + 1) + '/' + path.length : '—'],
+    ['nodes', String(nodes.length)],
+    ['edges', String(spec.edges.length)],
   ].map(([label, text]) => '<div><span>' + label + '</span><strong>' + text + '</strong></div>').join('')
   timeLabel.textContent = (progress * timeline.duration).toFixed(2) + ' s'
 }

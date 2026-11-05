@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-Read interactive HTML Artifacts in the conversation that produced them. Each checkpoint renders independently, including when history contains only the latest revision. A card stays in the message flow by default and can be docked as a persistent result pane, expanded over the window, or floated as an auxiliary view. You can inspect the HTML source and send an Artifact action only after explicit confirmation. The preview runs without access to the parent application or remote dependencies. A `function-plot` SceneSpec renders natively through the shared safe expression parser, with direct confirmation of the current analysis.
+Read interactive HTML Artifacts in the conversation that produced them. Each checkpoint renders independently, including when history contains only the latest revision. A card stays in the message flow by default and can be docked as a persistent result pane, expanded over the window, or floated as an auxiliary view. You can inspect the HTML source and send an Artifact action only after explicit confirmation. The preview runs without access to the parent application or remote dependencies. A `function-plot` or `flowchart` SceneSpec renders natively through the shared safe expression parser, with direct confirmation of the current analysis.
 
 ## Table of Contents
 
