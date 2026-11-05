@@ -3,6 +3,7 @@ import type { SceneSpec } from '@deepseek-ai/dsh-artifact/scene'
 import { renderFunctionPlot } from './renderers/function-plot.ts'
 import { renderFlowchart } from './renderers/flowchart.ts'
 import { renderParticleSystem } from './renderers/particle-system.ts'
+import { renderTimeline } from './renderers/timeline.ts'
 
 /** One SceneSpec primitive's renderer and its exporter name. */
 export interface ScenePrimitiveEntry {
@@ -29,5 +30,10 @@ export const scenePrimitives: Readonly<Record<SceneSpec['kind'], ScenePrimitiveE
     kind: 'particle-system',
     rendererName: 'renderParticleSystem',
     render: renderParticleSystem as ScenePrimitiveEntry['render'],
+  },
+  'timeline': {
+    kind: 'timeline',
+    rendererName: 'renderTimeline',
+    render: renderTimeline as ScenePrimitiveEntry['render'],
   },
 }

@@ -82,8 +82,24 @@ export interface ParticleSystemSpec {
   readonly timeline?: { readonly duration: number; readonly fps: number }
 }
 
+/** One event on a timeline. */
+export interface TimelineEventSpec {
+  readonly id: string
+  readonly label: string
+  readonly time: number
+  readonly description?: string
+}
+
+/** Declarative timeline with ordered events and a movable playhead. */
+export interface TimelineSpec {
+  readonly kind: 'timeline'
+  readonly events: readonly TimelineEventSpec[]
+  readonly playhead?: number
+  readonly timeline?: { readonly duration: number; readonly fps: number }
+}
+
 /** Union of all currently supported declarative SceneSpec primitives. */
-export type SceneSpec = FunctionPlotSpec | FlowchartSpec | ParticleSystemSpec
+export type SceneSpec = FunctionPlotSpec | FlowchartSpec | ParticleSystemSpec | TimelineSpec
 
 /** Catalog entry owning one primitive's version and normalization. */
 export interface SceneCatalogEntry {
@@ -283,11 +299,59 @@ export function normalizeParticleSystem(value: unknown): ParticleSystemSpec {
   return { kind: 'particle-system', particles, gravity, timeStep, trails: value.trails, ...(timeline === undefined ? {} : { timeline }), style: value.style === undefined ? 'editorial' : normalizeStyle(value.style) }
 }
 
+/**
+ * Validate and normalize a Timeline SceneSpec.
+ * @param value - Untrusted model or Session snapshot value.
+ * @returns A normalized Timeline SceneSpec.
+ * @throws {SceneValidationError} When events or the playhead are invalid.
+ */
+export function normalizeTimeline(value: unknown): TimelineSpec {
+  if (!isRecord(value) || value.kind !== 'timeline') throw new SceneValidationError('/kind', 'must be timeline')
+  if (!Array.isArray(value.events) || value.events.length < 1 || value.events.length > 64) {
+    throw new SceneValidationError('/events', 'must contain 1 to 64 events')
+  }
+  const events = value.events.map((item, index) => {
+    const path = `/events/${index}`
+    if (!isRecord(item)) throw new SceneValidationError(path, 'must be an object')
+    if (typeof item.id !== 'string' || !/^[a-z][a-z0-9-]{0,31}$/.test(item.id)) {
+      throw new SceneValidationError(`${path}/id`, 'must match [a-z][a-z0-9-]{0,31}')
+    }
+    if (typeof item.label !== 'string' || item.label.trim().length === 0) {
+      throw new SceneValidationError(`${path}/label`, 'must be a non-empty label')
+    }
+    return {
+      id: item.id, label: item.label.trim(), time: numberAt(item.time, `${path}/time`),
+      ...(item.description === undefined ? {} : { description: String(item.description) }),
+    }
+  }).sort((a, b) => a.time - b.time)
+  let playhead: number | undefined
+  if (value.playhead !== undefined) {
+    playhead = numberAt(value.playhead, '/playhead')
+    const firstTime = events.at(0)?.time
+    const lastTime = events.at(-1)?.time
+    if (firstTime === undefined || lastTime === undefined) throw new SceneValidationError('/events', 'must not be empty')
+    if (playhead < firstTime || playhead > lastTime) {
+      throw new SceneValidationError('/playhead', 'must be within the event time range')
+    }
+  }
+  let timeline: TimelineSpec['timeline']
+  if (value.timeline !== undefined) {
+    if (!isRecord(value.timeline)) throw new SceneValidationError('/timeline', 'must be an object')
+    const duration = numberAt(value.timeline.duration, '/timeline/duration')
+    const fps = numberAt(value.timeline.fps, '/timeline/fps')
+    if (duration <= 0) throw new SceneValidationError('/timeline/duration', 'must be > 0')
+    if (!Number.isSafeInteger(fps) || fps < 1 || fps > 120) throw new SceneValidationError('/timeline/fps', 'must be an integer in [1,120]')
+    timeline = { duration, fps }
+  }
+  return { kind: 'timeline', events, ...(playhead === undefined ? {} : { playhead }), ...(timeline === undefined ? {} : { timeline }) }
+}
+
 /** Versioned catalog of SceneSpec primitives available to model generation. */
 export const sceneCatalog: Readonly<Record<SceneSpec['kind'], SceneCatalogEntry>> = {
   'function-plot': { kind: 'function-plot', catalogVersion: 1, normalize: normalizeFunctionPlot },
   'flowchart': { kind: 'flowchart', catalogVersion: 1, normalize: normalizeFlowchart },
   'particle-system': { kind: 'particle-system', catalogVersion: 1, normalize: normalizeParticleSystem },
+  'timeline': { kind: 'timeline', catalogVersion: 1, normalize: normalizeTimeline },
 }
 
 /**

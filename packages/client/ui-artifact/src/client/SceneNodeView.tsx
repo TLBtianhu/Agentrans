@@ -7,6 +7,7 @@ import type { ArtifactPlacement, RecordArtifactAction } from './protocol.ts'
 import { FunctionPlotView } from './FunctionPlotView.tsx'
 import { FlowchartView } from './FlowchartView.tsx'
 import { ParticleSystemView } from './ParticleSystemView.tsx'
+import { TimelineView } from './TimelineView.tsx'
 
 interface SceneNodeViewProps {
   readonly spec: SceneSpec
@@ -31,5 +32,7 @@ export function SceneNodeView(props: SceneNodeViewProps) {
       return <FlowchartView {...props} spec={props.spec} />
     case 'particle-system':
       return <ParticleSystemView {...props} spec={props.spec} />
+    case 'timeline':
+      return <TimelineView {...props} spec={props.spec} />
   }
 }

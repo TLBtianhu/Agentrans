@@ -123,4 +123,22 @@ describe('SceneSpec validation and persistence', () => {
     expect(() => normalizeSceneSpec({ ...system, particles: [{ ...system.particles[0], mass: 0 }] })).toThrow('must be > 0')
     expect(() => normalizeSceneSpec({ ...system, style: 'unknown-style' })).toThrow('must be editorial, transit-map, blueprint, math-proof-lecture, or particles')
   })
+
+  it('normalizes a timeline spec and rejects out-of-range playheads', async () => {
+    const { normalizeSceneSpec } = await import('../src/scene.ts')
+    const timeline = {
+      kind: 'timeline',
+      events: [
+        { id: 'start', label: 'Start', time: 0 },
+        { id: 'middle', label: 'Middle', time: 5 },
+        { id: 'end', label: 'End', time: 10 },
+      ],
+      playhead: 5,
+    }
+    const normalized = normalizeSceneSpec(timeline)
+    if (normalized.kind !== 'timeline') throw new Error('expected a timeline spec')
+    expect(normalized.events.map(event => event.id)).toEqual(['start', 'middle', 'end'])
+    expect(normalized.playhead).toBe(5)
+    expect(() => normalizeSceneSpec({ ...timeline, playhead: 100 })).toThrow('must be within the event time range')
+  })
 })

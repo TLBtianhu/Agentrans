@@ -55,7 +55,24 @@ describe('scene animation export', () => {
     expect(html).toContain('"kind":"particle-system"')
     expect(html).toContain('scenePrimitives')
     expect(html).toContain('spec.timeStep')
-    expect(html).toContain('isFlowchart || isParticleSystem ? [] : spec.functions.map')
+    expect(html).toContain('isFlowchart || isParticleSystem || isTimeline ? [] : spec.functions.map')
+    expect(html).toContain('id="record"')
+  })
+
+  it('exports a timeline replay with a movable playhead', () => {
+    const timeline = {
+      kind: 'timeline' as const,
+      events: [
+        { id: 'start', label: 'Start', time: 0 },
+        { id: 'middle', label: 'Middle', time: 5 },
+        { id: 'end', label: 'End', time: 10 },
+      ],
+      playhead: 0,
+    }
+    const html = buildSceneAnimationHtml(timeline, 'History')
+    expect(html).toContain('"kind":"timeline"')
+    expect(html).toContain('scenePrimitives')
+    expect(html).toContain('playhead')
     expect(html).toContain('id="record"')
   })
 })
