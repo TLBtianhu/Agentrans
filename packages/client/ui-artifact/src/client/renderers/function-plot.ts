@@ -50,6 +50,16 @@ export function renderFunctionPlot(
   const accent = style.getPropertyValue('--dsw-alias-state-business-primary').trim()
   const good = style.getPropertyValue('--dsw-alias-state-success-primary').trim()
   const grid = style.getPropertyValue('--dsw-alias-border-l2').trim()
+  const isProofLecture = spec.style === 'math-proof-lecture'
+  const primaryInk = isProofLecture ? '#c7c7c9' : ink
+  const secondaryInk = isProofLecture ? '#6f7480' : muted
+  const subjectColor = isProofLecture ? '#fed74b' : accent
+  const baselineColor = isProofLecture ? '#5ac4dc' : good
+  const gridColor = isProofLecture ? 'rgba(199,199,201,0.08)' : grid
+  if (isProofLecture) {
+    context.fillStyle = '#0a0b0f'
+    context.fillRect(0, 0, width, height)
+  }
   const [xMin, xMax] = spec.viewport.x
   const [yMin, yMax] = spec.viewport.y
   const xRange = (xMax - xMin) / scale
@@ -62,7 +72,7 @@ export function renderFunctionPlot(
   const currentValue = evaluateAt(currentFunction, traceX)
 
   context.clearRect(0, 0, width, height)
-  context.strokeStyle = grid
+  context.strokeStyle = gridColor
   context.lineWidth = 1
   for (let index = 0; index <= COLUMNS; index++) {
     const x = centerX - xRange / 2 + (index / COLUMNS) * xRange
@@ -72,14 +82,14 @@ export function renderFunctionPlot(
     const y = centerY - yRange / 2 + (index / ROWS) * yRange
     context.beginPath(); context.moveTo(0, yToPixel(y)); context.lineTo(width, yToPixel(y)); context.stroke()
   }
-  context.strokeStyle = muted
+  context.strokeStyle = secondaryInk
   context.globalAlpha = 0.55
   context.beginPath(); context.moveTo(0, yToPixel(0)); context.lineTo(width, yToPixel(0)); context.stroke()
   context.beginPath(); context.moveTo(xToPixel(0), 0); context.lineTo(xToPixel(0), height); context.stroke()
   context.globalAlpha = 1
 
   if (showIntegral) {
-    context.fillStyle = good
+    context.fillStyle = baselineColor
     context.globalAlpha = 0.1
     context.beginPath()
     context.moveTo(xToPixel(0), yToPixel(0))
@@ -97,7 +107,7 @@ export function renderFunctionPlot(
   }
 
   for (const [index, fn] of functions.entries()) {
-    context.strokeStyle = index === 0 ? accent : good
+    context.strokeStyle = index === 0 ? subjectColor : baselineColor
     context.lineWidth = fn.id === currentFunction.id ? 2.5 : 1.5
     context.globalAlpha = fn.id === currentFunction.id ? 1 : 0.45
     context.beginPath()
@@ -120,7 +130,7 @@ export function renderFunctionPlot(
 
   if (showDerivative) {
     const slope = derivativeAt(traceX)
-    context.strokeStyle = accent
+    context.strokeStyle = subjectColor
     context.globalAlpha = 0.7
     context.setLineDash([4, 4])
     context.beginPath()
@@ -137,7 +147,7 @@ export function renderFunctionPlot(
   }
 
   context.font = '10px ui-monospace, SFMono-Regular, Menlo, monospace'
-  context.fillStyle = muted
+  context.fillStyle = secondaryInk
   context.textBaseline = 'bottom'
   for (let index = 0; index <= COLUMNS; index++) {
     const x = centerX - xRange / 2 + (index / COLUMNS) * xRange
@@ -153,7 +163,7 @@ export function renderFunctionPlot(
     context.fillText(y.toFixed(1), 5, pixel - 7)
   }
 
-  context.strokeStyle = muted
+  context.strokeStyle = secondaryInk
   context.globalAlpha = 0.5
   context.setLineDash([3, 3])
   context.beginPath()
@@ -165,13 +175,13 @@ export function renderFunctionPlot(
 
   context.beginPath()
   context.arc(xToPixel(traceX), yToPixel(currentValue), 4.5, 0, Math.PI * 2)
-  context.fillStyle = good
+  context.fillStyle = baselineColor
   context.fill()
-  context.strokeStyle = ink
+  context.strokeStyle = primaryInk
   context.lineWidth = 1
   context.stroke()
 
-  context.fillStyle = ink
+  context.fillStyle = primaryInk
   context.font = '11px ui-monospace, SFMono-Regular, Menlo, monospace'
   context.textBaseline = 'middle'
   const traceTag = `x ${traceX.toFixed(2)}`

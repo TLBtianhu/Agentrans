@@ -99,7 +99,7 @@ describe('SceneSpec validation and persistence', () => {
     expect(normalized.nodes.map(node => node.id)).toEqual(['a', 'b'])
     expect(normalized.path).toEqual(['a', 'b'])
     expect(normalized.style).toBe('transit-map')
-    expect(() => normalizeSceneSpec({ ...flowchart, style: 'unknown-style' })).toThrow('must be editorial, transit-map, or blueprint')
+    expect(() => normalizeSceneSpec({ ...flowchart, style: 'unknown-style' })).toThrow('must be editorial, transit-map, blueprint, math-proof-lecture, or particles')
     expect(() => normalizeSceneSpec({ ...flowchart, edges: [{ from: 'a', to: 'missing' }] })).toThrow('must reference an existing node')
     expect(() => normalizeSceneSpec({ ...flowchart, path: ['a', 'missing'] })).toThrow('must reference an existing node')
   })
@@ -112,12 +112,15 @@ describe('SceneSpec validation and persistence', () => {
       gravity: { x: 0, y: -9.8 },
       timeStep: 0.02,
       trails: true,
+      style: 'particles',
     }
     const normalized = normalizeSceneSpec(system)
     if (normalized.kind !== 'particle-system') throw new Error('expected a particle-system spec')
     expect(normalized.particles.map(particle => particle.id)).toEqual(['p1'])
     expect(normalized.gravity).toEqual({ x: 0, y: -9.8 })
     expect(normalized.trails).toBe(true)
+    expect(normalized.style).toBe('particles')
     expect(() => normalizeSceneSpec({ ...system, particles: [{ ...system.particles[0], mass: 0 }] })).toThrow('must be > 0')
+    expect(() => normalizeSceneSpec({ ...system, style: 'unknown-style' })).toThrow('must be editorial, transit-map, blueprint, math-proof-lecture, or particles')
   })
 })

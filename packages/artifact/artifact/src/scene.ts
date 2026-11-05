@@ -23,6 +23,7 @@ export interface FunctionPlotSpec {
   readonly parameters: Readonly<Record<string, SceneParameterSpec>>
   readonly viewport: { readonly x: readonly [number, number]; readonly y: readonly [number, number] }
   readonly trace: { readonly x: number; readonly derivative: boolean; readonly integral: boolean }
+  readonly style?: SceneStyle
   readonly timeline?: { readonly duration: number; readonly fps: number }
 }
 
@@ -42,7 +43,7 @@ export interface FlowchartEdgeSpec {
 }
 
 /** Visual idiom for a SceneSpec. */
-export type SceneStyle = 'editorial' | 'transit-map' | 'blueprint'
+export type SceneStyle = 'editorial' | 'transit-map' | 'blueprint' | 'math-proof-lecture' | 'particles'
 
 /** Declarative flowchart with nodes, directed edges, and an optional path to advance. */
 export interface FlowchartSpec {
@@ -77,6 +78,7 @@ export interface ParticleSystemSpec {
   readonly gravity: GravitySpec
   readonly timeStep: number
   readonly trails: boolean
+  readonly style?: SceneStyle
   readonly timeline?: { readonly duration: number; readonly fps: number }
 }
 
@@ -177,7 +179,7 @@ export function normalizeFunctionPlot(value: unknown): FunctionPlotSpec {
     if (!Number.isSafeInteger(fps) || fps < 1 || fps > 120) throw new SceneValidationError('/timeline/fps', 'must be an integer in [1,120]')
     timeline = { duration, fps }
   }
-  return { kind: 'function-plot', functions, parameters, viewport, trace: { x, derivative: value.trace.derivative, integral: value.trace.integral }, ...timeline === undefined ? {} : { timeline } }
+  return { kind: 'function-plot', functions, parameters, viewport, trace: { x, derivative: value.trace.derivative, integral: value.trace.integral }, ...timeline === undefined ? {} : { timeline }, style: value.style === undefined ? 'editorial' : normalizeStyle(value.style) }
 }
 
 /**
@@ -235,8 +237,8 @@ export function normalizeFlowchart(value: unknown): FlowchartSpec {
 }
 
 function normalizeStyle(value: unknown): SceneStyle {
-  if (value === 'editorial' || value === 'transit-map' || value === 'blueprint') return value
-  throw new SceneValidationError('/style', 'must be editorial, transit-map, or blueprint')
+  if (value === 'editorial' || value === 'transit-map' || value === 'blueprint' || value === 'math-proof-lecture' || value === 'particles') return value
+  throw new SceneValidationError('/style', 'must be editorial, transit-map, blueprint, math-proof-lecture, or particles')
 }
 
 /**
@@ -278,7 +280,7 @@ export function normalizeParticleSystem(value: unknown): ParticleSystemSpec {
     if (!Number.isSafeInteger(fps) || fps < 1 || fps > 120) throw new SceneValidationError('/timeline/fps', 'must be an integer in [1,120]')
     timeline = { duration, fps }
   }
-  return { kind: 'particle-system', particles, gravity, timeStep, trails: value.trails, ...(timeline === undefined ? {} : { timeline }) }
+  return { kind: 'particle-system', particles, gravity, timeStep, trails: value.trails, ...(timeline === undefined ? {} : { timeline }), style: value.style === undefined ? 'editorial' : normalizeStyle(value.style) }
 }
 
 /** Versioned catalog of SceneSpec primitives available to model generation. */
