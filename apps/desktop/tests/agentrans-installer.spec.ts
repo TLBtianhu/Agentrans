@@ -81,6 +81,18 @@ describe('agentrans-installer CLI', () => {
     await expect(readFile(join(root, 'runtime-envs', 'runtime.bin'), 'utf8')).rejects.toThrow()
   })
 
+  it('removes the registration even when the install manifest is unreadable', async () => {
+    const { root, releasePath, manifestPath, publicKeyPath, registration } = await setupRelease('0.3.0')
+    await execFileAsync(process.execPath, [installer, 'install', '--root', root, '--release', releasePath, '--manifest', manifestPath, '--public-key', publicKeyPath, '--uninstall-key', registration.uninstallKey, '--shortcut-path', registration.shortcutPath])
+    await writeFile(join(root, 'data', 'install', 'manifest.json'), '{ not json', 'utf8')
+    await mkdir(join(root, 'data', 'dsh', 'home', 'sessions'), { recursive: true })
+    await writeFile(join(root, 'data', 'dsh', 'home', 'sessions', 'keep.jsonl'), 'keep', 'utf8')
+    await execFileAsync(process.execPath, [installer, 'uninstall', '--root', root, '--silent', '--uninstall-key', registration.uninstallKey, '--shortcut-path', registration.shortcutPath])
+    await expect(readFile(join(root, 'app', 'index.js'), 'utf8')).rejects.toThrow()
+    expect(await readFile(join(root, 'data', 'dsh', 'home', 'sessions', 'keep.jsonl'), 'utf8')).toBe('keep')
+    await expect(verifyWindowsRegistration(registration)).rejects.toThrow()
+  })
+
   it('parses the native uninstall dialog without executing it', async () => {
     const script = 'C:/agent制作/deepseek-harness/apps/desktop/installer/uninstall-dialog.ps1'
     const command = `$errors = $null; [System.Management.Automation.PSParser]::Tokenize((Get-Content -Raw '${script}'), [ref]$errors) | Out-Null; if ($errors.Count -gt 0) { throw $errors[0] }`

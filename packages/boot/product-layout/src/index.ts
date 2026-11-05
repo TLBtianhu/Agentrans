@@ -32,11 +32,13 @@ export {
 export {
   ALL_UNINSTALL_SCOPE,
   APP_ONLY_UNINSTALL_SCOPE,
+  assertOwnedPaths,
   executeUninstallPlan,
   planUninstall,
   UninstallConfirmationError,
   UninstallExecutionError,
   UninstallHookError,
+  UninstallPathError,
   type UninstallHooks,
   type UninstallPlan,
   type UninstallResult,

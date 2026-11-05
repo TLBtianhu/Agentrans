@@ -47,10 +47,6 @@ function scopeFromText(value) {
   return scope
 }
 
-function isEnoent(error) {
-  return error !== null && typeof error === 'object' && 'code' in error && error.code === 'ENOENT'
-}
-
 async function install(options) {
   const layout = ProductLayout.fromRoot(required(options, 'root'), 'installed')
   const releasePath = required(options, 'release')
@@ -98,7 +94,9 @@ async function uninstall(options) {
       try {
         version = (await readInstallManifest(layout.installManifestPath)).appVersion
       } catch (error) {
-        if (!isEnoent(error)) throw error
+        // The registration entry is removed by key, so a missing or unreadable
+        // manifest must not abort after the selected paths are already gone.
+        console.warn(`agentrans uninstall: install manifest unavailable, using ${version} (${String(error)})`)
       }
       await removeWindowsRegistration(planWindowsRegistration(layout, {
         productName,

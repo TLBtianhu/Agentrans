@@ -30,7 +30,7 @@ Use `createInstallManifest()`, `writeInstallManifest()`, and `readInstallManifes
 
 Use `planInstall()` to preview an install, then `packPortable()` or `packInstalled()` to execute it from a clean application payload. Payloads containing `data`, `models`, `runtime-envs`, `integrations`, `.env`, credentials, or private keys are rejected. Upgrades replace only `app` and preserve existing data and assets. Installed packaging reports Windows registration operations separately; portable packaging reports none.
 
-Use `planUninstall()` to preview removal scope and `executeUninstallPlan()` to execute it. The default removes only `app` and regenerable cache. Full deletion requires confirmation. Selected paths are removed before Windows registration cleanup through supplied callbacks.
+Use `planUninstall()` to preview removal scope and `executeUninstallPlan()` to execute it. The default removes only `app` and regenerable cache. Full deletion requires confirmation. Selected paths are removed before Windows registration cleanup through supplied callbacks. `assertOwnedPaths()` rejects any removal that resolves outside the single root, so planning fails before deletion if a layout path ever escapes it.
 
 Use `signReleaseManifest()` with a caller-owned Ed25519 private key and `verifyReleaseManifest()` with the trusted public key. The manifest records the filename, version, size, SHA-256, algorithm, key fingerprint, and signature. Verification rejects modified manifests, modified files, wrong keys, and malformed manifests before installation.
 

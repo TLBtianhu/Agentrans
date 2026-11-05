@@ -1,6 +1,6 @@
 /** Scoped uninstall planning and ordered execution with explicit external-operation hooks. */
 import { rm } from 'node:fs/promises'
-import { join } from 'node:path'
+import { isAbsolute, join, relative, resolve, sep } from 'node:path'
 import type { ProductLayout } from './layout.ts'
 
 /** Asset and data categories a user may choose to remove. */
@@ -77,6 +77,32 @@ export class UninstallExecutionError extends Error {
   }
 }
 
+/** Raised when a planned removal resolves outside the installation root. */
+export class UninstallPathError extends Error {
+  /** Stable machine-readable code for a removal outside the product root. */
+  readonly code = 'UNINSTALL_PATH_OUTSIDE_ROOT'
+
+  /** @param path - The rejected removal path. */
+  constructor(readonly path: string) {
+    super(`Uninstall path is outside the installation root: ${path}`)
+    this.name = 'UninstallPathError'
+  }
+}
+
+/**
+ * Reject removals that would leave the single installation root.
+ * @param root - Installation root that owns every removable path.
+ * @param paths - Candidate removal paths.
+ * @throws {UninstallPathError} When a path is the root itself or resolves outside it.
+ */
+export function assertOwnedPaths(root: string, paths: readonly string[]): void {
+  const absoluteRoot = resolve(root)
+  for (const path of paths) {
+    const offset = relative(absoluteRoot, resolve(path))
+    if (offset === '' || isAbsolute(offset) || offset.split(sep)[0] === '..') throw new UninstallPathError(path)
+  }
+}
+
 /**
  * Preview a scoped uninstall without touching files or external registration state.
  * @param layout - Single-root installation to uninstall.
@@ -84,6 +110,7 @@ export class UninstallExecutionError extends Error {
  * @param options - Confirmation for the all-categories scope.
  * @returns Paths to remove, preserve, and externally deregister.
  * @throws {UninstallConfirmationError} When every category is selected without confirmation.
+ * @throws {UninstallPathError} When a layout path resolves outside the installation root.
  */
 export function planUninstall(
   layout: ProductLayout,
@@ -124,6 +151,7 @@ export function planUninstall(
   if (scope.app && layout.channel === 'installed') {
     externalOperations.push('windows:remove-uninstall-entry', 'windows:remove-start-menu-shortcut')
   }
+  assertOwnedPaths(layout.root, remove)
   return {
     layout,
     scope,

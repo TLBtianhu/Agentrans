@@ -5,12 +5,14 @@ import { tmpdir } from 'node:os'
 import {
   ALL_UNINSTALL_SCOPE,
   APP_ONLY_UNINSTALL_SCOPE,
+  assertOwnedPaths,
   executeUninstallPlan,
   planUninstall,
   ProductLayout,
   UninstallConfirmationError,
   UninstallExecutionError,
   UninstallHookError,
+  UninstallPathError,
 } from '../src/index.ts'
 
 const roots: string[] = []
@@ -69,6 +71,21 @@ describe('uninstall planning', () => {
     expect(plan.requiresConfirmation).toBe(true)
     expect(plan.externalOperations[0]).toBe('windows:remove-uninstall-entry')
     expect(plan.externalOperations).toContain('windows:remove-uninstall-entry')
+  })
+
+  it('keeps every planned removal inside the installation root', async () => {
+    const layout = ProductLayout.fromRoot(await tempRoot(), 'installed')
+    for (const scope of [APP_ONLY_UNINSTALL_SCOPE, ALL_UNINSTALL_SCOPE]) {
+      const plan = planUninstall(layout, scope, { allConfirmed: true })
+      expect(() => { assertOwnedPaths(layout.root, plan.remove) }).not.toThrow()
+    }
+  })
+
+  it('rejects a removal path that leaves the installation root', () => {
+    const root = join(tmpdir(), 'agentrans-owned-root')
+    expect(() => { assertOwnedPaths(root, [join(root, '..', 'outside')]) }).toThrow(UninstallPathError)
+    expect(() => { assertOwnedPaths(root, [root]) }).toThrow(UninstallPathError)
+    expect(() => { assertOwnedPaths(root, [join(root, 'data', 'settings')]) }).not.toThrow()
   })
 })
 

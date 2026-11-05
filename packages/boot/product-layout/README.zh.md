@@ -30,7 +30,7 @@ kind: "package-reference"
 
 使用 `planInstall()` 预览安装，再用 `packPortable()` 或 `packInstalled()` 从纯净应用负载执行。负载包含 `data`、`models`、`runtime-envs`、`integrations`、`.env`、凭据或私钥时会被拒绝。升级只替换 `app`，保留已有数据和资产。安装版会单独报告 Windows 注册操作，便携版不报告注册操作。
 
-使用 `planUninstall()` 预览卸载范围，用 `executeUninstallPlan()` 执行。默认只删除 `app` 和可重建 cache。完整删除需要确认。先清理所选路径，再通过回调处理 Windows 注册。
+使用 `planUninstall()` 预览卸载范围，用 `executeUninstallPlan()` 执行。默认只删除 `app` 和可重建 cache。完整删除需要确认。先清理所选路径，再通过回调处理 Windows 注册。`assertOwnedPaths()` 会拒绝解析到单根之外的删除路径，因此一旦布局路径越界，规划阶段就会失败，不会删除任何文件。
 
 使用 `signReleaseManifest()` 和调用方持有的 Ed25519 私钥签名，使用 `verifyReleaseManifest()` 和受信任的公钥验签。清单记录文件名、版本、大小、SHA-256、算法、密钥指纹和签名。安装前会拒绝被修改的清单、文件、错误密钥和非法清单。
 
