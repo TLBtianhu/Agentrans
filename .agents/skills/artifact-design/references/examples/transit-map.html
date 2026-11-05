@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Transit map · HTTP request</title>
+<style>
+:root { color-scheme: light; --paper:#f4f0e6; --ink:#1d1d22; --muted:#6f6a60; --terracotta:#d9774f; --navy:#23408e; --sign:#1f2a44; }
+* { box-sizing: border-box; }
+body { margin:0; background:var(--paper); color:var(--ink); font:13px/1.5 ui-sans-serif, system-ui, sans-serif; font-variant-numeric: tabular-nums; }
+main { width:min(980px,100%); margin:0 auto; padding:24px; display:grid; gap:14px; }
+.sign { background:var(--sign); color:white; padding:10px 16px; font:600 13px/1.4 ui-sans-serif, system-ui; letter-spacing:0.02em; }
+.title { margin:0; font:600 22px/1.2 ui-sans-serif, system-ui; }
+.subtitle { margin:0; color:var(--muted); font-size:12px; }
+svg { display:block; width:100%; height:auto; border-top:1px solid rgba(29,29,34,0.12); border-bottom:1px solid rgba(29,29,34,0.12); }
+.station { fill:var(--paper); stroke:var(--terracotta); stroke-width:3; }
+.station-label { font:11px ui-sans-serif, system-ui; fill:var(--ink); }
+.line { stroke:var(--terracotta); stroke-width:6; fill:none; stroke-linecap:round; }
+.train { fill:var(--navy); }
+.caption { margin:0; color:var(--muted); font-size:12px; }
+</style>
+</head>
+<body>
+<main>
+  <div class="sign">HTTP REQUEST · LINE 1 · TERMINUS: RESPONSE</div>
+  <h1 class="title">From browser to response</h1>
+  <p class="subtitle">Five stations, one route. The train advances with the timeline.</p>
+  <svg viewBox="0 0 900 260" role="img" aria-label="HTTP request transit map">
+    <path class="line" d="M80 130 H820" />
+    <g id="stations"></g>
+    <circle id="train" class="train" r="9" cx="80" cy="130" />
+  </svg>
+  <p class="caption">Stations light up in order; the train moves between them. Ending is the terminus sign.</p>
+</main>
+<script>
+const stations = [
+  { id: 'browser', label: 'Browser', x: 80 },
+  { id: 'dns', label: 'DNS', x: 260 },
+  { id: 'tcp', label: 'TCP', x: 440 },
+  { id: 'tls', label: 'TLS', x: 620 },
+  { id: 'response', label: 'Response', x: 800 },
+]
+const svg = document.querySelector('svg')
+const group = document.getElementById('stations')
+for (const [index, station] of stations.entries()) {
+  const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
+  circle.setAttribute('class', 'station')
+  circle.setAttribute('r', '10')
+  circle.setAttribute('cx', String(station.x))
+  circle.setAttribute('cy', '130')
+  circle.dataset.index = String(index)
+  group.appendChild(circle)
+  const text = document.createElementNS('http://www.w3.org/2000/svg', 'text')
+  text.setAttribute('class', 'station-label')
+  text.setAttribute('x', String(station.x))
+  text.setAttribute('y', '160')
+  text.setAttribute('text-anchor', 'middle')
+  text.textContent = station.label
+  group.appendChild(text)
+}
+let index = 0
+const train = document.getElementById('train')
+function advance() {
+  const circles = group.querySelectorAll('circle')
+  circles.forEach((circle, i) => {
+    circle.style.fill = i <= index ? 'var(--terracotta)' : 'var(--paper)'
+  })
+  train.setAttribute('cx', String(stations[index].x))
+  index = (index + 1) % stations.length
+}
+setInterval(advance, 1200)
+advance()
+</script>
+</body>
+</html>

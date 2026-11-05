@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Math proof lecture · damped oscillator</title>
+<style>
+:root { color-scheme: dark; --bg:#0a0b0f; --ink:#c7c7c9; --muted:#6f7480; --gold:#fed74b; --cyan:#5ac4dc; --sage:#8ab679; --coral:#ca6f74; --grid:rgba(199,199,201,0.08); }
+* { box-sizing: border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font:13px/1.5 ui-sans-serif, system-ui, sans-serif; font-variant-numeric: tabular-nums; }
+main { width:min(980px,100%); margin:0 auto; padding:24px; display:grid; gap:12px; }
+.series { margin:0; color:var(--ink); font:600 12px/1.4 Georgia, serif; letter-spacing:0.02em; }
+.lemma { margin:0; color:var(--gold); font:12px/1.4 ui-monospace, monospace; }
+.title { margin:0; font:600 26px/1.15 Georgia, serif; }
+.subtitle { margin:0; color:var(--muted); font-size:12px; }
+canvas { display:block; width:100%; height:auto; border-top:1px solid var(--grid); border-bottom:1px solid var(--grid); }
+.footer { display:flex; justify-content:space-between; color:var(--muted); font-size:11px; }
+.qed { color:var(--gold); font-family:ui-monospace, monospace; }
+</style>
+</head>
+<body>
+<main>
+  <p class="series">Damped oscillator · proof of decay</p>
+  <p class="lemma">Lemma 1. The envelope exp(-d·t) bounds the amplitude.</p>
+  <h1 class="title">Amplitude decays exponentially</h1>
+  <p class="subtitle">Displacement x(t) = exp(-d·t) · sin(2π·f·t), with d = 0.4 and f = 1.5.</p>
+  <canvas id="plot" width="900" height="360" role="img" aria-label="Damped oscillator and its envelope"></canvas>
+  <div class="footer"><span>Source: analytic solution, d = 0.4, f = 1.5</span><span class="qed">∴ amplitude decays ∎</span></div>
+</main>
+<script>
+const canvas = document.getElementById('plot')
+const context = canvas.getContext('2d')
+const style = getComputedStyle(canvas)
+const ink = style.getPropertyValue('--ink')
+const grid = style.getPropertyValue('--grid')
+const gold = style.getPropertyValue('--gold')
+const cyan = style.getPropertyValue('--cyan')
+const muted = style.getPropertyValue('--muted')
+const xToPixel = t => (t / 12) * canvas.width
+const yToPixel = y => canvas.height / 2 - y * (canvas.height / 2.4)
+const displacement = t => Math.exp(-0.4 * t) * Math.sin(2 * Math.PI * 1.5 * t)
+context.clearRect(0, 0, canvas.width, canvas.height)
+context.strokeStyle = grid
+for (let index = 0; index <= 6; index++) {
+  const t = index * 2
+  context.beginPath(); context.moveTo(xToPixel(t), 0); context.lineTo(xToPixel(t), canvas.height); context.stroke()
+}
+for (const y of [-1, -0.5, 0, 0.5, 1]) {
+  context.beginPath(); context.moveTo(0, yToPixel(y)); context.lineTo(canvas.width, yToPixel(y)); context.stroke()
+}
+context.strokeStyle = cyan
+context.lineWidth = 2
+context.beginPath()
+for (let pixel = 0; pixel <= canvas.width; pixel++) {
+  const t = (pixel / canvas.width) * 12
+  const y = displacement(t)
+  if (pixel === 0) context.moveTo(pixel, yToPixel(y))
+  else context.lineTo(pixel, yToPixel(y))
+}
+context.stroke()
+context.strokeStyle = gold
+context.setLineDash([5, 4])
+context.beginPath()
+for (let pixel = 0; pixel <= canvas.width; pixel++) {
+  const t = (pixel / canvas.width) * 12
+  const y = Math.exp(-0.4 * t)
+  if (pixel === 0) context.moveTo(pixel, yToPixel(y))
+  else context.lineTo(pixel, yToPixel(y))
+}
+context.stroke()
+context.setLineDash([])
+context.fillStyle = muted
+context.font = '11px ui-monospace, monospace'
+for (let index = 0; index <= 6; index++) context.fillText(`${index * 2}s`, xToPixel(index * 2) + 4, canvas.height - 6)
+for (const y of [-1, -0.5, 0.5, 1]) context.fillText(y.toFixed(1), 6, yToPixel(y) - 6)
+</script>
+</body>
+</html>

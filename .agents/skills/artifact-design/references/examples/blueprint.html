@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blueprint · request pipeline</title>
+<style>
+:root { color-scheme: dark; --blue:#17508c; --line:#eef4fb; --faint:rgba(238,244,251,0.25); --yellow:#ffd166; }
+* { box-sizing: border-box; }
+body { margin:0; background:var(--blue); color:var(--line); font:12px/1.5 "IBM Plex Mono", ui-monospace, monospace; letter-spacing:0.04em; }
+main { width:min(980px,100%); margin:0 auto; padding:22px; display:grid; gap:14px; }
+.note { margin:0; color:var(--faint); text-transform:uppercase; border-bottom:1px dashed var(--faint); padding-bottom:4px; }
+.title { margin:0; font:600 22px/1.2 "IBM Plex Mono", ui-monospace, monospace; text-transform:uppercase; }
+.subtitle { margin:0; color:var(--faint); }
+.sheet { border:1px solid var(--faint); padding:16px; display:grid; gap:14px; }
+.step { display:flex; align-items:center; gap:12px; }
+.balloon { width:26px; height:26px; border:1px solid var(--yellow); color:var(--yellow); border-radius:50%; display:grid; place-items:center; font-size:12px; }
+.box { border:1px solid var(--line); padding:8px 14px; text-transform:uppercase; }
+.arrow { color:var(--faint); }
+.dimension { display:flex; align-items:center; gap:8px; color:var(--yellow); }
+.dimension::before, .dimension::after { content:""; flex:1; border-top:1px solid var(--yellow); }
+.block { display:flex; justify-content:space-between; color:var(--faint); border-top:1px solid var(--faint); padding-top:8px; }
+</style>
+</head>
+<body>
+<main>
+  <p class="note">NOTE: all stages are sequential; no parallel branches</p>
+  <h1 class="title">Request pipeline</h1>
+  <p class="subtitle">Sheet 01 · system structure · drafting convention</p>
+  <section class="sheet" aria-label="Request pipeline blueprint">
+    <div class="step"><span class="balloon">1</span><span class="box">Browser</span><span class="arrow">→</span><span class="box">DNS</span></div>
+    <div class="step"><span class="balloon">2</span><span class="box">TCP</span><span class="arrow">→</span><span class="box">TLS</span></div>
+    <div class="step"><span class="balloon">3</span><span class="box">Request</span><span class="arrow">→</span><span class="box">Response</span></div>
+    <div class="dimension">5 stages</div>
+  </section>
+  <div class="block"><span>DWG 001 · REQUEST PIPELINE</span><span>REV A · 2026-11-05</span></div>
+</main>
+</body>
+</html>
