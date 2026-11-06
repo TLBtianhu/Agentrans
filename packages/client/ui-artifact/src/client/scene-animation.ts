@@ -1,5 +1,5 @@
 /** Standalone HTML animation export for validated SceneSpec values. */
-import type { FunctionPlotSpec, FlowchartSpec, ParticleSystemSpec, TimelineSpec, NetworkGraphSpec } from '@deepseek-ai/dsh-artifact/scene'
+import type { FunctionPlotSpec, FlowchartSpec, ParticleSystemSpec, TimelineSpec, NetworkGraphSpec, MapSpec } from '@deepseek-ai/dsh-artifact/scene'
 import { sceneExprBundle } from './scene-expr.generated.ts'
 import { sceneRenderersBundle } from './scene-renderers.generated.ts'
 
@@ -14,7 +14,7 @@ function escapeHtml(value: string): string {
  * @returns A complete HTML document with an inline parser, shared renderers, and timeline player.
  */
 export function buildSceneAnimationHtml(
-  spec: FunctionPlotSpec | FlowchartSpec | ParticleSystemSpec | TimelineSpec | NetworkGraphSpec,
+  spec: FunctionPlotSpec | FlowchartSpec | ParticleSystemSpec | TimelineSpec | NetworkGraphSpec | MapSpec,
   title: string,
 ): string {
   const specJson = JSON.stringify(spec)
@@ -69,13 +69,14 @@ const isFlowchart = spec.kind === 'flowchart'
 const isParticleSystem = spec.kind === 'particle-system'
 const isTimeline = spec.kind === 'timeline'
 const isNetworkGraph = spec.kind === 'network-graph'
+const isMap = spec.kind === 'map'
 const path = isFlowchart ? (spec.path ?? []) : []
 const timelineTimes = isTimeline ? spec.events.map(event => event.time) : []
 const minTime = timelineTimes.length > 0 ? Math.min(...timelineTimes) : 0
 const maxTime = timelineTimes.length > 0 ? Math.max(...timelineTimes) : 1
 let pathIndex = 0
 const parameters = Object.fromEntries(Object.entries(spec.parameters ?? {}).map(([key, value]) => [key, value.value]))
-const functions = isFlowchart || isParticleSystem || isTimeline || isNetworkGraph ? [] : spec.functions.map(fn => ({ ...fn, node: SceneExpr.parseExpression(fn.expression, Object.keys(spec.parameters)) }))
+const functions = isFlowchart || isParticleSystem || isTimeline || isNetworkGraph || isMap ? [] : spec.functions.map(fn => ({ ...fn, node: SceneExpr.parseExpression(fn.expression, Object.keys(spec.parameters)) }))
 const canvas = document.getElementById('plot')
 const context = canvas.getContext('2d')
 const scrub = document.getElementById('scrub')
@@ -129,6 +130,17 @@ function simulateParticles(time) {
   return { particles, trails }
 }
 function draw() {
+  if (isMap) {
+    const index = Math.min(spec.markers.length - 1, Math.floor(progress * spec.markers.length))
+    const selected = spec.markers[index]?.id
+    SceneRenderers.renderMap(spec, canvas, canvas.width, canvas.height, { selected })
+    readout.innerHTML = [
+      ['selected', selected ?? '—'],
+      ['markers', String(spec.markers.length)],
+    ].map(([label, text]) => '<div><span>' + label + '</span><strong>' + text + '</strong></div>').join('')
+    timeLabel.textContent = (progress * timeline.duration).toFixed(2) + ' s'
+    return
+  }
   if (isNetworkGraph) {
     const index = Math.min(spec.nodes.length - 1, Math.floor(progress * spec.nodes.length))
     const selected = spec.nodes[index]?.id

@@ -5,6 +5,7 @@ import { renderFlowchart } from './renderers/flowchart.ts'
 import { renderParticleSystem } from './renderers/particle-system.ts'
 import { renderTimeline } from './renderers/timeline.ts'
 import { renderNetworkGraph } from './renderers/network-graph.ts'
+import { renderMap } from './renderers/map.ts'
 
 /** One SceneSpec primitive's renderer and its exporter name. */
 export interface ScenePrimitiveEntry {
@@ -41,5 +42,10 @@ export const scenePrimitives: Readonly<Record<SceneSpec['kind'], ScenePrimitiveE
     kind: 'network-graph',
     rendererName: 'renderNetworkGraph',
     render: renderNetworkGraph as ScenePrimitiveEntry['render'],
+  },
+  'map': {
+    kind: 'map',
+    rendererName: 'renderMap',
+    render: renderMap as ScenePrimitiveEntry['render'],
   },
 }

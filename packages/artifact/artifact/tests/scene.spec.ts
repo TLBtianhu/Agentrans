@@ -159,4 +159,22 @@ describe('SceneSpec validation and persistence', () => {
     expect(normalized.edges).toHaveLength(2)
     expect(() => normalizeSceneSpec({ ...graph, edges: [{ from: 'client', to: 'missing' }] })).toThrow('must reference an existing node')
   })
+
+  it('normalizes a map spec and rejects dangling route markers', async () => {
+    const { normalizeSceneSpec } = await import('../src/scene.ts')
+    const map = {
+      kind: 'map',
+      markers: [
+        { id: 'client', label: 'Client', x: 0, y: 0 },
+        { id: 'edge', label: 'Edge', x: 1, y: 0 },
+        { id: 'origin', label: 'Origin', x: 2, y: 0 },
+      ],
+      path: ['client', 'edge', 'origin'],
+    }
+    const normalized = normalizeSceneSpec(map)
+    if (normalized.kind !== 'map') throw new Error('expected a map spec')
+    expect(normalized.markers.map(marker => marker.id)).toEqual(['client', 'edge', 'origin'])
+    expect(normalized.path).toEqual(['client', 'edge', 'origin'])
+    expect(() => normalizeSceneSpec({ ...map, path: ['client', 'missing'] })).toThrow('must reference an existing marker')
+  })
 })

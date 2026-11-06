@@ -9,6 +9,7 @@ import { FlowchartView } from './FlowchartView.tsx'
 import { ParticleSystemView } from './ParticleSystemView.tsx'
 import { TimelineView } from './TimelineView.tsx'
 import { NetworkGraphView } from './NetworkGraphView.tsx'
+import { MapView } from './MapView.tsx'
 
 interface SceneNodeViewProps {
   readonly spec: SceneSpec
@@ -37,5 +38,7 @@ export function SceneNodeView(props: SceneNodeViewProps) {
       return <TimelineView {...props} spec={props.spec} />
     case 'network-graph':
       return <NetworkGraphView {...props} spec={props.spec} />
+    case 'map':
+      return <MapView {...props} spec={props.spec} />
   }
 }

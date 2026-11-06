@@ -55,7 +55,7 @@ describe('scene animation export', () => {
     expect(html).toContain('"kind":"particle-system"')
     expect(html).toContain('scenePrimitives')
     expect(html).toContain('spec.timeStep')
-    expect(html).toContain('isFlowchart || isParticleSystem || isTimeline || isNetworkGraph ? [] : spec.functions.map')
+    expect(html).toContain('isFlowchart || isParticleSystem || isTimeline || isNetworkGraph || isMap ? [] : spec.functions.map')
     expect(html).toContain('id="record"')
   })
 
@@ -89,6 +89,23 @@ describe('scene animation export', () => {
     const html = buildSceneAnimationHtml(graph, 'Request graph')
     expect(html).toContain('"kind":"network-graph"')
     expect(html).toContain('renderNetworkGraph')
+    expect(html).toContain('selected')
+    expect(html).toContain('id="record"')
+  })
+
+  it('exports a map replay with marker stepping', () => {
+    const map = {
+      kind: 'map' as const,
+      markers: [
+        { id: 'client', label: 'Client', x: 0, y: 0 },
+        { id: 'edge', label: 'Edge', x: 1, y: 0 },
+        { id: 'origin', label: 'Origin', x: 2, y: 0 },
+      ],
+      path: ['client', 'edge', 'origin'],
+    }
+    const html = buildSceneAnimationHtml(map, 'Route map')
+    expect(html).toContain('"kind":"map"')
+    expect(html).toContain('renderMap')
     expect(html).toContain('selected')
     expect(html).toContain('id="record"')
   })

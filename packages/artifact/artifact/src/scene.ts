@@ -108,8 +108,26 @@ export interface NetworkGraphSpec {
   readonly timeline?: { readonly duration: number; readonly fps: number }
 }
 
+/** One marker on a map. */
+export interface MapMarkerSpec {
+  readonly id: string
+  readonly label: string
+  readonly x: number
+  readonly y: number
+  readonly description?: string
+}
+
+/** Declarative map with positioned markers and an optional route to step through. */
+export interface MapSpec {
+  readonly kind: 'map'
+  readonly markers: readonly MapMarkerSpec[]
+  readonly path?: readonly string[]
+  readonly style?: SceneStyle
+  readonly timeline?: { readonly duration: number; readonly fps: number }
+}
+
 /** Union of all currently supported declarative SceneSpec primitives. */
-export type SceneSpec = FunctionPlotSpec | FlowchartSpec | ParticleSystemSpec | TimelineSpec | NetworkGraphSpec
+export type SceneSpec = FunctionPlotSpec | FlowchartSpec | ParticleSystemSpec | TimelineSpec | NetworkGraphSpec | MapSpec
 
 /** Catalog entry owning one primitive's version and normalization. */
 export interface SceneCatalogEntry {
@@ -363,6 +381,48 @@ export const sceneCatalog: Readonly<Record<SceneSpec['kind'], SceneCatalogEntry>
   'particle-system': { kind: 'particle-system', catalogVersion: 1, normalize: normalizeParticleSystem },
   'timeline': { kind: 'timeline', catalogVersion: 1, normalize: normalizeTimeline },
   'network-graph': { kind: 'network-graph', catalogVersion: 1, normalize: normalizeNetworkGraph },
+  'map': { kind: 'map', catalogVersion: 1, normalize: normalizeMap },
+}
+
+function normalizeMap(value: unknown): MapSpec {
+  if (!isRecord(value) || value.kind !== 'map') throw new SceneValidationError('/kind', 'must be map')
+  if (!Array.isArray(value.markers) || value.markers.length < 1 || value.markers.length > 64) {
+    throw new SceneValidationError('/markers', 'must contain 1 to 64 markers')
+  }
+  const markers = value.markers.map((item, index) => {
+    const path = `/markers/${index}`
+    if (!isRecord(item)) throw new SceneValidationError(path, 'must be an object')
+    if (typeof item.id !== 'string' || !/^[a-z][a-z0-9-]{0,31}$/.test(item.id)) {
+      throw new SceneValidationError(`${path}/id`, 'must match [a-z][a-z0-9-]{0,31}')
+    }
+    if (typeof item.label !== 'string' || item.label.trim().length === 0) {
+      throw new SceneValidationError(`${path}/label`, 'must be a non-empty label')
+    }
+    return {
+      id: item.id, label: item.label.trim(),
+      x: numberAt(item.x, `${path}/x`), y: numberAt(item.y, `${path}/y`),
+      ...(item.description === undefined ? {} : { description: String(item.description) }),
+    }
+  })
+  const ids = new Set(markers.map(marker => marker.id))
+  let path: MapSpec['path']
+  if (value.path !== undefined) {
+    if (!Array.isArray(value.path)) throw new SceneValidationError('/path', 'must be an array of marker ids')
+    for (const [index, id] of value.path.entries()) {
+      if (typeof id !== 'string' || !ids.has(id)) throw new SceneValidationError(`/path/${index}`, 'must reference an existing marker')
+    }
+    path = value.path as readonly string[]
+  }
+  let timeline: MapSpec['timeline']
+  if (value.timeline !== undefined) {
+    if (!isRecord(value.timeline)) throw new SceneValidationError('/timeline', 'must be an object')
+    const duration = numberAt(value.timeline.duration, '/timeline/duration')
+    const fps = numberAt(value.timeline.fps, '/timeline/fps')
+    if (duration <= 0) throw new SceneValidationError('/timeline/duration', 'must be > 0')
+    if (!Number.isSafeInteger(fps) || fps < 1 || fps > 120) throw new SceneValidationError('/timeline/fps', 'must be an integer in [1,120]')
+    timeline = { duration, fps }
+  }
+  return { kind: 'map', markers, ...(path === undefined ? {} : { path }), ...(timeline === undefined ? {} : { timeline }), style: value.style === undefined ? 'editorial' : normalizeStyle(value.style) }
 }
 
 function normalizeNetworkGraph(value: unknown): NetworkGraphSpec {
