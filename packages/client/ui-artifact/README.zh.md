@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-在产生 Artifact 的对话里阅读交互 HTML。每个 checkpoint 都能独立呈现，即使历史里只有最新修订。卡片默认留在消息流中，也可以并排成常驻结果栏、展开到整个窗口，或浮成辅助视图。你可以检查 HTML 源码，并且只在明确确认后发送 Artifact 操作。预览无法访问父应用或远程依赖。`function-plot`、`flowchart` 或 `particle-system` SceneSpec 通过共享安全表达式解析器原生渲染，并直接确认当前分析。
+在产生 Artifact 的对话里阅读交互 HTML。每个 checkpoint 都能独立呈现，即使历史里只有最新修订。卡片默认留在消息流中，也可以并排成常驻结果栏、展开到整个窗口，或浮成辅助视图。你可以检查 HTML 源码，并且只在明确确认后发送 Artifact 操作。预览无法访问父应用或远程依赖。`function-plot`、`flowchart`、`particle-system`、`timeline`、`network-graph` 或 `map` SceneSpec 通过共享安全表达式解析器原生渲染，并直接确认当前分析。可选的 `style` 字段为每类原语选择视觉风格（editorial、transit-map、blueprint、math-proof-lecture 或 particles），同一份声明式规格可以呈现为数学证明、地铁图、蓝图或粒子模拟。
 
 ## 目录
 
