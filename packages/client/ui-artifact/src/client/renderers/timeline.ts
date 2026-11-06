@@ -53,13 +53,22 @@ export function renderTimeline(
   const good = style.getPropertyValue('--dsw-alias-state-success-primary').trim()
   const surface = style.getPropertyValue('--dsw-alias-bg-base').trim()
   const border = style.getPropertyValue('--dsw-alias-border-l2').trim()
+  const isTransitMap = spec.style === 'transit-map'
+  const primaryInk = isTransitMap ? '#1d1d22' : ink
+  const secondaryInk = isTransitMap ? '#6f6a60' : muted
+  const routeColor = isTransitMap ? '#d9774f' : accent
+  const signColor = isTransitMap ? '#1f2a44' : accent
+  if (isTransitMap) {
+    context.fillStyle = '#f4f0e6'
+    context.fillRect(0, 0, width, height)
+  }
   const currentEvent = spec.events.filter(event => event.time <= playhead).at(-1) ?? spec.events[0]
   const xToPixel = (time: number): number => 60 + ((time - minTime) / span) * (width - 120)
   const axisY = 84
   context.clearRect(0, 0, width, height)
 
   // Timeline strip: the route with station-like markers and a moving playhead.
-  context.strokeStyle = muted
+  context.strokeStyle = routeColor
   context.lineWidth = 2
   context.beginPath()
   context.moveTo(40, axisY)
@@ -71,17 +80,17 @@ export function renderTimeline(
     context.beginPath()
     context.moveTo(x, axisY - 10)
     context.lineTo(x, axisY + 10)
-    context.strokeStyle = isCurrent ? accent : muted
+    context.strokeStyle = isCurrent ? routeColor : secondaryInk
     context.lineWidth = isCurrent ? 2 : 1
     context.stroke()
     context.beginPath()
     context.arc(x, axisY, isCurrent ? 7 : 4, 0, Math.PI * 2)
-    context.fillStyle = isCurrent ? accent : surface
+    context.fillStyle = isCurrent ? routeColor : surface
     context.fill()
-    context.strokeStyle = isCurrent ? accent : muted
+    context.strokeStyle = isCurrent ? routeColor : secondaryInk
     context.lineWidth = 1.5
     context.stroke()
-    context.fillStyle = isCurrent ? ink : muted
+    context.fillStyle = isCurrent ? primaryInk : secondaryInk
     context.font = isCurrent ? '600 11px ui-sans-serif, system-ui' : '11px ui-sans-serif, system-ui'
     context.textAlign = 'center'
     context.textBaseline = 'top'
@@ -114,32 +123,32 @@ export function renderTimeline(
   context.stroke()
   if (currentEvent) {
     const step = spec.events.indexOf(currentEvent) + 1
-    context.fillStyle = accent
+    context.fillStyle = signColor
     context.beginPath()
     context.arc(cardLeft + 34, cardTop + 34, 16, 0, Math.PI * 2)
     context.fill()
-    context.fillStyle = surface
+    context.fillStyle = isTransitMap ? '#f4f0e6' : surface
     context.font = '600 13px ui-monospace, monospace'
     context.textAlign = 'center'
     context.textBaseline = 'middle'
     context.fillText(String(step).padStart(2, '0'), cardLeft + 34, cardTop + 34)
     context.textAlign = 'left'
     context.textBaseline = 'top'
-    context.fillStyle = ink
+    context.fillStyle = primaryInk
     context.font = '600 20px ui-sans-serif, system-ui'
     context.fillText(currentEvent.label, cardLeft + 64, cardTop + 22)
-    context.fillStyle = muted
+    context.fillStyle = secondaryInk
     context.font = '11px ui-monospace, monospace'
     context.fillText(`t = ${currentEvent.time.toFixed(2)}`, cardLeft + 64, cardTop + 50)
     if (currentEvent.description) {
-      context.fillStyle = muted
+      context.fillStyle = secondaryInk
       context.font = '12px ui-sans-serif, system-ui'
       const lines = wrapText(context, currentEvent.description, cardWidth - 64)
       lines.slice(0, 5).forEach((line, index) => {
         context.fillText(line, cardLeft + 64, cardTop + 78 + index * 18)
       })
     }
-    context.fillStyle = muted
+    context.fillStyle = secondaryInk
     context.font = '10px ui-monospace, monospace'
     context.textAlign = 'right'
     context.textBaseline = 'bottom'

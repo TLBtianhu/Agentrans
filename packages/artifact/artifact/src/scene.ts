@@ -95,6 +95,7 @@ export interface TimelineSpec {
   readonly kind: 'timeline'
   readonly events: readonly TimelineEventSpec[]
   readonly playhead?: number
+  readonly style?: SceneStyle
   readonly timeline?: { readonly duration: number; readonly fps: number }
 }
 
@@ -103,6 +104,7 @@ export interface NetworkGraphSpec {
   readonly kind: 'network-graph'
   readonly nodes: readonly FlowchartNodeSpec[]
   readonly edges: readonly FlowchartEdgeSpec[]
+  readonly style?: SceneStyle
   readonly timeline?: { readonly duration: number; readonly fps: number }
 }
 
@@ -351,7 +353,7 @@ export function normalizeTimeline(value: unknown): TimelineSpec {
     if (!Number.isSafeInteger(fps) || fps < 1 || fps > 120) throw new SceneValidationError('/timeline/fps', 'must be an integer in [1,120]')
     timeline = { duration, fps }
   }
-  return { kind: 'timeline', events, ...(playhead === undefined ? {} : { playhead }), ...(timeline === undefined ? {} : { timeline }) }
+  return { kind: 'timeline', events, ...(playhead === undefined ? {} : { playhead }), ...(timeline === undefined ? {} : { timeline }), style: value.style === undefined ? 'editorial' : normalizeStyle(value.style) }
 }
 
 /** Versioned catalog of SceneSpec primitives available to model generation. */
@@ -366,7 +368,7 @@ export const sceneCatalog: Readonly<Record<SceneSpec['kind'], SceneCatalogEntry>
 function normalizeNetworkGraph(value: unknown): NetworkGraphSpec {
   if (!isRecord(value) || value.kind !== 'network-graph') throw new SceneValidationError('/kind', 'must be network-graph')
   const { nodes, edges, timeline } = normalizeFlowchart({ ...value, kind: 'flowchart' })
-  return { kind: 'network-graph', nodes, edges, ...(timeline === undefined ? {} : { timeline }) }
+  return { kind: 'network-graph', nodes, edges, ...(timeline === undefined ? {} : { timeline }), style: value.style === undefined ? 'editorial' : normalizeStyle(value.style) }
 }
 
 /**

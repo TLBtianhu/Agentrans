@@ -38,7 +38,7 @@ export function apply(ctx: Context): void {
     name: 'scene',
     description: 'Create or update a declarative interactive scene. Use SceneSpec JSON, not HTML. '
       + 'For function-plot, provide functions, parameters, viewport, and trace. For flowchart, provide nodes, edges, and an optional path. The host validates the spec before committing it. '
-      + 'Optional style for flowchart, function-plot, and particle-system: editorial (default), transit-map, or blueprint. '
+      + 'Optional style for flowchart, function-plot, particle-system, timeline, and network-graph: editorial (default), transit-map, blueprint, math-proof-lecture, or particles. '
       + 'Interactive explanations default to this scene tool, not to workspace files; only write a workspace file when the user explicitly asks for a standalone HTML file or program. '
       + 'Follow the artifact-design style reference for the visual idiom appropriate to the content. '
       + 'Two Scenes may share one comparison group with independent control and variant roles.',

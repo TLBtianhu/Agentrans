@@ -50,8 +50,8 @@ function layout(nodes: readonly FlowchartNodeSpec[], edges: readonly { from: str
       b.py -= (dy / distance) * force
     }
     for (const node of positioned) {
-      node.px *= 0.95
-      node.py *= 0.95
+      node.px *= 1
+      node.py *= 1
     }
   }
   return positioned
@@ -85,18 +85,26 @@ export function renderNetworkGraph(
   const accent = style.getPropertyValue('--dsw-alias-state-business-primary').trim()
   const good = style.getPropertyValue('--dsw-alias-state-success-primary').trim()
   const surface = style.getPropertyValue('--dsw-alias-bg-base').trim()
+  const isBlueprint = spec.style === 'blueprint'
+  const primaryInk = isBlueprint ? '#eef4fb' : ink
+  const secondaryInk = isBlueprint ? 'rgba(238,244,251,0.45)' : muted
+  const highlightColor = isBlueprint ? '#ffd166' : accent
   const xToPixel = (value: number): number => 70 + ((value + 1) / 2) * (width - 140)
   const yToPixel = (value: number): number => 60 + ((value + 1) / 2) * (height - 120)
   const isNeighbour = (id: string): boolean => selected !== undefined && spec.edges.some(
     edge => (edge.from === selected && edge.to === id) || (edge.to === selected && edge.from === id),
   )
   context.clearRect(0, 0, width, height)
+  if (isBlueprint) {
+    context.fillStyle = '#17508c'
+    context.fillRect(0, 0, width, height)
+  }
   for (const edge of spec.edges) {
     const a = byId.get(edge.from)
     const b = byId.get(edge.to)
     if (!a || !b) continue
     const active = selected !== undefined && (edge.from === selected || edge.to === selected)
-    context.strokeStyle = active ? accent : muted
+    context.strokeStyle = active ? highlightColor : secondaryInk
     context.globalAlpha = active ? 0.9 : 0.35
     context.lineWidth = active ? 2 : 1
     context.beginPath()
@@ -109,10 +117,10 @@ export function renderNetworkGraph(
     context.lineTo(xToPixel(b.px) - 9 * Math.cos(angle - Math.PI / 6), yToPixel(b.py) - 9 * Math.sin(angle - Math.PI / 6))
     context.lineTo(xToPixel(b.px) - 9 * Math.cos(angle + Math.PI / 6), yToPixel(b.py) - 9 * Math.sin(angle + Math.PI / 6))
     context.closePath()
-    context.fillStyle = active ? accent : muted
+    context.fillStyle = active ? highlightColor : secondaryInk
     context.fill()
     if (edge.label) {
-      context.fillStyle = muted
+      context.fillStyle = secondaryInk
       context.font = '10px ui-sans-serif, system-ui'
       context.textAlign = 'center'
       context.textBaseline = 'middle'
@@ -128,15 +136,34 @@ export function renderNetworkGraph(
     const radius = isSelected ? 10 : isConnected ? 8 : 6
     context.beginPath()
     context.arc(x, y, radius, 0, Math.PI * 2)
-    context.fillStyle = isSelected ? accent : isConnected ? good : surface
+    context.fillStyle = isSelected ? highlightColor : isConnected ? good : surface
     context.fill()
     context.lineWidth = isSelected ? 2 : 1.5
-    context.strokeStyle = isSelected ? accent : isConnected ? good : muted
+    context.strokeStyle = isSelected ? highlightColor : isConnected ? good : secondaryInk
     context.stroke()
-    context.fillStyle = isSelected ? surface : ink
+    context.fillStyle = isSelected ? surface : primaryInk
     context.font = isSelected ? '600 11px ui-sans-serif, system-ui' : '11px ui-sans-serif, system-ui'
     context.textAlign = 'center'
     context.textBaseline = 'top'
     context.fillText(node.label, x, y + radius + 6)
+    if (isBlueprint) {
+      context.beginPath()
+      context.arc(x - radius - 8, y - radius - 8, 9, 0, Math.PI * 2)
+      context.strokeStyle = highlightColor
+      context.lineWidth = 1
+      context.stroke()
+      context.fillStyle = highlightColor
+      context.font = '9px ui-monospace, monospace'
+      context.textBaseline = 'middle'
+      context.fillText(String(spec.nodes.indexOf(node) + 1).padStart(2, '0'), x - radius - 12, y - radius - 8)
+    }
+  }
+  if (isBlueprint) {
+    context.fillStyle = secondaryInk
+    context.font = '10px ui-monospace, monospace'
+    context.textAlign = 'right'
+    context.textBaseline = 'bottom'
+    context.fillText(`DWG ${spec.nodes.length} NODES / ${spec.edges.length} EDGES · REV A`, width - 12, height - 12)
+    context.textAlign = 'start'
   }
 }
