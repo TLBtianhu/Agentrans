@@ -26,7 +26,7 @@ const config = {
   ...base,
   appId: 'com.agentrans.app',
   productName: 'Agentrans',
-  artifactName: 'agentrans-${version}-win-x64.${ext}',
+  artifactName: 'agentrans-0.1.0-win-x64.${ext}',
   directories: { output },
   protocols: [],
   extraMetadata: { agentransAppId: 'com.agentrans.app', agentransChannel: 'nightly', name: 'agentrans' },
@@ -40,7 +40,7 @@ const config = {
     ...base.nsis,
     uninstallDisplayName: 'Agentrans',
     shortcutName: 'Agentrans',
-    artifactName: 'agentrans-${version}-win-x64.${ext}',
+    artifactName: 'agentrans-0.1.0-win-x64.${ext}',
     allowToChangeInstallationDirectory: false,
   },
 }
