@@ -141,4 +141,22 @@ describe('SceneSpec validation and persistence', () => {
     expect(normalized.playhead).toBe(5)
     expect(() => normalizeSceneSpec({ ...timeline, playhead: 100 })).toThrow('must be within the event time range')
   })
+
+  it('normalizes a network-graph spec and rejects dangling edges', async () => {
+    const { normalizeSceneSpec } = await import('../src/scene.ts')
+    const graph = {
+      kind: 'network-graph',
+      nodes: [
+        { id: 'client', label: 'Client', x: 0, y: 0 },
+        { id: 'edge', label: 'Edge', x: 1, y: 0 },
+        { id: 'origin', label: 'Origin', x: 2, y: 0 },
+      ],
+      edges: [{ from: 'client', to: 'edge' }, { from: 'edge', to: 'origin' }],
+    }
+    const normalized = normalizeSceneSpec(graph)
+    if (normalized.kind !== 'network-graph') throw new Error('expected a network-graph spec')
+    expect(normalized.nodes.map(node => node.id)).toEqual(['client', 'edge', 'origin'])
+    expect(normalized.edges).toHaveLength(2)
+    expect(() => normalizeSceneSpec({ ...graph, edges: [{ from: 'client', to: 'missing' }] })).toThrow('must reference an existing node')
+  })
 })

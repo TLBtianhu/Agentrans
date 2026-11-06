@@ -8,6 +8,7 @@ import { FunctionPlotView } from './FunctionPlotView.tsx'
 import { FlowchartView } from './FlowchartView.tsx'
 import { ParticleSystemView } from './ParticleSystemView.tsx'
 import { TimelineView } from './TimelineView.tsx'
+import { NetworkGraphView } from './NetworkGraphView.tsx'
 
 interface SceneNodeViewProps {
   readonly spec: SceneSpec
@@ -34,5 +35,7 @@ export function SceneNodeView(props: SceneNodeViewProps) {
       return <ParticleSystemView {...props} spec={props.spec} />
     case 'timeline':
       return <TimelineView {...props} spec={props.spec} />
+    case 'network-graph':
+      return <NetworkGraphView {...props} spec={props.spec} />
   }
 }

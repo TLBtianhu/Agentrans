@@ -98,8 +98,16 @@ export interface TimelineSpec {
   readonly timeline?: { readonly duration: number; readonly fps: number }
 }
 
+/** Declarative network graph with nodes and directed edges for relationship explanations. */
+export interface NetworkGraphSpec {
+  readonly kind: 'network-graph'
+  readonly nodes: readonly FlowchartNodeSpec[]
+  readonly edges: readonly FlowchartEdgeSpec[]
+  readonly timeline?: { readonly duration: number; readonly fps: number }
+}
+
 /** Union of all currently supported declarative SceneSpec primitives. */
-export type SceneSpec = FunctionPlotSpec | FlowchartSpec | ParticleSystemSpec | TimelineSpec
+export type SceneSpec = FunctionPlotSpec | FlowchartSpec | ParticleSystemSpec | TimelineSpec | NetworkGraphSpec
 
 /** Catalog entry owning one primitive's version and normalization. */
 export interface SceneCatalogEntry {
@@ -352,6 +360,13 @@ export const sceneCatalog: Readonly<Record<SceneSpec['kind'], SceneCatalogEntry>
   'flowchart': { kind: 'flowchart', catalogVersion: 1, normalize: normalizeFlowchart },
   'particle-system': { kind: 'particle-system', catalogVersion: 1, normalize: normalizeParticleSystem },
   'timeline': { kind: 'timeline', catalogVersion: 1, normalize: normalizeTimeline },
+  'network-graph': { kind: 'network-graph', catalogVersion: 1, normalize: normalizeNetworkGraph },
+}
+
+function normalizeNetworkGraph(value: unknown): NetworkGraphSpec {
+  if (!isRecord(value) || value.kind !== 'network-graph') throw new SceneValidationError('/kind', 'must be network-graph')
+  const { nodes, edges, timeline } = normalizeFlowchart({ ...value, kind: 'flowchart' })
+  return { kind: 'network-graph', nodes, edges, ...(timeline === undefined ? {} : { timeline }) }
 }
 
 /**
