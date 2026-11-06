@@ -1,4 +1,4 @@
-import { execFile } from 'node:child_process'
+import { execFile, spawnSync } from 'node:child_process'
 import { copyFile, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { dirname, delimiter, join } from 'node:path'
@@ -8,6 +8,8 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { resolveCredentialUploadEnvironment } from '../scripts/upload-target.ts'
 
 const execute = promisify(execFile)
+// The launcher is PowerShell 7; Windows PowerShell 5.1 is not a supported substitute.
+const pwshAvailable = spawnSync('pwsh', ['-NoProfile', '-NonInteractive', '-Command', 'exit 0']).status === 0
 const launcher = fileURLToPath(new URL('../scripts/upload-with-credentials.ps1', import.meta.url))
 const roots: string[] = []
 const quote = (value: string): string => `'${value.replaceAll("'", "''")}'`
@@ -84,7 +86,7 @@ afterEach(async () => {
   await Promise.all(roots.splice(0).map(async root => rm(root, { recursive: true, force: true })))
 })
 
-describe('credential launcher destination', () => {
+describe.skipIf(!pwshAvailable)('credential launcher destination', () => {
   const fileEnvironment = {
     DSH_DESKTOP_AUTO_UPDATE_ENV: 'test', DOWNLOAD_TEST_ORIGIN: 'https://download-test.example.com', DOWNLOAD_TEST_RELEASE_ID: '0123456789abcdef0123456789abcdef',
     DOWNLOAD_TEST_COS_BUCKET: 'test-bucket', DOWNLOAD_TEST_COS_SECRET_ID: 'stale-id', DOWNLOAD_TEST_COS_SECRET_KEY: 'stale-key',
@@ -114,7 +116,7 @@ describe('credential launcher destination', () => {
 })
 
 // DPAPI's user-and-machine encryption is Windows-only.
-describe.skipIf(process.platform !== 'win32')('Windows upload credentials', () => {
+describe.skipIf(process.platform !== 'win32' || !pwshAvailable)('Windows upload credentials', () => {
   it.each(['production', 'test'])('checks %s credentials without uploading or changing the parent', async (deployment) => {
     const result = await check('valid', deployment)
     expect(result.code, result.output).toBe(0)

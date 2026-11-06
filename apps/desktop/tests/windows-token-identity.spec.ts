@@ -1,4 +1,4 @@
-import { execFileSync } from 'node:child_process'
+import { execFileSync, spawnSync } from 'node:child_process'
 import { X509Certificate } from 'node:crypto'
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -8,6 +8,7 @@ import { expect, it, vi } from 'vitest'
 import { inspectWindowsTokenIdentity, windowsTokenIdentityFailure } from '../scripts/windows-token-identity.ts'
 
 const launch = vi.hoisted(() => vi.fn(async (_file: string, _args: string[], _options: { env: NodeJS.ProcessEnv; timeout: number }) => ({ stdout: '', stderr: '' })))
+const pwshAvailable = spawnSync('pwsh', ['-NoProfile', '-NonInteractive', '-Command', 'exit 0'], { stdio: 'ignore' }).status === 0
 vi.mock('node:child_process', async (importOriginal) => {
   const original = await importOriginal<typeof import('node:child_process')>()
   const { promisify } = await import('node:util')
@@ -90,7 +91,7 @@ it('reports a missing query launcher without exposing process diagnostics or ret
   expect(message).toContain('no signing was attempted')
 })
 
-it.skipIf(process.platform !== 'win32')('exercises native control flow with a fake CSP and never constructs the native adapter', () => {
+it.skipIf(process.platform !== 'win32' || !pwshAvailable)('exercises native control flow with a fake CSP and never constructs the native adapter', () => {
   const root = mkdtempSync(join(tmpdir(), 'token-public-test-'))
   try {
     const source = resolve(import.meta.dirname, '../scripts/windows-token-public-key.cs')
