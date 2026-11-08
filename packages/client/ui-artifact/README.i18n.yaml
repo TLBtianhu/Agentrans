@@ -15,23 +15,35 @@
   en: d152484eb41ac6b4
   zh: 0bfab96e4723c4cc
 /deepseek-ai-dsh-client-ui-artifact/use-this-package:
-  en: 0914b05bc3b6b67f
-  zh: ef6d9d7eb71d388f
+  en: 7191cfb82905b42c
+  zh: 0b5617b55b0b4c59
 /deepseek-ai-dsh-client-ui-artifact/use-this-package/reading-and-acting-on-an-artifact:
-  en: 3a46be6c5fc9e9d5
-  zh: 159cf8dcb35cc1fc
+  en: 9df654c5d0b96e6d
+  zh: c526015a0f861617
 /deepseek-ai-dsh-client-ui-artifact/use-this-package/isolation-and-input-limits:
-  en: 04b4aa3088a0cc04
-  zh: 515476d1cf61df1e
+  en: 5f2bdb73710d163b
+  zh: dc846ad963327756
+/deepseek-ai-dsh-client-ui-artifact/use-this-package/runtime-readiness-and-supported-operations:
+  en: 002c0965de4a823d
+  zh: 35457fb6c99dcb6a
 /deepseek-ai-dsh-client-ui-artifact/use-this-package/comparison-groups:
-  en: 583efd34fb7fa1d3
-  zh: 95f9c168daef4d1e
+  en: 659ed02c82ceec83
+  zh: b0d12fba6e22868d
 /deepseek-ai-dsh-client-ui-artifact/use-this-package/scenespec-primitives:
-  en: 422ea78b2b3c9a3a
-  zh: 596866c79be229e2
+  en: 5ddad39bf6d5d4d5
+  zh: 30f68a78f7c91bc0
+/deepseek-ai-dsh-client-ui-artifact/use-this-package/fixed-source-html-export:
+  en: e7efc3209d68176a
+  zh: d97ca41b44e8c214
+/deepseek-ai-dsh-client-ui-artifact/use-this-package/asking-about-the-selected-experiment:
+  en: 3b9fb37236099bbd
+  zh: b6df954a9ca0c72e
+/deepseek-ai-dsh-client-ui-artifact/use-this-package/returning-a-branch-conclusion-with-evidence:
+  en: d5b5c4a3a25a1651
+  zh: 054c7a3a63396164
 /deepseek-ai-dsh-client-ui-artifact/understand-the-implementation:
-  en: 82c98b1dbc0f1f24
-  zh: 40e9814f4cf193ce
+  en: de1ef4674d745512
+  zh: 59c5dae73b0987d8
 /deepseek-ai-dsh-client-ui-artifact/further-exploration:
   en: ee9685117d429c3b
   zh: e3d41c5e9c6a0f57
@@ -45,8 +57,8 @@
   en: ab608b42ae73785d
   zh: 4f08431ae54433b4
 /deepseek-ai-dsh-client-ui-artifact/model-experience/artifact-presentation-and-actions/token-effect:
-  en: b06eba5aa2bdf54d
-  zh: d39f6b888da3dcec
+  en: 09035a60313879fe
+  zh: 36a30e10d1cbdf42
 /deepseek-ai-dsh-client-ui-artifact/model-experience/artifact-presentation-and-actions/kv-cache-effect:
   en: 7924f61c12551b70
   zh: 82e733bda0b9e968
@@ -54,8 +66,8 @@
   en: 7a612ab4dd822064
   zh: 3563585b54d6921e
 /deepseek-ai-dsh-client-ui-artifact/known-limitations-and-deferred-work:
-  en: 2bb82116216dd5b0
-  zh: 3e745f8bc19df7d5
+  en: 7b522cc2308766b9
+  zh: 8db74b58daf3eeae
 /deepseek-ai-dsh-client-ui-artifact/known-limitations-and-deferred-work/dev-note:
   en: 5b78f0523b3f56d5
   zh: de0043cd4acfe49e

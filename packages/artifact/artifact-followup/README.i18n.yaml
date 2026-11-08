@@ -1,0 +1,52 @@
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write packages/artifact/artifact-followup/README.md
+/:
+  en: 5aa382c62cdcdf3b
+  zh: cba64f4fcaad6a86
+/deepseek-ai-dsh-artifact-followup:
+  en: 5c7a84fdf1f1ab04
+  zh: e4de983362edc4cd
+/deepseek-ai-dsh-artifact-followup/summary:
+  en: 38d0eade5672b083
+  zh: 80932c16dbbb2831
+/deepseek-ai-dsh-artifact-followup/table-of-contents:
+  en: d152484eb41ac6b4
+  zh: 87d7d2dbd7777429
+/deepseek-ai-dsh-artifact-followup/use-this-package:
+  en: 3b63a485a2e110ec
+  zh: 6b37efe511347db1
+/deepseek-ai-dsh-artifact-followup/understand-the-implementation:
+  en: 8e61b67c0a7054a4
+  zh: 955654709e171a4c
+/deepseek-ai-dsh-artifact-followup/further-exploration:
+  en: e3903373a37c357e
+  zh: e296714c6462cd96
+/deepseek-ai-dsh-artifact-followup/model-experience:
+  en: 215e7ba838619b7b
+  zh: a311da3843709f90
+/deepseek-ai-dsh-artifact-followup/model-experience/a-question-about-an-experiment:
+  en: 9e0a28548ad1b521
+  zh: e2e7d2ceb5293377
+/deepseek-ai-dsh-artifact-followup/model-experience/a-question-about-an-experiment/what-the-model-sees:
+  en: 50e945f873bf103e
+  zh: 253ad0c7e698bb9d
+/deepseek-ai-dsh-artifact-followup/model-experience/a-question-about-an-experiment/what-the-model-sees/experiment-context-attribution:
+  en: a532f15e88c04024
+  zh: 8d67e83264b4923b
+/deepseek-ai-dsh-artifact-followup/model-experience/a-question-about-an-experiment/what-the-model-sees/program-report-attribution:
+  en: 9ca23007662fe079
+  zh: 795d48988295780f
+/deepseek-ai-dsh-artifact-followup/model-experience/a-question-about-an-experiment/token-effect:
+  en: b18ed85cf90be788
+  zh: 415e27c7daf2d30b
+/deepseek-ai-dsh-artifact-followup/model-experience/a-question-about-an-experiment/kv-cache-effect:
+  en: a3aea917c19ab93f
+  zh: 81d3c42f8360c983
+/deepseek-ai-dsh-artifact-followup/known-limitations-and-deferred-work:
+  en: 0c6a99a5045a2b6f
+  zh: ca2adfeb755b7931
+/deepseek-ai-dsh-artifact-followup/known-limitations-and-deferred-work/dev-note:
+  en: 1773afd0fe10993d
+  zh: 8cbd5109db289f5e

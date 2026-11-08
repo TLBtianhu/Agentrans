@@ -1,0 +1,19 @@
+# Bilingual-pair consistency record for 2026-11-07-saved-artifact-observations.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-11-07-saved-artifact-observations.md
+/agent-note-saved-observations-retain-their-source-and-durable-admission-receipts:
+  en: c471234604b1147e
+  zh: 52a24f2d61c8ef53
+/agent-note-saved-observations-retain-their-source-and-durable-admission-receipts/problem:
+  en: 22fb33b3a0bc4102
+  zh: fe89925f8370db0c
+/agent-note-saved-observations-retain-their-source-and-durable-admission-receipts/decision:
+  en: 24a4419637db4aeb
+  zh: 9c4dedd452ff97ae
+/agent-note-saved-observations-retain-their-source-and-durable-admission-receipts/alternatives-considered:
+  en: 6b7c6b1fce66db01
+  zh: 406f482043b1fdf3
+/agent-note-saved-observations-retain-their-source-and-durable-admission-receipts/consequences:
+  en: 0181a86d331d832a
+  zh: f9f22e47f738644c

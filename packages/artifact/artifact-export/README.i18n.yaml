@@ -1,0 +1,46 @@
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write packages/artifact/artifact-export/README.md
+/:
+  en: f3c37313ac42ad93
+  zh: e98a069a60600462
+/deepseek-ai-dsh-artifact-export:
+  en: 9a82b928bb2ae1da
+  zh: c7125a3d2c230a22
+/deepseek-ai-dsh-artifact-export/summary:
+  en: 225a3e44f0269d45
+  zh: 6a343d8eb5651302
+/deepseek-ai-dsh-artifact-export/table-of-contents:
+  en: d152484eb41ac6b4
+  zh: 87d7d2dbd7777429
+/deepseek-ai-dsh-artifact-export/use-this-package:
+  en: dffa4e408703d929
+  zh: 84f5b3d678bb0533
+/deepseek-ai-dsh-artifact-export/understand-the-implementation:
+  en: 2644f2aef86fdf0b
+  zh: 053632d54a56f683
+/deepseek-ai-dsh-artifact-export/further-exploration:
+  en: 67bbd8d9e2c784f1
+  zh: 9b44fd14b76e7399
+/deepseek-ai-dsh-artifact-export/model-experience:
+  en: 215e7ba838619b7b
+  zh: a311da3843709f90
+/deepseek-ai-dsh-artifact-export/model-experience/user-requested-html-generation:
+  en: eeb960d493fb5bcd
+  zh: 9ce107520172fa25
+/deepseek-ai-dsh-artifact-export/model-experience/user-requested-html-generation/what-the-model-sees:
+  en: 881d89438c9d1132
+  zh: dadb3eaa76cedf23
+/deepseek-ai-dsh-artifact-export/model-experience/user-requested-html-generation/token-effect:
+  en: 37b7b71b11ada05c
+  zh: 5fd9552496dcfcf4
+/deepseek-ai-dsh-artifact-export/model-experience/user-requested-html-generation/kv-cache-effect:
+  en: 3eadb1d2e840f11d
+  zh: be87a823f0130dd1
+/deepseek-ai-dsh-artifact-export/known-limitations-and-deferred-work:
+  en: 1156a74c9b7d1d62
+  zh: 47665bb5389c2921
+/deepseek-ai-dsh-artifact-export/known-limitations-and-deferred-work/dev-note:
+  en: 0a7b89ab3f3427fe
+  zh: d4facf6b9c43324a

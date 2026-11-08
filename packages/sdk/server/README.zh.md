@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-`dsh-sdk-jsonrpc-server` 通过 stdio 服务 SDK 协议格式（wire format），使进程外客户端能够驱动 harness agent（智能体）：它为每个 `sessionId` 打开一个会话、把用户提示词排入队列，并把每个会话事件与 agent 状态转换流式发回客户端。把它作为 `jsonrpc` 插件挂载到 Loader 组合中；外围插件树提供其余一切——agent、模型适配器、持久化与工具。Stdout 只承载 JSON-RPC 帧，因此部署不得组合 stdout logger。它通过 dispose（资源释放）根运行时并以 0 退出应答 `shutdown`；EOF 与信号退出归 app bin 负责。
+`dsh-sdk-jsonrpc-server` 让进程外客户端通过 stdio JSON-RPC 打开会话、排入提示词并接收事件与状态转换。外围 Loader profile 提供 agent、模型适配器、持久化、工具和启动器退出回调。Stdout 只承载协议帧。SDK 持有的工作停稳后，关闭路径刷新响应并请求启动器退出；启动器负责清理 profile 和完成进程退出。EOF 与信号也使用同一个应用所有者。
 
 ## 目录
 
@@ -25,7 +25,7 @@ kind: "package-reference"
 <a id="use-this-package"></a>
 ## 使用本包
 
-当运行时必须服务 SDK 客户端时挂载本插件：把它加入组合了 agent 服务的 `cordis.yml`，启动运行时，客户端即可通过 stdio 连接。常用路径是显式的——插件需要 `agents` 服务；其余每个能力都来自外围插件树。
+当运行时必须服务 SDK 客户端时挂载本插件：把它加入组合了 agent 服务的 `cordis.yml`，启动运行时，客户端即可通过 stdio 连接。外围应用提供 `appExit`；随附的 `dsh` profile 会在挂载配置树前提供它。
 
 将 `initialize.approvalRequests` 设为 `true`，即可把内部审批作为服务端到客户端的 `approval/request` 请求发送。桥接通过 `agents.isOwnedBy()` 运行时归属识别 SDK 拥有的 Agent 及其仍在运行的进程内后代，持久化的 `parentSession` 历史关系不决定审批归属；其他 Agent，以及未提供该标志的客户端，继续使用已组合的应答链。审批服务仍在分发前执行 `never` 策略，并记录询问与决定的审计事件。桥接仅接受 `allowed-once`、`rejected` 或 `cancelled`；无效响应、客户端错误或传输断开会产生审批服务的拒绝放行结果 `unavailable`。请求取消时释放待处理的协议等待项；shutdown 在等待 Agent 结束前释放所有此类等待项。迟到响应不能授权已放弃的操作。载荷见[协议](../protocol/README.zh.md)，客户端处理见 [Python 示例](../../../python/sdk/README.zh.md#client-approvals)。
 
@@ -57,7 +57,7 @@ Host 与桌面适配器共用 `dsh-commands/builtin` 的定义身份及中英文
 
 ### 组装
 
-插件在首次使用时为每个 `sessionId` 创建一个 agent。已注册的模型适配器优先用于该路由；尚无适配器负责的 `deepseek-official` 路由会挂载 DeepSeek 适配器，任何其他尚无适配器负责的提供方都会导致初始化失败。初始化成功前，所选适配器会解析确切模型与可选推理强度。
+插件在首次使用时为每个 `sessionId` 创建一个 agent。外围 profile 注册所有模型适配器。初始化选择已存在的提供方，并在成功前解析其确切模型与可选推理强度；缺少提供方时以 `no adapter registered for provider "<id>"` 拒绝，不挂载适配器。随附的 `sdk` 和 `sdk-minimal` profile 显式注册官方 DeepSeek 适配器。
 
 ### 配置
 
@@ -65,7 +65,7 @@ Host 与桌面适配器共用 `dsh-commands/builtin` 的定义身份及中英文
 |---|---|---|
 | `maxTokensAsSuccess` | `false` | 把 max-token 轮次或 subagent 终止报告为成功的 SDK 结果 |
 
-profile 组合拥有每个根 agent 的工具。`input`、`output` 与 `exit` 是仅供测试的运行时传输钩子；生产环境使用进程 stdio 与 `process.exit`。生成的[配置目录](../../../docs/config-catalog.zh.md#deepseek-aidsh-sdk-jsonrpc-server)是每个受支持字段的穷尽式真源。
+profile 组合拥有每个根 agent 的工具。`input`、`output` 与 `exit` 是仅供测试的运行时钩子；生产环境使用进程 stdio 和启动器的 `appExit`。`exit` 钩子替换退出请求，须负责应用清理和进程退出。缺少这两个退出回调时，挂载立即拒绝。生成的[配置目录](../../../docs/config-catalog.zh.md#deepseek-aidsh-sdk-jsonrpc-server)是每个受支持字段的穷尽式真源。
 
 ### stdout 即协议
 
@@ -84,7 +84,9 @@ Stdout 只承载 JSON-RPC 帧，客户端可以逐字节解析；诊断信息应
 
 ### 关闭与退出
 
-插件应答 `shutdown`，刷新响应并 dispose 根上下文，使 SDK 持有的 agent、订阅与持久化达到完全停稳，然后以 0 退出。EOF 与信号退出归 app bin 负责，后者也会 dispose 根上下文。仅卸载此插件会停止服务，但不会退出进程。
+`shutdown` 成功响应表示 SDK 持有的 Agent 与活动已清理。插件刷新该响应、移除自身传输监听器，只暂停其默认进程 stdin，再请求启动器以 0 退出。SDK 清理错误保留错误响应，并在刷新后请求以 1 退出；刷新失败也请求以 1 退出。显式注入的输入流仍归调用方所有，不会被暂停或销毁。竞争的关闭请求共用一次退出请求。
+
+启动器负责整个 profile 的清理、代理清理和进程自然退出。既有清理时限从收到退出请求后开始，不约束此前的 SDK 清理或响应刷新。SDK 客户端保留各自的请求与关闭超时。EOF 与信号使用同一个应用所有者。仅卸载此插件会关闭传输，不暂停输入、不清理根上下文，也不请求退出。
 
 -----
 
@@ -110,11 +112,11 @@ Stdout 只承载 JSON-RPC 帧，客户端可以逐字节解析；诊断信息应
 
 ### 请求流程
 
-每个协议方法在执行前都会校验输入并解析负责该请求的状态——`initialize` 保存 SDK 路由，`session/prompt` 解析存活的 agent 与会话配对并排入消息，`shutdown` 刷新响应，再 dispose 根上下文使其达到完全停稳，最后以 0 退出——共享退出任务确保竞争的 `shutdown` 请求绝不会重复 dispose 或退出。分发逻辑位于 [src/index.ts](src/index.ts) 与 [src/server.ts](src/server.ts)。
+每个协议方法在执行前都会校验输入并解析负责该请求的状态。`initialize` 保存 SDK 路由；`session/prompt` 将工作排入其存活 Agent；`shutdown` 在响应前等待 SDK 持有的资源清理。服务插件随后刷新响应，并向应用所有者发送一次退出请求。分发逻辑位于 [src/index.ts](src/index.ts) 与 [src/server.ts](src/server.ts)。
 
 ### 清理
 
-`server.shutdown()` 关闭其精确根 Agent 下的后代准入，按子级优先顺序排空托管后代，再释放根句柄与适配器。它移除自身订阅，而仅卸载本插件时，无关父级树与外围上下文保持运行。后代排空失败会在其余根句柄与适配器的清理完成后报告。协议 `shutdown` 则 dispose 根 fiber，使持久化与整个运行时在进程退出前达到完全停稳。
+`server.shutdown()` 关闭其精确根 Agent 下的后代准入，按子级优先顺序排空托管后代，再释放根句柄与订阅。后代排空失败会在其余 SDK 自有资源清理后报告。仅卸载本插件时，调用方拥有的适配器、无关父级树与外围上下文继续运行。整个 profile 的清理由启动器负责。
 
 </details>
 
@@ -216,7 +218,6 @@ Stdout 只承载 JSON-RPC 帧，客户端可以逐字节解析；诊断信息应
 - **协议没有逐会话关闭或提示词取消方法**——SDK 创建的 agent 会一直存活到进程关闭。
 - **没有逐提示词结果**——`MessageId` 只标识 inbox 准入；拥有自动化活动区间的客户端必须自行定义并观察该区间。
 - **stdout 纯净性由部署保证**——外围配置仍可能加载 stdout logger 并破坏 JSON-RPC 通道；此插件不会检查或否决同级 logger。
-- **自动挂载适配器仅支持 DeepSeek**——`initialize` 可以复用任何预先注册的模型适配器，但唯一的回退行为是挂载 DeepSeek 适配器。
 
 <a id="dev-note"></a>
 ### 开发备注

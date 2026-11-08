@@ -844,6 +844,20 @@ interface SessionLogUploadRequest {
 type SessionLogUploadExclusion = (request: SessionLogUploadRequest) => boolean
 ```
 
+## 共用输入准入
+
+`sessionInputs` 服务为普通问题和已标识领域消息统一拥有原有私有收据 Projection 与执行中预约。`SessionInputIdentity` 区分 RPC 请求 id 和消息 id。预约发生在异步准备 Agent 前，释放拒绝新工作并等待已准入任务。消费者保留自身资源直到调用结束，源码检查、访问规则、附件处理和消息构造仍由消费者拥有。
+
+普通 RPC 收据维持原有只按身份确认的语义，在上下文或附件解析前检查。已标识消息在既有 `UserMessage.id` 下保留首次来源/内容摘要。已接受的相同消息在首次准入校验前返回确认，内容不同则冲突。队列编辑、取消与后来消费不释放或替换首次身份；继承前缀不为子级提供收据。发送方式只生效一次，不属于持久指纹字段，因此已接受重试既不改变发送方式，也不能证明重启后能检测只改变 mode 的冲突。
+
+恢复读取准备态 Projection，不同步扫描历史。不新增 Session 事件、消息来源字段、wire Projection 或模型提示词。状态版本 3 替代旧私有问题收据检查点，不可用的旧缓存从 Session 事件重建。API 行为、成本和限制见 [Session 输入](../../packages/session/session-input/README.zh.md)。
+
+## 普通问题所选的上下文
+
+`SessionPromptRequest.contexts` 可携带有界的 `{kind, value}` 附加上下文。Session Controller 拥有通用 `registerPromptContext` 注册表，各领域拥有校验与同步解析器。未知类型、贡献上限或已知解析拒绝，会在附件存储或 Agent 输入前报告。已知领域拒绝在 `session/prompt-context-rejected` 中保留原始代码与详情。解析后的文本块附加到问题内容，并作为一条普通用户消息准入，因此模型可见事实能从日志重建。
+
+Client 重试带上下文的问题时保留原始请求身份、正文、附件和已采集上下文，不重新采集之后的画面。Host 相同请求的并发调用共用一次准入；冲突的处理中请求被拒绝。共用的 [Session 输入服务](../../packages/session/session-input/README.zh.md)从本 Session 自有 inbox 插入和用户消息归并已接受身份，排除继承前缀。已接受身份在再次解析上下文前返回原回执；移除排队输入不会释放其身份，重试也不会将其重新排队。子代理继续输入会明确拒绝不支持的上下文。没有上下文的请求维持普通发送行为。
+
 <!-- BEGIN GENERATED cordis-surface (gen-cordis-catalog.ts) — do not edit between markers -->
 
 <a id="cordis-surface"></a>
@@ -859,6 +873,14 @@ Generated from source by `scripts/gen-cordis-catalog.ts` (verified fresh by `pnp
 Host service backing the generated `ctx.remote.session` namespace.
 
 ```ts cordis-catalog
+/**
+ * Register the domain owner of one optional prompt selection.
+ * @param kind - unique selection kind.
+ * @param resolve - synchronous Host validation and model-visible text construction.
+ * @returns disposer that withdraws this registration.
+ */
+registerPromptContext(kind: string, resolve: (agent: Agent, value: import('@deepseek-ai/dsh-util-values').JsonValue) => readonly TextBlock[]): () => void
+
 /**
  * Resolve or resume one ordinary Session for another Host API domain.
  * @param sessionId - Session identity whose Agent owns the operation.
@@ -961,7 +983,8 @@ workspaceDesktop(): { name: string; available: boolean; fileManager: 'finder' | 
  * A repeated `(parent, branch, resultSeq)` request returns the existing parent event.
  * @param request - direct parent, ordinary branch, and child-owned durable assistant seq.
  * @returns the parent-local user/message receipt after its durability checkpoint.
- * @throws RemoteError when lineage or the result is invalid, or the parent is running or under maintenance.
+ * @throws RemoteError when lineage is invalid, the parent is busy, or the result was returned with different content.
+ * Other failures may follow a committed append; retry the same request to recover its receipt.
  */
 @Remote({ name: 'returnBranchResult', resources: { session: (request: SessionBranchResultRequest) => [request.sessionId, request.branchSessionId], }, }) async returnBranchResult(request: SessionBranchResultRequest): Promise<SessionBranchResultValue>
 
@@ -1067,9 +1090,53 @@ workspaceDesktop(): { name: string; available: boolean; fileManager: 'finder' | 
 @Remote({ mode: 'stream' }) async *control(signal: AbortSignal): AsyncIterable<SessionControlFrame>
 ```
 
-Types: [SessionBranchResultRequest](branch.zh.md) · [SessionBranchResultValue](branch.zh.md) · [SessionId](core.zh.md) · [SessionSearchRequest](session-query.zh.md)
+Types: [Agent](core.zh.md) · [SessionBranchResultRequest](branch.zh.md) · [SessionBranchResultValue](branch.zh.md) · [SessionId](core.zh.md) · [SessionSearchRequest](session-query.zh.md) · [TextBlock](llm-streaming.zh.md)
 
 Source: [`packages/api/session-controller/src/index.ts`](../../packages/api/session-controller/src/index.ts)
+
+<a id="ctxsessioninputs--sessioninputadmission"></a>
+
+### `ctx.sessionInputs` — `SessionInputAdmission`
+
+Owns one replayable receipt index and one process-local admission lifetime for every consumer.
+
+```ts cordis-catalog
+/**
+ * Reserve an input identity before any asynchronous preparation and join identical in-flight work.
+ * This operation owns no Agent activation or business validation; the job supplies those policies.
+ * @param sessionId - Target Session identity; RPC and message identities have separate namespaces.
+ * @param identity - Stable Client identity for this admission attempt.
+ * @param input - Complete JSON request, including first-attempt delivery choices.
+ * @param job - Preparation and admission using only the detached frozen request.
+ * @returns The shared admission receipt; failures release only the in-flight reservation.
+ * @throws {SessionInputAdmissionError} For closing, invalid JSON or conflicting in-flight input.
+ */
+async run<T>(sessionId: SessionId, identity: SessionInputIdentity, input: T, job: (frozenInput: T) => SessionInputReceipt | Promise<SessionInputReceipt>): Promise<SessionInputReceipt>
+
+/**
+ * Read the original ordinary-prompt acceptance before resolving optional context or attachments.
+ * @param agent - Agent whose already-prepared own Session supplies the receipts.
+ * @param requestId - Ordinary prompt identity; inherited aliases do not count.
+ * @returns Whether the original input was accepted, even if its queue item was edited or canceled.
+ */
+hasPromptReceipt(agent: Agent, requestId: SessionInputRequestId): boolean
+
+/**
+ * Admit one already-identified message or return its original acceptance before current-source validation.
+ * Delivery mode applies only once; a cold retry cannot change delivery or detect a mode-only difference.
+ * @param agent - Exact live Agent; this method never resumes or activates another Agent.
+ * @param message - Complete immutable source and content with the Client's stable message identity.
+ * @param mode - First-admission delivery policy.
+ * @param validateFirst - Domain checks executed only before the first admission, never on an accepted retry.
+ * @returns Acceptance without replacing or re-enqueueing an accepted message.
+ * @throws {SessionInputAdmissionError} For unavailable Agent, identity conflict, or unconfirmed dispatch effects.
+ */
+admitMessage(agent: Agent, message: UserMessage, mode: SessionInputMode, validateFirst?: () => void): Promise<SessionInputReceipt>
+```
+
+Types: [Agent](core.zh.md) · [SessionId](core.zh.md)
+
+Source: [`packages/session/session-input/src/index.ts`](../../packages/session/session-input/src/index.ts)
 
 <a id="ctxsessionlogdeepseek--sessionlogdeepseekservice"></a>
 

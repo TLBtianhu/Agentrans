@@ -53,6 +53,10 @@ const snapshot = snapshotJsonValue(input) as JsonValue
 
 `WeakMapWithValues<Key, Value>` combines weak object-key lookup with a strongly retained, insertion-ordered `values` set. Each value belongs to one key. The owner must call `delete(key)` or `clear()` at the corresponding lifecycle boundary; the collection does not perform automatic cleanup.
 
+### Evaluate mathematical expressions
+
+`parseExpression()` accepts a bounded mathematical expression without executing source code. `evaluateExpression()` requires finite values for every referenced variable and returns a finite number. A non-finite mathematical operation throws `ExpressionDomainError`; missing variables, non-finite inputs, and invalid trees remain ordinary errors. Consumers may turn only domain failures into unavailable samples.
+
 ### Close a discriminated union
 
 Use `assertNever(value, context?)` in the default branch of a closed discriminated union. A newly added variant then fails TypeScript compilation at every exhaustive switch, while a runtime value that escaped its declared type throws with the optional context label.

@@ -16,6 +16,16 @@ Ordinary scenarios begin with no registered Workspace or Session and a durable m
 
 Same-day message goldens use the shared `WEB_FIXTURE_TIME`: seeded transcripts pass it as `createdAt` and pin the browser calendar with `pinBrowserClock`; scenarios that submit live messages also use `pinHostClock` and restore it after teardown. These clocks advance with real elapsed time while keeping native timers intact, so midnight does not change a scenario's date labels.
 
+## Fixture ownership
+
+`snapshots/web/` owns recorded Sessions that serve as both replay input and complete expected persisted output. Their `snapshot.yml` declares composition, recording, and header ownership. A browser case may borrow an existing corpus owner; the scaffold validates that owner before startup even when `compareReplaySession` is `false`.
+
+`fixtures/replay/` owns input-only Session-format replay scripts. These cases explicitly select `compareReplaySession: false`, check fixture roles and normalization with `assertFixtureInventory`, and assert their actual browser and Host behavior. Those assertions do not make the input a complete persistence or migration oracle. Keep parent and child files together. Reviewed relocation preserves file bytes and generation names; it does not record or refresh a Session. See the [corpus rules](../../../snapshots/AGENTS.md).
+
+## Live Artifact acceptance
+
+[The live Artifact case](artifact-live.e2e.ts) requires a nonempty `DEEPSEEK_API_KEY`, `DSH_ARTIFACT_LIVE=1`, and `DSH_SNAPSHOT=record`. Set `DSH_ARTIFACT_LIVE_OUTPUT_DIR` to an evidence directory, then run `node node_modules/vitest/vitest.mjs run --config vitest.web.config.ts apps/web/tests/artifact-live.e2e.ts --maxWorkers=1 --retry=0 --reporter=verbose`. It uses the shipped `deepseek-flash` model in a temporary workspace, without loading or writing replay fixtures. Each run saves a new evidence subdirectory with its Session, screenshots, and request statuses; credentials and HTTP authentication headers are excluded. The case checks model-created particles, local stepping without a new model turn, Host-recomputed state attached to an ordinary question, and a model update to the same Artifact followed by its changed simulation behavior. Both turns and teardown must complete successfully. Set `DSH_PLAYWRIGHT_EXECUTABLE_PATH` to use an existing Chromium-compatible browser.
+
 ## Completion observations
 
 State-sensitive cases use Workspace, admission, attachment, and model-stream barriers to separate visible intermediate states from completed operations. Model-picker persistence assertions wait for the saved default, independently of menu closure. Details close waits for frame transitions; archive verification assigns an explicit title to the seeded Session and follows that identity across reload. The [CI test reliability workflow](../../../.agents/skills/dsh-ci-test-reliability/SKILL.md#synchronize-on-state) owns these synchronization rules.

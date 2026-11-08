@@ -27,6 +27,8 @@ kind: "package-library"
 
 当 TypeScript 代码需要从另一进程驱动完整 Harness 运行时、且你能显式指名运行时可执行文件时，使用本客户端。常用路径极简：用启动规格构造 `DeepSeekHarness`，运行提示词，然后关闭它，使子进程总能被回收。
 
+未提供 `dshBin` 时，由导入的 SDK 决定运行层：工作区 TypeScript 源码启动同版本源码 CLI 并应用其兼容 patch，即使旧构建产物存在；发布的 JavaScript SDK 启动同版本已构建 CLI，缺少可执行文件即失败。文件是否存在不会切换运行层。两条路径都要求包版本匹配。需要选择另一份已准备的 CLI 模块时，显式提供 `dshBin`。
+
 若由客户端处理审批，先调用 `harness.client.start()`，安装 `harness.client.onRequest(handler)`，再调用 `harness.start()`，并在 Harness 选项中设置 `approvalRequests: true`。处理器接收 `approval/request` 参数，返回 `{ outcome: "allowed-once" | "rejected" | "cancelled" }`；处理器拒绝时返回 JSON-RPC 错误，运行时拒绝放行该审批。替换客户端时需要为新实例安装处理器；已关闭的客户端不能重启。原生问答仍由 `onUserQuestion` 回调处理。启用审批但未安装附加请求处理器时，服务端请求收到未知请求错误，审批以 `unavailable` 拒绝放行。未启用时保留现有审批应答链。请求字段与取消规则见[协议](../protocol/README.zh.md)。
 
 下面的终端接入示例会逐项询问一次性授权，不改变会话的权限模式。Node 部署的包操作需要可用的 pnpm；[Python 运行时](../../../python/sdk-runtime/README.zh.md) 可以提供显式下载的 Node/pnpm。
@@ -136,6 +138,7 @@ console.log(result.finalResponse)
 |---|---|
 | [`src/api.ts`](src/api.ts) | `DeepSeekHarness` + `HarnessSession`：统一输入路由、自有活动区间与命令结果 |
 | [`src/client.ts`](src/client.ts) | `HarnessClient`：spawn、握手、请求、订阅扇出、类型化错误 |
+| [`src/launch.ts`](src/launch.ts) | 按导入 SDK 的源码或产物层选择同版本 CLI |
 | [`src/dispose.ts`](src/dispose.ts) | 私有关闭阶梯：stdin EOF → SIGTERM → SIGKILL 直到真正退出 |
 | [`src/types.ts`](src/types.ts) | 启动与超时选项、通知、`RunResult` |
 | [`src/index.ts`](src/index.ts) | 消费方接口：两层客户端与面向调用方的类型 |

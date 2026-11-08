@@ -16,6 +16,10 @@ Artifact 家族保存代码生成的交互解释，不把它们与文件、工�
 | 包 | 职责 |
 |---|---|
 | [`artifact`](artifact/README.zh.md) | 校验并提交 Artifact 快照，提供模型工具与操作 Remote |
+| [`artifact-branch`](artifact-branch/README.zh.md) | 回流结论与用户选择的已保存证据 |
+| [`artifact-export`](artifact-export/README.zh.md) | 固定 Scene 输入并保存 HTML 导出结果 |
+| [`artifact-followup`](artifact-followup/README.zh.md) | 在普通问题中解析用户选择的实验事实 |
+| [`artifact-runtime`](artifact-runtime/README.zh.md) | 持有实时渲染器报告，并提供精确修订的模型查询 |
 | [`ui-artifact`](../client/ui-artifact/README.zh.md) | 将 Artifact 事件折叠为稳定 Chat 节点，并渲染受限 iframe |
 
 ## 相关文档

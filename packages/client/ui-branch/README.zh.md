@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-`ui-branch` 为普通手动分支提供一个 assistant 详情入口。用户先展开内联预览，查看 Host 将重新读取的准确可见文本，再明确确认回流。取消不会发送请求；失败保留预览以便重试；成功后打开父 Session。
+`ui-branch` 为普通手动分支提供一个 assistant 详情入口。用户先展开内联预览，查看 Host 将重新读取的准确可见文本，再明确确认回流。取消不会发送请求；暂时失败保留预览以便重试，内容冲突则提供打开父级的操作；成功后打开父 Session。
 
 ## 目录
 
@@ -24,7 +24,7 @@ kind: "package-reference"
 
 将插件与 Chat、Session、Workspace、Slot 和 locale 服务一起挂载。它在 `conversation.chat.assistant.details` 下注册 `branch-result` 入口。durable user 和 assistant 行按真实 seq 开岔；streaming 或 synthetic 行不显示分支操作。
 
-确认使用内联预览，不弹对话框。取消不发请求，重复点击会去重，父级忙时保留预览供重试。成功后打开父 Session，但不会启动模型轮次。
+确认使用内联预览，不弹对话框。取消不发请求，重复点击会去重，父级忙时保留预览供重试。成功后打开父 Session，但不会启动模型轮次。如果该结论已通过不同证据回流，确认会以冲突停止，并提供打开父级的操作，不再重试未改变的内容。
 
 -----
 
@@ -39,16 +39,16 @@ kind: "package-reference"
 
 #### Token 影响
 
-只有获确认的可见文本会增加模型可见内容。预览、取消和确认失败都不会增加。回流文本成为父级本地的一条 user 消息，而不是复制的子对话全文。
+只有获确认的可见文本会增加模型可见内容。预览、取消和准入前拒绝都不会增加。响应失败可能掩盖已提交回流；重试同一请求可找回回执。回流文本成为父级本地的一条 user 消息，而不是复制的子对话全文。
 
 #### KV Cache 影响
 
-获确认文本会按普通前缀缓存规则影响父 Session 的下一次模型请求。预览、取消和确认失败不会改变模型历史。
+获确认文本会按普通前缀缓存规则影响父 Session 的下一次模型请求。预览、取消和准入前拒绝不会改变模型历史。
 
 ##### 回流边界
 
 ```markdown
-Only confirmed visible text becomes parent history; preview, cancellation, and failure add nothing.
+Only confirmed visible text becomes parent history; preview, cancellation, and pre-admission rejection add nothing.
 ```
 
 ## 已知限制与后续工作

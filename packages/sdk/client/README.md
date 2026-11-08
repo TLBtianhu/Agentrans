@@ -27,6 +27,8 @@ English | [中文](README.zh.md)
 
 Use this client when TypeScript code must drive a complete Harness runtime from another process and you can name the runtime executable explicitly. The common path is minimal: construct a `DeepSeekHarness` with a launch spec, run prompts, and close it so the child process is always reaped.
 
+Without `dshBin`, the imported SDK determines the runtime plane: workspace TypeScript source launches the matching source CLI with its compatibility patch, even when old build output exists; the published JavaScript SDK launches the matching built CLI and fails if that executable is absent. File presence never selects a different plane. Both paths require matching package versions. Use `dshBin` to select a separate prepared CLI module explicitly.
+
 For client-owned approvals, call `harness.client.start()`, install `harness.client.onRequest(handler)`, then call `harness.start()` with `approvalRequests: true` in the Harness options. The handler receives `approval/request` parameters and returns `{ outcome: "allowed-once" | "rejected" | "cancelled" }`; a rejected handler returns a JSON-RPC error and the runtime fails that approval closed. A replacement client needs its own handler; a closed client cannot restart. Native user questions keep their `onUserQuestion` callback. Enabling approvals without the additional-request handler returns an unknown-request error and fails approvals closed as `unavailable`. Without the opt-in, existing approval answerers remain in control. See the [wire protocol](../protocol/README.md) for request fields and cancellation.
 
 For example, this terminal embedding asks for each one-operation grant. It does not change the Session's permission mode. Node deployments need an available pnpm for package operations; the [Python runtime](../../../python/sdk-runtime/README.md) can supply its explicitly downloaded Node/pnpm instead.
@@ -136,6 +138,7 @@ The client is two layers over one wire: `DeepSeekHarness` (owned runs) over `Har
 |---|---|
 | [`src/api.ts`](src/api.ts) | `DeepSeekHarness` + `HarnessSession`: unified input routing, owned activity intervals and command results |
 | [`src/client.ts`](src/client.ts) | `HarnessClient`: spawn, handshake, requests, subscription fan-out, typed errors |
+| [`src/launch.ts`](src/launch.ts) | Same-version CLI selection in the imported SDK's source or artifact plane |
 | [`src/dispose.ts`](src/dispose.ts) | Private teardown ladder: stdin EOF → SIGTERM → SIGKILL to actual exit |
 | [`src/types.ts`](src/types.ts) | Launch and timeout options, notifications, `RunResult` |
 | [`src/index.ts`](src/index.ts) | Consumer interface: the two client layers and caller-facing types |

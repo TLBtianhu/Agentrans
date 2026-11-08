@@ -242,8 +242,8 @@ export interface Config {
 
 ## `@deepseek-ai/dsh-api-session-controller`
 
-- `inject`: `agentDefaultModel` · `agents` · `attachments` · `fileUploads` · `fs` · `llm` · `remoteAccess` · `sessions` · `sessionProjections` · `sessionQuery` · `typert` · `typertGateway` · `workspaceRegistry`
-- `source`: [`packages/api/session-controller/src/index.ts:130`](../packages/api/session-controller/src/index.ts)
+- `inject`: `agentDefaultModel` · `agents` · `attachments` · `fileUploads` · `fs` · `llm` · `remoteAccess` · `sessions` · `sessionProjections` · `sessionInputs` · `sessionQuery` · `typert` · `typertGateway` · `workspaceRegistry`
+- `source`: [`packages/api/session-controller/src/index.ts:131`](../packages/api/session-controller/src/index.ts)
 
 ```ts config-catalog
 /** Session Controller deployment policy. */
@@ -252,6 +252,10 @@ export interface Config {
   readonly nativeOpen?: boolean
   /** Positive integral milliseconds of list work before yielding between complete rows. */
   readonly listWorkSliceMs?: number
+  /** Maximum feature selections carried by one prompt; default 8. */
+  readonly maxPromptContexts?: number
+  /** Maximum UTF-8 bytes of complete encoded context text blocks; default 16384. */
+  readonly maxPromptContextBytes?: number
 }
 ```
 <!-- END GENERATED config-catalog:@deepseek-ai/dsh-api-session-controller -->
@@ -371,7 +375,8 @@ export interface Config {
 
 ## `@deepseek-ai/dsh-artifact`
 
-- `source`: [`packages/artifact/artifact/src/index.ts:32`](../packages/artifact/artifact/src/index.ts)
+- `inject`: `sessionProjections`
+- `source`: [`packages/artifact/artifact/src/index.ts:43`](../packages/artifact/artifact/src/index.ts)
 
 ```ts config-catalog
 /** Deployment limits for durable source and user-action messages. */
@@ -380,9 +385,93 @@ export interface Config {
   readonly maxSourceBytes?: number
   /** Maximum UTF-8 bytes of the complete encoded action message; default 16384. */
   readonly maxActionBytes?: number
+  /** Maximum saved observations retained for one Artifact; default 32. */
+  readonly maxSavedObservationsPerArtifact?: number
 }
 ```
 <!-- END GENERATED config-catalog:@deepseek-ai/dsh-artifact -->
+
+<!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-artifact-branch -->
+<a id="deepseek-aidsh-artifact-branch"></a>
+
+## `@deepseek-ai/dsh-artifact-branch`
+
+- `inject`: `sessionQuery` · `sessionController` · `sessions` · `artifacts`
+- `source`: [`packages/artifact/artifact-branch/src/index.ts:26`](../packages/artifact/artifact-branch/src/index.ts)
+
+```ts config-catalog
+/** Complete returned-message deployment budget. */
+export interface Config {
+  /** Maximum UTF-8 bytes of the complete parent UserMessage; default 16384, matching Artifact actions. */
+  readonly maxActionBytes?: number
+}
+```
+<!-- END GENERATED config-catalog:@deepseek-ai/dsh-artifact-branch -->
+
+<!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-artifact-export -->
+<a id="deepseek-aidsh-artifact-export"></a>
+
+## `@deepseek-ai/dsh-artifact-export`
+
+- `inject`: `agents` · `artifacts` · `attachments` · `sessions` · `sessionProjections`
+- `source`: [`packages/artifact/artifact-export/src/index.ts:26`](../packages/artifact/artifact-export/src/index.ts)
+
+```ts config-catalog
+/** Retained-result and complete-output budgets for one Session. */
+export interface Config {
+  /** Maximum retained export identities per Session; default 32, with no automatic eviction. */
+  readonly maxExportsPerSession?: number
+  /** Maximum UTF-8 bytes of the complete pending record, including original source; default 262144. */
+  readonly maxInputBytes?: number
+  /** Maximum UTF-8 bytes of the complete generated HTML; default 2097152. */
+  readonly maxOutputBytes?: number
+}
+```
+<!-- END GENERATED config-catalog:@deepseek-ai/dsh-artifact-export -->
+
+<!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-artifact-followup -->
+<a id="deepseek-aidsh-artifact-followup"></a>
+
+## `@deepseek-ai/dsh-artifact-followup`
+
+- `inject`: `artifacts` · `sessionController`
+- `source`: [`packages/artifact/artifact-followup/src/index.ts:33`](../packages/artifact/artifact-followup/src/index.ts)
+
+```ts config-catalog
+/** Deployment budget for complete serialized question-context blocks. */
+export interface Config {
+  /** Maximum UTF-8 bytes of the complete contributed text-block array; default 16384. */
+  readonly maxContextBytes?: number
+}
+```
+<!-- END GENERATED config-catalog:@deepseek-ai/dsh-artifact-followup -->
+
+<!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-artifact-runtime -->
+<a id="deepseek-aidsh-artifact-runtime"></a>
+
+## `@deepseek-ai/dsh-artifact-runtime`
+
+- `inject`: `artifacts`
+- `source`: [`packages/artifact/artifact-runtime/src/index.ts:24`](../packages/artifact/artifact-runtime/src/index.ts)
+
+```ts config-catalog
+/** Active report and diagnostic retention budgets. */
+export interface Config {
+  /** Maximum concurrently attached views for one Session; default 16. */
+  readonly maxViewsPerSession?: number
+  /** Maximum concurrently attached views across this Host; default 128. */
+  readonly maxViewsTotal?: number
+  /** Maximum UTF-8 bytes of one complete JSON diagnostic object; default 2048. */
+  readonly maxErrorBytes?: number
+  /** Maximum duration of one readiness wait in milliseconds; default 5000. */
+  readonly maxWaitMs?: number
+  /** Maximum pending readiness waits for one Session; default 4. */
+  readonly maxWaitsPerSession?: number
+  /** Maximum pending readiness waits across this Host; default 32. */
+  readonly maxWaitsTotal?: number
+}
+```
+<!-- END GENERATED config-catalog:@deepseek-ai/dsh-artifact-runtime -->
 
 <!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-attachment-local -->
 <a id="deepseek-aidsh-attachment-local"></a>
@@ -2996,7 +3085,7 @@ export interface Config {
 
 - `inject`: `agents` · `workingDirectory`
 - `refs`: `Readable` (`node:stream`) · `Writable` (`node:stream`)
-- `source`: [`packages/sdk/server/src/index.ts:24`](../packages/sdk/server/src/index.ts)
+- `source`: [`packages/sdk/server/src/index.ts:25`](../packages/sdk/server/src/index.ts)
 
 ```ts config-catalog
 /** JSON-RPC deployment config plus runtime-only test hooks. */
@@ -3007,7 +3096,7 @@ export interface JsonRpcConfig {
   input?: Readable
   /** Transport output override; production uses `process.stdout`. */
   output?: Writable
-  /** Process-exit override; production uses `process.exit`. */
+  /** Exit-request override; production uses the launcher's `appExit` service. */
   exit?: (code: number) => void
 }
 ```
@@ -4942,6 +5031,7 @@ These load from a `cordis.yml` entry with no `config:` block; they declare no co
 | `@deepseek-ai/dsh-sandbox-ssh` | `ssh` | [`packages/ssh/sandbox-ssh/src/index.ts`](../packages/ssh/sandbox-ssh/src/index.ts) |
 | `@deepseek-ai/dsh-session` | — | [`packages/core/session/src/index.ts`](../packages/core/session/src/index.ts) |
 | `@deepseek-ai/dsh-session-checkpoint-policy` | `llm` · `sessionPersistence` · `sessions` · `tools` | [`packages/session/session-checkpoint-policy/src/index.ts`](../packages/session/session-checkpoint-policy/src/index.ts) |
+| `@deepseek-ai/dsh-session-input` | `sessionProjections` | [`packages/session/session-input/src/index.ts`](../packages/session/session-input/src/index.ts) |
 | `@deepseek-ai/dsh-session-projection` | — | [`packages/session/session-projection/src/index.ts`](../packages/session/session-projection/src/index.ts) |
 | `@deepseek-ai/dsh-session-stats` | `sessionProjections` | [`packages/session/session-stats/src/index.ts`](../packages/session/session-stats/src/index.ts) |
 | `@deepseek-ai/dsh-session-turn-outline` | `sessionProjections` | [`packages/session/session-turn-outline/src/index.ts`](../packages/session/session-turn-outline/src/index.ts) |

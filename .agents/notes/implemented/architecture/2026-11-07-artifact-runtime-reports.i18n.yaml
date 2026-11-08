@@ -1,0 +1,19 @@
+# Bilingual-pair consistency record for 2026-11-07-artifact-runtime-reports.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-11-07-artifact-runtime-reports.md
+/agent-note-artifact-readiness-belongs-to-a-connected-runtime:
+  en: 82d882671a68d901
+  zh: e882231ff441e3ef
+/agent-note-artifact-readiness-belongs-to-a-connected-runtime/problem:
+  en: b8a49b85517a9647
+  zh: 91966fe9a904f7a7
+/agent-note-artifact-readiness-belongs-to-a-connected-runtime/decision:
+  en: 9fa8fda15cba9010
+  zh: 3b95c23dec89d5cd
+/agent-note-artifact-readiness-belongs-to-a-connected-runtime/alternatives-considered:
+  en: f085a7fd95c3cf2b
+  zh: 846ca80826f133ff
+/agent-note-artifact-readiness-belongs-to-a-connected-runtime/consequences:
+  en: 5789b345a3ab85d4
+  zh: 5ee230d160a2d5b0

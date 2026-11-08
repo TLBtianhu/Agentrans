@@ -1,0 +1,16 @@
+# Bilingual-pair consistency record for guide.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write docs/upgrade-guide/v0.2.2-alpha.2/artifact-runtime/guide.md
+/:
+  en: 4c6df20611171a12
+  zh: 66fad1f4aab4d70a
+/declare-artifact-runtime-support:
+  en: 038d16250c307e35
+  zh: 723f50c71a3eca21
+/declare-artifact-runtime-support/change:
+  en: 79f0293173c376ec
+  zh: bf6600f9c37d480a
+/declare-artifact-runtime-support/migration:
+  en: 93c99651178e6873
+  zh: 54b72fc6eba9b67b

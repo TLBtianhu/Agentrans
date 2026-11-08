@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-This package owns durable HTML and SceneSpec Artifacts: complete snapshots with a stable id, compare-and-set revisions, semantic presentation, and model-facing `artifact` and `scene` tools. Its Remote `record` method converts a user-confirmed action into an ordinary text `UserMessage`; actions never grant filesystem, network, or approval authority.
+This package owns durable HTML and SceneSpec Artifacts: complete snapshots with a stable id, compare-and-set revisions, semantic presentation, and model-facing `artifact` and `scene` tools. Its stable Remote `submitAction` and legacy `record` convert user-confirmed actions into text `UserMessage`s; actions never grant filesystem, network, or approval authority.
 
 ## Table of Contents
 
@@ -25,12 +25,13 @@ This package owns durable HTML and SceneSpec Artifacts: complete snapshots with 
 <a id="use-this-package"></a>
 ## Use this package
 
-Mount the service as `@deepseek-ai/dsh-artifact`, the HTML tool as `@deepseek-ai/dsh-artifact/tool`, and the SceneSpec tool as `@deepseek-ai/dsh-artifact/scene-tool`. The service owns validation, current-revision lookup, and Session commits. Each tool prepares a snapshot but commits it only after its authoritative successful tool result. SceneSpec validation uses the versioned SceneCatalog and a safe expression parser, never `eval`.
+Mount the service as `@deepseek-ai/dsh-artifact`, the HTML tool as `@deepseek-ai/dsh-artifact/tool`, and the SceneSpec tool as `@deepseek-ai/dsh-artifact/scene-tool`. The service requires Session Projection and awaits registration before synchronous reads. It owns validation, current-revision lookup, and Session commits. Each tool prepares a snapshot but commits it only after its authoritative successful tool result. SceneSpec validation uses the versioned SceneCatalog and a safe expression parser, never `eval`.
 
 | Config | Default | Meaning |
 |---|---|---|
 | `maxSourceBytes` | `262144` | Maximum UTF-8 bytes of one complete HTML source |
 | `maxActionBytes` | `16384` | Maximum UTF-8 bytes of the complete encoded action message |
+| `maxSavedObservationsPerArtifact` | `32` | Maximum named observations; additional saves are rejected |
 
 A create starts at revision 1. An update supplies `baseRevision` and succeeds only when it equals the current durable revision. Every `artifact/upsert` contains the complete `ArtifactSnapshot`, never a delta.
 
@@ -39,9 +40,25 @@ A create starts at revision 1. An update supplies `baseRevision` and succeeds on
 <a id="understand-the-implementation"></a>
 ## Understand the implementation
 
-An Artifact can post `{ kind: 'artifact-action', artifactId, revision, action, payload }` to its parent. The Host validates the current revision and complete message size before routing the action. `wake: false` uses `agent.inject`; `wake: true` uses `agent.steer`. UI policy decides when a human review is required.
+An Artifact can post `{ kind: 'artifact-action', artifactId, revision, action, payload }` to its parent. This proposes user intent; UI policy decides when human confirmation is required. `wake: false` uses `agent.inject`; `wake: true` uses `agent.steer`.
 
-Scene snapshots use `format: 'scene'` and a complete `spec`. The current catalog supports `function-plot` with functions, bounded parameters, viewport, and trace settings. Unknown variables or functions, invalid parameter ranges, and non-finite expression results are rejected before commit.
+`submitAction(agent, request)` accepts a trusted Client-minted `requestId` with the complete frozen action. That id becomes the existing user message id; source kind and complete action text retain their existing meanings. [Session input](../../session/session-input/README.md) checks the original acceptance before current revision and size checks. Identical accepted retries do not send again, even after source replacement or queue cancellation; conflicting source/content under the same id is rejected. Delivery mode applies only at first acceptance, not on a later retry. The exact frozen payload must be retained, including its encoded text order.
+
+Stable submission requires Session input and the exact live root Agent. Remote calls require the owner principal; the request cannot supply caller attribution. Known refusal, identity conflict, service unavailability and unconfirmed dispatch are distinct. The synchronous `record` method remains available to legacy callers, creates a fresh identity each time and does not provide safe retry. Source creation and legacy use do not activate Session input.
+
+Scene snapshots use `format: 'scene'` and a complete `spec`. The catalog validates function plots, flowcharts, particle systems, timelines, network graphs, and maps. Invalid expressions, parameter ranges, and references are rejected before commit.
+
+The DOM-free `capabilities` entry exposes `getArtifactSourceCapabilities(snapshot)`. The SceneCatalog owns the source declaration for each primitive: particles support Host-recomputed observations, saving, restoration, fixed saved-pair comparison and question context; other native scenes support HTML export from source defaults. Particle export can preserve a checkpoint or use source defaults. HTML question context retains program-reported state or errors; it does not gain Host-calculated observations, saved checkpoints, restoration, fixed comparison or HTML export. These declarations neither enable optional services nor grant permission, report renderer readiness or verify a result. Each operation still validates its source and inputs.
+
+The `runtime-values` entry supplies shared JSON traversal and diagnostic limits. Its bounded lossless plain-data subset rejects negative zero, sparse arrays, accessors, symbols, extra array properties and non-plain objects instead of changing or discarding reported data. Browser parsing, the isolated program bridge and Host question admission use this validator; it neither executes getters nor verifies the values reported by a program.
+
+The DOM-free `@deepseek-ai/dsh-artifact/particle-runtime` entry supplies the same fixed-step particle calculation to previews and standalone exports. Its versioned checkpoint records a step count and requires the same SceneSpec and revision for restoration. Observation output converts `-0` to `0` for JSON; internal integration state is unchanged. It does not persist state or grant execution permissions.
+
+The browser-safe `scene-renderers` and `scene-export` entries own the shared canvas calculations and standalone HTML generator. `buildSceneAnimationHtml(spec, title, checkpoint?, origin?)` embeds optional fixed source identity and replay conditions as escaped JSON. Export generation uses source defaults for non-particle scenes; it does not capture browser-local sliders, selection, or iframe state. Durable file generation and retry receipts belong to the separate [Artifact export service](../artifact-export/README.md).
+
+Saved particle observations keep their complete source revision and Host-recomputed values. Saving appends a whole-list event without waking the Agent. The opened Session projection supplies observations; compact summaries omit them. Explicit sending can reference an older revision and deduplicates accepted retries from durable inbox and user-message receipts. First-admission live actions retain current-revision validation; accepted stable retries return their original acknowledgment before that validation. See [saved observation semantics](../../../docs/subsystems/artifact.md#presentation-and-recovery).
+
+The browser-safe `observation-comparison` entry resolves a fixed control/variant pair at common runtime version, time step and step count. `confirmObservationComparison` reads both saved references in the current Session and admits one `comparison.completed` input for that ordered pair. It uses the saved source revisions, rejects incompatible conditions, and does not accept Client-computed values. Individual sends and comparison sends have independent admission receipts.
 
 -----
 
@@ -95,12 +112,12 @@ A confirmed action becomes one bounded user message; it grants no additional aut
 
 <a id="known-limitations-and-deferred-work"></a>
 
-- The current SceneCatalog supports only `function-plot`; flowchart and particle-system remain reference HTML templates until their native SceneSpec migrations.
 - Durable state covers source, revision, and semantic action messages, not iframe JavaScript heap, canvas pixels, scroll position, or unconfirmed pending actions.
 - Revision checks are serialized by the enclosing Agent operation; they are not a cross-process transaction.
 - The service does not execute or sanitize HTML. Execution belongs to the Client's opaque iframe and content policy.
 
 <a id="dev-note"></a>
+
 ### Dev Note
 
 None.

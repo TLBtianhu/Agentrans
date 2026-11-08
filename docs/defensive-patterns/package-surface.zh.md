@@ -4,6 +4,8 @@
 
 关于包导出什么、怎么构建、如何声明依赖的规则。布局本身见 [development.zh.md](../development.zh.md#typescript-project-layout)；常设条款见 [packages/AGENTS.md](../../packages/AGENTS.md)。
 
+Artifact 的 `particle-runtime`、`observation-comparison`、`scene-renderers` 与 `scene-export` 子路径是精确声明的浏览器安全计算与序列化入口。Client bundle 可以内联这些入口；Artifact 服务主入口与嵌套实现路径不在允许范围内。Scene 程序常量在 Host 编译前生成，使干净的 Host 导出构建不依赖 Client 源码或上次构建的 Client 产物。
+
 ## 插件包导出 Loader 所需的东西
 
 插件包的入口取两种形态之一，两者不得混用。**函数插件**具名导出 `name`、`inject`、`Config`、`apply`：`name`、`inject`、`apply` 全小写，`Config` 首字母大写，且同时以 `interface` 与 Schemastery schema 值两种形态出现。**服务插件**默认导出它的服务类，Loader 就是这么加载它的；在四件套旁边再加一个默认导出，会让 Loader 丢弃函数插件的命名空间。除这两者之外，Host 入口可以导出供其他包 `extends` 或 `throw` 的 Service Definition 类与错误类型——能力接缝消费的正是这些——但绝不导出测试便利值。UI 插件包的 `/client` 入口更严，[packages/client/AGENTS.md](../../packages/client/AGENTS.md) 是那条纪律的正家：同包测试用相对 `../src/...` 路径或 `./src/*` 子路径触达内部，测试专用的需要因此永远不会变成常驻导出。

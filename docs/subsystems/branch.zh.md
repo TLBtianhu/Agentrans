@@ -12,11 +12,12 @@
 
 子分支只从自己的日志派生模型消息。开岔后父级新增的事件和兄弟对话不会进入该子分支。嵌套子分支继承直接父级的前缀，其中已经包含相关祖先。
 
+<a id="confirmed-result-return"></a>
 ## 确认后的结论回流
 
 `SessionBranchResultRequest` 包含直接父级 `sessionId`、子分支 `branchSessionId` 和子分支自有的持久 `assistant/message` 序号 `resultSeq`。请求不携带结论文本。Host 重新读取精确的子事件，并校验消息 id 和非空可见文本。
 
-`SessionBranchResultValue` 包含 `parentSessionId`、父级本地 `eventSeq` 和父级本地 `messageId`。重试同一 `(parent, branch, resultSeq)` 会返回已有回执，不重复追加。
+`SessionBranchResultValue` 包含 `parentSessionId`、父级本地 `eventSeq` 和父级本地 `messageId`。以相同确认内容重试同一 `(parent, branch, resultSeq)` 会返回已有回执，不重复追加。该结论使用不同内容时报告 `session/branch-result-conflict`，包括纯结论与带证据回流之间的冲突。
 
 接受的结论在父级当前尾部形成新的普通 `user/message`，其 source 为 `branch-result`，包含：
 
@@ -31,10 +32,16 @@
 
 非分支、subagent、错误父级、继承事件、结果不存在或可见文本为空都会被拒绝。空闲父级通过 maintenance 串行化追加并 flush；运行中的父级返回 busy，不隐式 steer。
 
+普通回流和 [Artifact 证据桥接](../../packages/artifact/artifact-branch/README.zh.md)共用 Host 专用的 `session-branch/admission` 操作。它在持有父级 maintenance 时比较已有内容，只对新消息追加并 flush。操作开始后的失败可能留下未知结果；重试同一选择可找回回执。只有未能进入 maintenance 的失败才报告 busy。
+
+证据桥接从同一个不可变子分支切面读取结论和已保存观察。它以额外普通文本附加用户选择的证据，不改变 `branch-result` source 或子分支历史。可以选择继承的基线观察，但不能使用后来的父级事实或兄弟事实。证据选择不表示助手使用过这些事实来撰写先前结论。
+
 <a id="verification"></a>
 ## 验证
 
 keyless [branch-result 场景](../../apps/web/tests/branch-result.e2e.ts) 通过实际 Web 组合重放父级回答和独立的子级回答。浏览器从父级开岔，打开子级自有结论的预览，先取消一次而不回流，然后再确认。测试检查预览不包含 reasoning、父级只新增一条携带子级引用和可见文本的 `branch-result` 用户消息，并且确认前后都不启动父级模型轮次。
+
+[分支证据场景](../../apps/web/tests/branch-evidence.e2e.ts) 将旧修订观察与子分支结论一同回流，丢弃首次成功响应，再重试冻结请求。它核对父级只新增一条持久输入、更换证据明确冲突、子分支日志不变，以及父级同名 Artifact 保持原样。
 
 <!-- BEGIN GENERATED cordis-surface (gen-cordis-catalog.ts) — do not edit between markers -->
 <a id="cordis-surface"></a>

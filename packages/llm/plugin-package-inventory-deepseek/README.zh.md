@@ -28,7 +28,7 @@ kind: "package-reference"
 |---|---:|---|
 | `enabled` | `true` | 注册 `dsh_plugin_packages` 贡献。将其设为 `false` 可省略包元数据。 |
 
-随附 profile 使用该默认值，因此只要准备成功，每个 DeepSeek 官方请求都会携带包清单。
+Agentrans 随附基础组合包关闭此插件行。自定义部署若显式挂载它，采用上表的配置默认值，因此准备成功时 DeepSeek 官方请求会携带包清单。
 
 <a id="collection"></a>
 ## 收集

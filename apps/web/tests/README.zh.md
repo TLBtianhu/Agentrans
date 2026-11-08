@@ -16,6 +16,16 @@ pnpm --filter @deepseek-ai/dsh-web-frontend exec playwright install --with-deps 
 
 当天消息的 golden 使用共享的 `WEB_FIXTURE_TIME`：预置会话将它传为 `createdAt`，并通过 `pinBrowserClock` 固定浏览器日期；提交实时消息的场景还使用 `pinHostClock`，在清理后恢复。固定后的时钟随真实耗时前进，保留原生定时器，因此跨午夜不会改变场景的日期标签。
 
+## Fixture 归属
+
+`snapshots/web/` 拥有同时用作回放输入和完整持久化预期输出的已记录 Session。其 `snapshot.yml` 声明组合、录制和 header 归属。浏览器用例可以借用既有 corpus owner；即使 `compareReplaySession` 为 `false`，scaffold 也会在启动前校验该 owner。
+
+`fixtures/replay/` 拥有仅作输入的 Session 格式回放脚本。这些用例显式设置 `compareReplaySession: false`，通过 `assertFixtureInventory` 检查 fixture 角色与规范化，并断言真实浏览器和 Host 行为。这些断言不使输入成为完整持久化或迁移 oracle。父子文件须保持成组。经审阅的位置调整保持文件字节和 generation 名称，不录制或刷新 Session。参见 [corpus 规则](../../../snapshots/AGENTS.md)。
+
+## 真实 Artifact 验收
+
+[真实 Artifact 用例](artifact-live.e2e.ts)要求非空的 `DEEPSEEK_API_KEY`、`DSH_ARTIFACT_LIVE=1` 和 `DSH_SNAPSHOT=record`。将 `DSH_ARTIFACT_LIVE_OUTPUT_DIR` 设置为证据目录后，运行 `node node_modules/vitest/vitest.mjs run --config vitest.web.config.ts apps/web/tests/artifact-live.e2e.ts --maxWorkers=1 --retry=0 --reporter=verbose`。用例在临时工作区使用随附的 `deepseek-flash` 模型，不加载或写入回放 fixture。每次运行在新证据子目录保存 Session、截图和请求状态，不包含凭据及 HTTP 认证请求头。它检查模型创建粒子、不增加模型轮次的本地步进、随普通问题附上的 Host 重算状态，以及模型更新同一 Artifact 后改变的仿真行为。两轮及资源清理都必须正常完成。设置 `DSH_PLAYWRIGHT_EXECUTABLE_PATH` 可使用已有的 Chromium 兼容浏览器。
+
 ## 完成状态观察
 
 依赖状态的用例使用 Workspace、接纳、附件和模型流屏障，区分可见中间状态与已完成操作。模型选择器的持久化断言等待默认设置保存完成，不以菜单关闭作为完成信号。详情关闭等待框架过渡结束；归档验证为 seed Session 设置显式标题，并跨重载跟踪该身份。[CI 测试可靠性工作流](../../../.agents/skills/dsh-ci-test-reliability/SKILL.md#synchronize-on-state)负责这些同步规则。

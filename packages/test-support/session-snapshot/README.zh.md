@@ -82,6 +82,8 @@ Headless/ACP 与 SDK 适配器在规范化之前，将原始目录中的子创�
 
 `pnpm run test:snapshot:record` 调用在线 LLM（大语言模型），并在规范具名版本文件下写入收集到的当前 generation。record 与 refresh 绝不重命名或删除已完成的 generation，即使后续运行不再产生某个 child 角色也一样；受审阅的源树整理只有在同角色存在已验证的当前替代文件后才移除前代。显式声明 `sessionFormat` 的场景在录制模式下保持只读。`pnpm run test:snapshot:refresh` 保持无密钥，运行选定的最高 replay 输入，并写入 stdout、各 pin 自有的提示词与工具 schema 伴随文件，以及新鲜当前 generation 的可比较 Session 输出；保留历史输入的场景写入单独的 writer 输出比较基准，而非规范当前格式 replay 代际。Headless 与 SDK 场景可通过本地 `runtime.cordis.yml` patch 添加执行 fixture。每个组合 owner 把 replay patch 放在 live patch 旁；顶层 `snapshots/` 拥有 Session 驱动场景，其他预期输出留在其 package owner 旁。[`dsh-llm-replay`](../llm-replay/README.zh.md) 提供通过 `DSH_SNAPSHOT_*` 环境值选择的已记录流。
 
+SDK replay 与 refresh 按 JSON 字符串的编码层级物化 cwd token，并在启动 profile 前解析输入、派生回放脚本。refresh 在稳定 header 身份之前将生成 cwd 的各类写法替换为 token，保留嵌套 JSON 编码以及无关的命令文本和外部路径。格式错误的输入在运行时初始化前失败。其 Node 子进程使用测试拥有的网络约束，拒绝外部 HTTP 与 socket 目的地、允许 loopback fixture；replay 不继承环境中的 Node 预载配置。出现与 fixture 不符的错误终态时，在等待后续事件前立即失败。record 模式保留显式调用真实提供方的行为。
+
 首次录制尚无 Session 文件的 headless 在线场景时，临时在 `snapshot.yml` 设置 `input.task`，由在线组合选择模型。录制后移除该输入，让选定 Session 拥有任务文本。回放与刷新必须已有规范 Session 文件，格式错误或缺少 parent 的角色仍会报错。
 
 嵌套的 `workspace.expected/<directory>/.empty` 标记表示空目录；实际 workspace 中的同名文件仍按普通文件比较。
@@ -92,7 +94,9 @@ Headless/ACP 与 SDK 适配器在规范化之前，将原始目录中的子创�
 
 ### 平台与组合变体
 
-需要非 Windows 主机的场景声明 `posixOnly`，在 Windows 上跳过运行测试，但 fixture 保护仍在所有平台覆盖其已提交文件；组合需要可用 `pwsh` 的场景声明 `pwshOnly`。当临时目录授权自身待测时，`workspaceParent` 将生成子级 cwd 移出平台临时区域；场景签入的 `workspace/` 会先复制到该子级，随后 `prepareWorkspace` 在 agent 启动前针对生成 cwd 运行。默认生成的 workspace 在会话 fixture 中存储为 `{{cwd}}`，使平台临时根目录与随机 basename 不影响录制。headless manifest 在测试 Session workspace 授权本身时使用 `workspace.parent: outside-temp`。适配器在父目录可写且位于系统临时授权之外时，于平台临时根目录旁分配目录，否则使用 home，并拒绝已被自动临时写授权覆盖的生成 cwd。
+主 header 伴随文件 owner 可声明 `header.toolSchemasVariants: [win32]` 或 `header.systemPromptVariants: [win32]`，在对应共享文件旁拥有 `tool-schemas.win32.expected.json` 或 `system-prompt.win32.expected.md`。Headless、SDK 和 ACP 的读取沿 manifest 中对应的 source 引用定位 owner，再选择其声明的主机变体。owner 的 record/refresh 写入选择同一变体，不修改共享文件。其它主机使用共享伴随文件。缺少已声明的变体会失败，不会回退。完整、独立的预期目录与提示文本仍是比较依据；平台选择不从断言中移除工具名、说明、参数或提示指令。
+
+Headless、SDK 和 ACP manifest 用 `platform: posix` 声明依赖 POSIX 行为的录制，用 `platform: pwsh` 声明需要可用 PowerShell 可执行文件的组合；可移植场景省略该字段。通用适配器将这两项要求写作 `posixOnly` 和 `pwshOnly`。不受支持的运行测试会跳过，但 fixture 保护仍在所有主机校验其已提交文件。PowerShell 对应场景独立拥有自己的命令、完整 Session 和工作区预期，保留的 POSIX 录制不被替换。当临时目录授权自身待测时，`workspaceParent` 将生成子级 cwd 移出平台临时区域；场景签入的 `workspace/` 会先复制到该子级，随后 `prepareWorkspace` 在 agent 启动前针对生成 cwd 运行。默认生成的 workspace 在会话 fixture 中存储为 `{{cwd}}`，使平台临时根目录与随机 basename 不影响录制。headless manifest 在测试 Session workspace 授权本身时使用 `workspace.parent: outside-temp`。适配器在父目录可写且位于系统临时授权之外时，于平台临时根目录旁分配目录，否则使用 home，并拒绝已被自动临时写授权覆盖的生成 cwd。
 
 ### 可能出什么问题
 
@@ -122,6 +126,7 @@ Headless/ACP 与 SDK 适配器在规范化之前，将原始目录中的子创�
 | [`src/launcher.ts`](src/launcher.ts) | 子进程/客户端启动器与关闭所有权 |
 | [`src/harness.ts`](src/harness.ts) | 脚本化场景驱动与会话日志收集 |
 | [`src/manifest.ts`](src/manifest.ts) | 封闭 `snapshot.yml` schema、收集与归属规则 |
+| [`src/header-sidecars.ts`](src/header-sidecars.ts) | 由 manifest 定义、供各 profile 读写共用的 header 来源与主机变体选择 |
 | [`src/session-files.ts`](src/session-files.ts) | 规范 parent/child generation grammar、header 一致性与最高角色选择 |
 | [`src/identity.ts`](src/identity.ts) | 跨父子日志的类型化首次出现身份 token 化 |
 | [`src/normalize.ts`](src/normalize.ts) | 纯规范化器与擦除辅助 |

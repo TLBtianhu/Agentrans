@@ -313,7 +313,7 @@ interface LlmImageRequestPricing {
 
 ## `AppIdentity`：应用归属
 
-每个适配器都会向提供方发送的静态公开应用标识（[`packages/llm/llm/src/attribution.ts`](../../packages/llm/llm/src/attribution.ts)）。`attributionHeaders(identity?)` 只把它映射到标准 `User-Agent` header；该约定有意不支持 OpenRouter 特有的应用归属 header。默认 `APP_IDENTITY` 从包 manifest（元数据清单）获取版本；每个字段都是公开产品事实——不含 secret、路径、会话 id 或逐用户标识，且任何逐请求信息都不得影响这些值。
+每个适配器都会向提供方发送的静态公开应用标识（[`packages/llm/llm/src/attribution.ts`](../../packages/llm/llm/src/attribution.ts)）。`attributionHeaders(identity?)` 只把它映射到标准 `User-Agent` header；该约定有意不支持 OpenRouter 特有的应用归属 header。默认 `APP_IDENTITY` 标识 Agentrans，并从包 manifest（元数据清单）获取版本；每个字段都是公开产品事实，不含 secret、路径、Session id 或逐用户标识。DeepSeek 模型目录兼容检查使用独立的 `DEEPSEEK_CLIENT_COMPATIBILITY` 键和适配器版本，因此产品归属不会改变 requirements 或 metadata 的查找。
 
 ```ts type-equiv
 /**

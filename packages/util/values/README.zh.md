@@ -53,6 +53,10 @@ const snapshot = snapshotJsonValue(input) as JsonValue
 
 `WeakMapWithValues<Key, Value>` 组合弱对象键查找与强引用且保持插入顺序的 `values` set。每个 value 只属于一个 key。owner 必须在对应生命周期边界调用 `delete(key)` 或 `clear()`；该集合不执行自动清理。
 
+### 求值数学表达式
+
+`parseExpression()` 接受有界的数学表达式，不执行源码。`evaluateExpression()` 要求每个被引用变量都有有限数值，并返回有限数值。数学运算产生非有限结果时抛出 `ExpressionDomainError`；缺失变量、非有限输入和非法表达式树仍是普通错误。调用方可以仅将数学域错误转换为不可用采样。
+
 ### 封闭可辨识联合类型
 
 在封闭可辨识联合类型的 default 分支中使用 `assertNever(value, context?)`。新增变体会让每个穷尽 switch 在 TypeScript 编译时失败；如果某个运行时值逃过了声明类型，该函数会抛出带可选上下文标签的错误。

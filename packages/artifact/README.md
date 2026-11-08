@@ -16,6 +16,10 @@ The Artifact family stores code-generated interactive explanations without confu
 | Package | Role |
 |---|---|
 | [`artifact`](artifact/README.md) | Validates and commits Artifact snapshots; exposes the model-facing tool and action Remote |
+| [`artifact-branch`](artifact-branch/README.md) | Returns a conclusion with user-selected saved evidence |
+| [`artifact-export`](artifact-export/README.md) | Freezes Scene input and stores HTML export results |
+| [`artifact-followup`](artifact-followup/README.md) | Resolves selected experiment facts within ordinary questions |
+| [`artifact-runtime`](artifact-runtime/README.md) | Holds live renderer reports and provides exact-revision model inspection |
 | [`ui-artifact`](../client/ui-artifact/README.md) | Folds Artifact events into stable Chat nodes and renders the restricted iframe |
 
 ## Related documentation

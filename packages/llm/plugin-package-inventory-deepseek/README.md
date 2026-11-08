@@ -28,7 +28,7 @@ Best-effort active Loader-backed plugin package inventory for official DeepSeek 
 |---|---:|---|
 | `enabled` | `true` | Register the `dsh_plugin_packages` contribution. Set it to `false` to omit package metadata. |
 
-Shipped profiles use the default, so every official DeepSeek request carries the package inventory when preparation succeeds.
+The shipped Agentrans base bundle disables this plugin row. A custom deployment that explicitly mounts it uses the configuration default above, so official DeepSeek requests carry the package inventory when preparation succeeds.
 
 <a id="collection"></a>
 ## Collection

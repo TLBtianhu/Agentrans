@@ -25,11 +25,11 @@ Agent + Trans：一个通用编程 Agent 工作台，把解释转化为可执行
 
 编译产物只是产生分发物的中间结果，不是用户数据根。开发运行使用独立数据根，绝不复用上游 DSH profile。不要把本源码目录安装或运行覆盖到已有 DSH 上。
 
+源码的 `dsh`、`start:web` 和 `dev:web` 命令会在源码树外初始化独立的 worktree 开发实例。`AGENTRANS_DEV_ROOT` 可显式选择空目录或已有开发标识的根目录；继承的 Harness home 变量不决定产品状态路径。已有未标识数据会被拒绝，不做迁移。
+
 ```powershell
 pnpm install
 pnpm run build
-$env:DSH_HOME = 'C:\agent制作\.dev-data\harness'
-$env:DSH_AGENTS_HOME = 'C:\agent制作\.dev-data\agents'
 pnpm dsh web --no-open --port 58910
 ```
 
@@ -39,6 +39,10 @@ pnpm dsh web --no-open --port 58910
 ## 模型配置
 
 Agentrans 不提供 DeepSeek 账号登录或服务端账号绑定。用户自行配置提供商与凭据：端点 URL、协议格式、模型 id 和模型元数据。自定义提供商可使用 `openai-completions`、`openai-responses` 或 `anthropic-messages`；新增模型不需要更新上游源码。参见 [custom-provider.cordis.yml](apps/cli/config/examples/custom-provider.cordis.yml) 和[提供商指南](docs/user/guide/providers.zh.md)。凭据只保存在本地凭据存储或环境变量中，绝不写入仓库。
+
+## 默认数据分享
+
+Agentrans 随附组合关闭会话日志附加字段、插件清单附加字段、反馈触发的会话上传和桌面产品埋点。反馈与会话历史仍保存在本地。正常模型请求、搜索和用户配置的插件仍可使用网络。组合设置见[基础组合包](packages/bundle/base/README.zh.md#included-capabilities)与 [Web 组合包](packages/bundle/web-app/README.zh.md)；自定义 overlay 可以显式更改这些设置。
 
 ## 验证
 

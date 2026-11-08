@@ -1,0 +1,16 @@
+# Bilingual-pair consistency record for guide.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write docs/upgrade-guide/v0.2.2-alpha.2/agentrans-installer-entry/guide.md
+/:
+  en: 72fda92b1692d415
+  zh: 7d3af5b29ae75b29
+/use-the-agentrans-installer-entry:
+  en: 57da36018dd86d67
+  zh: 8004ba491a1e8cc1
+/use-the-agentrans-installer-entry/change:
+  en: e4ced611db2ecc2e
+  zh: 0da096c4f0b75693
+/use-the-agentrans-installer-entry/migration:
+  en: 2c94547f9d35b89e
+  zh: de8ec2539a56f77c

@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-本包负责持久化 HTML 和 SceneSpec Artifact：以稳定 id、compare-and-set 修订号和语义呈现方式保存完整快照，并提供模型侧 `artifact` 和 `scene` 工具。Remote `record` 方法把用户确认的操作转换为普通文本 `UserMessage`；操作不授予文件、网络或批准权限。
+本包负责持久化 HTML 和 SceneSpec Artifact：以稳定 id、compare-and-set 修订号和语义呈现方式保存完整快照，并提供模型侧 `artifact` 和 `scene` 工具。稳定 Remote `submitAction` 和旧 `record` 把用户确认的操作转换为文本 `UserMessage`；操作不授予文件、网络或批准权限。
 
 ## 目录
 
@@ -25,12 +25,13 @@ kind: "package-reference"
 <a id="use-this-package"></a>
 ## 使用
 
-以 `@deepseek-ai/dsh-artifact` 挂载服务，以 `@deepseek-ai/dsh-artifact/tool` 挂载 HTML 工具，以 `@deepseek-ai/dsh-artifact/scene-tool` 挂载 SceneSpec 工具。服务负责校验、读取当前修订号和提交 Session；每个工具先准备快照，只有最终工具结果成功才提交。SceneSpec 使用版本化 SceneCatalog 和安全表达式解析器校验，不使用 `eval`。
+以 `@deepseek-ai/dsh-artifact` 挂载服务，以 `@deepseek-ai/dsh-artifact/tool` 挂载 HTML 工具，以 `@deepseek-ai/dsh-artifact/scene-tool` 挂载 SceneSpec 工具。服务依赖 Session Projection，并在同步读取前等待注册完成。它负责校验、读取当前修订号和提交 Session；每个工具先准备快照，只有最终工具结果成功才提交。SceneSpec 使用版本化 SceneCatalog 和安全表达式解析器校验，不使用 `eval`。
 
 | 配置 | 默认值 | 含义 |
 |---|---|---|
 | `maxSourceBytes` | `262144` | 一份完整 HTML 源码的 UTF-8 字节上限 |
 | `maxActionBytes` | `16384` | 完整编码操作消息的 UTF-8 字节上限 |
+| `maxSavedObservationsPerArtifact` | `32` | 命名观察数量上限；超出后拒绝新增保存 |
 
 创建从修订号 1 开始。更新必须提供 `baseRevision`，且只有等于当前持久化修订号才成功。每条 `artifact/upsert` 都携带完整 `ArtifactSnapshot`，不是增量。
 
@@ -39,9 +40,25 @@ kind: "package-reference"
 <a id="understand-the-implementation"></a>
 ## 实现说明
 
-Artifact 可以向父页面发送 `{ kind: 'artifact-action', artifactId, revision, action, payload }`。Host 在投递前校验当前修订号和完整消息大小。`wake: false` 使用 `agent.inject`；`wake: true` 使用 `agent.steer`。是否需要人工确认由 UI 政策决定。
+Artifact 可以向父页面发送 `{ kind: 'artifact-action', artifactId, revision, action, payload }`。它只提出用户意图，是否需要人工确认由 UI 政策决定。`wake: false` 使用 `agent.inject`；`wake: true` 使用 `agent.steer`。
 
-Scene 快照使用 `format: 'scene'` 和完整 `spec`。当前 catalog 支持 `function-plot`，包含函数、有界参数、视口和描点设置。未知变量或函数、非法参数范围和非有限表达式结果都会在提交前拒绝。
+`submitAction(agent, request)` 接受可信 Client 生成的 `requestId` 与完整冻结操作，该 id 成为既有用户消息 id，来源类型和完整操作文本保持原义。[Session 输入](../../session/session-input/README.zh.md)先检查原接受事实，再检查当前修订和大小。相同已接受重试不再次发送，源码替换或队列取消后也是如此；同一 id 的来源/内容冲突会被拒绝。发送方式只在首次接受时生效，不在后续重试时改变。必须保留准确的冻结载荷，包括其编码文本顺序。
+
+稳定提交要求 Session 输入服务和准确的实时根 Agent；Remote 调用要求所有者 principal，请求不能提供调用者归属。明确拒绝、身份冲突、服务不可用与分发未确认分别报告。旧同步 `record` 仍可供旧调用方使用，但每次创建新身份，不提供安全重试。源码创建和旧调用不激活 Session 输入服务。
+
+Scene 快照使用 `format: 'scene'` 和完整的 `spec`。目录校验函数图、流程图、粒子系统、时间轴、网络图和地图。非法表达式、参数范围和引用会在提交前被拒绝。
+
+不依赖 DOM 的 `capabilities` 入口提供 `getArtifactSourceCapabilities(snapshot)`。SceneCatalog 拥有每种原语的源码声明：粒子支持 Host 重算观察、保存、恢复、固定已保存双方的比较和问题上下文；其它原生场景支持按源码默认条件导出 HTML。粒子导出可以保留检查点或使用源码默认值。HTML 问题上下文保留程序自报的状态或错误，不会获得 Host 计算的观察、已保存检查点、恢复、固定比较或 HTML 导出。这些声明不启用可选服务，不授予权限，不报告 renderer 就绪，也不验证结果。每项操作仍须校验自己的源码和输入。
+
+`runtime-values` 入口提供共用 JSON 遍历与诊断上限。其有界无损普通数据子集拒绝负零、稀疏数组、访问器、symbol、数组额外属性与非普通对象，不修改或丢弃报告数据。浏览器解析、不透明程序桥接和 Host 问题准入共用此校验器；它不执行 getter，也不验证程序所报数值的真实性。
+
+不依赖 DOM 的 `@deepseek-ai/dsh-artifact/particle-runtime` 入口为预览和独立导出提供同一份固定步长粒子计算。带版本号的检查点记录步数，恢复时必须使用同一 SceneSpec 和修订。观察输出将 `-0` 规范为 `0` 以便写入 JSON，内部积分状态不变。它不持久化状态，也不授予执行权限。
+
+浏览器安全入口 `scene-renderers` 与 `scene-export` 拥有共用画布计算和独立 HTML 生成器。`buildSceneAnimationHtml(spec, title, checkpoint?, origin?)` 可将固定来源身份与重放条件作为转义 JSON 嵌入文件。非粒子场景按源码默认条件导出，不捕获浏览器局部滑块、选择或 iframe 状态。持久文件生成和重试回执归独立的 [Artifact 导出服务](../artifact-export/README.zh.md) 所有。
+
+已保存粒子观察保留完整源码修订和 Host 重新计算的数值。保存会追加完整列表事件，不唤醒 Agent。已打开 Session 的投影提供这些观察；紧凑摘要省略它们。明确发送可引用旧修订，并从持久 Inbox 和用户消息收据中对已准入重试去重。Live 操作首次准入仍校验当前修订，已接受的稳定重试在该校验前返回原确认。见[已保存观察语义](../../../docs/subsystems/artifact.zh.md#presentation-and-recovery)。
+
+浏览器安全的 `observation-comparison` 入口在共同运行版本、时间步长和步数下解析固定 control/variant 双方。`confirmObservationComparison` 在当前 Session 中读取两个已保存引用，为该有序组合准入一条 `comparison.completed` 输入。它使用已保存源码修订，拒绝不兼容条件，不接受 Client 计算值。单条观察发送与比较发送使用独立的准入收据。
 
 -----
 
@@ -95,12 +112,12 @@ A confirmed action becomes one bounded user message; it grants no additional aut
 
 <a id="known-limitations-and-deferred-work"></a>
 
-- 当前 SceneCatalog 只支持 `function-plot`；流程图和粒子系统在迁移为原生 SceneSpec 前仍是参考 HTML 模板。
 - 持久事实包括源码、修订号和语义操作消息，不包括 iframe JavaScript 堆、Canvas 像素、滚动位置或未确认的待发送操作。
 - 修订检查由所属 Agent 操作串行化，不是跨进程事务。
 - 服务不执行或清理 HTML。执行由 Client 的不透明 origin iframe 与内容策略负责。
 
 <a id="dev-note"></a>
+
 ### 开发备注
 
 无。

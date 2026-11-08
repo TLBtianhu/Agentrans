@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-用于 DeepSeek 官方 LLM（大语言模型）API 请求的增量规范会话日志上传。该函数插件注入 `ctx.sessions` 与 `ctx.deepseekLlmApiExtensions`，并拥有 `dsh_session_log` 请求字段以及用于派生接受水位的持久 `session-log-deepseek/delivery-accepted` 事件。仅当官方 API 不得接收会话日志后缀时才禁用它。
+用于 DeepSeek 官方 LLM（大语言模型）API 请求的增量规范会话日志上传。该函数插件注入 `ctx.sessions` 与 `ctx.deepseekLlmApiExtensions`，并拥有 `dsh_session_log` 请求字段以及用于派生接受水位的持久 `session-log-deepseek/delivery-accepted` 事件。部署方决定是否挂载该贡献器。
 
 ## 目录
 
@@ -31,9 +31,9 @@ kind: "package-reference"
 | `enabled` | `true` | 发送 `dsh_session_log` 贡献。修改从下一次请求生效；设为 `false` 可停止会话日志上传。 |
 | `maxBytes` | 8 MiB | 单次请求携带的 `dsh_session_log` 字段序列化后的最大 UTF-8 字节数。 |
 
-随附 profile 会挂载该插件，因此默认配置会注册请求字段并追加接受水位；`enabled: false` 会停止贡献。Web 开关可通过当前 profile 覆盖组合包默认值；home patch 和命令行 overlay 保持更高优先级，会拒绝与其冲突的表单写入。
+Agentrans 随附基础组合包关闭此插件行，Web 组合包关闭其设置 UI。上表默认值仅适用于部署方显式挂载插件的情况。`enabled: false` 会停止已挂载插件的贡献。
 
-Web **设置 → 通用 → 在使用官方模型 API 时上传 Session Log** 开关通过 Host 配置持久化 `enabled`。进行中的请求保留已准备的载荷。重新开启后继续上传尚未确认的后缀，包括关闭期间记录的事件。OpenTelemetry 反馈上传使用独立设置。
+自定义部署若也启用 Web 设置插件，**设置 → 通用 → 在使用官方模型 API 时上传 Session Log** 开关通过 Host 配置持久化 `enabled`。home patch 和命令行 overlay 保持更高优先级，会拒绝与其冲突的表单写入。在途请求保留已准备的载荷。重新启用后会继续发送尚未被接受的后缀，包括关闭期间记录的事件。OpenTelemetry 反馈上传采用独立策略。
 
 <a id="request-field"></a>
 ## 请求字段

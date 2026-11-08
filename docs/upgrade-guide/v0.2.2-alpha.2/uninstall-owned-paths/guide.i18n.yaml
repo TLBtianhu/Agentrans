@@ -1,0 +1,16 @@
+# Bilingual-pair consistency record for guide.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write docs/upgrade-guide/v0.2.2-alpha.2/uninstall-owned-paths/guide.md
+/:
+  en: 1ea8f71a2f55968a
+  zh: e9b75fa9dc94562a
+/handle-incomplete-uninstall:
+  en: 0f3b66955cc8db99
+  zh: 1d175edfe4377f1c
+/handle-incomplete-uninstall/change:
+  en: 37e388bc5d7b1b30
+  zh: a7ae48466d6925a6
+/handle-incomplete-uninstall/migration:
+  en: b28f0f6c4891eada
+  zh: 1edb4f1a590f8460

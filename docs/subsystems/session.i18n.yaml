@@ -71,3 +71,9 @@
 /sessions/session-log-upload-exclusions:
   en: cfe3323aade972be
   zh: 8423b490c47c5013
+/sessions/shared-input-admission:
+  en: 1da2cf1c268abd40
+  zh: e1ddb3c16374723d
+/sessions/selected-context-on-ordinary-prompts:
+  en: c2d58ab611d2443c
+  zh: 2ebfcdbf0d0696e9

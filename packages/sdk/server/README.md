@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-`dsh-sdk-jsonrpc-server` serves the SDK wire protocol over stdio so out-of-process clients can drive harness agents: it opens one session per `sessionId`, queues user prompts, and streams every session event and agent status transition back to the client. Mount it as the `jsonrpc` plugin in a Loader composition; the surrounding tree supplies everything else — agents, model adapters, persistence, and tools. Stdout carries only JSON-RPC frames, so a deployment must not compose a stdout logger. It answers `shutdown` by disposing the root runtime and exiting 0; the app bin owns EOF and signal exits.
+`dsh-sdk-jsonrpc-server` lets out-of-process clients open sessions, queue prompts, and receive events and status transitions over stdio JSON-RPC. The surrounding Loader profile supplies agents, model adapters, persistence, tools, and the launcher exit callback. Stdout carries protocol frames only. After SDK-owned work drains, shutdown flushes its response and requests launcher exit; the launcher disposes the profile and completes the process. EOF and signals use that same application owner.
 
 ## Table of Contents
 
@@ -25,7 +25,7 @@ English | [中文](README.zh.md)
 <a id="use-this-package"></a>
 ## Use this package
 
-Mount this plugin when a runtime must serve SDK clients: add it to a `cordis.yml` that composes the agent service, boot the runtime, and clients connect over stdio. The common path is explicit — the plugin needs the `agents` service; every other capability comes from the surrounding tree.
+Mount this plugin when a runtime must serve SDK clients: add it to a `cordis.yml` that composes the agent service, boot the runtime, and clients connect over stdio. The surrounding application supplies `appExit`; the shipped `dsh` profiles provide it before mounting the tree.
 
 Set `initialize.approvalRequests` to `true` to send internal approvals as server-to-client `approval/request` calls. The bridge handles SDK-owned Agents and their live in-process descendants, following `agents.isOwnedBy()` runtime ownership rather than persisted `parentSession` lineage; unrelated Agents and clients that omit the flag continue through the composed answerer chain. The approval service still applies `never` policy before dispatch and records the ask/decision audit pair. The bridge accepts only `allowed-once`, `rejected`, or `cancelled`; an invalid response, client error, or transport loss yields the service's fail-closed `unavailable` outcome. Request cancellation abandons the pending wire waiter; shutdown abandons all such waiters before draining Agents. Late replies cannot grant an abandoned operation. See the [protocol](../protocol/README.md) for the payload and the [Python example](../../../python/sdk/README.md#client-approvals) for client handling.
 
@@ -57,7 +57,7 @@ Creation and edit accept images as reference material before the next round; sho
 
 ### Wiring
 
-The plugin creates one agent per `sessionId` on first use. A registered model adapter wins the route; an unowned `deepseek-official` route mounts the DeepSeek adapter, and any other unowned provider fails initialization. The selected adapter resolves the exact model and optional reasoning effort before initialization succeeds.
+The plugin creates one agent per `sessionId` on first use. The surrounding profile registers every model adapter. Initialization selects an existing provider and resolves its exact model and optional reasoning effort before succeeding; a missing provider rejects with `no adapter registered for provider "<id>"` without mounting an adapter. The shipped `sdk` and `sdk-minimal` profiles explicitly register the official DeepSeek adapter.
 
 ### Configuration
 
@@ -65,7 +65,7 @@ The plugin creates one agent per `sessionId` on first use. A registered model ad
 |---|---|---|
 | `maxTokensAsSuccess` | `false` | Report max-token turn/subagent termination as a successful SDK result |
 
-The profile composition owns each root agent's tools. `input`, `output`, and `exit` are runtime-only transport hooks for tests; production uses process stdio and `process.exit`. The generated [configuration catalog](../../../docs/config-catalog.md#deepseek-aidsh-sdk-jsonrpc-server) is the exhaustive source for every accepted field.
+The profile composition owns each root agent's tools. `input`, `output`, and `exit` are runtime-only test hooks; production uses process stdio and the launcher's `appExit`. The `exit` hook replaces the exit request and must supply application teardown and process completion. Mounting without either exit callback rejects immediately. The generated [configuration catalog](../../../docs/config-catalog.md#deepseek-aidsh-sdk-jsonrpc-server) is the exhaustive source for every accepted field.
 
 ### stdout is the protocol
 
@@ -84,7 +84,9 @@ An initialized client advertising `capabilities.userQuestions` handles questions
 
 ### Shutdown and exit
 
-The plugin answers `shutdown`, flushes the response, disposes the root context so SDK-owned agents, subscriptions, and persistence reach quiescence, then exits 0. EOF and signal exits belong to the app bin, which also disposes the root context. Unloading only this plugin stops serving without exiting the process.
+The successful `shutdown` response follows SDK-owned Agent and activity teardown. The plugin flushes that response, stops its transport listeners, pauses only its default process stdin, and requests launcher exit 0. SDK teardown errors retain their error response and request exit 1 after flushing; a failed flush also requests exit 1. Explicitly injected input streams remain caller-owned and are neither paused nor destroyed. Racing shutdown requests share one exit request.
+
+The launcher owns whole-profile disposal, proxy cleanup, and natural process completion. Its existing teardown deadline starts after the exit request; it does not bound the preceding SDK drain or response flush. SDK clients retain their own request and close timeouts. EOF and signals use the same application owner. Unloading only this plugin closes its transport without pausing input, disposing the root, or requesting exit.
 
 -----
 
@@ -110,11 +112,11 @@ The plugin is a thin presentation adapter: [`HarnessSdkJsonRpcServer`](src/serve
 
 ### Request flow
 
-Each protocol method validates its inputs and resolves the owning state before acting — `initialize` stores the SDK route, `session/prompt` resolves the live agent+session pair and queues the message, and `shutdown` flushes the response, then disposes the root context to quiescence before exiting 0 — and a shared exit task guarantees that racing `shutdown` requests never dispose or exit twice. The dispatch lives in [src/index.ts](src/index.ts) and [src/server.ts](src/server.ts).
+Each protocol method validates its inputs and resolves the owning state before acting. `initialize` stores the SDK route; `session/prompt` queues work on its live Agent; `shutdown` joins SDK-owned teardown before responding. The serving plugin then flushes the response and sends one exit request to the application owner. The dispatch lives in [src/index.ts](src/index.ts) and [src/server.ts](src/server.ts).
 
 ### Teardown
 
-`server.shutdown()` closes descendant admission below its exact root Agents and drains their managed descendants child-first before releasing the root handles and adapter. It removes its subscriptions while unrelated parent trees and the surrounding context stay running when just this plugin is unloaded. A descendant drain failure is reported after the remaining root and adapter teardown completes. Protocol `shutdown` instead disposes the root fiber so persistence and the whole runtime reach quiescence before the process exits.
+`server.shutdown()` closes descendant admission below its exact root Agents and drains their managed descendants child-first before releasing the root handles and subscriptions. A descendant drain failure is reported after the remaining SDK-owned teardown completes. Caller-owned adapters, unrelated parent trees, and the surrounding context stay running when just this plugin is unloaded. Whole-profile cleanup belongs to the launcher.
 
 </details>
 
@@ -216,7 +218,6 @@ These limits define when the plugin needs special operational care. They are cur
 - **The wire has no per-session close or prompt-cancel method** — SDK-created agents remain live until process shutdown.
 - **There is no per-prompt result** — `MessageId` identifies inbox admission only; clients that own an automation interval must define and observe that interval themselves.
 - **stdout purity is deployment-enforced** — a surrounding config can still load a stdout logger and corrupt the JSON-RPC channel; this plugin does not inspect or veto sibling loggers.
-- **Automatic adapter mounting is DeepSeek-specific** — `initialize` can reuse any pre-registered model adapter, but its only fallback mounts the DeepSeek adapter.
 
 <a id="dev-note"></a>
 ### Dev Note

@@ -1,0 +1,19 @@
+# Bilingual-pair consistency record for 2026-11-07-evidence-bearing-branch-results.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-11-07-evidence-bearing-branch-results.md
+/agent-note-branch-evidence-shares-one-immutable-result-admission:
+  en: b19cc82255f7f5fe
+  zh: e04e7a5ad50bcb01
+/agent-note-branch-evidence-shares-one-immutable-result-admission/problem:
+  en: f2fe13b65c16948f
+  zh: a77638732248cf85
+/agent-note-branch-evidence-shares-one-immutable-result-admission/decision:
+  en: c43098c52f65a724
+  zh: 3f0fd6e7bf4b09d1
+/agent-note-branch-evidence-shares-one-immutable-result-admission/alternatives-considered:
+  en: f1d4cc32b49823de
+  zh: faf2460372544227
+/agent-note-branch-evidence-shares-one-immutable-result-admission/consequences:
+  en: fb8f07772815d65b
+  zh: 52b55b49876e641f

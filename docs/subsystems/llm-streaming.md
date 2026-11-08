@@ -311,7 +311,7 @@ Retry configuration resolves before route registration into an immutable discrim
 
 ## `AppIdentity` — app attribution
 
-The static public application identity every adapter sends to providers ([`packages/llm/llm/src/attribution.ts`](../../packages/llm/llm/src/attribution.ts)). `attributionHeaders(identity?)` maps it to the standard `User-Agent` header only; OpenRouter-specific app attribution headers are intentionally not supported by this contract. The default `APP_IDENTITY` sources its version from the package manifest; every field is a public product fact - no secrets, paths, session ids, or per-user identifiers, and nothing per-request may influence the values.
+The static public application identity every adapter sends to providers ([`packages/llm/llm/src/attribution.ts`](../../packages/llm/llm/src/attribution.ts)). `attributionHeaders(identity?)` maps it to the standard `User-Agent` header only; OpenRouter-specific app attribution headers are intentionally not supported by this contract. The default `APP_IDENTITY` identifies Agentrans and sources its version from the package manifest; every field is a public product fact, without secrets, paths, Session ids, or per-user identifiers. DeepSeek model-catalog compatibility uses the separate `DEEPSEEK_CLIENT_COMPATIBILITY` key and adapter version, so product attribution does not change requirement or metadata lookup.
 
 ```ts type-equiv
 /**

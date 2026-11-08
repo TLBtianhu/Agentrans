@@ -3,8 +3,8 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write docs/defensive-patterns/package-surface.md
 /package-surface-rules:
-  en: 28d4c2d7da24269f
-  zh: d723b807815401d7
+  en: 84b03e545258f5c0
+  zh: 2aa7c712d50f7a7b
 /package-surface-rules/a-plugin-package-exports-what-the-loader-loads:
   en: 44a06f50e751f06b
   zh: 339dea7be403fd0b

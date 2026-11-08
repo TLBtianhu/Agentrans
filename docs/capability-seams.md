@@ -191,12 +191,20 @@ flowchart LR
   pkg_artifact["artifact"]
   svc_artifacts["ctx.artifacts<br/>Executable Artifact lifecycle"]
   pkg_ui_artifact["ui-artifact"]
+  pkg_artifact_branch["artifact-branch"]
+  svc_artifactBranchResults["ctx.artifactBranchResults<br/>Evidence-bearing branch result return"]
+  pkg_artifact_export["artifact-export"]
+  svc_artifactExports["ctx.artifactExports<br/>Fixed-source Artifact HTML export"]
+  pkg_artifact_runtime["artifact-runtime"]
+  svc_artifactRuntime["ctx.artifactRuntime<br/>Live Artifact runtime reports"]
   pkg_plan_mode["plan-mode"]
   svc_planMode["ctx.planMode<br/>Plan collaboration state"]
   pkg_agent_preset_registry["agent-preset-registry"]
   svc_agentPresets["ctx.agentPresets<br/>Per-session agent composition"]
   pkg_commands["commands"]
   svc_commands["ctx.commands<br/>Human command registry"]
+  pkg_session_input["session-input"]
+  svc_sessionInputs["ctx.sessionInputs<br/>Shared Session input admission"]
   pkg_session_projection["session-projection"]
   svc_sessionProjections["ctx.sessionProjections<br/>Session projection units"]
   pkg_session_projection_cache["session-projection-cache"]
@@ -337,6 +345,9 @@ flowchart LR
   pkg_api_workspace_files --> svc_workspaceFiles
   pkg_app_boot --> svc_profileContext
   pkg_artifact --> svc_artifacts
+  pkg_artifact_branch --> svc_artifactBranchResults
+  pkg_artifact_export --> svc_artifactExports
+  pkg_artifact_runtime --> svc_artifactRuntime
   pkg_attachment --> svc_attachments
   pkg_attachment_local --> svc_attachments
   pkg_authorization --> svc_authorization
@@ -426,6 +437,7 @@ flowchart LR
   pkg_sandbox_windows_acl --> svc_skills
   pkg_schedule --> svc_schedule
   pkg_session --> svc_sessions
+  pkg_session_input --> svc_sessionInputs
   pkg_session_log_deepseek --> svc_deepseekLlmApiExtensions
   pkg_session_log_deepseek --> svc_sessionLogDeepSeek
   pkg_session_persistence --> svc_sessionPersistence
@@ -499,6 +511,9 @@ flowchart LR
   svc_approval --> pkg_acp
   svc_approval --> pkg_tool_bash
   svc_approval --> pkg_tools
+  svc_artifactBranchResults --> pkg_ui_artifact
+  svc_artifactExports --> pkg_ui_artifact
+  svc_artifactRuntime --> pkg_ui_artifact
   svc_artifacts --> pkg_ui_artifact
   svc_attachments --> pkg_api_session_controller
   svc_attachments --> pkg_llm_deepseek
@@ -563,6 +578,8 @@ flowchart LR
   svc_sandboxPolicy --> pkg_bash_sandbox
   svc_sandboxPolicy --> pkg_fs_sandbox
   svc_sandboxPolicy --> pkg_terminal_bash
+  svc_sessionInputs --> pkg_api_session_controller
+  svc_sessionInputs --> pkg_artifact
   svc_sessionPersistence --> pkg_agent_loop
   svc_sessionPersistence --> pkg_hooks_claude_code
   svc_sessionPersistence --> pkg_hooks_codex
@@ -723,9 +740,13 @@ flowchart LR
 | `ctx.tools` | `core` | [`tools`](../packages/core/tools) | - | [`agent-loop`](../packages/core/agent-loop), [`tool-ask-user`](../packages/interaction/tool-ask-user), [`tool-bash`](../packages/shell/tool-bash), [`tool-cordis`](../packages/extensions/tool-cordis), [`tool-fs`](../packages/fs/tool-fs), [`tool-terminal`](../packages/experimental/tool-terminal), [`tool-skill`](../packages/skill/tool-skill), [`tool-subagent`](../packages/subagent/tool-subagent), [`tool-todo`](../packages/todo/tool-todo), [`tool-web`](../packages/web/tool-web) | - | Registers capabilities and scoped executors. Native and PTC providers own descriptions and complete raw call batches; their optional shared pipeline handles tool policy and dispatch. |
 | `ctx.userQuestions` | `seam` | [`user-questions`](../packages/interaction/user-questions) | - | [`tool-ask-user`](../packages/interaction/tool-ask-user) | - | UI front ends provide the active human-answer provider; tool-ask-user pauses a tool call on the provider-neutral ask() promise. |
 | `ctx.artifacts` | `seam` | [`artifact`](../packages/artifact/artifact) | - | `ui-artifact` | - | Stores complete Artifact snapshots and compare-and-set revisions, exposes the artifact tool, and turns confirmed user actions into ordinary text input. |
+| `ctx.artifactBranchResults` | `service` | [`artifact-branch`](../packages/artifact/artifact-branch) | - | `ui-artifact` | - | Resolves saved evidence from the child conclusion cut and uses shared branch admission to append one user-confirmed parent notice without starting a model turn. |
+| `ctx.artifactExports` | `service` | [`artifact-export`](../packages/artifact/artifact-export) | - | `ui-artifact` | - | Freezes source and replay conditions, stores verified immutable HTML files, and projects export receipts without starting a model turn. |
+| `ctx.artifactRuntime` | `service` | [`artifact-runtime`](../packages/artifact/artifact-runtime) | - | `ui-artifact` | - | Owns stream-scoped renderer reports and exposes exact-revision model inspection through ordinary logged tool results; no live readiness is restored from history. |
 | `ctx.planMode` | `core` | [`plan-mode`](../packages/plan/plan-mode) | - | - | - | Folds logged plan/mode state, flushes user selections at turn boundaries, renders deployment-owned guidance, registers /plan, and keeps the plan-exit schema stable across transitions. |
 | `ctx.agentPresets` | `core` | [`agent-preset-registry`](../packages/preset/agent-preset-registry) | - | - | - | Eagerly mounts YAML-declared preset revisions, binds Agents and cold readers to scoped contributions, and retains retired revisions until their last user releases them. |
 | `ctx.commands` | `core` | [`commands`](../packages/interaction/commands) | - | - | - | Plugins register direct human commands without sending invocations to the model. |
+| `ctx.sessionInputs` | `service` | [`session-input`](../packages/session/session-input) | - | [`api-session-controller`](../packages/api/session-controller), [`artifact`](../packages/artifact/artifact) | - | Owns accepted input identities and concurrent reservation; consumers retain message construction, validation, permissions and delivery resources. |
 | `ctx.sessionProjections` | `core` | [`session-projection`](../packages/session/session-projection) | - | [`api-session-controller`](../packages/api/session-controller), [`tool-todo`](../packages/todo/tool-todo), [`session-title`](../packages/session/session-title) | - | Domains register state-driven fold units; the eager drive keeps per-session watermark states and the Session controller serves baselines and pushes changed values. |
 | `ctx.sessionProjectionCache` | `core` | [`session-projection-cache`](../packages/session/session-projection-cache) | - | [`api-session-controller`](../packages/api/session-controller), [`session-query`](../packages/session-query/session-query), [`session-reference`](../packages/context/session-reference) | - | Durably checkpoints projection unit states per session (throttled + turn/end/detach mandatory points), serves cached projection views, and accelerates prepared-Session projection hydration. |
 | `ctx.skills` | `seam` | [`skill`](../packages/skill/skill) | [`sandbox-windows-acl`](../packages/sandbox/sandbox-windows-acl), [`skill-badge`](../packages/experimental/skill-badge), [`skill-filesystem`](../packages/skill/skill-filesystem), [`skill-office`](../packages/skill/skill-office) | [`tool-skill`](../packages/skill/tool-skill) | - | Merges provider skill catalogs; tool-skill renders the session-prefix catalog and loads complete skill bodies. |

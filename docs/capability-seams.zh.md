@@ -193,12 +193,20 @@ flowchart LR
   pkg_artifact["artifact"]
   svc_artifacts["ctx.artifacts<br/>Executable Artifact lifecycle"]
   pkg_ui_artifact["ui-artifact"]
+  pkg_artifact_branch["artifact-branch"]
+  svc_artifactBranchResults["ctx.artifactBranchResults<br/>Evidence-bearing branch result return"]
+  pkg_artifact_export["artifact-export"]
+  svc_artifactExports["ctx.artifactExports<br/>Fixed-source Artifact HTML export"]
+  pkg_artifact_runtime["artifact-runtime"]
+  svc_artifactRuntime["ctx.artifactRuntime<br/>Live Artifact runtime reports"]
   pkg_plan_mode["plan-mode"]
   svc_planMode["ctx.planMode<br/>Plan collaboration state"]
   pkg_agent_preset_registry["agent-preset-registry"]
   svc_agentPresets["ctx.agentPresets<br/>Per-session agent composition"]
   pkg_commands["commands"]
   svc_commands["ctx.commands<br/>Human command registry"]
+  pkg_session_input["session-input"]
+  svc_sessionInputs["ctx.sessionInputs<br/>Shared Session input admission"]
   pkg_session_projection["session-projection"]
   svc_sessionProjections["ctx.sessionProjections<br/>Session projection units"]
   pkg_session_projection_cache["session-projection-cache"]
@@ -339,6 +347,9 @@ flowchart LR
   pkg_api_workspace_files --> svc_workspaceFiles
   pkg_app_boot --> svc_profileContext
   pkg_artifact --> svc_artifacts
+  pkg_artifact_branch --> svc_artifactBranchResults
+  pkg_artifact_export --> svc_artifactExports
+  pkg_artifact_runtime --> svc_artifactRuntime
   pkg_attachment --> svc_attachments
   pkg_attachment_local --> svc_attachments
   pkg_authorization --> svc_authorization
@@ -428,6 +439,7 @@ flowchart LR
   pkg_sandbox_windows_acl --> svc_skills
   pkg_schedule --> svc_schedule
   pkg_session --> svc_sessions
+  pkg_session_input --> svc_sessionInputs
   pkg_session_log_deepseek --> svc_deepseekLlmApiExtensions
   pkg_session_log_deepseek --> svc_sessionLogDeepSeek
   pkg_session_persistence --> svc_sessionPersistence
@@ -501,6 +513,9 @@ flowchart LR
   svc_approval --> pkg_acp
   svc_approval --> pkg_tool_bash
   svc_approval --> pkg_tools
+  svc_artifactBranchResults --> pkg_ui_artifact
+  svc_artifactExports --> pkg_ui_artifact
+  svc_artifactRuntime --> pkg_ui_artifact
   svc_artifacts --> pkg_ui_artifact
   svc_attachments --> pkg_api_session_controller
   svc_attachments --> pkg_llm_deepseek
@@ -565,6 +580,8 @@ flowchart LR
   svc_sandboxPolicy --> pkg_bash_sandbox
   svc_sandboxPolicy --> pkg_fs_sandbox
   svc_sandboxPolicy --> pkg_terminal_bash
+  svc_sessionInputs --> pkg_api_session_controller
+  svc_sessionInputs --> pkg_artifact
   svc_sessionPersistence --> pkg_agent_loop
   svc_sessionPersistence --> pkg_hooks_claude_code
   svc_sessionPersistence --> pkg_hooks_codex
@@ -725,9 +742,13 @@ flowchart LR
 | `ctx.tools` | `core` | [`tools`](../packages/core/tools) | - | [`agent-loop`](../packages/core/agent-loop), [`tool-ask-user`](../packages/interaction/tool-ask-user), [`tool-bash`](../packages/shell/tool-bash), [`tool-cordis`](../packages/extensions/tool-cordis), [`tool-fs`](../packages/fs/tool-fs), [`tool-terminal`](../packages/experimental/tool-terminal), [`tool-skill`](../packages/skill/tool-skill), [`tool-subagent`](../packages/subagent/tool-subagent), [`tool-todo`](../packages/todo/tool-todo), [`tool-web`](../packages/web/tool-web) | - | 注册能力和作用域执行器。原生与 PTC 提供者负责工具描述及完整原始调用批次；它们可选用共享流水线处理工具策略和分发。 |
 | `ctx.userQuestions` | `seam` | [`user-questions`](../packages/interaction/user-questions) | - | [`tool-ask-user`](../packages/interaction/tool-ask-user) | - | UI 前端提供当前生效的人工回答提供方；tool-ask-user 在提供方无关的 ask() promise 上暂停工具调用。 |
 | `ctx.artifacts` | `seam` | [`artifact`](../packages/artifact/artifact) | - | `ui-artifact` | - | 保存完整 Artifact 快照和 compare-and-set 修订号，提供 artifact 工具，并将确认的用户操作转换为普通文本输入。 |
+| `ctx.artifactBranchResults` | `service` | [`artifact-branch`](../packages/artifact/artifact-branch) | - | `ui-artifact` | - | 从子分支结论所在切面解析已保存证据，并使用共用分支准入追加一条用户确认的父级通知，不启动模型轮次。 |
+| `ctx.artifactExports` | `service` | [`artifact-export`](../packages/artifact/artifact-export) | - | `ui-artifact` | - | 固定源码与重放条件，保存经过校验的不可变 HTML 文件，并投影导出回执，不启动模型轮次。 |
+| `ctx.artifactRuntime` | `service` | [`artifact-runtime`](../packages/artifact/artifact-runtime) | - | `ui-artifact` | - | 持有属于实时流的渲染器报告，通过普通已记录工具结果提供精确修订查询；不从历史恢复实时就绪。 |
 | `ctx.planMode` | `core` | [`plan-mode`](../packages/plan/plan-mode) | - | - | - | 折叠已记录的计划／模式状态，在轮次边界刷新用户选择，渲染由部署方拥有的指导信息，注册 /plan，并在状态转换期间保持计划退出 schema 稳定。 |
 | `ctx.agentPresets` | `core` | [`agent-preset-registry`](../packages/preset/agent-preset-registry) | - | - | - | 立即挂载 YAML 声明的 preset 版本，把 Agent 和冷读取绑定到作用域内的贡献，并保留已替换的版本，直到最后一个使用者释放它。 |
 | `ctx.commands` | `core` | [`commands`](../packages/interaction/commands) | - | - | - | 插件注册直接面向人的命令，而不会把调用发送给模型。 |
+| `ctx.sessionInputs` | `service` | [`session-input`](../packages/session/session-input) | - | [`api-session-controller`](../packages/api/session-controller), [`artifact`](../packages/artifact/artifact) | - | 拥有已接受输入身份与并发预约；消费者保留消息构造、校验、权限和发送资源。 |
 | `ctx.sessionProjections` | `core` | [`session-projection`](../packages/session/session-projection) | - | [`api-session-controller`](../packages/api/session-controller), [`tool-todo`](../packages/todo/tool-todo), [`session-title`](../packages/session/session-title) | - | 各领域注册由状态驱动的折叠单元；主动驱动过程维护每个会话的水位状态，Session controller 提供 baseline 并推送发生变化的值。 |
 | `ctx.sessionProjectionCache` | `core` | [`session-projection-cache`](../packages/session/session-projection-cache) | - | [`api-session-controller`](../packages/api/session-controller), [`session-query`](../packages/session-query/session-query), [`session-reference`](../packages/context/session-reference) | - | 按会话持久保存投影单元状态的检查点（节流检查点，以及轮次／结束／分离时的必选检查点），提供缓存投影视图，并加速 prepared Session 的投影恢复。 |
 | `ctx.skills` | `seam` | [`skill`](../packages/skill/skill) | [`sandbox-windows-acl`](../packages/sandbox/sandbox-windows-acl), [`skill-badge`](../packages/experimental/skill-badge), [`skill-filesystem`](../packages/skill/skill-filesystem), [`skill-office`](../packages/skill/skill-office) | [`tool-skill`](../packages/skill/tool-skill) | - | 合并提供方的 skill（技能）目录；tool-skill 渲染会话前缀目录，并加载完整的 skill 正文。 |

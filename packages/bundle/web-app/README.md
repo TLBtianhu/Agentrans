@@ -7,9 +7,9 @@ kind: "package-bundle"
 
 English | [中文](README.zh.md)
 
-Desktop analytics follows the [product collection policy](../../client/product-analytics/README.md), including its live application setting. Web usage is excluded.
+The shipped Agentrans composition disables `desktop-product-telemetry`, `product-analytics`, and `ui-settings-session-log`. Desktop product analytics and its exporter are not mounted, and Settings does not offer an upload switch for the disabled Session-log contributor.
 
-Desktop analytics schedules partial batches every 30 seconds, with a 15-second exporter timeout and a 20-second processor timeout. Shutdown allows 2 seconds to drain, then cancels pending requests and retry waits so telemetry does not keep the Host alive. Pending events may be lost on exit.
+Custom deployments that explicitly enable these plugins own their collection policy and destination; see [product analytics](../../client/product-analytics/README.md) and the [base bundle](../base/README.md#included-capabilities).
 
 ## Summary
 

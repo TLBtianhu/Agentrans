@@ -25,11 +25,11 @@ The shipped replay scenarios exercise these flows through the real Web compositi
 
 Build output is an intermediate for producing distributions, not a user home. Development runs use isolated data roots and never reuse the upstream DSH profile. Do not install or run this checkout over an existing DSH installation.
 
+The source `dsh`, `start:web`, and `dev:web` commands initialize a per-worktree development instance outside the source tree. `AGENTRANS_DEV_ROOT` may select an explicit empty or already marked development root; inherited Harness home variables do not select product state. Existing unmarked data is rejected rather than migrated.
+
 ```powershell
 pnpm install
 pnpm run build
-$env:DSH_HOME = 'C:\agent制作\.dev-data\harness'
-$env:DSH_AGENTS_HOME = 'C:\agent制作\.dev-data\agents'
 pnpm dsh web --no-open --port 58910
 ```
 
@@ -39,6 +39,10 @@ Portable and installed distributions must use separate program and data paths fr
 ## Model configuration
 
 Agentrans has no DeepSeek account login or server-side account binding. Users configure providers and credentials themselves: endpoint URL, wire protocol, model ids, and model metadata. Custom providers can use `openai-completions`, `openai-responses`, or `anthropic-messages`; adding a new model does not require an upstream source update. See [custom-provider.cordis.yml](apps/cli/config/examples/custom-provider.cordis.yml) and the [provider guide](docs/user/guide/providers.md). Credentials stay in the local credential store or environment, never in the repository.
+
+## Default data sharing
+
+The shipped Agentrans composition disables Session-log attachments, plugin-inventory attachments, feedback-triggered Session uploads, and Desktop product analytics. Feedback and conversation history remain local. Normal model requests, search, and user-configured plugins can still use the network. See the [base bundle](packages/bundle/base/README.md#included-capabilities) and [Web bundle](packages/bundle/web-app/README.md) for composition settings; custom overlays can explicitly change them.
 
 ## Verification
 

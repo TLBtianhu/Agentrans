@@ -1,0 +1,19 @@
+# Bilingual-pair consistency record for 2026-11-07-session-input-admission.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-11-07-session-input-admission.md
+/agent-note-one-owner-for-accepted-session-input:
+  en: f061ef3def27dbfe
+  zh: 87e9320b63eee001
+/agent-note-one-owner-for-accepted-session-input/problem:
+  en: 42dadb0741a4e440
+  zh: cb56745132fc651f
+/agent-note-one-owner-for-accepted-session-input/decision:
+  en: 90b762a90f44501e
+  zh: 70e03ff93f4e8cfe
+/agent-note-one-owner-for-accepted-session-input/alternatives-considered:
+  en: 799a420657d47e67
+  zh: 9eb8ed91e773b841
+/agent-note-one-owner-for-accepted-session-input/consequences:
+  en: 5abedbcef88235c3
+  zh: 0a0729f33a793a8d

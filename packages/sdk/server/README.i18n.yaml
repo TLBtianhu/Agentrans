@@ -9,20 +9,20 @@
   en: 96813b70808d7c86
   zh: ab20ab1cb59432c1
 /deepseek-ai-dsh-sdk-jsonrpc-server/summary:
-  en: 1412ec56449364a9
-  zh: 604f7127ce6e96b5
+  en: 6b2e63cdc5dde6d0
+  zh: a2ffe5532dcd4527
 /deepseek-ai-dsh-sdk-jsonrpc-server/table-of-contents:
   en: d152484eb41ac6b4
   zh: 09388d293f9be9cb
 /deepseek-ai-dsh-sdk-jsonrpc-server/use-this-package:
-  en: d229158284c7e2af
-  zh: cd9b226792f30eaa
+  en: 48bda8dc9e6a0f36
+  zh: d519c87f60ee77a0
 /deepseek-ai-dsh-sdk-jsonrpc-server/use-this-package/wiring:
-  en: 47a33e9397e36e15
-  zh: e6d173820f9ea6e5
+  en: 83544764febf1b54
+  zh: 68b5b11cceeee8b0
 /deepseek-ai-dsh-sdk-jsonrpc-server/use-this-package/configuration:
-  en: a908534bf8193305
-  zh: 6e3875e9ea0ccc79
+  en: 88e2ea228488f14c
+  zh: 364f933478684036
 /deepseek-ai-dsh-sdk-jsonrpc-server/use-this-package/stdout-is-the-protocol:
   en: 784b68b5a498f2d5
   zh: 2c3c5a1490845179
@@ -33,8 +33,8 @@
   en: 5100c311c8476f93
   zh: 60d4bc3165731246
 /deepseek-ai-dsh-sdk-jsonrpc-server/use-this-package/shutdown-and-exit:
-  en: 08c3858f53090f39
-  zh: dfae960e11515b06
+  en: dbe2244f4fd9e38a
+  zh: d1a38bda11089ec8
 /deepseek-ai-dsh-sdk-jsonrpc-server/understand-the-implementation:
   en: eca39e7027d67d8f
   zh: dd3f494276322857
@@ -45,11 +45,11 @@
   en: 783bd2b6628c0680
   zh: ca5b6b730893ddec
 /deepseek-ai-dsh-sdk-jsonrpc-server/understand-the-implementation/request-flow:
-  en: 2658804b2f90b135
-  zh: 085aa00c8f0bbbcd
+  en: 2171138a6a88e26e
+  zh: fd410beea988ed81
 /deepseek-ai-dsh-sdk-jsonrpc-server/understand-the-implementation/teardown:
-  en: 7e4403a7b1da7ff4
-  zh: ef75ee9411486b90
+  en: 4205fac5cf93edbf
+  zh: 8b81e1f3666cf580
 /deepseek-ai-dsh-sdk-jsonrpc-server/further-exploration:
   en: cea854984c56c75a
   zh: 1ee5eaab8305e10d
@@ -117,8 +117,8 @@
   en: f4edb02fb1124718
   zh: 0f70aae68553eb5a
 /deepseek-ai-dsh-sdk-jsonrpc-server/known-limitations-and-deferred-work:
-  en: a6d0b12d02961572
-  zh: 92822e033db55980
+  en: a9789c8053e7779b
+  zh: c87685a746de8892
 /deepseek-ai-dsh-sdk-jsonrpc-server/known-limitations-and-deferred-work/dev-note:
   en: 583a835f84c55c33
   zh: a4377e2c9bea8c4e

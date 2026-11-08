@@ -1,0 +1,19 @@
+# Bilingual-pair consistency record for 2026-11-07-particle-run-ownership.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-11-07-particle-run-ownership.md
+/agent-note-particle-runs-retain-one-calculation-across-preview-and-export:
+  en: d5985e82f9561220
+  zh: 167adbf5ea74b98f
+/agent-note-particle-runs-retain-one-calculation-across-preview-and-export/problem:
+  en: c4993af173e90ef1
+  zh: 0de2f95084c6976b
+/agent-note-particle-runs-retain-one-calculation-across-preview-and-export/decision:
+  en: a3a974328c1dce8f
+  zh: 10e8061468bea3c1
+/agent-note-particle-runs-retain-one-calculation-across-preview-and-export/alternatives-considered:
+  en: 60b281056fc06f5e
+  zh: f13b1ec9eb7abd1a
+/agent-note-particle-runs-retain-one-calculation-across-preview-and-export/consequences:
+  en: eedc2412b95e85ad
+  zh: c512aa2feaaf2a02

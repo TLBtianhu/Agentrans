@@ -7,9 +7,9 @@ kind: "package-bundle"
 
 [English](README.md) | 中文
 
-桌面埋点遵循[产品采集策略](../../client/product-analytics/README.zh.md)及其动态应用配置，不包含 Web 使用情况。
+Agentrans 随附组合关闭 `desktop-product-telemetry`、`product-analytics` 和 `ui-settings-session-log`。桌面产品埋点及其导出器不挂载，设置也不为已关闭的会话日志贡献器提供上传开关。
 
-桌面埋点每 30 秒调度未满批次，exporter 超时为 15 秒，processor 超时为 20 秒。退出时允许 2 秒排空，随后取消待完成的请求和重试等待，避免埋点阻止 Host 退出。尚未发送完成的事件可能丢失。
+自定义部署若显式启用这些插件，须自行决定采集策略和目的地；参见[产品埋点](../../client/product-analytics/README.zh.md)与[基础组合包](../base/README.zh.md#included-capabilities)。
 
 ## 概述
 
