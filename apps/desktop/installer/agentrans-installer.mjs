@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url'
 import {
   ALL_UNINSTALL_SCOPE,
   APP_ONLY_UNINSTALL_SCOPE,
+  assertWindowsRegistrationOwnership,
   executeUninstallPlan,
   installSignedRelease,
   planUninstall,
@@ -15,6 +16,10 @@ import {
   ProductLayout,
   readInstallManifest,
   removeWindowsRegistration,
+  UninstallExecutionError,
+  UninstallFilesystemError,
+  UninstallPathError,
+  WindowsRegistrationOwnershipError,
 } from '../../../packages/boot/product-layout/lib/index.js'
 
 const execFileAsync = promisify(execFile)
@@ -41,7 +46,7 @@ function scopeFromText(value) {
   if (value === undefined) return APP_ONLY_UNINSTALL_SCOPE
   const scope = { app: false, sessions: false, settings: false, models: false, runtimes: false, exports: false }
   for (const name of value.split(',')) {
-    if (!(name in scope)) throw new Error(`Unknown uninstall scope: ${name}`)
+    if (!Object.hasOwn(scope, name)) throw new Error(`Unknown uninstall scope: ${name}`)
     scope[name] = true
   }
   return scope
@@ -88,24 +93,26 @@ async function uninstall(options) {
   }
 
   const plan = planUninstall(layout, scope, { allConfirmed })
-  const result = await executeUninstallPlan(plan, {
-    removeRegistration: async () => {
-      let version = '0.0.0'
-      try {
-        version = (await readInstallManifest(layout.installManifestPath)).appVersion
-      } catch (error) {
-        // The registration entry is removed by key, so a missing or unreadable
-        // manifest must not abort after the selected paths are already gone.
-        console.warn(`agentrans uninstall: install manifest unavailable, using ${version} (${String(error)})`)
-      }
-      await removeWindowsRegistration(planWindowsRegistration(layout, {
-        productName,
-        version,
-        publisher: 'Agentrans',
-        ...optional(options, 'uninstall-key') === undefined ? {} : { uninstallKey: optional(options, 'uninstall-key') },
-        ...optional(options, 'shortcut-path') === undefined ? {} : { shortcutPath: optional(options, 'shortcut-path') },
-      }))
-    },
+  let registration
+  if (plan.scope.app) {
+    let version = '0.0.0'
+    try {
+      version = (await readInstallManifest(layout.installManifestPath)).appVersion
+    } catch (error) {
+      // Registration removal uses its key and shortcut, even when the manifest is unreadable.
+      console.warn(`agentrans uninstall: install manifest unavailable, using ${version} (${String(error)})`)
+    }
+    registration = planWindowsRegistration(layout, {
+      productName,
+      version,
+      publisher: 'Agentrans',
+      ...optional(options, 'uninstall-key') === undefined ? {} : { uninstallKey: optional(options, 'uninstall-key') },
+      ...optional(options, 'shortcut-path') === undefined ? {} : { shortcutPath: optional(options, 'shortcut-path') },
+    })
+    await assertWindowsRegistrationOwnership(registration)
+  }
+  const result = await executeUninstallPlan(plan, registration === undefined ? {} : {
+    removeRegistration: () => removeWindowsRegistration(registration),
   })
   console.log(JSON.stringify({ status: 'uninstalled', completed: result.completed }))
 }
@@ -140,6 +147,19 @@ try {
 } catch (error) {
   const code = error !== null && typeof error === 'object' && 'code' in error && typeof error.code === 'string' ? error.code : 'ERROR'
   const message = error instanceof Error ? error.message : String(error)
-  console.error(JSON.stringify({ status: 'error', code, message }))
+  const partial = error instanceof UninstallExecutionError
+  const pathFailure = error instanceof UninstallFilesystemError || error instanceof UninstallPathError
+  const registrationFailure = error instanceof WindowsRegistrationOwnershipError
+  const cause = error instanceof Error ? error.cause : undefined
+  const causeCode = cause !== null && typeof cause === 'object' && 'code' in cause
+    && typeof cause.code === 'string' ? cause.code : undefined
+  console.error(JSON.stringify({ status: 'error', code, message,
+    ...partial ? { completed: error.completed, failedOperation: error.failedOperation,
+      recovery: 'Some selected paths may already be removed. Resolve the reported cause, then retry the same scope; completed removals cannot be undone.' } : {},
+    ...pathFailure ? { path: error.path } : {},
+    ...error instanceof UninstallFilesystemError ? { reason: error.reason } : {},
+    ...registrationFailure ? { component: error.component, path: error.path, reason: error.reason } : {},
+    ...causeCode === undefined ? {} : { causeCode },
+  }))
   process.exitCode = 1
 }

@@ -84,9 +84,16 @@ describe.skipIf(!existsSync(preload('preload-app')))('built sandboxed Desktop pr
       expect(send).toHaveBeenCalledWith('dsh-desktop:locale-changed', 'zh')
     } else {
       expect(exposed.has('dshWelcome')).toBe(true)
-      const bridge = exposed.get('dshWelcome') as { takeNotice(): Promise<unknown> }
-      void bridge.takeNotice()
-      expect(invoke).toHaveBeenCalledWith('dsh-welcome:take-notice')
+      const bridge = exposed.get('dshWelcome') as { openApiKeyPage: (...args: unknown[]) => Promise<void> }
+      expect(Object.keys(bridge).sort()).toEqual([
+        'id', 'messages', 'analytics', 'analyticsEnabled', 'openApiKeyPage', 'saveApiKey', 'skip',
+      ].sort())
+      invoke.mockClear()
+      await bridge.openApiKeyPage()
+      expect(invoke).toHaveBeenCalledExactlyOnceWith('dsh-welcome:open-api-key-page')
+      invoke.mockClear()
+      await bridge.openApiKeyPage('https://renderer.invalid/untrusted')
+      expect(invoke).toHaveBeenCalledExactlyOnceWith('dsh-welcome:open-api-key-page')
     }
   })
 })

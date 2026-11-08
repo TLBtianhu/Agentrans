@@ -1,5 +1,6 @@
-import { afterEach, describe, expect, it } from 'vitest'
-import { mkdir, mkdtemp, rm, stat, writeFile } from 'node:fs/promises'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import * as filesystem from 'node:fs'
+import { lstat, mkdir, mkdtemp, readFile, realpath, rm, stat, symlink, unlink, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import {
@@ -11,19 +12,39 @@ import {
   ProductLayout,
   UninstallConfirmationError,
   UninstallExecutionError,
+  UninstallFilesystemError,
   UninstallHookError,
   UninstallPathError,
 } from '../src/index.ts'
 
+vi.mock('node:fs', async importOriginal => ({ ...await importOriginal<typeof import('node:fs')>() }))
+
 const roots: string[] = []
+const links: string[] = []
+
 afterEach(async () => {
+  vi.restoreAllMocks()
+  for (const link of links.splice(0).reverse()) {
+    let entry
+    try { entry = await lstat(link) }
+    catch (error) {
+      if (error instanceof Error && 'code' in error && error.code === 'ENOENT') continue
+      throw error
+    }
+    if (entry.isSymbolicLink()) await unlink(link)
+  }
   for (const root of roots.splice(0)) await rm(root, { recursive: true, force: true })
 })
 
 async function tempRoot(): Promise<string> {
-  const root = await mkdtemp(join(tmpdir(), 'agentrans-uninstall-'))
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'agentrans-uninstall-')))
   roots.push(root)
   return root
+}
+
+async function directoryLink(target: string, link: string): Promise<void> {
+  await symlink(target, link, process.platform === 'win32' ? 'junction' : 'dir')
+  links.push(link)
 }
 
 async function exists(path: string): Promise<boolean> {
@@ -145,8 +166,9 @@ describe('uninstall execution', () => {
     await seed(layout)
     const plan = planUninstall(layout)
     let failure: unknown
+    const cause = new Error('registry failed')
     try {
-      await executeUninstallPlan(plan, { removeRegistration: async () => { throw new Error('registry failed') } })
+      await executeUninstallPlan(plan, { removeRegistration: async () => { throw cause } })
     } catch (error) {
       failure = error
     }
@@ -154,8 +176,154 @@ describe('uninstall execution', () => {
     if (failure instanceof UninstallExecutionError) {
       expect(failure.completed).toContain(layout.appDir)
       expect(failure.completed).toContain(join(layout.dataDir, 'cache'))
+      expect(failure.failedOperation).toBe('windows:remove-registration')
+      expect(failure.cause).toBe(cause)
     }
     expect(await exists(layout.appDir)).toBe(false)
     expect(await exists(join(layout.dataDir, 'sessions', 'keep.txt'))).toBe(true)
+  })
+
+  it.each(['selected-root', 'intermediate-directory'])('refuses a %s link before deleting earlier categories', async (kind) => {
+    const layout = ProductLayout.fromRoot(await tempRoot(), 'installed')
+    const outside = await tempRoot()
+    await mkdir(layout.appDir)
+    await writeFile(join(layout.appDir, 'keep.txt'), 'application')
+    await mkdir(join(outside, 'cache'))
+    const sentinel = join(outside, 'cache', 'keep.txt')
+    await writeFile(sentinel, 'outside')
+    if (kind === 'selected-root') await mkdir(layout.dataDir)
+    const link = kind === 'selected-root' ? join(layout.dataDir, 'cache') : layout.dataDir
+    await directoryLink(kind === 'selected-root' ? join(outside, 'cache') : outside, link)
+    const removeRegistration = vi.fn<() => Promise<void>>()
+    await expect(executeUninstallPlan(planUninstall(layout), { removeRegistration })).rejects.toMatchObject({
+      code: 'UNINSTALL_PATH_UNSAFE', path: link, reason: 'LINK',
+    })
+    expect(await readFile(join(layout.appDir, 'keep.txt'), 'utf8')).toBe('application')
+    expect(await readFile(sentinel, 'utf8')).toBe('outside')
+    expect(removeRegistration).not.toHaveBeenCalled()
+  })
+
+  it.each(['root', 'ancestor'])('refuses an installation %s link', async (kind) => {
+    const parent = await tempRoot()
+    const outside = await tempRoot()
+    const actualRoot = kind === 'root' ? outside : join(outside, 'installation')
+    const actual = ProductLayout.fromRoot(actualRoot, 'portable')
+    await seed(actual)
+    const link = join(parent, 'alias')
+    await directoryLink(outside, link)
+    const layout = ProductLayout.fromRoot(kind === 'root' ? link : join(link, 'installation'), 'portable')
+    await expect(executeUninstallPlan(planUninstall(layout))).rejects.toMatchObject({
+      code: 'UNINSTALL_PATH_UNSAFE', path: link, reason: 'LINK',
+    })
+    expect(await readFile(join(actual.appDir, 'index.js'), 'utf8')).toBe('app')
+    expect(await readFile(join(actual.dataDir, 'cache', 'cache.txt'), 'utf8')).toBe('cache')
+  })
+
+  it('unlinks nested dependency and dangling directory links without visiting their targets', async () => {
+    const layout = ProductLayout.fromRoot(await tempRoot(), 'portable')
+    const outside = await tempRoot()
+    await seed(layout)
+    await writeFile(join(outside, 'keep.txt'), 'external dependency')
+    await mkdir(join(layout.appDir, 'node_modules'))
+    await directoryLink(outside, join(layout.appDir, 'node_modules', 'dependency'))
+    await directoryLink(join(outside, 'absent'), join(layout.appDir, 'dangling'))
+    await executeUninstallPlan(planUninstall(layout))
+    expect(await exists(layout.appDir)).toBe(false)
+    expect(await readFile(join(outside, 'keep.txt'), 'utf8')).toBe('external dependency')
+    expect(await exists(join(layout.dataDir, 'sessions', 'keep.txt'))).toBe(true)
+  })
+
+  it('completes repeatedly when selected paths and some ancestors are missing', async () => {
+    const layout = ProductLayout.fromRoot(join(await tempRoot(), 'absent'), 'portable')
+    const plan = planUninstall(layout, ALL_UNINSTALL_SCOPE, { allConfirmed: true })
+    expect((await executeUninstallPlan(plan)).completed).toEqual(plan.remove)
+    expect((await executeUninstallPlan(plan)).completed).toEqual(plan.remove)
+  })
+
+  it('refuses a non-directory ancestor without removing an earlier category', async () => {
+    const layout = ProductLayout.fromRoot(await tempRoot(), 'portable')
+    await mkdir(layout.appDir)
+    await writeFile(layout.dataDir, 'not a directory')
+    await expect(executeUninstallPlan(planUninstall(layout))).rejects.toMatchObject({
+      code: 'UNINSTALL_PATH_UNSAFE', path: layout.dataDir, reason: 'NOT_DIRECTORY',
+    })
+    expect(await exists(layout.appDir)).toBe(true)
+    expect(await readFile(layout.dataDir, 'utf8')).toBe('not a directory')
+  })
+
+  it('rechecks a forged plan before deleting any selected path', async () => {
+    const layout = ProductLayout.fromRoot(await tempRoot(), 'portable')
+    const outside = await tempRoot()
+    await seed(layout)
+    await writeFile(join(outside, 'keep.txt'), 'outside')
+    const plan = { ...planUninstall(layout), remove: [layout.appDir, outside] }
+    await expect(executeUninstallPlan(plan)).rejects.toBeInstanceOf(UninstallPathError)
+    expect(await readFile(join(layout.appDir, 'index.js'), 'utf8')).toBe('app')
+    expect(await readFile(join(outside, 'keep.txt'), 'utf8')).toBe('outside')
+  })
+
+  it('rechecks a later selected root after an earlier removal and reports partial completion', async () => {
+    const layout = ProductLayout.fromRoot(await tempRoot(), 'portable')
+    const outside = await tempRoot()
+    await mkdir(layout.appDir)
+    await mkdir(layout.dataDir)
+    await writeFile(join(outside, 'keep.txt'), 'outside')
+    const cache = join(layout.dataDir, 'cache')
+    const remove = filesystem.rmdirSync
+    vi.spyOn(filesystem, 'rmdirSync').mockImplementation((path) => {
+      remove(path)
+      if (path === layout.appDir) {
+        filesystem.symlinkSync(outside, cache, process.platform === 'win32' ? 'junction' : 'dir')
+        links.push(cache)
+      }
+    })
+    await expect(executeUninstallPlan(planUninstall(layout))).rejects.toMatchObject({
+      code: 'UNINSTALL_PARTIAL', completed: [layout.appDir], failedOperation: cache,
+      cause: { code: 'UNINSTALL_PATH_UNSAFE', path: cache, reason: 'LINK' },
+    })
+    expect(await exists(layout.appDir)).toBe(false)
+    expect(await readFile(join(outside, 'keep.txt'), 'utf8')).toBe('outside')
+  })
+
+  it('uses the captured removal list when a caller mutates its plan during deletion', async () => {
+    const layout = ProductLayout.fromRoot(await tempRoot(), 'portable')
+    const outside = await tempRoot()
+    await mkdir(layout.appDir)
+    await writeFile(join(outside, 'keep.txt'), 'outside')
+    const paths = [...planUninstall(layout).remove]
+    const plan = { ...planUninstall(layout), remove: paths }
+    const remove = filesystem.rmdirSync
+    vi.spyOn(filesystem, 'rmdirSync').mockImplementation((path) => {
+      remove(path)
+      if (path === layout.appDir) paths.push(outside)
+    })
+    expect((await executeUninstallPlan(plan)).completed).toEqual([layout.appDir, join(layout.dataDir, 'cache')])
+    expect(paths).toContain(outside)
+    expect(await readFile(join(outside, 'keep.txt'), 'utf8')).toBe('outside')
+  })
+
+  it('preserves inspection failures as a refusal before deletion', async () => {
+    const layout = ProductLayout.fromRoot(await tempRoot(), 'portable')
+    await seed(layout)
+    const cause = Object.assign(new Error('inspection denied'), { code: 'EACCES' })
+    vi.spyOn(filesystem, 'lstatSync').mockImplementationOnce(() => { throw cause })
+    const execution = executeUninstallPlan(planUninstall(layout))
+    await expect(execution).rejects.toBeInstanceOf(UninstallFilesystemError)
+    await expect(execution).rejects.toMatchObject({ code: 'UNINSTALL_PATH_UNSAFE', reason: 'INSPECTION_FAILED', cause })
+    expect(await readFile(join(layout.appDir, 'index.js'), 'utf8')).toBe('app')
+  })
+
+  it('reports the affected removal and original filesystem error without deregistration', async () => {
+    const layout = ProductLayout.fromRoot(await tempRoot(), 'installed')
+    await seed(layout)
+    const cause = Object.assign(new Error('file is locked'), { code: 'EBUSY' })
+    vi.spyOn(filesystem, 'unlinkSync').mockImplementationOnce(() => { throw cause })
+    const removeRegistration = vi.fn<() => Promise<void>>()
+    await expect(executeUninstallPlan(planUninstall(layout), { removeRegistration })).rejects.toMatchObject({
+      code: 'UNINSTALL_PARTIAL', completed: [], failedOperation: layout.appDir, cause,
+    })
+    expect(removeRegistration).not.toHaveBeenCalled()
+    expect(await exists(join(layout.dataDir, 'cache', 'cache.txt'))).toBe(true)
+    expect(cause.code).toBe('EBUSY')
   })
 })

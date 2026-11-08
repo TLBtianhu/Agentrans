@@ -2,10 +2,11 @@
 
 import { delimiter, join } from 'node:path'
 import { randomUUID } from 'node:crypto'
+import {
+  PRODUCT_LAUNCH_CONTEXT_ENV, applyProductLaunchEnvironment, parseProductLaunchContext, prepareProductState,
+} from '@deepseek-ai/dsh-product-layout/launch-context'
 import type { PluginOperationRunId } from '@deepseek-ai/dsh-plugin-manager/diagnostic'
 import { formatFatalDiagnostic } from './fatal-diagnostic.ts'
-import { loadLayeredEnv, loadProfileDirectory, reportSkippedBundles } from '@deepseek-ai/dsh-app-boot'
-import { runProfile } from '@deepseek-ai/dsh/profile-boot'
 import type {} from '@deepseek-ai/dsh-client-connection'
 import type {} from '@deepseek-ai/dsh-host-webserver'
 import type {} from '@deepseek-ai/dsh-deepseek-account'
@@ -20,6 +21,13 @@ import { installOfficeEngineResolution } from './office-engine.ts'
 import { installOperationDiagnostics } from './operation-diagnostics.ts'
 
 async function main(): Promise<void> {
+  const encoded = process.env[PRODUCT_LAUNCH_CONTEXT_ENV]
+  if (encoded === undefined) throw new Error('desktop Host: product launch context is required')
+  const launchContext = parseProductLaunchContext(encoded)
+  prepareProductState(launchContext)
+  applyProductLaunchEnvironment(launchContext, process.env)
+  const { loadLayeredEnv, loadProfileDirectory, reportSkippedBundles } = await import('@deepseek-ai/dsh-app-boot')
+  const { runProfile } = await import('@deepseek-ai/dsh/profile-boot')
   const runId = randomUUID() as PluginOperationRunId
   if (process.connected) process.send?.({ type: 'starting', runId }, (error) => { if (error !== null) console.error(error) })
   const runtimeDir = process.argv[2] as string

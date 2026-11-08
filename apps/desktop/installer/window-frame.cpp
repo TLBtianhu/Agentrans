@@ -15,6 +15,7 @@
 #include "extract-report.h"
 #include "directory-report.h"
 #include "uninstall-data.h"
+#include "uninstall-ownership.h"
 
 using namespace Gdiplus;
 
@@ -65,6 +66,30 @@ extern "C" __declspec(dllexport) int __cdecl InstallerReportExtractFailure(
     }
 }
 
+// Saves partial-removal diagnostics and shows recovery guidance unless silent; report failure never changes the removal error.
+extern "C" __declspec(dllexport) int __cdecl UninstallReportFailure(
+    HWND parent, DWORD error, LPCWSTR target, LPCWSTR reportPath, int show, LPCWSTR title,
+    LPCWSTR heading, LPCWSTR hint, LPCWSTR copy, LPCWSTR expand, LPCWSTR collapse,
+    LPCWSTR savedFormat, LPCWSTR unsaved, LPCWSTR copied) {
+    try {
+        const std::wstring report = L"operation: uninstall removal\r\nwin32Error: " + std::to_wstring(error)
+            + L"\r\ntarget: " + target
+            + L"\r\neffects: selected files may already have been removed; registration cleanup was not reached\r\n";
+        const bool saved = extract_report::WriteUtf8(reportPath, report);
+        if (show) {
+            std::wstring footer = saved ? savedFormat : unsaved;
+            const auto placeholder = footer.find(L"%s");
+            if (saved && placeholder != std::wstring::npos) footer.replace(placeholder, 2, reportPath);
+            const extract_report::DialogStrings strings{title, heading, copy, expand, collapse, footer.c_str(), copied};
+            extract_report::Show(parent, hint, extract_report::BoundedExcerpt(extract_report::Lines(extract_report::Trim(report))), report, strings);
+        }
+        return saved ? 1 : 0;
+    } catch (const std::bad_alloc&) {
+        if (show) MessageBoxW(parent, hint, heading, MB_OK | MB_ICONEXCLAMATION);
+        return 0;
+    }
+}
+
 // Returns a Win32 error code; no cleanup request may traverse a linked root or touch the protected root.
 extern "C" __declspec(dllexport) DWORD __cdecl UninstallRemoveData(LPCWSTR path, LPCWSTR installation, LPCWSTR protectedRoot) {
     return uninstall_data::Remove(path, installation, protectedRoot);
@@ -75,9 +100,24 @@ extern "C" __declspec(dllexport) DWORD __cdecl UninstallRemoveRoot(LPCWSTR path,
     return uninstall_data::Remove(path, L"", protectedRoot);
 }
 
+// Deletes one regular file while its non-linked parent chain is pinned; no delayed path deletion can affect a later install.
+extern "C" __declspec(dllexport) DWORD __cdecl UninstallRemoveFile(LPCWSTR path) {
+    return uninstall_data::Remove(path, L"", nullptr, true);
+}
+
 // Returns a Win32 error code; only ordinary empty directories strictly below the stop directory are removed.
 extern "C" __declspec(dllexport) DWORD __cdecl UninstallRemoveEmptyParents(LPCWSTR path, LPCWSTR stop) {
     return uninstall_data::RemoveEmptyParents(path, stop);
+}
+
+// Returns zero for an absent entry or one owned by this installation; inaccessible or foreign entries are refused.
+extern "C" __declspec(dllexport) DWORD __cdecl UninstallCheckRegistration(LPCWSTR key, LPCWSTR root, DWORD view) {
+    return uninstall_ownership::Registration(key, root, view);
+}
+
+// A missing shortcut is harmless; an unreadable shortcut or a different target is not owned by this installation.
+extern "C" __declspec(dllexport) DWORD __cdecl UninstallCheckShortcut(LPCWSTR path, LPCWSTR executable, LPCWSTR legacyExecutable) {
+    return uninstall_ownership::Shortcut(path, executable, legacyExecutable);
 }
 
 // Match the affected executable, not another user's or directory's same-named application.

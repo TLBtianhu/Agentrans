@@ -12,13 +12,19 @@ import { createUpdateServer } from './update-server.mjs'
 import { fixture } from './workspace-update-adapters.mjs'
 import { DesktopUpdateHttpExecutor } from '../../lib/types/update-http-executor.js'
 import { desktopUpdateReadyConfirmation, resolveDesktopLocale } from '../../lib/types/locale.js'
+import { parseProductLaunchContext } from '@deepseek-ai/dsh-product-layout/launch-context'
 
 const root = process.env.DSH_WORKSPACE_UPDATE_ROOT
 assert.ok(root)
 const interactive = process.argv.includes('--interactive')
 const application = join(root, 'app')
+const context = parseProductLaunchContext(process.env.AGENTRANS_LAUNCH_CONTEXT)
+assert.equal(context.purpose, 'verification')
+assert.equal(context.instanceRoot, join(root, 'state'))
+assert.equal(context.codeRoot, application)
 app.setAppPath(application)
-app.setPath('userData', join(root, 'electron'))
+app.setPath('userData', context.paths.electronUserDataDir)
+app.setPath('sessionData', context.paths.electronUserDataDir)
 const entry = pathToFileURL(join(application, 'lib/main.js')).href
 const adapters = new URL('./workspace-update-adapters.mjs', import.meta.url).href
 const hooks = registerHooks({ resolve(specifier, context, next) {
@@ -37,7 +43,7 @@ await writeFile(config, 'updaterCacheDirName: private-workspace-cache\n')
 const forbidden = () => { throw new Error('Qualification must not quit or relaunch through updater') }
 const updater = new updaterModule.NsisUpdater(undefined, {
   version: '0.1.5-rc.1', name: 'workspace-update-qualification', isPackaged: true,
-  appUpdateConfigPath: config, userDataPath: root, baseCachePath: root,
+  appUpdateConfigPath: config, userDataPath: context.paths.electronUserDataDir, baseCachePath: context.paths.cacheDir,
   whenReady: () => app.whenReady(), quit: forbidden, relaunch: forbidden, onQuit: forbidden,
 })
 updater.logger = null

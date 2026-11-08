@@ -1,6 +1,8 @@
 Agentrans
 Agentrans
-Welcome to Agentrans
-Build potential. Explore intelligence.
-Sign in
-Add API Key
+Configure an API key
+Enter your DeepSeek API key to get started. You can configure other models later in settings.
+Enter API key [password]
+Get an API key from DeepSeek
+Save and continue [disabled]
+Set up later

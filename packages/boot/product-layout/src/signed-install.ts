@@ -9,10 +9,13 @@ import { packInstalled, packPortable, type InstallExecutionOptions, type Install
 import { verifyReleaseManifest, type ReleaseDigest, type ReleaseManifest } from './release-manifest.ts'
 import {
   planWindowsRegistration,
+  assertWindowsRegistrationOwnership,
   registerWindowsRegistration,
   WindowsRegistrationError,
+  WindowsRegistrationOwnershipError,
   type WindowsCommandRunner,
   type WindowsRegistrationOptions,
+  type WindowsRegistrationReader,
   type WindowsRegistrationPlan,
 } from './windows-registration.ts'
 
@@ -36,6 +39,8 @@ export interface SignedReleaseInstallOptions {
   readonly registration?: WindowsRegistrationOptions
   /** Optional command runner for archive extraction and registration. */
   readonly runner?: WindowsCommandRunner
+  /** Optional ownership reader paired with a custom registration command runner. */
+  readonly registrationReader?: WindowsRegistrationReader
 }
 
 /** Result of a completed signed release install. */
@@ -52,7 +57,7 @@ export class SignedReleaseInstallError extends Error {
 
   constructor(
     readonly install: InstallResult,
-    readonly registrationError: WindowsRegistrationError,
+    readonly registrationError: WindowsRegistrationError | WindowsRegistrationOwnershipError,
     options?: ErrorOptions,
   ) {
     super('Signed release installed, but Windows registration failed', options)
@@ -74,6 +79,9 @@ export async function installSignedRelease(options: SignedReleaseInstallOptions)
     throw new TypeError('Windows registration options are required for installed releases')
   }
   const verification = await verifyReleaseManifest(options.releasePath, options.manifest, options.publicKey)
+  const registrationPlan = shouldRegister && options.registration !== undefined
+    ? planWindowsRegistration(layout, options.registration) : undefined
+  if (registrationPlan !== undefined) await assertWindowsRegistrationOwnership(registrationPlan, options.registrationReader)
   await ensureProductLayout(layout)
   const staging = await mkdtemp(join(layout.dataDir, 'install', 'release-'))
   const runner = options.runner ?? defaultRunner
@@ -87,15 +95,18 @@ export async function installSignedRelease(options: SignedReleaseInstallOptions)
     const install = layout.channel === 'installed'
       ? await packInstalled(layout, options.manifest.version, installOptions)
       : await packPortable(layout, options.manifest.version, installOptions)
-    if (!shouldRegister) return { digest: verification.digest, install }
+    if (registrationPlan === undefined) return { digest: verification.digest, install }
     try {
       const registration = await registerWindowsRegistration(
-        planWindowsRegistration(layout, options.registration as WindowsRegistrationOptions),
+        registrationPlan,
         runner,
+        options.registrationReader,
       )
       return { digest: verification.digest, install, registration }
     } catch (error) {
-      if (error instanceof WindowsRegistrationError) throw new SignedReleaseInstallError(install, error, { cause: error })
+      if (error instanceof WindowsRegistrationError || error instanceof WindowsRegistrationOwnershipError) {
+        throw new SignedReleaseInstallError(install, error, { cause: error })
+      }
       throw error
     }
   } finally {

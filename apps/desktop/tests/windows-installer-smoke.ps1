@@ -9,7 +9,7 @@ Add-Type -AssemblyName UIAutomationClient, UIAutomationTypes
 [InstallerCapture]::Initialize()
 [InstallerCapture]::ProductName = $ProductName
 $installPath = Join-Path $OutputDirectory 'Installed App'
-$appPath = Join-Path $installPath ($ProductName + '.exe')
+$appPath = Join-Path (Join-Path $installPath 'app') ($ProductName + '.exe')
 $uninstaller = Join-Path $installPath ('Uninstall ' + $ProductName + '.exe')
 $processes = [Collections.Generic.List[Diagnostics.Process]]::new()
 $results = [Collections.Generic.List[string]]::new()
@@ -60,7 +60,9 @@ function Click-Control([Diagnostics.Process]$Process, [string]$Text) {
 function Dismiss([Diagnostics.Process]$Process, [string]$Text) {
     $control = Wait-Control $Process $Text -Dialog
     $dialog = [InstallerCapture]::TopLevel($control)
-    [InstallerCapture]::Click([InstallerCapture]::GetDlgItem($dialog, 2))
+    $dismissButton = [InstallerCapture]::GetDlgItem($dialog, 1)
+    if ($dismissButton -eq [IntPtr]::Zero) { $dismissButton = [InstallerCapture]::GetDlgItem($dialog, 2) }
+    [InstallerCapture]::Click($dismissButton)
     $timer = [Diagnostics.Stopwatch]::StartNew()
     while ([InstallerCapture]::IsWindow($dialog)) {
         if ($timer.Elapsed.TotalSeconds -gt 10) { throw 'Dialog did not close' }
@@ -151,7 +153,7 @@ try {
     $bounds = [InstallerCapture]::Bounds($window)
     Click-Control $process $copy.INSTALLER_INSTALL
     Finish-Setup $process $false light $bounds
-    if (-not (Test-Path -LiteralPath $appPath) -or (Test-Path -LiteralPath (Join-Path $installPath 'launched.txt'))) { throw 'Unchecked launch behavior failed' }
+    if (-not (Test-Path -LiteralPath $appPath) -or (Test-Path -LiteralPath (Join-Path (Join-Path $installPath 'app') 'launched.txt'))) { throw 'Unchecked launch behavior failed' }
     $results.Add('enter-validates-current-path-and-unchecked-launch')
     $results.Add('completion-preserves-window-position')
     $results.Add('welcome-ready-before-first-show')

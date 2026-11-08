@@ -8,10 +8,17 @@ import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { installDesktopUpdateTaskControl } from '../../../desktop-host/lib/types/update-tasks.js'
 import { ready } from './host-update-control.mjs'
+import { parseProductLaunchContext } from '@deepseek-ai/dsh-product-layout/launch-context'
 
 const root = process.argv[2]
 assert.ok(root)
 const project = join(root, 'project')
+const context = parseProductLaunchContext(process.env.AGENTRANS_LAUNCH_CONTEXT)
+assert.equal(context.purpose, 'verification')
+assert.equal(context.instanceRoot, join(root, 'state'))
+assert.equal(context.codeRoot, project)
+assert.equal(process.env.DSH_HOME, context.paths.dshHomeDir)
+assert.equal(process.env.DSH_AGENTS_HOME, context.paths.dshAgentsHomeDir)
 const require = createRequire(join(project, 'package.json'))
 const { LlmAdapter, createUserMessage } = await import(pathToFileURL(require.resolve('@deepseek-ai/dsh-llm')).href)
 const observed = []
@@ -164,7 +171,7 @@ try {
     }
 
     ctx.effect(() => ctx.jobs.attachController('update-qualification'))
-    for (const owner of [undefined, agent]) {
+    for (const owner of [undefined, agent.id]) {
       let child
       let done
       const id = ctx.jobs.start({ kind: 'update-qualification', label: 'Private Node process waiting for stdin EOF', owner,

@@ -1,7 +1,10 @@
 /** Public dsh commands using the immutable runtime carried by the Desktop installation. */
 
 import { delimiter, dirname, join, resolve } from 'node:path'
-import { runCli } from '@deepseek-ai/dsh/lib/bin.js'
+import {
+  PRODUCT_LAUNCH_CONTEXT_ENV, ProductLaunchError,
+  applyProductLaunchEnvironment, prepareProductState, resolvePackagedLaunchContext,
+} from '@deepseek-ai/dsh-product-layout/launch-context'
 import { installOfficeEngineResolution, runtimeArchivePath } from './office-engine.ts'
 
 /**
@@ -11,7 +14,14 @@ import { installOfficeEngineResolution, runtimeArchivePath } from './office-engi
  * @returns Completion of the selected CLI command; profile plugins own their process lifetime.
  */
 export async function runDesktopCli(runtimeDir: string, supportDir: string): Promise<void> {
+  const context = resolvePackagedLaunchContext(dirname(resolve(supportDir)), process.env[PRODUCT_LAUNCH_CONTEXT_ENV])
+  if (process.platform !== 'win32' && context.purpose !== 'verification') {
+    throw new ProductLaunchError('INVALID_LAUNCH_REQUEST', 'Packaged user CLI requires a platform-specific product layout')
+  }
+  prepareProductState(context)
+  applyProductLaunchEnvironment(context, process.env)
   installOfficeEngineResolution(runtimeDir)
+  const { runCli } = await import('@deepseek-ai/dsh/lib/bin.js')
   await runCli({
     manageDesktopProfile: true,
     packageManager: {

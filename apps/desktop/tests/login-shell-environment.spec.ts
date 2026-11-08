@@ -89,6 +89,17 @@ describe('mergeLoginShellEnvironment', () => {
     expect(merged).toEqual({ PATH: '/login/bin:/usr/bin', HOME: '/home/user', DSH_DESKTOP_DSH_DIR: '/launcher', PWD: '/', XDG_CACHE_HOME: '/cache' })
     expect(base.PATH).toBe('/usr/bin')
   })
+
+  it('keeps the explicit development root and serialized instance together across a login-shell read', () => {
+    const context = JSON.stringify({ purpose: 'development', instanceRoot: '/custom dev state', codeRoot: '/source', resourcesRoot: '/source' })
+    const base = { AGENTRANS_DEV_ROOT: '/custom dev state', AGENTRANS_LAUNCH_CONTEXT: context, PATH: '/usr/bin' }
+    const merged = mergeLoginShellEnvironment(base, {
+      AGENTRANS_DEV_ROOT: '/another instance', AGENTRANS_LAUNCH_CONTEXT: 'foreign-context',
+      AGENTRANS_TEST_SETTING: 'must-not-be-injected', PATH: '/login/bin:/usr/bin',
+    })
+    expect(merged).toEqual({ ...base, PATH: '/login/bin:/usr/bin' })
+    expect(base).toEqual({ AGENTRANS_DEV_ROOT: '/custom dev state', AGENTRANS_LAUNCH_CONTEXT: context, PATH: '/usr/bin' })
+  })
 })
 
 describe('readDesktopLoginShellEnvironment', () => {

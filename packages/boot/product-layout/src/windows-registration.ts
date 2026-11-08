@@ -1,10 +1,13 @@
 /** User-level Windows uninstall and Start Menu registration. */
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
-import { mkdir, rm, stat } from 'node:fs/promises'
+import { mkdir, stat } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { homedir } from 'node:os'
 import type { ProductLayout } from './layout.ts'
+import { readWindowsRegistrationOwnership, registrationOwnershipArguments, registrationOwnershipFailure,
+  type WindowsRegistrationReader } from './registration-ownership.ts'
+export { WindowsRegistrationOwnershipError, type WindowsRegistrationReader, type WindowsRegistrationState } from './registration-ownership.ts'
 
 /** Command execution seam used by tests and by the real Windows backend. */
 export type WindowsCommandRunner = (file: string, args: readonly string[]) => Promise<void>
@@ -47,7 +50,12 @@ export class WindowsRegistrationError extends Error {
   /** Stable machine-readable code for a failed Windows registration operation. */
   readonly code = 'WINDOWS_REGISTRATION_FAILED'
 
-  constructor(readonly completed: readonly string[], options?: ErrorOptions) {
+  /**
+   * @param completed - Registration phases completed before failure.
+   * @param options - Original registration failure.
+   * @param rollbackError - Failure to remove newly created resources, when cleanup was attempted.
+   */
+  constructor(readonly completed: readonly string[], options?: ErrorOptions, readonly rollbackError?: unknown) {
     super('Windows registration operation failed', options)
     this.name = 'WindowsRegistrationError'
   }
@@ -59,11 +67,6 @@ function quoteWindowsArg(value: string): string {
 
 function psQuote(value: string): string {
   return `'${value.replaceAll("'", "''")}'`
-}
-
-function isMissingRegistry(error: unknown): boolean {
-  const text = String(error).toLowerCase()
-  return text.includes('unable to find') || text.includes('cannot find') || text.includes('not exist')
 }
 
 /**
@@ -101,10 +104,10 @@ export function planWindowsRegistration(layout: ProductLayout, options: WindowsR
 
 function registryValues(plan: WindowsRegistrationPlan): readonly { readonly name: string; readonly value: string }[] {
   return [
+    { name: 'InstallLocation', value: plan.installLocation },
     { name: 'DisplayName', value: plan.displayName },
     { name: 'DisplayVersion', value: plan.displayVersion },
     { name: 'Publisher', value: plan.publisher },
-    { name: 'InstallLocation', value: plan.installLocation },
     { name: 'UninstallString', value: plan.uninstallCommand },
     { name: 'DisplayIcon', value: plan.appExePath },
   ]
@@ -114,13 +117,16 @@ function registryValues(plan: WindowsRegistrationPlan): readonly { readonly name
  * Register uninstall metadata and a Start Menu shortcut through user-level Windows APIs.
  * @param plan - Plan returned by planWindowsRegistration.
  * @param runner - Optional command runner used by tests.
+ * @param reader - Optional ownership inspector paired with the host or test runner.
  * @returns The same plan after all operations complete.
  * @throws {WindowsRegistrationError} With completed phases and best-effort rollback.
  */
 export async function registerWindowsRegistration(
   plan: WindowsRegistrationPlan,
   runner: WindowsCommandRunner = defaultRunner,
+  reader: WindowsRegistrationReader = readWindowsRegistrationOwnership,
 ): Promise<WindowsRegistrationPlan> {
+  const initial = await reader(plan)
   const completed: string[] = []
   try {
     await mkdir(dirname(plan.shortcutPath), { recursive: true })
@@ -140,13 +146,12 @@ export async function registerWindowsRegistration(
     completed.push('windows:register-start-menu-shortcut')
     return plan
   } catch (error) {
-    try {
-      await removeWindowsRegistration(plan, runner)
-    } catch (rollbackError) {
-      // Rollback is best-effort and must not hide the original registration failure.
-      void rollbackError
+    let rollbackError: unknown
+    if (initial.registry === 'missing' && initial.shortcut === 'missing') {
+      try { await removeWindowsRegistration(plan, runner, reader) }
+      catch (failure) { rollbackError = failure }
     }
-    throw new WindowsRegistrationError(completed, { cause: error })
+    throw new WindowsRegistrationError(completed, { cause: error }, rollbackError)
   }
 }
 
@@ -168,19 +173,35 @@ export async function verifyWindowsRegistration(
 }
 
 /**
- * Remove the Start Menu shortcut and uninstall registry entry; missing state is idempotent.
+ * Inspect every shared registration resource before any selected uninstall path is removed.
+ * @param plan - Expected installation, registry key and shortcut identity.
+ * @param reader - Optional reader; defaults to the actual Windows registry and COM shortcut.
+ * @returns Nothing when each resource is owned or missing.
+ * @throws {WindowsRegistrationOwnershipError} For a foreign or unreadable resource; nothing is removed.
+ */
+export async function assertWindowsRegistrationOwnership(
+  plan: WindowsRegistrationPlan,
+  reader: WindowsRegistrationReader = readWindowsRegistrationOwnership,
+): Promise<void> {
+  await reader(plan)
+}
+
+/**
+ * Remove only an owned Start Menu shortcut and uninstall entry; missing resources are idempotent.
+ * All resources are inspected before mutation and checked again in the removal command.
+ * Registry and COM checks are not an atomic transaction against concurrent external replacement.
  * @param plan - Registration plan to remove.
  * @param runner - Optional command runner used by tests.
+ * @param reader - Optional preflight reader paired with the host or test runner.
  * @returns Nothing after cleanup completes.
+ * @throws {WindowsRegistrationOwnershipError} Before deletion when any resource is foreign or unreadable.
  */
 export async function removeWindowsRegistration(
   plan: WindowsRegistrationPlan,
   runner: WindowsCommandRunner = defaultRunner,
+  reader: WindowsRegistrationReader = readWindowsRegistrationOwnership,
 ): Promise<void> {
-  await rm(plan.shortcutPath, { force: true })
-  try {
-    await runner('reg.exe', ['delete', plan.uninstallKey, '/f'])
-  } catch (error) {
-    if (!isMissingRegistry(error)) throw error
-  }
+  await assertWindowsRegistrationOwnership(plan, reader)
+  try { await runner('powershell.exe', registrationOwnershipArguments(plan, true)) }
+  catch (error) { throw registrationOwnershipFailure(error) ?? error }
 }

@@ -1,24 +1,24 @@
 /** Run the compiled Electron main entry in a private app with local update delivery and real Host IPC. */
 import { execFileSync, spawn } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
-import { cp, mkdir, mkdtemp, readFile, symlink, writeFile } from 'node:fs/promises'
+import { cp, mkdir, mkdtemp, readFile, realpath, symlink, writeFile } from 'node:fs/promises'
 import { createRequire } from 'node:module'
-import { join, resolve } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { prepareProductState, productLaunchEnvironment, resolveProductLaunchContext } from '@deepseek-ai/dsh-product-layout/launch-context'
 import { createDevelopmentProjectMetadata, createPluginProfile } from '../src/project-manager.ts'
 import { removeOwnedDirectory } from '../src/owned-directory.ts'
 import { DESKTOP_HOST_PROTOCOL_VERSION } from '../src/host-protocol.ts'
 import { desktopTargetPlatform, developmentRuntimeDirectory, resolveDesktopBuildTarget } from './desktop-build-paths.mjs'
 
-const repo = resolve(import.meta.dirname, '../../..')
+const repo = await realpath(resolve(import.meta.dirname, '../../..'))
 const interactive = process.argv.includes('--interactive')
 if (process.argv.slice(2).some(argument => argument !== '--interactive')) throw new Error('Expected only --interactive')
-const evidence = join(repo, 'apps/desktop/.desktop-build/qualification')
+const evidence = join(dirname(repo), '.dev-data/agentrans/verification')
 await mkdir(evidence, { recursive: true })
 const root = await mkdtemp(join(evidence, 'electron-workspace-updates-'))
 const application = join(root, 'app')
 const project = join(application, '.desktop-build/development/project')
-const profile = join(root, 'home/profiles/desktop')
 const manifest = JSON.parse(await readFile(join(repo, 'apps/desktop/package.json'), 'utf8')) as { version: string }
 const pnpm = JSON.parse(await readFile(join(repo, 'apps/desktop/node_modules/pnpm/package.json'), 'utf8')) as { version: string }
 try {
@@ -30,6 +30,12 @@ try {
     pnpmVersion: pnpm.version, hostProtocolVersion: DESKTOP_HOST_PROTOCOL_VERSION }
   const target = resolveDesktopBuildTarget()
   createDevelopmentProjectMetadata(project, release)
+  const resources = process.platform === 'darwin'
+    ? resolve(dirname(electron), '../Resources') : join(dirname(electron), 'resources')
+  const context = resolveProductLaunchContext({ purpose: 'verification', instanceRoot: join(root, 'state'),
+    codeRoot: await realpath(application), resourcesRoot: await realpath(resources) })
+  prepareProductState(context)
+  const profile = join(context.paths.dshHomeDir, 'profiles', 'desktop')
   createPluginProfile(profile)
   await writeFile(join(project, 'desktop-runtime.json'), JSON.stringify({
     schemaVersion: 1, release, ...desktopTargetPlatform(target), files: [],
@@ -53,6 +59,7 @@ try {
     { id: 'webserver', config: { host: '127.0.0.1', port: 0 } },
     { id: 'llm-deepseek', disabled: true }, { id: 'session-title-llm', disabled: true },
     { id: 'session-telemetry-otel', disabled: true },
+    { id: 'desktop-product-telemetry', disabled: true }, { id: 'product-analytics', disabled: true },
     { id: 'agent-preset-registry', config: { default: 'standard' } },
     { insert: [{ id: 'update-control', name: new URL('../tests/fixtures/workspace-update-host.mjs', import.meta.url).href }] },
   ]))
@@ -60,9 +67,9 @@ try {
     /^(?:path|systemroot|windir|comspec|pathext)$/iu.test(name)))
   const child = spawn(electron, [fileURLToPath(new URL('../tests/fixtures/workspace-updates.mjs', import.meta.url)), '--lang=zh-CN',
     ...(interactive ? ['--interactive'] : [])], {
-    cwd: root, env: { ...environment, DSH_HOME: join(root, 'home'), USERPROFILE: root, HOME: root,
+    cwd: root, env: productLaunchEnvironment(context, { ...environment, USERPROFILE: root, HOME: root,
       TEMP: root, TMP: root, TMPDIR: root, DSH_WORKSPACE_UPDATE_ROOT: root, DSH_WORKSPACE_UPDATE_TOKEN: randomUUID(),
-      DSH_DESKTOP_PRIMARY_RUNTIME_DIR: developmentRuntimeDirectory(), DSH_DESKTOP_OPEN_DEVTOOLS: '0' },
+      DSH_DESKTOP_PRIMARY_RUNTIME_DIR: developmentRuntimeDirectory(), DSH_DESKTOP_OPEN_DEVTOOLS: '0' }),
     // Hiding the GUI process suppresses its first window and can suspend renderer frame callbacks.
     stdio: 'inherit', windowsHide: false,
   })

@@ -3,11 +3,12 @@
 import { appendFileSync, cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import { rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 import { fileURLToPath } from 'node:url'
 import { readPrimaryRuntime, workspaceDependencyPaths } from '../../../packages/skill/tool-workspace-dependencies/src/index.ts'
+import { prepareProductState, productLaunchEnvironment, resolveProductLaunchContext } from '@deepseek-ai/dsh-product-layout/launch-context'
 import { DesktopHostProcess } from '../src/host-process.ts'
 import { createPluginProfile } from '../src/project-manager.ts'
 import type { DesktopRuntimeDescriptor } from '../src/runtime-tree.ts'
@@ -25,20 +26,28 @@ export async function smokeDesktopRuntime(
   root: string, node: string, runtime: DesktopRuntimeDescriptor, environment: NodeJS.ProcessEnv, resourcesRuntime: string,
 ): Promise<void> {
   const home = mkdtempSync(join(tmpdir(), 'dsh-desktop-smoke-'))
-  const profile = join(home, 'profiles', 'desktop')
-  const hostEnvironment = {
-    ...Object.fromEntries(Object.entries(environment).filter(([name]) => !/^(?:npm|pnpm|corepack)_/iu.test(name))),
-    DSH_HOME: home, HOME: home, USERPROFILE: home,
-    XDG_CONFIG_HOME: home, XDG_CACHE_HOME: home, XDG_STATE_HOME: home,
-    APPDATA: home, LOCALAPPDATA: home,
-    npm_config_userconfig: join(home, 'npmrc'), npm_config_globalconfig: join(home, 'npmrc'),
-    npm_config_store_dir: join(home, 'store'), npm_config_enable_global_virtual_store: 'false',
-  }
-  const host = new DesktopHostProcess(node, root, profile, undefined, hostEnvironment,
-    undefined, join(resourcesRuntime, 'primary-runtime'),
-    { pnpm: join(resourcesRuntime, 'primary-runtime', 'dependencies', 'pnpm', 'bin', 'pnpm.mjs'), nodeBin: join(resourcesRuntime, 'bin') })
+  let host: DesktopHostProcess | undefined
   let timer: ReturnType<typeof setTimeout> | undefined
   try {
+    const resourcesRoot = dirname(resourcesRuntime)
+    const context = resolveProductLaunchContext({
+      purpose: 'verification', instanceRoot: home,
+      codeRoot: dirname(resourcesRoot), resourcesRoot,
+    })
+    prepareProductState(context)
+    const profile = join(context.paths.dshHomeDir, 'profiles', 'desktop')
+    const hostEnvironment = productLaunchEnvironment(context, {
+      ...Object.fromEntries(Object.entries(environment).filter(([name]) => !/^(?:npm|pnpm|corepack)_/iu.test(name))),
+      HOME: home, USERPROFILE: home,
+      XDG_CONFIG_HOME: home, XDG_CACHE_HOME: home, XDG_STATE_HOME: home,
+      APPDATA: home, LOCALAPPDATA: home,
+      DSH_DESKTOP_UPDATE_JOURNAL_DIR: context.paths.updateJournalDir,
+      npm_config_userconfig: join(home, 'npmrc'), npm_config_globalconfig: join(home, 'npmrc'),
+      npm_config_store_dir: join(home, 'store'), npm_config_enable_global_virtual_store: 'false',
+    })
+    host = new DesktopHostProcess(node, root, profile, undefined, hostEnvironment,
+      undefined, join(resourcesRuntime, 'primary-runtime'),
+      { pnpm: join(resourcesRuntime, 'primary-runtime', 'dependencies', 'pnpm', 'bin', 'pnpm.mjs'), nodeBin: join(resourcesRuntime, 'bin') })
     writeFileSync(join(home, 'npmrc'), '')
     createPluginProfile(profile)
     const pluginName = 'desktop-runtime-smoke-plugin'
@@ -187,7 +196,7 @@ export function apply(ctx) {
     console.log('desktop runtime: DOCX, XLSX, PPTX to PDF and skill CLI discovery passed')
   } finally {
     clearTimeout(timer)
-    try { await host.stop() } finally {
+    try { await host?.stop() } finally {
       await rm(home, { recursive: true, force: true, maxRetries: 20, retryDelay: 50 })
     }
   }

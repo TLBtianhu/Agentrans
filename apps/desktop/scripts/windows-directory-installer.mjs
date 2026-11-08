@@ -19,6 +19,8 @@ function replaceOnce(source, before, after) {
  */
 export function directoryInstallSection(source) {
   let result = source.replaceAll('\r\n', '\n')
+  result = replaceOnce(result, 'StrCpy $appExe "$INSTDIR\\${APP_EXECUTABLE_FILENAME}"',
+    'StrCpy $appExe "$INSTDIR\\app\\${APP_EXECUTABLE_FILENAME}"')
   result = replaceOnce(result, '!include installer.nsh', `!include installer.nsh
 !macroundef extractUsing7za
 !macro extractUsing7za FILE

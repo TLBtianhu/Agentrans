@@ -1,6 +1,7 @@
 /** Resolve the Desktop auto-update channel and its Tencent COS destination. */
 
 import { valid } from 'semver'
+import { assertUpstreamDesktopReleaseIdentity } from './desktop-release-environment.mjs'
 
 /** Environment variable that selects the Desktop update deployment. */
 export const DESKTOP_AUTO_UPDATE_ENV = 'DSH_DESKTOP_AUTO_UPDATE_ENV'
@@ -152,6 +153,7 @@ function httpsOrigin(value, name) {
  * @throws {Error} When the test deployment lacks a valid HTTPS origin or a 32-character lowercase hexadecimal release ID.
  */
 export function resolveDesktopAutoUpdateConfig(env, platform, arch) {
+  assertUpstreamDesktopReleaseIdentity(env.DSH_DESKTOP_APP_ID)
   const channel = resolveDesktopUpdateChannel(env)
   const environment = resolveDesktopAutoUpdateEnvironment(env)
   const target = resolveDesktopAutoUpdateTarget(platform, arch)

@@ -4,4 +4,5 @@ export function configureInstalledUpdateIdentity(
   run: { id: string; versions: readonly string[] },
   metadata: { version?: string; dshDesktopAppId?: string },
   environment: NodeJS.ProcessEnv,
-): { root: string; userData: string; harnessHome: string; journals: string }
+  resourcesRoot: string,
+): { root: string; userData: string; harnessHome: string; agentsHome: string; journals: string }

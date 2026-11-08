@@ -4,6 +4,7 @@ import { connectDesktopWelcome } from '../src/welcome-backend.ts'
 
 function transport(preference?: string) {
   const keys = new Map<string, string>()
+  const methods: string[] = []
   const namespaces = [
     { ns: 'llm-deepseek', value: { apiKeyEnv: 'CUSTOM_DEEPSEEK_KEY' } },
     { ns: 'llm-pi-ai', value: { profiles: { example: { apiKeyEnv: 'EXAMPLE_API_KEY' } } } },
@@ -16,17 +17,18 @@ function transport(preference?: string) {
       method: string
       payload: { args: { ref: string; value: string; refs: string[] } }
     }
+    methods.push(method)
     let value: unknown
-    if (method === 'account/getState') value = { links: { usageUrl: 'http://localhost/usage', topUpUrl: 'http://localhost/top_up' }, status: 'signed-out', attempt: null }
-    else if (method === 'settings/describe') value = { namespaces }
+    if (method === 'settings/describe') value = { namespaces }
     else if (method === 'llm/listConfigurableProviders') value = [{ settingsNs: 'llm-pi-ai', settingsPath: ['profiles', 'example'] }]
     else if (method === 'productAnalytics/enabled') value = true
     else if (method === 'productAnalytics/report') value = undefined
     else if (method === 'credentials/set') keys.set(payload.args.ref, payload.args.value)
-    else value = Object.fromEntries(payload.args.refs.map(ref => [ref, { configured: keys.has(ref), writable: true }]))
+    else if (method === 'credentials/describe') value = Object.fromEntries(payload.args.refs.map(ref => [ref, { configured: keys.has(ref), writable: true }]))
+    else throw new Error(`Unexpected native welcome RPC: ${method}`)
     return Response.json({ type: 'server-response', rpcId, result: { ok: true, value } })
   })
-  return { send, keys, namespaces }
+  return { send, keys, namespaces, methods }
 }
 
 const url = 'http://127.0.0.1:19387/?token=fixture'
@@ -39,7 +41,9 @@ describe('desktop welcome Web operations', () => {
     expect(await backend.analyticsEnabled()).toBe(true)
     expect(await backend.save('sk-example')).toEqual({ ok: true })
     expect(host.keys.get('CUSTOM_DEEPSEEK_KEY')).toBe('sk-example')
-    expect(await backend.read()).toEqual({ loggedIn: false, hasApiKey: true, writable: true, localePreference: null })
+    expect(await backend.read()).toEqual({ hasApiKey: true, writable: true, localePreference: null })
+    expect(host.methods.some(method => method.startsWith('account/'))).toBe(false)
+    expect(host.methods).not.toContain('credentials/get')
     for (const [input, init] of host.send.mock.calls.slice(1)) {
       expect(input).toMatch(/^http:\/\/127\.0\.0\.1:19387\/api\//u)
       expect(init).toMatchObject({ credentials: 'include', redirect: 'error' })
@@ -53,6 +57,9 @@ describe('desktop welcome Web operations', () => {
     expect(await backend.read()).toMatchObject({ localePreference: 'zh', hasApiKey: true })
     host.keys.clear()
     expect(await backend.read()).toMatchObject({ hasApiKey: false })
+    expect(host.methods.filter(method => method === 'credentials/describe')).toHaveLength(2)
+    expect(host.methods.some(method => method.startsWith('account/'))).toBe(false)
+    expect(host.methods).not.toContain('credentials/get')
     expect(host.send.mock.calls.every(([, init]) => !(init?.body as string | undefined)?.includes('credentials/set'))).toBe(true)
   })
 
@@ -74,6 +81,7 @@ describe('desktop welcome Web operations', () => {
     expect(await backend.read()).toMatchObject({ hasApiKey: true, writable: false })
     expect(await backend.save('official-key')).toEqual({ ok: false })
     expect(host.keys.has('undefined')).toBe(false)
+    expect(host.methods.some(method => method.startsWith('account/'))).toBe(false)
   })
 
   it.each(['', 'bad key', 'key\n'])('rejects malformed keys without contacting a provider: %s', async (value) => {

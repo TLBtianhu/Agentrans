@@ -41,6 +41,7 @@ it('stages before stopping the application and promotes before registering the i
   expect(result).toContain('!insertmacro handleUninstallResult HKEY_CURRENT_USER')
   expect(result).not.toContain('!insertmacro installApplicationFiles')
   expect(result).not.toContain('File /oname=uninstallerIcon.ico')
+  expect(result).toContain('StrCpy $appExe "$INSTDIR\\app\\${APP_EXECUTABLE_FILENAME}"')
 })
 
 it.each(['!include installer.nsh', '!insertmacro setLinkVars', '!insertmacro installApplicationFiles'])(

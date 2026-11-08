@@ -43,6 +43,9 @@
     },
     {
       "path": "../../packages/client/ui-file-actions"
+    },
+    {
+      "path": "../../packages/boot/product-layout"
     }
   ],
   "exclude": [

@@ -1,6 +1,6 @@
 /** Scoped uninstall planning and ordered execution with explicit external-operation hooks. */
-import { rm } from 'node:fs/promises'
-import { isAbsolute, join, relative, resolve, sep } from 'node:path'
+import { lstatSync, readdirSync, rmdirSync, unlinkSync } from 'node:fs'
+import { dirname, isAbsolute, join, parse, relative, resolve, sep } from 'node:path'
 import type { ProductLayout } from './layout.ts'
 
 /** Asset and data categories a user may choose to remove. */
@@ -71,9 +71,33 @@ export class UninstallExecutionError extends Error {
   /** Stable machine-readable code for an uninstall that stopped partway through. */
   readonly code = 'UNINSTALL_PARTIAL'
 
-  constructor(readonly completed: readonly string[], options?: ErrorOptions) {
+  /**
+   * @param completed - Operations that finished before the failure.
+   * @param failedOperation - Removal target or Windows registration operation that did not complete.
+   * @param options - Original failure, including filesystem or registration details.
+   */
+  constructor(readonly completed: readonly string[], readonly failedOperation: string, options?: ErrorOptions) {
     super('Uninstall stopped before all selected operations completed', options)
     this.name = 'UninstallExecutionError'
+  }
+}
+
+/** A filesystem condition that prevents establishing a selected path's ownership. */
+export type UninstallFilesystemFailure = 'LINK' | 'NOT_DIRECTORY' | 'UNSUPPORTED_ENTRY' | 'INSPECTION_FAILED'
+
+/** Refuses deletion through an unsafe existing filesystem component. */
+export class UninstallFilesystemError extends Error {
+  /** Stable identity for an unsafe or unreadable uninstall path. */
+  readonly code = 'UNINSTALL_PATH_UNSAFE'
+
+  /**
+   * @param path - Existing component whose ownership or entry kind could not be established.
+   * @param reason - Machine-readable refusal classification.
+   * @param options - Original filesystem inspection failure, when present.
+   */
+  constructor(readonly path: string, readonly reason: UninstallFilesystemFailure, options?: ErrorOptions) {
+    super(`Cannot establish uninstall path ownership: ${path} (${reason})`, options)
+    this.name = 'UninstallFilesystemError'
   }
 }
 
@@ -101,6 +125,40 @@ export function assertOwnedPaths(root: string, paths: readonly string[]): void {
     const offset = relative(absoluteRoot, resolve(path))
     if (offset === '' || isAbsolute(offset) || offset.split(sep)[0] === '..') throw new UninstallPathError(path)
   }
+}
+
+function inspect(path: string): ReturnType<typeof lstatSync> | undefined {
+  try { return lstatSync(path, { throwIfNoEntry: false }) }
+  catch (error) { throw new UninstallFilesystemError(path, 'INSPECTION_FAILED', { cause: error }) }
+}
+
+function assertFilesystemOwnership(path: string): void {
+  const absolute = resolve(path)
+  const ancestors: string[] = []
+  for (let current = dirname(absolute); ; current = dirname(current)) {
+    ancestors.push(current)
+    if (current === parse(current).root) break
+  }
+  for (const current of [...ancestors.reverse(), absolute]) {
+    const entry = inspect(current)
+    if (entry === undefined) continue
+    if (entry.isSymbolicLink()) throw new UninstallFilesystemError(current, 'LINK')
+    if (current !== absolute && !entry.isDirectory()) throw new UninstallFilesystemError(current, 'NOT_DIRECTORY')
+    if (current === absolute && !entry.isDirectory() && !entry.isFile()) {
+      throw new UninstallFilesystemError(current, 'UNSUPPORTED_ENTRY')
+    }
+  }
+}
+
+function removeEntry(path: string): void {
+  const entry = inspect(path)
+  if (entry === undefined) return
+  if (entry.isSymbolicLink() || !entry.isDirectory()) {
+    unlinkSync(path)
+    return
+  }
+  for (const name of readdirSync(path)) removeEntry(join(path, name))
+  rmdirSync(path)
 }
 
 /**
@@ -164,29 +222,41 @@ export function planUninstall(
 
 /**
  * Execute an uninstall in selected paths → registration order.
+ * Selected roots and ancestors must be ordinary entries; nested links are unlinked without visiting their targets.
+ * Checks do not provide handle-relative isolation against concurrent filesystem replacement by other processes.
  * @param plan - Preview previously returned by planUninstall.
  * @param hooks - Windows registration callback required by the installed app scope.
  * @returns Completed operations in execution order.
  * @throws {UninstallHookError} Before deletion when a required callback is missing.
+ * @throws {UninstallPathError} Before deletion when any selected path escapes the installation root.
+ * @throws {UninstallFilesystemError} Before deletion when a selected path or ancestor is linked or unreadable.
  * @throws {UninstallExecutionError} With completed operations when a later operation fails.
  */
 export async function executeUninstallPlan(plan: UninstallPlan, hooks: UninstallHooks = {}): Promise<UninstallResult> {
-  if (plan.scope.app && plan.layout.channel === 'installed' && hooks.removeRegistration === undefined) {
+  const root = resolve(plan.layout.root)
+  const paths = [...plan.remove].map(path => resolve(path))
+  const removeRegistration = plan.scope.app && plan.layout.channel === 'installed' ? hooks.removeRegistration : undefined
+  if (plan.scope.app && plan.layout.channel === 'installed' && removeRegistration === undefined) {
     throw new UninstallHookError('Windows registration removal requires the installer callback')
   }
-
+  assertOwnedPaths(root, paths)
+  for (const path of paths) assertFilesystemOwnership(path)
   const completed: string[] = []
+  let failedOperation = paths[0] ?? 'windows:remove-registration'
   try {
-    for (const path of plan.remove) {
-      await rm(path, { recursive: true, force: true })
+    for (const path of paths) {
+      failedOperation = path
+      assertFilesystemOwnership(path)
+      removeEntry(path)
       completed.push(path)
     }
-    if (plan.scope.app && plan.layout.channel === 'installed') {
-      await hooks.removeRegistration?.()
+    if (removeRegistration !== undefined) {
+      failedOperation = 'windows:remove-registration'
+      await removeRegistration()
       completed.push('windows:remove-registration')
     }
   } catch (error) {
-    throw new UninstallExecutionError(completed, { cause: error })
+    throw new UninstallExecutionError(completed, failedOperation, { cause: error })
   }
   return { completed }
 }

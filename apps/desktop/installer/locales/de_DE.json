@@ -31,7 +31,10 @@
     "INSTALLER_EXTRACT_COLLAPSE": "Details ausblenden",
     "INSTALLER_EXTRACT_SAVED": "Der vollständige Bericht wurde unter %s gespeichert",
     "INSTALLER_EXTRACT_UNSAVED": "Der vollständige Bericht konnte nicht gespeichert werden. Verwenden Sie „Fehlerdetails kopieren“, um sie beizubehalten.",
-    "INSTALLER_EXTRACT_COPIED": "Fehlerdetails wurden in die Zwischenablage kopiert."
+    "INSTALLER_EXTRACT_COPIED": "Fehlerdetails wurden in die Zwischenablage kopiert.",
+    "INSTALLER_UNINSTALL_FAILED": "Die Deinstallation wurde nicht abgeschlossen.",
+    "INSTALLER_UNINSTALL_HINT": "Einige ausgewählte Dateien wurden möglicherweise bereits entfernt. Schließen Sie Programme, die diesen Ordner verwenden, und führen Sie die Deinstallation erneut aus. Wurde ein verknüpfter Ordner abgelehnt, stellen Sie zuerst den ursprünglichen Ordner wieder her. Der Deinstallationseintrag bleibt verfügbar.",
+    "INSTALLER_UNINSTALL_OWNERSHIP_HINT": "Deinstallationseinträge oder Verknüpfungen gehören zu einem anderen Speicherort oder konnten nicht überprüft werden. Die weitere Bereinigung wurde gestoppt. Verwenden Sie die Deinstallation der aktuell registrierten Installation und bewahren Sie bei Hilfebedarf die Fehlerdetails auf."
   },
   "uninstaller": {
     "welcome": "Willkommen",

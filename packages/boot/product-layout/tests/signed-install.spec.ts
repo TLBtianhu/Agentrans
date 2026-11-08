@@ -11,6 +11,7 @@ import {
   SignedReleaseInstallError,
   signReleaseManifest,
   WindowsRegistrationError,
+  WindowsRegistrationOwnershipError,
 } from '../src/index.ts'
 
 const execFileAsync = promisify(execFile)
@@ -52,6 +53,7 @@ describe('signed release installation', () => {
         uninstallKey: 'HKCU\\Software\\AgentransTest',
         shortcutPath: join(layout.root, 'Agentrans Test.lnk'),
       },
+      registrationReader: async () => ({ registry: 'missing', shortcut: 'missing' }),
       runner: async (file, args) => {
         if (file === 'tar.exe') await execFileAsync(file, [...args])
       },
@@ -89,6 +91,7 @@ describe('signed release installation', () => {
           uninstallKey: 'HKCU\\Software\\AgentransTest',
           shortcutPath: join(layout.root, 'Agentrans Test.lnk'),
         },
+        registrationReader: async () => ({ registry: 'missing', shortcut: 'missing' }),
         runner: async (file, args) => {
           if (file === 'reg.exe') throw new Error('registry failed')
           await execFileAsync(file, [...args])
@@ -102,6 +105,38 @@ describe('signed release installation', () => {
       expect(failure.install.manifest.appVersion).toBe('0.1.0')
       expect(failure.registrationError).toBeInstanceOf(WindowsRegistrationError)
     }
+    expect(await readFile(join(layout.appDir, 'index.js'), 'utf8')).toContain('0.1.0')
+  })
+
+  it('refuses foreign registration before preparing or replacing the installed app', async () => {
+    const layout = ProductLayout.fromRoot(await tempRoot(), 'installed')
+    const releasePath = await archive(layout.root, '0.1.0')
+    const manifest = await signReleaseManifest(releasePath, privateKey, { version: '0.1.0' })
+    const refusal = new WindowsRegistrationOwnershipError('registry', 'HKCU\\Software\\foreign', 'FOREIGN')
+    await expect(installSignedRelease({ layout, releasePath, manifest, publicKey,
+      registration: { version: '0.1.0', publisher: 'Agentrans' },
+      registrationReader: async () => { throw refusal },
+    })).rejects.toBe(refusal)
+    await expect(readFile(join(layout.appDir, 'index.js'), 'utf8')).rejects.toThrow()
+  })
+
+  it('reports the installed app when registration ownership changes after unpacking', async () => {
+    const layout = ProductLayout.fromRoot(await tempRoot(), 'installed')
+    const releasePath = await archive(layout.root, '0.1.0')
+    const manifest = await signReleaseManifest(releasePath, privateKey, { version: '0.1.0' })
+    const refusal = new WindowsRegistrationOwnershipError('registry', 'HKCU\\Software\\foreign', 'FOREIGN')
+    let inspections = 0
+    const attempt = installSignedRelease({ layout, releasePath, manifest, publicKey,
+      registration: { version: '0.1.0', publisher: 'Agentrans' },
+      registrationReader: async () => {
+        if (inspections++ > 0) throw refusal
+        return { registry: 'missing', shortcut: 'missing' }
+      },
+      runner: async (file, args) => { if (file === 'tar.exe') await execFileAsync(file, [...args]) },
+    })
+    await expect(attempt).rejects.toBeInstanceOf(SignedReleaseInstallError)
+    await expect(attempt).rejects.toMatchObject({ registrationError: refusal,
+      install: { manifest: { appVersion: '0.1.0' } } })
     expect(await readFile(join(layout.appDir, 'index.js'), 'utf8')).toContain('0.1.0')
   })
 })

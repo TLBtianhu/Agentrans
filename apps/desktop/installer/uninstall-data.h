@@ -96,7 +96,7 @@ inline DWORD RemoveTree(const std::wstring& path) {
 // Never select a shell folder, its ancestor, Windows/Program Files descendants,
 // a path overlapping the installation, or a path overlapping the protected root
 // (the configured Harness home). Linked descendants are unlinked only.
-inline DWORD Remove(LPCWSTR input, LPCWSTR installation, LPCWSTR protectedRoot) {
+inline DWORD Remove(LPCWSTR input, LPCWSTR installation, LPCWSTR protectedRoot, bool file = false) {
     std::wstring path, install;
     if (!Normalize(input, path)) return ERROR_INVALID_NAME;
     if (*installation && (!Normalize(installation, install) || Contains(path, install) || Contains(install, path))) return ERROR_ACCESS_DENIED;
@@ -138,6 +138,16 @@ inline DWORD Remove(LPCWSTR input, LPCWSTR installation, LPCWSTR protectedRoot) 
         DWORD error = Pin(path.substr(0, end), parents);
         if (error == ERROR_FILE_NOT_FOUND || error == ERROR_PATH_NOT_FOUND) return ERROR_SUCCESS;
         if (error) return error;
+    }
+    if (file) {
+        const std::wstring extended = L"\\\\?\\" + path;
+        const DWORD attributes = GetFileAttributesW(extended.c_str());
+        if (attributes == INVALID_FILE_ATTRIBUTES) {
+            const DWORD error = GetLastError();
+            return error == ERROR_FILE_NOT_FOUND || error == ERROR_PATH_NOT_FOUND ? ERROR_SUCCESS : error;
+        }
+        if (attributes & (FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_REPARSE_POINT)) return ERROR_ACCESS_DENIED;
+        return DeleteFileW(extended.c_str()) ? ERROR_SUCCESS : GetLastError();
     }
     // A selected root must be a real directory, even though links inside it may be removed.
     {

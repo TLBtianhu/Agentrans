@@ -1,10 +1,16 @@
 /** The installed CLI uses the shared pnpm distribution with Electron's package-operation environment. */
 
 import { delimiter, join } from 'node:path'
-import { afterEach, expect, it, vi } from 'vitest'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { afterEach, expect, it, onTestFinished, vi } from 'vitest'
+import {
+  PRODUCT_LAUNCH_CONTEXT_ENV, parseProductLaunchContext, resolveProductLaunchContext, serializeProductLaunchContext,
+} from '@deepseek-ai/dsh-product-layout/launch-context'
 import { runCli } from '@deepseek-ai/dsh/lib/bin.js'
 import { runDesktopCli } from '../../desktop-host/src/cli.ts'
 import { installOfficeEngineResolution } from '../../desktop-host/src/office-engine.ts'
+import { configureDesktopProduct } from '../src/product-context.ts'
 
 vi.mock('@deepseek-ai/dsh/lib/bin.js', () => ({ runCli: vi.fn() }))
 vi.mock('../../desktop-host/src/office-engine.ts', () => ({ installOfficeEngineResolution: vi.fn() }))
@@ -14,12 +20,26 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-it.each(['system-bin', undefined])('dispatches with bundled pnpm when PATH is %s', async (path) => {
+it.skipIf(process.platform !== 'win32').each(['system-bin', undefined])('dispatches with bundled pnpm when PATH is %s', async (path) => {
   vi.stubEnv('PATH', path)
-  const runtime = join('Application 中文 with spaces', 'resources', 'app.asar', 'dsh')
-  const support = join('Application 中文 with spaces', 'resources', 'runtime')
+  vi.stubEnv('DSH_HOME', 'must-not-use-upstream-home')
+  vi.stubEnv('DSH_AGENTS_HOME', 'must-not-use-upstream-agents')
+  vi.stubEnv(PRODUCT_LAUNCH_CONTEXT_ENV, undefined)
+  const root = realpathSync(mkdtempSync(join(tmpdir(), 'agentrans-cli-instance-')))
+  onTestFinished(() => rmSync(root, { recursive: true, force: true }))
+  const instance = join(root, 'Application 中文 with spaces')
+  const resources = join(instance, 'app', 'resources')
+  mkdirSync(resources, { recursive: true })
+  const runtime = join(resources, 'app.asar', 'dsh')
+  const support = join(resources, 'runtime')
 
   await runDesktopCli(runtime, support)
+
+  expect(process.env.DSH_HOME).toBe(join(instance, 'data', 'dsh', 'home'))
+  expect(process.env.DSH_AGENTS_HOME).toBe(join(instance, 'data', 'dsh', 'agents'))
+  expect(parseProductLaunchContext(process.env[PRODUCT_LAUNCH_CONTEXT_ENV]!)).toMatchObject({
+    purpose: 'user', instanceRoot: instance, codeRoot: join(instance, 'app'), resourcesRoot: resources,
+  })
 
   expect(installOfficeEngineResolution).toHaveBeenCalledExactlyOnceWith(runtime)
   expect(runCli).toHaveBeenCalledExactlyOnceWith({
@@ -34,4 +54,73 @@ it.each(['system-bin', undefined])('dispatches with bundled pnpm when PATH is %s
       },
     },
   })
+})
+
+it('shares one verification instance with the packaged GUI without writing payload or foreign homes', async () => {
+  const root = realpathSync(mkdtempSync(join(tmpdir(), 'agentrans-cli-verification-')))
+  onTestFinished(() => rmSync(root, { recursive: true, force: true }))
+  const instance = join(root, 'Application 中文 with spaces')
+  const resources = join(instance, 'app', 'resources')
+  const appPath = join(resources, 'app.asar')
+  mkdirSync(appPath, { recursive: true })
+  const payload = join(appPath, 'payload.txt')
+  writeFileSync(payload, 'immutable payload')
+  const context = resolveProductLaunchContext({
+    purpose: 'verification', instanceRoot: join(root, 'verification-state'),
+    codeRoot: join(instance, 'app'), resourcesRoot: resources,
+  })
+  const inherited = {
+    DSH_HOME: join(root, 'foreign-home'), DSH_AGENTS_HOME: join(root, 'foreign-agents'),
+    [PRODUCT_LAUNCH_CONTEXT_ENV]: serializeProductLaunchContext(context),
+  }
+  for (const [key, value] of Object.entries(inherited)) vi.stubEnv(key, value)
+  const guiEnvironment = { ...inherited }
+  const app = { isPackaged: true, getAppPath: () => appPath, setPath: vi.fn() }
+  const guiContext = configureDesktopProduct(app, resources, root, guiEnvironment)
+  const runtime = join(appPath, 'dsh')
+  await runDesktopCli(runtime, join(resources, 'runtime'))
+  expect(parseProductLaunchContext(process.env[PRODUCT_LAUNCH_CONTEXT_ENV]!)).toEqual(guiContext)
+  expect(process.env.DSH_HOME).toBe(guiEnvironment.DSH_HOME)
+  expect(process.env.DSH_AGENTS_HOME).toBe(guiEnvironment.DSH_AGENTS_HOME)
+  expect(app.setPath.mock.calls).toEqual([
+    ['userData', context.paths.electronUserDataDir], ['sessionData', context.paths.electronUserDataDir],
+    ['logs', context.paths.logsDir], ['crashDumps', context.paths.crashDumpsDir],
+  ])
+  expect(readFileSync(payload, 'utf8')).toBe('immutable payload')
+  expect(readdirSync(instance)).toEqual(['app'])
+  expect(readdirSync(resources)).toEqual(['app.asar'])
+  expect(readdirSync(appPath)).toEqual(['payload.txt'])
+  expect(existsSync(inherited.DSH_HOME)).toBe(false)
+  expect(existsSync(inherited.DSH_AGENTS_HOME)).toBe(false)
+  expect(installOfficeEngineResolution).toHaveBeenCalledExactlyOnceWith(runtime)
+  expect(runCli).toHaveBeenCalledOnce()
+})
+
+it('rejects a foreign verification payload before changing paths or creating state', async () => {
+  const root = realpathSync(mkdtempSync(join(tmpdir(), 'agentrans-cli-foreign-payload-')))
+  onTestFinished(() => rmSync(root, { recursive: true, force: true }))
+  const instance = join(root, 'Application')
+  const resources = join(instance, 'app', 'resources')
+  const foreignCode = join(root, 'foreign-payload')
+  mkdirSync(resources, { recursive: true })
+  mkdirSync(foreignCode)
+  const context = resolveProductLaunchContext({
+    purpose: 'verification', instanceRoot: join(root, 'verification-state'),
+    codeRoot: foreignCode, resourcesRoot: foreignCode,
+  })
+  const foreignHome = join(root, 'foreign-home')
+  vi.stubEnv('DSH_HOME', foreignHome)
+  vi.stubEnv('DSH_AGENTS_HOME', join(root, 'foreign-agents'))
+  vi.stubEnv(PRODUCT_LAUNCH_CONTEXT_ENV, serializeProductLaunchContext(context))
+  await expect(runDesktopCli(join(resources, 'app.asar', 'dsh'), join(resources, 'runtime')))
+    .rejects.toMatchObject({ code: 'INVALID_LAUNCH_REQUEST' })
+  expect(process.env.DSH_HOME).toBe(foreignHome)
+  expect(parseProductLaunchContext(process.env[PRODUCT_LAUNCH_CONTEXT_ENV]!)).toEqual(context)
+  expect(existsSync(context.instanceRoot)).toBe(false)
+  expect(existsSync(foreignHome)).toBe(false)
+  expect(readdirSync(instance)).toEqual(['app'])
+  expect(readdirSync(resources)).toEqual([])
+  expect(readdirSync(foreignCode)).toEqual([])
+  expect(installOfficeEngineResolution).not.toHaveBeenCalled()
+  expect(runCli).not.toHaveBeenCalled()
 })

@@ -9,6 +9,7 @@ import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 import {
   resolveDesktopAppId,
+  assertUpstreamDesktopReleaseIdentity,
   resolveMacOSNotarizationEnvironment,
   resolveMacOSSigningEnvironment,
 } from './desktop-release-environment.mjs'
@@ -51,7 +52,24 @@ export function createElectronBuilderConfig(
   preparedRuntime = undefined,
   preparedRuntimeVersion = undefined,
 ) {
+  return electronBuilderConfig(env, hostPlatform, hostArch, preparedRuntime, preparedRuntimeVersion, 'required')
+}
+
+/**
+ * Create an unsigned Windows artifact without embedding a remote mandatory-update policy.
+ * The caller must explicitly select Windows and unsigned mode; ordinary releases retain required policy validation.
+ * @param {NodeJS.ProcessEnv} env - Packaging environment with DSH_DESKTOP_UNSIGNED=1.
+ * @param {NodeJS.Platform} hostPlatform - Build-host platform used when no target override exists.
+ * @param {string} hostArch - Build-host architecture used when no target override exists.
+ * @returns {ReturnType<typeof createElectronBuilderConfig>} Windows configuration with no policy or update feed.
+ */
+export function createUnsignedWindowsConfigWithoutPolicy(env = process.env, hostPlatform = process.platform, hostArch = process.arch) {
+  return electronBuilderConfig(env, hostPlatform, hostArch, undefined, undefined, 'none')
+}
+
+function electronBuilderConfig(env, hostPlatform, hostArch, preparedRuntime, preparedRuntimeVersion, policyMode) {
   const appId = resolveDesktopAppId(env)
+  if (policyMode === 'required') assertUpstreamDesktopReleaseIdentity(appId)
   const targetPlatform = env.DSH_DESKTOP_TARGET_PLATFORM
   const resolvedPlatform = targetPlatform ?? hostPlatform
   const resolvedArch = env.DSH_DESKTOP_TARGET_ARCH ?? hostArch
@@ -66,7 +84,10 @@ export function createElectronBuilderConfig(
   if (skipNotarization && (unsigned || resolvedPlatform !== 'darwin')) throw new Error('Skipping notarization requires a signed macOS build')
   const packagesMacOS = targetPlatform === 'darwin' || (targetPlatform === undefined && hostPlatform === 'darwin')
   const packagesWindows = resolvedPlatform === 'win32'
-  const policy = packagesMacOS && unsigned ? undefined : resolveDesktopPolicyEnvironment(env)
+  if (policyMode === 'none' && (!packagesWindows || !unsigned)) {
+    throw new Error('desktop package: disabling mandatory-update policy requires explicitly unsigned Windows packaging')
+  }
+  const policy = policyMode === 'none' || (packagesMacOS && unsigned) ? undefined : resolveDesktopPolicyEnvironment(env)
   if (resolvedPlatform === 'win32') installWindowsDirectoryInstaller()
   const macOSSigning = packagesMacOS && !unsigned ? resolveMacOSSigningEnvironment(env) : undefined
   if (packagesMacOS && !unsigned && !skipNotarization) resolveMacOSNotarizationEnvironment(env)
@@ -111,7 +132,7 @@ export function createElectronBuilderConfig(
       dshDesktopAppId: appId,
       dshDesktopUpdateChannel: update?.channel ?? 'nightly',
       ...(policy === undefined ? {} : { dshMandatoryUpdatePolicy: policy }),
-      ...buildVersion === productVersion ? {} : { version: buildVersion },
+      version: buildVersion,
       ...packaged === undefined ? {} : { dshBuildCommit: packaged.commit, dshBuildDirty: packaged.dirty },
     },
     productName: 'Agentrans',

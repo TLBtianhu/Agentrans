@@ -31,6 +31,22 @@ describe('desktop locale dictionaries', () => {
     expect(resolveDesktopStartupLocale(null, [id]).id).toBe(id === 'zh' ? 'zh-CN' : id)
   })
 
+  it.each(SHIPPED_LOCALE_IDS)('provides the API-key welcome contract in %s', (id) => {
+    const { messages } = resolveDesktopLocale(id)
+    expect(Object.keys(messages)).toEqual(Object.keys(en))
+    expect(messages.welcomeTitle).toBe('Agentrans')
+    expect(messages.welcomeBrand).toBe('Agentrans')
+    expect(messages.welcomeTaglineBrand).toBe('Agentrans')
+    expect(messages.welcomeKeyDescription).toContain('DeepSeek')
+    expect(messages.welcomeKeyGet).toContain('DeepSeek')
+    expect(messages.welcomeKeyLinkFailed).toContain('DeepSeek')
+    expect(Object.keys(messages).filter(key => key.startsWith('welcomeAuth'))).toEqual([])
+    for (const key of ['welcomeSignIn', 'welcomeApiKey', 'welcomeKeyBack', 'welcomeSessionExpired']) {
+      expect(messages).not.toHaveProperty(key)
+    }
+    expect(messages.policyLogin.length).toBeGreaterThan(0)
+  })
+
   it('formats named values without consuming unknown placeholders', () => {
     expect(formatDesktopMessage('{name}@{version} {missing}', { name: 'plugin', version: '1.2.3' }))
       .toBe('plugin@1.2.3 {missing}')

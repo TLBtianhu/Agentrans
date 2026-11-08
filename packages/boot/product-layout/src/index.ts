@@ -37,9 +37,11 @@ export {
   planUninstall,
   UninstallConfirmationError,
   UninstallExecutionError,
+  UninstallFilesystemError,
   UninstallHookError,
   UninstallPathError,
   type UninstallHooks,
+  type UninstallFilesystemFailure,
   type UninstallPlan,
   type UninstallResult,
   type UninstallScope,
@@ -58,12 +60,16 @@ export {
   type ReleaseVerificationErrorCode,
 } from './release-manifest.ts'
 export {
+  assertWindowsRegistrationOwnership,
   planWindowsRegistration,
   registerWindowsRegistration,
   removeWindowsRegistration,
   verifyWindowsRegistration,
   WindowsRegistrationError,
+  WindowsRegistrationOwnershipError,
   type WindowsCommandRunner,
+  type WindowsRegistrationReader,
+  type WindowsRegistrationState,
   type WindowsRegistrationOptions,
   type WindowsRegistrationPlan,
 } from './windows-registration.ts'

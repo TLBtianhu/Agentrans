@@ -31,7 +31,10 @@
     "INSTALLER_EXTRACT_COLLAPSE": "Hide details",
     "INSTALLER_EXTRACT_SAVED": "The full report was saved to %s",
     "INSTALLER_EXTRACT_UNSAVED": "The full report could not be saved. Use Copy error details to keep it.",
-    "INSTALLER_EXTRACT_COPIED": "Error details were copied to the clipboard."
+    "INSTALLER_EXTRACT_COPIED": "Error details were copied to the clipboard.",
+    "INSTALLER_UNINSTALL_FAILED": "Uninstallation did not finish.",
+    "INSTALLER_UNINSTALL_HINT": "Some selected files may already have been removed. Close programs using this folder and run the uninstaller again. If a linked folder was refused, restore the original folder first. The uninstall entry remains available.",
+    "INSTALLER_UNINSTALL_OWNERSHIP_HINT": "Uninstall entries or shortcuts belong to another location, or could not be verified. Further cleanup was stopped. Use the uninstaller from the currently registered installation, and keep the error details if you need help."
   },
   "uninstaller": {
     "welcome": "Welcome",

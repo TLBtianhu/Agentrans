@@ -231,14 +231,14 @@ Function InstallerFinishLeave
         ClearErrors
         ${If} ${UAC_IsAdmin}
             ; An explicitly elevated installer must still launch through the user's shell.
-            ${StdUtils.ExecShellAsUser} $1 "$INSTDIR\${APP_EXECUTABLE_FILENAME}" "open" "$0"
+            ${StdUtils.ExecShellAsUser} $1 "$appExe" "open" "$0"
             ${If} $1 != "ok"
             ${AndIf} $1 != "fallback"
                 SetErrors
             ${EndIf}
         ${Else}
             ; Per-user installation can create the process without Explorer/shortcut dispatch.
-            Exec '"$INSTDIR\${APP_EXECUTABLE_FILENAME}" $0'
+            Exec '"$appExe" $0'
         ${EndIf}
         ${If} ${Errors}
             ShowWindow $HWNDPARENT 5

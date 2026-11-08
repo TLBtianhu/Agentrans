@@ -3,14 +3,14 @@ import { execFileSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
+import { PRODUCT_LAUNCH_CONTEXT_ENV, serializeProductLaunchContext, type ProductLaunchContext } from '@deepseek-ai/dsh-product-layout/launch-context'
 
 /** Workspace and runtime settings captured for Launch Services cold starts. */
 export interface DevelopmentAppOptions {
   readonly electron: string
   readonly appRoot: string
   readonly directory: string
-  readonly home: string
-  readonly userData: string
+  readonly context: ProductLaunchContext
   readonly mainPort: number
   readonly rendererPort: number
   readonly hostPort: number
@@ -18,6 +18,21 @@ export interface DevelopmentAppOptions {
 }
 
 function quote(value: string): string { return `'${value.replaceAll("'", "'\\''")}'` }
+
+/**
+ * Describe a development bundle without registering a product URL scheme.
+ * @param appRoot - Source application directory used to distinguish development bundles.
+ * @returns Bundle metadata consumed by plutil; an empty URL list clears inherited associations.
+ */
+export function developmentBundleMetadata(appRoot: string) {
+  return {
+    CFBundleIdentifier: `com.deepseek.harness.dev.${createHash('sha256').update(appRoot).digest('hex').slice(0, 12)}`,
+    CFBundleName: 'Harness Dev',
+    CFBundleDisplayName: 'Harness Dev',
+    CFBundleExecutable: 'HarnessDev',
+    CFBundleURLTypes: [],
+  }
+}
 
 /**
  * Prepare and register a disposable .app without changing the installed Electron package.
@@ -35,13 +50,7 @@ export function prepareDevelopmentApp(options: DevelopmentAppOptions): string {
     rmSync(bundle, { recursive: true, force: true })
     execFileSync('/usr/bin/ditto', [source, bundle])
     const plist = join(bundle, 'Contents', 'Info.plist')
-    const values = {
-      CFBundleIdentifier: `com.deepseek.harness.dev.${createHash('sha256').update(options.appRoot).digest('hex').slice(0, 12)}`,
-      CFBundleName: 'Harness Dev',
-      CFBundleDisplayName: 'Harness Dev',
-      CFBundleExecutable: 'HarnessDev',
-      CFBundleURLTypes: [{ CFBundleURLName: 'DeepSeek Harness', CFBundleURLSchemes: ['dsh'], CFBundleTypeRole: 'Viewer' }],
-    }
+    const values = developmentBundleMetadata(options.appRoot)
     for (const [key, value] of Object.entries(values)) {
       execFileSync('/usr/bin/plutil', ['-replace', key, '-json', JSON.stringify(value), plist])
     }
@@ -61,7 +70,10 @@ export function prepareDevelopmentApp(options: DevelopmentAppOptions): string {
  */
 export function developmentLauncher(options: DevelopmentAppOptions, bundle: string): string {
   const environment = {
-    DSH_HOME: options.home,
+    AGENTRANS_DEV_ROOT: options.context.instanceRoot,
+    [PRODUCT_LAUNCH_CONTEXT_ENV]: serializeProductLaunchContext(options.context),
+    DSH_HOME: options.context.paths.dshHomeDir,
+    DSH_AGENTS_HOME: options.context.paths.dshAgentsHomeDir,
     DSH_DESKTOP_DEV_APP: '1',
     DSH_DESKTOP_HOST_INSPECT_PORT: String(options.hostPort),
     DSH_DESKTOP_OPEN_DEVTOOLS: options.openDevtools,
@@ -71,7 +83,7 @@ export function developmentLauncher(options: DevelopmentAppOptions, bundle: stri
     join(bundle, 'Contents', 'MacOS', 'Electron'),
     `--inspect=127.0.0.1:${String(options.mainPort)}`,
     `--remote-debugging-port=${String(options.rendererPort)}`,
-    `--user-data-dir=${options.userData}`,
+    `--user-data-dir=${options.context.paths.electronUserDataDir}`,
     options.appRoot,
   ]
   return [

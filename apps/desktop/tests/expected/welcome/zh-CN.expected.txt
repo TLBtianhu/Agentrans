@@ -1,6 +1,8 @@
 Agentrans
 Agentrans
-欢迎使用 Agentrans
-组装无限可能，共探智能上限
-登录
-添加 API Key
+配置 API Key
+输入 DeepSeek API Key 即可开始使用，也可以稍后在设置中配置其他模型。
+输入 API 密钥 [password]
+前往 DeepSeek 获取 API Key
+保存并继续 [disabled]
+稍后配置

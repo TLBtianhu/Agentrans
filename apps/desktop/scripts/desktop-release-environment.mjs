@@ -3,6 +3,20 @@
 /** Environment variable that supplies the Electron application identifier. */
 export const DESKTOP_APP_ID_ENV = 'DSH_DESKTOP_APP_ID'
 
+/** Fixed identity of the separately configured Agentrans Windows distribution. */
+export const AGENTRANS_DESKTOP_APP_ID = 'com.agentrans.app'
+
+/**
+ * Refuse the Agentrans identity on generic upstream release and publication paths.
+ * @param {string | undefined} appId - Selected application identity, if the generic caller supplies one.
+ * @returns {void}
+ */
+export function assertUpstreamDesktopReleaseIdentity(appId) {
+  if (appId?.trim() === AGENTRANS_DESKTOP_APP_ID) {
+    throw new Error('desktop release: Agentrans requires its unsigned Windows installer entry; upstream release destinations are not configured for it')
+  }
+}
+
 /** Environment variable that supplies electron-builder's macOS certificate qualifier. */
 export const MACOS_SIGNING_IDENTITY_ENV = 'DSH_DESKTOP_MACOS_SIGNING_IDENTITY'
 

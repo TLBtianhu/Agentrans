@@ -31,7 +31,10 @@
     "INSTALLER_EXTRACT_COLLAPSE": "Masquer les détails",
     "INSTALLER_EXTRACT_SAVED": "Le rapport complet a été enregistré dans %s",
     "INSTALLER_EXTRACT_UNSAVED": "Le rapport complet n'a pas pu être enregistré. Utilisez Copier les détails de l'erreur pour le conserver.",
-    "INSTALLER_EXTRACT_COPIED": "Les détails de l'erreur ont été copiés dans le presse-papiers."
+    "INSTALLER_EXTRACT_COPIED": "Les détails de l'erreur ont été copiés dans le presse-papiers.",
+    "INSTALLER_UNINSTALL_FAILED": "La désinstallation ne s’est pas terminée.",
+    "INSTALLER_UNINSTALL_HINT": "Certains fichiers sélectionnés ont peut-être déjà été supprimés. Fermez les programmes utilisant ce dossier et relancez le programme de désinstallation. Si un dossier lié a été refusé, restaurez d’abord le dossier d’origine. L’entrée de désinstallation reste disponible.",
+    "INSTALLER_UNINSTALL_OWNERSHIP_HINT": "Les entrées de désinstallation ou les raccourcis appartiennent à un autre emplacement, ou n’ont pas pu être vérifiés. Le nettoyage a été arrêté. Utilisez le programme de désinstallation de l’installation actuellement enregistrée et conservez les détails de l’erreur si vous avez besoin d’aide."
   },
   "uninstaller": {
     "welcome": "Bienvenue",

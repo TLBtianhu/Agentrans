@@ -31,7 +31,10 @@
     "INSTALLER_EXTRACT_COLLAPSE": "隐藏详情",
     "INSTALLER_EXTRACT_SAVED": "完整错误报告已保存到 %s",
     "INSTALLER_EXTRACT_UNSAVED": "无法保存完整错误报告，请使用“复制错误信息”保留。",
-    "INSTALLER_EXTRACT_COPIED": "错误信息已复制到剪贴板。"
+    "INSTALLER_EXTRACT_COPIED": "错误信息已复制到剪贴板。",
+    "INSTALLER_UNINSTALL_FAILED": "卸载未完成。",
+    "INSTALLER_UNINSTALL_HINT": "部分所选文件可能已经删除。请关闭使用此文件夹的程序，再次运行卸载程序。如果因文件夹联接而被拒绝，请先恢复原始文件夹。卸载入口仍然保留。",
+    "INSTALLER_UNINSTALL_OWNERSHIP_HINT": "卸载项或快捷方式属于其他位置，或无法核实其归属。后续清理已停止。请使用当前已注册安装中的卸载程序；如需帮助，请保留错误详情。"
   },
   "uninstaller": {
     "welcome": "欢迎",

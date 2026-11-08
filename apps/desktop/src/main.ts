@@ -1,16 +1,16 @@
+import { desktopLaunchContext } from './product-bootstrap.ts'
+import { productLaunchEnvironment } from '@deepseek-ai/dsh-product-layout/launch-context'
 import { installFileActions } from './file-actions.ts'
 import type { ProductEventMap, ProductEvent } from '@deepseek-ai/dsh-client-product-analytics/types'
 import { WINDOWS_TITLEBAR_HEIGHT } from './windows-layout.ts'
 /** Electron shell: desktop project ownership, custom protocol, windows, and lifecycle. */
 
 import { access, readFile, writeFile } from 'node:fs/promises'
-import { mkdirSync } from 'node:fs'
-import { dirname, join } from 'node:path'
+import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
   app,
   BrowserWindow,
-  clipboard,
   dialog,
   ipcMain,
   Menu,
@@ -45,7 +45,7 @@ import { pruneCrashReports, RendererConsoleTail, writeCrashReport, type CrashRep
 import { OperationJournal } from './operation-journal.ts'
 import { runOperationReportJob, type OperationReportJobResult } from './operation-report-job.ts'
 import { openWelcomeWindow } from './welcome-window.ts'
-import { WELCOME_IPC, needsWelcome, type WelcomeNotice } from './welcome-api.ts'
+import { needsWelcome } from './welcome-api.ts'
 import { connectDesktopWelcome, type DesktopWelcomeBackend } from './welcome-backend.ts'
 import { DesktopUpdateJournal } from './update-journal.ts'
 import { DesktopUpdatePreparationError } from './update-error.ts'
@@ -68,19 +68,6 @@ import { DesktopQuitConfirmation } from './quit-confirmation.ts'
 import { DesktopTray } from './tray.ts'
 import { DesktopBackgroundNotice } from './background-notice.ts'
 
-/** Keep an installed Agentrans instance's Electron and DSH data below its own root. */
-function configureInstalledDataRoot(): void {
-  if (!app.isPackaged) return
-  const installRoot = dirname(dirname(process.resourcesPath))
-  const dshRoot = join(installRoot, 'data', 'dsh')
-  const userData = join(installRoot, 'data', 'settings', 'electron')
-  process.env.DSH_HOME = join(dshRoot, 'home')
-  process.env.DSH_AGENTS_HOME = join(dshRoot, 'agents')
-  mkdirSync(userData, { recursive: true })
-  app.setPath('userData', userData)
-}
-configureInstalledDataRoot()
-
 let focusPrimaryWindow = (): void => {}
 let stopForRecovery = async (): Promise<void> => { await stopOperationReports() }
 let shuttingDown = false
@@ -98,10 +85,6 @@ let windowsLanguage: string | undefined = readDesktopLocaleCache(app.getPath('us
 let backendReady = false
 /** Error-level console output of the primary window, attached to crash reports. */
 const rendererConsole = new RendererConsoleTail()
-
-// Platform-conventional logs directory (macOS ~/Library/Logs/<name>, otherwise under userData);
-// set before ready so the first fatal report already resolves under it.
-app.setAppLogsPath()
 
 function currentDesktopLocale(): ReturnType<typeof resolveDesktopLocale> {
   return resolveDesktopLocale(windowsLanguage ?? app.getLocale())
@@ -255,20 +238,6 @@ function chromeFallbackFill(): string {
   return nativeTheme.shouldUseDarkColors ? '#1b1b1c' : '#f9fafb'
 }
 
-/**
- * Add the effective Desktop palette to a Platform authorization URL so the
- * login page opens in the application's theme. `system` resolves through
- * `nativeTheme.shouldUseDarkColors`, which follows the theme source the
- * application preload publishes.
- * @param authorizeUrl - validated Platform authorization URL.
- * @returns the authorization URL carrying `theme=light` or `theme=dark`.
- */
-function platformLoginUrl(authorizeUrl: string): string {
-  const url = new URL(authorizeUrl)
-  url.searchParams.set('theme', nativeTheme.shouldUseDarkColors ? 'dark' : 'light')
-  return url.href
-}
-
 function createWindow(preload: string, show = false, primary = false): BrowserWindow {
   const window = new BrowserWindow({
     width: 1280,
@@ -381,8 +350,8 @@ function createWindow(preload: string, show = false, primary = false): BrowserWi
 async function main(): Promise<void> {
   const desktopSettings = readDesktopSettings(app.getPath('userData'))
   void pruneCrashReports(app.getPath('logs'))
-  const journalDirectory = process.env.DSH_DESKTOP_UPDATE_JOURNAL_DIR
-  const updateJournal = journalDirectory === undefined ? undefined : new DesktopUpdateJournal(journalDirectory, app.getVersion())
+  const updateJournal = process.env.DSH_DESKTOP_UPDATE_JOURNAL_DIR === undefined ? undefined
+    : new DesktopUpdateJournal(desktopLaunchContext.paths.updateJournalDir, app.getVersion())
   const resources = runtimeResources()
   const paths = resolveDesktopPaths()
   const development = !app.isPackaged
@@ -402,7 +371,9 @@ async function main(): Promise<void> {
     return result.environment
   })
   let hostEnvironment: NodeJS.ProcessEnv = process.env
-  const prepareHostEnvironment = async (): Promise<void> => { hostEnvironment = await loginShell }
+  const prepareHostEnvironment = async (): Promise<void> => {
+    hostEnvironment = productLaunchEnvironment(desktopLaunchContext, await loginShell)
+  }
   let quitting = false
   let startup: Promise<void> | undefined
   let workspaceRecovery: Promise<void> | undefined
@@ -490,18 +461,13 @@ async function main(): Promise<void> {
   let injections: readonly unknown[] = []
   let welcomeBackend: DesktopWelcomeBackend | undefined
   let reportedLaunch = false
-  let analyticsEnabled = false
   const track = async <K extends keyof ProductEventMap>(eventName: K, attributes: ProductEventMap[K]): Promise<void> => {
     const event = { eventName, attributes, timestamp: Date.now() } as ProductEvent
     try {
-      if (analyticsEnabled) await welcomeBackend?.report(event)
+      const target = welcomeBackend
+      if (!quitting && target !== undefined && await target.analyticsEnabled()) await target.report(event)
     } catch (_error) { /* Analytics cannot interrupt native actions. */ }
   }
-  let stopAccount: (() => void) | undefined
-  let openedAttempt: string | undefined
-  let returnedAttempt: string | undefined
-  let pendingWelcomeNotice: WelcomeNotice | undefined
-  let previousAccountStatus: string | undefined
   const assertProductSender = (event: IpcMainInvokeEvent): BrowserWindow => {
     assertDesktopSender(event, ['app'])
     if (mainWindow === undefined || mainWindow.isDestroyed() || event.sender !== mainWindow.webContents
@@ -546,51 +512,10 @@ async function main(): Promise<void> {
         hostUrl = ready.url
         if (ready.injections === undefined) throw new Error('Desktop Host did not provide boot injections')
         injections = ready.injections
-        welcomeBackend = await connectDesktopWelcome(ready.url, (input, init) => fetch(input, withDesktopHostCookie(init, hostCookie)), async () => hostCookie ?? '')
-        analyticsEnabled = await welcomeBackend.analyticsEnabled().catch(() => false)
+        welcomeBackend = await connectDesktopWelcome(ready.url, (input, init) => fetch(input, withDesktopHostCookie(init, hostCookie)))
         if (!reportedLaunch) { reportedLaunch = true; void track('desktop_app_launch', {}) }
-        stopAccount?.()
-        const accountBackend = welcomeBackend.account
-        stopAccount = accountBackend.watch((state) => {
-          if (quitting) return
-          if (welcomeWindow !== undefined && !welcomeWindow.isDestroyed()) welcomeWindow.webContents.send(WELCOME_IPC.state, state)
-          const attempt = state.attempt
-          if (attempt?.phase === 'waiting-browser' && attempt.authorizeUrl !== undefined && openedAttempt !== attempt.id) {
-            openedAttempt = attempt.id
-            void shell.openExternal(platformLoginUrl(attempt.authorizeUrl)).catch(() => undefined)
-          }
-          if ((attempt?.phase === 'failed' || attempt?.phase === 'expired') && returnedAttempt !== attempt.id) {
-            returnedAttempt = attempt.id
-            focusPrimaryWindow()
-          }
-          if (state.status === 'credential-stored' && attempt?.phase === 'succeeded' && welcomeWindow !== undefined) void enterWorkspace({ activate: false }).catch(() => undefined)
-          if (previousAccountStatus === 'credential-stored' && state.status === 'signed-out') {
-            void readWelcomeState().then(async (value) => {
-              if (needsWelcome(value) && !quitting) {
-                enteredWorkspace = false
-                await showWelcome()
-                if (welcomeWindow !== undefined && !welcomeWindow.isDestroyed()) welcomeWindow.webContents.send(WELCOME_IPC.state, state)
-              }
-              return undefined
-            }).catch(() => undefined)
-          }
-          previousAccountStatus = state.status
-        }, () => {
-          // The stream reconnects; a transport failure does not change account state.
-        }, () => {
-          void readWelcomeState().then(async (value) => {
-            if (!needsWelcome(value) || quitting) return
-            pendingWelcomeNotice = 'session-expired'
-            enteredWorkspace = false
-            await showWelcome()
-            const state = await accountBackend.state()
-            if (welcomeWindow !== undefined && !welcomeWindow.isDestroyed()) welcomeWindow.webContents.send(WELCOME_IPC.state, state)
-          }).catch(() => undefined)
-        }, (enabled) => { analyticsEnabled = enabled })
       },
       stop: async () => {
-        analyticsEnabled = false
-        stopAccount?.()
         try { await host.stop(requireCleanStop) }
         catch (error) {
           if (!requireCleanStop || !(error instanceof DesktopHostUncleanExitError)) throw error
@@ -1228,13 +1153,12 @@ async function main(): Promise<void> {
     })
     return window
   }
-  const enterWorkspace = async ({ activate = true }: { activate?: boolean } = {}): Promise<void> => {
+  const enterWorkspace = async (): Promise<void> => {
     if (quitting) return
     const window = mainWindow ?? createMainWindow()
     await navigateMain(applicationUrl)
     if (isQuitting() || recovery.active || window.isDestroyed()) return
-    if (activate) window.show()
-    else window.showInactive()
+    window.show()
     enteredWorkspace = true
     if (welcomeWindow !== undefined) {
       welcomeWindow.close()
@@ -1246,7 +1170,7 @@ async function main(): Promise<void> {
       window.moveTop()
       window.focus()
     }
-    if (activate && development && process.env.DSH_DESKTOP_OPEN_DEVTOOLS !== '0') {
+    if (development && process.env.DSH_DESKTOP_OPEN_DEVTOOLS !== '0') {
       window.webContents.openDevTools({ mode: 'detach' })
     }
   }
@@ -1262,27 +1186,8 @@ async function main(): Promise<void> {
     openingWelcome ??= (async () => {
       welcomeWindow = await openWelcomeWindow(locale, {
         analytics: track,
-        analyticsEnabled: () => Promise.resolve(analyticsEnabled),
-        takeNotice: () => {
-          const notice = pendingWelcomeNotice
-          pendingWelcomeNotice = undefined
-          return Promise.resolve(notice)
-        },
-        startSignIn: async () => {
-          if (welcomeBackend === undefined) throw new Error('desktop welcome: backend unavailable')
-          return welcomeBackend.account.start(desktopClientMetadata(locale.id))
-        },
-        cancelSignIn: async (id) => {
-          if (welcomeBackend === undefined) throw new Error('desktop welcome: backend unavailable')
-          return welcomeBackend.account.cancel(id)
-        },
-        copySignInLink: async (id) => {
-          const state = await welcomeBackend?.account.state()
-          if (state?.attempt?.id !== id || state.attempt.phase !== 'waiting-browser' || state.attempt.authorizeUrl === undefined) {
-            throw new Error('desktop welcome: login link is unavailable')
-          }
-          await clipboard.writeText(platformLoginUrl(state.attempt.authorizeUrl))
-        },
+        analyticsEnabled: () => welcomeBackend?.analyticsEnabled().catch(() => false) ?? Promise.resolve(false),
+        openApiKeyPage: () => shell.openExternal('https://platform.deepseek.com/api_keys'),
         saveApiKey: async (apiKey) => {
           if (backend.host === undefined || welcomeBackend === undefined) return { ok: false }
           const saved = await welcomeBackend.save(apiKey)
@@ -1293,12 +1198,6 @@ async function main(): Promise<void> {
         skip: enterWorkspace,
       })
       const window = welcomeWindow
-      window.once('closed', () => {
-        void welcomeBackend?.account.state().then((state) => {
-          if (state.attempt !== null && !enteredWorkspace) return welcomeBackend?.account.cancel(state.attempt.id)
-          return undefined
-        }).catch(() => undefined)
-      })
       window.once('closed', () => {
         if (welcomeWindow === window) welcomeWindow = undefined
         if (enteredWorkspace || recovery.active) return
@@ -1320,8 +1219,8 @@ async function main(): Promise<void> {
     writeDesktopLocaleCache(app.getPath('userData'), locale.id)
     windowsLanguage = locale.id
     refreshApplicationMenu()
-    if (!enteredWorkspace && needsWelcome({ loggedIn: state.loggedIn, hasApiKey: state.hasApiKey })) {
-      // A later login must retain its own activation policy instead of replaying startup focus.
+    if (!enteredWorkspace && needsWelcome(state)) {
+      // Welcome actions own activation rather than replaying startup focus.
       raiseAfterUpdate = false
       await showWelcome()
     } else {
@@ -1337,14 +1236,13 @@ async function main(): Promise<void> {
       void (backend.state.phase === 'ready' ? openInitialWindow() : navigateMain(applicationUrl)).catch((error: unknown) => { reportFatal(error, 'main') })
       return
     }
-    // Startup and sign-out select the visible window before activation may reveal the workspace.
+    // Startup selects the visible window before activation may reveal the workspace.
     if (window === mainWindow && !enteredWorkspace) return
     if (window.isMinimized()) window.restore()
     window.show()
     window.focus()
   }
 
-  if (app.isPackaged || process.env.DSH_DESKTOP_DEV_APP === '1') app.setAsDefaultProtocolClient('dsh')
   app.on('open-url', (event, url) => {
     event.preventDefault()
     if (url === 'dsh://open' || url === 'dsh://open/') focusPrimaryWindow()
@@ -1364,7 +1262,6 @@ async function main(): Promise<void> {
     quitConfirmation.dispose()
     backgroundNotice?.dispose()
     tray?.dispose()
-    stopAccount?.()
     if (welcomeWindow !== undefined && !welcomeWindow.isDestroyed()) welcomeWindow.hide()
     if (mainWindow !== undefined && !mainWindow.isDestroyed()) mainWindow.hide()
     updateSchedule.dispose()

@@ -31,7 +31,10 @@
     "INSTALLER_EXTRACT_COLLAPSE": "Ocultar detalles",
     "INSTALLER_EXTRACT_SAVED": "El informe completo se guardó en %s.",
     "INSTALLER_EXTRACT_UNSAVED": "No se pudo guardar el informe completo. Utilice Copiar detalles del error para conservarlo.",
-    "INSTALLER_EXTRACT_COPIED": "Los detalles del error se copiaron al portapapeles."
+    "INSTALLER_EXTRACT_COPIED": "Los detalles del error se copiaron al portapapeles.",
+    "INSTALLER_UNINSTALL_FAILED": "La desinstalación no terminó.",
+    "INSTALLER_UNINSTALL_HINT": "Es posible que algunos archivos seleccionados ya se hayan eliminado. Cierre los programas que usan esta carpeta y vuelva a ejecutar el desinstalador. Si se rechazó una carpeta enlazada, restaure primero la carpeta original. La entrada de desinstalación sigue disponible.",
+    "INSTALLER_UNINSTALL_OWNERSHIP_HINT": "Las entradas de desinstalación o los accesos directos pertenecen a otra ubicación o no se pudieron verificar. Se detuvo la limpieza. Use el desinstalador de la instalación registrada actualmente y conserve los detalles del error si necesita ayuda."
   },
   "uninstaller": {
     "welcome": "Bienvenido",

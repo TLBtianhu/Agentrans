@@ -57,6 +57,21 @@ int wmain(int argc, wchar_t** argv) {
     }
     assert(Exists(cache));
 
+    // Exact-file cleanup has the same parent protections and does not schedule deletion against a later installation.
+    const std::wstring oldUninstaller = root + L"\\Uninstall Test.exe";
+    File(oldUninstaller);
+    assert(uninstall_data::Remove(root.c_str(), L"", nullptr, true) == ERROR_ACCESS_DENIED);
+    assert(uninstall_data::Remove(oldUninstaller.c_str(), L"", nullptr, true) == ERROR_SUCCESS);
+    assert(!Exists(oldUninstaller));
+    assert(uninstall_data::Remove(oldUninstaller.c_str(), L"", nullptr, true) == ERROR_SUCCESS);
+    File(oldUninstaller);
+    HANDLE oldHeld = CreateFileW(oldUninstaller.c_str(), GENERIC_READ, FILE_SHARE_READ,
+        nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+    assert(oldHeld != INVALID_HANDLE_VALUE);
+    assert(uninstall_data::Remove(oldUninstaller.c_str(), L"", nullptr, true) == ERROR_SHARING_VIOLATION);
+    CloseHandle(oldHeld);
+    assert(uninstall_data::Remove(oldUninstaller.c_str(), L"", nullptr, true) == ERROR_SUCCESS);
+
     // A locked file returns its error but every sibling, including a read-only one, is still removed.
     HANDLE held = CreateFileW((cache + L"\\CURRENT").c_str(), GENERIC_READ, FILE_SHARE_READ,
         nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);

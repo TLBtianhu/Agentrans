@@ -31,7 +31,10 @@
     "INSTALLER_EXTRACT_COLLAPSE": "Ocultar detalhes",
     "INSTALLER_EXTRACT_SAVED": "O relatório completo foi salvo em %s",
     "INSTALLER_EXTRACT_UNSAVED": "Não foi possível salvar o relatório completo. Use Copiar detalhes do erro para mantê-lo.",
-    "INSTALLER_EXTRACT_COPIED": "Os detalhes do erro foram copiados para a área de transferência."
+    "INSTALLER_EXTRACT_COPIED": "Os detalhes do erro foram copiados para a área de transferência.",
+    "INSTALLER_UNINSTALL_FAILED": "A desinstalação não foi concluída.",
+    "INSTALLER_UNINSTALL_HINT": "Alguns arquivos selecionados podem já ter sido removidos. Feche os programas que usam esta pasta e execute o desinstalador novamente. Se uma pasta vinculada foi recusada, restaure primeiro a pasta original. A entrada de desinstalação continua disponível.",
+    "INSTALLER_UNINSTALL_OWNERSHIP_HINT": "As entradas de desinstalação ou atalhos pertencem a outro local ou não puderam ser verificados. A limpeza foi interrompida. Use o desinstalador da instalação registrada atualmente e guarde os detalhes do erro se precisar de ajuda."
   },
   "uninstaller": {
     "welcome": "Bem-vindo",

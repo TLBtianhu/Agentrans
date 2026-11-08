@@ -11,11 +11,16 @@
       "types": "./lib/types/index.d.ts",
       "default": "./lib/index.js"
     },
+    "./launch-context": {
+      "types": "./lib/types/launch-context.d.ts",
+      "default": "./lib/launch-context.js"
+    },
     "./src/*": "./src/*",
     "./package.json": "./package.json"
   },
   "files": [
     "lib/index.js",
+    "lib/launch-context.js",
     "lib/types/**/*.d.ts"
   ],
   "license": "MIT",

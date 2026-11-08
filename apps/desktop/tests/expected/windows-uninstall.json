@@ -1,3 +1,19 @@
 {
-  "cases": ["interactive", "silent", "upgrade", "replaced", "home-inside"]
+  "cases": [
+    "interactive",
+    "silent",
+    "upgrade",
+    "replaced",
+    "home-inside"
+  ],
+  "failureCases": [
+    "locked-cache",
+    "locked-app",
+    "linked-cache-parent",
+    "linked-app",
+    "locked-cache-interactive",
+    "stale-registration",
+    "foreign-shortcut",
+    "foreign-working-directory"
+  ]
 }

@@ -1,7 +1,20 @@
 import { parsePluginOperationRecord } from '@deepseek-ai/dsh-plugin-manager/diagnostic'
 import type { DesktopHostProcess } from '../src/host-process.ts'
-import type { AccountView } from '@deepseek-ai/dsh-deepseek-account/types'
 import { WINDOWS_TITLEBAR_HEIGHT } from '../src/windows-layout.ts'
+const launchFixture = vi.hoisted(() => ({ instanceRoot: undefined as string | undefined }))
+vi.mock('../src/product-bootstrap.ts', async () => {
+  const launchContext = await import('@deepseek-ai/dsh-product-layout/launch-context')
+  const path = await import('node:path')
+  const { tmpdir } = await import('node:os')
+  return {
+    get desktopLaunchContext() {
+      return launchContext.resolveProductLaunchContext({
+        purpose: 'verification', instanceRoot: launchFixture.instanceRoot ?? path.join(tmpdir(), 'desktop-main-fixture-state'),
+        codeRoot: path.join(tmpdir(), 'desktop-main-fixture-code'), resourcesRoot: path.join(tmpdir(), 'desktop-main-fixture-code', 'resources'),
+      })
+    },
+  }
+})
 import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from 'vitest'
 import type { IpcMainInvokeEvent } from 'electron'
 import { join } from 'node:path'
@@ -198,9 +211,7 @@ const harness = await vi.hoisted(async () => {
       }
     }),
   })
-  let accountListener: ((state: AccountView) => void) | undefined
   let analyticsEnabled = true
-  let analyticsEnabledListener: ((enabled: boolean) => void) | undefined
   const analytics = vi.fn(async (_event: unknown) => {})
   const nativeTheme = { themeSource: 'system', shouldUseDarkColors: false }
   const trays: FakeTray[] = []
@@ -221,16 +232,7 @@ const harness = await vi.hoisted(async () => {
     platformCloseAndWait,
 
     get analyticsEnabled() { return analyticsEnabled },
-    set analyticsEnabled(value: boolean) { analyticsEnabled = value; analyticsEnabledListener?.(value) },
-    watchAccount: (
-      listener: (state: AccountView) => void, _failed: () => void, _expired: () => void,
-      onAnalyticsEnabledChanged?: (enabled: boolean) => void,
-    ) => {
-      analyticsEnabledListener = onAnalyticsEnabledChanged
-      accountListener = listener
-      return () => { accountListener = undefined; analyticsEnabledListener = undefined }
-    },
-    publishAccount(state: AccountView) { accountListener?.(state) },
+    set analyticsEnabled(value: boolean) { analyticsEnabled = value },
     ipcOn: vi.fn<(channel: string, listener: (event: { sender: unknown; senderFrame: unknown }, ...args: unknown[]) => void) => void>(),
     get updateState() { return updateState },
     set updateState(value: DesktopUpdateState) { updateState = value },
@@ -260,7 +262,6 @@ const harness = await vi.hoisted(async () => {
     set pluginsEnabled(value: boolean) { pluginsEnabled = value },
     set closeWindowsOnQuit(value: boolean) { closeWindowsOnQuit = value },
     reset() {
-      accountListener = undefined
       windows.length = 0
       views.length = 0; hosts.length = 0; handlers.clear(); app.removeAllListeners()
       trays.length = 0
@@ -396,7 +397,6 @@ vi.mock('../src/welcome-backend.ts', () => ({
     readLocalePreference: async () => null,
     read: async (): Promise<unknown> => (await harness.hosts.at(-1)!.fetch()).json() as Promise<unknown>,
     save: async () => ({ ok: true }),
-    account: { watch: harness.watchAccount, state: async () => ({ status: 'signed-out', attempt: null }) },
   }),
 }))
 
@@ -426,6 +426,7 @@ function applicationMenuItems(): MenuItemConstructorOptions[] {
 
 beforeEach(() => {
   vi.resetModules()
+  launchFixture.instanceRoot = undefined
   vi.clearAllMocks()
   harness.dialog.showMessageBox.mockReset()
   harness.dialog.showMessageBox.mockResolvedValue({ response: 1 })
@@ -849,7 +850,9 @@ describe('desktop main startup', () => {
   it('persists opt-in update evidence from the real main entry without private diagnostics', async () => {
     const directory = mkdtempSync(join(tmpdir(), 'dsh-main-update-journal-'))
     try {
-      vi.stubEnv('DSH_DESKTOP_UPDATE_JOURNAL_DIR', directory)
+      launchFixture.instanceRoot = directory
+      const foreignDirectory = join(directory, 'foreign-journal')
+      vi.stubEnv('DSH_DESKTOP_UPDATE_JOURNAL_DIR', foreignDirectory)
       await readyForUpdate()
       harness.publishUpdate({ phase: 'error', failedOperation: 'download', version: '1.2.3', message: 'ENOSPC secret-url' })
       await invoke(DESKTOP_IPC.updatesOpen, 'app')
@@ -857,9 +860,11 @@ describe('desktop main startup', () => {
       for (const host of harness.hosts) host.exited.resolve()
       harness.app.quit()
       await harness.quitCompleted.promise
-      const files = readdirSync(directory)
+      expect(existsSync(foreignDirectory)).toBe(false)
+      const journalDirectory = join(directory, 'data/install/update-journal')
+      const files = readdirSync(journalDirectory)
       expect(files).toHaveLength(1)
-      const contents = readFileSync(join(directory, files[0]!), 'utf8')
+      const contents = readFileSync(join(journalDirectory, files[0]!), 'utf8')
       const records = contents.trim().split('\n').map(line => JSON.parse(line) as { event: string })
       expect(records.map(row => row.event)).toEqual(expect.arrayContaining(['started', 'workspace-ready', 'state', 'quit-requested']))
       expect(contents).toContain('ENOSPC')
@@ -2615,42 +2620,6 @@ describe('desktop main startup', () => {
     expect(window.urls).toEqual(['dsh-app://app/'])
     expect(harness.windows).toHaveLength(1)
   })
-})
-
-it.each(['failed', 'expired'] as const)('focuses DSH once when browser authorization becomes %s', async (phase) => {
-  await import('../src/main.ts')
-  await harness.preparing.promise
-  harness.prepared.resolve()
-  await harness.hostStarted.promise
-  harness.hosts[0]!.ready.resolve()
-  await Promise.resolve(invoke(DESKTOP_IPC.boot))
-  const window = harness.windows[0]!
-  window.focus.mockClear()
-  const state: AccountView = {
-    status: 'signed-out', links: { usageUrl: 'https://platform.deepseek.com/usage', topUpUrl: 'https://platform.deepseek.com/top_up' },
-    attempt: { id: 'test-failed-attempt' as NonNullable<AccountView['attempt']>['id'], phase },
-  }
-  harness.publishAccount(state)
-  harness.publishAccount(state)
-  expect(window.focus).toHaveBeenCalledTimes(1)
-})
-
-it.each([['light', false], ['dark', true]] as const)('opens Platform authorization in the effective %s palette', async (theme, shouldUseDarkColors) => {
-  await import('../src/main.ts')
-  await harness.preparing.promise
-  harness.prepared.resolve()
-  await harness.hostStarted.promise
-  harness.hosts[0]!.ready.resolve()
-  await Promise.resolve(invoke(DESKTOP_IPC.boot))
-  harness.nativeTheme.shouldUseDarkColors = shouldUseDarkColors
-  const state: AccountView = {
-    status: 'signed-out', links: { usageUrl: 'https://platform.deepseek.com/usage', topUpUrl: 'https://platform.deepseek.com/top_up' },
-    attempt: { id: 'test-theme-attempt' as NonNullable<AccountView['attempt']>['id'], phase: 'waiting-browser',
-      authorizeUrl: 'https://platform.deepseek.com/dsh/authorize?state=state-1' },
-  }
-  harness.publishAccount(state)
-  harness.publishAccount(state)
-  expect(harness.openExternal).toHaveBeenCalledExactlyOnceWith(`https://platform.deepseek.com/dsh/authorize?state=state-1&theme=${theme}`)
 })
 
 it('disables native product events for a disabled Desktop launch', async () => {
