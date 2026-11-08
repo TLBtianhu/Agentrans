@@ -13,6 +13,7 @@ import { RemoteError } from '@deepseek-ai/dsh-typert-protocol'
 import { createClientTest, webApp } from '@deepseek-ai/dsh-client-test-runtime/src/assembly/index.ts'
 import type { PendingSubmissionRetirement } from '../src/client/contract/session.ts'
 import type { SessionRequestId } from '../src/types.ts'
+import * as timeZone from '../src/client/time-zone.ts'
 import { ev, historyValue } from './event-script.client.ts'
 import { sessionBench } from './remote/bench.client.ts'
 import {
@@ -340,9 +341,12 @@ describe('observed retirement', () => {
       expect(frames).toHaveLength(0)
       if (order === 'inbox-first') session.projections.apply('inbox', empty, SessionSeq(1))
       await pushEvent(mock, promptEvent(SessionSeq(2), handle.requestId, refs))
+      // Local release must preserve the observed attachment handoff, even before its Inbox watermark arrives.
+      handle.abandon()
+      expect(onRetire).not.toHaveBeenCalled()
+      expect(session.getSnapshot().pendingSubmissions).toHaveLength(1)
       if (order === 'transcript-first') {
         await pushEvent(mock, ev.turnEnd(SessionSeq(3), 1))
-        handle.abandon()
         session.projections.apply('inbox', queued, SessionSeq(0))
         await Promise.resolve()
         expect(frames).toHaveLength(0)
@@ -731,5 +735,89 @@ describe('disposal', () => {
       { text: '已观察', retirement: { reason: 'observed', attachments: [] } },
     ])
     expect(session.getSnapshot().pendingSubmissions).toEqual([])
+  })
+})
+
+
+it('retains captured browser time zone and late acceptance through a contextual retry', async ({ mock, start }) => {
+  const session = await sessionBench(mock, start, SID)
+  const zone = vi.spyOn(timeZone, 'resolvedClientTimeZone').mockReturnValueOnce('Asia/Tokyo').mockReturnValue('Europe/Paris')
+  try {
+    const accepted = vi.fn()
+    const handle = session.beginSubmission({ mode: 'queue', text: 'A', attachments: [], captureTimeZone: true, onAccept: accepted })
+    const contexts = [{ kind: 'experiment', value: 1 }]
+    mock.remote.session.prompt.mockResolvedValueOnce(err(new RemoteError('gateway/internal', 'unknown', {})))
+    await session.prompt([{ type: 'text', text: 'A' }], 'queue', undefined, handle.requestId, contexts, handle.clientTimeZone)
+    await session.prompt([{ type: 'text', text: 'A' }], 'queue', undefined, handle.requestId, contexts, handle.clientTimeZone)
+    const requests = mock.log.requests('session/prompt')
+    expect(requests).toHaveLength(2)
+    expect(requests[0]).toEqual(requests[1])
+    expect(requests[0]).toMatchObject({ clientTimeZone: 'Asia/Tokyo', contexts })
+    expect(zone).toHaveBeenCalledTimes(1)
+    expect(accepted).toHaveBeenCalledTimes(1)
+  } finally { zone.mockRestore() }
+})
+
+
+describe('contextual prompt acceptance ordering', () => {
+  it('keeps observed acceptance after the echo retired and the HTTP receipt fails', async ({ mock, start }) => {
+    const session = await sessionBench(mock, start, SID)
+    await session.open()
+    const handle = session.beginSubmission({ mode: 'queue', text: 'A', attachments: [] })
+    const receipt = Promise.withResolvers<Awaited<ReturnType<typeof session.prompt>>>()
+    mock.remote.session.prompt.mockImplementationOnce(() => receipt.promise)
+    const pending = session.prompt([{ type: 'text', text: 'A' }], 'queue', undefined, handle.requestId,
+      [{ kind: 'experiment', value: 1 }])
+    await pushEvent(mock, promptEvent(SessionSeq(0), handle.requestId))
+    await settleFrames()
+    expect(session.getSnapshot().pendingSubmissions).toEqual([])
+    expect(session.getSnapshot().blank).toBe(false)
+    expect(session.getSnapshot().awaitingFirstTurn).toBe(true)
+    receipt.resolve(err(new RemoteError('gateway/internal', 'response lost after acceptance', {})))
+    await expect(pending).resolves.toEqual({ ok: true, value: { accepted: true } })
+    expect(session.getSnapshot().promptError).toBeNull()
+    expect(session.getSnapshot().awaitingFirstTurn).toBe(true)
+  })
+
+  it('clears only the matching prompt error when acceptance arrives after the HTTP failure', async ({ mock, start }) => {
+    const session = await sessionBench(mock, start, SID)
+    await session.open()
+    const handle = session.beginSubmission({ mode: 'queue', text: 'A', attachments: [] })
+    mock.remote.session.prompt.mockResolvedValueOnce(err(new RemoteError('gateway/internal', 'unconfirmed A', {})))
+    const result = await session.prompt([{ type: 'text', text: 'A' }], 'queue', undefined, handle.requestId,
+      [{ kind: 'experiment', value: 1 }])
+    expect(result.ok).toBe(false)
+    expect(session.getSnapshot().promptError?.error.message).toBe('unconfirmed A')
+    await pushEvent(mock, promptEvent(SessionSeq(0), handle.requestId))
+    expect(session.getSnapshot().promptError).toBeNull()
+    expect(session.getSnapshot().blank).toBe(false)
+  })
+
+  it('does not clear a newer prompt error when an older request becomes accepted', async ({ mock, start }) => {
+    const session = await sessionBench(mock, start, SID)
+    await session.open()
+    const first = session.beginSubmission({ mode: 'queue', text: 'A', attachments: [] })
+    mock.remote.session.prompt.mockResolvedValueOnce(err(new RemoteError('gateway/internal', 'unconfirmed A', {})))
+    await session.prompt([{ type: 'text', text: 'A' }], 'queue', undefined, first.requestId, [{ kind: 'experiment', value: 1 }])
+    const second = session.beginSubmission({ mode: 'queue', text: 'B', attachments: [] })
+    mock.remote.session.prompt.mockResolvedValueOnce(err(new RemoteError('gateway/internal', 'unconfirmed B', {})))
+    await session.prompt([{ type: 'text', text: 'B' }], 'queue', undefined, second.requestId, [{ kind: 'experiment', value: 2 }])
+    await pushEvent(mock, promptEvent(SessionSeq(0), first.requestId))
+    expect(session.getSnapshot().promptError?.error.message).toBe('unconfirmed B')
+  })
+
+  it('does not overwrite a newer prompt error with an older late HTTP failure', async ({ mock, start }) => {
+    const session = await sessionBench(mock, start, SID)
+    const first = session.beginSubmission({ mode: 'queue', text: 'A', attachments: [] })
+    const receipt = Promise.withResolvers<Awaited<ReturnType<typeof session.prompt>>>()
+    mock.remote.session.prompt.mockImplementationOnce(() => receipt.promise)
+    const pending = session.prompt([{ type: 'text', text: 'A' }], 'queue', undefined, first.requestId,
+      [{ kind: 'experiment', value: 1 }])
+    const second = session.beginSubmission({ mode: 'queue', text: 'B', attachments: [] })
+    mock.remote.session.prompt.mockResolvedValueOnce(err(new RemoteError('gateway/internal', 'unconfirmed B', {})))
+    await session.prompt([{ type: 'text', text: 'B' }], 'queue', undefined, second.requestId, [{ kind: 'experiment', value: 2 }])
+    receipt.resolve(err(new RemoteError('gateway/internal', 'late failure A', {})))
+    expect((await pending).ok).toBe(false)
+    expect(session.getSnapshot().promptError?.error.message).toBe('unconfirmed B')
   })
 })

@@ -1190,6 +1190,54 @@ describe('TypertGatewayService', () => {
     }
   })
 
+  it.each([
+    ['ordinary bytes', new Uint8Array([0, 128, 255])],
+    ['empty bytes', new Uint8Array()],
+    ['Node buffer bytes', Buffer.from([0, 128, 255])],
+  ])('preserves the strict root attachment placeholder for %s', async (_label, bytes) => {
+    const { ctx, service } = await setup()
+    const fiber = ctx.plugin(FakeConnectionService)
+    await fiber
+    const schema = z.instanceof(Uint8Array)
+    const remove = registerStrict(ctx, [{
+      ...passthroughDescriptor(),
+      result: {
+        mode: 'strict', typeSymbol: '@fixture/gateway#RootBytes', create: () => schema,
+        encode: (input, writeBytes) => writeBytes(schema.parse(input), []),
+      },
+    }])
+    try {
+      service.nextResult = bytes
+      const handler = rawConnection(ctx).handler!
+      await expect(handler('goals/passthrough', { args: { value: null } }, new AbortController().signal)).resolves.toEqual({
+        ok: true, value: null, attachments: [{ path: [], bytes }],
+      })
+      expect(service.calls).toEqual(['passthrough'])
+    } finally {
+      await remove()
+      await fiber.dispose()
+    }
+  })
+
+  it('keeps strict JSON results unchanged when the descriptor has no result encoder', async () => {
+    const { ctx, service } = await setup()
+    const fiber = ctx.plugin(FakeConnectionService)
+    await fiber
+    const remove = registerStrict(ctx, [{
+      ...passthroughDescriptor(), result: strictCodec('@fixture/gateway#PlainJson', z.object({ count: z.number() })),
+    }])
+    try {
+      service.nextResult = { count: 3 }
+      const handler = rawConnection(ctx).handler!
+      await expect(handler('goals/passthrough', { args: { value: null } }, new AbortController().signal)).resolves.toEqual({
+        ok: true, value: { count: 3 },
+      })
+    } finally {
+      await remove()
+      await fiber.dispose()
+    }
+  })
+
   it('owns runtime result projection for SRC methods', async () => {
     const { ctx, service } = await setup()
     const fiber = ctx.plugin(FakeConnectionService)

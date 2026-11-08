@@ -6,6 +6,9 @@ export type {} from '@deepseek-ai/dsh-client-product-analytics/remote'
 import agentPresetsRemote from '@deepseek-ai/dsh-agent-preset-registry/remote'
 import userQuestionsRemote from '@deepseek-ai/dsh-user-questions/remote'
 import artifactRemote from '@deepseek-ai/dsh-artifact/remote'
+import artifactBranchRemote from '@deepseek-ai/dsh-artifact-branch/remote'
+import artifactExportRemote from '@deepseek-ai/dsh-artifact-export/remote'
+import artifactRuntimeRemote from '@deepseek-ai/dsh-artifact-runtime/remote'
 import commandsRemote from '@deepseek-ai/dsh-commands/remote'
 import accountRemote from '@deepseek-ai/dsh-api-account-controller/remote'
 import settingsControllerRemote from '@deepseek-ai/dsh-api-settings-controller/remote'
@@ -53,6 +56,9 @@ export type { PluginInventorySnapshot } from '@deepseek-ai/dsh-host-plugin-inven
 export type {} from '@deepseek-ai/dsh-agent-preset-registry/remote'
 export type {} from '@deepseek-ai/dsh-user-questions/remote'
 export type {} from '@deepseek-ai/dsh-artifact/remote'
+export type {} from '@deepseek-ai/dsh-artifact-branch/remote'
+export type {} from '@deepseek-ai/dsh-artifact-export/remote'
+export type {} from '@deepseek-ai/dsh-artifact-runtime/remote'
 export type {} from '@deepseek-ai/dsh-commands/remote'
 export type {} from '@deepseek-ai/dsh-api-settings-controller/remote'
 export type {} from '@deepseek-ai/dsh-api-account-controller/remote'
@@ -197,7 +203,7 @@ export async function apply(ctx: Context): Promise<() => Promise<void>> {
       messageFeedbackRemote, sessionFeedbackRemote,
       fileUploadsRemote, sessionReferencesRemote,
       permissionPresetsRemote, subagentsRemote, sessionRemote, jobRemote, workspaceRemote, workspaceFilesRemote, terminalRemote,
-      officeToPdfRemote, userQuestionsRemote, artifactRemote,
+      officeToPdfRemote, userQuestionsRemote, artifactRemote, artifactBranchRemote, artifactExportRemote, artifactRuntimeRemote,
     ]) {
       disposers.push(await ctx.remote.$mount(contribution))
     }

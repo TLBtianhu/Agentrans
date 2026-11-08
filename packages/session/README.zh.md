@@ -45,6 +45,7 @@ session 组让对话持久保存，恢复已发布的日志格式，并使已提
 
 | 包 | 职责 | ctx key |
 |---|---|---|
+| [`session-input/`](session-input/README.zh.md) | 恢复已接受输入的身份，合并并发问题或确认消息的准入 | `ctx.sessionInputs` |
 | [`session-projection/`](session-projection/README.zh.md) | 定义并驱动把已提交事件折叠为完整当前值的投影单元 | `ctx.sessionProjections` |
 | [`working-directory/`](working-directory/README.zh.md) | 拥有每个 Session 的有效执行目录和用户上下文变更 | `ctx.workingDirectory` |
 | [`tool-working-directory/`](tool-working-directory/README.zh.md) | 通过一个工具读取或改变当前目录 | `working_directory` |

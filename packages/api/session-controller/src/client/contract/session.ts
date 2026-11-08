@@ -7,6 +7,7 @@
  * must stub); implementation-internal entry points (history staging, wire-frame
  * dispatch) stay on the class, invisible out here.
  */
+import type { PromptContextInput } from '../../types.ts'
 import type { FileAttachmentRef, ImageAttachmentRef } from '@deepseek-ai/dsh-attachment'
 import type { MessageId } from '@deepseek-ai/dsh-llm/brand'
 import type { SessionId, SessionSeq } from '@deepseek-ai/dsh-session/types'
@@ -19,7 +20,8 @@ import type { PendingSubmissionAttachment, SessionSnapshot } from './snapshot.ts
  * Why a local submission echo left the snapshot: `observed` when its durable
  * `user/message` event or host queue occurrence arrived (with the admitted
  * attachment references in prompt order), `failed` when the prompt was rejected,
- * threw, or was aborted before acceptance.
+ * threw, or its unobserved local echo was released by its owner. Releasing an
+ * echo can follow an accepted retry and does not report Host failure or cancellation.
  */
 export type PendingSubmissionRetirement =
   | {
@@ -32,6 +34,8 @@ export type PendingSubmissionRetirement =
 export interface BeginSubmissionInput {
   /** Delivery mode used with the upcoming prompt. */
   readonly mode: 'queue' | 'steer'
+  /** Capture browser metadata for a caller-owned contextual retry. */
+  readonly captureTimeZone?: boolean
   /** Prompt text exactly as the upcoming prompt will send it. */
   readonly text: string
   /** Ordered image previews and durable file metadata matching the upcoming prompt attachments. */
@@ -45,11 +49,16 @@ export interface BeginSubmissionInput {
   readonly onRetire?: (retirement: PendingSubmissionRetirement) => void
 }
 
-/** One registered submission echo: the identity its prompt must carry, and the pre-prompt escape hatch. */
+/** One registered submission echo: the identity its prompt must carry, and its local release capability. */
 export interface SubmissionHandle {
   /** The prompt RPC identity; pass it to {@link ISession.prompt}. */
   readonly requestId: SessionRequestId
-  /** Retire the echo as failed when the caller cannot reach prompt() (serialization failure); no-op after any other settlement. */
+  /** Browser zone captured before this submission began asynchronous preparation. */
+  readonly clientTimeZone?: string
+  /**
+   * Release an unobserved local echo, including after an accepted retry; never cancel Host input.
+   * Already admitted input keeps its observed display handoff; other settled echoes are unchanged.
+   */
   abandon(): void
 }
 
@@ -93,6 +102,8 @@ export interface ISession {
    * @param mode - 'queue' appends a turn; 'steer' interrupts the running one.
    * @param signal - optional caller cancellation for the complete admission round-trip.
    * @param requestId - identity from {@link beginSubmission}; a failed identified prompt retires its echo.
+   * @param contexts - frozen optional selections owned by the contextual submission.
+   * @param clientTimeZone - browser zone captured by its original submission handle.
    * @returns acceptance, or the business error (also mirrored into snapshot.promptError).
    */
   prompt(
@@ -100,6 +111,8 @@ export interface ISession {
     mode: 'queue' | 'steer',
     signal?: AbortSignal,
     requestId?: SessionRequestId,
+    contexts?: readonly PromptContextInput[],
+    clientTimeZone?: string,
   ): Promise<RemoteResult<{ accepted: true }>>
   /**
    * Resolve one stored image using this Session's gateway permission scope.

@@ -28,8 +28,11 @@ import type { QueueAction } from '@deepseek-ai/dsh-api-session-controller/types'
 import type { MessageId } from '@deepseek-ai/dsh-llm/brand'
 import type { ComposerBlocks } from './contract/composer-blocks.ts'
 import type {
-  DraftAttachmentId, DraftAttachmentSerializationResult, SessionInputResolver, SubmitAttachment, SubmitOutcome,
+  DraftAttachmentId, DraftAttachmentSerializationResult, SessionInputResolver, SubmitAttachment, DefaultSubmitOutcome,
 } from './contract/input.ts'
+import type { JsonValue } from '@deepseek-ai/dsh-util-values'
+import { snapshotJsonValue, deepFreeze } from '@deepseek-ai/dsh-util-values'
+import type { PromptContextInput } from '@deepseek-ai/dsh-api-session-controller/types'
 import type { InputSubmitMode } from './contract/composer-submission.ts'
 
 /**
@@ -40,6 +43,13 @@ import type { InputSubmitMode } from './contract/composer-submission.ts'
 export interface IConversation {
   /** The per-session input machine registry (SessionInputResolver face). */
   readonly input: SessionInputResolver
+  /**
+   * Register a synchronous submit-time feature selection.
+   * @param kind - selection kind.
+   * @param capture - current Session selection.
+   * @returns registration disposer.
+   */
+  registerPromptContext(kind: string, capture: (sessionId: SessionId) => JsonValue | undefined): () => void
   /**
    * The per-session composer-block registry: how a plugin the composer
    * cannot import makes a session's input inert with its own reason.
@@ -157,6 +167,7 @@ export class ConversationController extends Service implements IConversation {
   readonly blocks: ComposerBlocks
   /** Live upload state per draft that uploads when added: every file draft and every uploaded image draft. */
   readonly fileUploads: SnapshotStore<Record<string, DraftFileUpload>> = createSnapshotStore<Record<string, DraftFileUpload>>({})
+  private readonly lifetime = new AbortController()
   private readonly draftAttachments = new Map<DraftAttachmentId, ComposerAttachment>()
   private readonly fileUploadOperations = new Map<DraftAttachmentId, {
     readonly controller: AbortController
@@ -188,8 +199,11 @@ export class ConversationController extends Service implements IConversation {
     this.maxConcurrentFileUploads = config.maxConcurrentFileUploads
     ctx.effect(() => async () => {
       const operations = [...this.fileUploadOperations.values()]
+      this.lifetime.abort()
       for (const operation of operations) operation.controller.abort()
       await Promise.allSettled([...this.pendingFileUploads])
+      for (const pending of this.contextPrompts.values()) pending.abandon()
+      this.contextPrompts.clear()
       this.fileUploadOperations.clear()
       this.fileUploadQueue.length = 0
       for (const attachment of this.draftAttachments.values()) {
@@ -198,6 +212,54 @@ export class ConversationController extends Service implements IConversation {
       this.draftAttachments.clear()
       this.fileUploads.set({})
     }, 'conversation draft attachments')
+  }
+
+  private readonly contextPrompts = new Map<SessionFace, {
+    readonly attempt: number
+    readonly retry: (signal?: AbortSignal) => Promise<DefaultSubmitOutcome>
+    readonly abandon: () => void
+  }>()
+
+  /**
+   * End a locally retained contextual submission without undoing Host admission.
+   * @param session - addressed generation.
+   * @param attempt - optional matching attempt.
+   */
+  abandonContextPrompt(session: SessionFace, attempt?: number): void {
+    const pending = this.contextPrompts.get(session)
+    if (pending === undefined || attempt !== undefined && pending.attempt !== attempt) return
+    this.contextPrompts.delete(session)
+    pending.abandon()
+  }
+
+  private readonly promptContexts = new Map<string, (sessionId: SessionId) => JsonValue | undefined>()
+
+  /**
+   * Register one submit-time capture.
+   * @param kind - unique kind.
+   * @param capture - synchronous selection reader.
+   * @returns registration disposer.
+   */
+  registerPromptContext(kind: string, capture: (sessionId: SessionId) => JsonValue | undefined): () => void {
+    if (!/^[a-z][a-z0-9._-]{0,79}$/.test(kind)) throw new Error('Invalid prompt context kind')
+    if (this.promptContexts.has(kind)) throw new Error(`Prompt context already registered: ${kind}`)
+    this.promptContexts.set(kind, capture)
+    return () => { if (this.promptContexts.get(kind) === capture) this.promptContexts.delete(kind) }
+  }
+
+  /**
+   * Capture immutable selections before any asynchronous submission work.
+   * @param sessionId - addressed Session.
+   * @returns detached frozen JSON selections.
+   */
+  capturePromptContexts(sessionId: SessionId): readonly PromptContextInput[] {
+    return Object.freeze([...this.promptContexts].flatMap(([kind, capture]) => {
+      const value = capture(sessionId)
+      if (value === undefined) return []
+      const detached = snapshotJsonValue(value)
+      if (detached === undefined) throw new Error('Prompt context must contain lossless JSON')
+      return [deepFreeze({ kind, value: detached })]
+    }))
   }
 
   /**
@@ -229,6 +291,7 @@ export class ConversationController extends Service implements IConversation {
    * @param mode - queue or steer delivery selected by composer policy.
    * @param signal - optional cancellation for the complete Host admission.
    * @param accept - called inside the Session's acceptance, before the echo renders, so the composer settles with it.
+   * @param context - immutable selections and the attempt that owns unknown-outcome retries.
    * @returns the Host admission outcome; local attachment preparation failures reject.
    */
   async sendSession(
@@ -238,7 +301,14 @@ export class ConversationController extends Service implements IConversation {
     mode: InputSubmitMode,
     signal?: AbortSignal,
     accept?: () => void,
-  ): Promise<SubmitOutcome> {
+    context?: { readonly attempt: number; readonly inputs: readonly PromptContextInput[] },
+  ): Promise<DefaultSubmitOutcome> {
+    this.lifetime.signal.throwIfAborted()
+    const pending = this.contextPrompts.get(session)
+    if (context !== undefined && pending !== undefined) {
+      if (pending.attempt !== context.attempt) throw new Error('A contextual prompt already has an unknown outcome')
+      return pending.retry(signal)
+    }
     const attachments = this.resolveDraftAttachments(attachmentIds)
     if (attachments.length !== attachmentIds.length) {
       throw new Error('conversation.sendSession: one or more draft attachments are no longer available')
@@ -282,10 +352,12 @@ export class ConversationController extends Service implements IConversation {
     const acceptance = Promise.withResolvers<undefined>()
     const submission = session.beginSubmission({
       mode,
+      ...context === undefined ? {} : { captureTimeZone: true },
       text,
       attachments: pendingAttachments,
       onAccept: () => {
         ownership.accepted = true
+        if (context !== undefined && this.contextPrompts.get(session)?.attempt === context.attempt) this.contextPrompts.delete(session)
         accept?.()
         acceptance.resolve(undefined)
       },
@@ -298,7 +370,11 @@ export class ConversationController extends Service implements IConversation {
     let content: Parameters<SessionFace['prompt']>[0]
     try {
       await nextPaint()
+      this.lifetime.signal.throwIfAborted()
+      signal?.throwIfAborted()
       const uploaded = await serializeAttachments()
+      this.lifetime.signal.throwIfAborted()
+      signal?.throwIfAborted()
       content = [...uploaded, ...(text === '' ? [] : [{ type: 'text' as const, text }])]
     } catch (error) {
       submission.abandon()
@@ -306,12 +382,44 @@ export class ConversationController extends Service implements IConversation {
     }
     // An Inbox row can show the acceptance before the receipt; a receipt that fails afterwards changes
     // nothing here because the Host already holds the message.
-    const result = await Promise.race([session.prompt(content, mode, signal, submission.requestId), acceptance.promise])
-    if (result !== undefined && !result.ok) return { kind: 'error' }
-    ownership.accepted = true
-    // An accepted prompt whose echo already retired unobserved, as when its queue entry was removed.
-    if (ownership.retiredUnobserved) this.releaseDraftAttachments(attachments)
-    return { kind: 'success' }
+    let previouslyUnknown = false
+    const perform = async (currentSignal?: AbortSignal): Promise<DefaultSubmitOutcome> => {
+      try {
+        const sent = context === undefined
+          ? session.prompt(content, mode, currentSignal, submission.requestId)
+          : session.prompt(content, mode, currentSignal, submission.requestId, context.inputs, submission.clientTimeZone)
+        const result = await Promise.race([sent, acceptance.promise])
+        if (result !== undefined && !result.ok) {
+          if (context !== undefined && (previouslyUnknown || !knownPromptRefusal(result.error.code))) {
+            previouslyUnknown = true
+            return { kind: 'unknown' }
+          }
+          this.contextPrompts.delete(session)
+          submission.abandon()
+          return { kind: 'error' }
+        }
+        this.contextPrompts.delete(session)
+        ownership.accepted = true
+        // A historical acknowledgment can outlive its canceled queue row and every event in the local window.
+        // Once an unknown retry succeeds, Host inbox/history owns display; retaining the echo could invent pending work.
+        if (previouslyUnknown) submission.abandon()
+        accept?.()
+        if (ownership.retiredUnobserved) this.releaseDraftAttachments(attachments)
+        return { kind: 'success' }
+      } catch (error) {
+        if (context === undefined) throw error
+        previouslyUnknown = true
+        return { kind: 'unknown' }
+      }
+    }
+    if (context !== undefined) {
+      signal?.throwIfAborted()
+      const detached = snapshotJsonValue(content)
+      if (detached === undefined) { submission.abandon(); throw new Error('Prompt content must contain lossless JSON') }
+      content = deepFreeze(detached)
+      this.contextPrompts.set(session, { attempt: context.attempt, retry: perform, abandon: () => { submission.abandon() } })
+    }
+    return perform(signal)
   }
 
   /**
@@ -645,4 +753,14 @@ export function isImageMediaType(value: string): boolean {
 
 function revokePreview(url: string): void {
   if (url.startsWith('blob:')) URL.revokeObjectURL(url)
+}
+
+/** Explicit pre-admission refusals; other contextual prompt failures preserve an unknown outcome. */
+function knownPromptRefusal(code: string): boolean {
+  return new Set([
+    'gateway/bad-request', 'gateway/access-denied', 'gateway/invocation-unavailable', 'gateway/service-unavailable',
+    'gateway/definition-unavailable', 'gateway/method-unavailable', 'session/prompt-context-unavailable',
+    'session/prompt-context-invalid', 'session/prompt-context-rejected', 'session/prompt-request-conflict', 'session/not-found', 'session/writer-held',
+    'session/attachment-invalid', 'subagent/attachment-invalid', 'session/invalid-time-zone',
+  ]).has(code)
 }

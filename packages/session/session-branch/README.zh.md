@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-`dsh-session-branch` 提供手动 Session 分支的领域规则：从子分支自有的 durable `assistant/message` 选择可见文本，构造带 `branch-result` 来源的父级本地 `user/message`，并查询同一结论是否已经回流。本包不执行 Session I/O、Agent 调度、Remote 调用或模型调用。
+`dsh-session-branch` 提供手动 Session 分支的领域规则。根入口从子分支自有的 durable `assistant/message` 选择可见文本，构造带 `branch-result` 来源的父级本地 `user/message`，并查询同一结论是否已经回流，不执行 I/O。Host 专用的 `/admission` 入口让不同回流提供方共用 maintenance 串行化、内容冲突校验和持久化。两个入口都不调用模型。
 
 ## 目录
 
@@ -26,6 +26,8 @@ kind: "package-reference"
 - `createBranchResultMessage(selection)` 创建新的父级本地消息 id，并在 `source` 中携带子分支 id、结果 seq 和结果消息 id。子事件 seq 不写入父事件的 `sourceEventSeqs`。
 - `findBranchResult(events, reference)` 在相同引用已回流时返回已有父事件和消息 id。
 
+`/admission` 的 `admitBranchResult` 接受父 Agent、已校验选择，以及绑定精确父级的观察和 flush 能力。它可以追加 Host 构建的证据文本。相同内容返回旧回执；不同内容报告冲突。校验在新追加之前进行。只有 maintenance 开始前的拒绝才是 busy；后续失败保留未知结果，需要以同一请求重试。
+
 -----
 
 <a id="model-experience"></a>
@@ -39,7 +41,7 @@ kind: "package-reference"
 
 #### Token 影响
 
-只有选定的可见文本块进入父级消息。回流操作不会加入子对话全文或兄弟文本。同一结论重复回流会复用已有回执，不追加重复文本。
+根入口只选择可见文本块。Host 准入入口还可追加领域所有者提供、由用户明确选择的证据。不复制子对话全文或兄弟文本。以相同内容重复回流会复用已有回执，不追加重复文本。
 
 #### KV Cache 影响
 

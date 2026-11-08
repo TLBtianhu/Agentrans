@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-Use `dsh-session-branch` for the domain rules of a first-class manual Session branch. The package selects visible text from a child-owned durable `assistant/message`, constructs a fresh parent-local `user/message` with a `branch-result` source, and finds an earlier return of the same result. It performs no Session I/O, Agent scheduling, Remote dispatch, or model invocation.
+Use `dsh-session-branch` for the domain rules of a first-class manual Session branch. The root entry selects visible text from a child-owned durable `assistant/message`, constructs a fresh parent-local `user/message` with a `branch-result` source, and finds an earlier return of the same result without I/O. The Host-only `/admission` entry shares maintenance serialization, content conflict checks and durability across return providers. Neither entry invokes a model.
 
 ## Table of Contents
 
@@ -26,6 +26,8 @@ Use `dsh-session-branch` for the domain rules of a first-class manual Session br
 - `createBranchResultMessage(selection)` creates a new parent-local message id and carries the child branch id, result seq, and result message id in `source`. The child event seq is not a parent `sourceEventSeqs` value.
 - `findBranchResult(events, reference)` returns the existing parent event and message ids when the same reference was already returned.
 
+`admitBranchResult` from `/admission` accepts the parent Agent, validated selection and exact-parent observation/flush capabilities. It can append Host-built evidence text. Identical content returns the old receipt; changed content reports a conflict. Validation runs before a new append. Only refusal before maintenance starts is busy; a later failure retains an unknown outcome and requires the identical request for retry.
+
 -----
 
 <a id="model-experience"></a>
@@ -39,7 +41,7 @@ A returned conclusion becomes ordinary model-visible user history only when the 
 
 #### Token effect
 
-Only selected visible text blocks enter the parent message. No child transcript or sibling text is added by the return operation. Repeated returns of the same result reuse an earlier receipt rather than appending duplicate text.
+The root selection includes only visible text blocks. The Host admission entry can also append explicitly selected evidence supplied by its domain owner. No child transcript or sibling text is copied. Repeated returns with identical content reuse an earlier receipt rather than appending duplicate text.
 
 #### KV Cache effect
 

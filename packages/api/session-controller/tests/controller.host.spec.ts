@@ -1,4 +1,5 @@
 import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
+import SessionInputAdmission from '@deepseek-ai/dsh-session-input'
 import { Context } from '@deepseek-ai/cordis'
 import AgentRegistry from '@deepseek-ai/dsh-agent'
 import type { Agent } from '@deepseek-ai/dsh-agent'
@@ -35,6 +36,7 @@ describe('SessionController facade', () => {
     const agent = partial as Agent
     const entered = Promise.withResolvers<undefined>()
     const gate = Promise.withResolvers<undefined>()
+    await ctx.plugin(SessionInputAdmission)
     const original = ctx.sessionProjections.register.bind(ctx.sessionProjections)
     let first = true
     vi.spyOn(ctx.sessionProjections, 'register').mockImplementation(async (...args: Parameters<typeof original>) => {

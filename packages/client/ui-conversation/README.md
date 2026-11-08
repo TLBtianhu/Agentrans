@@ -132,6 +132,10 @@ When another writer owns the Session, the send-error toast asks the user to quit
 
 Two independent Escape presses in the focused Chat or Composer stop its current running turn and preserve queued messages. The interval comes from the shortcuts plugin’s `stopSequenceMs` configuration (500 ms by default). A menu, approval, modal, terminal, embedded webpage, composition, repeated key, changed input region, Session or turn breaks the sequence. The shortcut uses the same scoped cancellation as the Stop button. The plugin registers Stop as a fixed action in the `input` display group. Its registration reserves plain Escape against editable shortcuts and supplies the `Esc Esc` sequence shown in the Stop button’s hover and keyboard-focus tooltip.
 
+`conversation.registerPromptContext(kind, capture)` registers a synchronous Session-addressed feature selection. Ordinary Enter captures detached, deeply frozen JSON before reference expansion, command arbitration or attachment preparation. A claimed command does not capture context; an unclaimed slash line uses it only if it becomes an ordinary message. A capture failure keeps the draft and sends nothing. Registration returns a disposer and remains owned by the contributing plugin.
+
+For a contextual prompt, the submit owner retains the first serialized text, attachments, delivery mode, context selections, request id and captured browser time zone. An unknown result enters read-only `uncertain` state with **Retry original message** and **Dismiss retry**. Retry never re-reads a changed experiment or reference; later service refusal does not erase the original unknown request. Dismissal restores editing and does not undo an accepted message. Late Inbox or durable-message acceptance also settles the retained attempt. A later HTTP failure cannot downgrade observed acceptance; confirming one request clears only that request’s failure toast. After an unknown result, a successful retry releases its unobserved local echo and accepted draft attachments; Host inbox and history own the display, including when the original queue item was already canceled outside the local event window. This can briefly hide the message until Host data arrives. Releasing the echo never cancels Host input. Session or plugin teardown aborts preparation, abandons the local echo and releases retained data. Prompts without context keep their existing behavior.
+
 <a id="temporary-composer-entries"></a>
 ## Temporary composer entries
 
@@ -198,6 +202,8 @@ None; Conversation assembly and browser input state do not alter provider-side p
 ## Known Limitations and Deferred Work
 
 <a id="known-limitations-and-deferred-work"></a>
+
+- Unknown contextual requests are retained only by their live Session binding. Reloading or releasing that binding discards local retry state without cancelling Host input; retry or inspect history before leaving. Cross-reload recovery of unconfirmed requests is deferred.
 
 - **Only registered targets can render** — the shell deliberately has no implicit fallback target beyond the registered `chat` preference.
 - **Factory occurrences inherit their render-position Session** — `conversation.content` does not accept an independently addressed Session; that requires a separate Session-provider capability.

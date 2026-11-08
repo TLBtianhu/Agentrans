@@ -8,6 +8,7 @@
  * only then does the editor clear, and a refusal or failure returns it to
  * editing unchanged.
  */
+import type { PromptContextInput } from '@deepseek-ai/dsh-api-session-controller/types'
 import type { InputSubmitMode, MessageSubmission } from '../contract/composer-submission.ts'
 import type { DraftQuote, Occurrence } from '../contract/draft-editor.ts'
 import type {
@@ -67,7 +68,7 @@ export class SubmitMachine {
 
   /** The attempt of the message being sent; undefined outside the sending phase. */
   get sendingAttempt(): SubmitAttempt | undefined {
-    return this.phase === 'sending' ? this.inflight?.attempt : undefined
+    return this.phase === 'sending' || this.phase === 'uncertain' ? this.inflight?.attempt : undefined
   }
 
   /**
@@ -84,6 +85,8 @@ export class SubmitMachine {
       case 'adjudication-failed': return this.onAdjudicationFailed(ev.attempt, ev.message)
       case 'submit-settled': return this.onSubmitSettled(ev)
       case 'sink-settled': return this.onSinkSettled(ev)
+      case 'retry-sink': return this.phase === 'uncertain' && this.inflight !== undefined ? this.send(this.inflight.attempt) : []
+      case 'dismiss-sink': return this.phase === 'uncertain' ? this.onRelease() : []
       case 'release': return this.onRelease()
       default: return unreachable(ev)
     }
@@ -111,6 +114,8 @@ export class SubmitMachine {
     quotes: readonly DraftQuote[],
     attachmentIds: readonly DraftAttachmentId[],
     submission?: MessageSubmission,
+    contexts?: readonly PromptContextInput[],
+    contextError?: string,
   ): SubmitAttempt {
     const controller = new AbortController()
     this.seq += 1
@@ -123,6 +128,8 @@ export class SubmitMachine {
       attachmentIds,
       mode,
       ...submission === undefined ? {} : { submission },
+      ...contexts === undefined ? {} : { contexts },
+      ...contextError === undefined ? {} : { contextError },
     }
     this.inflight = { attempt, controller }
     return attempt
@@ -136,16 +143,16 @@ export class SubmitMachine {
   }
 
   private onEnter(ev: Extract<InputEvent, { type: 'enter' }>): readonly InputEffect[] {
-    if (this.phase === 'adjudicating' || this.phase === 'submitting' || this.phase === 'sending') return []
-    const { mode, draft, occurrences, quotes, attachmentIds, submission } = ev
+    if (this.phase === 'adjudicating' || this.phase === 'submitting' || this.phase === 'sending' || this.phase === 'uncertain') return []
+    const { mode, draft, occurrences, quotes, attachmentIds, submission, contexts, contextError } = ev
     if (this.phase === 'claimed' && this.claim !== undefined) {
-      const attempt = this.beginAttempt(mode, draft, occurrences, quotes, attachmentIds, submission)
+      const attempt = this.beginAttempt(mode, draft, occurrences, quotes, attachmentIds, submission, contexts, contextError)
       this.phase = 'submitting'
       return [{ type: 'begin-submit', attempt, claim: this.claim, args: argsAfter(draft, this.claim.token) }]
     }
     const trimmed = draft.trim()
     if (trimmed === '' && attachmentIds.length === 0) return []
-    const attempt = this.beginAttempt(mode, draft, occurrences, quotes, attachmentIds, submission)
+    const attempt = this.beginAttempt(mode, draft, occurrences, quotes, attachmentIds, submission, contexts, contextError)
     if (trimmed.startsWith('/')) {
       this.phase = 'adjudicating'
       return [{ type: 'adjudicate', attempt, draft }]
@@ -205,7 +212,11 @@ export class SubmitMachine {
   /** An accepted message clears the editor; a refused or failed one returns to editing unchanged. */
   private onSinkSettled(ev: Extract<InputEvent, { type: 'sink-settled' }>): readonly InputEffect[] {
     const flight = this.inflight
-    if (this.phase !== 'sending' || flight === undefined || flight.attempt.seq !== ev.attempt.seq) return []
+    if ((this.phase !== 'sending' && this.phase !== 'uncertain') || flight === undefined || flight.attempt.seq !== ev.attempt.seq) return []
+    if (ev.outcome?.kind === 'unknown') {
+      this.phase = 'uncertain'
+      return []
+    }
     this.inflight = undefined
     this.phase = 'plain'
     const effects: InputEffect[] = ev.ok ? [{ type: 'commit-draft', retainSuffixOf: null }] : []

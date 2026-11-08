@@ -502,7 +502,7 @@ export function apply(ctx: Context, config: Config = Config({})): void {
         addFiles: (files, directories = new Set()) => {
           if (sessions.binding(sessionId) === undefined) return t('file.sessionUnavailable')
           const { phase } = shell.snapshot
-          if (phase === 'adjudicating' || phase === 'submitting' || phase === 'sending') {
+          if (phase === 'adjudicating' || phase === 'submitting' || phase === 'sending' || phase === 'uncertain') {
             return t('attachment.dropBlocked')
           }
           const uploads: File[] = []

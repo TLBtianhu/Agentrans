@@ -1,5 +1,6 @@
 import TypertRegistry from '@deepseek-ai/dsh-typert-registry'
 import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
+import SessionInputAdmission from '@deepseek-ai/dsh-session-input'
 import { RemoteError } from '@deepseek-ai/dsh-typert-protocol'
 import { Context } from '@deepseek-ai/cordis'
 import AgentRegistry from '@deepseek-ai/dsh-agent'
@@ -14,11 +15,11 @@ import SessionStore, {
 import type { UserMessage } from '@deepseek-ai/dsh-session'
 import { snapshotSubagentDescriptor, SUBAGENT_DESCRIPTOR_VERSION } from '@deepseek-ai/dsh-subagent'
 import { subagentIdentityProjectionDefinition } from '@deepseek-ai/dsh-subagent/src/projection.ts'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi, type MockInstance } from 'vitest'
 import { ApiSessionAgentController } from '../src/agent.ts'
 import { SessionCommandController } from '../src/commands.ts'
 import { unsupportedModel, createInboxStub } from '@deepseek-ai/dsh-agent-loop-testkit'
-import { installSessionReadTestServices } from './test-remote.ts'
+import { installSessionReadTestServices, createSessionTestController } from './test-remote.ts'
 
 declare module '@deepseek-ai/dsh-llm' {
   interface MessageSourceMap {
@@ -35,12 +36,13 @@ async function commandHarness(
   inbox: Inbox
   steer: ReturnType<typeof vi.fn>
   cancel: ReturnType<typeof vi.fn>
-  resolveAgent: ReturnType<typeof vi.fn>
+  resolveAgent: MockInstance<ApiSessionAgentController['resolveAgent']>
 }> {
   const ctx = new Context()
   await ctx.plugin(SessionStore)
   await ctx.plugin(SessionProjectionRegistry)
   await ctx.plugin(AgentRegistry)
+  await ctx.plugin(SessionInputAdmission)
   await ctx.plugin(TypertRegistry)
   installSessionReadTestServices(ctx)
   await ctx.sessionProjections.register(subagentIdentityProjectionDefinition)
@@ -387,5 +389,242 @@ describe('Session attachment reads', () => {
     } finally {
       await ctx.fiber.dispose()
     }
+  })
+})
+
+
+async function contextPromptHarness(config: { maxPromptContexts?: number; maxPromptContextBytes?: number } = {}) {
+  const b = await commandHarness()
+  // This fixture has no running driver, so model the driver's durable queue writes.
+  const append = b.inbox.append.bind(b.inbox)
+  vi.spyOn(b.inbox, 'append').mockImplementation((target, message) => {
+    const start = target === 'next-turn' ? b.inbox.nextTurn.length : b.inbox.nextStep.length
+    b.agent.session.append('agent/inbox/spliced', { target, start, inserted: [message] })
+    append(target, message)
+  })
+  const remove = b.inbox.remove.bind(b.inbox)
+  vi.spyOn(b.inbox, 'remove').mockImplementation((id) => {
+    for (const target of ['next-turn', 'next-step'] as const) {
+      const queue = target === 'next-turn' ? b.inbox.nextTurn : b.inbox.nextStep
+      const start = queue.findIndex(message => message.id === id)
+      if (start < 0) continue
+      b.agent.session.append('agent/inbox/spliced', { target, start, removedCount: 1, inserted: [], outcome: 'canceled' })
+      return remove(id)
+    }
+    return false
+  })
+  const service = await createSessionTestController(b.ctx, {
+    cwd: '/workspace', defaultModelSelection: () => ({ provider: 'fixture', model: 'fixture-model' }), ...config,
+  })
+  return { ...b, service }
+}
+
+describe('registered prompt context admission', () => {
+  it('settles reserved Agent resolution during disposal without looking up withdrawn admission services', async () => {
+    const b = await commandHarness()
+    const entered = Promise.withResolvers<undefined>()
+    const release = Promise.withResolvers<{ agent: Agent }>()
+    b.resolveAgent.mockImplementationOnce(() => { entered.resolve(undefined); return release.promise })
+    const request = { requestId: 'during-close' as import('../src/types.ts').SessionRequestId, sessionId: b.agent.id,
+      mode: 'queue' as const, content: [{ type: 'text' as const, text: 'Accepted during shutdown' }] }
+    const operation = b.controller.prompt(request, { kind: 'user', rpcId: request.requestId })
+    await entered.promise
+    const disposing = b.ctx.fiber.dispose()
+    release.resolve({ agent: b.agent })
+    await expect(operation).rejects.toMatchObject({ code: 'session/not-found' })
+    await disposing
+  })
+
+  it('acknowledges a canceled accepted request without resolving or re-enqueueing it', async () => {
+    const b = await contextPromptHarness()
+    try {
+      const resolve = vi.fn(() => [{ type: 'text' as const, text: 'fixed evidence' }])
+      const withdraw = b.service.registerPromptContext('experiment', resolve)
+      const followup = vi.spyOn(b.agent, 'followup').mockImplementation((message) => { b.inbox.append('next-turn', message) })
+      const request = { requestId: 'canceled-accepted' as import('../src/types.ts').SessionRequestId, sessionId: b.agent.id,
+        mode: 'queue' as const, content: [{ type: 'text' as const, text: 'Explain' }], contexts: [{ kind: 'experiment', value: 1 }] }
+      const signal = new AbortController().signal
+      await expect(b.service.prompt(request, signal)).resolves.toEqual({ accepted: true })
+      const queued = b.inbox.nextTurn[0]
+      if (queued === undefined) throw new Error('Expected one queued prompt')
+      await b.service.updateQueue({ sessionId: b.agent.id, itemId: queued.id, action: { kind: 'remove' } })
+      expect(b.inbox.nextTurn).toEqual([])
+      withdraw()
+      const legacyRead = vi.spyOn(b.agent.session, 'snapshotEvents')
+        .mockImplementation(() => { throw new Error('Prompt retries must use their prepared receipt state') })
+      await expect(b.service.prompt(request, signal)).resolves.toEqual({ accepted: true })
+      expect(legacyRead).not.toHaveBeenCalled()
+      legacyRead.mockRestore()
+      expect(resolve).toHaveBeenCalledTimes(1)
+      expect(followup).toHaveBeenCalledTimes(1)
+      expect(b.inbox.nextTurn).toEqual([])
+    } finally { await b.ctx.fiber.dispose() }
+  })
+
+  it('admits a child request independently of the inherited parent receipt', async () => {
+    const b = await contextPromptHarness()
+    try {
+      const requestId = 'parent-and-child' as import('../src/types.ts').SessionRequestId
+      b.agent.session.append('user/message', createUserMessage({
+        content: [{ type: 'text', text: 'Parent input' }], source: { kind: 'user', rpcId: requestId },
+      }), { surfaceOp: 'append' })
+      const inherited = b.agent.session.snapshotEvents()
+      const child = b.ctx.sessions.create(SessionId('independent-child'), {
+        seed: inherited, inheritedEventCount: SessionLogOffset(inherited.length), meta: { isSeeded: true },
+      })
+      const inbox = createInboxStub()
+      const followup = vi.fn((message: UserMessage) => {
+        child.append('agent/inbox/spliced', { target: 'next-turn', start: inbox.nextTurn.length, inserted: [message] })
+        inbox.append('next-turn', message)
+      })
+      await b.ctx.agents.register({ ...b.agent, id: child.id, session: child, inbox, followup })
+      const resolve = vi.fn(() => [{ type: 'text' as const, text: 'Child evidence' }])
+      b.service.registerPromptContext('experiment', resolve)
+      await expect(b.service.prompt({ requestId, sessionId: child.id, mode: 'queue',
+        content: [{ type: 'text', text: 'Child input' }], contexts: [{ kind: 'experiment', value: null }] },
+      new AbortController().signal)).resolves.toEqual({ accepted: true })
+      expect(resolve).toHaveBeenCalledTimes(1)
+      expect(followup).toHaveBeenCalledTimes(1)
+      expect(inbox.nextTurn).toHaveLength(1)
+    } finally { await b.ctx.fiber.dispose() }
+  })
+
+  it('freezes one resolved context before attachment work and joins identical concurrent requests', async () => {
+    const b = await contextPromptHarness()
+    try {
+      let step = 6
+      const resolve = vi.fn(() => [{ type: 'text' as const, text: JSON.stringify({ step }) }])
+      const agents = new ApiSessionAgentController(b.ctx)
+      vi.spyOn(agents, 'resolveAgent').mockResolvedValue({ agent: b.agent })
+      const controller = new SessionCommandController(b.ctx, agents, '/workspace', resolve)
+      const entered = Promise.withResolvers<undefined>()
+      const release = Promise.withResolvers<undefined>()
+      vi.spyOn(b.ctx.attachments, 'admitPromptContent').mockImplementation(async () => {
+        entered.resolve(undefined)
+        await release.promise
+        return [{ type: 'text', text: 'Explain A' }]
+      })
+      const followup = vi.spyOn(b.agent, 'followup').mockImplementation((message) => { b.inbox.append('next-turn', message) })
+      const request = { requestId: 'context-a' as import('../src/types.ts').SessionRequestId, sessionId: b.agent.id,
+        mode: 'queue' as const, content: [{ type: 'text' as const, text: 'Explain A' }],
+        contexts: [{ kind: 'experiment', value: { step: 6 } }] }
+      const source = { kind: 'user' as const, rpcId: request.requestId }
+      const first = controller.prompt(request, source)
+      await entered.promise
+      step = 12
+      const second = controller.prompt(request, source)
+      await expect(controller.prompt({ ...request, content: [{ type: 'text', text: 'Different' }] }, source))
+        .rejects.toMatchObject({ code: 'session/prompt-request-conflict' })
+      release.resolve(undefined)
+      await Promise.all([first, second])
+      expect(resolve).toHaveBeenCalledTimes(1)
+      expect(followup).toHaveBeenCalledTimes(1)
+      expect(b.inbox.nextTurn[0]?.content).toEqual([{ type: 'text', text: 'Explain A' }, { type: 'text', text: '{"step":6}' }])
+      await controller.prompt(request, source)
+      expect(resolve).toHaveBeenCalledTimes(1)
+      expect(followup).toHaveBeenCalledTimes(1)
+    } finally { await b.ctx.fiber.dispose() }
+  })
+
+  it('preserves a post-dispatch unknown outcome and finds its original receipt on retry', async () => {
+    const b = await contextPromptHarness()
+    try {
+      const agents = new ApiSessionAgentController(b.ctx)
+      vi.spyOn(agents, 'resolveAgent').mockResolvedValue({ agent: b.agent })
+      const resolve = vi.fn(() => [{ type: 'text' as const, text: 'fixed evidence' }])
+      const controller = new SessionCommandController(b.ctx, agents, '/workspace', resolve)
+      const followup = vi.spyOn(b.agent, 'followup').mockImplementation((message) => {
+        b.inbox.append('next-turn', message)
+        throw new Error('post-append observer failure')
+      })
+      const request = { requestId: 'context-unknown' as import('../src/types.ts').SessionRequestId, sessionId: b.agent.id,
+        mode: 'queue' as const, content: [{ type: 'text' as const, text: 'Explain' }], contexts: [{ kind: 'experiment', value: 1 }] }
+      const source = { kind: 'user' as const, rpcId: request.requestId }
+      await expect(controller.prompt(request, source)).rejects.toMatchObject({ code: 'gateway/internal' })
+      expect(b.inbox.nextTurn).toHaveLength(1)
+      await expect(controller.prompt(request, source)).resolves.toEqual({ accepted: true })
+      expect(followup).toHaveBeenCalledTimes(1)
+      expect(resolve).toHaveBeenCalledTimes(1)
+    } finally { await b.ctx.fiber.dispose() }
+  })
+
+  it('rejects an unmounted context owner before attachments or inbox writes', async () => {
+    const b = await contextPromptHarness()
+    try {
+      const admit = vi.spyOn(b.ctx.attachments, 'admitPromptContent')
+      const request = { requestId: 'missing-owner' as import('../src/types.ts').SessionRequestId, sessionId: b.agent.id,
+        mode: 'queue' as const, content: [{ type: 'text' as const, text: 'Explain' }], contexts: [{ kind: 'missing', value: null }] }
+      await expect(b.controller.prompt(request, { kind: 'user', rpcId: request.requestId }))
+        .rejects.toMatchObject({ code: 'session/prompt-context-unavailable' })
+      expect(admit).not.toHaveBeenCalled()
+      expect(b.inbox.nextTurn).toEqual([])
+    } finally { await b.ctx.fiber.dispose() }
+  })
+})
+
+
+describe('prompt context owner registration', () => {
+  it('does not apply a tiny context budget to ordinary prompts without selections', async () => {
+    const b = await contextPromptHarness({ maxPromptContextBytes: 1 })
+    try {
+      const followup = vi.spyOn(b.agent, 'followup').mockImplementation((message) => { b.inbox.append('next-turn', message) })
+      const request = { requestId: 'no-context' as import('../src/types.ts').SessionRequestId, sessionId: b.agent.id,
+        mode: 'queue' as const, content: [{ type: 'text' as const, text: 'Ordinary prompt' }] }
+      const signal = new AbortController().signal
+      await expect(b.service.prompt(request, signal)).resolves.toEqual({ accepted: true })
+      await expect(b.service.prompt({ ...request, requestId: 'empty-context' as import('../src/types.ts').SessionRequestId,
+        contexts: [] }, signal)).resolves.toEqual({ accepted: true })
+      expect(followup).toHaveBeenCalledTimes(2)
+      b.service.registerPromptContext('experiment', () => [])
+      await expect(b.service.prompt({ ...request, requestId: 'selected-context' as import('../src/types.ts').SessionRequestId,
+        contexts: [{ kind: 'experiment', value: null }] }, signal))
+        .rejects.toMatchObject({ code: 'session/prompt-context-invalid', details: { reason: 'BYTE_LIMIT' } })
+      expect(followup).toHaveBeenCalledTimes(2)
+    } finally { await b.ctx.fiber.dispose() }
+  })
+
+  it('withdraws providers and wraps only known provider refusals before effects', async () => {
+    const b = await contextPromptHarness()
+    try {
+      const request = { requestId: 'provider-failure' as import('../src/types.ts').SessionRequestId, sessionId: b.agent.id,
+        mode: 'queue' as const, content: [{ type: 'text' as const, text: 'Explain' }], contexts: [{ kind: 'experiment', value: null }] }
+      const signal = new AbortController().signal
+      const refusal = new RemoteError('gateway/bad-request', 'unsupported experiment', {})
+      const dispose = b.service.registerPromptContext('experiment', () => { throw refusal })
+      const admit = vi.spyOn(b.ctx.attachments, 'admitPromptContent')
+      await expect(b.service.prompt(request, signal)).rejects.toMatchObject({
+        code: 'session/prompt-context-rejected', details: { kind: 'experiment', code: 'gateway/bad-request', details: {} }, cause: refusal,
+      })
+      expect(admit).not.toHaveBeenCalled()
+      dispose()
+      await expect(b.service.prompt(request, signal)).rejects.toMatchObject({ code: 'session/prompt-context-unavailable' })
+      const unexpected = new Error('provider defect')
+      b.service.registerPromptContext('experiment', () => { throw unexpected })
+      await expect(b.service.prompt(request, signal)).rejects.toBe(unexpected)
+      expect(b.inbox.nextTurn).toEqual([])
+    } finally { await b.ctx.fiber.dispose() }
+  })
+
+  it('bounds the complete encoded UTF-8 blocks at exact bytes and limits selection count', async () => {
+    const blocks = [{ type: 'text' as const, text: '中文😀' }]
+    const bytes = Buffer.byteLength(JSON.stringify(blocks), 'utf8')
+    const b = await contextPromptHarness({ maxPromptContextBytes: bytes, maxPromptContexts: 1 })
+    try {
+      const followup = vi.spyOn(b.agent, 'followup').mockImplementation((message) => { b.inbox.append('next-turn', message) })
+      let output = blocks
+      b.service.registerPromptContext('experiment', () => output)
+      const request = { requestId: 'exact-bytes' as import('../src/types.ts').SessionRequestId, sessionId: b.agent.id,
+        mode: 'queue' as const, content: [{ type: 'text' as const, text: 'Explain' }], contexts: [{ kind: 'experiment', value: null }] }
+      const signal = new AbortController().signal
+      await expect(b.service.prompt(request, signal)).resolves.toEqual({ accepted: true })
+      expect(followup).toHaveBeenCalledTimes(1)
+      output = [{ type: 'text', text: '中文😀!' }]
+      await expect(b.service.prompt({ ...request, requestId: 'too-large' as import('../src/types.ts').SessionRequestId }, signal))
+        .rejects.toMatchObject({ code: 'session/prompt-context-invalid', details: { reason: 'BYTE_LIMIT' } })
+      await expect(b.service.prompt({ ...request, requestId: 'too-many' as import('../src/types.ts').SessionRequestId,
+        contexts: [...request.contexts, ...request.contexts] }, signal))
+        .rejects.toMatchObject({ code: 'session/prompt-context-invalid', details: { reason: 'COUNT_LIMIT' } })
+      expect(followup).toHaveBeenCalledTimes(1)
+    } finally { await b.ctx.fiber.dispose() }
   })
 })

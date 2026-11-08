@@ -1127,7 +1127,7 @@ function encodeRpcResult(value: unknown, codec: TypertCodec): ConnectionRpcResul
     return null
   }
   const encoded = codec.mode === 'strict'
-    ? codec.encode?.(value, writeBytes) ?? value
+    ? (codec.encode === undefined ? value : codec.encode(value, writeBytes))
     : encodeRuntimeResult(value, writeBytes)
   return { ok: true, value: encoded, ...(attachments.length === 0 ? {} : { attachments }) }
 }

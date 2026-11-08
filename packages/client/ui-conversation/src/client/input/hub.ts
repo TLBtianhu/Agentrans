@@ -18,10 +18,11 @@ import type { ModelSelectionProjection } from '@deepseek-ai/dsh-agent/types'
 import type { ObservableSnapshot } from '@deepseek-ai/dsh-client-store'
 import type {
   DraftAttachmentId, DraftAttachmentSerializationResult, DraftInitializationOptions, DraftInitializationResult, InputTriggerController,
-  SessionInputResolver, SessionInput, SubmitOutcome,
+  SessionInputResolver, SessionInput, DefaultSubmitOutcome,
 } from '../contract/input.ts'
 import type { ComposerKeyboard } from '../contract/draft-editor.ts'
 import type { ComposerBlocks } from '../contract/composer-blocks.ts'
+import type { PromptContextInput } from '@deepseek-ai/dsh-api-session-controller/types'
 import type { InputSubmitMode } from '../contract/composer-submission.ts'
 import type { PopupDismissFace } from './facade.ts'
 import { SessionInputShell } from './facade.ts'
@@ -42,6 +43,8 @@ interface InputTriggerServiceFace {
 /** Attachment-send face resolved lazily to keep hub/service construction acyclic. */
 interface ConversationAttachmentFace {
   readonly blocks: ComposerBlocks
+  capturePromptContexts(sessionId: SessionId): readonly PromptContextInput[]
+  abandonContextPrompt(session: SessionFace, attempt?: number): void
   sendSession(
     session: SessionFace,
     text: string,
@@ -49,7 +52,8 @@ interface ConversationAttachmentFace {
     mode: InputSubmitMode,
     signal?: AbortSignal,
     accept?: () => void,
-  ): Promise<SubmitOutcome>
+    context?: { readonly attempt: number; readonly inputs: readonly PromptContextInput[] },
+  ): Promise<DefaultSubmitOutcome>
   serializeDraftAttachments(attachmentIds: readonly DraftAttachmentId[]): Promise<DraftAttachmentSerializationResult>
   releaseDraftAttachment(id: DraftAttachmentId): void
 }
@@ -102,6 +106,9 @@ export class InputHub implements SessionInputResolver {
     const { session, ctx: actx } = binding
     const shell = new SessionInputShell({
       actx,
+      capturePromptContexts: () => this.conversation().capturePromptContexts(session.sessionId),
+      contextCaptureFailure: () => this.t('input.contextCaptureFailed'),
+      abandonContextPrompt: (attempt) => { this.conversation().abandonContextPrompt(session, attempt) },
       submissionState: () => {
         const state = session.getSnapshot()
         const model = session.projections.faceOf('modelSelection').getSnapshot() as ModelSelectionProjection | undefined
@@ -125,7 +132,8 @@ export class InputHub implements SessionInputResolver {
       inputTriggers: () => this.controller(actx),
       popup: () => this.popup(actx),
       inbox: session.projections.faceOf('inbox') as ObservableSnapshot<InboxState | undefined>,
-      defaultSink: (text, attachmentIds, mode, signal, accept) => this.sink(session, text, attachmentIds, mode, signal, accept),
+      defaultSink: (text, attachmentIds, mode, signal, accept, context) =>
+        this.sink(session, text, attachmentIds, mode, signal, accept, context),
       quoteRemoveLabel: () => this.t('quote.remove'),
       quoteInsertionAllowed: () => {
         const state = session.getSnapshot()
@@ -171,7 +179,9 @@ export class InputHub implements SessionInputResolver {
         const drafts = shell.dispose()
         this.shells.delete(binding)
         const conversation = this.rootCtx.get('conversation') as ConversationAttachmentFace | undefined
-        for (const attachmentId of drafts) conversation?.releaseDraftAttachment(attachmentId)
+        try { conversation?.abandonContextPrompt(session) } finally {
+          for (const attachmentId of drafts) conversation?.releaseDraftAttachment(attachmentId)
+        }
       }
     }, 'conversation.input: session shell')
     actx.inject(['inputTriggers'], (scope) => {
@@ -250,9 +260,10 @@ export class InputHub implements SessionInputResolver {
     mode: InputSubmitMode,
     signal: AbortSignal,
     accept: () => void,
-  ): Promise<SubmitOutcome> {
+    context?: { readonly attempt: number; readonly inputs: readonly PromptContextInput[] },
+  ): Promise<DefaultSubmitOutcome> {
     if (text === '' && attachmentIds.length === 0) return Promise.resolve({ kind: 'success' })
-    return this.conversation().sendSession(session, text, attachmentIds, mode, signal, accept)
+    return this.conversation().sendSession(session, text, attachmentIds, mode, signal, accept, context)
   }
 
   /**

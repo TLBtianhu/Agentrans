@@ -6,18 +6,18 @@ import type { Agent } from '@deepseek-ai/dsh-agent'
 import type {} from '@deepseek-ai/dsh-fs'
 import { Context, Service } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
-import { errorChain, ReasoningEffortId, type MessageSource } from '@deepseek-ai/dsh-llm'
+import { deepFreeze, snapshotJsonValue, type JsonValue } from '@deepseek-ai/dsh-util-values'
+import { errorChain, ReasoningEffortId, type MessageSource, type TextBlock } from '@deepseek-ai/dsh-llm'
 import type {} from '@deepseek-ai/dsh-client-file-upload'
 import { canOpenNativePath, nativeFileManager, nativeFileApplications, openNativeFileApplication, openNativeAssociatedPath, revealNativePath } from '@deepseek-ai/dsh-native-command'
 import type { SessionId } from '@deepseek-ai/dsh-session'
 import { SessionSeq } from '@deepseek-ai/dsh-session'
-import {
-  createBranchResultMessage, findBranchResult, selectBranchResult,
-} from '@deepseek-ai/dsh-session-branch'
+import { selectBranchResult } from '@deepseek-ai/dsh-session-branch'
+import { admitBranchResult, BranchResultAdmissionBusy, BranchResultAdmissionConflict } from '@deepseek-ai/dsh-session-branch/admission'
 import type { BranchResultSelectionFailure } from '@deepseek-ai/dsh-session-branch/types'
 import type {} from '@deepseek-ai/dsh-session-projection-cache'
 import { SessionQueryError, type SessionObservation } from '@deepseek-ai/dsh-session-query'
-import { Remote, RemoteError, TypertRemoteService, principalOf, type TypertResourceResolveInput } from '@deepseek-ai/dsh-typert-protocol'
+import { Remote, RemoteError, TypertRemoteService, principalOf, remoteErrorOf, type TypertResourceResolveInput } from '@deepseek-ai/dsh-typert-protocol'
 import { canonicalClientTimeZone } from '@deepseek-ai/dsh-util-time'
 import { assertNever } from '@deepseek-ai/dsh-util-values'
 import type {} from '@deepseek-ai/dsh-api-remote-access'
@@ -25,6 +25,7 @@ import {
   ApiSessionAgentController,
   type ApiSessionAgentResult,
 } from './agent.ts'
+import type {} from '@deepseek-ai/dsh-session-input'
 import { SessionCommandController, hasPromptContent } from './commands.ts'
 import { SessionControlController } from './control.ts'
 import { HistoryController } from './history/controller.ts'
@@ -59,7 +60,7 @@ import type {
   SessionOpenWorkspacePathValue,
   SessionEventsPage, SessionPageRequest, SessionEventFrame, SessionObserveEventRequest,
   SessionProjectionFrame, SessionStateRequest, SessionState, SessionWaitRequest, SessionWaitValue,
-  SessionPromptRequest,
+  PromptContextInput, SessionPromptRequest,
   SessionPromptValue,
   SessionRenameRequest,
   SessionRenameValue,
@@ -132,10 +133,18 @@ export interface Config {
   readonly nativeOpen?: boolean
   /** Positive integral milliseconds of list work before yielding between complete rows. */
   readonly listWorkSliceMs?: number
+  /** Maximum feature selections carried by one prompt; default 8. */
+  readonly maxPromptContexts?: number
+  /** Maximum UTF-8 bytes of complete encoded context text blocks; default 16384. */
+  readonly maxPromptContextBytes?: number
 }
 
 /** Deployment policy after schema defaults have been applied. */
-type ResolvedConfig = Config & { readonly listWorkSliceMs: number }
+type ResolvedConfig = Config & {
+  readonly listWorkSliceMs: number
+  readonly maxPromptContexts: number
+  readonly maxPromptContextBytes: number
+}
 
 /** Host integrations replaceable by direct unit tests. */
 export interface SessionControllerInternals {
@@ -163,6 +172,7 @@ export class SessionController extends TypertRemoteService {
     'remoteAccess',
     'sessions',
     'sessionProjections',
+    'sessionInputs',
     'sessionQuery',
     'typert',
     'typertGateway',
@@ -172,6 +182,8 @@ export class SessionController extends TypertRemoteService {
   static Config: z<Config, ResolvedConfig> = z.object({
     nativeOpen: z.boolean(),
     listWorkSliceMs: z.natural().min(1).default(16),
+    maxPromptContexts: z.natural().min(1).default(8),
+    maxPromptContextBytes: z.natural().min(1).default(16_384),
   })
 
   private historyController!: HistoryController
@@ -187,6 +199,8 @@ export class SessionController extends TypertRemoteService {
   private readonly openFileApplication: typeof openNativeFileApplication
   private readonly revealPath: (path: string, signal: AbortSignal) => Promise<void>
   private readonly canOpenPath: () => boolean
+  private readonly promptContexts = new Map<string, (agent: Agent, value: import('@deepseek-ai/dsh-util-values').JsonValue) => readonly TextBlock[]>()
+  private readonly promptContextPolicy: ResolvedConfig
   private readonly listWorkSliceMs: number
   private readonly promotions = new Set<Promise<void>>()
   private readonly branchResults = new Map<string, Promise<SessionBranchResultValue>>()
@@ -198,7 +212,8 @@ export class SessionController extends TypertRemoteService {
    */
   constructor(ctx: Context, config: Config, internals: SessionControllerInternals = {}) {
     super(ctx, 'sessionController', { namespace: 'session' })
-    this.listWorkSliceMs = SessionController.Config(config).listWorkSliceMs
+    this.promptContextPolicy = SessionController.Config(config)
+    this.listWorkSliceMs = this.promptContextPolicy.listWorkSliceMs
     this.fileApplications = internals.fileApplications ?? nativeFileApplications
     this.openFileApplication = internals.openFileApplication ?? openNativeFileApplication
     this.openPath = internals.openPath ?? openNativeAssociatedPath
@@ -207,12 +222,54 @@ export class SessionController extends TypertRemoteService {
       ?? (() => config.nativeOpen ?? (internals.openPath !== undefined || canOpenNativePath()))
   }
 
+  /**
+   * Register the domain owner of one optional prompt selection.
+   * @param kind - unique selection kind.
+   * @param resolve - synchronous Host validation and model-visible text construction.
+   * @returns disposer that withdraws this registration.
+   */
+  registerPromptContext(kind: string, resolve: (agent: Agent, value: import('@deepseek-ai/dsh-util-values').JsonValue) => readonly TextBlock[]): () => void {
+    if (!/^[a-z][a-z0-9._-]{0,79}$/.test(kind)) throw new Error('Invalid prompt context kind')
+    if (this.promptContexts.has(kind)) throw new Error(`Prompt context already registered: ${kind}`)
+    this.promptContexts.set(kind, resolve)
+    return () => { if (this.promptContexts.get(kind) === resolve) this.promptContexts.delete(kind) }
+  }
+
+  private resolvePromptContexts(agent: Agent, inputs: readonly PromptContextInput[]): readonly TextBlock[] {
+    if (inputs.length === 0) return []
+    if (inputs.length > this.promptContextPolicy.maxPromptContexts) {
+      throw new RemoteError('session/prompt-context-invalid', 'Too many prompt context selections', { kind: inputs[0]?.kind ?? '', reason: 'COUNT_LIMIT' })
+    }
+    const blocks: TextBlock[] = []
+    for (const input of inputs) {
+      if (!/^[a-z][a-z0-9._-]{0,79}$/.test(input.kind)) {
+        throw new RemoteError('session/prompt-context-invalid', 'Invalid prompt context kind', { kind: input.kind, reason: 'INVALID_KIND' })
+      }
+      const resolve = this.promptContexts.get(input.kind)
+      if (resolve === undefined) throw new RemoteError('session/prompt-context-unavailable', 'Selected prompt context is unavailable', { kind: input.kind })
+      try { blocks.push(...resolve(agent, input.value)) } catch (error) {
+        const refusal = remoteErrorOf(error)
+        if (refusal === undefined) throw error
+        throw new RemoteError('session/prompt-context-rejected', 'Selected context was rejected before prompt admission', {
+          kind: input.kind, code: refusal.code, details: refusal.details as JsonValue,
+        }, { cause: error })
+      }
+    }
+    if (Buffer.byteLength(JSON.stringify(blocks), 'utf8') > this.promptContextPolicy.maxPromptContextBytes) {
+      throw new RemoteError('session/prompt-context-invalid', 'Prompt context exceeds its byte limit', { kind: inputs[0]?.kind ?? '', reason: 'BYTE_LIMIT' })
+    }
+    const detached = snapshotJsonValue(blocks)
+    if (detached === undefined) throw new Error('Prompt context owner returned non-JSON text')
+    return deepFreeze(detached)
+  }
+
   protected async [Service.init](): Promise<void> {
     const ctx = this.ctx
     ctx.typert.resources.register('session', { resolve: resolveSessionResource })
     this.agents = new ApiSessionAgentController(ctx)
     this.agents.initialize()
-    this.commands = new SessionCommandController(ctx, this.agents, process.cwd())
+    this.commands = new SessionCommandController(ctx, this.agents, process.cwd(),
+      (agent, inputs) => this.resolvePromptContexts(agent, inputs))
     ctx.effect(() => ctx.fileUploads.registerAgentResolver(async (sessionId) => {
       const result = await this.agents.resolveAgent(sessionId)
       if ('error' in result) throw result.error
@@ -481,7 +538,8 @@ export class SessionController extends TypertRemoteService {
    * A repeated `(parent, branch, resultSeq)` request returns the existing parent event.
    * @param request - direct parent, ordinary branch, and child-owned durable assistant seq.
    * @returns the parent-local user/message receipt after its durability checkpoint.
-   * @throws RemoteError when lineage or the result is invalid, or the parent is running or under maintenance.
+   * @throws RemoteError when lineage is invalid, the parent is busy, or the result was returned with different content.
+   * Other failures may follow a committed append; retry the same request to recover its receipt.
    */
   @Remote({
     name: 'returnBranchResult',
@@ -532,22 +590,21 @@ export class SessionController extends TypertRemoteService {
     if ('error' in resolved) throw resolved.error
     const parent = resolved.agent
     try {
-      return await parent.runMaintenance(async (signal) => {
-        using current = await this.ctx.sessionQuery.observeSession(parent.id, { projectionMode: 'none', signal })
-        const existing = findBranchResult(current.events, selection.value.reference)
-        if (existing !== undefined) {
-          await this.ctx.sessions.flush(parent.session)
-          return { parentSessionId: parent.id, ...existing }
-        }
-        const message = createBranchResultMessage(selection.value)
-        const event = parent.session.append('user/message', message, { surfaceOp: 'append' })
-        await this.ctx.sessions.flush(parent.session)
-        return { parentSessionId: parent.id, eventSeq: event.seq, messageId: event.data.id }
+      const receipt = await admitBranchResult(parent, selection.value, {
+        observeParent: signal => this.ctx.sessionQuery.observeSession(parent.id, { projectionMode: 'none', signal }),
+        flushParent: () => this.ctx.sessions.flush(parent.session),
       })
+      return { parentSessionId: parent.id, ...receipt }
     } catch (error) {
-      throw new RemoteError('session/agent-busy', 'The parent branch is running; retry when it becomes idle.', {
-        reason: 'branch-result-parent-busy',
-      }, { cause: error })
+      if (error instanceof BranchResultAdmissionBusy) {
+        throw new RemoteError('session/agent-busy', error.message, { reason: 'branch-result-parent-busy' }, { cause: error })
+      }
+      if (error instanceof BranchResultAdmissionConflict) {
+        throw new RemoteError('session/branch-result-conflict', error.message, {
+          parentSessionId: request.sessionId, branchSessionId: request.branchSessionId, resultSeq,
+        }, { cause: error })
+      }
+      throw error
     }
   }
 

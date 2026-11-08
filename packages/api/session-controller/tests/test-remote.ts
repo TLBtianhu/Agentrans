@@ -24,6 +24,7 @@ import {
   type SessionPersistenceStatOptions,
 } from '@deepseek-ai/dsh-session-persistence'
 import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
+import SessionInputAdmission from '@deepseek-ai/dsh-session-input'
 import SessionQueryEngine from '@deepseek-ai/dsh-session-query'
 import { vi } from 'vitest'
 import {
@@ -107,6 +108,8 @@ export interface TestSessionRemoteDefaults {
   readonly openFileApplication?: SessionControllerInternals['openFileApplication']
   readonly revealPath?: (path: string, signal: AbortSignal) => Promise<void>
   readonly canOpenPath?: () => boolean
+  readonly maxPromptContexts?: number
+  readonly maxPromptContextBytes?: number
   readonly listWorkSliceMs?: number
 }
 
@@ -297,6 +300,7 @@ async function installControllers(
     } as never)
   }
   installSessionReadTestServices(ctx)
+  if (ctx.get('sessionInputs') === undefined) await ctx.plugin(SessionInputAdmission)
   if (ctx.get('remoteAccess') === undefined) new RemoteAccessService(ctx)
   const cwd = vi.spyOn(process, 'cwd').mockReturnValue(defaults.cwd)
   class TestController extends SessionController {
@@ -311,6 +315,8 @@ async function installControllers(
       {
         ...defaults.nativeOpen === undefined ? {} : { nativeOpen: defaults.nativeOpen },
         ...defaults.listWorkSliceMs === undefined ? {} : { listWorkSliceMs: defaults.listWorkSliceMs },
+        ...defaults.maxPromptContexts === undefined ? {} : { maxPromptContexts: defaults.maxPromptContexts },
+        ...defaults.maxPromptContextBytes === undefined ? {} : { maxPromptContextBytes: defaults.maxPromptContextBytes },
       },
       {
         ...defaults.openPath === undefined ? {} : { openPath: defaults.openPath },

@@ -19,6 +19,7 @@ import type { FileUploadReceiptId } from '@deepseek-ai/dsh-client-file-upload/ty
 import { describe, expect, it, onTestFinished, vi } from 'vitest'
 import { ApiSessionAgentController } from '../src/agent.ts'
 import { SessionCommandController } from '../src/commands.ts'
+import SessionInputAdmission from '@deepseek-ai/dsh-session-input'
 import type { SessionRequestId } from '../src/types.ts'
 
 const SESSION = SessionId('upload-session')
@@ -61,6 +62,7 @@ async function uploadHarness(origin?: 'subagent', imageLimits: ImageAttachmentLi
   await ctx.plugin(SessionStore)
   await ctx.plugin(SessionProjectionRegistry)
   await ctx.plugin(AgentRegistry)
+  await ctx.plugin(SessionInputAdmission)
   await ctx.plugin(CommandRuntime)
   const session = ctx.sessions.create(SESSION, {
     meta: { cwd: '/workspace', ...(origin === undefined ? {} : { origin }) },
@@ -527,13 +529,15 @@ describe('Session file uploads', () => {
     const { controller, agent, followup } = await uploadHarness()
     const request = promptRequest([{ type: 'text', text: 'once' }])
     await controller.prompt(request, USER_SOURCE)
-    agent.inbox.append('next-turn', followup.mock.calls[0]?.[0] as UserMessage)
+    const accepted = followup.mock.calls[0]?.[0] as UserMessage
+    agent.inbox.append('next-turn', accepted)
+    agent.session.append('agent/inbox/spliced', { target: 'next-turn', start: 0, inserted: [accepted] })
     await expect(controller.prompt(request, USER_SOURCE)).resolves.toEqual({ accepted: true })
     expect(followup).toHaveBeenCalledOnce()
   })
 
   it('deduplicates a retried rpcId already present in the durable log', async () => {
-    const { controller, agent, followup } = await uploadHarness()
+    const { controller, agent, followup } = await uploadHarness(undefined, IMAGE_LIMITS)
     const request = promptRequest([{ type: 'text', text: 'once' }])
     agent.session.append('turn/start', { turn: 1 })
     agent.session.append('user/message', createUserMessage({

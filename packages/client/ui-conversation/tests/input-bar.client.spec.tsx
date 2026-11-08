@@ -2186,3 +2186,21 @@ it('places context usage below the composer and hides it until the activity clos
   expect(view.getByRole('dialog', { name: '上下文已用' })).toBeTruthy()
   expect(view.getByRole('button', { name: '发送消息' })).toBeTruthy()
 })
+
+
+describe('prompt toast settlement', () => {
+  it('removes a prompt failure toast when late acceptance clears its error', () => {
+    const b = bench({ promptError: { op: 'send', error: new RemoteError('gateway/internal', 'unconfirmed context send', {}) } })
+    expect(b.view.getByRole('alert').textContent).toContain('unconfirmed context send')
+    act(() => { b.session.set({ ...b.session.getSnapshot(), promptError: null }) })
+    expect(b.view.queryByRole('alert')).toBeNull()
+  })
+
+  it('does not dismiss an unrelated notice when a prompt error clears', () => {
+    const b = bench({ promptError: { op: 'send', error: new RemoteError('gateway/internal', 'unconfirmed context send', {}) } })
+    act(() => { b.shell.notify('error', 'independent intake failure') })
+    expect(b.view.getByRole('alert').textContent).toContain('independent intake failure')
+    act(() => { b.session.set({ ...b.session.getSnapshot(), promptError: null }) })
+    expect(b.view.getByRole('alert').textContent).toContain('independent intake failure')
+  })
+})

@@ -17,7 +17,7 @@ import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useStat
 import type { ChangeEvent, KeyboardEvent, MouseEvent } from 'react'
 import clsx from 'clsx'
 import {
-  focusWithoutRing, IconPlusOutlineMedium, IconWarningOutlineRegular, isMobileDevice, Toast, Tooltip,
+  Button, focusWithoutRing, IconPlusOutlineMedium, IconWarningOutlineRegular, isMobileDevice, Toast, Tooltip,
 } from '@deepseek-ai/dsh-client-ui-primitives'
 // Type-only: the `plan` projection key merge (the TodoDock posture — the
 // composer reads a host-computed value; the domain owns the key).
@@ -97,11 +97,11 @@ export const InputBar = memo(function InputBar({
   // Transient error banner (machine notices, image-intake rejections, and
   // prompt failures): the seq keys the Toast so an identical repeated message
   // restarts the hold-then-fade cycle instead of reusing the faded one.
-  const [toast, setToast] = useState<{ seq: number; text: string } | null>(null)
+  const [toast, setToast] = useState<{ seq: number; text: string; source: 'prompt' | 'other' } | null>(null)
   const toastSeq = useRef(0)
-  const showToast = useCallback((text: string) => {
+  const showToast = useCallback((text: string, source: 'prompt' | 'other' = 'other') => {
     toastSeq.current += 1
-    setToast({ seq: toastSeq.current, text })
+    setToast({ seq: toastSeq.current, text, source })
   }, [])
   const dismissToast = useCallback(() => { setToast(null) }, [])
   // The deployment's image-intake limits (absent while no attachment service
@@ -121,15 +121,23 @@ export const InputBar = memo(function InputBar({
   // refused them. Writer contention has localized recovery guidance; other
   // failures retain the diagnostic message and code.
   useEffect(() => {
-    if (promptError === null) return
+    if (promptError === null) {
+      setToast(current => current?.source === 'prompt' ? null : current)
+      return
+    }
     const { error } = promptError
     if (error.code === 'session/writer-held') {
-      showToast(t('error.sessionInUse'))
+      showToast(t('error.sessionInUse'), 'prompt')
+      return
+    }
+    if (error.code === 'session/prompt-context-rejected' || error.code === 'session/prompt-context-invalid'
+      || error.code === 'session/prompt-context-unavailable') {
+      showToast(t('input.contextRejected'), 'prompt')
       return
     }
     showToast(error.code === 'session/attachment-invalid' || error.code === 'subagent/attachment-invalid'
       ? attachmentErrorText(t, error.details.reason, imageLimits)
-      : `${error.message} (${error.code})`)
+      : `${error.message} (${error.code})`, 'prompt')
   }, [promptError, showToast, t, imageLimits])
   useEffect(() => {
     if (notice?.level === 'error') showToast(notice.text)
@@ -158,7 +166,7 @@ export const InputBar = memo(function InputBar({
   // the composer asking for the only thing it prevents. The other reasons to
   // be disabled do lock it — there is no session to choose a model for.
   const modelSeatLocked = removed || inert || !live
-  const machineBusy = input?.phase === 'adjudicating' || input?.phase === 'submitting' || input?.phase === 'sending'
+  const machineBusy = input?.phase === 'adjudicating' || input?.phase === 'submitting' || input?.phase === 'sending' || input?.phase === 'uncertain'
   // The message waits for the Host to accept it; Send shows progress instead of the arrow.
   const sending = input?.phase === 'sending'
   // The no-workspace surface remains the resident DOM node but acts as the
@@ -425,6 +433,11 @@ export const InputBar = memo(function InputBar({
           onDone={dismissToast}
         />
       )}
+      {input?.phase === 'uncertain' && <div className={css.notice} role="alert" data-prompt-context-retry>
+        <p>{t('input.contextUnknown')}</p>
+        <Button size="sm" variant="outline" onClick={() => { inputActions?.retrySubmission?.() }}>{t('input.contextRetry')}</Button>
+        <Button size="sm" variant="ghost" onClick={() => { inputActions?.dismissSubmission?.() }}>{t('input.contextDismiss')}</Button>
+      </div>}
       {notice?.level === 'info' && (
         <div className={css.notice} role="status">
           {notice.text}

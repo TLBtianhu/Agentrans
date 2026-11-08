@@ -132,6 +132,10 @@ Send 和 Stop 按钮禁用时不显示提示气泡，轮次结束后由 Stop 切
 
 在获得焦点的 Chat 或 Composer 中连续独立按下两次 Esc，可停止当前运行轮次并保留排队消息。间隔由 shortcuts 插件的 `stopSequenceMs` 配置决定，默认 500 ms。菜单、审批、模态层、终端、内嵌网页、输入法、重复按键，以及输入区域、Session 或轮次变化会清空序列。快捷键与 Stop 按钮调用同一作用域取消操作。插件将 Stop 注册为 `input` 展示分组中的固定操作。该注册使普通 Esc 不能分配给可编辑快捷键，并为 Stop 按钮的悬停和键盘聚焦提示提供 `Esc Esc` 序列。
 
+`conversation.registerPromptContext(kind, capture)` 注册按 Session 寻址的同步功能选择。普通 Enter 在引用展开、命令仲裁或附件准备前，捕获脱离原对象并深冻结的 JSON。已认领命令不捕获上下文；未认领斜杠行只有成为普通消息时才使用它。捕获失败会保留草稿且不发送。注册返回清理函数，由贡献插件拥有生命周期。
+
+带上下文的消息由提交所有者保留首次序列化的文本、附件、投递方式、选择、请求 id 与浏览器时区。结果未知时进入只读 `uncertain` 状态，提供 **重试原消息** 和 **放弃本次重试**。重试不会重新读取变化后的实验或引用；之后的服务拒绝也不会抹去原未知请求。放弃后恢复编辑，但不撤销已接受的消息。迟到的 Inbox 或持久消息接受事实同样可结算原尝试。之后的 HTTP 失败不会降级已观察到的接受；确认请求只清除该请求自己的失败提示。未知结果重试成功后，提交者释放尚未观察到的本地回显及已接受的草稿附件，展示交给 Host Inbox 和历史；原排队项已在本地事件窗口之外取消时同样适用。Host 数据到达前可能短暂不显示该消息。释放回显不会取消 Host 输入。Session 或插件卸载会中止准备、放弃本地回显并释放保留数据。没有上下文的消息保持既有行为。
+
 <a id="temporary-composer-entries"></a>
 ## 临时 composer entry
 
@@ -198,6 +202,8 @@ selector 必须是 owner currency 的纯函数。非 null 返回值作为 `match
 ## 已知限制与暂缓事项
 
 <a id="known-limitations-and-deferred-work"></a>
+
+- 未确认的上下文请求只由活跃 Session binding 保留。刷新或释放 binding 会清除本地重试状态，但不会取消 Host 输入；离开前应重试或核对历史。跨刷新恢复未确认请求暂缓。
 
 - **只有已注册 target 可以渲染**——除已注册的 `chat` 偏好外，shell 刻意不提供隐式 fallback target。
 - **Factory occurrence 继承渲染位置的 Session**——`conversation.content` 不接受独立寻址的 Session；该能力需要单独的 Session provider。

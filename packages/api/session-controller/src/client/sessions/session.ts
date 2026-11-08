@@ -1,5 +1,6 @@
 // Sessions remain resident after creation so their open Remote sources keep running off-screen.
 
+import type { PromptContextInput } from '../../types.ts'
 import type { Context } from '@deepseek-ai/cordis'
 import type { InboxState, InboxTarget } from '@deepseek-ai/dsh-agent/types'
 import { randomUUID } from '@deepseek-ai/dsh-util-crypto'
@@ -126,6 +127,8 @@ export class Session implements SessionFace {
   private blankBit = true
   private removed = false
   private promptError: PromptError | null = null
+  private promptErrorRequestId: SessionRequestId | undefined
+  private promptAttemptSequence = 0
   private lastAgentError: string | null = null
   /** Local submission echoes, insertion-ordered, including those the Host has not accepted yet. */
   private pendingSubmissions: readonly PendingSubmission[] = []
@@ -146,6 +149,7 @@ export class Session implements SessionFace {
     admitted?: readonly (ImageAttachmentRef | FileAttachmentRef)[]
     /** Whether the Host accepted the prompt; the echo is published only from then on. */
     accepted: boolean
+    contextual?: boolean
     readonly onAccept?: (() => void) | undefined
     readonly onRetire?: ((retirement: PendingSubmissionRetirement) => void) | undefined
     retiring: boolean
@@ -232,6 +236,7 @@ export class Session implements SessionFace {
    * @returns the minted identity for {@link prompt} plus the pre-prompt abandon path.
    */
   beginSubmission(input: BeginSubmissionInput): SubmissionHandle {
+    const clientTimeZone = input.captureTimeZone === true ? resolvedClientTimeZone() : undefined
     const requestId = randomUUID() as SessionRequestId
     const placement = this.running ? input.mode === 'steer' ? 'steering' : 'queued' : 'transcript'
     this.pendingSubmissions = [...this.pendingSubmissions, {
@@ -244,7 +249,8 @@ export class Session implements SessionFace {
     this.submissionSettlements.set(requestId, {
       placement, accepted: false, onAccept: input.onAccept, onRetire: input.onRetire, retiring: false,
     })
-    return { requestId, abandon: () => { this.retireFailedSubmission(requestId) } }
+    return { requestId, ...clientTimeZone === undefined ? {} : { clientTimeZone },
+      abandon: () => { this.retireFailedSubmission(requestId) } }
   }
 
   /**
@@ -256,6 +262,8 @@ export class Session implements SessionFace {
    * @param mode - queue appends after the current turn; steer interrupts it.
    * @param signal - optional caller cancellation for the complete admission round-trip.
    * @param requestId - identity from {@link beginSubmission}; a failed identified prompt retires its echo.
+   * @param contexts - frozen optional selections retained by the contextual submission.
+   * @param capturedTimeZone - original browser zone retained across retries.
    * @returns the prompt result (also mirrored into promptError on failure).
    */
   async prompt(
@@ -263,7 +271,14 @@ export class Session implements SessionFace {
     mode: 'queue' | 'steer',
     signal?: AbortSignal,
     requestId?: SessionRequestId,
+    contexts?: readonly PromptContextInput[],
+    capturedTimeZone?: string,
   ): Promise<RemoteResult<{ accepted: true }>> {
+    const contextual = (contexts?.length ?? 0) > 0
+    const contextualSettlement = contextual && requestId !== undefined ? this.submissionSettlements.get(requestId) : undefined
+    if (contextualSettlement !== undefined) contextualSettlement.contextual = true
+    const attempt = ++this.promptAttemptSequence
+    this.promptErrorRequestId = undefined
     this.promptError = null
     this.lastAgentError = null
     // Before the first await, so a turn observed ahead of the receipt clears it.
@@ -271,14 +286,17 @@ export class Session implements SessionFace {
     if (firstPrompt) this.firstPromptPendingTurn = true
     let result: RemoteResult<{ accepted: true }>
     if (this.address === undefined) {
-      const clientTimeZone = resolvedClientTimeZone()
+      const clientTimeZone = capturedTimeZone ?? resolvedClientTimeZone()
       result = await this.remote.session.prompt({
         requestId: requestId ?? randomUUID() as SessionRequestId,
         sessionId: this.sessionId,
         mode,
         content,
         clientTimeZone,
+        ...contexts === undefined || contexts.length === 0 ? {} : { contexts },
       }, signal)
+    } else if (contexts !== undefined && contexts.length > 0) {
+      result = { ok: false, error: new RemoteError('session/prompt-context-unavailable', 'Subagent prompt context admission is not supported', { kind: contexts[0]?.kind ?? '' }) }
     } else if (content.some(part => part.type === 'file')) {
       result = {
         ok: false,
@@ -304,10 +322,13 @@ export class Session implements SessionFace {
       result = routed.ok ? { ok: true, value: { accepted: true } } : routed
     }
     if (!result.ok) {
+      if (contextualSettlement?.accepted === true) return { ok: true, value: { accepted: true } }
+      if (contextual && attempt !== this.promptAttemptSequence) return result
       // Rejection must leave a first prompt blank and eligible for workspace reuse.
       if (firstPrompt) this.firstPromptPendingTurn = false
-      if (requestId !== undefined) this.retireFailedSubmission(requestId)
+      if (requestId !== undefined && (contexts === undefined || contexts.length === 0)) this.retireFailedSubmission(requestId)
       this.promptError = { op: 'send', error: result.error }
+      this.promptErrorRequestId = contextual ? requestId : undefined
       this.notifier.markDirty()
       return result
     }
@@ -324,6 +345,11 @@ export class Session implements SessionFace {
    * @param requestId - identity from {@link beginSubmission}; absent for a prompt sent without an echo.
    */
   private acceptPrompt(requestId: SessionRequestId | undefined): void {
+    if (requestId !== undefined && this.promptError?.op === 'send' && this.promptErrorRequestId === requestId) {
+      this.promptError = null
+      this.promptErrorRequestId = undefined
+      this.notifier.markDirty()
+    }
     const settlement = requestId === undefined ? undefined : this.submissionSettlements.get(requestId)
     if (settlement?.accepted === true) return
     if (settlement !== undefined) {
@@ -842,6 +868,7 @@ export class Session implements SessionFace {
       return
     }
     settlement.admitted = attachmentRefsIn(message.content)
+    if (settlement.contextual === true) this.acceptPrompt(source.rpcId)
     this.retireAdmittedSubmission(source.rpcId)
   }
 
@@ -884,7 +911,7 @@ export class Session implements SessionFace {
     scheduleFrame(() => { this.finishSubmission(requestId, { reason: 'observed', attachments }) })
   }
 
-  /** Remove one unsettled echo immediately (prompt rejection, abort, or disposal). */
+  /** Release one unobserved local echo; this says nothing about Host cancellation or acceptance. */
   private retireFailedSubmission(requestId: SessionRequestId): void {
     const settlement = this.submissionSettlements.get(requestId)
     if (settlement === undefined || settlement.retiring || settlement.admitted !== undefined) return

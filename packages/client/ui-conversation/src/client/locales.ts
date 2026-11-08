@@ -9,6 +9,12 @@ const PLAN_NEXT_ACTION_EN = 'describe your task to generate plan'
 
 /** Simplified Chinese dictionary (the key-set source of truth). */
 export const zh = {
+  'input.contextCaptureFailed': '无法固定选定上下文。请检查当前实验后重发。',
+  'input.contextRejected': '选定上下文未能附加。请重新选择或移除后重发。',
+  'input.contextUnknown': '无法确认这条消息是否已发送。重试会使用原消息和原实验条件；放弃重试不会撤回已发送消息。 离开或刷新前，请先重试或核对对话记录。',
+  'input.contextRetry': '重试原消息',
+  'input.contextDismiss': '放弃本次重试',
+
   'quote.remove': '移除引用',
   'shortcut.newline': '换行',
   'shortcut.complementary': '使用互补的 Queue／Steer 方式',
@@ -399,6 +405,12 @@ export type ConversationKey = keyof typeof zh
 
 /** English dictionary, checked complete against the zh key set. */
 export const en = {
+  'input.contextCaptureFailed': 'Unable to capture the selected context. Check the current experiment before sending again.',
+  'input.contextRejected': 'The selected context could not be attached. Select it again or remove it before sending.',
+  'input.contextUnknown': 'This message may already have been sent. Retry uses the original message and experiment conditions. Dismissing retry does not undo a sent message. Before leaving or reloading, retry or check the conversation history.',
+  'input.contextRetry': 'Retry original message',
+  'input.contextDismiss': 'Dismiss retry',
+
   'quote.remove': 'Remove quote',
   'shortcut.newline': 'New line',
   'shortcut.complementary': 'Use the complementary Queue / Steer action',
@@ -788,6 +800,12 @@ export const en = {
 
 /** Japanese copy, checked against the English keys. */
 export const ja = {
+  'input.contextCaptureFailed': '選択したコンテキストを固定できません。現在の実験を確認して再送してください。',
+  'input.contextRejected': '選択したコンテキストを追加できませんでした。選択し直すか削除して送信してください。',
+  'input.contextUnknown': 'このメッセージは送信済みの可能性があります。再試行は元のメッセージと実験条件を使用します。再試行を中止しても送信済みメッセージは取り消されません。 移動や再読み込みの前に再試行するか、履歴を確認してください。',
+  'input.contextRetry': '元のメッセージを再試行',
+  'input.contextDismiss': '再試行を中止',
+
   'quote.remove': '引用を削除',
   'shortcut.newline': '改行',
   'shortcut.complementary': '補助のキュー / 実行中の指示変更を使用',
@@ -1175,6 +1193,12 @@ export const ja = {
 
 /** Spanish dictionary, checked against the English keys. */
 export const es = {
+  'input.contextCaptureFailed': 'No se pudo capturar el contexto seleccionado. Revisa el experimento antes de volver a enviar.',
+  'input.contextRejected': 'No se pudo adjuntar el contexto seleccionado. Vuelve a seleccionarlo o elimínalo antes de enviar.',
+  'input.contextUnknown': 'Puede que este mensaje ya se haya enviado. Reintentar usa el mensaje y las condiciones originales. Descartar el reintento no anula un envío. Antes de salir o recargar, reintenta o revisa el historial.',
+  'input.contextRetry': 'Reintentar mensaje original',
+  'input.contextDismiss': 'Descartar reintento',
+
   'quote.remove': 'Eliminar cotización',
   'shortcut.newline': 'Nueva linea',
   'shortcut.complementary': 'Usar la acción alternativa de poner en cola o redirigir',
@@ -1564,6 +1588,12 @@ export const es = {
 
 /** French dictionary, checked against the English keys. */
 export const fr = {
+  'input.contextCaptureFailed': 'Impossible de figer le contexte sélectionné. Vérifiez l’expérience avant de renvoyer.',
+  'input.contextRejected': 'Le contexte sélectionné n’a pas pu être joint. Sélectionnez-le à nouveau ou retirez-le avant l’envoi.',
+  'input.contextUnknown': 'Ce message a peut-être déjà été envoyé. Le nouvel essai conserve le message et les conditions d’origine. Abandonner ne retire pas un message envoyé. Avant de quitter ou de recharger, réessayez ou consultez l’historique.',
+  'input.contextRetry': 'Réessayer le message initial',
+  'input.contextDismiss': 'Abandonner l’essai',
+
   'quote.remove': 'Supprimer le devis',
   'shortcut.newline': 'Nouvelle ligne',
   'shortcut.complementary': 'Utiliser l’action alternative de mise en attente ou de guidage',
@@ -1953,6 +1983,12 @@ export const fr = {
 
 /** German dictionary, checked against the English keys. */
 export const de = {
+  'input.contextCaptureFailed': 'Der gewählte Kontext konnte nicht erfasst werden. Prüfen Sie das Experiment vor dem erneuten Senden.',
+  'input.contextRejected': 'Der gewählte Kontext konnte nicht angefügt werden. Wählen Sie ihn erneut oder entfernen Sie ihn.',
+  'input.contextUnknown': 'Diese Nachricht wurde möglicherweise bereits gesendet. Ein neuer Versuch nutzt die ursprüngliche Nachricht und Bedingungen. Verwerfen macht das Senden nicht rückgängig. Wiederholen Sie vor dem Verlassen oder Neuladen oder prüfen Sie den Verlauf.',
+  'input.contextRetry': 'Ursprüngliche Nachricht erneut senden',
+  'input.contextDismiss': 'Wiederholung verwerfen',
+
   'quote.remove': 'Zitat entfernen',
   'shortcut.newline': 'Neue Zeile',
   'shortcut.complementary': 'Die alternative Aktion zum Vormerken oder Lenken verwenden',
@@ -2342,6 +2378,12 @@ export const de = {
 
 /** Russian dictionary, checked against the English keys. */
 export const ru = {
+  'input.contextCaptureFailed': 'Не удалось зафиксировать выбранный контекст. Проверьте эксперимент перед повторной отправкой.',
+  'input.contextRejected': 'Не удалось добавить выбранный контекст. Выберите его снова или удалите перед отправкой.',
+  'input.contextUnknown': 'Возможно, сообщение уже отправлено. Повтор использует исходное сообщение и условия эксперимента. Отказ от повтора не отменяет отправку. Перед выходом или обновлением повторите запрос либо проверьте историю.',
+  'input.contextRetry': 'Повторить исходное сообщение',
+  'input.contextDismiss': 'Отказаться от повтора',
+
   'quote.remove': 'Удалить цитату',
   'shortcut.newline': 'Новая линия',
   'shortcut.complementary': 'Использовать альтернативное действие: поставить в очередь или направить',
@@ -2731,6 +2773,12 @@ export const ru = {
 
 /** Portuguese dictionary, checked against the English keys. */
 export const pt = {
+  'input.contextCaptureFailed': 'Não foi possível capturar o contexto selecionado. Verifique a experiência antes de enviar novamente.',
+  'input.contextRejected': 'Não foi possível anexar o contexto selecionado. Selecione-o novamente ou remova-o antes de enviar.',
+  'input.contextUnknown': 'Esta mensagem pode já ter sido enviada. A nova tentativa usa a mensagem e as condições originais. Descartar não anula uma mensagem enviada. Antes de sair ou recarregar, tente novamente ou consulte o histórico.',
+  'input.contextRetry': 'Repetir mensagem original',
+  'input.contextDismiss': 'Descartar tentativa',
+
   'quote.remove': 'Remover cotação',
   'shortcut.newline': 'Nova linha',
   'shortcut.complementary': 'Usar a ação alternativa de enfileirar ou orientar',

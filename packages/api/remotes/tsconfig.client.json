@@ -76,6 +76,9 @@
       "path": "../../interaction/user-questions"
     },
     { "path": "../../artifact/artifact" },
+    { "path": "../../artifact/artifact-branch" },
+    { "path": "../../artifact/artifact-export" },
+    { "path": "../../artifact/artifact-runtime" },
     {
       "path": "../job-controller/tsconfig.client.json"
     },

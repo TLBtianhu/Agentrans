@@ -6,6 +6,7 @@
  * and its reference chips live in the shell's Lexical editor; the machine
  * here is the submit plane (phase, claim, attempt) alone.
  */
+import type { PromptContextInput } from '@deepseek-ai/dsh-api-session-controller/types'
 import type { Context } from '@deepseek-ai/cordis'
 import type { SessionBinding } from '@deepseek-ai/dsh-api-session-controller/client'
 import type { InboxState } from '@deepseek-ai/dsh-agent/types'
@@ -34,6 +35,9 @@ export interface SubmitOutcome {
   readonly kind: 'success' | 'error'
   readonly text?: string
 }
+
+/** A default message may retain an unknown outcome for explicit same-request retry. */
+export type DefaultSubmitOutcome = SubmitOutcome | { readonly kind: 'unknown'; readonly text?: string }
 
 /** Command-mode credential supplied by one input-trigger source. */
 export interface CommandClaim {
@@ -279,6 +283,10 @@ export interface InputActions {
   pruneAttachments(ids: readonly DraftAttachmentId[]): void
   /** Enter submission (adjudication / claim transaction / default sink inside). */
   submit(): void
+  /** Retry the same captured contextual prompt after an unknown result. */
+  retrySubmission?(): void
+  /** End local retry while keeping the draft; accepted Host input is not undone. */
+  dismissSubmission?(): void
 }
 
 /** One surfaced notice (command results, adjudication failures). seq keys re-render of repeats. */
@@ -305,7 +313,7 @@ export interface InputState {
    * an ordinary message waits for the Host to accept it. The editor and the
    * attachments are read-only in all three.
    */
-  readonly phase: 'plain' | 'adjudicating' | 'claimed' | 'submitting' | 'sending'
+  readonly phase: 'plain' | 'adjudicating' | 'claimed' | 'submitting' | 'sending' | 'uncertain'
   /** Present exactly while claimed/submitting (claim snapshot during flight; submit closure withheld). */
   readonly claim?: { readonly name: string; readonly token: string; readonly hint?: string; readonly attachments?: boolean }
   /** Reference occurrence view of the editor's chips, sorted by offset. */
@@ -337,6 +345,8 @@ export interface SubmitAttempt {
   readonly mode: InputSubmitMode
   /** Original message occurrence, retained across command arbitration. */
   readonly submission?: MessageSubmission
+  readonly contexts?: readonly PromptContextInput[]
+  readonly contextError?: string
 }
 
 /**
@@ -358,6 +368,8 @@ export type InputEvent =
     readonly quotes: readonly DraftQuote[]
     readonly attachmentIds: readonly DraftAttachmentId[]
     readonly submission?: MessageSubmission
+    readonly contexts?: readonly PromptContextInput[]
+    readonly contextError?: string
   }
   | { readonly type: 'adjudicated'; readonly attempt: SubmitAttempt; readonly outcome: PickOutcome }
   | { readonly type: 'adjudication-failed'; readonly attempt: SubmitAttempt; readonly message: string }
@@ -371,7 +383,9 @@ export type InputEvent =
     readonly message?: string
   }
   /** Settlement of the message being sent: the Host accepted it, or refused it or failed. */
-  | { readonly type: 'sink-settled'; readonly attempt: SubmitAttempt; readonly ok: boolean; readonly outcome?: SubmitOutcome; readonly message?: string }
+  | { readonly type: 'sink-settled'; readonly attempt: SubmitAttempt; readonly ok: boolean; readonly outcome?: DefaultSubmitOutcome; readonly message?: string }
+  | { readonly type: 'retry-sink' }
+  | { readonly type: 'dismiss-sink' }
   | { readonly type: 'release' }
 
 /**

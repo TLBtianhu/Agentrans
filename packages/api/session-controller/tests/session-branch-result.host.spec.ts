@@ -10,6 +10,8 @@ import SessionStore, {
 } from '@deepseek-ai/dsh-session'
 import type { Session, SessionEvent, SessionHeader, SessionId } from '@deepseek-ai/dsh-session'
 import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
+import { selectBranchResult } from '@deepseek-ai/dsh-session-branch'
+import { admitBranchResult } from '@deepseek-ai/dsh-session-branch/admission'
 import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import {
   createSessionTestRemote, installSessionReadTestServices, testSessionPersistence,
@@ -212,6 +214,46 @@ function texts(session: Session): string {
 }
 
 describe('session.returnBranchResult', () => {
+  it('reports a typed conflict when evidence was already returned for the same conclusion', async () => {
+    const harness = await composed()
+    try {
+      const parent = await attachStored(harness, stored('conflict-parent', [turnStart(0), user(1, 'P'), turnEnd(2)]))
+      const child = await attachStored(harness, branch('conflict-child', parent.session.id, 'Confirmed result'))
+      using observed = await harness.ctx.sessionQuery.observeSession(child.session.id, { projectionMode: 'none' })
+      const selected = selectBranchResult(observed, parent.session.id, SessionSeq(6))
+      if (!selected.ok) throw new Error('Expected branch-result selection')
+      await admitBranchResult(parent.agent, selected.value, {
+        observeParent: signal => harness.ctx.sessionQuery.observeSession(parent.session.id, { projectionMode: 'none', signal }),
+        flushParent: () => harness.ctx.sessions.flush(parent.session),
+      }, [{ type: 'text', text: 'User-selected evidence' }])
+      const response = await harness.remote.returnBranchResult({
+        sessionId: parent.session.id, branchSessionId: child.session.id, resultSeq: 6,
+      })
+      expect(response).toMatchObject({ ok: false, error: { code: 'session/branch-result-conflict' } })
+      expect(parent.session.snapshotEvents().filter(event => event.type === 'user/message' && event.data.source.kind === 'branch-result'))
+        .toHaveLength(1)
+    } finally {
+      await harness.ctx.fiber.dispose()
+    }
+  })
+
+  it('preserves an unknown durability outcome instead of reporting busy and reuses the committed append on retry', async () => {
+    const harness = await composed()
+    try {
+      const parent = await attachStored(harness, stored('flush-parent', [turnStart(0), user(1, 'P'), turnEnd(2)]))
+      const child = await attachStored(harness, branch('flush-child', parent.session.id, 'Confirmed result'))
+      vi.spyOn(harness.ctx.sessions, 'flush').mockRejectedValueOnce(new Error('Durability acknowledgement lost'))
+      const selected = { sessionId: parent.session.id, branchSessionId: child.session.id, resultSeq: 6 }
+      expect(await harness.remote.returnBranchResult(selected)).toMatchObject({ ok: false, error: { code: 'gateway/internal' } })
+      const response = await harness.remote.returnBranchResult(selected)
+      expect(response.ok).toBe(true)
+      expect(parent.session.snapshotEvents().filter(event => event.type === 'user/message' && event.data.source.kind === 'branch-result'))
+        .toHaveLength(1)
+    } finally {
+      await harness.ctx.fiber.dispose()
+    }
+  })
+
   it('returns only confirmed child text, preserves siblings and later parent work, and replays idempotently', async () => {
     const parentStored = stored('parent', [turnStart(0), user(1, 'P'), turnEnd(2)])
     const childStored = branch('child', parentStored.header.id, 'C1-result')

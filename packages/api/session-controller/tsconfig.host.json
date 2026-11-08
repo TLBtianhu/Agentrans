@@ -129,6 +129,9 @@
     },
     {
       "path": "../../session/working-directory"
+    },
+    {
+      "path": "../../session/session-input"
     }
   ]
 }

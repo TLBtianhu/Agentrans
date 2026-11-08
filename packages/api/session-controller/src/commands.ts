@@ -14,13 +14,14 @@ import type {} from '@deepseek-ai/dsh-client-file-upload'
 import {
   ReasoningEffortId, createUserMessage, freezeMessage,
 } from '@deepseek-ai/dsh-llm'
-import type { MessageSource } from '@deepseek-ai/dsh-llm'
+import type { MessageSource, TextBlock } from '@deepseek-ai/dsh-llm'
 import { buildForkSeed } from '@deepseek-ai/dsh-session/fork'
 import { SessionLogOffset, SessionSeq } from '@deepseek-ai/dsh-session'
 import type { SessionEvent, SessionHeader, SessionId, UserMessage } from '@deepseek-ai/dsh-session'
 import { SessionQueryError, type SessionObservation } from '@deepseek-ai/dsh-session-query'
 import { SessionTitleInvalidError } from '@deepseek-ai/dsh-session-title'
 import { assertNever } from '@deepseek-ai/dsh-util-values'
+import { SessionInputAdmissionError } from '@deepseek-ai/dsh-session-input'
 import { RemoteError, remoteErrorOf } from '@deepseek-ai/dsh-typert-protocol'
 import type { Workspace } from '@deepseek-ai/dsh-workspace'
 import {
@@ -41,7 +42,7 @@ import type {
   SessionCreateValue,
   SessionForkRequest,
   SessionForkValue,
-  SessionPromptRequest,
+  PromptContextInput, SessionPromptRequest,
   SessionPromptValue,
   SessionRenameRequest,
   SessionRenameValue,
@@ -49,7 +50,6 @@ import type {
   SessionSelectModelValue,
   SessionUpdateQueueRequest,
   SessionUpdateQueueValue,
-  SessionRequestId,
 } from './types.ts'
 
 type PromptContentCandidate =
@@ -87,12 +87,25 @@ export class SessionCommandController {
    * @param ctx - Host context carrying Agent, model, attachment, title, and Workspace services.
    * @param agents - sole owner of create, resume, and Agent composition.
    * @param defaultCwd - project directory used when create names neither a Workspace nor a cwd.
+   * @param resolveContexts - synchronous selection validation owned by registered providers.
    */
   constructor(
     private readonly ctx: Context,
     private readonly agents: ApiSessionAgentController,
     private readonly defaultCwd: string,
-  ) {}
+    private readonly resolveContexts: (agent: Agent, inputs: readonly PromptContextInput[]) => readonly TextBlock[] = (_agent, inputs) => {
+      if (inputs.length > 0) throw new RemoteError('session/prompt-context-unavailable', 'Prompt context owner is not mounted', { kind: inputs[0]?.kind ?? '' })
+      return []
+    },
+  ) {
+    ctx.effect(() => async () => {
+      this.closing = true
+      await Promise.allSettled([...this.promptSettlements])
+    }, 'Session prompt caller settlement')
+  }
+
+  private closing = false
+  private readonly promptSettlements = new Set<Promise<SessionPromptValue>>()
 
   /**
    * Create one ordinary Session for a new conversation, reusing the named
@@ -303,8 +316,37 @@ export class SessionCommandController {
    * @returns acknowledgement that the Agent accepted the prompt.
    */
   async prompt(request: SessionPromptRequest, source: MessageSource): Promise<SessionPromptValue> {
+    if (this.closing) throw new RemoteError('session/not-found', 'Session prompt admission is closing', { sessionId: request.sessionId })
+    const inputs = this.ctx.sessionInputs
+    const operation = inputs.run(request.sessionId, { kind: 'rpc', requestId: request.requestId }, request,
+      frozen => this.preparePrompt(frozen, source, agent => inputs.hasPromptReceipt(agent, frozen.requestId)))
+    this.promptSettlements.add(operation)
+    try {
+      return await operation
+    } catch (error) {
+      if (error instanceof SessionInputAdmissionError) {
+        if (error.code === 'CLOSED') {
+          throw new RemoteError('session/not-found', 'Session prompt admission is closing', { sessionId: request.sessionId })
+        }
+        if (error.code === 'INVALID_INPUT') throw new RemoteError('gateway/bad-request', error.message, {})
+        if (error.code === 'CONFLICT') {
+          throw new RemoteError('session/prompt-request-conflict', error.message, { requestId: request.requestId })
+        }
+      }
+      throw error
+    } finally { this.promptSettlements.delete(operation) }
+  }
+
+  private async preparePrompt(request: SessionPromptRequest, source: MessageSource,
+    hasReceipt: (agent: Agent) => boolean): Promise<SessionPromptValue> {
     const agent = await this.resolveAgent(request.sessionId)
-    if (hasPromptRequest(agent, request.requestId)) return { accepted: true }
+    if (hasReceipt(agent)) return { accepted: true }
+    if (this.closing) throw new RemoteError('session/not-found', 'Session prompt admission is closing', { sessionId: request.sessionId })
+    return this.admitPrompt(agent, request, source)
+  }
+
+  private async admitPrompt(agent: Agent, request: SessionPromptRequest, source: MessageSource): Promise<SessionPromptValue> {
+    const context = this.resolveContexts(agent, request.contexts ?? [])
     const admission = resolvePromptFileReceipts(
       request.content,
       receiptId => this.ctx.fileUploads.resolve(agent, receiptId),
@@ -312,6 +354,7 @@ export class SessionCommandController {
     // Encoded images and image upload receipts both make an image prompt.
     const hasImage = admission.content.some(part => part.type === 'image')
     const admit = async (): Promise<SessionPromptValue> => {
+      let dispatchStarted = false
       try {
         if (hasImage) {
           const current = agent.model.current()
@@ -327,7 +370,7 @@ export class SessionCommandController {
           }
         }
         const content = await this.ctx.attachments.admitPromptContent(admission.content)
-        const message: UserMessage = createUserMessage({ content, source })
+        const message: UserMessage = createUserMessage({ content: [...content, ...context], source })
         if (this.ctx.agents.get(agent.id) !== agent) {
           throw new RemoteError(
             'session/not-found',
@@ -336,10 +379,14 @@ export class SessionCommandController {
           )
         }
         using binding = this.ctx.fileUploads.bindPrompt(agent, admission.receiptIds, request.requestId)
+        dispatchStarted = true
         if (request.mode === 'steer') agent.steer(message)
         else agent.followup(message)
         binding.commit()
       } catch (error) {
+        if (dispatchStarted && (request.contexts?.length ?? 0) > 0) {
+          throw new RemoteError('gateway/internal', 'Unable to confirm contextual prompt admission', {}, { cause: error })
+        }
         if (remoteErrorOf(error) !== undefined) throw error
         if (error instanceof AttachmentError) {
           throw new RemoteError('session/attachment-invalid', error.message, { reason: error.code })
@@ -538,18 +585,4 @@ function resolvePromptFileReceipts(
     return attachment
   })
   return { content: resolved, receiptIds: [...receiptIds] }
-}
-
-function hasPromptRequest(agent: Agent, requestId: SessionRequestId): boolean {
-  const matches = (message: UserMessage): boolean => {
-    const source = message.source
-    return source.kind === 'user' && 'rpcId' in source && source.rpcId === requestId
-  }
-  if (agent.inbox.nextTurn.some(matches) || agent.inbox.nextStep.some(matches)) return true
-  // oxlint-disable-next-line typescript/no-deprecated -- Existing Session history read; migration deferred.
-  return agent.session.snapshotEvents().some((event) => {
-    if (event.type !== 'user/message') return false
-    const source = event.data.source
-    return source.kind === 'user' && 'rpcId' in source && source.rpcId === requestId
-  })
 }

@@ -17,11 +17,12 @@ import type { LexicalEditor } from 'lexical'
 import type {
   CommandClaim, ConsumeTokenRequest, DraftAttachmentId, DraftInitializationOptions, DraftInitializationResult,
   InputActions, InputEffect, InputNotice, InputState, InputTriggerController, PickOutcome,
-  SessionInput, SubmitAttempt, SubmitAttachment, SubmitOutcome,
+  SessionInput, SubmitAttempt, SubmitAttachment, DefaultSubmitOutcome,
 } from '../contract/input.ts'
 import type {
   ArbitrateKey, ArbitrateOutcome, ComposerKeyboard, DraftInput, DraftSnapshot, ReferenceInsert, TokenSpan,
 } from '../contract/draft-editor.ts'
+import type { PromptContextInput } from '@deepseek-ai/dsh-api-session-controller/types'
 import type { InputSubmitMode, MessageSubmission, MessageSubmissionState } from '../contract/composer-submission.ts'
 import { serializeDraftPrompt } from './prompt.ts'
 import { SubmitMachine } from './machine.ts'
@@ -43,6 +44,9 @@ export interface SessionInputDeps {
   /** Session-scope ctx handed to claim.submit transactions. */
   actx: Context
   /** Snapshot the Session facts before asynchronous command arbitration. */
+  capturePromptContexts?: () => readonly PromptContextInput[]
+  contextCaptureFailure?: () => string
+  abandonContextPrompt?: (attempt: number) => void
   submissionState?: () => MessageSubmissionState
   /** Notify one ordinary message attempt before reference serialization. */
   messageSubmitted?: (submission: MessageSubmission) => void
@@ -69,7 +73,8 @@ export interface SessionInputDeps {
     mode: InputSubmitMode,
     signal: AbortSignal,
     accept: () => void,
-  ): Promise<SubmitOutcome>
+    context?: { readonly attempt: number; readonly inputs: readonly PromptContextInput[] },
+  ): Promise<DefaultSubmitOutcome>
   /** Live Session and composer-block policy for transcript insertion. */
   quoteInsertionAllowed?: () => boolean
   /** Current localized quote removal copy. */
@@ -96,7 +101,7 @@ function guardOf(phase: InputState['phase']): 'plain' | 'claimed' | 'frozen' {
 
 /** Whether an attempt owns the draft: the editor and attachments are read-only until it settles. */
 function frozen(phase: InputState['phase']): boolean {
-  return phase === 'adjudicating' || phase === 'submitting' || phase === 'sending'
+  return phase === 'adjudicating' || phase === 'submitting' || phase === 'sending' || phase === 'uncertain'
 }
 
 /** Whether two projections differ in content (selection and caret excluded). */
@@ -153,8 +158,15 @@ export class SessionInputShell implements SessionInput {
     removeAttachment: (id) => { this.removeAttachment(id) },
     pruneAttachments: (ids) => { this.pruneAttachments(ids) },
     submit: () => { this.submit('queue') },
+    retrySubmission: () => { this.dispatchRun({ type: 'retry-sink' }) },
+    dismissSubmission: () => {
+      const attempt = this.core.sendingAttempt
+      if (attempt !== undefined) this.deps.abandonContextPrompt?.(attempt.seq)
+      this.dispatchRun({ type: 'dismiss-sink' })
+    },
   }
 
+  private serializedContextPrompt: { readonly attempt: SubmitAttempt; readonly text: string } | undefined
   private readonly core = new SubmitMachine()
   private readonly draftEditor: DraftEditorRuntime
   private get projection(): EditorProjection {
@@ -221,6 +233,7 @@ export class SessionInputShell implements SessionInput {
    * @param text - plain text or the complete semantic document.
    */
   setDraft(text: DraftInput): void {
+    if (this.snapshot.phase === 'uncertain') return
     const draft = resolveDraftInput(text)
     this.cancelCommandRestore()
     if (draft.references.length === 0 && (draft.quotes?.length ?? 0) === 0) this.draftEditor.setDraft(draft.text)
@@ -391,6 +404,17 @@ export class SessionInputShell implements SessionInput {
   submit(mode: InputSubmitMode = 'queue', source?: 'click' | 'enter'): void {
     if (this.disposed) return
     const timestamp = Date.now()
+    let contexts: readonly PromptContextInput[] | undefined
+    let contextError: string | undefined
+    if (this.snapshot.phase === 'plain' && (this.snapshot.draft.trim() !== '' || this.attachmentIds.length > 0)) {
+      try { contexts = this.deps.capturePromptContexts?.() } catch (_error) {
+        contextError = this.deps.contextCaptureFailure?.() ?? 'Unable to capture the selected prompt context.'
+        if (!this.snapshot.draft.trimStart().startsWith('/')) {
+          this.notify('error', contextError)
+          return
+        }
+      }
+    }
     let state: MessageSubmissionState | undefined
     if (this.snapshot.phase === 'plain' && (this.snapshot.draft.trim() !== '' || this.attachmentIds.length > 0)) {
       try { state = this.deps.submissionState?.() } catch (_error) { /* Optional Session observations cannot interrupt submission. */ }
@@ -415,6 +439,8 @@ export class SessionInputShell implements SessionInput {
       quotes: [...this.projection.quotes],
       attachmentIds: [...this.attachmentIds],
       submission,
+      ...contexts === undefined ? {} : { contexts },
+      ...contextError === undefined ? {} : { contextError },
     })
     if (frozen(this.snapshot.phase)) {
       this.deps.popup?.()?.dismiss()
@@ -717,17 +743,25 @@ export class SessionInputShell implements SessionInput {
     draft: string,
     mode: InputSubmitMode,
   ): void {
+    if (attempt.contextError !== undefined) { this.failSink(attempt, new Error(attempt.contextError)); return }
+    const send = (text: string): void => {
+      if (this.dead(attempt)) return
+      if ((attempt.contexts?.length ?? 0) > 0) this.serializedContextPrompt = { attempt, text }
+      const accept = (): void => { this.acceptSink(attempt) }
+      const pending = attempt.contexts === undefined || attempt.contexts.length === 0
+        ? this.deps.defaultSink(text, attempt.attachmentIds, mode, attempt.signal, accept)
+        : this.deps.defaultSink(text, attempt.attachmentIds, mode, attempt.signal, accept,
+          { attempt: attempt.seq, inputs: attempt.contexts })
+      this.settleSink(attempt, pending)
+    }
+    if (this.serializedContextPrompt?.attempt === attempt) { send(this.serializedContextPrompt.text); return }
     this.notifySubmission(attempt.submission)
-    const { occurrences, quotes, attachmentIds } = attempt
+    const { occurrences, quotes } = attempt
     const inputTriggers = this.deps.inputTriggers?.()
     const prompt = serializeDraftPrompt(snapshotDraft(draft, occurrences, undefined, quotes), async (source, ref) => {
       if (inputTriggers === undefined) throw new Error(`no serializer for reference source "${source}"`)
       return inputTriggers.serializeReference(source, ref, attempt.signal)
     })
-    const send = (text: string): void => {
-      if (this.dead(attempt)) return
-      this.settleSink(attempt, this.deps.defaultSink(text, attachmentIds, mode, attempt.signal, () => { this.acceptSink(attempt) }))
-    }
     if (!(prompt instanceof Promise)) { send(prompt); return }
     void prompt.then(send, (error: unknown) => { this.failSink(attempt, error) })
   }
@@ -745,7 +779,7 @@ export class SessionInputShell implements SessionInput {
    */
   private settleSink(
     attempt: SubmitAttempt,
-    pending: Promise<SubmitOutcome>,
+    pending: Promise<DefaultSubmitOutcome>,
   ): void {
     pending.then(
       (outcome) => { if (!this.dead(attempt)) this.applySinkOutcome(attempt, outcome) },
@@ -759,7 +793,8 @@ export class SessionInputShell implements SessionInput {
     this.applySinkOutcome(attempt, { kind: 'success' })
   }
 
-  private applySinkOutcome(attempt: SubmitAttempt, outcome: SubmitOutcome): void {
+  private applySinkOutcome(attempt: SubmitAttempt, outcome: DefaultSubmitOutcome): void {
+    if (outcome.kind !== 'unknown') this.serializedContextPrompt = undefined
     const accepted = outcome.kind === 'success'
     if (accepted && attempt.attachmentIds.length > 0) {
       const sent = new Set(attempt.attachmentIds)

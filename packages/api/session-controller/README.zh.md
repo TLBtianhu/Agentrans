@@ -57,7 +57,7 @@ Client 列表刷新保留未变化的行对象，并在顺序和值均相同时�
 
 Client 适配器提供 `SessionEventStream`，即绑定到一个普通 Session 或 direct subagent address 的 Gateway `RemoteJournalStream`。它在读取首个 page 前打开 follow，只发布连续的 `replace`、`prepend`、`append` 与 `settle-assistant` 变更，并通过 tail page 修复重连或 seq 缺口。向后分页有两个动词：`loadOlder()` 拉一页按轮次开头对齐的历史，而 `loadThrough(seq)`——轮次跳转加载器——按轮次开头对齐页面循环拉取直到窗口覆盖目标 seq，重复调用会下调共享目标，遇到无进展的页即停止，忙碌状态复用同一个 `loadingOlder` 快照位。Web 适配器显式选择接收无 cursor 的 Assistant frame：每个 opening 携带活跃 attempt 的 `startedAfterSeq`、`nextIndex` 与紧凑 stream，每个 stream member 都成为排在持久 cursor 之间的 Client-only `assistant/live-chunk` 条目。Host 会随该 baseline 捕获 follower 本地到达序号，并抑制该 cut 及之前的 buffered frame；replacement Agent 可以从 revision 一重新开始。活跃 opening 之后到达的持久 `assistant/message` 或 `assistant/attempt` 只有在其 seq 晚于 `startedAfterSeq` 且轮次与步骤匹配时才会保持暂存；匹配的 end type、seq 与 index 会发布持久条目。成功消息的瞬态 row 保留到所属 `step/end`，让待派发工具的身份持续可用；失败或中断的 settlement 立即移除对应 row，同一步骤中更早的 retry 仍然保留。已知 attempt 的 revision、密集 index 或 settlement 缺口会重新打开 follow；若 controller 错过 start，则忽略 unknown-attempt frame，并正常发布其持久 settlement。Abandoned end 会发布不含持久条目的 settlement delta，使瞬态 row 立即退出。持久缺口修复 page 不携带 Assistant baseline，因此 held notification 会重新打开 follow 一次，以取得配对的 page 与 baseline。每条历史 record 只覆盖自身的事件 seq。业务、persistence 或无法恢复的连续性错误会终止 stream，只有物理载体断开才触发自动恢复。`SessionControlStream` 是 Gateway `RemoteSnapshotStream`；每代都以完整的进程本地 baseline 开始，因此重连会替换 projection 状态，而不会把瞬态值当作 durable event。每次 Host generation 就绪时，同步的 Client 订阅会先清除保留的投影值及其水位，再刷新查询并重新打开 control stream，其中也包括 control baseline 中没有列出的 Session。首次 control stream 会等待 generation 就绪，确保其 opening 值不会先于旧状态清理到达。上一代尚未完成的 list 响应无法重新发布这些值。同一 generation 内，延迟到达的 control baseline 不能覆盖或清除较新的 sequenced 值，无论它们来自活 Session 的 list block、history page 还是 frame；冷 Session 从 projection cache 看出来的 cached list block 则不论水位都让位于建连 Session 的 baseline。持久 `inbox` 投影通过与其他投影相同的冷读取和重连路径传输两份待处理列表。Client Agent 上下文提供独立 [`fileUpload`](../../client/file-upload/README.zh.md) 服务使用的身份；Session 对象提供生命周期、prompt、queue 与历史操作，不提供文件传输。
 
-Session 对象还承载本地提交回显：`session.beginSubmission` 在调用方序列化与发送提示词之前登记一条回显，Host 接收该提示词后，Session 才把它公开在 `SessionSnapshot.pendingSubmissions` 中；`prompt` 的回执和带有该请求 id 的 `inbox` 行都能表明已接收，以先到者为准。因此会话 UI 从接收起显示消息，直到它的持久条目渲染出来，Chat 和 QueueDock 也从对应的 Inbox 行到达起就把它排除。新会话从空白进入 engaging 也发生在这次接收时。回显按顺序存放图片预览与持久文件引用。Session 根据当前运行状态与请求的投递模式推导其 `transcript`、`queued` 或 `steering` 位置，并保留该位置直到展示接管。提示词的 `requestId` 是关联标识：Host 把它回显为 durable user source 的 `rpcId`，`inbox` 投影中的待处理消息也保留同一 source。排队回显在队列接受后延迟一个动画帧退休；Chat 回显遵循下述入档规则。尚未入档的回显在带标识的提示词失败或被放弃时立即退休。销毁时保留已观察到的入档结果，其余未结算提交按 failed 退休。接收时触发一次 `onAccept`，与公开回显处于同一次更新，让发送方与回显同时结算输入框。每次退休恰好触发一次 `onRetire`；observed 退休还会携带有序的持久附件引用，让发送方释放或移交已发送的附件。回显只存在于 Client 内存；刷新与重连只从持久事件重建会话。
+Session 对象还承载本地提交回显：`session.beginSubmission` 在调用方序列化与发送提示词之前登记一条回显，Host 接收该提示词后，Session 才把它公开在 `SessionSnapshot.pendingSubmissions` 中；`prompt` 的回执和带有该请求 id 的 `inbox` 行都能表明已接收，以先到者为准。因此会话 UI 从接收起显示消息，直到它的持久条目渲染出来，Chat 和 QueueDock 也从对应的 Inbox 行到达起就把它排除。新会话从空白进入 engaging 也发生在这次接收时。回显按顺序存放图片预览与持久文件引用。Session 根据当前运行状态与请求的投递模式推导其 `transcript`、`queued` 或 `steering` 位置，并保留该位置直到展示接管。提示词的 `requestId` 是关联标识：Host 把它回显为 durable user source 的 `rpcId`，`inbox` 投影中的待处理消息也保留同一 source。排队回显在队列接受后延迟一个动画帧退休；Chat 回显遵循下述入档规则。尚未入档的回显在带标识的提示词失败或被放弃时立即退休。`SubmissionHandle.abandon()` 只释放本地回显，包括未知结果重试收到历史接受确认后的释放；它不会取消 Host 输入，已入档的输入仍保留观察到的展示交接。因此 `failed` 退休表示本地释放，不证明 Host 拒绝。销毁时保留已观察到的入档结果，其余未结算提交按 failed 退休。接收时触发一次 `onAccept`，与公开回显处于同一次更新，让发送方与回显同时结算输入框。每次退休恰好触发一次 `onRetire`；observed 退休还会携带有序的持久附件引用，让发送方释放或移交已发送的附件。回显只存在于 Client 内存；刷新与重连只从持久事件重建会话。
 
 
 正常在线时，transcript 与 steering 回显在 Inbox 接受与领取期间留在 Chat，直到持久消息到达。本地 Chat 消息入档后，其身份保留到 Inbox 水位覆盖 next-turn 或 next-step 领取序号：Chat 已显示真实 Node，而 Chat 与 QueueDock 排除匹配的旧 Inbox 行。其他排队消息照常显示。新的 follow 基线会将已有接收回执的回显按 observed 撤去，使用已接受的附件引用完成结算；尚未确认接收的提交继续保留。待处理或已入档的消息随后由 Host 数据呈现。在领取与入档之间重连时，气泡可能短暂消失；撤去回显只确认接收，不代表执行或失败。
@@ -77,6 +77,12 @@ Client 的首次 `follow`、重连首屏与 `loadOlder()` 至少请求 50 条以
 `session.attachment` 接收 `{ sessionId, attachment: ImageAttachmentRef }`，并把完整引用交给 `AttachmentStore.readImage()`，不读取或遍历 Session 历史。Client 通过 `session.readAttachment(ref)` 传入消息中的引用。连接身份认证和 Gateway 权限检查仍然适用；`sessionId` 为该接口的权限检查指定 Session 资源。授权通过后，处理函数不检查该 Session 是否存在，也不会仅因其不存在而返回 `session/not-found`。获准调用的身份可以读取同一存储中的任意图片，包括仅被其他 Session 引用或未被任何 Session 引用的图片。响应在把 ID、媒体类型、字节数、宽度和高度与存储字节校验后，保留传入的引用。可选的 `name` 和 `originalDimensions` 作为调用方提交的显示信息原样返回，不根据文件校验。对象缺失或无效时返回明确的附件失败。Client 的历史图片缓存按 Session 和附件 ID 保留一份结果与浏览器 URL。
 
 本控制器通过 `ctx.plugin` 组合 `ArchivedSessionGate`：在 Agent 注册表、Session store 与 Workspace 注册表就绪后加载，随控制器一起释放。它的 `agent/pre-step` 监听器会拒绝为已归档会话或其子代理子孙——从 Session header 的血缘字段读出，从不包括 fork——提出的步骤，因此迟到的唤醒投递会让该回合以 `blocked` 收口而不发出模型请求；取消归档即为整条血缘解除门禁。已归档会话仍在跑的工作由各自的 owner 通过 Workspace 注册表的归档准入（[接缝](../../workspace/workspace/README.zh.md)）报告与停止：运行中的回合由 [Agent 注册表](../../core/agent/README.zh.md)负责，所属任务由[任务注册表接缝](../../jobs/jobs/README.zh.md)负责，子代理子孙由 [Subagent](../../subagent/subagent/README.zh.md) runtime 负责，提醒由 [Schedule](../../schedule/schedule/README.zh.md) 插件负责；本控制器自己不报告任何内容。
+
+`sessionController.registerPromptContext(kind, resolve)` 为可选的 `SessionPromptRequest.contexts` 选择注册同步领域解析器。每个选择包含种类与 JSON 值，由注册的所有者校验并返回文本块。解析发生在已接受请求 id 检查之后、附件存储之前。解析块与原提示一起进入同一条 `UserMessage`，排队、Steer 和持久历史因而保持二者绑定。缺少所有者会拒绝准入；所有者的已知拒绝转为 `session/prompt-context-rejected`，保留原始错误码与详情；意外失败继续表示未知结果。注册返回清理函数。
+
+`maxPromptContexts` 默认限制 8 个选择，`maxPromptContextBytes` 默认限制完整新增文本块 JSON 编码后的 16,384 UTF-8 字节。超限请求不追加输入。同请求 id 的相同并发输入共用一次准入；内容冲突的在途请求被拒绝。卸载时拒绝新工作，并等待所有已准入操作，包括 Agent 解析阶段。带上下文的派发开始后，后续失败报告未知结果；重试先检查已有回执，再决定是否解析上下文。已接受的请求 id 始终指向原消息，不会替换其内容。
+
+必需的 [Session 输入服务](../../session/session-input/README.zh.md)统一拥有本控制器和已确认领域消息的接受身份与并发准入。它从本 Session 自有 inbox 插入和用户消息归并，排除继承前缀。删除队列项仍保留已接受 id：重试返回原确认，不恢复已取消工作。普通 RPC 别名维持只按身份确认，已标识领域消息另保留首次内容指纹。控制器只保留自身调用的执行中结算句柄，使自身资源活到调用完成。
 
 <a id="client-references"></a>
 ## Client 引用
@@ -122,6 +128,8 @@ Blockquote 作为普通 prompt 文本传递，不携带 quote 元数据。本地
 ## 已知限制与延期工作
 
 <a id="known-limitations-and-deferred-work"></a>
+
+- 已接受输入的恢复及内存/重放成本归 [Session 输入](../../session/session-input/README.zh.md)所有。控制器不保留另一份收据索引，也不在发送时扫描历史。
 
 - 单个摘要、查询提供方自身的枚举、最终排序和响应序列化都可能超出列表时间片目标；它不是 Host 延迟的硬上限。
 - 图片字节上限不校验解码后的尺寸或像素数。

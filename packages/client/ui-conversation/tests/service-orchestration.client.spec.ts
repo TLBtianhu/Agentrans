@@ -8,10 +8,12 @@ import type { MessageId } from '@deepseek-ai/dsh-llm/brand'
 import { Context } from '@deepseek-ai/cordis'
 import { describe, expect, it, vi } from 'vitest'
 import { makeTranslate, RemoteError, SlotTestRuntime } from '@deepseek-ai/dsh-client-test-runtime'
+import { createClientTest, webApp } from '@deepseek-ai/dsh-client-test-runtime/src/assembly/index.ts'
+import { Session } from '@deepseek-ai/dsh-api-session-controller/src/client/sessions/session.ts'
 import type {
-  BeginSubmissionInput, PendingSubmissionRetirement,
+  BeginSubmissionInput, PendingSubmissionRetirement, SessionFace,
 } from '@deepseek-ai/dsh-api-session-controller/client'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
+import { SessionSeq, type SessionId } from '@deepseek-ai/dsh-session/types'
 import { ComposerBlockRegistry } from '../src/client/input/blocks.ts'
 import { InputHub } from '../src/client/input/hub.ts'
 import { reportMessageSubmission } from '../src/client/input/submission-analytics.ts'
@@ -31,6 +33,8 @@ const UPLOAD_IMAGES = true
 /** `createDrafts` mode of a draft whose images travel inline, as a subagent continuation's do. */
 const INLINE_IMAGES = false
 
+const sessionIt = createClientTest({ roster: webApp.closure(['@deepseek-ai/dsh-api-gateway']) })
+
 async function bench(maxConcurrentFileUploads = 2) {
   const runtime = await SlotTestRuntime.create()
   runtime.fileUpload.upload = (sessionId: SessionId, ...args: unknown[]) => {
@@ -48,8 +52,8 @@ async function bench(maxConcurrentFileUploads = 2) {
     return session.uploadImage(...args)
   }
   const prompt = vi.fn((
-    _content?: unknown, _mode?: unknown, _signal?: AbortSignal, _rpcId?: string,
-  ) => Promise.resolve({ ok: true as const, value: { accepted: true as const } }))
+    _content?: unknown, _mode?: unknown, _signal?: AbortSignal, _rpcId?: string, _contexts?: unknown,
+  ): ReturnType<SessionFace['prompt']> => Promise.resolve({ ok: true as const, value: { accepted: true as const } }))
   const updateQueue = vi.fn(() => Promise.resolve({ ok: true as const, value: { accepted: true as const } }))
   const cancel = vi.fn(() => Promise.resolve({ ok: true as const, value: { accepted: true as const } }))
   const loadOlder = vi.fn(() => Promise.resolve())
@@ -1194,4 +1198,159 @@ it('reports nothing for a submission whose Session facts were not captured', () 
   ctx.provide('productAnalytics', { enabled: true, track } as never)
   reportMessageSubmission(ctx, { timestamp: 1, mode: 'queue', source: 'click' })
   expect(track).not.toHaveBeenCalled()
+})
+
+
+describe('submit-time feature context', () => {
+  sessionIt('releases an accepted retry echo after an empty Host baseline and releases its accepted attachments', async ({ mock, start }) => {
+    const b = await bench()
+    const created = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:accepted-retry')
+    const revoked = vi.spyOn(URL, 'revokeObjectURL').mockReturnValue(undefined)
+    let session: Session | undefined
+    try {
+      mock.remote.session.prompt.mockResolvedValueOnce({ ok: false,
+        error: new RemoteError('gateway/internal', 'lost admission response', {}) })
+        .mockResolvedValue({ ok: true, value: { accepted: true } })
+      const client = await start()
+      session = new Session('retry-echo' as SessionId, client.ctx.remote)
+      session.handleRunning(true)
+      const [attachment] = b.root.createDrafts(session.sessionId, [
+        new File([Uint8Array.of(1)], 'retry.png', { type: 'image/png' }),
+      ], INLINE_IMAGES)
+      if (attachment === undefined) throw new Error('Expected an inline image draft')
+      const context = { attempt: 1, inputs: [{ kind: 'experiment', value: { step: 6 } }] }
+      await expect(b.root.sendSession(session, 'Explain the original', [attachment.id], 'queue', undefined, undefined, context))
+        .resolves.toEqual({ kind: 'unknown' })
+      expect(b.root.resolveDraftAttachments([attachment.id])).toHaveLength(1)
+      // The Host accepted then canceled this input outside the Client window. Only the empty replacement survives.
+      session.projections.apply('inbox', { 'next-turn': [], 'next-step': [] }, SessionSeq(100))
+      await expect(b.root.sendSession(session, 'Explain the original', [attachment.id], 'queue', undefined, undefined, context))
+        .resolves.toEqual({ kind: 'success' })
+      expect(mock.log.requests('session/prompt')).toHaveLength(2)
+      const [first, second] = mock.log.requests('session/prompt')
+      expect(second).toEqual(first)
+      expect(session.getSnapshot().pendingSubmissions).toEqual([])
+      expect(session.projections.get('inbox')).toEqual({ 'next-turn': [], 'next-step': [] })
+      expect(b.root.resolveDraftAttachments([attachment.id])).toEqual([])
+      expect(revoked).toHaveBeenCalledExactlyOnceWith('blob:accepted-retry')
+      session.projections.apply('inbox', { 'next-turn': [], 'next-step': [] }, SessionSeq(101))
+      expect(session.getSnapshot().pendingSubmissions).toEqual([])
+    } finally {
+      await session?.dispose()
+      created.mockRestore()
+      revoked.mockRestore()
+      await b.runtime.dispose()
+    }
+  })
+
+  it('freezes selections before asynchronous send preparation and disposes their capture', async () => {
+    const b = await bench()
+    try {
+      const value = { revision: 1, conditions: { step: 6 } }
+      const capture = vi.fn(() => value)
+      const dispose = b.root.registerPromptContext('experiment', capture)
+      b.shell.setDraft('Why is it here?')
+      b.shell.submit()
+      value.revision = 2
+      value.conditions.step = 99
+      await expect.poll(() => b.prompt.mock.calls.length).toBe(1)
+      const inputs = b.prompt.mock.calls[0]?.[4]
+      expect(inputs).toEqual([{ kind: 'experiment', value: { revision: 1, conditions: { step: 6 } } }])
+      expect(Object.isFrozen(inputs)).toBe(true)
+      expect(capture).toHaveBeenCalledExactlyOnceWith('s1')
+      dispose()
+      expect(b.root.capturePromptContexts('s1' as SessionId)).toEqual([])
+    } finally { await b.runtime.dispose() }
+  })
+
+  it('retains the original complete request through unknown and unavailable retries', async () => {
+    const b = await bench()
+    try {
+      let step = 6
+      const capture = vi.fn(() => ({ step }))
+      b.root.registerPromptContext('experiment', capture)
+      b.prompt.mockRejectedValueOnce(new Error('lost response'))
+        .mockResolvedValueOnce({ ok: false, error: new RemoteError('gateway/service-unavailable', 'temporarily unavailable', { endpoint: 'session/prompt' }) })
+      b.shell.setDraft('Explain A')
+      b.shell.submit()
+      await expect.poll(() => b.shell.snapshot.phase).toBe('uncertain')
+      step = 12
+      b.shell.setDraft('Explain B')
+      expect(b.shell.snapshot.draft).toBe('Explain A')
+      b.shell.actions.retrySubmission?.()
+      await expect.poll(() => b.prompt.mock.calls.length).toBe(2)
+      await expect.poll(() => b.shell.snapshot.phase).toBe('uncertain')
+      b.shell.actions.retrySubmission?.()
+      await expect.poll(() => b.shell.snapshot.phase).toBe('plain')
+      expect(b.shell.snapshot.draft).toBe('')
+      expect(b.prompt.mock.calls).toHaveLength(3)
+      const [first, second, third] = b.prompt.mock.calls
+      expect(first?.slice(0, 2)).toEqual(second?.slice(0, 2))
+      expect(first?.slice(3)).toEqual(second?.slice(3))
+      expect(first?.slice(3)).toEqual(third?.slice(3))
+      expect(capture).toHaveBeenCalledTimes(1)
+    } finally { await b.runtime.dispose() }
+  })
+
+  it('requires explicit dismissal before capturing a different experiment', async () => {
+    const b = await bench()
+    try {
+      let step = 6
+      b.root.registerPromptContext('experiment', () => ({ step }))
+      b.prompt.mockRejectedValueOnce(new Error('lost response'))
+      b.shell.setDraft('Explain this')
+      b.shell.submit()
+      await expect.poll(() => b.shell.snapshot.phase).toBe('uncertain')
+      b.shell.actions.dismissSubmission?.()
+      expect(b.shell.snapshot.phase).toBe('plain')
+      expect(b.shell.snapshot.draft).toBe('Explain this')
+      step = 12
+      b.shell.submit()
+      await expect.poll(() => b.prompt.mock.calls.length).toBe(2)
+      expect(b.prompt.mock.calls[0]?.[3]).not.toBe(b.prompt.mock.calls[1]?.[3])
+      expect(b.prompt.mock.calls[1]?.[4]).toEqual([{ kind: 'experiment', value: { step: 12 } }])
+    } finally { await b.runtime.dispose() }
+  })
+
+  it('keeps the draft and sends nothing when capture fails', async () => {
+    const b = await bench()
+    try {
+      const dispose = b.root.registerPromptContext('experiment', () => { throw new Error('not ready') })
+      b.shell.setDraft('Explain this')
+      b.shell.submit()
+      expect(b.shell.snapshot.draft).toBe('Explain this')
+      expect(b.shell.snapshot.phase).toBe('plain')
+      expect(b.prompt).not.toHaveBeenCalled()
+      expect(b.shell.notices.getSnapshot()?.level).toBe('error')
+      dispose()
+      b.shell.submit()
+      await expect.poll(() => b.prompt.mock.calls.length).toBe(1)
+      expect(b.prompt.mock.calls[0]).toHaveLength(4)
+    } finally { await b.runtime.dispose() }
+  })
+})
+
+
+it('does not publish an unknown retry or call the Host after preparation was cancelled', async () => {
+  const b = await bench()
+  const frame = Promise.withResolvers<FrameRequestCallback>()
+  const animation = vi.spyOn(globalThis, 'requestAnimationFrame').mockImplementation((callback) => { frame.resolve(callback); return 1 })
+  try {
+    const session = b.runtime.sessions.binding('s1')?.session
+    if (session === undefined) throw new Error('Expected retained Session')
+    const controller = new AbortController()
+    const pending = b.root.sendSession(session, 'A', [], 'queue', controller.signal, undefined,
+      { attempt: 1, inputs: [{ kind: 'experiment', value: 1 }] })
+    const rejected = expect(pending).rejects.toThrow()
+    const finish = await frame.promise
+    controller.abort()
+    finish(0)
+    await rejected
+    expect(b.prompt).not.toHaveBeenCalled()
+    animation.mockRestore()
+    await b.root.sendSession(session, 'B', [], 'queue', undefined, undefined,
+      { attempt: 1, inputs: [{ kind: 'experiment', value: 2 }] })
+    expect(b.prompt.mock.calls[0]?.[0]).toEqual([{ type: 'text', text: 'B' }])
+    expect(b.prompt.mock.calls[0]?.[4]).toEqual([{ kind: 'experiment', value: 2 }])
+  } finally { animation.mockRestore(); await b.runtime.dispose() }
 })

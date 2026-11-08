@@ -193,6 +193,10 @@ declare module '@deepseek-ai/dsh-typert-protocol' {
     'session/projections-unavailable': Record<string, never>
     'session/writer-held': { readonly sessionId: SessionId }
     'session/agent-busy': { readonly reason: string }
+    'session/prompt-context-rejected': { readonly kind: string; readonly code: string; readonly details: JsonValue }
+    'session/prompt-context-unavailable': { readonly kind: string }
+    'session/prompt-context-invalid': { readonly kind: string; readonly reason: 'COUNT_LIMIT' | 'BYTE_LIMIT' | 'INVALID_KIND' }
+    'session/prompt-request-conflict': { readonly requestId: SessionRequestId }
     'session/invalid-time-zone': { readonly value: string }
     'session/workspace-attach-failed': { readonly sessionId: SessionId; readonly workspaceId: string }
     'agent-preset/conflict': {
@@ -209,6 +213,12 @@ declare module '@deepseek-ai/dsh-typert-protocol' {
       readonly branchSessionId: SessionId
       readonly resultSeq: number
       readonly reason: BranchResultSelectionFailure
+    }
+    /** The same branch conclusion was already returned with different user-confirmed content. */
+    'session/branch-result-conflict': {
+      readonly parentSessionId: SessionId
+      readonly branchSessionId: SessionId
+      readonly resultSeq: number
     }
     'session/migration-required': { readonly sessionId: SessionId }
     'subagent/not-found': {
@@ -339,6 +349,12 @@ export interface SessionBranchResultValue {
   readonly messageId: MessageId
 }
 
+/** One immutable feature selection resolved before ordinary prompt admission. */
+export interface PromptContextInput {
+  readonly kind: string
+  readonly value: JsonValue
+}
+
 /** Session prompt request. */
 export interface SessionPromptRequest {
   /** Client-minted identity persisted on the exact accepted user message. */
@@ -347,6 +363,8 @@ export interface SessionPromptRequest {
   readonly mode: 'queue' | 'steer'
   /** At least one non-whitespace text part or attachment. */
   readonly content: readonly PromptContentPart[]
+  /** Frozen feature selections resolved by registered Host owners before admission. */
+  readonly contexts?: readonly PromptContextInput[]
   readonly clientTimeZone?: string
 }
 
