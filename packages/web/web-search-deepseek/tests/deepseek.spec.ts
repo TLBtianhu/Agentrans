@@ -793,18 +793,20 @@ describe('web-search-deepseek search readiness', () => {
     return ctx
   }
 
-  it('is not ready on an API-key route without a search key', async () => {
+  it('is not ready on an API-key route without a search key, and names the missing credential', async () => {
     const ctx = await compose()
     expect(await ctx.web.searchReady('deepseek-official')).toBe(false)
+    expect(await ctx.web.searchCapabilityState('deepseek-official')).toBe('missing')
   })
 
   it('becomes ready once a search key is stored', async () => {
     const dir = await mkdtemp(join(tmpdir(), 'dsh-web-search-ready-'))
     try {
       const ctx = await compose({ credentialsDir: dir })
-      expect(await ctx.web.searchReady('deepseek-official')).toBe(false)
+      expect(await ctx.web.searchCapabilityState('deepseek-official')).toBe('missing')
       await ctx.credentials.set(credentialRef('DEEPSEEK_API_KEY'), 'stored-key')
       expect(await ctx.web.searchReady('deepseek-official')).toBe(true)
+      expect(await ctx.web.searchCapabilityState('deepseek-official')).toBe('ready')
     } finally {
       await rm(dir, { recursive: true, force: true })
     }

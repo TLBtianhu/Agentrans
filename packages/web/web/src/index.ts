@@ -9,6 +9,7 @@
 import { Context, Service, type Volatile } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
 import type {
+  WebCapabilityState,
   WebFetchProvider,
   WebFetchRequest,
   WebFetchResult,
@@ -22,6 +23,7 @@ export {
   WebError,
 } from './types.ts'
 export type {
+  WebCapabilityState,
   WebFetchBody,
   WebFetchProvider,
   WebFetchRequest,
@@ -156,6 +158,19 @@ export class WebRuntime extends Service {
     return await selectedProviderReady(() => this.selectSearchProvider(), llmProvider)
   }
 
+  /**
+   * Why the provider `search()` would select can or cannot authenticate a search made for a
+   * model request on the `llmProvider` chat route. Asks only that provider, and makes no
+   * network calls; a surface that wants to explain a disabled tool reads this, while
+   * `searchReady` stays its boolean projection.
+   * @param llmProvider - the provider route id of the model request, when known.
+   * @returns the selected provider's state, or `ready` when selection fails, because
+   *   `search()` reports that failure as a structured `WebError`.
+   */
+  async searchCapabilityState(llmProvider?: string): Promise<WebCapabilityState> {
+    return await selectedProviderState(() => this.selectSearchProvider(), llmProvider)
+  }
+
   /** Select the search provider with the rules above, throwing the matching {@link WebError}. */
   private selectSearchProvider(): WebSearchProvider {
     const configuredId = this.config.searchProvider.get() ?? this.searchProviderEnv
@@ -189,6 +204,18 @@ export class WebRuntime extends Service {
     return await selectedProviderReady(() => this.selectFetchProvider(), llmProvider)
   }
 
+  /**
+   * Why the provider `fetch()` would select can or cannot authenticate a fetch made for a
+   * model request on the `llmProvider` chat route. Asks only that provider, and makes no
+   * network calls; `fetchReady` stays its boolean projection.
+   * @param llmProvider - the provider route id of the model request, when known.
+   * @returns the selected provider's state, or `ready` when selection fails, because
+   *   `fetch()` reports that failure as a structured `WebError`.
+   */
+  async fetchCapabilityState(llmProvider?: string): Promise<WebCapabilityState> {
+    return await selectedProviderState(() => this.selectFetchProvider(), llmProvider)
+  }
+
   /** Select the fetch provider with the rules above, throwing the matching {@link WebError}. */
   private selectFetchProvider(): WebFetchProvider {
     const configuredId = this.config.fetchProvider.get() ?? this.fetchProviderEnv
@@ -202,7 +229,24 @@ export class WebRuntime extends Service {
 interface ResolvableProvider {
   readonly id: string
   available(): boolean
+  state?(llmProvider: string | undefined): Promise<WebCapabilityState>
   ready?(llmProvider: string | undefined): Promise<boolean>
+}
+
+/**
+ * Ask the provider an operation selects why it can or cannot authenticate for one chat route.
+ * @param select - the operation's selection; throws its {@link WebError} when no provider qualifies.
+ * @param llmProvider - the provider route id of the model request, when known.
+ * @returns the provider's state; `ready` when it declares neither `state()` nor `ready()`, and
+ *   when selection fails, because the operation reports that failure itself.
+ */
+async function selectedProviderState(select: () => ResolvableProvider, llmProvider: string | undefined): Promise<WebCapabilityState> {
+  let provider: ResolvableProvider
+  try { provider = select() }
+  catch (_selectionFailure) { return 'ready' /* The operation surfaces the same failure when called. */ }
+  if (provider.state !== undefined) return await provider.state(llmProvider)
+  if (provider.ready === undefined) return 'ready'
+  return await provider.ready(llmProvider) ? 'ready' : 'missing'
 }
 
 /**
@@ -213,10 +257,7 @@ interface ResolvableProvider {
  *   operation reports that failure itself.
  */
 async function selectedProviderReady(select: () => ResolvableProvider, llmProvider: string | undefined): Promise<boolean> {
-  let provider: ResolvableProvider
-  try { provider = select() }
-  catch (_selectionFailure) { return true /* The operation surfaces the same failure when called. */ }
-  return await provider.ready?.(llmProvider) ?? true
+  return await selectedProviderState(select, llmProvider) === 'ready'
 }
 
 /** Resolve the selected provider or throw the matching {@link WebError}. */

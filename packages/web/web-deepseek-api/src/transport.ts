@@ -12,7 +12,7 @@ import type {} from '@deepseek-ai/dsh-agent'
 import { credentialRef, type CredentialRef } from '@deepseek-ai/dsh-credentials'
 import type {} from '@deepseek-ai/dsh-deepseek-account'
 import { launchEnvironmentOf } from '@deepseek-ai/dsh-launch-environment'
-import { WebError } from '@deepseek-ai/dsh-web'
+import { WebError, type WebCapabilityState } from '@deepseek-ai/dsh-web'
 
 const ACCOUNT_PROVIDER = 'deepseek-account'
 const USER_AGENT = 'deepseek-harness/0.0.1'
@@ -95,34 +95,35 @@ export function deepSeekWebAuth(ctx: Context, config: { apiKey: string | undefin
 
 /**
  * Whether an operation for a model request on `route` has a credential, checked in the order the
- * operation resolves them: the account token first on the account route, then the API key. A failed
- * read answers false, because the operation fails on that read instead of trying the next credential.
+ * operation resolves them: the account token first on the account route, then the API key. The three
+ * failure facts stay distinct — a failed grant or store read is `unreachable`, an unconfigured
+ * reference is `missing`, and an operation carrying a credential is `ready`.
  * Only presence is checked: the key's value is not read and the endpoint is not contacted, so a wrong
  * key still counts as configured.
  * @param ctx - Provider context with the account, credential, and environment planes.
  * @param config - Literal key, credential reference, and API base from the settings snapshot.
  * @param route - Provider route of the model request being prepared.
- * @returns Whether the account token or an API key is available to that operation.
+ * @returns Why the account token or an API key is or is not available to that operation.
  */
-export async function deepSeekWebCredentialReady(
+export async function deepSeekWebCredentialState(
   ctx: Context, config: { apiKey: string | undefined; apiKeyEnv: string; baseURL: string }, route: string | undefined,
-): Promise<boolean> {
+): Promise<WebCapabilityState> {
   const account = ctx.get('deepseekAccount')
   if (route === ACCOUNT_PROVIDER && account !== undefined) {
     let token: string | undefined
     try { token = await account.resolveToken(config.baseURL) }
-    catch (_unreadableGrant) { return false /* The operation fails on this read before it tries the API key. */ }
-    if (token !== undefined && token.length > 0) return true
+    catch (_unreadableGrant) { return 'unreachable' /* The operation fails on this read before it tries the API key. */ }
+    if (token !== undefined && token.length > 0) return 'ready'
   }
-  if (config.apiKey !== undefined && config.apiKey.length > 0) return true
+  if (config.apiKey !== undefined && config.apiKey.length > 0) return 'ready'
   const apiKeyEnv = credentialRef(config.apiKeyEnv)
   const credentials = ctx.get('credentials')
   if (credentials === undefined) {
     const ambient = launchEnvironmentOf(ctx).get(apiKeyEnv)
-    return ambient !== undefined && ambient.value.length > 0
+    return ambient !== undefined && ambient.value.length > 0 ? 'ready' : 'missing'
   }
-  try { return (await credentials.describe(apiKeyEnv)).configured }
-  catch (_unreadableStore) { return false /* A store that cannot be read supplies no key to the operation either. */ }
+  try { return (await credentials.describe(apiKeyEnv)).configured ? 'ready' : 'missing' }
+  catch (_unreadableStore) { return 'unreachable' /* A store that cannot be read supplies no key to the operation either. */ }
 }
 /* jscpd:ignore-end */
 

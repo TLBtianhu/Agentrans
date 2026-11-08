@@ -18,7 +18,7 @@ import { DEEPSEEK_API_KEY_REF } from '@deepseek-ai/dsh-deepseek-issuer'
 import type {} from '@deepseek-ai/dsh-deepseek-account'
 import { launchEnvironmentOf } from '@deepseek-ai/dsh-launch-environment'
 import type {} from '@deepseek-ai/dsh-session'
-import type {} from '@deepseek-ai/dsh-web'
+import type { WebCapabilityState } from '@deepseek-ai/dsh-web'
 import {
   DeepSeekSearchProvider,
   DEEPSEEK_DEFAULT_API_VERSION,
@@ -143,39 +143,41 @@ function resolveOptions(
 }
 
 /**
- * Whether the search a model request on `route` would make has a credential, checked in the order
- * the search resolves them: the account token first on the account route, then the API key. A failed
- * read answers false, because the search fails on that read instead of trying the next credential.
+ * Report why the search a model request on `route` would make can or cannot authenticate,
+ * checked in the order the search resolves credentials: the account token first on the
+ * account route, then the API key. The three failure facts stay distinct — a failed grant
+ * or store read is `unreachable`, an unconfigured reference is `missing`, and a search that
+ * carries a credential is `ready` — so a surface can say what to fix.
  * Only presence is checked: the API key's value is not read and the endpoint is not contacted, so a
  * wrong key or an endpoint without native search still counts as configured.
  * @param ctx - plugin context supplying the account, credential, and environment planes.
  * @param options - options the next search would use.
  * @param route - provider route of the model request being assembled.
- * @returns whether the account token or an API key is available to that search.
+ * @returns the capability state for that search.
  */
-async function searchConfigured(
+async function searchState(
   ctx: Context, options: SearchOptions, route: string | undefined,
-): Promise<boolean> {
+): Promise<WebCapabilityState> {
   const account = ctx.get('deepseekAccount')
   if (route === ACCOUNT_PROVIDER && account !== undefined) {
     let token: string | undefined
     try { token = await account.resolveToken(`${options.baseURL}/messages`) }
-    catch (_unreadableGrant) { return false /* The search fails on this read before it tries the API key. */ }
-    if (token !== undefined && token.length > 0) return true
+    catch (_unreadableGrant) { return 'unreachable' /* The search fails on this read before it tries the API key. */ }
+    if (token !== undefined && token.length > 0) return 'ready'
   }
-  if (options.apiKey !== undefined) return true
+  if (options.apiKey !== undefined) return 'ready'
   const credentials = ctx.get('credentials')
   if (credentials === undefined) {
     const ambient = launchEnvironmentOf(ctx).get(options.apiKeyEnv)
-    return ambient !== undefined && ambient.value.length > 0
+    return ambient !== undefined && ambient.value.length > 0 ? 'ready' : 'missing'
   }
-  try { return (await credentials.describe(options.apiKeyEnv)).configured }
-  catch (_unreadableStore) { return false /* A store that cannot be read supplies no key to the search either. */ }
+  try { return (await credentials.describe(options.apiKeyEnv)).configured ? 'ready' : 'missing' }
+  catch (_unreadableStore) { return 'unreachable' /* A store that cannot be read supplies no key to the search either. */ }
 }
 
 /**
- * Register the DeepSeek search provider with `ctx.web`. Its `ready()` answers whether a
- * search for a model request on the given route would have a credential to send.
+ * Register the DeepSeek search provider with `ctx.web`. Its `state()` answers why a search
+ * for a model request on the given route can or cannot authenticate.
  */
 export function apply(ctx: Context, config: Config): void {
   const options = () => resolveOptions(ctx, {
@@ -186,7 +188,7 @@ export function apply(ctx: Context, config: Config): void {
   ctx.web.registerSearchProvider({
     id: provider.id,
     available: () => provider.available(),
-    ready: llmProvider => searchConfigured(ctx, options(), llmProvider),
+    state: llmProvider => searchState(ctx, options(), llmProvider),
     search: (request, signal) => provider.search(request, signal),
   })
 }

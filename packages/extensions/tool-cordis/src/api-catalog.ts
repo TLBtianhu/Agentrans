@@ -4490,6 +4490,12 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         returns: 'false only when the selected provider reports that it cannot authenticate.',
       },
       {
+        signature: 'async searchCapabilityState(llmProvider?: string): Promise<WebCapabilityState>',
+        description: 'Why the provider `search()` would select can or cannot authenticate a search made for a model request on the `llmProvider` chat route. Asks only that provider, and makes no network calls; a surface that wants to explain a disabled tool reads this, while `searchReady` stays its boolean projection.',
+        parameters: [{ name: 'llmProvider', description: 'the provider route id of the model request, when known.' }],
+        returns: 'the selected provider\'s state, or `ready` when selection fails, because `search()` reports that failure as a structured `WebError`.',
+      },
+      {
         signature: 'async fetch(request: WebFetchRequest, signal?: AbortSignal): Promise<WebFetchResult>',
         description: 'Retrieve one URL through the selected provider. Resolves the provider at call time with the selection rules above; throws WebError when the capability cannot run. A non-2xx response is a result, not a throw.',
         parameters: [{ name: 'request', description: 'the URL plus retrieval options.' }, { name: 'signal', description: 'optional cancellation signal forwarded to the provider.' }],
@@ -4500,6 +4506,12 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         description: 'Whether the provider `fetch()` would select can authenticate a fetch made for a model request on the `llmProvider` chat route. Asks only that provider\'s `ready()`; one without `ready()` counts as ready. Makes no network calls. A selection failure answers true, because `fetch()` reports that failure as a structured `WebError`.',
         parameters: [{ name: 'llmProvider', description: 'the provider route id of the model request, when known.' }],
         returns: 'false only when the selected provider reports that it cannot authenticate.',
+      },
+      {
+        signature: 'async fetchCapabilityState(llmProvider?: string): Promise<WebCapabilityState>',
+        description: 'Why the provider `fetch()` would select can or cannot authenticate a fetch made for a model request on the `llmProvider` chat route. Asks only that provider, and makes no network calls; `fetchReady` stays its boolean projection.',
+        parameters: [{ name: 'llmProvider', description: 'the provider route id of the model request, when known.' }],
+        returns: 'the selected provider\'s state, or `ready` when selection fails, because `fetch()` reports that failure as a structured `WebError`.',
       },
     ],
   },
@@ -10342,12 +10354,16 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface WebBootRelease {\n    version: string;\n    commit?: string;\n}',
   },
   {
+    name: 'WebCapabilityState',
+    declaration: 'export type WebCapabilityState = \'ready\' | \'missing\' | \'invalid\' | \'unentitled\' | \'unreachable\';',
+  },
+  {
     name: 'WebFetchBody',
     declaration: 'export type WebFetchBody = {\n    readonly kind: \'html\';\n    readonly content: string;\n} | {\n    readonly kind: \'text\';\n    readonly content: string;\n};',
   },
   {
     name: 'WebFetchProvider',
-    declaration: 'export interface WebFetchProvider {\n    readonly id: string;\n    available(): boolean;\n    ready?(llmProvider: string | undefined): Promise<boolean>;\n    fetch(request: WebFetchRequest, signal?: AbortSignal): Promise<WebFetchResult>;\n}',
+    declaration: 'export interface WebFetchProvider {\n    readonly id: string;\n    available(): boolean;\n    state?(llmProvider: string | undefined): Promise<WebCapabilityState>;\n    ready?(llmProvider: string | undefined): Promise<boolean>;\n    fetch(request: WebFetchRequest, signal?: AbortSignal): Promise<WebFetchResult>;\n}',
   },
   {
     name: 'WebFetchRequest',
@@ -10415,7 +10431,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'WebSearchProvider',
-    declaration: 'export interface WebSearchProvider {\n    readonly id: string;\n    available(): boolean;\n    ready?(llmProvider: string | undefined): Promise<boolean>;\n    search(request: WebSearchRequest, signal?: AbortSignal): Promise<WebSearchResult>;\n}',
+    declaration: 'export interface WebSearchProvider {\n    readonly id: string;\n    available(): boolean;\n    state?(llmProvider: string | undefined): Promise<WebCapabilityState>;\n    ready?(llmProvider: string | undefined): Promise<boolean>;\n    search(request: WebSearchRequest, signal?: AbortSignal): Promise<WebSearchResult>;\n}',
   },
   {
     name: 'WebSearchRequest',

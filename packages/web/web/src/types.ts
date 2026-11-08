@@ -99,6 +99,18 @@ export type WebFetchBody =
   | { readonly kind: 'text'; readonly content: string }
 
 /**
+ * Why the provider that one model request would select can or cannot authenticate its
+ * web operation.
+ *
+ * Only `ready` admits the tool. Each other value names a different fact, so a settings
+ * surface can say what to fix instead of reporting every cause as "no credential":
+ * `missing` means no credential is configured, `invalid` means the stored credential was
+ * rejected, `unentitled` means it authenticates but does not include this capability, and
+ * `unreachable` means the configuration or credential store could not be read.
+ */
+export type WebCapabilityState = 'ready' | 'missing' | 'invalid' | 'unentitled' | 'unreachable'
+
+/**
  * A search-capable backend. Registered with `ctx.web.registerSearchProvider`.
  * `id` is a stable string, unique within the search capability kind.
  */
@@ -107,9 +119,17 @@ export interface WebSearchProvider {
   /** Cheap local usability check; must not make network calls. */
   available(): boolean
   /**
+   * Why a search made for a model request on the `llmProvider` chat route can or cannot
+   * authenticate. Checks configuration only and must make no network calls. Takes
+   * precedence over {@link ready}.
+   * @param llmProvider - the provider route id of the model request, when known.
+   * @returns the capability state; omitted means ready.
+   */
+  state?(llmProvider: string | undefined): Promise<WebCapabilityState>
+  /**
    * Whether a search made for a model request on the `llmProvider` chat route has a
    * credential to send. Checks configuration only and must not make network calls.
-   * Omitted = ready.
+   * Omitted = ready. A provider that implements {@link state} need not implement this.
    * @param llmProvider - the provider route id of the model request, when known.
    * @returns false when that request's searches could not authenticate.
    */
@@ -127,9 +147,17 @@ export interface WebFetchProvider {
   /** Cheap local usability check; must not make network calls. */
   available(): boolean
   /**
+   * Why a fetch made for a model request on the `llmProvider` chat route can or cannot
+   * authenticate. Checks configuration only and must make no network calls. Takes
+   * precedence over {@link ready}.
+   * @param llmProvider - the provider route id of the model request, when known.
+   * @returns the capability state; omitted means ready.
+   */
+  state?(llmProvider: string | undefined): Promise<WebCapabilityState>
+  /**
    * Whether a fetch made for a model request on the `llmProvider` chat route has a
    * credential to send. Checks configuration only and must not make network calls.
-   * Omitted = ready.
+   * Omitted = ready. A provider that implements {@link state} need not implement this.
    * @param llmProvider - the provider route id of the model request, when known.
    * @returns false when that request's fetches could not authenticate.
    */

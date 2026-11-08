@@ -207,6 +207,17 @@ async search(request: WebSearchRequest, signal?: AbortSignal): Promise<WebSearch
 async searchReady(llmProvider?: string): Promise<boolean>
 
 /**
+ * Why the provider `search()` would select can or cannot authenticate a search made for a
+ * model request on the `llmProvider` chat route. Asks only that provider, and makes no
+ * network calls; a surface that wants to explain a disabled tool reads this, while
+ * `searchReady` stays its boolean projection.
+ * @param llmProvider - the provider route id of the model request, when known.
+ * @returns the selected provider's state, or `ready` when selection fails, because
+ *   `search()` reports that failure as a structured `WebError`.
+ */
+async searchCapabilityState(llmProvider?: string): Promise<WebCapabilityState>
+
+/**
  * Retrieve one URL through the selected provider. Resolves the provider at
  * call time with the selection rules above; throws {@link WebError} when the
  * capability cannot run. A non-2xx response is a result, not a throw.
@@ -225,6 +236,16 @@ async fetch(request: WebFetchRequest, signal?: AbortSignal): Promise<WebFetchRes
  * @returns false only when the selected provider reports that it cannot authenticate.
  */
 async fetchReady(llmProvider?: string): Promise<boolean>
+
+/**
+ * Why the provider `fetch()` would select can or cannot authenticate a fetch made for a
+ * model request on the `llmProvider` chat route. Asks only that provider, and makes no
+ * network calls; `fetchReady` stays its boolean projection.
+ * @param llmProvider - the provider route id of the model request, when known.
+ * @returns the selected provider's state, or `ready` when selection fails, because
+ *   `fetch()` reports that failure as a structured `WebError`.
+ */
+async fetchCapabilityState(llmProvider?: string): Promise<WebCapabilityState>
 ```
 
 Source: [`packages/web/web/src/index.ts`](../../packages/web/web/src/index.ts)

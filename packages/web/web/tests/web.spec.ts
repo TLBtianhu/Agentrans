@@ -192,6 +192,41 @@ describe('WebRuntime search readiness', () => {
     await expect(web.searchReady(undefined)).resolves.toBe(false)
   })
 
+  it('reports a state, and derives the boolean from it', async () => {
+    const { web } = await mountWeb({ searchProvider: 'deepseek' })
+    web.registerSearchProvider({
+      ...makeSearchProvider('deepseek', available, () => Promise.resolve(searchResult('deepseek'))),
+      state: () => Promise.resolve('unentitled'),
+    })
+    await expect(web.searchCapabilityState('deepseek-official')).resolves.toBe('unentitled')
+    await expect(web.searchReady('deepseek-official')).resolves.toBe(false)
+  })
+
+  it('prefers a declared state over a boolean answer', async () => {
+    const { web } = await mountWeb({ searchProvider: 'deepseek' })
+    web.registerSearchProvider({
+      ...makeSearchProvider('deepseek', available, () => Promise.resolve(searchResult('deepseek'))),
+      ready: () => Promise.resolve(true),
+      state: () => Promise.resolve('invalid'),
+    })
+    await expect(web.searchCapabilityState(undefined)).resolves.toBe('invalid')
+    await expect(web.searchReady(undefined)).resolves.toBe(false)
+  })
+
+  it('reports missing, not ready, when a provider only answers the boolean', async () => {
+    const { web } = await mountWeb({ searchProvider: 'deepseek' })
+    web.registerSearchProvider(readyProvider('deepseek', available, false))
+    await expect(web.searchCapabilityState(undefined)).resolves.toBe('missing')
+  })
+
+  it('reports ready when selection fails or the provider declares neither answer', async () => {
+    const empty = await mountWeb({ searchProvider: 'missing-provider' })
+    await expect(empty.web.searchCapabilityState(undefined)).resolves.toBe('ready')
+    const silent = await mountWeb({ searchProvider: 'deepseek' })
+    silent.web.registerSearchProvider(makeSearchProvider('deepseek', available, () => Promise.resolve(searchResult('deepseek'))))
+    await expect(silent.web.searchCapabilityState(undefined)).resolves.toBe('ready')
+  })
+
   it('treats a selected provider without ready() as ready', async () => {
     const { web } = await mountWeb()
     web.registerSearchProvider(makeSearchProvider('plain', available, () => Promise.resolve(searchResult('plain'))))

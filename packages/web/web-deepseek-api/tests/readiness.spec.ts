@@ -59,6 +59,11 @@ function ready(ctx: Context, operation: Operation, route: string | undefined): P
   return operation === 'search' ? ctx.web.searchReady(route) : ctx.web.fetchReady(route)
 }
 
+/** Ask the seam why `operation` is or is not ready for a model request on `route`. */
+function capabilityState(ctx: Context, operation: Operation, route: string | undefined): Promise<string> {
+  return operation === 'search' ? ctx.web.searchCapabilityState(route) : ctx.web.fetchCapabilityState(route)
+}
+
 /**
  * Run `operation` for a Session whose latest model request ran on `route`.
  * @param ctx - the mounted context.
@@ -87,9 +92,21 @@ function stubApis(): () => (string | null)[] {
 }
 
 describe.each(OPERATIONS)('%s readiness', (operation) => {
-  it('is not ready without any credential', async () => {
+  it('is not ready without any credential, and says the credential is missing', async () => {
     const ctx = await mount({})
     expect(await ready(ctx, operation, 'deepseek-official')).toBe(false)
+    expect(await capabilityState(ctx, operation, 'deepseek-official')).toBe('missing')
+  })
+
+  it('names an unreadable credential store instead of reporting a missing key', async () => {
+    const ctx = await mount({ credentials: { describe: async () => { throw new Error('store unavailable') } } })
+    expect(await ready(ctx, operation, 'deepseek-official')).toBe(false)
+    expect(await capabilityState(ctx, operation, 'deepseek-official')).toBe('unreachable')
+  })
+
+  it('names an unreadable account grant instead of reporting a missing key', async () => {
+    const ctx = await mount({ account: { resolveToken: async () => { throw new Error('grant unreadable') } } })
+    expect(await capabilityState(ctx, operation, 'deepseek-account')).toBe('unreachable')
   })
 
   it('is ready with the DeepSeek chat key on the DeepSeek routes and outside a model request', async () => {
@@ -97,6 +114,7 @@ describe.each(OPERATIONS)('%s readiness', (operation) => {
     expect(await ready(ctx, operation, 'deepseek-official')).toBe(true)
     expect(await ready(ctx, operation, 'deepseek-account')).toBe(true)
     expect(await ready(ctx, operation, undefined)).toBe(true)
+    expect(await capabilityState(ctx, operation, 'deepseek-official')).toBe('ready')
   })
 
   it('is ready with a literal key on a DeepSeek route', async () => {

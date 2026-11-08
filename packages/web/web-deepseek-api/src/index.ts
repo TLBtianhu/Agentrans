@@ -17,7 +17,7 @@ import type {} from '@deepseek-ai/dsh-web'
 import { DEEPSEEK_API_KEY_REF } from '@deepseek-ai/dsh-deepseek-issuer'
 import { DeepSeekFetchApiProvider } from './fetch.ts'
 import { DEEPSEEK_DEFAULT_COUNT, DEEPSEEK_WEB_API_BASE_URL, DeepSeekSearchApiProvider } from './search.ts'
-import { deepSeekWebAuth, deepSeekWebCredentialReady } from './transport.ts'
+import { deepSeekWebAuth, deepSeekWebCredentialState } from './transport.ts'
 
 export { DEEPSEEK_FETCH_API_PROVIDER_ID, DeepSeekFetchApiProvider } from './fetch.ts'
 export type { DeepSeekFetchApiOptions } from './fetch.ts'
@@ -77,8 +77,8 @@ function latestUserQuestion(session: Session | undefined): string | undefined {
 export function apply(ctx: Context, config: Config): void {
   const keyConfig = () => ({ apiKey: config.apiKey.get(), apiKeyEnv: config.apiKeyEnv.get() })
   const auth = () => deepSeekWebAuth(ctx, keyConfig())
-  const ready = (llmProvider: string | undefined) =>
-    deepSeekWebCredentialReady(ctx, { ...keyConfig(), baseURL: config.baseURL.get() }, llmProvider)
+  const state = (llmProvider: string | undefined) =>
+    deepSeekWebCredentialState(ctx, { ...keyConfig(), baseURL: config.baseURL.get() }, llmProvider)
   const searchApi = new DeepSeekSearchApiProvider(() => ({
     ...auth(),
     baseURL: config.baseURL.get(),
@@ -89,9 +89,9 @@ export function apply(ctx: Context, config: Config): void {
   }))
   const fetchApi = new DeepSeekFetchApiProvider(() => ({ ...auth(), baseURL: config.baseURL.get() }))
   ctx.web.registerSearchProvider({
-    id: searchApi.id, available: () => searchApi.available(), ready, search: (request, signal) => searchApi.search(request, signal),
+    id: searchApi.id, available: () => searchApi.available(), state, search: (request, signal) => searchApi.search(request, signal),
   })
   ctx.web.registerFetchProvider({
-    id: fetchApi.id, available: () => fetchApi.available(), ready, fetch: (request, signal) => fetchApi.fetch(request, signal),
+    id: fetchApi.id, available: () => fetchApi.available(), state, fetch: (request, signal) => fetchApi.fetch(request, signal),
   })
 }

@@ -950,6 +950,7 @@ export const LINK_MAP: Readonly<Record<string, string>> = {
   ExistingBranchResult: 'branch.md',
   SessionBranchResultRequest: 'branch.md',
   SessionBranchResultValue: 'branch.md',
+  WebCapabilityState: 'web.md',
   WebFetchProvider: 'web.md',
   WebFetchRequest: 'web.md',
   WebFetchResult: 'web.md',
