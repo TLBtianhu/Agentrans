@@ -49,4 +49,13 @@ export const PRODUCT_PACKAGE_POLICY: Readonly<Record<string, ProductPackagePolic
   'packages/client/web': { category: 'web-distribution', reason: 'Browser boot kernel bundled into the Web distribution.' },
   'packages/client/ui-dockkit': { category: 'web-distribution', reason: 'Layout library bundled into the Web distribution.' },
   'packages/util/package-manifest': { category: 'declarations', reason: 'Shared package metadata declarations have no runtime mount.' },
+
+  // Shipped rows the product keeps switched off. Each stays in the composition so an
+  // explicit overlay can audit or enable it, but no default profile activates it.
+  'packages/client/ui-settings-session-log': { category: 'optional', reason: 'Upload settings row for the session log contribution; the shipped Web and Desktop compositions disable it.' },
+  'packages/host/product-telemetry-otel': { category: 'optional', reason: 'Host product telemetry exporter; the shipped Web composition disables product analytics.' },
+  'packages/llm/plugin-package-inventory-deepseek': { category: 'optional', reason: 'Active package inventory request field; the shipped compositions disable the contribution.' },
+  'packages/session/session-log-deepseek': { category: 'optional', reason: 'DeepSeek-specific API session log field; the shipped compositions disable the contribution.' },
+  'packages/session/session-telemetry': { category: 'optional', reason: 'Service definition for the session telemetry seam consumed by the disabled OTel sink.' },
+  'packages/session/session-telemetry-otel': { category: 'optional', reason: 'OTel session telemetry sink; the shipped compositions disable it.' },
 }

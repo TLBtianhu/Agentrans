@@ -5,7 +5,7 @@
 ## 已完成只读审计：架构一致性与主题契约（2026-11-08，未整改）
 
 - 本轮只读：阅读 MEMORY/PROGRESS/源码，并实跑 `apps/desktop/tests`、`apps/web/tests` 与 `verify-product-use`。未改源码、未提交、未联网、未调用模型、未读凭据。证据在 `C:\agent制作\.dev-data\qa\2026-11-08-architecture-theme-audit`（AUDIT.txt、THEME_CONTRACT_PLAN.txt）。
-- 交付状态实测：最后提交 `85415b4c`（2026-11-06 21:51）= HEAD = origin/main；其后两天工作全未提交（408 文件 +13,801/−5,037，144 个未跟踪文件 + 24 个目录，5 个整包在 git 里 0 文件）。无 stash。这是当前最大风险：工作区是唯一副本。
+- 交付状态实测：最后提交停在 2026-11-06 21:51（`Record the 0.1.0 progress and open issues`），HEAD 与 `origin/main` 相同；其后两天工作全未提交（408 文件 +13,801/−5,037，144 个未跟踪文件 + 24 个目录，5 个整包在 git 里 0 文件）。无 stash。这是当前最大风险：工作区是唯一副本。
 - 测试实测与既有记录不符：`apps/desktop/tests` 180 文件、4 文件 9 失败 + 2 个 unhandled（2022 通过、76 跳过）；`apps/web/tests` 35 用例 1 失败。根因三类：改名漏改断言（windows-update-publisher 2、macos-signature 3）、代码硬编码 `'DeepSeek Harness.app'`（package-macos.ts:81、package-target.ts:548/554、verify-retained-desktop.ts:42，macOS 打包必 ENOENT）、夹具清单缺 `desktop-release-environment.mjs`（purge-command）。默认 vitest `testIncludes` 含 `apps/*/tests`，而文档引用的全绿数字出自 `test:gui`（仅 packages/client+host），故“只剩 Windows symlink EPERM”只对该子集成立。
 - 门禁实测：`verify-product-use` 12 项红。2 项为 `product-layout/launch-context` 子路径缺 tsconfig.base.json paths 映射（该子路径被 14 个文件引用，exports 指向 lib，源码平面落到产物，违反 source/artifact 分离）；10 项为无产品用途包（本轮关闭分享/遥测后的副作用）。记忆第 881 行“两条源映射 + 四个休眠账号包”已过期。
 - 品牌与身份实测：4 份桌面 PNG 同哈希（各 967,051 B）、3 份 SVG 同哈希（各 511 B）；PWA 四图标与 favicon 仍旧；`welcome-brand.svg` 已无源码引用；`render-app-icons.ts:109` 与 `render-tray-icon.ts:102` 对现 `icon.svg` 必抛（生成链已断）；`harness-dev-context` 仍挂 web-app 并自述上游；`index.html` 与八语言 `brand.localBuild` 仍 DSH；PE CompanyName 仍上游；版本三套（0.2.2-alpha.2 / 0.1.0 / Release v0.1.0）。
@@ -13,9 +13,9 @@
 - 方案要点：轴化 → 角色表闭集（补 data.series/grid/axis/highlight）→ `ResolvedTheme(revision)` 可投递 → surface 声明（host/self-contained）→ 陈旧语义；风格与主题切开；验收改用 app/OS 两向错配并加“关通道必红”。建议第一个切片做 `flowchart`。默认主题最后再定，它是触发器不是病因。
 - 文档冲突需先修：本文件顶部与 §四 P1–P5、记忆第 817 行与第 881 行、以及“只剩 symlink EPERM”的范围表述。
 - 下一步顺序建议：① 先提交/备份工作区（含 5 个新包）；② 修 10 个红测试（macOS 包名属代码 bug，先改代码再改断言）；③ 补 launch-context paths 映射并处理 10 个无用途包；④ 按 THEME_CONTRACT_PLAN 做 flowchart 最小切片；⑤ 统一品牌单一源与生成器；⑥ 重建隔离安装候选。默认主题、UV_HANDLE_CLOSING、导出附件 GC、卸载 TOCTOU 仍单列。
-- 提交拆分（同日晚，已落地）：工作区按子系统拆成 7 个提交，`bdc41e98` 构建门禁 → `8200cba9` 共享准入 → `2f7937d7` 文档 → `23384ea0` 作品能力 → `3c98c244` 桌面 → `4078fe04` 产品装配 → `ec897049` 回放/SDK，HEAD = `ec897049`，`origin/main` 仍在 `85415b4c`（未推送）。拆分前快照在本地分支 `backup/2026-11-08-pre-split`（`fc5add43`），确认无误后可删。文档必须先于代码提交，因为配对校验器在部分索引上会因跨文件存在性检查误报。
+- 提交拆分（同日晚，已落地）：工作区按子系统拆成 7 个提交，依次为构建门禁 → 共享准入 → 文档 → 作品能力 → 桌面 → 产品装配 → 回放/SDK，`origin/main` 未快进（未推送分支前 `main` 仍指向旧基线）。拆分前快照保留在本地分支 `backup/2026-11-08-pre-split`，确认无误后可删。文档必须先于代码提交，因为配对校验器在部分索引上会因跨文件存在性检查误报。
 - 为过 pre-commit 钩子修了 4 处真实问题：`launch-context.ts` 两处超长行与一处 `delete` 改 `Reflect.deleteProperty`、`launch-context.spec.ts` 一处超长行；另为 `snapshots/sdk/*/workspace.expected/**` 增加 `whitespace=-blank-at-eof`，因为该 fixture 必须逐字节保留工具写出的尾随空行。提交后 `pnpm run typecheck` 6/6（18.86 s）、`product-layout` 7 文件 86/86；工作区与拆分前快照逐字节一致，仅上述 3 个文件加上 `.gitattributes` 不同。
-- 已于同日推送 `feat/first-slice` 到 origin（`7f903dc7`，pre-push typecheck 6/6 通过）；`origin/main` 仍在 `85415b4c`，未快进、未发布安装包。工作区除仓库根的 `PkgExplorerPlugin.dll.log`（0 字节外部工具残留）外干净。
+- 已于同日推送 `feat/first-slice` 到 origin（pre-push typecheck 6/6 通过）；`origin/main` 未快进、未发布安装包。工作区除仓库根的 `PkgExplorerPlugin.dll.log`（0 字节外部工具残留）外干净。
 
 ## 已完成切片：原生欢迎页改为无账号 API Key 配置（2026-11-08）
 

@@ -3,7 +3,7 @@ import type { DesktopElectronBuilderConfig } from '../electron-builder.config.mj
 /** Explicit Agentrans identity and local-only output over the shared unsigned Windows configuration. */
 export interface AgentransInstallerConfig extends Omit<DesktopElectronBuilderConfig,
   'protocols' | 'extraMetadata' | 'files' | 'extraResources' | 'nsis' | 'publish'> {
-  readonly productName: 'Agentrans'
+  readonly productName: string
   readonly protocols: readonly []
   readonly extraMetadata: DesktopElectronBuilderConfig['extraMetadata'] & {
     readonly name: 'agentrans'
@@ -12,9 +12,9 @@ export interface AgentransInstallerConfig extends Omit<DesktopElectronBuilderCon
   }
   readonly files: readonly DesktopElectronBuilderConfig['files'][number][]
   readonly extraResources: readonly { readonly from: string; readonly to: string }[]
-  readonly nsis: Omit<DesktopElectronBuilderConfig['nsis'], 'uninstallDisplayName'> & {
-    readonly uninstallDisplayName: 'Agentrans'
-    readonly shortcutName: 'Agentrans'
+  readonly nsis: Omit<DesktopElectronBuilderConfig['nsis'], 'uninstallDisplayName' | 'shortcutName'> & {
+    readonly uninstallDisplayName: string
+    readonly shortcutName: string
     readonly artifactName: string
   }
   readonly publish: null

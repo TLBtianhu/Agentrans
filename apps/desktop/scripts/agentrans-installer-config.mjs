@@ -2,9 +2,10 @@
 import { join } from 'node:path'
 import { createUnsignedWindowsConfigWithoutPolicy } from './electron-builder-config.mjs'
 import { AGENTRANS_DESKTOP_APP_ID } from './desktop-release-environment.mjs'
+import { DESKTOP_ARTIFACT_SLUG, DESKTOP_PRODUCT_NAME } from './desktop-product-identity.mjs'
 import { scrubWindowsSigningEnvironment } from './windows-sign.mjs'
 
-const PRODUCT_NAME = 'Agentrans'
+const PRODUCT_NAME = DESKTOP_PRODUCT_NAME
 const TARGET_SETTINGS = {
   DSH_DESKTOP_APP_ID: AGENTRANS_DESKTOP_APP_ID,
   DSH_DESKTOP_TARGET_PLATFORM: 'win32',
@@ -54,7 +55,7 @@ export function agentransInstallerEnvironment(environment) {
  */
 export function createAgentransInstallerConfig({ environment, output, repositoryRoot }) {
   const base = createUnsignedWindowsConfigWithoutPolicy(agentransInstallerEnvironment(environment), 'win32', 'x64')
-  const artifactName = 'agentrans-${version}-win-x64-unsigned.${ext}'
+  const artifactName = `${DESKTOP_ARTIFACT_SLUG}-\${version}-win-x64-unsigned.\${ext}`
   return {
     ...base,
     appId: AGENTRANS_DESKTOP_APP_ID,

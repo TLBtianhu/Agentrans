@@ -1,4 +1,4 @@
-/** Committed install icon dimensions and the generator's SVG crop and safe-zone scale. */
+/** Committed install icon dimensions and the generator's tile crop and safe-zone scale. */
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
@@ -16,17 +16,18 @@ describe('web install icons', () => {
     }
   })
 
-  it('crops the desktop shadow and scales only the maskable artwork', async () => {
+  it('renders the tile at 1:1 and scales only the maskable artwork', async () => {
     const source = await readFile(TILE_SOURCE, 'utf8')
     const tile = tileDocument(source)
     const maskable = maskableDocument(source)
-    expect(tile).toContain('viewBox="40 32 1024 1024"')
-    expect(tile).not.toContain('<g filter="url(#filter0_d_1637_371)">')
+    expect(tile).toContain('viewBox="0 0 1024 1024"')
+    expect(tile).toContain('<g id="tile-artwork">')
+    expect(tile).toContain('<rect id="tile-background"')
     expect(tile).not.toContain(`scale(${MASKABLE_ARTWORK_SCALE})`)
-    expect(tile).toContain('<g filter="url(#filter1_ddi_1637_371)">')
     expect(tile).toContain(source.match(/<path\b[^>]*>/u)![0])
-    expect(tile).toContain(source.match(/<defs>[\s\S]*<\/defs>/u)![0])
-    expect(maskable).toContain(`transform="translate(552 544) scale(${MASKABLE_ARTWORK_SCALE}) translate(-552 -544)"`)
+    expect(maskable).toContain(
+      `transform="translate(512 512) scale(${MASKABLE_ARTWORK_SCALE}) translate(-512 -512)"`,
+    )
   })
 
   it('rejects non-PNG bytes and incomplete image headers', () => {
@@ -34,10 +35,9 @@ describe('web install icons', () => {
     expect(() => pngSize(Buffer.alloc(33))).toThrow(/PNG IHDR/)
   })
 
-  it('fails loudly on a source without the tile it transforms', () => {
+  it('fails loudly on a source without the artwork it transforms', () => {
     expect(() => tileDocument('')).toThrow(/no root element/)
-    expect(() => tileDocument('<svg></svg>')).toThrow(/no shadowed tile group/)
-    expect(() => maskableDocument('<svg><g filter="url(#filter0_d_1637_371)"></g></svg>'))
-      .toThrow(/no artwork group/)
+    expect(() => tileDocument('<svg></svg>')).toThrow(/no tile-artwork group/)
+    expect(() => maskableDocument('<svg><rect id="tile-background"/></svg>')).toThrow(/no tile-artwork group/)
   })
 })

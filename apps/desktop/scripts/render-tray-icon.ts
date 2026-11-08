@@ -1,5 +1,5 @@
 /**
- * Render the Windows tray icon with an enlarged whale from `resources/icon-windows.svg`.
+ * Render the Windows tray icon from the one product mark in `resources/icon.svg`.
  *
  * The tray shows the icon at 16 logical pixels, so Windows picks one of the
  * bundled bitmaps by display scale. Each size is rasterized from the vector
@@ -18,12 +18,17 @@ export const TRAY_ICON_SIZES = [16, 20, 24, 32, 40, 48, 64] as const
 
 /** Vector source and committed output of the tray icon. */
 export const TRAY_ICON_PATHS = {
-  source: fileURLToPath(new URL('../resources/icon-windows.svg', import.meta.url)),
+  source: fileURLToPath(new URL('../resources/icon.svg', import.meta.url)),
   output: fileURLToPath(new URL('../resources/tray-windows.ico', import.meta.url)),
 } as const
 
 /** Coordinate space of the vector source; sharp's SVG density is scaled against it. */
 const SOURCE_EDGE = 1024
+
+/** Artwork group every shared icon renderer requires from the product mark. */
+const TILE_ARTWORK_GROUP = '<g id="tile-artwork">'
+
+/** Density at which the source's own 1:1 scale renders. */
 const SOURCE_DENSITY = 72
 const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
 const ICON_DIRECTORY_BYTES = 6
@@ -93,16 +98,15 @@ export function unpackIco(ico: Buffer): IcoEntry[] {
 
 /**
  * Rasterize the vector source at each tray size.
- * @param svg - SVG document with a 1024-unit square viewBox and a `tray-glyph` group.
+ * @param svg - SVG document with a 1024-unit square viewBox and a `tile-artwork` group.
  * @param sizes - Bitmap edges to render.
  * @returns PNG entries in the given order.
  */
 export async function renderTrayIconEntries(svg: Buffer, sizes: readonly number[] = TRAY_ICON_SIZES): Promise<IcoEntry[]> {
   const source = svg.toString('utf8')
-  const glyph = '<g id="tray-glyph"'
-  if (!source.includes(glyph)) throw new Error('tray icon: SVG requires a tray-glyph group')
-  // Scale around the application tile center, retaining its background and the whale's aspect ratio.
-  const tray = Buffer.from(source.replace(glyph, `${glyph} transform="translate(552 544) scale(1.2) translate(-552 -544)"`))
+  if (!source.includes(TILE_ARTWORK_GROUP)) throw new Error('tray icon: SVG requires a tile-artwork group')
+  // The whole tile is the tray bitmap; Windows scales one bitmap to the shell's display scale.
+  const tray = Buffer.from(source)
   return Promise.all(sizes.map(async size => ({
     size,
     png: await sharp(tray, { density: SOURCE_DENSITY * size / SOURCE_EDGE }).resize(size, size).png().toBuffer(),

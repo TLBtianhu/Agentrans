@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="Agentrans mark">
-  <rect width="1024" height="1024" fill="#F5F1E8"/>
-  <path d="M 250 560 C 250 390 385 250 560 250 C 700 250 800 330 820 470 C 830 530 800 570 760 570 C 705 570 665 525 625 525 C 565 525 525 565 525 625 L 525 700"
-        fill="none" stroke="#0F766E" stroke-width="108" stroke-linecap="round"/>
-  <rect x="762" y="352" width="118" height="118" rx="26" transform="rotate(45 821 411)" fill="#F59E0B"/>
-</svg>
