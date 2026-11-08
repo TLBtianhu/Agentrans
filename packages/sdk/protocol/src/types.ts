@@ -22,7 +22,7 @@ export interface InitializeParams {
   approvalRequests?: boolean
   /** Provider route every SDK-created agent runs on. */
   provider: string
-  /** Model name every SDK-created agent runs on (the server may mount a fallback adapter; see `HarnessSdkJsonRpcServer.initialize`). */
+  /** Model name every SDK-created agent runs on through a profile-provided adapter. */
   model: string
   /** Optional adapter-owned reasoning effort for the selected provider/model route. */
   reasoningEffort?: ReasoningEffortId

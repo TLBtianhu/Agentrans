@@ -17,6 +17,7 @@ const launch = resolveExampleLaunch({
   srcBin: fileURLToPath(new URL('../../../src/bin.ts', import.meta.url)),
   mode: 'lib',
 })
+const exitObserver = new URL('./fixtures/sdk-exit-observer.mjs', import.meta.url)
 
 
 function waitForLine(
@@ -240,6 +241,7 @@ describe('Python SDK dsh profile keyless smoke', () => {
   ])('$label', async ({ editorEnabled, imageEnabled, optOut, offloadEnabled }) => {
     const root = await mkdtemp(join(tmpdir(), 'dsh-python-sdk-minimal-'))
     onTestFinished(() => rm(root, { recursive: true, force: true }))
+    const exitAudit = join(root, 'exit-audit.jsonl')
     const editorPatch = join(root, 'editor.patch.yml')
     if (editorEnabled) {
       const guide = await readFile(join(repoRoot, 'docs/user/guide/python-sdk.md'), 'utf8')
@@ -316,6 +318,10 @@ describe('Python SDK dsh profile keyless smoke', () => {
         DSH_SYSTEM_PROMPT: 'Minimal allowlist prompt.',
         DEEPSEEK_API_KEY: 'keyless-smoke-no-call',
         DEEPSEEK_BASE_URL: `http://127.0.0.1:${address.port}`,
+        ...imageEnabled ? {
+          NODE_OPTIONS: `--import=${exitObserver.href}`,
+          DSH_TEST_EXIT_AUDIT: exitAudit,
+        } : {},
       },
       timeout: 35_000,
       killSignal: 'SIGKILL',
@@ -411,11 +417,23 @@ describe('Python SDK dsh profile keyless smoke', () => {
       }
 
       child.stdin.write(`${JSON.stringify({ jsonrpc: '2.0', id: 3, method: 'shutdown' })}\n`)
-      await waitForLine(lines, value => value.id === 3, () => stderr)
+      const shutdown = await waitForLine(lines, value => value.id === 3, () => stderr)
+      if (imageEnabled) expect(shutdown).toEqual({ jsonrpc: '2.0', id: 3, result: {} })
       const exit = await child
       expect(exit.timedOut, stderr).toBe(false)
       expect(exit.signal, stderr).toBeUndefined()
       expect(exit.exitCode, `signal=${String(exit.signal)}; stderr=${stderr}`).toBe(0)
+      if (imageEnabled) {
+        const audit = (await readFile(exitAudit, 'utf8')).trim().split('\n').map(line => JSON.parse(line) as {
+          event: string
+          pid: number
+          code: number
+        })
+        expect(audit).toEqual([
+          { event: 'beforeExit', pid: child.pid, code: 0 },
+          { event: 'exit', pid: child.pid, code: 0 },
+        ])
+      }
     } finally {
       child.kill('SIGKILL')
       await child

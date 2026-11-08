@@ -8,6 +8,8 @@
             inputModalities: [text, image]
 
 - insert:
+    - id: command-attachment-skill-policy
+      name: './runtime.mjs'
     - id: command-attachment-request-capture
       name: '../manual-compact/capture-requests.mjs'
       config:

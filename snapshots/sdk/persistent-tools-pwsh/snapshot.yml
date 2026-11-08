@@ -1,0 +1,14 @@
+version: 1
+scenario: persistent-tools-pwsh
+profile: sdk-minimal
+composition: sdk-persistent-pwsh
+recording: authored
+platform: pwsh
+environment:
+  DSH_EXAMPLE_COUNT: ''
+header:
+  class: sdk-persistent-pwsh
+  pin: true
+  systemPromptSource: persistent-tools
+workspace:
+  final: true

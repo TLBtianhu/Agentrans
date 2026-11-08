@@ -2,14 +2,15 @@
  * SDK-facing JSON-RPC plugin over stdio. The selected dsh profile decides
  * whether to load it; see the single-launch Agent Note and package README.
  * Stdout is reserved for protocol frames, so the tree must not load a stdout logger.
- * This plugin answers `shutdown`, disposes the complete root runtime, and exits 0; the app bin
- * owns EOF and signal exits. Keep named plugin exports with no default export so
+ * This plugin answers `shutdown` and requests launcher-owned exit; the launcher
+ * owns root disposal and process completion. Keep named plugin exports with no default export so
  * Loader `unwrapExports` preserves `name`, `inject`, `Config`, and `apply`.
  *
  * @module @deepseek-ai/dsh-sdk-jsonrpc-server
  */
 
 import type { Context } from '@deepseek-ai/cordis'
+import type {} from '@deepseek-ai/dsh-cmdline'
 import type { Readable, Writable } from 'node:stream'
 import Schema from '@deepseek-ai/schemastery'
 import { JsonRpcLineTransport } from '@deepseek-ai/dsh-sdk-protocol'
@@ -28,7 +29,7 @@ export interface JsonRpcConfig {
   input?: Readable
   /** Transport output override; production uses `process.stdout`. */
   output?: Writable
-  /** Process-exit override; production uses `process.exit`. */
+  /** Exit-request override; production uses the launcher's `appExit` service. */
   exit?: (code: number) => void
 }
 
@@ -39,21 +40,19 @@ export const Config: Schema<JsonRpcConfig> = Schema.object({
 /**
  * Serve SDK requests over the configured streams. Effect disposal shuts down
  * SDK-created agents and closes the transport. A `shutdown` response is flushed
- * before the root runtime is disposed and the process exits 0; the app bin
- * owns root-context disposal for EOF and signals.
+ * before requesting launcher-owned root disposal and natural process completion.
+ * A failed flush requests exit 1. EOF and signals use the same launcher lifecycle.
  */
 export function apply(ctx: Context, config: JsonRpcConfig): void {
   // Cordis applies the schema default before invoking the plugin.
   const resolvedConfig = config as JsonRpcConfig & { maxTokensAsSuccess: boolean }
-  // Protocol shutdown owns the complete runtime process, so it must await the
-  // root lifecycle (including persistence) before exiting.
-  const rootFiber = ctx.root.fiber
-  /* v8 ignore next -- production stdio wiring; tests always inject the runtime hooks */
+  const requestExit = config.exit ?? ctx.get('appExit')
+  if (requestExit === undefined) {
+    throw new Error('sdk-jsonrpc-server: the launcher must provide ctx.appExit or an exit request hook before the tree mounts')
+  }
   const input = config.input ?? process.stdin
   /* v8 ignore next -- production stdio wiring; tests always inject the runtime hooks */
   const output = config.output ?? process.stdout
-  /* v8 ignore next -- production exit wiring; tests always inject the runtime hooks */
-  const exit = config.exit ?? ((code: number): void => { process.exit(code) })
 
   const transport = new JsonRpcLineTransport(input, output)
   const server = new HarnessSdkJsonRpcServer(ctx, transport, {
@@ -63,16 +62,31 @@ export function apply(ctx: Context, config: JsonRpcConfig): void {
   // Like the app startup marker, this carries readiness, not another control API.
   ctx.provide('sdkSessionActivation', { ready: true })
 
-  // Share one exit task so racing shutdown requests cannot dispose the root or
-  // exit the process more than once.
+  // Racing shutdown requests share one flush and one launcher exit request.
   let exitTask: Promise<void> | undefined
-  const disposeAndExit = (): Promise<void> => {
+  let exitCode = 0
+  const requestExitAfterFlush = (): Promise<void> => {
     exitTask ??= (async () => {
-      await Promise.allSettled([Promise.resolve().then(() => transport.flush())])
-      await Promise.allSettled([Promise.resolve().then(() => rootFiber.dispose())])
-      exit(0)
+      try {
+        await transport.flush()
+      } catch (error) {
+        // A failed response write still requires launcher-owned teardown.
+        exitCode = 1
+        ctx.logger.error(error)
+      } finally {
+        transport.close()
+        // Only the production stdin belongs to this stdio app. Caller-provided
+        // inputs and HMR disposal retain their existing stream ownership.
+        if (config.input === undefined) input.pause()
+        requestExit(exitCode)
+      }
     })()
     return exitTask
+  }
+  const scheduleExit = (code: number): void => {
+    if (code !== 0) exitCode = code
+    // The handler response reaches the output before its flush barrier.
+    setImmediate(() => { void requestExitAfterFlush() })
   }
 
   transport.onRequest(async (method, params) => {
@@ -86,19 +100,25 @@ export function apply(ctx: Context, config: JsonRpcConfig): void {
     if (method === 'initialize') {
       await ctx.get('loader')?.await()
     }
-    const result = await server.handleRequest(method, params)
-    if (method === 'shutdown') {
-      // Run after the handler result is written; the task then flushes, disposes, and exits.
-      setImmediate(() => { void disposeAndExit() })
+    try {
+      const result = await server.handleRequest(method, params)
+      if (method === 'shutdown') scheduleExit(0)
+      return result
+    } catch (error) {
+      // Preserve the teardown error response before requesting failed exit.
+      if (method === 'shutdown') scheduleExit(1)
+      throw error
     }
-    return result
   })
 
   ctx.effect(() => {
     transport.start()
     return async () => {
-      await server.shutdown()
-      transport.close()
+      try {
+        await server.shutdown()
+      } finally {
+        transport.close()
+      }
     }
   }, 'jsonrpc.serve')
 }

@@ -6,6 +6,8 @@ recording: authored
 header:
   class: sdk-command-attachments
   pin: true
+  toolSchemasVariants: [win32]
+  systemPromptVariants: [win32]
 input:
   attachments:
     - id: sha256:b1ff9c8ea3a780bad09b346c423d2d0e46815926879b18e841d928376a946640

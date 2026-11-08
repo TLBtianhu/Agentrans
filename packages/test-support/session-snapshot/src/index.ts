@@ -42,6 +42,7 @@ export {
   extractSnapshotSpillPaths,
   normalizeSessionFormatMetadata,
   normalizeSessionLog,
+  materializeSessionFixtureCwd,
   normalizeSessionSnapshot,
   normalizeSessionSnapshots,
   normalizeStdout,
@@ -72,6 +73,12 @@ export {
   type SnapshotSessionWriteMode,
   type SnapshotWorkspaceManifest,
 } from './manifest.ts'
+export {
+  resolveToolSchemasSnapshotPath,
+  resolveSystemPromptSnapshotPath,
+  toolSchemasSnapshotFilename,
+  systemPromptSnapshotFilename,
+} from './header-sidecars.ts'
 export {
   assertPersistedSessionVersion,
   assertSessionFixtureVersion,

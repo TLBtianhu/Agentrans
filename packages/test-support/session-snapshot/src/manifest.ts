@@ -17,8 +17,12 @@ export interface SnapshotHeaderManifest {
   pin?: true
   /** Scenario that owns the readable system-prompt sidecar. */
   systemPromptSource?: string
+  /** Host-specific prompt sidecars owned here; absent hosts use the shared sidecar. */
+  systemPromptVariants?: 'win32'[]
   /** Scenario that owns the readable tool-schema sidecar. */
   toolSchemasSource?: string
+  /** Host-specific schema sidecars owned here; absent hosts use the shared sidecar. */
+  toolSchemasVariants?: 'win32'[]
   /** Child fixture indexes that own distinct system-prompt sidecars. */
   childSystemPrompts?: number[]
   /** Child fixture indexes that own distinct tool-schema sidecars. */
@@ -248,7 +252,9 @@ export function parseSnapshotManifest(source: string, path = 'snapshot.yml'): Sn
         'class',
         'pin',
         'systemPromptSource',
+        'systemPromptVariants',
         'toolSchemasSource',
+        'toolSchemasVariants',
         'childSystemPrompts',
         'childToolSchemas',
         'changes',
@@ -262,15 +268,30 @@ export function parseSnapshotManifest(source: string, path = 'snapshot.yml'): Sn
           throw new Error(`manifest.header.${field} must be a non-negative integer`)
         }
       }
+      for (const field of ['systemPromptVariants', 'toolSchemasVariants'] as const) {
+        const variants = value[field]
+        if (variants !== undefined && (!Array.isArray(variants)
+          || variants.length === 0
+          || variants.some(platform => platform !== 'win32')
+          || new Set(variants).size !== variants.length)) {
+          throw new Error(`manifest.header.${field} must be a non-empty array of unique supported hosts: win32`)
+        }
+      }
       header = {
         class: name(value.class, 'manifest.header.class'),
         ...(value.pin === true ? { pin: true as const } : {}),
         ...(value.systemPromptSource === undefined
           ? {}
           : { systemPromptSource: scenarioSource(value.systemPromptSource, 'manifest.header.systemPromptSource') }),
+        ...(value.systemPromptVariants === undefined
+          ? {}
+          : { systemPromptVariants: [...value.systemPromptVariants as 'win32'[]] }),
         ...(value.toolSchemasSource === undefined
           ? {}
           : { toolSchemasSource: scenarioSource(value.toolSchemasSource, 'manifest.header.toolSchemasSource') }),
+        ...(value.toolSchemasVariants === undefined
+          ? {}
+          : { toolSchemasVariants: [...value.toolSchemasVariants as 'win32'[]] }),
         ...(value.childSystemPrompts === undefined
           ? {}
           : { childSystemPrompts: positiveIndexes(value.childSystemPrompts, 'manifest.header.childSystemPrompts') }),

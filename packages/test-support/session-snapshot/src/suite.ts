@@ -31,6 +31,7 @@ import {
   type SnapshotSessionFormatManifest,
 } from './manifest.ts'
 import { redactSessionSnapshotIds } from './identity.ts'
+import { resolveSystemPromptSnapshotPath, resolveToolSchemasSnapshotPath } from './header-sidecars.ts'
 import { captureExpectedWorkspaceSnapshot } from './workspace.ts'
 import {
   assertSessionFixtureVersion,
@@ -1410,7 +1411,7 @@ export function defineAcpSnapshotSuite(options: SnapshotSuiteOptions): void {
             const promptSnapshot = formatSystemPromptSnapshot(prompts[0] as string, prompts.slice(1))
             /* v8 ignore next -- registration guarantees every scenario class has resolved sources. */
             const promptSource = promptSourceByClass.get(classOf(scenario)) ?? scenario
-            const promptPath = join(snapshotsDir, promptSource.name, SYSTEM_PROMPT_SNAPSHOT)
+            const promptPath = await resolveSystemPromptSnapshotPath(join(snapshotsDir, promptSource.name))
             claimSharedSnapshot(promptClaims, promptPath, scenario.name, promptSnapshot)
             await writeFile(promptPath, promptSnapshot)
 
@@ -1423,7 +1424,7 @@ export function defineAcpSnapshotSuite(options: SnapshotSuiteOptions): void {
             )
             /* v8 ignore next -- registration guarantees every scenario class has resolved sources. */
             const schemaSource = schemaSourceByClass.get(classOf(scenario)) ?? scenario
-            const schemaPath = join(snapshotsDir, schemaSource.name, TOOL_SCHEMAS_SNAPSHOT)
+            const schemaPath = await resolveToolSchemasSnapshotPath(join(snapshotsDir, schemaSource.name))
             claimSharedSnapshot(schemaClaims, schemaPath, scenario.name, toolSchemasSnapshot)
             await writeFile(schemaPath, toolSchemasSnapshot)
           }
@@ -1497,7 +1498,7 @@ export function defineAcpSnapshotSuite(options: SnapshotSuiteOptions): void {
         const pinnedFixture = await readFile(join(pinningDir, pinningFixtureFile as string), 'utf8')
         const pinned = pinningHeaderPayloads(pinnedFixture, fixtureContext(pinnedFixture))
         const promptSnapshot = await readFile(
-          join(snapshotsDir, promptSource.name, SYSTEM_PROMPT_SNAPSHOT),
+          await resolveSystemPromptSnapshotPath(join(snapshotsDir, promptSource.name)),
           'utf8',
         )
         const initialPromptSnapshot = initialSystemPromptSnapshot(promptSnapshot)
@@ -1506,7 +1507,7 @@ export function defineAcpSnapshotSuite(options: SnapshotSuiteOptions): void {
         expect(parseSystemPromptSnapshot(promptSnapshot).changes.length, `the prompt source (${promptSource.name}) has an unexpected system prompt change count`)
           .toBe(pinningScenario.expectedPromptChanges ?? 0)
         const toolSchemasSnapshot = await readFile(
-          join(snapshotsDir, schemaSource.name, TOOL_SCHEMAS_SNAPSHOT),
+          await resolveToolSchemasSnapshotPath(join(snapshotsDir, schemaSource.name)),
           'utf8',
         )
         const toolSchemas = parseToolSchemasSnapshot(toolSchemasSnapshot)
@@ -1676,13 +1677,13 @@ export function defineAcpSnapshotSuite(options: SnapshotSuiteOptions): void {
         const fixture = await readFile(join(fixtureDir, fixtureFile as string), 'utf8')
         const headers = pinningHeaderPayloads(fixture, fixtureContext(fixture))
         const promptSnapshot = await readFile(
-          join(snapshotsDir, promptSource.name, SYSTEM_PROMPT_SNAPSHOT),
+          await resolveSystemPromptSnapshotPath(join(snapshotsDir, promptSource.name), 'linux'),
           'utf8',
         )
         expect(headers.length, `${scenario.name}: unexpected request/header count`)
           .toBe(1 + (scenario.expectedHeaderChanges ?? 0))
         const toolSchemasSnapshot = await readFile(
-          join(snapshotsDir, schemaSource.name, TOOL_SCHEMAS_SNAPSHOT),
+          await resolveToolSchemasSnapshotPath(join(snapshotsDir, schemaSource.name), 'linux'),
           'utf8',
         )
         const toolSchemas = parseToolSchemasSnapshot(toolSchemasSnapshot)

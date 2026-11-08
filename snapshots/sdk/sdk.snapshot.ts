@@ -10,11 +10,16 @@
  */
 
 import { existsSync } from 'node:fs'
+import { spawnSync } from 'node:child_process'
 import { cp, mkdir, mkdtemp, readFile, readdir, realpath, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { basename, delimiter, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, onTestFinished } from 'vitest'
+import { execa } from 'execa'
+import * as yaml from 'js-yaml'
+import { entryListSchema } from '@deepseek-ai/cordis-plugin-include'
+import { resolveExampleLaunch } from '@deepseek-ai/dsh-loader-smoke'
 import {
   assertPersistedSessionVersion,
   assertSessionFixtureVersion,
@@ -34,6 +39,8 @@ import {
   reconcileCatalogCreationTimes,
   REPLAY_CREDENTIAL_ENV,
   restorePinnedToolSchemas,
+  resolveToolSchemasSnapshotPath,
+  resolveSystemPromptSnapshotPath,
   scrubModelRequestBulk,
   scrubSessionSnapshot,
   scrubSystemPrompts,
@@ -47,6 +54,7 @@ import {
   tokenizeSessionFixtureCwd,
   writesCurrentSessionFixtures,
   materializeProfilePatch,
+  materializeSessionFixtureCwd,
   formatSystemPromptSnapshot,
   formatToolSchemasSnapshot,
   latestPersistedSessionPaths,
@@ -66,8 +74,10 @@ import {
 } from '@deepseek-ai/dsh-sdk-client'
 import { SESSION_FORMAT_VERSION } from '@deepseek-ai/dsh-session'
 import { deriveReplayScript, parseSessionLog } from '@deepseek-ai/dsh-llm-replay'
+import { resolvePwshPath } from '@deepseek-ai/dsh-pwsh-local'
 
 const corpusRoot = fileURLToPath(new URL('../', import.meta.url))
+const replayNetworkGuard = new URL('../../packages/test-support/session-snapshot/tests/fixtures/replay-network-guard.mjs', import.meta.url).href
 
 const MINIMAL_SYSTEM_PROMPT = 'You are the environment-selected minimal software engineer.'
 const MINIMAL_BASH_DESCRIPTION = `Run commands in a bash shell
@@ -197,7 +207,7 @@ const SDK_ASSERTIONS: Readonly<Record<string, SdkAssertions>> = {
   },
   'minimal-image-compaction': {
     expectedFinalResponse: 'MINIMAL_IMAGE_OK',
-    expectedTools: { bash: ['command'], read_image: ['file_path'], working_directory: [] },
+    expectedTools: { [process.platform === 'win32' ? 'pwsh' : 'bash']: ['command'], read_image: ['file_path'], working_directory: [] },
   },
   'session-title-stability': { waitForProviderTitle: true },
   'dynamic-tool-updates': {
@@ -245,6 +255,17 @@ const SDK_ASSERTIONS: Readonly<Record<string, SdkAssertions>> = {
     runtimeContext: {
       includes: ['Current working directory:', 'Current DSH file policy: danger-full-access', 'Approval prompts are disabled in this session'],
       excludes: ['workspace-write'],
+    },
+  },
+  'persistent-tools-pwsh': {
+    environment: { DSH_SYSTEM_PROMPT: MINIMAL_SYSTEM_PROMPT },
+    expectedFinalResponse: 'PERSISTENT_PWSH_TOOLS_OK',
+    expectedTools: { pwsh: ['command'], str_replace_editor: ['command', 'path'], working_directory: [] },
+    expectedSystem: MINIMAL_SYSTEM_PROMPT,
+    expectedToolDescriptions: { pwsh: 'Run commands in a persistent PowerShell session.' },
+    runtimeContext: {
+      includes: ['Current working directory:'],
+      excludes: ['Current DSH file policy:', 'Approval prompts'],
     },
   },
   'subagent-dsh-sdk-dynamic-route': {
@@ -295,6 +316,11 @@ async function collectCorpus(): Promise<CorpusScenario[]> {
 }
 
 const corpus = await collectCorpus()
+const hasPwsh = spawnSync(
+  resolvePwshPath(),
+  ['-NoLogo', '-NoProfile', '-NonInteractive', '-Command', '$true'],
+  { encoding: 'utf8', timeout: 10_000, windowsHide: true },
+).status === 0
 const scenarioByKey = new Map(corpus.map(scenario => [scenario.key, scenario]))
 const sdkScenarios = corpus
   .filter(scenario => scenario.manifest.profile === 'sdk' || scenario.manifest.profile === 'sdk-minimal')
@@ -443,7 +469,10 @@ async function hydrateReplayFixtures(scenario: CorpusScenario, cwd: string): Pro
   await mkdir(root, { recursive: true })
   return Promise.all((await fixtureFiles(scenario)).map(async (source) => {
     const destination = join(root, basename(source))
-    await writeFile(destination, (await readFile(source, 'utf8')).replaceAll('{{cwd}}', cwd))
+    const materialized = materializeSessionFixtureCwd(await readFile(source, 'utf8'), cwd)
+    // Reject malformed replay input during fixture materialization.
+    deriveReplayScript(parseSessionLog(materialized))
+    await writeFile(destination, materialized)
     return destination
   }))
 }
@@ -730,6 +759,79 @@ function authoredPatches(scenario: CorpusScenario, replaying: boolean): string[]
   ]
 }
 
+interface ReplayRoute {
+  provider: string
+  model: string
+}
+
+function replayRouteFacts(rows: readonly JsonObject[], mainRoute: ReplayRoute): JsonObject[] {
+  const native = rows.find(row => row.id === 'llm-deepseek')
+  if (native?.disabled !== true) throw new Error('keyless title replay requires llm-deepseek disabled before launch')
+  const title = rows.find(row => row.id === 'session-title-provider' && row.disabled !== true)
+  const titleConfig = title?.config as JsonObject | undefined
+  if (typeof titleConfig?.provider !== 'string' || typeof titleConfig.model !== 'string') {
+    throw new Error('keyless title replay has no configured auxiliary title route')
+  }
+  return [{ rowId: 'llm-deepseek', disabled: true }, ...[mainRoute, {
+    provider: titleConfig.provider, model: titleConfig.model,
+  }].map((route) => {
+    const owners = rows.filter((row) => {
+      if (row.name !== '@deepseek-ai/dsh-llm-replay' || row.disabled !== undefined && row.disabled !== false) return false
+      const config = row.config as JsonObject | undefined
+      return Array.isArray(config?.providers) && config.providers.some((provider: JsonObject) => provider.id === route.provider
+        && Array.isArray(provider.models) && provider.models.some((model: JsonObject) => model.id === route.model))
+    })
+    if (owners.length !== 1) throw new Error(`keyless title replay route ${route.provider}/${route.model} requires one active replay owner`)
+    return { rowId: owners[0]!.id, provider: route.provider, model: route.model }
+  })]
+}
+
+async function preflightTitleReplay(
+  scenario: CorpusScenario, patches: readonly string[], cwd: string, env: NodeJS.ProcessEnv, route: ReplayRoute,
+): Promise<void> {
+  const launch = resolveExampleLaunch({
+    srcBin: fileURLToPath(new URL('../../apps/cli/src/bin.ts', import.meta.url)),
+    mode: 'src',
+    sourceImport: 'tsx/esm',
+    tsconfigPath: fileURLToPath(new URL('../../tsconfig.json', import.meta.url)),
+    configArgs: ['--profile', scenario.manifest.profile, ...patches.flatMap(path => ['--patch', path]), '--dump-config'],
+    env,
+  })
+  const dumped = await execa(launch.command, launch.args, {
+    cwd, env: launch.env, reject: false, timeout: 30_000,
+  })
+  if (dumped.exitCode !== 0 || dumped.timedOut) throw new Error(`${scenario.name}: keyless dump-config preflight failed`)
+  const rows: unknown = yaml.load(dumped.stdout, { schema: entryListSchema })
+  if (!Array.isArray(rows) || !rows.every(row => row !== null && typeof row === 'object' && !Array.isArray(row))) {
+    throw new Error(`${scenario.name}: dump-config preflight did not return entry rows`)
+  }
+  console.info(JSON.stringify({ scenario: scenario.name, replayRoutes: replayRouteFacts(rows, route) }))
+}
+
+async function assertReplayNetworkAudit(path: string, previousPids?: ReadonlySet<number>): Promise<ReadonlySet<number>> {
+  const audit = records(await readFile(path, 'utf8'))
+  const installed = audit.filter(event => event.kind === 'installed')
+  if (installed.length === 0) throw new Error('keyless replay child did not install its network guard')
+  const blocked = audit.find(event => event.kind === 'blocked')
+  if (blocked !== undefined) {
+    const frames = Array.isArray(blocked.frames) ? blocked.frames.filter(frame => typeof frame === 'string').join('\n') : ''
+    throw new Error(`keyless replay attempted external ${String(blocked.transport)}: ${String(blocked.destination)}\n${frames}`)
+  }
+  const pids = new Set(installed.flatMap(event => typeof event.pid === 'number' ? [event.pid] : []))
+  if (pids.size === 0 || previousPids !== undefined && ![...pids].some(pid => !previousPids.has(pid))) {
+    throw new Error('keyless replay SDK child did not install a new network guard after preflight')
+  }
+  return pids
+}
+
+function assertReplayTurnOutcome(scenario: string, fixture: string, turn: number, result: RunResult): void {
+  const end = records(fixture).find(event => event.type === 'turn/end' && (event.data as JsonObject).turn === turn)
+  const expected = ((end?.data as JsonObject | undefined)?.reason as JsonObject | undefined)?.kind
+  if (result.finishReason === 'error' && expected !== 'error') {
+    throw new Error(`${scenario}: keyless replay turn ${String(turn)} failed instead of ${String(expected)}; refusing to await later events`)
+  }
+}
+
 /** One SDK-controlled recorded scenario against a fresh SDK-profile subprocess. */
 async function runScenario(scenario: CorpusScenario): Promise<{
   results: RunResult[]
@@ -751,6 +853,11 @@ async function runScenario(scenario: CorpusScenario): Promise<{
     workspacePrefix += '-'.repeat(paddingLength)
   }
   const cwd = await realpath(await mkdtemp(join(workspaceParent, workspacePrefix)))
+  let harness: DeepSeekHarness | undefined
+  onTestFinished(async () => {
+    if (harness !== undefined) await harness.close()
+    await rm(cwd, { recursive: true, force: true })
+  })
   if (fixedWidthCwd) expect(JSON.stringify(cwd)).toHaveLength(192)
   const dshHome = join(cwd, '.dsh')
   const sessionsRoot = join(dshHome, 'sessions')
@@ -761,6 +868,7 @@ async function runScenario(scenario: CorpusScenario): Promise<{
   const route = modelFromSession(primaryFixture)
   const patchRoot = join(cwd, '.snapshot-patches')
   await mkdir(patchRoot, { recursive: true })
+  const networkAudit = join(patchRoot, 'network-audit.jsonl')
   const assertions = SDK_ASSERTIONS[scenario.name] ?? {}
   const patches = [
     ...legacySdkCompositions.has(scenario.manifest.composition) ? [legacySdkContextPatch] : [],
@@ -823,6 +931,10 @@ async function runScenario(scenario: CorpusScenario): Promise<{
     ...assertions.environment,
     ...childEnvironment,
     ...resumeReplayFile === undefined ? {} : { DSH_SNAPSHOT_OVERRIDE: resumeReplayFile },
+    ...recording ? {} : {
+      NODE_OPTIONS: `--disable-warning=ExperimentalWarning --import=${replayNetworkGuard}`,
+      DSH_SNAPSHOT_NETWORK_AUDIT_FILE: networkAudit,
+    },
   }
 
   const planReviews = assertions.planReviews === undefined ? undefined : [...assertions.planReviews]
@@ -853,8 +965,13 @@ async function runScenario(scenario: CorpusScenario): Promise<{
     model,
     ...onUserQuestion === undefined ? {} : { onUserQuestion },
   })
-  let harness = createHarness()
+  harness = createHarness()
   try {
+    let preflightGuardPids: ReadonlySet<number> | undefined
+    if (!recording && scenario.manifest.composition.startsWith('session-title')) {
+      await preflightTitleReplay(scenario, patches, cwd, env, route)
+      preflightGuardPids = await assertReplayNetworkAudit(networkAudit)
+    }
     const notifications: HarnessNotification[] = []
     const observedMethods = new Set<string>()
     const results: RunResult[] = []
@@ -872,6 +989,7 @@ async function runScenario(scenario: CorpusScenario): Promise<{
       })
     }
     await harness.start()
+    if (!recording) await assertReplayNetworkAudit(networkAudit, preflightGuardPids)
     let subscription = harness.client.subscribeSessionTree(sessionId)
     const titleSubscription = assertions.waitForProviderTitle === true
       ? harness.client.subscribeSessionTree(sessionId)
@@ -899,6 +1017,7 @@ async function runScenario(scenario: CorpusScenario): Promise<{
             { type: 'text', text: action.line },
           ] : action.line)
           expect(execution.sessionId).toBe(sessionId)
+          if (!recording) await assertReplayNetworkAudit(networkAudit)
           if (scenario.name === 'plan-review' && action === actions.find(item => item.kind === 'command')) {
             expect(execution).toMatchObject({ finalResponse: 'SDK_PLAN_APPROVED', finishReason: 'completed' })
             expect(execution.events.filter(event => event.type === 'turn/end'))
@@ -962,6 +1081,10 @@ async function runScenario(scenario: CorpusScenario): Promise<{
           result = outcome
         }
         results.push(result)
+        if (!recording) {
+          await assertReplayNetworkAudit(networkAudit)
+          assertReplayTurnOutcome(scenario.name, primaryFixture, action.turn, result)
+        }
         if (titleSubscription !== undefined) {
           const expected = expectedTitles[results.length - 1]?.data as JsonObject | undefined
           expect(expected, 'each turn has a recorded provider title').toBeDefined()
@@ -1020,6 +1143,10 @@ async function runScenario(scenario: CorpusScenario): Promise<{
       titleSubscription?.close()
     }
     await harness.close()
+    if (!recording) {
+      console.info(JSON.stringify({ scenario: scenario.name,
+        guardedNodeProcesses: (await assertReplayNetworkAudit(networkAudit)).size, externalRequests: 0 }))
+    }
     const logs = (await Promise.all([
       persistedLogs(sessionsRoot),
       ...(childSessionsRoot === undefined ? [] : [persistedLogs(childSessionsRoot)]),
@@ -1034,7 +1161,6 @@ async function runScenario(scenario: CorpusScenario): Promise<{
     return { results, notifications, observedMethods, logs, initialWorkspace, finalWorkspace, cwd, modelRequests }
   } finally {
     await harness.close()
-    await rm(cwd, { recursive: true, force: true })
   }
 }
 
@@ -1064,13 +1190,13 @@ async function writeHeaderSidecars(
     const schemas = normalizedToolSchemas(primary.content, ctx)
     if (scenario.manifest.header.systemPromptSource === undefined) {
       await writeFile(
-        join(scenario.dir, 'system-prompt.expected.md'),
+        await resolveSystemPromptSnapshotPath(scenario.dir),
         formatSystemPromptSnapshot(prompts[0] as string, prompts.slice(1)),
       )
     }
     if (scenario.manifest.header.toolSchemasSource === undefined) {
       await writeFile(
-        join(scenario.dir, 'tool-schemas.expected.json'),
+        await resolveToolSchemasSnapshotPath(scenario.dir),
         formatToolSchemasSnapshot(schemas[0] as unknown[], schemas.slice(1)),
       )
     }
@@ -1112,8 +1238,8 @@ async function verifyHeaders(
   })
   const promptOwner = sourceScenario(pin, pin.manifest.header.systemPromptSource)
   const schemaOwner = sourceScenario(pin, pin.manifest.header.toolSchemasSource)
-  const prompt = await readFile(join(promptOwner.dir, 'system-prompt.expected.md'), 'utf8')
-  const schemas = parseToolSchemasSnapshot(await readFile(join(schemaOwner.dir, 'tool-schemas.expected.json'), 'utf8'))
+  const prompt = await readFile(await resolveSystemPromptSnapshotPath(promptOwner.dir), 'utf8')
+  const schemas = parseToolSchemasSnapshot(await readFile(await resolveToolSchemasSnapshotPath(schemaOwner.dir), 'utf8'))
   const schemaSets = [schemas.initial, ...schemas.changes]
   const reconstructed = pinned.map((header, index) => restorePinnedToolSchemas(
     header,
@@ -1156,7 +1282,95 @@ async function verifyHeaders(
   }
 }
 
+/** Preserve cwd encoding before refresh replaces the harvested header's volatile identities. */
+function stabilizeSdkFixture(
+  fresh: string,
+  existing: string,
+  replacements: ReturnType<typeof refreshFixtureReplacements>,
+  context: NormalizeContext,
+): string {
+  return scrubSessionSnapshot(stabilizeRefreshLog(
+    tokenizeSessionFixtureCwd(fresh), existing, replacements, context,
+  ))
+}
+
 describe('TypeScript SDK snapshots over the jsonrpc runtime', () => {
+  it.each([String.raw`C:\Users\fixture\sdk-snapshot-ABC123`, String.raw`\\server\share\sdk-snapshot-ABC123`])(
+    'refreshes new nested JSON input without retaining the generated cwd %s', async cwd => {
+      const existing = await readFile(join(corpusRoot, 'sdk/persistent-tools-pwsh/session.v4.jsonl'), 'utf8')
+      const input = {
+        path: `${cwd}/new.txt`,
+        literal: String.raw`C:\external\keep.txt`,
+      }
+      const appended = { type: 'user/message', surfaceOp: 'append', data: {
+        id: 'refresh-new-message', role: 'user', source: { kind: 'user' },
+        content: [{ type: 'text', text: JSON.stringify({ input: JSON.stringify(input) }) }],
+      } }
+      const fresh = materializeSessionFixtureCwd(existing, cwd).trimEnd() + '\n' + JSON.stringify(appended) + '\n'
+      const header = records(fresh)[0]!
+      const replacements = refreshFixtureReplacements([{ id: String(header.id), createdAt: Number(header.createdAt), content: fresh }], [existing])
+      const stable = records(stabilizeSdkFixture(fresh, existing, replacements, contextOfContents([fresh])))
+      expect(stable.at(-1)).toEqual({ ...appended, data: { ...appended.data, content: [{
+        type: 'text', text: JSON.stringify({ input: JSON.stringify({ ...input, path: '{{cwd}}/new.txt' }) }),
+      }] } })
+      expect(stable[0]).toMatchObject({ version: SESSION_FORMAT_VERSION, cwd: '{{cwd}}' })
+    },
+  )
+  it('rejects a keyless title composition without exclusive replay routes', () => {
+    const main = { provider: 'deepseek-official', model: 'fixture-main' }
+    const rows: JsonObject[] = [
+      { id: 'llm-deepseek', disabled: true },
+      { id: 'session-title-provider', config: { provider: 'title-replay', model: 'fixture-title' } },
+      { id: 'main-replay', name: '@deepseek-ai/dsh-llm-replay', config: {
+        providers: [{ id: main.provider, models: [{ id: main.model }] }],
+      } },
+      { id: 'title-replay', name: '@deepseek-ai/dsh-llm-replay', config: {
+        providers: [{ id: 'title-replay', models: [{ id: 'fixture-title' }] }],
+      } },
+    ]
+    expect(replayRouteFacts(rows, main).map(fact => fact.rowId)).toEqual(['llm-deepseek', 'main-replay', 'title-replay'])
+    expect(() => replayRouteFacts([{ ...rows[0], disabled: false }, ...rows.slice(1)], main))
+      .toThrow('requires llm-deepseek disabled')
+    expect(() => replayRouteFacts(rows.filter(row => row.id !== 'main-replay'), main)).toThrow('requires one active replay owner')
+    expect(() => replayRouteFacts([...rows.slice(0, 3), { ...rows[3], disabled: true }], main))
+      .toThrow('requires one active replay owner')
+  })
+
+  it('reports an unexpected replay error before waiting for later events while retaining recorded errors', () => {
+    const result: RunResult = { sessionId: 'fixture', finalResponse: '', finishReason: 'error', events: [], notifications: [] }
+    const fixture = (kind: string): string => JSON.stringify({ type: 'turn/end', data: { turn: 1, reason: { kind } } })
+    expect(() => assertReplayTurnOutcome('fixture', fixture('completed'), 1, result)).toThrow('refusing to await later events')
+    expect(() => assertReplayTurnOutcome('fixture', fixture('error'), 1, result)).not.toThrow()
+  })
+
+  it.each([String.raw`C:\Users\fixture\sdk-replay`, String.raw`\\server\share\sdk-replay`])(
+    'validates real title replay input with JSON-safe cwd %s before launching', async (cwd) => {
+      const source = await readFile(join(corpusRoot, 'sdk/session-title-after-turn/session.v4.jsonl'), 'utf8')
+      expect(() => parseSessionLog(source.replaceAll('{{cwd}}', cwd))).toThrow('session snapshot line 1 contains invalid JSON')
+      const materialized = materializeSessionFixtureCwd(source, cwd)
+      expect(deriveReplayScript(parseSessionLog(materialized))).toEqual(deriveReplayScript(parseSessionLog(source)))
+    },
+  )
+
+  it('rejects an input reference to a recorded session that has not bound', () => {
+    const scenario = scenarioByKey.get('sdk/session-title-after-turn')!
+    expect(() => materializeInput([{ type: 'text', text: '{{session:2}}' }], scenario, '/snapshot', ['parent']))
+      .toThrow('session token 2 has not bound')
+  })
+
+  it('requires an SDK guard PID beyond the separate preflight process', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'sdk-guard-pids-'))
+    const path = join(root, 'audit.jsonl')
+    try {
+      await writeFile(path, '{"kind":"installed","pid":1}\n')
+      await expect(assertReplayNetworkAudit(path, new Set([1]))).rejects.toThrow('did not install a new network guard')
+      await writeFile(path, '{"kind":"installed","pid":1}\n{"kind":"installed","pid":2}\n')
+      expect([...(await assertReplayNetworkAudit(path, new Set([1])))]).toEqual([1, 2])
+    } finally {
+      await rm(root, { recursive: true, force: true })
+    }
+  })
+
   it('restores the retained V3 max-tokens recording after an interrupted next-turn restart', async () => {
     const path = join(corpusRoot, 'sdk/max-tokens-continue/session.v3.jsonl')
     const fixture = await readFile(path, 'utf8')
@@ -1176,10 +1390,10 @@ describe('TypeScript SDK snapshots over the jsonrpc runtime', () => {
   })
 
   for (const scenario of sdkScenarios) {
-    const scenarioTest = recording
-      && (scenario.manifest.recording === 'authored' || scenario.manifest.sessionFormat !== undefined)
-      ? it.skip
-      : it
+    const skipped = scenario.manifest.platform === 'posix' && process.platform === 'win32'
+      || scenario.manifest.platform === 'pwsh' && !hasPwsh
+      || recording && (scenario.manifest.recording === 'authored' || scenario.manifest.sessionFormat !== undefined)
+    const scenarioTest = skipped ? it.skip : it
     scenarioTest(`${mode}s ${scenario.name} through dsh --profile ${scenario.manifest.profile}`, async () => {
       const scenarioDir = scenario.dir
       const retained = scenario.manifest.sessionFormat !== undefined
@@ -1431,6 +1645,23 @@ describe('TypeScript SDK snapshots over the jsonrpc runtime', () => {
           data: { reason: { kind: 'aborted', reason: { kind: 'user' } } },
         })
       }
+      if (scenario.name === 'persistent-tools-pwsh') {
+        const toolResults = results.flatMap(result => result.events).filter(event => event.type === 'tool/result')
+        expect(toolResults).toHaveLength(8)
+        for (const result of toolResults) expect(result).toMatchObject({ data: { message: { isError: false } } })
+        for (const [toolCallId, text] of [
+          ['pwsh-state-1', 'COUNT=1 CWD=persistent-state'],
+          ['pwsh-state-2', 'COUNT=2 CWD=persistent-state'],
+          ['pwsh-delayed-pipeline', 'delayed'],
+          ['pwsh-exit', '[shell exited: code 9]'],
+          ['pwsh-exit', 'persistent pwsh shell was reset'],
+          ['pwsh-reset', 'RESET_WORKSPACE=True COUNT_SET=False'],
+        ]) {
+          expect(toolResults).toContainEqual(expect.objectContaining({ data: expect.objectContaining({ message: expect.objectContaining({
+            toolCallId, content: [{ type: 'text', text: expect.stringContaining(text) }],
+          }) }) }))
+        }
+      }
       if (scenario.name === 'minimal-image-compaction') {
         const events = results.flatMap(result => result.events)
         const failures = events.filter(event => event.type === 'turn/end' && event.data.reason.kind === 'error')
@@ -1601,9 +1832,7 @@ describe('TypeScript SDK snapshots over the jsonrpc runtime', () => {
         const refreshed = ordered.map((log, index) => {
           const existing = expectedContents[index]
           if (existing === undefined) throw new Error(`no fixture for persisted log ${index}`)
-          return scrubSessionSnapshot(tokenizeSessionFixtureCwd(
-            stabilizeRefreshLog(log.content, existing, replacements, actualContext),
-          ))
+          return stabilizeSdkFixture(log.content, existing, replacements, actualContext)
         })
         expectedContents = redactSessionSnapshotIds(stabilizeFixtureMessageIds(reconcileCatalogCreationTimes(refreshed, 'preserve-headers'), expectedContents))
       }

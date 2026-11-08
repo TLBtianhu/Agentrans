@@ -165,6 +165,11 @@ describe('snapshot manifest', () => {
     })
   })
 
+  it('declares host prompt and schema variants at their sidecar owner', () => {
+    expect(parseSnapshotManifest('version: 1\nprofile: headless\nheader:\n  class: default\n  toolSchemasVariants: [win32]\n  systemPromptVariants: [win32]\n').header)
+      .toEqual({ class: 'default', toolSchemasVariants: ['win32'], systemPromptVariants: ['win32'] })
+  })
+
   it.each([
     ['', 'manifest must be a mapping'],
     ['version: 2\nprofile: acp\n', 'manifest.version must equal 1'],
@@ -178,6 +183,10 @@ describe('snapshot manifest', () => {
     ['version: 1\nprofile: acp\nheader:\n  class: base\n  changes: -1\n', 'manifest.header.changes must be a non-negative integer'],
     ['version: 1\nprofile: acp\nheader:\n  class: base\n  promptChanges: 1.5\n', 'manifest.header.promptChanges must be a non-negative integer'],
     ['version: 1\nprofile: acp\nheader:\n  class: base\n  systemPromptSource: ../bad\n', 'manifest.header.systemPromptSource must be a lower-kebab-case name or corpus-relative path'],
+    ...['systemPromptVariants', 'toolSchemasVariants'].flatMap(field => ['[]', '[linux]', '[win32, win32]', 'win32'].map(value => [
+      `version: 1\nprofile: headless\nheader:\n  class: default\n  ${field}: ${value}\n`,
+      `manifest.header.${field} must be a non-empty array of unique supported hosts: win32`,
+    ])),
     ['version: 1\nprofile: acp\nreplay:\n  override: false\n', 'manifest.replay.override must equal true'],
     ['version: 1\nprofile: acp\nplatform: windows\n', 'manifest.platform must be posix or pwsh'],
     ['version: 1\nprofile: acp\npermission: root\n', 'manifest.permission must be read-only, workspace-write, or danger-full-access'],

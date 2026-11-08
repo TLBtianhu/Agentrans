@@ -114,14 +114,15 @@ export interface SessionSnapshotComparisonOptions extends Omit<NormalizeOptions,
   nativeWriterOutput?: true
 }
 
-/** Return every known spelling of the generated cwd, most specific first. */
+/** Return physical and embedded JSON spellings of the generated cwd, most specific first. */
 function cwdSpellings(ctx: NormalizeContext): string[] {
   const spellings = [...new Set([ctx.cwd, ...ctx.cwdAliases ?? []])]
     .filter(spelling => spelling.length > 0)
   const macAliases = spellings
     .filter(spelling => spelling.startsWith('/') && !spelling.startsWith('/private/'))
     .map(spelling => `/private${spelling}`)
-  return [...new Set([...spellings, ...macAliases])]
+  return [...new Set([...spellings, ...macAliases]
+    .flatMap(spelling => [spelling, JSON.stringify(spelling).slice(1, -1)]))]
     .sort((left, right) => right.length - left.length)
 }
 
@@ -167,6 +168,46 @@ function replaceCwd(value: string, ctx: NormalizeContext, replacement: string): 
   return out
 }
 
+/** Match JSON string literals after the surrounding JSON text has been validated. */
+const JSON_STRING_LITERAL_RE = /"(?:[^"\\]|\\[\s\S])*"/g
+
+function materializeFixtureString(value: string, cwd: string): string {
+  if (!value.includes(CWD)) return value
+  try { JSON.parse(value) }
+  catch (error) {
+    if (!(error instanceof SyntaxError)) throw error
+    if (/^\s*(?:\{(?!\{cwd\}\})|\[)/u.test(value)) {
+      throw new Error('snapshot cwd materialization refuses incomplete embedded JSON', { cause: error })
+    }
+    // Ordinary text is already a decoded string; only cwd-rooted tokens change.
+    return replaceCwdSpelling(value, CWD, cwd)
+  }
+  return materializeFixtureJson(value, cwd)
+}
+
+function materializeFixtureJson(source: string, cwd: string): string {
+  JSON.parse(source)
+  return source.replace(JSON_STRING_LITERAL_RE, (literal: string, offset: number) => {
+    // Keys are identifiers in the recorded document, not generated path values.
+    if (/^\s*:/u.test(source.slice(offset + literal.length))) return literal
+    const value = JSON.parse(literal) as string
+    const materialized = materializeFixtureString(value, cwd)
+    return materialized === value ? literal : JSON.stringify(materialized)
+  })
+}
+
+/**
+ * Materialize cwd tokens in JSONL string values, including independently encoded JSON inside strings.
+ * Other text, object keys, relationship tokens, and embedded JSON whitespace remain unchanged.
+ * @param rawLog - valid recorded JSONL; committed fixture bytes are never written.
+ * @param cwd - this replay process's physical working directory.
+ * @returns Valid JSONL with cwd-rooted tokens replaced at their own string-encoding depth.
+ * @throws If a non-empty fixture line is invalid JSON or a token appears in incomplete embedded JSON.
+ */
+export function materializeSessionFixtureCwd(rawLog: string, cwd: string): string {
+  return rawLog.split('\n').map(line => line.trim() === '' ? line : materializeFixtureJson(line, cwd)).join('\n')
+}
+
 /** Replace cwd, session ids, and any stray UUID with stable tokens in a string. */
 function scrubString(
   value: string,
@@ -186,7 +227,7 @@ function scrubString(
   if (cwdPathMode === 'canonical') {
     // Restrict separator conversion to paths rooted at the cwd token. A global
     // backslash rewrite would corrupt regexes, commands, and model-authored text.
-    out = out.replace(CWD_ROOTED_PATH_RE, path => path.replaceAll('\\', '/'))
+    out = out.replace(CWD_ROOTED_PATH_RE, path => path.replace(/\\+/g, '/'))
     out = canonicalizeEmbeddedPaths(out)
   }
   out = out.replace(LOCAL_SPILL_PATH_RE, (_match, name: string) => `{{spillLocator:${name}}}`)
@@ -241,13 +282,30 @@ function escapeRegExp(value: string): string {
 
 /** Replace any absolute spelling whose final segment is the generated cwd basename. */
 function tokenizeFixtureString(value: string, ctx: NormalizeContext, basename: string): string {
-  const exact = replaceCwd(value, ctx, CWD)
-  const absoluteCwd = new RegExp(
-    String.raw`(?:[A-Za-z]:)?[\\/](?:[^\\/\s<>"]+[\\/])*${escapeRegExp(basename)}`
-    + String.raw`(?=$|[\\/\s<>'"()\[\]{},;:!?=])`,
-    'g',
-  )
-  return exact.replace(absoluteCwd, CWD).split(`/private${CWD}`).join(CWD)
+  try { JSON.parse(value) }
+  catch (error) {
+    if (!(error instanceof SyntaxError)) throw error
+    const exact = replaceCwd(value, ctx, CWD)
+    const absoluteCwd = new RegExp(
+      String.raw`(?:[A-Za-z]:)?[\\/](?:[^\\/\s<>"]+[\\/])*${escapeRegExp(basename)}`
+      + String.raw`(?=$|[\\/\s<>'"()\[\]{},;:!?=])`,
+      'g',
+    )
+    const tokenized = exact.replace(absoluteCwd, (path: string, offset: number) =>
+      isCwdMatch(exact, offset, path.length) ? CWD : path).split(`/private${CWD}`).join(CWD)
+    if (tokenized !== value && /^\s*(?:\{(?!\{cwd\}\})|\[)/u.test(value)) {
+      throw new Error('snapshot cwd tokenization refuses incomplete embedded JSON', { cause: error })
+    }
+    return tokenized
+  }
+  // Decode valid embedded JSON before path matching; a shallow match inside an
+  // escaped Windows path can otherwise leave its drive or UNC prefix behind.
+  return value.replace(JSON_STRING_LITERAL_RE, (literal: string, offset: number) => {
+    if (/^\s*:/u.test(value.slice(offset + literal.length))) return literal
+    const decoded = JSON.parse(literal) as string
+    const tokenized = tokenizeFixtureString(decoded, ctx, basename)
+    return tokenized === decoded ? literal : JSON.stringify(tokenized)
+  })
 }
 
 /** Recursively replace generated-cwd spellings while preserving every other JSON value. */
@@ -269,13 +327,14 @@ function tokenizeFixtureValue(
 
 /**
  * Store one generated workspace as `{{cwd}}` while retaining every other
- * session value. The caller opts in only for workspaces created under a
+ * session value and embedded JSON text outside changed string literals. The
+ * caller opts in only for workspaces created under a
  * platform temporary root; explicitly relocated workspaces keep their real
  * path.
  *
  * @param rawLog The raw or refresh-stabilized session JSONL fixture.
  * @returns Compact JSONL whose known cwd spellings become `{{cwd}}`.
- * @throws If a non-empty line is invalid JSON or the session cwd has no basename.
+ * @throws If a non-empty line is invalid JSON, a changed path is inside incomplete embedded JSON, or the session cwd has no basename.
  */
 export function tokenizeSessionFixtureCwd(rawLog: string): string {
   const lines = rawLog.split('\n')

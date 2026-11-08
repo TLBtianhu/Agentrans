@@ -15,7 +15,7 @@ import { queryCommandImages, queryContent } from './query-content.ts'
 import { brandString } from '@deepseek-ai/dsh-brand'
 import type { Agent, AgentHandle } from '@deepseek-ai/dsh-agent'
 import { admitEncodedImages, type EncodedImageAttachment, type ImageAttachmentRef } from '@deepseek-ai/dsh-attachment'
-import { createUserMessage, ReasoningEffortId, type ContentBlock, type LlmRuntime } from '@deepseek-ai/dsh-llm'
+import { createUserMessage, ReasoningEffortId, type ContentBlock } from '@deepseek-ai/dsh-llm'
 import { carrierKeyOf, type Scoped } from '@deepseek-ai/dsh-scope'
 import type { SessionId, SessionLogOffset } from '@deepseek-ai/dsh-session'
 import type {} from '@deepseek-ai/dsh-working-directory'
@@ -24,7 +24,6 @@ import type {} from '@deepseek-ai/dsh-user-approval'
 import type {} from '@deepseek-ai/dsh-schedule'
 import type SubagentRuntime from '@deepseek-ai/dsh-subagent'
 import type { SubagentRunEndInfo } from '@deepseek-ai/dsh-subagent'
-import * as LlmDeepSeek from '@deepseek-ai/dsh-llm-deepseek-api-key'
 import type {
   ApprovalRequestParams,
   CommandExecution,
@@ -99,7 +98,6 @@ export class HarnessSdkJsonRpcServer {
   private model = 'deepseek-official'
   private reasoningEffort: ReturnType<typeof ReasoningEffortId> | undefined
   private maxTokens: number | undefined
-  private llmFiber: { dispose(): Promise<void> } | undefined
   private readonly sessions = new Map<string, SessionRecord>()
   private readonly sessionCreations = new Map<string, Promise<SessionRecord>>()
   private readonly commandTasks = new Set<Promise<CommandExecution | undefined>>()
@@ -216,7 +214,7 @@ export class HarnessSdkJsonRpcServer {
   }
 
   /**
-   * Validate and configure the SDK route, mounting the DeepSeek fallback only when unowned.
+   * Validate and configure a model route supplied by the surrounding plugin tree.
    * @param params - SDK handshake parameters.
    * @returns server identity for the handshake.
    */
@@ -238,12 +236,10 @@ export class HarnessSdkJsonRpcServer {
     const reasoningEffort = params.reasoningEffort === undefined
       ? undefined
       : ReasoningEffortId(params.reasoningEffort)
-    if (!this.hasAdapterFor(provider)) {
-      if (provider !== 'deepseek-official') throw new Error(`no adapter registered for provider "${provider}"`)
-      this.llmFiber = await this.ctx.plugin(LlmDeepSeek)
+    const llm = this.ctx.get('llm')
+    if (llm === undefined || !llm.listProviders().some(entry => entry.id === provider)) {
+      throw new Error(`no adapter registered for provider "${provider}"`)
     }
-    // Adapter presence was read from this service above; a successful fallback mount also requires it.
-    const llm = this.ctx.get('llm') as LlmRuntime
     await llm.resolveCallConfig({
       provider,
       model,
@@ -477,9 +473,7 @@ export class HarnessSdkJsonRpcServer {
     const teardownResults = await Promise.allSettled([
       this.goalLifetime.dispose(),
       ...records.map(rec => Promise.resolve().then(() => rec.handle.dispose())),
-      ...(this.llmFiber === undefined ? [] : [Promise.resolve().then(() => this.llmFiber?.dispose())]),
     ])
-    this.llmFiber = undefined
     failures.push(...teardownResults
       .filter((result): result is PromiseRejectedResult => result.status === 'rejected')
       .map(result => result.reason as unknown))
@@ -593,9 +587,5 @@ export class HarnessSdkJsonRpcServer {
     const rec: SessionRecord = { handle, failure: undefined }
     this.sessions.set(sessionId, rec)
     return rec
-  }
-
-  private hasAdapterFor(provider: string): boolean {
-    return this.ctx.get('llm')?.listProviders().some(entry => entry.id === provider) ?? false
   }
 }

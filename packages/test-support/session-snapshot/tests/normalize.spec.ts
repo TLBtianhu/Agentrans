@@ -4,6 +4,7 @@ import { prepareSessionSnapshotFixtureForComparison } from '@deepseek-ai/dsh-llm
 import {
   type NormalizeContext,
   extractSnapshotSpillPaths,
+  materializeSessionFixtureCwd,
   normalizeSessionLog,
   normalizeSessionFormatMetadata,
   normalizeSessionSnapshot,
@@ -25,6 +26,36 @@ const ctx: NormalizeContext = {
   sessionIds: ['11111111-2222-3333-4444-555555555555'],
   cwd: '/tmp/acp-snap-cwd-abc123',
 }
+
+describe('materializeSessionFixtureCwd', () => {
+  it.each([String.raw`C:\Users\fixture\sdk-replay`, String.raw`\\server\share\sdk-replay`, '/tmp/sdk-replay'])(
+    'materializes %s at each JSON string depth without changing other source text', (cwd) => {
+      const embedded = '{  "path" : "{{cwd}}/file.txt", "value": 1e3, "keep" : "regex\\\\w+"  }'
+      const raw = `${JSON.stringify({
+        type: 'session', cwd: '{{cwd}}', literal: String.raw`regex \\w+; prefix{{cwd}}suffix`,
+        embedded, nested: JSON.stringify(embedded), relation: '{{session:2}}', '{{cwd}}': 'unchanged key',
+      })}\n`
+      const materialized = materializeSessionFixtureCwd(raw, cwd)
+      const value = JSON.parse(materialized) as Record<string, string>
+      const expectedEmbedded = embedded.replace('"{{cwd}}/file.txt"', JSON.stringify(`${cwd}/file.txt`))
+      expect(value.cwd).toBe(cwd)
+      expect(value.embedded).toBe(expectedEmbedded)
+      expect(JSON.parse(value.nested as string)).toBe(expectedEmbedded)
+      expect(value.literal).toBe(String.raw`regex \\w+; prefix{{cwd}}suffix`)
+      expect(value.relation).toBe('{{session:2}}')
+      expect(value['{{cwd}}']).toBe('unchanged key')
+      expect(materializeSessionFixtureCwd(materialized, cwd)).toBe(materialized)
+      const simple = `${JSON.stringify({ type: 'session', cwd: '{{cwd}}', relation: '{{session:2}}' })}\n`
+      expect(tokenizeSessionFixtureCwd(materializeSessionFixtureCwd(simple, cwd))).toBe(simple)
+    },
+  )
+
+  it('rejects malformed outer or incomplete embedded JSON before a runtime can use it', () => {
+    expect(() => materializeSessionFixtureCwd('{"cwd":', 'C:\\work')).toThrow(SyntaxError)
+    expect(() => materializeSessionFixtureCwd(JSON.stringify({ args: '{"path":"{{cwd}}' }), 'C:\\work'))
+      .toThrow('refuses incomplete embedded JSON')
+  })
+})
 
 describe('normalizeStdout', () => {
   it('rewrites JSON-RPC ids to a stable first-seen sequence', () => {
@@ -181,6 +212,33 @@ Additional instructions from: nested\AGENTS.md`,
     const raw = JSON.stringify({ path: `${windowsCtx.cwd}\\nested\\proof.txt` })
     const frame = JSON.parse(normalizeStdout(raw, windowsCtx, { cwdPathMode: 'native' })) as { path: string }
     expect(frame.path).toBe(String.raw`{{cwd}}\nested\proof.txt`)
+  })
+
+  it.each([
+    [String.raw`C:\work\snapshot`, 'canonical'],
+    [String.raw`C:\work\snapshot`, 'native'],
+    [String.raw`\\server\share\snapshot`, 'canonical'],
+    [String.raw`\\server\share\snapshot`, 'native'],
+  ] as const)('scrubs physical and embedded JSON cwd paths for %s in %s mode', (cwd, cwdPathMode) => {
+    const context: NormalizeContext = { sessionIds: [], cwd }
+    const path = `${cwd}\\nested\\proof.txt`
+    const regex = String.raw`\d+\w+`
+    const command = String.raw`printf "\\n"`
+    const raw = JSON.stringify({ params: {
+      runtime: `Current working directory: ${JSON.stringify(cwd)}.`,
+      path,
+      embedded: JSON.stringify({ root: cwd, path, regex, command }),
+      unrelated: [JSON.stringify(`${cwd}.backup`), JSON.stringify(`${cwd}-copy`), `prefix${cwd}`].join(' '),
+    } })
+    const frame = JSON.parse(normalizeStdout(raw, context, { cwdPathMode })) as {
+      params: { runtime: string; path: string; embedded: string; unrelated: string }
+    }
+    const expectedPath = cwdPathMode === 'native' ? String.raw`{{cwd}}\nested\proof.txt` : '{{cwd}}/nested/proof.txt'
+    expect(frame.params.runtime).toBe('Current working directory: "{{cwd}}".')
+    expect(frame.params.path).toBe(expectedPath)
+    expect(JSON.parse(frame.params.embedded)).toEqual({ root: '{{cwd}}', path: expectedPath, regex, command })
+    expect(frame.params.unrelated)
+      .toBe([JSON.stringify(`${cwd}.backup`), JSON.stringify(`${cwd}-copy`), `prefix${cwd}`].join(' '))
   })
 
   it('scrubs a stray UUID not in the known list', () => {
@@ -1003,6 +1061,47 @@ describe('normalizeSessionSnapshot', () => {
 })
 
 describe('tokenizeSessionFixtureCwd', () => {
+  it.each([String.raw`C:\Users\fixture\sdk-snapshot-ABC123`, String.raw`\\server\share\sdk-snapshot-ABC123`, '/tmp/sdk-snapshot-ABC123'])(
+    'tokenizes %s only at decoded JSON value depth while preserving embedded source text', (cwd) => {
+      const external = String.raw`C:\external\keep.txt`
+      const embedded = `{  "path" : ${JSON.stringify(`${cwd}/new.txt`)}, "value": 1e3, "external" : ${JSON.stringify(external)}, ${JSON.stringify(cwd)} : "unchanged key"  }`
+      const expectedEmbedded = embedded.replace(JSON.stringify(`${cwd}/new.txt`), '"{{cwd}}/new.txt"')
+      const nested = JSON.stringify({ input: JSON.stringify(embedded), external })
+      const raw = JSON.stringify({ type: 'session', cwd, embedded, nested,
+        literal: `prefix${cwd}suffix ${cwd}-backup ${cwd}.backup ${external}`,
+        relation: '{{session:2}}' }) + '\n'
+      const expected = JSON.stringify({ type: 'session', cwd: '{{cwd}}', embedded: expectedEmbedded,
+        nested: JSON.stringify({ input: JSON.stringify(expectedEmbedded), external }),
+        literal: `prefix${cwd}suffix ${cwd}-backup ${cwd}.backup ${external}`, relation: '{{session:2}}' }) + '\n'
+      const output = tokenizeSessionFixtureCwd(raw)
+      expect(output).toBe(expected)
+      expect(tokenizeSessionFixtureCwd(output)).toBe(output)
+      expect(materializeSessionFixtureCwd(output, cwd)).toBe(raw)
+    },
+  )
+
+  it('rejects a generated cwd inside incomplete embedded JSON without rewriting unrelated fragments', () => {
+    const cwd = String.raw`C:\Users\fixture\sdk-snapshot-ABC123`
+    expect(() => tokenizeSessionFixtureCwd(JSON.stringify({ type: 'session', cwd,
+      fragment: `{"path":${JSON.stringify(`${cwd}/new.txt`)}` })))
+      .toThrow('snapshot cwd tokenization refuses incomplete embedded JSON')
+    const fragment = '{"path":"C:\\\\external\\\\keep.txt"'
+    const output = tokenizeSessionFixtureCwd(JSON.stringify({ type: 'session', cwd, fragment }))
+    expect(JSON.parse(output)).toEqual({ type: 'session', cwd: '{{cwd}}', fragment })
+  })
+
+  it.each([String.raw`C:\Users\fixture\sdk-snapshot-ABC123`, String.raw`\\server\share\sdk-snapshot-ABC123`, '/tmp/sdk-snapshot-ABC123'])(
+    'preserves %s when it is only a substring or an unrelated relative path', (cwd) => {
+      const values = [`prefix${cwd}`, `${cwd}-copy`, `${cwd}.backup`, 'relative/sdk-snapshot-ABC123']
+      const raw = JSON.stringify({ type: 'session', cwd, text: values.join('; '),
+        nested: JSON.stringify({ values, [cwd]: 'unchanged key' }) }) + '\n'
+      const expected = JSON.stringify({ type: 'session', cwd: '{{cwd}}', text: values.join('; '),
+        nested: JSON.stringify({ values, [cwd]: 'unchanged key' }) }) + '\n'
+      expect(tokenizeSessionFixtureCwd(raw)).toBe(expected)
+      expect(materializeSessionFixtureCwd(expected, cwd)).toBe(raw)
+    },
+  )
+
   it.each([
     {
       name: 'macOS',

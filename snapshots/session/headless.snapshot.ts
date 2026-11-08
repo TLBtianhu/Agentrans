@@ -34,6 +34,10 @@ import {
   refreshFixtureReplacements,
   REPLAY_CREDENTIAL_ENV,
   restorePinnedToolSchemas,
+  resolveToolSchemasSnapshotPath,
+  toolSchemasSnapshotFilename,
+  resolveSystemPromptSnapshotPath,
+  systemPromptSnapshotFilename,
   scrubSessionSnapshot,
   scrubSystemPrompts,
   scrubToolSchemas,
@@ -288,6 +292,7 @@ async function writeHeaderSidecars(
   scenario: HeadlessScenario,
   actualLogs: readonly SessionLog[],
   ctx: NormalizeContext,
+  platform: NodeJS.Platform = process.platform,
 ): Promise<void> {
   if (scenario.manifest.header.pin === true
     || [...headerPins.values()].some(pin => pin.manifest.header.systemPromptSource === scenario.name
@@ -300,13 +305,13 @@ async function writeHeaderSidecars(
     const schemaOwner = scenario.manifest.header.toolSchemasSource ?? scenario.name
     if (promptOwner === scenario.name) {
       await writeFile(
-        join(scenario.dir, 'system-prompt.expected.md'),
+        await resolveSystemPromptSnapshotPath(scenario.dir, platform),
         formatSystemPromptSnapshot(prompts[0] as string, prompts.slice(1)),
       )
     }
     if (schemaOwner === scenario.name) {
       await writeFile(
-        join(scenario.dir, 'tool-schemas.expected.json'),
+        await resolveToolSchemasSnapshotPath(scenario.dir, platform),
         formatToolSchemasSnapshot(schemas[0] as unknown[], schemas.slice(1)),
       )
     }
@@ -943,8 +948,8 @@ async function verifyHeaders(scenario: HeadlessScenario, actualLogs: readonly Se
   if (promptOwner === undefined || schemaOwner === undefined) {
     throw new Error(`${scenario.name}: header sidecar source is not a headless scenario`)
   }
-  const prompt = await readFile(join(promptOwner.dir, 'system-prompt.expected.md'), 'utf8')
-  const schemas = parseToolSchemasSnapshot(await readFile(join(schemaOwner.dir, 'tool-schemas.expected.json'), 'utf8'))
+  const prompt = await readFile(await resolveSystemPromptSnapshotPath(promptOwner.dir), 'utf8')
+  const schemas = parseToolSchemasSnapshot(await readFile(await resolveToolSchemasSnapshotPath(schemaOwner.dir), 'utf8'))
   const schemaSets = [schemas.initial, ...schemas.changes]
   expect(schemaSets, `${scenario.name}: pin tool-schema count`).toHaveLength(pinned.length)
   const reconstructed = pinned.map((header, index) => restorePinnedToolSchemas(
@@ -1176,7 +1181,7 @@ describe('headless recorded-session snapshots', () => {
     }
   })
 
-  it('writes header sidecars without replacing a retained Session generation', async () => {
+  it.each(['linux', 'win32'] as const)('writes %s header sidecars without replacing a retained Session generation', async platform => {
     const directory = await mkdtemp(join(tmpdir(), 'dsh-headless-sidecars-'))
     try {
       const scenario: HeadlessScenario = {
@@ -1188,7 +1193,7 @@ describe('headless recorded-session snapshots', () => {
           profile: 'headless',
           composition: 'default',
           recording: 'live',
-          header: { class: 'default', pin: true },
+          header: { class: 'default', pin: true, toolSchemasVariants: ['win32'], systemPromptVariants: ['win32'] },
           sessionFormat: { version: 1, coverage: ['adjacent-migration'] },
         },
       }
@@ -1220,21 +1225,55 @@ describe('headless recorded-session snapshots', () => {
       ].map(record => JSON.stringify(record)).join('\n')
       const retained = '{"type":"session","version":1}\n'
       await writeFile(join(directory, 'session.v1.jsonl'), retained)
+      await writeFile(join(directory, 'snapshot.yml'), 'version: 1\nprofile: headless\nheader:\n  class: default\n  toolSchemasVariants: [win32]\n  systemPromptVariants: [win32]\n')
+      const shared = join(directory, 'tool-schemas.expected.json')
+      await writeFile(shared, 'retained shared schema oracle')
+      const sharedPrompt = join(directory, 'system-prompt.expected.md')
+      await writeFile(sharedPrompt, 'retained shared prompt oracle')
 
       await writeHeaderSidecars(
         scenario,
         [{ content, header }],
         { sessionIds: ['sidecar-session'], cwd: '/tmp/sidecar-session' },
+        platform,
       )
 
-      expect(await readFile(join(directory, 'system-prompt.expected.md'), 'utf8'))
+      expect(await readFile(join(directory, systemPromptSnapshotFilename(scenario.manifest.header, platform)), 'utf8'))
         .toBe('fresh system prompt\n')
-      expect(await readFile(join(directory, 'tool-schemas.expected.json'), 'utf8'))
+      expect(await readFile(join(directory, toolSchemasSnapshotFilename(scenario.manifest.header, platform)), 'utf8'))
         .toContain('"name": "fresh_tool"')
+      if (platform === 'win32') expect(await readFile(shared, 'utf8')).toBe('retained shared schema oracle')
+      if (platform === 'win32') expect(await readFile(sharedPrompt, 'utf8')).toBe('retained shared prompt oracle')
       expect(await readFile(join(directory, 'session.v1.jsonl'), 'utf8')).toBe(retained)
       expect(sessionFixtureNames(await readdir(directory))).toEqual(['session.v1.jsonl'])
     } finally {
       await rm(directory, { recursive: true, force: true })
+    }
+  })
+
+  it('rejects missing platform tools and unrelated request-header changes', async () => {
+    const scenario = scenarioByName.get('fs-read')!
+    const pin = pinOf(scenario)
+    const fixture = await readFile(join(pin.dir, await primaryFixtureFile(pin.dir)), 'utf8')
+    const schemas = parseToolSchemasSnapshot(await readFile(await resolveToolSchemasSnapshotPath(pin.dir), 'utf8'))
+    const header = restorePinnedToolSchemas(normalizedHeaders(fixture, fixtureContext(fixture))[0], schemas.initial) as JsonObject
+    const promptOwner = scenarioByName.get(pin.manifest.header.systemPromptSource ?? pin.name)!
+    const prompt = await readFile(await resolveSystemPromptSnapshotPath(promptOwner.dir), 'utf8')
+    const logs = (requestHeader: JsonObject): SessionLog[] => [{
+      header: {},
+      content: [
+        { type: 'system/message', data: { message: { content: [{ type: 'text', text: prompt.trimEnd() }] } } },
+        { type: 'request/header', data: { header: requestHeader, reason: 'initial' } },
+      ].map(record => JSON.stringify(record)).join('\n'),
+    }]
+    const context: NormalizeContext = { cwd: '/snapshot', sessionIds: [] }
+    await verifyHeaders(scenario, logs(header), context)
+    for (const changed of [
+      { ...header, tools: schemas.initial.slice(1) },
+      { ...header, config: { provider: 'unexpected', model: 'unexpected' } },
+      { ...header, unexpected: true },
+    ]) {
+      await expect(verifyHeaders(scenario, logs(changed), context)).rejects.toThrow('request header 1')
     }
   })
 

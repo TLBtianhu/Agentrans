@@ -226,6 +226,7 @@ describe('HarnessSdkJsonRpcServer', () => {
     vi.stubEnv('DEEPSEEK_API_KEY', 'test-key')
     vi.stubEnv('DEEPSEEK_BASE_URL', llmServer.url)
     const ctx = await makeHarness(storageDir)
+    await ctx.plugin(LlmDeepSeek)
     try {
       const transport = new FakeTransport()
       const server = new HarnessSdkJsonRpcServer(ctx, transport)
@@ -513,6 +514,7 @@ describe('HarnessSdkJsonRpcServer', () => {
     vi.stubEnv('DEEPSEEK_API_KEY', 'test-key')
     vi.stubEnv('DEEPSEEK_BASE_URL', llmServer.url)
     const ctx = await makeHarness(storageDir)
+    await ctx.plugin(LlmDeepSeek)
     try {
       const server = new HarnessSdkJsonRpcServer(ctx, new FakeTransport())
 
@@ -1004,39 +1006,78 @@ describe('HarnessSdkJsonRpcServer', () => {
     const storageDir = await mkdtemp(join(tmpdir(), 'dsh-jsonrpc-existing-llm-'))
     const ctx = await makeHarness(storageDir)
     vi.stubEnv('DEEPSEEK_API_KEY', 'test-key')
-    await ctx.plugin(LlmDeepSeek, { models: [{ id: 'preinstalled-model' }] })
+    const owner = await ctx.plugin(LlmDeepSeek, { models: [{ id: 'preinstalled-model' }] })
     try {
       const server = new HarnessSdkJsonRpcServer(ctx, new FakeTransport())
-      const inspect = server as unknown as { hasAdapterFor(provider: string): boolean }
-
-      expect(inspect.hasAdapterFor('deepseek-official')).toBe(true)
-      expect(inspect.hasAdapterFor('missing-provider')).toBe(false)
       await server.initialize({ cwd: storageDir, provider: 'deepseek-official', model: 'preinstalled-model' })
 
       expect(ctx.get('llm')?.listProviders().filter(provider => provider.id === 'deepseek-official')).toEqual([{ id: 'deepseek-official', name: 'DeepSeek' }])
       await server.shutdown()
+      expect(ctx.llm.listProviders()).toEqual([{ id: 'deepseek-official', name: 'DeepSeek' }])
+      await owner.dispose()
+      expect(ctx.llm.listProviders()).toEqual([])
     } finally {
       await ctx.fiber.dispose()
       await rm(storageDir, { recursive: true, force: true })
     }
   })
 
-  it('rejects a missing non-DeepSeek provider when an LLM service already exists', async () => {
+  it.each(['deepseek-official', 'private'])('rejects an uncomposed %s route without mounting or requesting an adapter', async (provider) => {
     const storageDir = await mkdtemp(join(tmpdir(), 'dsh-jsonrpc-new-llm-'))
     const ctx = await makeHarness(storageDir)
-    vi.stubEnv('DEEPSEEK_API_KEY', 'test-key')
-    await ctx.plugin(LlmDeepSeek)
+    const adapter = new MockAdapter([])
+    const disposeAdapter = ctx.llm.registerAdapter(['existing'], adapter)
+    const registerAdapter = vi.spyOn(ctx.llm, 'registerAdapter')
+    const mountPlugin = vi.spyOn(ctx, 'plugin')
+    const fetch = vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('unexpected network request'))
+    const server = new HarnessSdkJsonRpcServer(ctx, new FakeTransport())
     try {
-      const server = new HarnessSdkJsonRpcServer(ctx, new FakeTransport())
-
-      await expect(server.initialize({ cwd: storageDir, provider: 'private', model: 'new-model' }))
-        .rejects.toThrow('no adapter registered for provider "private"')
-
-      expect(ctx.get('llm')?.listProviders()).toEqual([
-        { id: 'deepseek-official', name: 'DeepSeek' },
-      ])
+      await expect(server.initialize({ cwd: storageDir, provider, model: 'new-model' }))
+        .rejects.toThrow(`no adapter registered for provider "${provider}"`)
+      await expect(server.prompt({ sessionId: 'uninitialized', contentBlocks: [{ type: 'text', text: 'must not run' }] }))
+        .rejects.toThrow('SDK server is not initialized')
+      expect(ctx.llm.listProviders()).toEqual([{ id: 'existing', name: 'existing' }])
+      expect(registerAdapter).not.toHaveBeenCalled()
+      expect(mountPlugin).not.toHaveBeenCalled()
+      expect(fetch).not.toHaveBeenCalled()
+      expect(adapter.requests).toEqual([])
       await server.shutdown()
     } finally {
+      fetch.mockRestore()
+      mountPlugin.mockRestore()
+      registerAdapter.mockRestore()
+      disposeAdapter()
+      await server.shutdown()
+      await ctx.fiber.dispose()
+      await rm(storageDir, { recursive: true, force: true })
+    }
+  })
+
+  it.each(['deepseek-official', 'private'])('preserves the composed replacement adapter for %s through initialization and shutdown', async (provider) => {
+    const storageDir = await mkdtemp(join(tmpdir(), 'dsh-jsonrpc-composed-route-'))
+    const ctx = await makeHarness(storageDir)
+    const adapter = new MockAdapter([textResponse('composed route')])
+    const disposeAdapter = ctx.llm.registerAdapter([provider], adapter)
+    const resolveModel = vi.spyOn(adapter, 'resolveModel')
+    const fetch = vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('unexpected network request'))
+    const server = new HarnessSdkJsonRpcServer(ctx, new FakeTransport())
+    try {
+      await server.initialize({ cwd: storageDir, provider, model: 'replayed-model' })
+      expect(resolveModel).toHaveBeenCalledWith(provider, 'replayed-model', undefined)
+      await server.prompt({ sessionId: 'composed', contentBlocks: [{ type: 'text', text: 'use composed route' }] })
+      await server.wait({ sessionId: 'composed' })
+      expect(adapter.requests).toHaveLength(1)
+      expect(adapter.requests[0]).toMatchObject({ provider, model: 'replayed-model' })
+      expect(fetch).not.toHaveBeenCalled()
+      await server.shutdown()
+      expect(ctx.llm.listProviders()).toEqual([{ id: provider, name: provider }])
+      disposeAdapter()
+      expect(ctx.llm.listProviders()).toEqual([])
+    } finally {
+      fetch.mockRestore()
+      resolveModel.mockRestore()
+      disposeAdapter()
+      await server.shutdown()
       await ctx.fiber.dispose()
       await rm(storageDir, { recursive: true, force: true })
     }
@@ -1154,8 +1195,9 @@ describe('HarnessSdkJsonRpcServer', () => {
     const storageDir = await mkdtemp(join(tmpdir(), 'dsh-jsonrpc-unsupported-reasoning-'))
     const ctx = await makeHarness(storageDir)
     vi.stubEnv('DEEPSEEK_API_KEY', 'test-key')
-    // A loopback endpoint keeps the fallback-mounted official route off the network; no request is sent.
+    // The explicit official fixture never requests this loopback endpoint during model validation.
     vi.stubEnv('DEEPSEEK_BASE_URL', 'http://127.0.0.1:9/anthropic')
+    await ctx.plugin(LlmDeepSeek)
     try {
       const server = new HarnessSdkJsonRpcServer(ctx, new FakeTransport())
       await expect(server.handleRequest('initialize', {
@@ -1172,17 +1214,22 @@ describe('HarnessSdkJsonRpcServer', () => {
     }
   })
 
-  it('reports no adapter when the LLM service is absent', async () => {
+  it.each(['deepseek-official', 'private'])('rejects %s when no LLM service is composed', async (provider) => {
     const ctx = new Context()
+    const server = new HarnessSdkJsonRpcServer(ctx, new FakeTransport())
+    const mountPlugin = vi.spyOn(ctx, 'plugin')
+    const fetch = vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('unexpected network request'))
     try {
-      const server = new HarnessSdkJsonRpcServer(ctx, new FakeTransport()) as unknown as {
-        hasAdapterFor(model: string): boolean
-        shutdown(): Promise<Record<string, never>>
-      }
-
-      expect(server.hasAdapterFor('missing-model')).toBe(false)
+      await expect(server.initialize({ cwd: '.', provider, model: 'missing-model' }))
+        .rejects.toThrow(`no adapter registered for provider "${provider}"`)
+      expect(ctx.get('llm')).toBeUndefined()
+      expect(mountPlugin).not.toHaveBeenCalled()
+      expect(fetch).not.toHaveBeenCalled()
       await server.shutdown()
     } finally {
+      fetch.mockRestore()
+      mountPlugin.mockRestore()
+      await server.shutdown()
       await ctx.fiber.dispose()
     }
   })

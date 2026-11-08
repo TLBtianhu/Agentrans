@@ -8,3 +8,5 @@ sessionFormat:
   coverage: [adjacent-migration]
 header:
   class: default
+  toolSchemasVariants: [win32]
+  systemPromptVariants: [win32]

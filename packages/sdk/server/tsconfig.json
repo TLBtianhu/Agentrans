@@ -15,10 +15,10 @@
       "path": "../../../vendor/schemastery"
     },
     {
-      "path": "../../llm/llm"
+      "path": "../../boot/cmdline"
     },
     {
-      "path": "../../llm/llm-deepseek-api-key"
+      "path": "../../llm/llm"
     },
     {
       "path": "../../core/agent"

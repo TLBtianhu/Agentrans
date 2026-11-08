@@ -1,0 +1,43 @@
+# Exercise the shipped persistent PowerShell stack through the minimal SDK profile.
+- id: terminal-bash
+  disabled: true
+
+- id: persistent-bash
+  disabled: true
+
+- id: terminal-pwsh
+  disabled: false
+  config:
+    shellDialect: pwsh
+    timeoutMs: 30000
+
+- id: persistent-pwsh
+  disabled: false
+  config:
+    timeoutMs: 30000
+    description: Run commands in a persistent PowerShell session.
+
+- id: tool-fs
+  disabled: true
+
+- insert:
+    - id: tool-str-replace-editor
+      name: '@deepseek-ai/dsh-tool-str-replace-editor'
+      config:
+        maxOutputChars: 16000
+
+- id: system-prompt
+  config:
+    includeHarnessIdentity: false
+    includeRuntimeContext: false
+    personaPrefix: You are the environment-selected minimal software engineer.
+
+- id: sessions
+  config:
+    root: !!js dshHomePath('sessions')
+    compression: none
+
+- id: llm-deepseek
+  config:
+    models:
+      - id: deepseek-v4-flash

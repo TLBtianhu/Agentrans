@@ -12,6 +12,7 @@ import Loader from '@deepseek-ai/cordis-plugin-loader'
 import AgentLoop from '@deepseek-ai/dsh-agent-loop'
 import { mountAgentLoopTestDependencies } from '@deepseek-ai/dsh-agent-loop-testkit'
 import { LlmAdapter } from '@deepseek-ai/dsh-llm'
+import * as LlmDeepSeek from '@deepseek-ai/dsh-llm-deepseek-api-key'
 import type { GenerateOptions, StreamChunk } from '@deepseek-ai/dsh-llm'
 import * as JsonlSessionPersistence from '@deepseek-ai/dsh-session-persistence-jsonl'
 import * as jsonrpc from '../src/index.ts'
@@ -31,6 +32,7 @@ type WireEvent =
 
 interface ApplyHarness {
   ctx: Context
+  input: PassThrough
   /** The plugin fiber used by the bare-dispose case. */
   fiber: Awaited<ReturnType<Context['plugin']>>
   /** Frames, write completions, and exits in observation order. */
@@ -73,6 +75,9 @@ async function mountPlugin(
   options: {
     writeDelayMs?: number
     failFlush?: boolean
+    defaultInput?: boolean
+    exitViaLauncher?: boolean
+    launcherExit?: (code: number) => void
     beforeServer?: (ctx: Context) => Promise<void> | void
   } = {},
 ): Promise<ApplyHarness> {
@@ -119,18 +124,22 @@ async function mountPlugin(
   })
   output.on('error', (error: Error) => { outputErrors.push(error) })
   const exit = (code: number): void => { events.push({ kind: 'exit', code }) }
+  if (options.exitViaLauncher === true || options.launcherExit !== undefined) {
+    ctx.provide('appExit', options.launcherExit ?? exit)
+  }
 
   ctx.effect(() => () => { events.push({ kind: 'root-disposed' }) }, 'jsonrpc test root-disposal witness')
   const fiber = await ctx.plugin(jsonrpc, {
-    input,
+    ...options.defaultInput === true ? {} : { input },
     output,
-    exit,
+    ...options.exitViaLauncher === true ? {} : { exit },
   })
 
   const frames = (): Record<string, unknown>[] =>
     events.flatMap(event => event.kind === 'frame' ? [event.frame] : [])
   return {
     ctx,
+    input,
     fiber,
     events,
     outputErrors,
@@ -172,8 +181,11 @@ async function mockCompletionServer(): Promise<{ url: string; requests: unknown[
 describe('dsh-sdk-jsonrpc-server plugin apply', () => {
   it('serves initialize over the injected stdio pair', async () => {
     const storageDir = await mkdtemp(join(tmpdir(), 'dsh-jsonrpc-apply-init-'))
-    vi.stubEnv('DEEPSEEK_API_KEY', 'test-key')
-    const harness = await mountPlugin(storageDir)
+    const harness = await mountPlugin(storageDir, {
+      beforeServer(ctx) {
+        ctx.llm.registerAdapter(['deepseek-official'], new DelayedAdapter())
+      },
+    })
     try {
       harness.send({ jsonrpc: '2.0', id: 'init-1', method: 'initialize', params: { cwd: storageDir, provider: 'deepseek-official', model: 'apply-model' } })
 
@@ -250,7 +262,9 @@ describe('dsh-sdk-jsonrpc-server plugin apply', () => {
     const llmServer = await mockCompletionServer()
     vi.stubEnv('DEEPSEEK_API_KEY', 'test-key')
     vi.stubEnv('DEEPSEEK_BASE_URL', llmServer.url)
-    const harness = await mountPlugin(storageDir)
+    const harness = await mountPlugin(storageDir, {
+      beforeServer: async (ctx) => { await ctx.plugin(LlmDeepSeek) },
+    })
     try {
       harness.send({ jsonrpc: '2.0', id: 1, method: 'initialize', params: { cwd: storageDir, provider: 'deepseek-official', model: 'dsagent-model' } })
       await harness.waitForFrame(frame => frame.id === 1, 'initialize response')
@@ -287,9 +301,11 @@ describe('dsh-sdk-jsonrpc-server plugin apply', () => {
     }
   })
 
-  it('answers shutdown before exiting 0 exactly once, even against a racing second shutdown', async () => {
+  it.each([false, true])('flushes shutdown before requesting exit exactly once without disposing the launcher tree (appExit=%s)', async (exitViaLauncher) => {
     const storageDir = await mkdtemp(join(tmpdir(), 'dsh-jsonrpc-apply-shutdown-'))
-    const harness = await mountPlugin(storageDir, { writeDelayMs: 10 })
+    const harness = await mountPlugin(storageDir, { writeDelayMs: 10, exitViaLauncher })
+    const pause = vi.spyOn(harness.input, 'pause')
+    const destroy = vi.spyOn(harness.input, 'destroy')
     try {
       // One chunk makes the two deferred exit callbacks race.
       const first = { jsonrpc: '2.0', id: 'sd-1', method: 'shutdown' }
@@ -306,40 +322,45 @@ describe('dsh-sdk-jsonrpc-server plugin apply', () => {
       const firstComplete = harness.events.findIndex(event => event.kind === 'write-complete' && event.ids.includes('sd-1'))
       const secondComplete = harness.events.findIndex(event => event.kind === 'write-complete' && event.ids.includes('sd-2'))
       const flushComplete = harness.events.findIndex(event => event.kind === 'write-complete' && event.ids.length === 0)
-      const rootDisposed = harness.events.findIndex(event => event.kind === 'root-disposed')
       expect(firstResponse).toBeGreaterThanOrEqual(0)
       expect(secondResponse).toBeGreaterThanOrEqual(0)
       expect(firstComplete).toBeGreaterThan(firstResponse)
       expect(secondComplete).toBeGreaterThan(secondResponse)
       expect(flushComplete).toBeGreaterThan(firstComplete)
       expect(flushComplete).toBeGreaterThan(secondComplete)
-      expect(rootDisposed).toBeGreaterThan(flushComplete)
-      expect(exitIndex).toBeGreaterThan(rootDisposed)
+      expect(exitIndex).toBeGreaterThan(flushComplete)
+      expect(harness.events.some(event => event.kind === 'root-disposed')).toBe(false)
+      expect(pause).not.toHaveBeenCalled()
+      expect(destroy).not.toHaveBeenCalled()
 
       await settle()
       expect(harness.exits()).toEqual([0])
-      expect(harness.events.filter(event => event.kind === 'root-disposed')).toHaveLength(1)
+      expect(harness.events.filter(event => event.kind === 'root-disposed')).toHaveLength(0)
 
       const before = harness.frames().length
       harness.send({ jsonrpc: '2.0', id: 'after-exit', method: 'initialize', params: { cwd: storageDir, provider: 'deepseek-official', model: 'x' } })
       await settle()
       expect(harness.frames().length).toBe(before)
+      await harness.dispose()
+      expect(harness.events.filter(event => event.kind === 'root-disposed')).toHaveLength(1)
     } finally {
+      pause.mockRestore()
+      destroy.mockRestore()
       await harness.dispose()
       await rm(storageDir, { recursive: true, force: true })
     }
   })
 
-  it('still disposes and exits once when the flush callback fails', async () => {
+  it.each([false, true])('requests failed exit without disposing the launcher tree when flush fails (appExit=%s)', async (exitViaLauncher) => {
     const storageDir = await mkdtemp(join(tmpdir(), 'dsh-jsonrpc-apply-flush-failure-'))
-    const harness = await mountPlugin(storageDir, { failFlush: true })
+    const harness = await mountPlugin(storageDir, { failFlush: true, exitViaLauncher })
     try {
       harness.send({ jsonrpc: '2.0', id: 'sd-fail', method: 'shutdown' })
 
       await waitFor(() => harness.exits().length > 0 ? true : undefined, 'exit after flush failure')
       await settle()
-      expect(harness.exits()).toEqual([0])
-      expect(harness.events.filter(event => event.kind === 'root-disposed')).toHaveLength(1)
+      expect(harness.exits()).toEqual([1])
+      expect(harness.events.filter(event => event.kind === 'root-disposed')).toHaveLength(0)
       expect(harness.outputErrors.map(error => error.message)).toEqual(['flush callback failed'])
 
       const before = harness.frames().length
@@ -355,6 +376,8 @@ describe('dsh-sdk-jsonrpc-server plugin apply', () => {
   it('stops serving on a bare fiber dispose (HMR-style unload) without calling exit', async () => {
     const storageDir = await mkdtemp(join(tmpdir(), 'dsh-jsonrpc-apply-dispose-'))
     const harness = await mountPlugin(storageDir)
+    const pause = vi.spyOn(harness.input, 'pause')
+    const destroy = vi.spyOn(harness.input, 'destroy')
     try {
       // Prove the handler-rejection path is live before disposal.
       harness.send({ jsonrpc: '2.0', id: 'probe-1', method: 'nope/unknown' })
@@ -372,7 +395,119 @@ describe('dsh-sdk-jsonrpc-server plugin apply', () => {
       await settle()
       expect(harness.frames().length).toBe(before)
       expect(harness.exits()).toEqual([])
+      expect(pause).not.toHaveBeenCalled()
+      expect(destroy).not.toHaveBeenCalled()
     } finally {
+      pause.mockRestore()
+      destroy.mockRestore()
+      await harness.dispose()
+      await rm(storageDir, { recursive: true, force: true })
+    }
+  })
+
+  it('refuses to mount without a launcher exit service or an explicit exit request hook', async () => {
+    const ctx = new Context()
+    try {
+      expect(() => { jsonrpc.apply(ctx, {}) }).toThrow('the launcher must provide ctx.appExit or an exit request hook')
+    } finally {
+      await ctx.fiber.dispose()
+    }
+  })
+
+  it('uses an explicit exit request hook before the launcher service', async () => {
+    const storageDir = await mkdtemp(join(tmpdir(), 'dsh-jsonrpc-exit-hook-'))
+    const launcherExit = vi.fn()
+    const harness = await mountPlugin(storageDir, { launcherExit })
+    try {
+      harness.send({ jsonrpc: '2.0', id: 'shutdown-hook', method: 'shutdown' })
+      await waitFor(() => harness.exits().length > 0 ? true : undefined, 'explicit exit request')
+      expect(harness.exits()).toEqual([0])
+      expect(launcherExit).not.toHaveBeenCalled()
+      expect(harness.events.some(event => event.kind === 'root-disposed')).toBe(false)
+    } finally {
+      await harness.dispose()
+      await rm(storageDir, { recursive: true, force: true })
+    }
+  })
+
+  it.each([false, true])('pauses default process stdin for protocol shutdown but not HMR unload (shutdown=%s)', async (protocolShutdown) => {
+    const storageDir = await mkdtemp(join(tmpdir(), 'dsh-jsonrpc-default-stdin-'))
+    const wasPaused = process.stdin.isPaused()
+    const pause = vi.spyOn(process.stdin, 'pause')
+    const destroy = vi.spyOn(process.stdin, 'destroy')
+    const harness = await mountPlugin(storageDir, { defaultInput: true, exitViaLauncher: true })
+    try {
+      if (protocolShutdown) {
+        process.stdin.emit('data', Buffer.from(`${JSON.stringify({ jsonrpc: '2.0', id: 'shutdown-stdin', method: 'shutdown' })}\n`))
+        await waitFor(() => harness.exits().length > 0 ? true : undefined, 'default-stdin exit request')
+      } else {
+        await harness.fiber.dispose()
+      }
+      expect(pause).toHaveBeenCalledTimes(protocolShutdown ? 1 : 0)
+      expect(destroy).not.toHaveBeenCalled()
+      expect(harness.exits()).toEqual(protocolShutdown ? [0] : [])
+      expect(harness.events.some(event => event.kind === 'root-disposed')).toBe(false)
+    } finally {
+      await harness.dispose()
+      pause.mockRestore()
+      destroy.mockRestore()
+      if (wasPaused) process.stdin.pause()
+      await rm(storageDir, { recursive: true, force: true })
+    }
+  })
+
+  it('preserves a shutdown error response and requests failed exit after flush without disposing the launcher tree', async () => {
+    const storageDir = await mkdtemp(join(tmpdir(), 'dsh-jsonrpc-shutdown-error-'))
+    const failure = new Error('SDK-owned teardown failed')
+    const shutdown = vi.spyOn(jsonrpc.HarnessSdkJsonRpcServer.prototype, 'shutdown')
+      .mockRejectedValueOnce(failure).mockResolvedValueOnce({})
+    const harness = await mountPlugin(storageDir, { exitViaLauncher: true, writeDelayMs: 10 })
+    try {
+      harness.sendRaw(`${JSON.stringify({ jsonrpc: '2.0', id: 'shutdown-error', method: 'shutdown' })}\n`
+        + `${JSON.stringify({ jsonrpc: '2.0', id: 'shutdown-success', method: 'shutdown' })}\n`)
+      await waitFor(() => harness.exits().length > 0 ? true : undefined, 'failed exit request')
+      expect(harness.frames()).toEqual([
+        { jsonrpc: '2.0', id: 'shutdown-error', error: { code: -32603, message: failure.message } },
+        { jsonrpc: '2.0', id: 'shutdown-success', result: {} },
+      ])
+      const exitIndex = harness.events.findIndex(event => event.kind === 'exit')
+      const flushIndex = harness.events.findIndex(event => event.kind === 'write-complete' && event.ids.length === 0)
+      const errorWrite = harness.events.findIndex(event => event.kind === 'write-complete' && event.ids.includes('shutdown-error'))
+      expect(flushIndex).toBeGreaterThan(errorWrite)
+      expect(exitIndex).toBeGreaterThan(flushIndex)
+      expect(harness.exits()).toEqual([1])
+      expect(harness.events.some(event => event.kind === 'root-disposed')).toBe(false)
+    } finally {
+      shutdown.mockRestore()
+      await harness.dispose()
+      await rm(storageDir, { recursive: true, force: true })
+    }
+  })
+
+  it('does not acknowledge shutdown before the SDK-owned teardown settles', async () => {
+    const storageDir = await mkdtemp(join(tmpdir(), 'dsh-jsonrpc-shutdown-pending-'))
+    const entered = Promise.withResolvers<undefined>()
+    const release = Promise.withResolvers<Record<string, never>>()
+    const shutdown = vi.spyOn(jsonrpc.HarnessSdkJsonRpcServer.prototype, 'shutdown').mockImplementationOnce(() => {
+      entered.resolve(undefined)
+      return release.promise
+    })
+    const harness = await mountPlugin(storageDir, { exitViaLauncher: true })
+    try {
+      harness.send({ jsonrpc: '2.0', id: 'shutdown-pending', method: 'shutdown' })
+      await entered.promise
+      harness.send({ jsonrpc: '2.0', id: 'probe-pending', method: 'nope/unknown' })
+      await harness.waitForFrame(frame => frame.id === 'probe-pending', 'probe while SDK teardown waits')
+      expect(harness.frames().some(frame => frame.id === 'shutdown-pending')).toBe(false)
+      expect(harness.exits()).toEqual([])
+      release.resolve({})
+      expect(await harness.waitForFrame(frame => frame.id === 'shutdown-pending', 'settled shutdown response'))
+        .toEqual({ jsonrpc: '2.0', id: 'shutdown-pending', result: {} })
+      await waitFor(() => harness.exits().length > 0 ? true : undefined, 'exit request after SDK teardown')
+      expect(harness.exits()).toEqual([0])
+    } finally {
+      release.resolve({})
+      shutdown.mockRestore()
       await harness.dispose()
       await rm(storageDir, { recursive: true, force: true })
     }
