@@ -558,34 +558,41 @@ describe('DeepSeekSearchProvider error handling', () => {
 
 describe('web-search-deepseek plugin registration', () => {
   it('registers the provider into ctx.web (HMR-safe)', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => jsonResponse(searchResponse())))
-    const ctx = new Context()
-    await ctx.plugin(WebRuntime, { searchProvider: DEEPSEEK_PROVIDER_ID })
-    const fiber = await ctx.plugin(deepseekPlugin, { apiKey: 'ds-key' })
-    await expect(ctx.web.search({ query: 'q' })).resolves.toMatchObject({ truncated: false })
-    await fiber.dispose()
-    await expect(ctx.web.search({ query: 'q' }))
-      .rejects.toThrow(expect.objectContaining({ code: 'WEB_PROVIDER_CONFIGURED_MISSING' }))
+    const prev = process.env.DEEPSEEK_API_KEY
+    process.env.DEEPSEEK_API_KEY = 'ds-key'
+    try {
+      vi.stubGlobal('fetch', vi.fn(async () => jsonResponse(searchResponse())))
+      const ctx = new Context()
+      await ctx.plugin(WebRuntime, { searchProvider: DEEPSEEK_PROVIDER_ID })
+      const fiber = await ctx.plugin(deepseekPlugin, {})
+      await expect(ctx.web.search({ query: 'q' })).resolves.toMatchObject({ truncated: false })
+      await fiber.dispose()
+      await expect(ctx.web.search({ query: 'q' }))
+        .rejects.toThrow(expect.objectContaining({ code: 'WEB_PROVIDER_CONFIGURED_MISSING' }))
+    } finally {
+      if (prev === undefined) delete process.env.DEEPSEEK_API_KEY
+      else process.env.DEEPSEEK_API_KEY = prev
+    }
   })
 
   it('rejects maxTokens: 0 at plugin construction', async () => {
     const ctx = new Context()
     await ctx.plugin(WebRuntime, { searchProvider: DEEPSEEK_PROVIDER_ID })
-    await expect(ctx.plugin(deepseekPlugin, { apiKey: 'ds-key', maxTokens: 0 }))
+    await expect(ctx.plugin(deepseekPlugin, { maxTokens: 0 }))
       .rejects.toThrow(/maxTokens expected number >= 1/)
   })
 
   it('rejects maxUses: 0 at plugin construction', async () => {
     const ctx = new Context()
     await ctx.plugin(WebRuntime, { searchProvider: DEEPSEEK_PROVIDER_ID })
-    await expect(ctx.plugin(deepseekPlugin, { apiKey: 'ds-key', maxUses: 0 }))
+    await expect(ctx.plugin(deepseekPlugin, { maxUses: 0 }))
       .rejects.toThrow(/maxUses expected number >= 1/)
   })
 
   it('rejects a fractional maxUses at plugin construction', async () => {
     const ctx = new Context()
     await ctx.plugin(WebRuntime, { searchProvider: DEEPSEEK_PROVIDER_ID })
-    await expect(ctx.plugin(deepseekPlugin, { apiKey: 'ds-key', maxUses: 1.5 }))
+    await expect(ctx.plugin(deepseekPlugin, { maxUses: 1.5 }))
       .rejects.toThrow(/maxUses expected number multiple of 1/)
   })
 
@@ -606,14 +613,21 @@ describe('web-search-deepseek plugin registration', () => {
 
   it('boots over ctx.web through the unwrapped module without an inject error', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => jsonResponse(searchResponse())))
-    const ctx = new Context()
-    await ctx.plugin(WebRuntime, { searchProvider: DEEPSEEK_PROVIDER_ID })
-    const loader = Object.create(Loader.prototype) as Loader
-    const unwrapped = loader.unwrapExports(deepseekPlugin) as Parameters<Context['plugin']>[0]
-    // A collapsed export shape (dropped inject) would throw "without inject" here.
-    const fiber = await ctx.plugin(unwrapped, { apiKey: 'ds-key' })
-    await expect(ctx.web.search({ query: 'q' })).resolves.toMatchObject({ truncated: false })
-    await fiber.dispose()
+    const prev = process.env.DEEPSEEK_API_KEY
+    process.env.DEEPSEEK_API_KEY = 'ds-key'
+    try {
+      const ctx = new Context()
+      await ctx.plugin(WebRuntime, { searchProvider: DEEPSEEK_PROVIDER_ID })
+      const loader = Object.create(Loader.prototype) as Loader
+      const unwrapped = loader.unwrapExports(deepseekPlugin) as Parameters<Context['plugin']>[0]
+      // A collapsed export shape (dropped inject) would throw "without inject" here.
+      const fiber = await ctx.plugin(unwrapped, {})
+      await expect(ctx.web.search({ query: 'q' })).resolves.toMatchObject({ truncated: false })
+      await fiber.dispose()
+    } finally {
+      if (prev === undefined) delete process.env.DEEPSEEK_API_KEY
+      else process.env.DEEPSEEK_API_KEY = prev
+    }
   })
 
   it('falls back to the env key and defaults when config omits them', async () => {
@@ -691,6 +705,18 @@ describe('web-search-deepseek plugin registration', () => {
 })
 
 describe('web-search-deepseek account route selection', () => {
+  let savedKey: string | undefined
+
+  beforeEach(() => {
+    savedKey = process.env.DEEPSEEK_API_KEY
+    process.env.DEEPSEEK_API_KEY = 'ds-key'
+  })
+
+  afterEach(() => {
+    if (savedKey === undefined) delete process.env.DEEPSEEK_API_KEY
+    else process.env.DEEPSEEK_API_KEY = savedKey
+  })
+
   /**
    * Mount the provider with a signed-in account and run one search inside an
    * initiator whose latest request context names `provider`.
@@ -711,7 +737,7 @@ describe('web-search-deepseek account route selection', () => {
       ctx.provide('deepseekAccount', {
         resolveToken: async (url: string) => { asked.push(url); return 'account-token' },
       } as DeepSeekAccount)
-      await ctx.plugin(deepseekPlugin, { apiKey: 'ds-key' })
+      await ctx.plugin(deepseekPlugin, {})
       const session = ctx.sessions.create(SessionId(`web-search-account-${provider ?? 'none'}`))
       session.append('turn/start', { turn: 1 })
       session.append('request/context', { provider: provider ?? 'deepseek-account', model: 'deepseek-v4-flash' })
@@ -812,11 +838,6 @@ describe('web-search-deepseek search readiness', () => {
     }
   })
 
-  it('is ready when the provider config carries a literal key', async () => {
-    const ctx = await compose({ config: { apiKey: 'ds-key' } })
-    expect(await ctx.web.searchReady('deepseek-official')).toBe(true)
-  })
-
   it('is ready when the launch environment supplies the key', async () => {
     process.env.DEEPSEEK_API_KEY = 'env-key'
     const ctx = await compose()
@@ -851,7 +872,6 @@ describe('web-search-deepseek search readiness', () => {
 
   it.each<[string, Record<string, unknown>, Record<string, string>, boolean]>([
     ['the DeepSeek key', {}, { DEEPSEEK_API_KEY: 'env-key' }, true],
-    ['a literal key', { apiKey: 'ds-key' }, {}, true],
     ['no key', {}, {}, false],
   ])('answers for a model request on another provider route with %s, as on any route', async (_label, config, env, expected) => {
     const saved = Object.fromEntries(Object.keys(env).map(name => [name, process.env[name]]))
@@ -886,7 +906,6 @@ describe('web-search-deepseek search readiness', () => {
   })
 
   it.each<[string, Setup, string | undefined]>([
-    ['a literal key', { config: { apiKey: 'ds-key' } }, undefined],
     ['a launch environment key', {}, 'env-key'],
   ])('is not ready on the account route when the account grant cannot be read, even with %s', async (_label, setup, envKey) => {
     if (envKey !== undefined) process.env.DEEPSEEK_API_KEY = envKey
@@ -943,7 +962,6 @@ describe('web-search-deepseek on any model route', () => {
 
   it.each<[string, Record<string, unknown>, string]>([
     ['the DeepSeek key', {}, 'env-key'],
-    ['a literal key', { apiKey: 'search-key' }, 'search-key'],
   ])('searches with %s for a conversation on another provider route', async (_label, config, key) => {
     const { fetchMock, result } = await searchOn('openai', config)
     expect(result).toMatchObject({ truncated: false })

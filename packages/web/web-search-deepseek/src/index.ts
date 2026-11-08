@@ -50,8 +50,6 @@ const DEFAULT_API_KEY_ENV = DEEPSEEK_API_KEY_REF
 
 /** Plugin config (all optional — `apply` fills env-var and constant defaults). */
 export interface Config {
-  /** Literal DeepSeek API key; prefer {@link apiKeyEnv} so no secret enters configuration files. */
-  apiKey: Volatile<string | undefined>
   /** Credential reference resolved for each search; defaults to `DEEPSEEK_API_KEY`. */
   apiKeyEnv: Volatile<string>
   /** Anthropic-compatible endpoint base; `/messages` is appended. */
@@ -67,7 +65,6 @@ export interface Config {
 }
 
 export const Config = z.object({
-  apiKey: z.string().role('secret').volatile(),
   apiKeyEnv: z.string().role('credential-ref').default(DEFAULT_API_KEY_ENV).volatile(),
   // Declared here rather than only at the use site: a configuration surface
   // renders the resolved section, so a default the schema does not carry reads
@@ -106,11 +103,7 @@ function resolveOptions(
   ctx: Context, config: { [K in keyof Config]: ReturnType<Config[K]['get']> },
 ): SearchOptions {
   const apiKeyEnv = credentialRef(config.apiKeyEnv)
-  const literalApiKey = config.apiKey !== undefined && config.apiKey.length > 0
-    ? config.apiKey
-    : undefined
   return {
-    ...literalApiKey === undefined ? {} : { apiKey: literalApiKey },
     resolveAccountToken: async (endpoint) => {
       // The latest request context names the route that served the model
       // request which called this search, as account sign-out reads it.
@@ -165,7 +158,6 @@ async function searchState(
     catch (_unreadableGrant) { return 'unreachable' /* The search fails on this read before it tries the API key. */ }
     if (token !== undefined && token.length > 0) return 'ready'
   }
-  if (options.apiKey !== undefined) return 'ready'
   const credentials = ctx.get('credentials')
   if (credentials === undefined) {
     const ambient = launchEnvironmentOf(ctx).get(options.apiKeyEnv)
@@ -181,7 +173,7 @@ async function searchState(
  */
 export function apply(ctx: Context, config: Config): void {
   const options = () => resolveOptions(ctx, {
-    apiKey: config.apiKey.get(), apiKeyEnv: config.apiKeyEnv.get(), baseURL: config.baseURL.get(), model: config.model.get(),
+    apiKeyEnv: config.apiKeyEnv.get(), baseURL: config.baseURL.get(), model: config.model.get(),
     apiVersion: config.apiVersion.get(), maxTokens: config.maxTokens.get(), maxUses: config.maxUses.get(),
   })
   const provider = new DeepSeekSearchProvider(options)

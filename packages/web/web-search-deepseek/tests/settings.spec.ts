@@ -1,10 +1,17 @@
 /** The `web-search-deepseek` settings section layered over the composition entry. */
 
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import { liveConfig } from '../../../settings/settings/tests/live-config.ts'
 import WebRuntime from '@deepseek-ai/dsh-web'
 import * as deepseekPlugin from '@deepseek-ai/dsh-web-search-deepseek'
+
+let savedKey: string | undefined
+
+beforeEach(() => {
+  savedKey = process.env.DEEPSEEK_API_KEY
+  process.env.DEEPSEEK_API_KEY = 'ds-key'
+})
 
 function jsonResponse(body: unknown): Response {
   return new Response(JSON.stringify(body), {
@@ -27,13 +34,15 @@ const ONE_RESULT = {
 async function boot() {
   const ctx = new Context()
   await ctx.plugin(WebRuntime, {})
-  const live = await liveConfig(ctx, deepseekPlugin, { apiKey: 'ds-key', baseURL: 'https://search.entry.test/v1' })
+  const live = await liveConfig(ctx, deepseekPlugin, { baseURL: 'https://search.entry.test/v1' })
   return { ctx, live }
 
 }
 
 afterEach(() => {
   vi.restoreAllMocks()
+  if (savedKey === undefined) delete process.env.DEEPSEEK_API_KEY
+  else process.env.DEEPSEEK_API_KEY = savedKey
 })
 
 /**

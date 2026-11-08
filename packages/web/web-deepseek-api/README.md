@@ -38,7 +38,6 @@ Mount the plugin alongside `dsh-web` and select its providers. Shipped profiles 
 
 | Field | Default | Meaning |
 |---|---|---|
-| `apiKey` | omitted | Literal API key; prefer a credential reference |
 | `apiKeyEnv` | `DEEPSEEK_API_KEY` | Credential reference resolved for each operation |
 | `baseURL` | `https://api.deepseek.com/v1/tools` | Search and Fetch API base including its deployment path prefix; append `/search` or `/fetch` |
 | `count` | `10` | Search API results per search, an integer from 1 to 50; a smaller `maxResults` on the request wins |
@@ -46,14 +45,16 @@ Mount the plugin alongside `dsh-web` and select its providers. Shipped profiles 
 
 Fill `baseURL` with the complete API base, including its path prefix and excluding the operation name. The default reaches `https://api.deepseek.com/v1/tools/search` and `https://api.deepseek.com/v1/tools/fetch`; a deployment with another prefix, such as `/api/v1/tools`, needs its complete base.
 
+Constructing either provider directly also accepts a literal `apiKey`, which wins over the resolver. Plugin configuration exposes only `apiKeyEnv`, so a secret set through these plugins never lives in a configuration file.
+
 Run the real API tests with `DEEPSEEK_API_KEY` and `DEEPSEEK_SEARCH_API_TEST_BASE_URL`; both are required, and the latter includes the API path prefix.
 
 <a id="authentication"></a>
 ### Authentication
 
-A Session using the `deepseek-account` route asks the account service for a token authorized for the resolved endpoint and sends it as `x-dsh-auth-token`; the public Search and Fetch routes accepted it on 2026-10-16. Otherwise a non-empty literal `apiKey` wins over `apiKeyEnv`; the reference resolves through `ctx.credentials`, or the launch environment when that service is absent. API keys use `Authorization: Bearer`. Credential resolution and endpoint selection share one settings snapshot.
+A Session using the `deepseek-account` route asks the account service for a token authorized for the resolved endpoint and sends it as `x-dsh-auth-token`; the public Search and Fetch routes accepted it on 2026-10-16. Otherwise the `apiKeyEnv` reference resolves through `ctx.credentials`, or the launch environment when that service is absent. API keys use `Authorization: Bearer`. Credential resolution and endpoint selection share one settings snapshot.
 
-Each provider's `ready()` answers whether an operation for a model request has a credential, on any model route: the request's route is `deepseek-account` and `ctx.deepseekAccount` resolves a token for the API base, or a literal `apiKey` is set or `ctx.credentials.describe` reports the `apiKeyEnv` reference configured (without that service, the launch environment must carry it). A failed account-token or credential-store read answers false. While these providers are selected, [`dsh-tool-web`](../tool-web/README.md#search-readiness) withholds `web_search` and `web_fetch` with their prompt guidance from each request for which they answer false. Only presence is checked: a wrong key counts as ready and fails each call.
+Each provider's `ready()` answers whether an operation for a model request has a credential, on any model route: the request's route is `deepseek-account` and `ctx.deepseekAccount` resolves a token for the API base, or `ctx.credentials.describe` reports the `apiKeyEnv` reference configured (without that service, the launch environment must carry it). A failed account-token or credential-store read answers false. While these providers are selected, [`dsh-tool-web`](../tool-web/README.md#search-readiness) withholds `web_search` and `web_fetch` with their prompt guidance from each request for which they answer false. Only presence is checked: a wrong key counts as ready and fails each call.
 
 ### Results and failures
 

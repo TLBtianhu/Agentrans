@@ -4711,8 +4711,6 @@ export interface Config {
 ```ts config-catalog
 /** Settings read by the next search or fetch without re-registering either provider. */
 export interface Config {
-  /** Literal DeepSeek API key; prefer {@link apiKeyEnv} so no secret enters configuration files. */
-  apiKey: Volatile<string | undefined>
   /** Credential reference resolved for each operation; defaults to `DEEPSEEK_API_KEY`. */
   apiKeyEnv: Volatile<string>
   /** API base including its path prefix; `/search` and `/fetch` are appended. */
@@ -4762,8 +4760,6 @@ export interface Config {
 ```ts config-catalog
 /** Plugin config (all optional — `apply` fills env-var and constant defaults). */
 export interface Config {
-  /** Literal DeepSeek API key; prefer {@link apiKeyEnv} so no secret enters configuration files. */
-  apiKey: Volatile<string | undefined>
   /** Credential reference resolved for each search; defaults to `DEEPSEEK_API_KEY`. */
   apiKeyEnv: Volatile<string>
   /** Anthropic-compatible endpoint base; `/messages` is appended. */

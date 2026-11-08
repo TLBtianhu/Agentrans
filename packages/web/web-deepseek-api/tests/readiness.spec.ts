@@ -117,14 +117,13 @@ describe.each(OPERATIONS)('%s readiness', (operation) => {
     expect(await capabilityState(ctx, operation, 'deepseek-official')).toBe('ready')
   })
 
-  it('is ready with a literal key on a DeepSeek route', async () => {
-    const ctx = await mount({ config: { apiKey: 'own-key' } })
+  it('is ready with a key from the launching environment on a DeepSeek route', async () => {
+    const ctx = await mount({ environment: { DEEPSEEK_API_KEY: 'own-key' } })
     expect(await ready(ctx, operation, 'deepseek-official')).toBe(true)
   })
 
   it.each<[string, Setup, boolean]>([
     ['the DeepSeek key', { environment: { DEEPSEEK_API_KEY: 'chat-key' } }, true],
-    ['a literal key', { config: { apiKey: 'own-key' } }, true],
     ['their own key reference', { config: { apiKeyEnv: 'DSH_WEB_API_KEY' }, environment: { DSH_WEB_API_KEY: 'own-key' } }, true],
     ['no key', {}, false],
   ])('answers on another provider\'s route, as on any route, when the APIs have %s', async (_label, setup, expected) => {

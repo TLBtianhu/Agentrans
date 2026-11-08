@@ -45,7 +45,7 @@ describe('web-deepseek-api API-key resolution', () => {
       await mount(ctx, {}, {})
       const missing = ctx.web.search({ query: 'missing' })
       await expect(missing).rejects.toMatchObject({ code: 'WEB_PROVIDER_CREDENTIAL_MISSING' })
-      await expect(missing).rejects.toThrow(/"apiKey" in the web-deepseek-api config/)
+      await expect(missing).rejects.toThrow(/store it through the credentials service/)
       const ref = credentialRef('DEEPSEEK_API_KEY')
       await ctx.credentials.set(ref, 'stored-key')
       await ctx.web.search({ query: 'stored' })
@@ -61,7 +61,6 @@ describe('web-deepseek-api API-key resolution', () => {
   it.each([
     ['the default reference', {}, { DEEPSEEK_API_KEY: 'env-key' }, 'Bearer env-key'],
     ['a configured reference', { apiKeyEnv: 'SEARCH_API_KEY' }, { SEARCH_API_KEY: 'custom-key' }, 'Bearer custom-key'],
-    ['an empty literal key', { apiKey: '' }, { DEEPSEEK_API_KEY: 'env-key' }, 'Bearer env-key'],
   ])('falls back to the launch environment for %s without a credentials service', async (_case, config, environment, expected) => {
     const authorization = captureAuthorization()
     const ctx = new Context()

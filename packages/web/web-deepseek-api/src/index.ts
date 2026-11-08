@@ -35,8 +35,6 @@ export const inject = ['web']
 
 /** Settings read by the next search or fetch without re-registering either provider. */
 export interface Config {
-  /** Literal DeepSeek API key; prefer {@link apiKeyEnv} so no secret enters configuration files. */
-  apiKey: Volatile<string | undefined>
   /** Credential reference resolved for each operation; defaults to `DEEPSEEK_API_KEY`. */
   apiKeyEnv: Volatile<string>
   /** API base including its path prefix; `/search` and `/fetch` are appended. */
@@ -48,7 +46,6 @@ export interface Config {
 }
 
 export const Config = z.object({
-  apiKey: z.string().role('secret').volatile(),
   apiKeyEnv: z.string().role('credential-ref').default(DEEPSEEK_API_KEY_REF).volatile(),
   baseURL: z.string().default(DEEPSEEK_WEB_API_BASE_URL).volatile(),
   count: z.number().step(1).min(1).max(50).default(DEEPSEEK_DEFAULT_COUNT).volatile(),
@@ -75,7 +72,7 @@ function latestUserQuestion(session: Session | undefined): string | undefined {
  * @param config - live settings, read once per operation.
  */
 export function apply(ctx: Context, config: Config): void {
-  const keyConfig = () => ({ apiKey: config.apiKey.get(), apiKeyEnv: config.apiKeyEnv.get() })
+  const keyConfig = () => ({ apiKeyEnv: config.apiKeyEnv.get() })
   const auth = () => deepSeekWebAuth(ctx, keyConfig())
   const state = (llmProvider: string | undefined) =>
     deepSeekWebCredentialState(ctx, { ...keyConfig(), baseURL: config.baseURL.get() }, llmProvider)

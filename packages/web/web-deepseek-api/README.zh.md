@@ -38,7 +38,6 @@ kind: "package-reference"
 
 | 字段 | 默认值 | 含义 |
 |---|---|---|
-| `apiKey` | 省略 | 字面 API 密钥；建议使用凭据引用 |
 | `apiKeyEnv` | `DEEPSEEK_API_KEY` | 每次操作解析的凭据引用 |
 | `baseURL` | `https://api.deepseek.com/v1/tools` | 包含部署路径前缀的 Search 与 Fetch API 基础地址；追加 `/search` 或 `/fetch` |
 | `count` | `10` | Search API 每次搜索的结果数，为 1 至 50 的整数；请求中更小的 `maxResults` 优先 |
@@ -46,14 +45,16 @@ kind: "package-reference"
 
 `baseURL` 填写完整的 API 基础地址，包含路径前缀，但不包含操作名。默认值请求 `https://api.deepseek.com/v1/tools/search` 和 `https://api.deepseek.com/v1/tools/fetch`；使用其他前缀（例如 `/api/v1/tools`）的部署需要填写其完整基础地址。
 
+直接构造任一 provider 时也可传入字面 `apiKey`，它优先于解析器。插件配置只暴露 `apiKeyEnv`，因此通过这些插件设置的密钥不会写进配置文件。
+
 真实 API 测试要求同时设置 `DEEPSEEK_API_KEY` 和 `DEEPSEEK_SEARCH_API_TEST_BASE_URL`，后者包含 API 路径前缀。
 
 <a id="authentication"></a>
 ### 鉴权
 
-使用 `deepseek-account` 路由的会话向账号服务请求已授权用于解析后端点的令牌，并通过 `x-dsh-auth-token` 发送；2026-10-16 公网 Search 与 Fetch 路由已接受该令牌。其他情况下，非空的字面 `apiKey` 优先于 `apiKeyEnv`；凭据引用通过 `ctx.credentials` 解析，该服务缺省时使用启动环境。API 密钥使用 `Authorization: Bearer`。凭据解析和端点选择使用同一份设置快照。
+使用 `deepseek-account` 路由的会话向账号服务请求已授权用于解析后端点的令牌，并通过 `x-dsh-auth-token` 发送；2026-10-16 公网 Search 与 Fetch 路由已接受该令牌。其他情况下，`apiKeyEnv` 引用凭据引用通过 `ctx.credentials` 解析，该服务缺省时使用启动环境。API 密钥使用 `Authorization: Bearer`。凭据解析和端点选择使用同一份设置快照。
 
-每个提供者的 `ready()` 回答模型请求将发起的操作是否有凭据，不论模型路由：该请求的路由是 `deepseek-account` 且 `ctx.deepseekAccount` 为 API 基础地址解析出令牌，或者设置了字面 `apiKey`，或 `ctx.credentials.describe` 报告 `apiKeyEnv` 引用已配置（没有该服务时，启动环境必须包含它）。账号令牌或凭据存储读取失败时回答 false。这两个提供者被选中时，[`dsh-tool-web`](../tool-web/README.zh.md#search-readiness) 会从它们回答 false 的每个请求中撤下 `web_search` 与 `web_fetch` 及其提示词指引。只检查是否存在：错误的密钥仍算就绪，并使每次调用失败。
+每个提供者的 `ready()` 回答模型请求将发起的操作是否有凭据，不论模型路由：该请求的路由是 `deepseek-account` 且 `ctx.deepseekAccount` 为 API 基础地址解析出令牌，或 `ctx.credentials.describe` 报告 `apiKeyEnv` 引用已配置（没有该服务时，启动环境必须包含它）。账号令牌或凭据存储读取失败时回答 false。这两个提供者被选中时，[`dsh-tool-web`](../tool-web/README.zh.md#search-readiness) 会从它们回答 false 的每个请求中撤下 `web_search` 与 `web_fetch` 及其提示词指引。只检查是否存在：错误的密钥仍算就绪，并使每次调用失败。
 
 ### 结果与失败
 

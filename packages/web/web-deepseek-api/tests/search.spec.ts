@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import AgentRegistry from '@deepseek-ai/dsh-agent'
 import type { Agent } from '@deepseek-ai/dsh-agent'
@@ -44,6 +44,18 @@ function searchResponse() {
 }
 
 afterEach(() => { vi.unstubAllGlobals() })
+
+let savedKey: string | undefined
+
+beforeEach(() => {
+  savedKey = process.env.DEEPSEEK_API_KEY
+  process.env.DEEPSEEK_API_KEY = 'ds-key'
+})
+
+afterEach(() => {
+  if (savedKey === undefined) delete process.env.DEEPSEEK_API_KEY
+  else process.env.DEEPSEEK_API_KEY = savedKey
+})
 
 describe('mapSearchResponse', () => {
   it('maps source titles, snippets, summaries and nullable dates in provider order', () => {
@@ -163,7 +175,7 @@ describe('Search API triggering question', () => {
       await ctx.plugin(SessionProjectionRegistry)
       await ctx.plugin(AgentRegistry)
       await ctx.plugin(WebRuntime, { searchProvider: 'deepseek-search-api' })
-      await ctx.plugin(webApiPlugin, { apiKey: 'ds-key', ...config })
+      await ctx.plugin(webApiPlugin, { ...config })
       const messages = [
         userMessage('m1', { kind: 'user' }, [{ type: 'text', text: 'Earlier question' }]),
         userMessage('m2', { kind: 'user' }, [
@@ -196,7 +208,7 @@ describe('Search API configuration and failures', () => {
     const ctx = new Context()
     try {
       await ctx.plugin(WebRuntime, { searchProvider: 'deepseek-search-api' })
-      await ctx.plugin(webApiPlugin, { apiKey: 'ds-key' })
+      await ctx.plugin(webApiPlugin, {})
       await ctx.web.search({ query: 'q' })
       expect(fetchMock.mock.calls[0]?.[0]).toBe(`${DEEPSEEK_WEB_API_BASE_URL}/search`)
       expect(DEEPSEEK_WEB_API_BASE_URL).toBe('https://api.deepseek.com/v1/tools')
@@ -209,7 +221,7 @@ describe('Search API configuration and failures', () => {
     const ctx = new Context()
     try {
       await ctx.plugin(WebRuntime, { searchProvider: 'deepseek-search-api' })
-      await ctx.plugin(webApiPlugin, { apiKey: 'ds-key', baseURL: '' })
+      await ctx.plugin(webApiPlugin, { baseURL: '' })
       await expect(ctx.web.search({ query: 'q' })).rejects.toMatchObject({ code: 'WEB_PROVIDER_CONFIGURED_UNAVAILABLE' })
       expect(fetchMock).not.toHaveBeenCalled()
     } finally { await ctx.fiber.dispose() }
@@ -248,7 +260,7 @@ describe('Search API account route', () => {
       ctx.provide('deepseekAccount', {
         resolveToken: async (url: string) => { asked.push(url); return 'account-token' },
       } as DeepSeekAccount)
-      await ctx.plugin(webApiPlugin, { apiKey: 'ds-key' })
+      await ctx.plugin(webApiPlugin, {})
       const session = ctx.sessions.create(SessionId('web-search-api-account'))
       session.append('turn/start', { turn: 1 })
       session.append('request/context', { provider: 'deepseek-account', model: 'deepseek-v4-flash' })

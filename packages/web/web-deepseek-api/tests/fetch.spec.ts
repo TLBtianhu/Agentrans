@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import WebRuntime from '@deepseek-ai/dsh-web'
 import { DeepSeekFetchApiProvider, type DeepSeekFetchApiOptions } from '@deepseek-ai/dsh-web-deepseek-api'
@@ -8,7 +8,18 @@ const options = { apiKey: 'ds-key', baseURL: 'https://api.deepseek.test/api/v1/t
 function jsonResponse(body: unknown, init: ResponseInit = {}): Response {
   return new Response(JSON.stringify(body), { status: 200, headers: { 'content-type': 'application/json' }, ...init })
 }
-afterEach(() => { vi.unstubAllGlobals() })
+afterEach(() => {
+  vi.unstubAllGlobals()
+  if (savedKey === undefined) delete process.env.DEEPSEEK_API_KEY
+  else process.env.DEEPSEEK_API_KEY = savedKey
+})
+
+let savedKey: string | undefined
+
+beforeEach(() => {
+  savedKey = process.env.DEEPSEEK_API_KEY
+  process.env.DEEPSEEK_API_KEY = 'ds-key'
+})
 
 describe('DeepSeek Fetch API', () => {
   it('posts the URL and returns the Markdown as a retrieved page', async () => {
@@ -61,7 +72,7 @@ describe('DeepSeek Fetch API', () => {
     const ctx = new Context()
     try {
       await ctx.plugin(WebRuntime, { searchProvider: 'deepseek-search-api', fetchProvider: 'deepseek-fetch-api' })
-      const fiber = await ctx.plugin(webApiPlugin, { apiKey: 'ds-key', baseURL: options.baseURL })
+      const fiber = await ctx.plugin(webApiPlugin, { baseURL: options.baseURL })
       await expect(ctx.web.fetch({ url: 'https://example.com' })).resolves.toMatchObject({ body: { content: 'body' } })
       await fiber.dispose()
       await expect(ctx.web.fetch({ url: 'https://example.com' })).rejects.toMatchObject({ code: 'WEB_PROVIDER_CONFIGURED_MISSING' })

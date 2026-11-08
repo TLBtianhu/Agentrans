@@ -336,9 +336,8 @@ export class DeepSeekSearchProvider implements WebSearchProvider {
     const ref = options.apiKeyEnv ?? 'DEEPSEEK_API_KEY'
     throw new WebError(
       `DeepSeek search has no API key for "${ref}"; store it through the credentials service`
-      + ' (the web Models page writes it), export it in the launching environment, or set a literal'
-      + ' "apiKey" in the web-search-deepseek config; a conversation using a DeepSeek Account model'
-      + ' searches with the account sign-in instead',
+      + ' (the web Models page writes it) or export it in the launching environment;'
+      + ' a conversation using a DeepSeek Account model searches with the account sign-in instead',
       'WEB_PROVIDER_CREDENTIAL_MISSING',
     )
   }
