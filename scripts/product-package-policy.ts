@@ -58,4 +58,5 @@ export const PRODUCT_PACKAGE_POLICY: Readonly<Record<string, ProductPackagePolic
   'packages/session/session-log-deepseek': { category: 'optional', reason: 'DeepSeek-specific API session log field; the shipped compositions disable the contribution.' },
   'packages/session/session-telemetry': { category: 'optional', reason: 'Service definition for the session telemetry seam consumed by the disabled OTel sink.' },
   'packages/session/session-telemetry-otel': { category: 'optional', reason: 'OTel session telemetry sink; the shipped compositions disable it.' },
+  'packages/web/web-deepseek-api': { category: 'optional', reason: 'Alternative search and fetch provider registering on ctx.web; the shipped composition selects the search and HTTP fetch providers instead.' },
 }
