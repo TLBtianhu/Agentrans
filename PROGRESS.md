@@ -15,6 +15,7 @@
 - 下一步顺序建议：① 先提交/备份工作区（含 5 个新包）；② 修 10 个红测试（macOS 包名属代码 bug，先改代码再改断言）；③ 补 launch-context paths 映射并处理 10 个无用途包；④ 按 THEME_CONTRACT_PLAN 做 flowchart 最小切片；⑤ 统一品牌单一源与生成器；⑥ 重建隔离安装候选。默认主题、UV_HANDLE_CLOSING、导出附件 GC、卸载 TOCTOU 仍单列。
 - 提交拆分（同日晚，已落地）：工作区按子系统拆成 7 个提交，`bdc41e98` 构建门禁 → `8200cba9` 共享准入 → `2f7937d7` 文档 → `23384ea0` 作品能力 → `3c98c244` 桌面 → `4078fe04` 产品装配 → `ec897049` 回放/SDK，HEAD = `ec897049`，`origin/main` 仍在 `85415b4c`（未推送）。拆分前快照在本地分支 `backup/2026-11-08-pre-split`（`fc5add43`），确认无误后可删。文档必须先于代码提交，因为配对校验器在部分索引上会因跨文件存在性检查误报。
 - 为过 pre-commit 钩子修了 4 处真实问题：`launch-context.ts` 两处超长行与一处 `delete` 改 `Reflect.deleteProperty`、`launch-context.spec.ts` 一处超长行；另为 `snapshots/sdk/*/workspace.expected/**` 增加 `whitespace=-blank-at-eof`，因为该 fixture 必须逐字节保留工具写出的尾随空行。提交后 `pnpm run typecheck` 6/6（18.86 s）、`product-layout` 7 文件 86/86；工作区与拆分前快照逐字节一致，仅上述 3 个文件加上 `.gitattributes` 不同。
+- 已于同日推送 `feat/first-slice` 到 origin（`7f903dc7`，pre-push typecheck 6/6 通过）；`origin/main` 仍在 `85415b4c`，未快进、未发布安装包。工作区除仓库根的 `PkgExplorerPlugin.dll.log`（0 字节外部工具残留）外干净。
 
 ## 已完成切片：原生欢迎页改为无账号 API Key 配置（2026-11-08）
 
