@@ -1,5 +1,6 @@
 /** Framework-free particle-system renderer shared by the conversation preview and the animation exporter. */
 import type { ParticleSystemSpec, ParticleSpec } from '../scene.ts'
+import type { ScenePalette } from '../scene-palette.ts'
 
 /** One particle state at a given simulation time. */
 export interface ParticleRenderState {
@@ -15,6 +16,7 @@ export interface ParticleRenderState {
  * @param width - Canvas width in pixels.
  * @param height - Canvas height in pixels.
  * @param state - Simulation time, particle states, and trails.
+ * @param palette - Resolved drawing roles; the particles style overrides them.
  */
 export function renderParticleSystem(
   spec: ParticleSystemSpec,
@@ -22,19 +24,18 @@ export function renderParticleSystem(
   width: number,
   height: number,
   state: ParticleRenderState,
+  palette: ScenePalette,
 ): void {
   const context = canvas.getContext('2d')
   if (!context) return
   const { particles, trails } = state
-  const style = getComputedStyle(canvas)
-  const ink = style.getPropertyValue('--dsw-alias-label-primary').trim()
-  const muted = style.getPropertyValue('--dsw-alias-label-tertiary').trim()
-  const accent = style.getPropertyValue('--dsw-alias-state-business-primary').trim()
-  const good = style.getPropertyValue('--dsw-alias-state-success-primary').trim()
+  const { ink, inkMuted: muted, accent, success: good, series1, series2, series3, series4 } = palette
   const isParticlesStyle = spec.style === 'particles'
   const primaryInk = isParticlesStyle ? '#edf2fb' : ink
   const secondaryInk = isParticlesStyle ? '#8f8da8' : muted
-  const particleColors = isParticlesStyle ? ['#38d6e6', '#a78bfa', '#f2f1f7', '#f472b6'] : [accent]
+  // Distinct bodies need distinct roles: one accent for every particle makes a
+  // two-body experiment unreadable.
+  const particleColors = isParticlesStyle ? ['#38d6e6', '#a78bfa', '#f2f1f7', '#f472b6'] : [series1, series2, series3, series4]
   if (isParticlesStyle) {
     context.fillStyle = '#05060b'
     context.fillRect(0, 0, width, height)

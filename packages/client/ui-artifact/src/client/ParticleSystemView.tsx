@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react'
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { RuntimeReport } from '@deepseek-ai/dsh-artifact-runtime/types'
-import { drawNativeScene } from './native-runtime.ts'
+import { drawNativeScene, scenePaletteFor } from './native-runtime.ts'
 import type { JsonValue } from '@deepseek-ai/dsh-util-values'
 import type { ParticleSystemSpec } from '@deepseek-ai/dsh-artifact/scene'
 import { observeParticleState } from '@deepseek-ai/dsh-artifact/particle-runtime'
@@ -46,7 +46,7 @@ export function ParticleSystemView({
     const canvas = canvasRef.current
     if (!canvas) return
     drawNativeScene(canvas, () => {
-      renderParticleSystem(spec, canvas, 900, 420, { time, particles, trails })
+      renderParticleSystem(spec, canvas, 900, 420, { time, particles, trails }, scenePaletteFor(canvas))
     }, onRuntimeReport === undefined ? undefined : (report) => {
       const failure = run.failure ?? { code: 'PARTICLE_RUNTIME_FAILED', message: 'Particle advancement failed' }
       onRuntimeReport(failed && report.status === 'ready' ? { status: 'error', error: failure } : report)

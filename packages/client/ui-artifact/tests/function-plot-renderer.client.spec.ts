@@ -1,14 +1,17 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { FunctionPlotSpec } from '@deepseek-ai/dsh-artifact/scene'
+import { resolveScenePalette } from '@deepseek-ai/dsh-artifact/scene-renderers'
 import { renderFunctionPlot } from '../src/client/renderers/function-plot.ts'
 
 afterEach(() => { vi.restoreAllMocks() })
 
+/** Complete palette whose accent is recognizable in the recorded strokes. */
+const palette = resolveScenePalette(token => token === '--dsw-alias-state-business-primary' ? '#123456' : '#888888')
+
 describe('function-plot rendering at domain gaps', () => {
   it.each(['sqrt(x)', 'log(x)', '1/x'])('draws the finite portions of %s without non-finite canvas coordinates', (expression) => {
     const canvas = document.createElement('canvas')
-    canvas.style.setProperty('--dsw-alias-state-business-primary', '#123456')
     const strokes: { color: string; points: { kind: 'move' | 'line'; x: number; y: number }[] }[] = []
     let points: (typeof strokes)[number]['points'] = []
     const coordinate = (kind: 'move' | 'line', x: number, y: number): void => {
@@ -32,7 +35,7 @@ describe('function-plot rendering at domain gaps', () => {
     }
     renderFunctionPlot(spec, canvas, 200, 100, {
       traceX: 0, scale: 1, pan: 0, parameters: {}, showDerivative: true, showIntegral: true,
-    })
+    }, palette)
     const curve = strokes.find(stroke => stroke.color === '#123456')
     expect(curve?.points.length).toBeGreaterThan(0)
     if (expression === '1/x') {

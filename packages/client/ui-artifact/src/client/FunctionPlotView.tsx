@@ -1,7 +1,7 @@
 /** Native FunctionPlot renderer for validated SceneSpec values. */
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { RuntimeReport } from '@deepseek-ai/dsh-artifact-runtime/types'
-import { drawNativeScene } from './native-runtime.ts'
+import { drawNativeScene, scenePaletteFor } from './native-runtime.ts'
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
 import { parseExpression, type JsonValue } from '@deepseek-ai/dsh-util-values'
@@ -100,7 +100,7 @@ export function FunctionPlotView({
     if (!canvas || !currentFunction) return
     drawNativeScene(canvas, () => { renderFunctionPlot(spec, canvas, size.width, size.height, {
       traceX, scale, pan, parameters, currentFunctionId: currentFunction.id, showDerivative, showIntegral,
-    }) }, onRuntimeReport)
+    }, scenePaletteFor(canvas)) }, onRuntimeReport)
   }, [spec, currentFunction, functions, parameters, traceX, scale, pan, showDerivative, showIntegral, size, onRuntimeReport])
 
   // React's onWheel is passive, so preventDefault cannot stop the page from

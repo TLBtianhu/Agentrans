@@ -1,5 +1,6 @@
 /** Framework-free flowchart renderer shared by the conversation preview and the animation exporter. */
 import type { FlowchartSpec } from '../scene.ts'
+import type { ScenePalette } from '../scene-palette.ts'
 
 /** Mutable view state for a flowchart render. */
 export interface FlowchartRenderState {
@@ -14,6 +15,7 @@ export interface FlowchartRenderState {
  * @param width - Canvas width in pixels.
  * @param height - Canvas height in pixels.
  * @param state - Selected node and current path position.
+ * @param palette - Resolved drawing roles; a self-contained style overrides them.
  */
 export function renderFlowchart(
   spec: FlowchartSpec,
@@ -21,6 +23,7 @@ export function renderFlowchart(
   width: number,
   height: number,
   state: FlowchartRenderState,
+  palette: ScenePalette,
 ): void {
   const context = canvas.getContext('2d')
   if (!context) return
@@ -44,14 +47,9 @@ export function renderFlowchart(
     x: 70 + node.nx * (width - 140),
     y: 60 + node.ny * (height - 120),
   })
-  const style = getComputedStyle(canvas)
-  const ink = style.getPropertyValue('--dsw-alias-label-primary').trim()
-  const muted = style.getPropertyValue('--dsw-alias-label-tertiary').trim()
-  const accent = style.getPropertyValue('--dsw-alias-state-business-primary').trim()
-  const good = style.getPropertyValue('--dsw-alias-state-success-primary').trim()
-  const surface = style.getPropertyValue('--dsw-alias-bg-base').trim()
   const isTransitMap = spec.style === 'transit-map'
   const isBlueprint = spec.style === 'blueprint'
+  const { ink, inkMuted: muted, accent, success: good, surface } = palette
   const background = isTransitMap ? '#f4f0e6' : isBlueprint ? '#17508c' : surface
   const primaryInk = isTransitMap ? '#1d1d22' : isBlueprint ? '#eef4fb' : ink
   const secondaryInk = isTransitMap ? '#6f6a60' : isBlueprint ? 'rgba(238,244,251,0.45)' : muted

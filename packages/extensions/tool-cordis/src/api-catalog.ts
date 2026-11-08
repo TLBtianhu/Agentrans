@@ -8411,7 +8411,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'SceneStyle',
-    declaration: 'export type SceneStyle = \'editorial\' | \'transit-map\' | \'blueprint\' | \'math-proof-lecture\' | \'particles\';',
+    declaration: 'export type SceneStyle = typeof SCENE_STYLES[number];',
   },
   {
     name: 'ScheduleCatalogEntry',

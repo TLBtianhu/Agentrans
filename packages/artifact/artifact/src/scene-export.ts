@@ -5,9 +5,34 @@ import {
 } from './particle-runtime.ts'
 import { sceneExprBundle } from './scene-expr.generated.ts'
 import { sceneRenderersBundle } from './scene-renderers.generated.ts'
+import type { ScenePaletteRole } from './scene-palette.ts'
 
 /** Version of the standalone SceneSpec HTML program and its fixed output options. */
 export const SCENE_EXPORTER_VERSION = 1
+
+/**
+ * Palette the exported document carries, light scheme.
+ *
+ * An export has no host theme to read, so it pins its own values under the same
+ * role names the live preview resolves. That keeps one renderer drawing both,
+ * and it is why the exported file looks the same on a machine whose application
+ * theme differs from the viewer's.
+ */
+const EXPORT_PALETTE_LIGHT: Readonly<Record<ScenePaletteRole, string>> = {
+  ink: '#17202b', inkMuted: '#647184', accent: '#4f56c7', success: '#147a5b',
+  surface: '#f4f5f7', grid: 'rgba(82,96,128,0.14)', highlight: '#b45309',
+  series1: '#2f6fd0', series2: '#b45309', series3: '#147a5b', series4: '#5b52c9',
+}
+
+/** Palette the exported document carries, dark scheme. */
+const EXPORT_PALETTE_DARK: Readonly<Record<ScenePaletteRole, string>> = {
+  ink: '#edf2fb', inkMuted: '#a1aec2', accent: '#a5b4fc', success: '#62d5a8',
+  surface: '#101318', grid: 'rgba(185,202,231,0.14)', highlight: '#fbbf24',
+  series1: '#7aa2ff', series2: '#fbbf24', series3: '#62d5a8', series4: '#a5b4fc',
+}
+
+/** Inert JSON carrying both pinned palettes to the exported program. */
+const EXPORT_PALETTES_JSON = JSON.stringify({ light: EXPORT_PALETTE_LIGHT, dark: EXPORT_PALETTE_DARK }).replaceAll('<', '\\u003c')
 
 /** Source identity embedded in a standalone export; particle conditions use the replay checkpoint. */
 export interface SceneExportOrigin {
@@ -61,8 +86,8 @@ export function buildSceneAnimationHtml(
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${titleHtml} · animation</title>
 <style>
-:root { color-scheme: light dark; --bg:#f4f5f7; --ink:#17202b; --muted:#647184; --accent:#4f56c7; --good:#147a5b; --grid:rgba(82,96,128,0.14); --border:rgba(68,83,112,0.2); }
-@media (prefers-color-scheme: dark) { :root { --bg:#101318; --ink:#edf2fb; --muted:#a1aec2; --accent:#a5b4fc; --good:#62d5a8; --grid:rgba(185,202,231,0.14); --border:rgba(184,202,232,0.22); } }
+:root { color-scheme: light dark; --bg:${EXPORT_PALETTE_LIGHT.surface}; --ink:${EXPORT_PALETTE_LIGHT.ink}; --muted:${EXPORT_PALETTE_LIGHT.inkMuted}; --accent:${EXPORT_PALETTE_LIGHT.accent}; --good:${EXPORT_PALETTE_LIGHT.success}; --grid:${EXPORT_PALETTE_LIGHT.grid}; --border:${EXPORT_PALETTE_LIGHT.grid}; }
+@media (prefers-color-scheme: dark) { :root { --bg:${EXPORT_PALETTE_DARK.surface}; --ink:${EXPORT_PALETTE_DARK.ink}; --muted:${EXPORT_PALETTE_DARK.inkMuted}; --accent:${EXPORT_PALETTE_DARK.accent}; --good:${EXPORT_PALETTE_DARK.success}; --grid:${EXPORT_PALETTE_DARK.grid}; --border:${EXPORT_PALETTE_DARK.grid}; } }
 * { box-sizing: border-box; }
 body { margin:0; background:var(--bg); color:var(--ink); font:13px/1.5 ui-sans-serif, system-ui, sans-serif; font-variant-numeric: tabular-nums; }
 main { width:min(980px,100%); margin:0 auto; padding:20px; display:grid; gap:12px; }
@@ -119,6 +144,12 @@ const parameters = Object.fromEntries(Object.entries(spec.parameters ?? {}).map(
 const functions = isFlowchart || isParticleSystem || isTimeline || isNetworkGraph || isMap ? [] : spec.functions.map(fn => ({ ...fn, node: SceneExpr.parseExpression(fn.expression, Object.keys(spec.parameters)) }))
 const canvas = document.getElementById('plot')
 const context = canvas.getContext('2d')
+// The document pins its own palette under the shared role names, so the same
+// renderers draw here and in the conversation preview.
+const exportPalettes = ${EXPORT_PALETTES_JSON}
+const palette = typeof matchMedia === 'function' && matchMedia('(prefers-color-scheme: dark)').matches
+  ? exportPalettes.dark
+  : exportPalettes.light
 const scrub = document.getElementById('scrub')
 const playButton = document.getElementById('play')
 const timeLabel = document.getElementById('time')
@@ -149,7 +180,7 @@ function drawScene() {
   if (isMap) {
     const index = Math.min(spec.markers.length - 1, Math.floor(progress * spec.markers.length))
     const selected = spec.markers[index]?.id
-    SceneRenderers.renderMap(spec, canvas, canvas.width, canvas.height, { selected })
+    SceneRenderers.renderMap(spec, canvas, canvas.width, canvas.height, { selected }, palette)
     renderReadout([
       ['selected', selected ?? '—'],
       ['markers', String(spec.markers.length)],
@@ -161,7 +192,7 @@ function drawScene() {
     const index = Math.min(spec.nodes.length - 1, Math.floor(progress * spec.nodes.length))
     const selected = spec.nodes[index]?.id
     const neighbours = selected === undefined ? [] : spec.edges.filter(edge => edge.from === selected || edge.to === selected).length
-    SceneRenderers.renderNetworkGraph(spec, canvas, canvas.width, canvas.height, { selected })
+    SceneRenderers.renderNetworkGraph(spec, canvas, canvas.width, canvas.height, { selected }, palette)
     renderReadout([
       ['selected', selected ?? '—'],
       ['neighbours', String(neighbours)],
@@ -173,7 +204,7 @@ function drawScene() {
   }
   if (isTimeline) {
     const playhead = minTime + progress * (maxTime - minTime)
-    SceneRenderers.renderTimeline(spec, canvas, canvas.width, canvas.height, { playhead })
+    SceneRenderers.renderTimeline(spec, canvas, canvas.width, canvas.height, { playhead }, palette)
     const currentEvent = spec.events.filter(event => event.time <= playhead).at(-1)
     renderReadout([
       ['playhead', playhead.toFixed(2)],
@@ -186,7 +217,7 @@ function drawScene() {
   }
   if (isFlowchart) {
     pathIndex = Math.min(path.length - 1, Math.floor(progress * path.length))
-    SceneRenderers.renderFlowchart(spec, canvas, canvas.width, canvas.height, { selected: path[pathIndex] ?? path[0], pathIndex })
+    SceneRenderers.renderFlowchart(spec, canvas, canvas.width, canvas.height, { selected: path[pathIndex] ?? path[0], pathIndex }, palette)
     renderReadout([
       ['node', path[pathIndex] ?? '—'],
       ['path', path.length > 0 ? (pathIndex + 1) + '/' + path.length : '—'],
@@ -199,7 +230,7 @@ function drawScene() {
   if (isParticleSystem) {
     const state = progress === 0 ? particleBaseState
       : SceneRenderers.particleStateAtTime(spec, progress * timeline.duration, particleCheckpoint)
-    SceneRenderers.renderParticleSystem(spec, canvas, canvas.width, canvas.height, state)
+    SceneRenderers.renderParticleSystem(spec, canvas, canvas.width, canvas.height, state, palette)
     renderReadout([
       ['time', state.time.toFixed(2)],
       ['particles', String(state.particles.length)],
@@ -214,7 +245,7 @@ function drawScene() {
   SceneRenderers.renderFunctionPlot(spec, canvas, canvas.width, canvas.height, {
     traceX, scale: 1, pan: 0, parameters,
     showDerivative: spec.trace.derivative, showIntegral: spec.trace.integral,
-  })
+  }, palette)
   const analysis = SceneRenderers.analyzeFunction(functions[0].node, parameters, traceX)
   renderReadout([
     ['x', traceX.toFixed(2)],

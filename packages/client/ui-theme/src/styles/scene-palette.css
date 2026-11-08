@@ -1,0 +1,14 @@
+/*
+ * Scene drawing roles. The renderers in `@deepseek-ai/dsh-artifact/scene-renderers`
+ * read these names and nothing else, so one sheet here retints every native
+ * scene, and an exported animation pins the same names to carry its own palette.
+ * Series values reference the static scale, which the dark palette redefines on
+ * the same element, so a role keeps its meaning across both color schemes.
+ */
+body {
+  --dsw-alias-data-series-1: var(--dsw-static-blue-500);
+  --dsw-alias-data-series-2: var(--dsw-static-amber-500);
+  --dsw-alias-data-series-3: var(--dsw-static-green-500);
+  --dsw-alias-data-series-4: var(--dsw-static-deepseek-450);
+  --dsw-alias-data-highlight: var(--dsw-static-amber-400);
+}

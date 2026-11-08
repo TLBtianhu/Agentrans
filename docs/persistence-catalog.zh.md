@@ -4048,7 +4048,7 @@ SHA-256: `4563e4f2d8c33c773ad98355e763141b90539f8111b5842d0207241277243fca`
 
 SHA-256: `6ac65764c97cc6a48db1d23f0d3f4e1050b6fc0249b1bc4953ab2d4d1c7f78bd`
 
-来源：[`packages/artifact/artifact/src/scene.ts:50`](../packages/artifact/artifact/src/scene.ts)
+来源：[`packages/artifact/artifact/src/scene.ts:53`](../packages/artifact/artifact/src/scene.ts)
 
 | 属性 | 存在性 | 类型 |
 |---|---|---|
@@ -4243,7 +4243,7 @@ SHA-256: `1df34a6c086866ffdc2dd9e8e5c581c3751a010cdf6b8538a7327f7a3237f0b4`
 
 SHA-256: `b84d23d64e11ab1a0f69a5ad6aec5b44d751836640f98d9e6e97e5ebeca826fb`
 
-来源：[`packages/artifact/artifact/src/scene.ts:70`](../packages/artifact/artifact/src/scene.ts)
+来源：[`packages/artifact/artifact/src/scene.ts:73`](../packages/artifact/artifact/src/scene.ts)
 
 | 属性 | 存在性 | 类型 |
 |---|---|---|
@@ -4713,7 +4713,7 @@ SHA-256: `6f72ece8f317cd080c4f20a93f1bf709965f5b81ac4669528f5a023191cfcf20`
 
 SHA-256: `1eb5cf4675d1c583975c67c48fcddd086987b72334b31d89044f5109931545fe`
 
-来源：[`packages/artifact/artifact/src/scene.ts:113`](../packages/artifact/artifact/src/scene.ts)
+来源：[`packages/artifact/artifact/src/scene.ts:116`](../packages/artifact/artifact/src/scene.ts)
 
 | 属性 | 存在性 | 类型 |
 |---|---|---|
@@ -4741,7 +4741,7 @@ SHA-256: `96a6439a75ff874c35e90bad54edebb8475b085182517b3b65c3efe624ca2c86`
 
 SHA-256: `58ebc1b29730122dc112aa4b7f60243b704991cd9cb807c0cafbfa15c8ba0efc`
 
-来源：[`packages/artifact/artifact/src/scene.ts:122`](../packages/artifact/artifact/src/scene.ts)
+来源：[`packages/artifact/artifact/src/scene.ts:125`](../packages/artifact/artifact/src/scene.ts)
 
 | 属性 | 存在性 | 类型 |
 |---|---|---|
@@ -5034,7 +5034,7 @@ SHA-256: `f09e5e7acf5ff5ccd193ff2eeec015fa2ff7c29d98bc465f8c3302058d47e29b`
 
 SHA-256: `7bff3da2eb7b7bab6077568bc8d69427931e25c6c9a478c366ee038e3dbaf29e`
 
-来源：[`packages/artifact/artifact/src/scene.ts:104`](../packages/artifact/artifact/src/scene.ts)
+来源：[`packages/artifact/artifact/src/scene.ts:107`](../packages/artifact/artifact/src/scene.ts)
 
 | 属性 | 存在性 | 类型 |
 |---|---|---|
@@ -5142,7 +5142,7 @@ SHA-256: `91fbde9e655649ad25eb5935a54fb44b028fa8c7419be95f9d5e714119c6e2c3`
 
 SHA-256: `e2438aeb14ab7553a37f57e0795fed6bbd378914b9afea3e1c4b10aecad4d496`
 
-来源：[`packages/artifact/artifact/src/scene.ts:60`](../packages/artifact/artifact/src/scene.ts)
+来源：[`packages/artifact/artifact/src/scene.ts:63`](../packages/artifact/artifact/src/scene.ts)
 
 | 属性 | 存在性 | 类型 |
 |---|---|---|
@@ -5171,7 +5171,7 @@ SHA-256: `3ca53212761e28a68a19c66f66fa2dd844f2c45eb970313682460ad913d0ecd2`
 
 SHA-256: `be3a1594642f418e7e861ed3437c158ff87a2f7d5a9de2efc8fa92eefbb0d5b2`
 
-来源：[`packages/artifact/artifact/src/scene.ts:76`](../packages/artifact/artifact/src/scene.ts)
+来源：[`packages/artifact/artifact/src/scene.ts:79`](../packages/artifact/artifact/src/scene.ts)
 
 | 属性 | 存在性 | 类型 |
 |---|---|---|
@@ -5447,7 +5447,7 @@ SHA-256: `241daa07c3b7d97466a0931ab08037740d0deb5ea59a798eab5a6ec36c3fbaae`
 
 SHA-256: `7c023d7fbbd3abb717710179fc4afff174a1c017453f5519aeaf33cb3bd2e46b`
 
-来源：[`packages/artifact/artifact/src/scene.ts:131`](../packages/artifact/artifact/src/scene.ts)
+来源：[`packages/artifact/artifact/src/scene.ts:134`](../packages/artifact/artifact/src/scene.ts)
 
 | kind | form 属性 | 其他必需字段 | 完整定义 |
 |---|---|---|---|
@@ -5979,7 +5979,7 @@ SHA-256: `4e887768586528565381dadbddee6cef555874148089f4579e0b4b1ad096fc9c`
 
 SHA-256: `9c11882a57f79431546aee438759255ad82c5facb4eecce41f427e4eca048d8d`
 
-来源：[`packages/artifact/artifact/src/scene.ts:87`](../packages/artifact/artifact/src/scene.ts)
+来源：[`packages/artifact/artifact/src/scene.ts:90`](../packages/artifact/artifact/src/scene.ts)
 
 | 属性 | 存在性 | 类型 |
 |---|---|---|
@@ -6006,7 +6006,7 @@ SHA-256: `ac92c6068dc0b46b05d8d776c07f34f4632ae78e7d7655c8792b1f688f5c9223`
 
 SHA-256: `5ea240d824570274311e7295e21211f0866082a95c4be3b813b290ac2c510e86`
 
-来源：[`packages/artifact/artifact/src/scene.ts:95`](../packages/artifact/artifact/src/scene.ts)
+来源：[`packages/artifact/artifact/src/scene.ts:98`](../packages/artifact/artifact/src/scene.ts)
 
 | 属性 | 存在性 | 类型 |
 |---|---|---|
@@ -7235,7 +7235,7 @@ SHA-256: `0a92c5bdfa06c2e2615b777728f3aa95f408d43b9012e7b754568311251db623`
 
 SHA-256: `9eeda7866dede47508378a3b263d8cd7acda288668b38d3d694899af0c21b4a7`
 
-来源：[`packages/artifact/artifact/src/scene.ts:100`](../packages/artifact/artifact/src/scene.ts) · [`packages/artifact/artifact/src/scene.ts:109`](../packages/artifact/artifact/src/scene.ts) · [`packages/artifact/artifact/src/scene.ts:127`](../packages/artifact/artifact/src/scene.ts) · [`packages/artifact/artifact/src/scene.ts:28`](../packages/artifact/artifact/src/scene.ts) · [`packages/artifact/artifact/src/scene.ts:56`](../packages/artifact/artifact/src/scene.ts) · [`packages/artifact/artifact/src/scene.ts:83`](../packages/artifact/artifact/src/scene.ts)
+来源：[`packages/artifact/artifact/src/scene.ts:103`](../packages/artifact/artifact/src/scene.ts) · [`packages/artifact/artifact/src/scene.ts:112`](../packages/artifact/artifact/src/scene.ts) · [`packages/artifact/artifact/src/scene.ts:130`](../packages/artifact/artifact/src/scene.ts) · [`packages/artifact/artifact/src/scene.ts:28`](../packages/artifact/artifact/src/scene.ts) · [`packages/artifact/artifact/src/scene.ts:59`](../packages/artifact/artifact/src/scene.ts) · [`packages/artifact/artifact/src/scene.ts:86`](../packages/artifact/artifact/src/scene.ts)
 
 | 属性 | 存在性 | 类型 |
 |---|---|---|

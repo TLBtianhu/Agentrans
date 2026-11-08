@@ -1,5 +1,6 @@
 /** Framework-free map renderer shared by the conversation preview and the animation exporter. */
 import type { MapSpec } from '../scene.ts'
+import type { ScenePalette } from '../scene-palette.ts'
 
 /** Mutable view state for a map render. */
 export interface MapRenderState {
@@ -40,6 +41,7 @@ function pinPath(context: CanvasRenderingContext2D, x: number, y: number, radius
  * @param width - Canvas width in pixels.
  * @param height - Canvas height in pixels.
  * @param state - Currently selected marker id, if any.
+ * @param palette - Resolved drawing roles; a self-contained style overrides them.
  */
 export function renderMap(
   spec: MapSpec,
@@ -47,6 +49,7 @@ export function renderMap(
   width: number,
   height: number,
   state: MapRenderState,
+  palette: ScenePalette,
 ): void {
   const context = canvas.getContext('2d')
   if (!context) return
@@ -59,12 +62,7 @@ export function renderMap(
   const maxY = Math.max(...ys)
   const spanX = maxX - minX || 1
   const spanY = maxY - minY || 1
-  const style = getComputedStyle(canvas)
-  const ink = style.getPropertyValue('--dsw-alias-label-primary').trim()
-  const muted = style.getPropertyValue('--dsw-alias-label-tertiary').trim()
-  const accent = style.getPropertyValue('--dsw-alias-state-business-primary').trim()
-  const surface = style.getPropertyValue('--dsw-alias-bg-base').trim()
-  const border = style.getPropertyValue('--dsw-alias-border-l2').trim()
+  const { ink, inkMuted: muted, accent, surface, grid: border } = palette
   const xToPixel = (value: number): number => 60 + ((value - minX) / spanX) * (width - 120)
   const yToPixel = (value: number): number => 60 + ((value - minY) / spanY) * (height - 120)
   context.clearRect(0, 0, width, height)

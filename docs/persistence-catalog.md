@@ -4046,7 +4046,7 @@ Array of [`FlowchartNodeSpec`](#persistence-type-sha256-632b688e2a4714e5fa4de55e
 
 SHA-256: `6ac65764c97cc6a48db1d23f0d3f4e1050b6fc0249b1bc4953ab2d4d1c7f78bd`
 
-Sources: [`packages/artifact/artifact/src/scene.ts:50`](../packages/artifact/artifact/src/scene.ts)
+Sources: [`packages/artifact/artifact/src/scene.ts:53`](../packages/artifact/artifact/src/scene.ts)
 
 | Property | Presence | Type |
 |---|---|---|
@@ -4241,7 +4241,7 @@ Sources: [`packages/goal/goal/src/domain.ts:24`](../packages/goal/goal/src/domai
 
 SHA-256: `b84d23d64e11ab1a0f69a5ad6aec5b44d751836640f98d9e6e97e5ebeca826fb`
 
-Sources: [`packages/artifact/artifact/src/scene.ts:70`](../packages/artifact/artifact/src/scene.ts)
+Sources: [`packages/artifact/artifact/src/scene.ts:73`](../packages/artifact/artifact/src/scene.ts)
 
 | Property | Presence | Type |
 |---|---|---|
@@ -4711,7 +4711,7 @@ Sources: [`packages/llm/llm-retry/src/types.ts:43`](../packages/llm/llm-retry/sr
 
 SHA-256: `1eb5cf4675d1c583975c67c48fcddd086987b72334b31d89044f5109931545fe`
 
-Sources: [`packages/artifact/artifact/src/scene.ts:113`](../packages/artifact/artifact/src/scene.ts)
+Sources: [`packages/artifact/artifact/src/scene.ts:116`](../packages/artifact/artifact/src/scene.ts)
 
 | Property | Presence | Type |
 |---|---|---|
@@ -4739,7 +4739,7 @@ Array of [`MapMarkerSpec`](#persistence-type-sha256-1eb5cf4675d1c583975c67c48fcd
 
 SHA-256: `58ebc1b29730122dc112aa4b7f60243b704991cd9cb807c0cafbfa15c8ba0efc`
 
-Sources: [`packages/artifact/artifact/src/scene.ts:122`](../packages/artifact/artifact/src/scene.ts)
+Sources: [`packages/artifact/artifact/src/scene.ts:125`](../packages/artifact/artifact/src/scene.ts)
 
 | Property | Presence | Type |
 |---|---|---|
@@ -5032,7 +5032,7 @@ Sources: [`packages/core/agent/src/types.ts:79`](../packages/core/agent/src/type
 
 SHA-256: `7bff3da2eb7b7bab6077568bc8d69427931e25c6c9a478c366ee038e3dbaf29e`
 
-Sources: [`packages/artifact/artifact/src/scene.ts:104`](../packages/artifact/artifact/src/scene.ts)
+Sources: [`packages/artifact/artifact/src/scene.ts:107`](../packages/artifact/artifact/src/scene.ts)
 
 | Property | Presence | Type |
 |---|---|---|
@@ -5140,7 +5140,7 @@ Sources: [`packages/artifact/artifact/src/particle-runtime.ts:33`](../packages/a
 
 SHA-256: `e2438aeb14ab7553a37f57e0795fed6bbd378914b9afea3e1c4b10aecad4d496`
 
-Sources: [`packages/artifact/artifact/src/scene.ts:60`](../packages/artifact/artifact/src/scene.ts)
+Sources: [`packages/artifact/artifact/src/scene.ts:63`](../packages/artifact/artifact/src/scene.ts)
 
 | Property | Presence | Type |
 |---|---|---|
@@ -5169,7 +5169,7 @@ Array of [`ParticleSpec`](#persistence-type-sha256-e2438aeb14ab7553a37f57e0795fe
 
 SHA-256: `be3a1594642f418e7e861ed3437c158ff87a2f7d5a9de2efc8fa92eefbb0d5b2`
 
-Sources: [`packages/artifact/artifact/src/scene.ts:76`](../packages/artifact/artifact/src/scene.ts)
+Sources: [`packages/artifact/artifact/src/scene.ts:79`](../packages/artifact/artifact/src/scene.ts)
 
 | Property | Presence | Type |
 |---|---|---|
@@ -5445,7 +5445,7 @@ Sources: [`packages/artifact/artifact/src/scene.ts:6`](../packages/artifact/arti
 
 SHA-256: `7c023d7fbbd3abb717710179fc4afff174a1c017453f5519aeaf33cb3bd2e46b`
 
-Sources: [`packages/artifact/artifact/src/scene.ts:131`](../packages/artifact/artifact/src/scene.ts)
+Sources: [`packages/artifact/artifact/src/scene.ts:134`](../packages/artifact/artifact/src/scene.ts)
 
 | kind | Form property | Other required fields | Full definition |
 |---|---|---|---|
@@ -5977,7 +5977,7 @@ Sources: [`packages/llm/llm/src/types.ts:69`](../packages/llm/llm/src/types.ts) 
 
 SHA-256: `9c11882a57f79431546aee438759255ad82c5facb4eecce41f427e4eca048d8d`
 
-Sources: [`packages/artifact/artifact/src/scene.ts:87`](../packages/artifact/artifact/src/scene.ts)
+Sources: [`packages/artifact/artifact/src/scene.ts:90`](../packages/artifact/artifact/src/scene.ts)
 
 | Property | Presence | Type |
 |---|---|---|
@@ -6004,7 +6004,7 @@ Array of [`TimelineEventSpec`](#persistence-type-sha256-9c11882a57f79431546aee43
 
 SHA-256: `5ea240d824570274311e7295e21211f0866082a95c4be3b813b290ac2c510e86`
 
-Sources: [`packages/artifact/artifact/src/scene.ts:95`](../packages/artifact/artifact/src/scene.ts)
+Sources: [`packages/artifact/artifact/src/scene.ts:98`](../packages/artifact/artifact/src/scene.ts)
 
 | Property | Presence | Type |
 |---|---|---|
@@ -7233,7 +7233,7 @@ Sources: [`packages/experimental/liveshare/src/host/viewer-principal.ts:29`](../
 
 SHA-256: `9eeda7866dede47508378a3b263d8cd7acda288668b38d3d694899af0c21b4a7`
 
-Sources: [`packages/artifact/artifact/src/scene.ts:100`](../packages/artifact/artifact/src/scene.ts) · [`packages/artifact/artifact/src/scene.ts:109`](../packages/artifact/artifact/src/scene.ts) · [`packages/artifact/artifact/src/scene.ts:127`](../packages/artifact/artifact/src/scene.ts) · [`packages/artifact/artifact/src/scene.ts:28`](../packages/artifact/artifact/src/scene.ts) · [`packages/artifact/artifact/src/scene.ts:56`](../packages/artifact/artifact/src/scene.ts) · [`packages/artifact/artifact/src/scene.ts:83`](../packages/artifact/artifact/src/scene.ts)
+Sources: [`packages/artifact/artifact/src/scene.ts:103`](../packages/artifact/artifact/src/scene.ts) · [`packages/artifact/artifact/src/scene.ts:112`](../packages/artifact/artifact/src/scene.ts) · [`packages/artifact/artifact/src/scene.ts:130`](../packages/artifact/artifact/src/scene.ts) · [`packages/artifact/artifact/src/scene.ts:28`](../packages/artifact/artifact/src/scene.ts) · [`packages/artifact/artifact/src/scene.ts:59`](../packages/artifact/artifact/src/scene.ts) · [`packages/artifact/artifact/src/scene.ts:86`](../packages/artifact/artifact/src/scene.ts)
 
 | Property | Presence | Type |
 |---|---|---|

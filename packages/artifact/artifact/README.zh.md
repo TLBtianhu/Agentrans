@@ -54,7 +54,7 @@ Scene 快照使用 `format: 'scene'` 和完整的 `spec`。目录校验函数图
 
 不依赖 DOM 的 `@deepseek-ai/dsh-artifact/particle-runtime` 入口为预览和独立导出提供同一份固定步长粒子计算。带版本号的检查点记录步数，恢复时必须使用同一 SceneSpec 和修订。观察输出将 `-0` 规范为 `0` 以便写入 JSON，内部积分状态不变。它不持久化状态，也不授予执行权限。
 
-浏览器安全入口 `scene-renderers` 与 `scene-export` 拥有共用画布计算和独立 HTML 生成器。`buildSceneAnimationHtml(spec, title, checkpoint?, origin?)` 可将固定来源身份与重放条件作为转义 JSON 嵌入文件。非粒子场景按源码默认条件导出，不捕获浏览器局部滑块、选择或 iframe 状态。持久文件生成和重试回执归独立的 [Artifact 导出服务](../artifact-export/README.zh.md) 所有。
+浏览器安全入口 `scene-renderers` 与 `scene-export` 拥有共用画布计算和独立 HTML 生成器。每个渲染器接收已解析的 `ScenePalette`，只按其中的角色取色——主文字、次级文字、强调、成功、底色、网格、四个序列色与一个高亮——因此它从不读取文档，一张样式表即可为所有原生场景换色。`resolveScenePalette(read)` 把这些角色映射到 `--dsw-alias-*` 自定义属性，缺少某个角色时抛出指名该角色的 `ScenePaletteError`，而不是画成透明。`SCENE_STYLE_PALETTES` 声明每种风格的调色板归属：`editorial` 跟随宿主调色板，`transit-map`、`blueprint`、`math-proof-lecture` 与 `particles` 属于 `self-contained` 风格，保留各自刻意的调色板。`buildSceneAnimationHtml(spec, title, checkpoint?, origin?)` 可将固定来源身份与重放条件作为转义 JSON 嵌入文件。导出物没有宿主主题，因此自带两套调色板并把匹配的一套交给同一批渲染器。非粒子场景按源码默认条件导出，不捕获浏览器局部滑块、选择或 iframe 状态。持久文件生成和重试回执归独立的 [Artifact 导出服务](../artifact-export/README.zh.md) 所有。
 
 已保存粒子观察保留完整源码修订和 Host 重新计算的数值。保存会追加完整列表事件，不唤醒 Agent。已打开 Session 的投影提供这些观察；紧凑摘要省略它们。明确发送可引用旧修订，并从持久 Inbox 和用户消息收据中对已准入重试去重。Live 操作首次准入仍校验当前修订，已接受的稳定重试在该校验前返回原确认。见[已保存观察语义](../../../docs/subsystems/artifact.zh.md#presentation-and-recovery)。
 

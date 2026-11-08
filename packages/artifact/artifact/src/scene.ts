@@ -43,8 +43,11 @@ export interface FlowchartEdgeSpec {
   readonly label?: string
 }
 
+/** Every visual idiom a SceneSpec may declare. */
+export const SCENE_STYLES = ['editorial', 'transit-map', 'blueprint', 'math-proof-lecture', 'particles'] as const
+
 /** Visual idiom for a SceneSpec. */
-export type SceneStyle = 'editorial' | 'transit-map' | 'blueprint' | 'math-proof-lecture' | 'particles'
+export type SceneStyle = typeof SCENE_STYLES[number]
 
 /** Declarative flowchart with nodes, directed edges, and an optional path to advance. */
 export interface FlowchartSpec {
@@ -283,8 +286,11 @@ export function normalizeFlowchart(value: unknown): FlowchartSpec {
 }
 
 function normalizeStyle(value: unknown): SceneStyle {
-  if (value === 'editorial' || value === 'transit-map' || value === 'blueprint' || value === 'math-proof-lecture' || value === 'particles') return value
-  throw new SceneValidationError('/style', 'must be editorial, transit-map, blueprint, math-proof-lecture, or particles')
+  const style = SCENE_STYLES.find(candidate => candidate === value)
+  if (style === undefined) {
+    throw new SceneValidationError('/style', `must be ${SCENE_STYLES.slice(0, -1).join(', ')}, or ${SCENE_STYLES[SCENE_STYLES.length - 1]}`)
+  }
+  return style
 }
 
 /**

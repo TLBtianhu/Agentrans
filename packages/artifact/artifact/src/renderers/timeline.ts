@@ -1,5 +1,6 @@
 /** Framework-free timeline renderer shared by the conversation preview and the animation exporter. */
 import type { TimelineSpec } from '../scene.ts'
+import type { ScenePalette } from '../scene-palette.ts'
 
 /** Mutable view state for a timeline render. */
 export interface TimelineRenderState {
@@ -31,6 +32,7 @@ function wrapText(context: CanvasRenderingContext2D, text: string, maxWidth: num
  * @param width - Canvas width in pixels.
  * @param height - Canvas height in pixels.
  * @param state - Current playhead time.
+ * @param palette - Resolved drawing roles; a self-contained style overrides them.
  */
 export function renderTimeline(
   spec: TimelineSpec,
@@ -38,6 +40,7 @@ export function renderTimeline(
   width: number,
   height: number,
   state: TimelineRenderState,
+  palette: ScenePalette,
 ): void {
   const context = canvas.getContext('2d')
   if (!context) return
@@ -46,13 +49,7 @@ export function renderTimeline(
   const minTime = Math.min(...times)
   const maxTime = Math.max(...times)
   const span = maxTime - minTime || 1
-  const style = getComputedStyle(canvas)
-  const ink = style.getPropertyValue('--dsw-alias-label-primary').trim()
-  const muted = style.getPropertyValue('--dsw-alias-label-tertiary').trim()
-  const accent = style.getPropertyValue('--dsw-alias-state-business-primary').trim()
-  const good = style.getPropertyValue('--dsw-alias-state-success-primary').trim()
-  const surface = style.getPropertyValue('--dsw-alias-bg-base').trim()
-  const border = style.getPropertyValue('--dsw-alias-border-l2').trim()
+  const { ink, inkMuted: muted, accent, success: good, surface, grid: border } = palette
   const isTransitMap = spec.style === 'transit-map'
   const primaryInk = isTransitMap ? '#1d1d22' : ink
   const secondaryInk = isTransitMap ? '#6f6a60' : muted

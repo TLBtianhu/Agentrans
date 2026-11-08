@@ -1,5 +1,6 @@
 /** Framework-free network-graph renderer shared by the conversation preview and the animation exporter. */
 import type { NetworkGraphSpec, FlowchartNodeSpec } from '../scene.ts'
+import type { ScenePalette } from '../scene-palette.ts'
 
 /** Mutable view state for a network-graph render. */
 export interface NetworkGraphRenderState {
@@ -66,6 +67,7 @@ function layout(nodes: readonly FlowchartNodeSpec[], edges: readonly { from: str
  * @param width - Canvas width in pixels.
  * @param height - Canvas height in pixels.
  * @param state - Currently selected node id, if any.
+ * @param palette - Resolved drawing roles; a self-contained style overrides them.
  */
 export function renderNetworkGraph(
   spec: NetworkGraphSpec,
@@ -73,18 +75,14 @@ export function renderNetworkGraph(
   width: number,
   height: number,
   state: NetworkGraphRenderState,
+  palette: ScenePalette,
 ): void {
   const context = canvas.getContext('2d')
   if (!context) return
   const { selected } = state
   const nodes = layout(spec.nodes, spec.edges)
   const byId = new Map(nodes.map(node => [node.id, node]))
-  const style = getComputedStyle(canvas)
-  const ink = style.getPropertyValue('--dsw-alias-label-primary').trim()
-  const muted = style.getPropertyValue('--dsw-alias-label-tertiary').trim()
-  const accent = style.getPropertyValue('--dsw-alias-state-business-primary').trim()
-  const good = style.getPropertyValue('--dsw-alias-state-success-primary').trim()
-  const surface = style.getPropertyValue('--dsw-alias-bg-base').trim()
+  const { ink, inkMuted: muted, accent, success: good, surface } = palette
   const isBlueprint = spec.style === 'blueprint'
   const primaryInk = isBlueprint ? '#eef4fb' : ink
   const secondaryInk = isBlueprint ? 'rgba(238,244,251,0.45)' : muted

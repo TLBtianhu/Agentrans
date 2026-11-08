@@ -2,6 +2,7 @@
 import { parseExpression } from '@deepseek-ai/dsh-util-values'
 import { analyzeFunction, evaluateFunction } from './function-analysis.ts'
 import type { FunctionPlotSpec } from '../scene.ts'
+import type { ScenePalette } from '../scene-palette.ts'
 
 const COLUMNS = 6
 const ROWS = 4
@@ -24,6 +25,7 @@ export interface FunctionPlotRenderState {
  * @param width - Canvas width in pixels.
  * @param height - Canvas height in pixels.
  * @param state - Trace position, zoom, pan, parameters, and analysis toggles.
+ * @param palette - Resolved drawing roles; the proof-lecture style overrides them.
  */
 export function renderFunctionPlot(
   spec: FunctionPlotSpec,
@@ -31,6 +33,7 @@ export function renderFunctionPlot(
   width: number,
   height: number,
   state: FunctionPlotRenderState,
+  palette: ScenePalette,
 ): void {
   const context = canvas.getContext('2d')
   if (!context) return
@@ -39,12 +42,7 @@ export function renderFunctionPlot(
   if (!currentFunction) return
   const { traceX, scale, pan, parameters, showDerivative, showIntegral } = state
   const evaluateAt = (fn: (typeof functions)[number], x: number): number | null => evaluateFunction(fn.node, parameters, x)
-  const style = getComputedStyle(canvas)
-  const ink = style.getPropertyValue('--dsw-alias-label-primary').trim()
-  const muted = style.getPropertyValue('--dsw-alias-label-tertiary').trim()
-  const accent = style.getPropertyValue('--dsw-alias-state-business-primary').trim()
-  const good = style.getPropertyValue('--dsw-alias-state-success-primary').trim()
-  const grid = style.getPropertyValue('--dsw-alias-border-l2').trim()
+  const { ink, inkMuted: muted, accent, success: good, grid } = palette
   const isProofLecture = spec.style === 'math-proof-lecture'
   const primaryInk = isProofLecture ? '#c7c7c9' : ink
   const secondaryInk = isProofLecture ? '#6f7480' : muted

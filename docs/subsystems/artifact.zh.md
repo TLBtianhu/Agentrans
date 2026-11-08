@@ -52,6 +52,8 @@ Artifact 操作是用户意图，不是权限。它不能批准工具、读取�
 
 原生预览只有在取得 Canvas 上下文且实际绘制完成后才报告 ready，计算初始化本身并不足够。HTML 在程序成功初始化后调用注入的 `window.artifactRuntime.ready`。可选状态和命令回调只声明该程序实际实现的桥接操作。iframe load 事件不能证明就绪。诊断有大小限制，父级接收方检查当前 frame 与完整运行身份。报告始终是 Client/程序声明，不能证明像素正确、观察可复算或因果结论成立。
 
+原生绘制共用一份调色板契约。渲染器接收已解析的 `ScenePalette`，只按其中的角色取色：主文字、次级文字、强调、成功、底色、网格、四个序列色与一个高亮。预览从当前主题解析这些角色，导出物固定自带的两套调色板，而没有提供任何取值的表面会以 `ScenePaletteError` 失败，不会画成透明。`SCENE_STYLE_PALETTES` 说明每种风格跟随哪个所有者：`editorial` 由宿主所有，`transit-map`、`blueprint`、`math-proof-lecture` 与 `particles` 属于 `self-contained`，其固定调色板是显式选择而非意外退出主题。两种情况下卡片、控件与外框都仍由主题控制。
+
 共享 HTML 命令要求双方当前程序都报告 ready 且声明该命令。请求身份将每条命令与回调完成确认关联；缺失或失败的确认保持可见。超时回调可能已有副作用，Client 不自动重试。没有握手的旧 HTML 仍可预览并提供显式用户操作，但不会获得未声明的控制或状态能力。
 
 只读模型工具 `artifact_runtime` 查询一个精确当前修订，也可在请求的上限内等待一次 ready/error 报告。普通 `tool/result` 记录所有匹配运行、等待结果与剩余轮次预算；没有报告、仍在启动的超时与断连保持区分，一个运行的 ready 不掩盖另一个的 error。等待由事件驱动，跟随调用方取消，在源码/Session/服务变化时结束，不启动代码或重复命令。工具策略限制查询次数，以及本轮已读到运行错误的 Artifact 源码更新尝试。临时计数在新轮次重置，不随新修订重置，不新增运行事件、Projection 或动态提示词输入。创建工具在成功结果后提交源码，不等待浏览器确认尚未公布的内容。参见[运行包](../../packages/artifact/artifact-runtime/README.zh.md)与[运行所有权决策](../../.agents/notes/implemented/architecture/2026-11-07-artifact-runtime-reports.zh.md)。

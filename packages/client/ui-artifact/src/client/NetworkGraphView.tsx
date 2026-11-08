@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { RuntimeReport } from '@deepseek-ai/dsh-artifact-runtime/types'
-import { drawNativeScene } from './native-runtime.ts'
+import { drawNativeScene, scenePaletteFor } from './native-runtime.ts'
 import type { JsonValue } from '@deepseek-ai/dsh-util-values'
 import type { NetworkGraphSpec } from '@deepseek-ai/dsh-artifact/scene'
 import type { ArtifactId } from '@deepseek-ai/dsh-artifact/types'
@@ -39,7 +39,7 @@ export function NetworkGraphView({
     const canvas = canvasRef.current
     if (!canvas) return
     drawNativeScene(canvas, () => {
-      renderNetworkGraph(spec, canvas, 900, 420, { ...(selected === undefined ? {} : { selected }) })
+      renderNetworkGraph(spec, canvas, 900, 420, { ...(selected === undefined ? {} : { selected }) }, scenePaletteFor(canvas))
     }, onRuntimeReport)
   }, [spec, selected, onRuntimeReport])
 
