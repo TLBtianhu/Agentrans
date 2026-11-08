@@ -207,6 +207,8 @@ None; Conversation assembly and browser input state do not alter provider-side p
 
 - Unknown contextual requests are retained only by their live Session binding. Reloading or releasing that binding discards local retry state without cancelling Host input; retry or inspect history before leaving. Cross-reload recovery of unconfirmed requests is deferred.
 
+- **A restored draft keeps formula text, not islands** — the semantic draft stores the clipboard projection, so `$tex$` comes back as ordinary text. Sending it still renders correctly because the message pipeline reads the same delimiters; rebuilding islands from that text on restore, and converting pasted `$...$`, are the next slice.
+
 - **Only registered targets can render** — the shell deliberately has no implicit fallback target beyond the registered `chat` preference.
 - **Factory occurrences inherit their render-position Session** — `conversation.content` does not accept an independently addressed Session; that requires a separate Session-provider capability.
 

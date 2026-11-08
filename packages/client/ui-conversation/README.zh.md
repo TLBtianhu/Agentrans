@@ -207,6 +207,8 @@ selector 必须是 owner currency 的纯函数。非 null 返回值作为 `match
 
 - 未确认的上下文请求只由活跃 Session binding 保留。刷新或释放 binding 会清除本地重试状态，但不会取消 Host 输入；离开前应重试或核对历史。跨刷新恢复未确认请求暂缓。
 
+- **恢复的草稿保留公式文本而非公式岛**——语义草稿存的是剪贴板投影，因此 `$tex$` 以普通文本回来。发送后仍能正确渲染，因为消息管线读同一套定界符；在恢复时把该文本重建为岛、以及把粘贴的 `$...$` 转成岛，属于下一片。
+
 - **只有已注册 target 可以渲染**——除已注册的 `chat` 偏好外，shell 刻意不提供隐式 fallback target。
 - **Factory occurrence 继承渲染位置的 Session**——`conversation.content` 不接受独立寻址的 Session；该能力需要单独的 Session provider。
 
