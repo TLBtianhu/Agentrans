@@ -53,7 +53,7 @@ describe('DeepSeekSearchProvider redirect policy', () => {
   it.each([301, 302, 303, 307, 308])('rejects HTTP %i before contacting Location', async (status) => {
     targetRequests.length = 0
     const provider = searchProvider({
-      apiKey: TEST_API_KEY,
+      resolveApiKey: async () => TEST_API_KEY,
       baseURL: `${redirectOrigin}/${status}`,
       model: 'deepseek-chat',
       apiVersion: '2023-06-01',

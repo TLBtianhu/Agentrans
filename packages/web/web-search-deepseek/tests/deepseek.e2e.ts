@@ -25,7 +25,7 @@ const maybe = apiKey !== undefined && apiKey.length > 0 ? describe : describe.sk
 maybe('DeepSeekSearchProvider real API', () => {
   it.skip('returns citeable sources for a live query via native web_search', async () => {
     const provider = searchProvider({
-      apiKey: apiKey!,
+      resolveApiKey: async () => apiKey!,
       baseURL: process.env.DEEPSEEK_SEARCH_BASE_URL ?? DEEPSEEK_DEFAULT_BASE_URL,
       model: process.env.DEEPSEEK_SEARCH_MODEL ?? DEEPSEEK_DEFAULT_MODEL,
       apiVersion: DEEPSEEK_DEFAULT_API_VERSION,

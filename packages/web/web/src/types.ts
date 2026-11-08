@@ -120,20 +120,11 @@ export interface WebSearchProvider {
   available(): boolean
   /**
    * Why a search made for a model request on the `llmProvider` chat route can or cannot
-   * authenticate. Checks configuration only and must make no network calls. Takes
-   * precedence over {@link ready}.
+   * authenticate. Checks configuration only and must make no network calls.
    * @param llmProvider - the provider route id of the model request, when known.
    * @returns the capability state; omitted means ready.
    */
   state?(llmProvider: string | undefined): Promise<WebCapabilityState>
-  /**
-   * Whether a search made for a model request on the `llmProvider` chat route has a
-   * credential to send. Checks configuration only and must not make network calls.
-   * Omitted = ready. A provider that implements {@link state} need not implement this.
-   * @param llmProvider - the provider route id of the model request, when known.
-   * @returns false when that request's searches could not authenticate.
-   */
-  ready?(llmProvider: string | undefined): Promise<boolean>
   /** Run one search; honor `signal` for cancellation. */
   search(request: WebSearchRequest, signal?: AbortSignal): Promise<WebSearchResult>
 }
@@ -148,20 +139,11 @@ export interface WebFetchProvider {
   available(): boolean
   /**
    * Why a fetch made for a model request on the `llmProvider` chat route can or cannot
-   * authenticate. Checks configuration only and must make no network calls. Takes
-   * precedence over {@link ready}.
+   * authenticate. Checks configuration only and must make no network calls.
    * @param llmProvider - the provider route id of the model request, when known.
    * @returns the capability state; omitted means ready.
    */
   state?(llmProvider: string | undefined): Promise<WebCapabilityState>
-  /**
-   * Whether a fetch made for a model request on the `llmProvider` chat route has a
-   * credential to send. Checks configuration only and must not make network calls.
-   * Omitted = ready. A provider that implements {@link state} need not implement this.
-   * @param llmProvider - the provider route id of the model request, when known.
-   * @returns false when that request's fetches could not authenticate.
-   */
-  ready?(llmProvider: string | undefined): Promise<boolean>
   /** Retrieve one URL; honor `signal` for cancellation. */
   fetch(request: WebFetchRequest, signal?: AbortSignal): Promise<WebFetchResult>
 }

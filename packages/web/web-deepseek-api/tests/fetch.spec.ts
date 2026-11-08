@@ -4,7 +4,10 @@ import WebRuntime from '@deepseek-ai/dsh-web'
 import { DeepSeekFetchApiProvider, type DeepSeekFetchApiOptions } from '@deepseek-ai/dsh-web-deepseek-api'
 import * as webApiPlugin from '@deepseek-ai/dsh-web-deepseek-api'
 const fetchProvider = (options: DeepSeekFetchApiOptions) => new DeepSeekFetchApiProvider(() => options)
-const options = { apiKey: 'ds-key', baseURL: 'https://api.deepseek.test/api/v1/tools' }
+const options = { resolveApiKey: async () => 'ds-key', baseURL: 'https://api.deepseek.test/api/v1/tools' }
+
+/** The same options with no credential source, for the missing-key paths. */
+const optionsWithoutKey = { baseURL: options.baseURL }
 function jsonResponse(body: unknown, init: ResponseInit = {}): Response {
   return new Response(JSON.stringify(body), { status: 200, headers: { 'content-type': 'application/json' }, ...init })
 }
@@ -64,7 +67,7 @@ describe('DeepSeek Fetch API', () => {
   })
   it('is available only with a credential source and a parseable base', () => {
     expect(fetchProvider(options).available()).toBe(true)
-    expect(fetchProvider({ ...options, apiKey: '' }).available()).toBe(false)
+    expect(fetchProvider(optionsWithoutKey).available()).toBe(false)
     expect(fetchProvider({ ...options, baseURL: 'not a url' }).available()).toBe(false)
   })
   it('unregisters both providers with its plugin fiber', async () => {

@@ -99,7 +99,7 @@ schema 校验会在执行前拒绝缺失或非数组的 `queries` 字段、非�
 
 本包建立在一个分离与一条注册规则之上：
 
-- **消费方拥有面向模型的约定。** 工具名称、schema、snake_case 参数名称、提示词区段、结果上限、格式化与呈现都定义在这里；提供方选择完全留在 `ctx.web` 内部。工具绝不会调用提供方的 `available()` 或 `ready()`，也绝不枚举提供方——唯一执行路径是 `ctx.web.search()`／`ctx.web.fetch()`，就绪由 `ctx.web.searchReady()`／`ctx.web.fetchReady()` 回答。
+- **消费方拥有面向模型的约定。** 工具名称、schema、snake_case 参数名称、提示词区段、结果上限、格式化与呈现都定义在这里；提供方选择完全留在 `ctx.web` 内部。工具绝不会调用提供方的 `available()` 或 `state()`，也绝不枚举提供方——唯一执行路径是 `ctx.web.search()`／`ctx.web.fetch()`，就绪由 `ctx.web.searchReady()`／`ctx.web.fetchReady()` 回答。
 - **启用状态驱动注册。** 工具在配置启用时注册，与后端可用性无关，因此插件加载顺序与 HMR（热模块替换）时机永远不会进入面向模型的约定。凭据状态只通过逐请求的搜索就绪进入：它从单个请求中移除 `web_search`，而不注销该工具。
 
 ### 源码地图

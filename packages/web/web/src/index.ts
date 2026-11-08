@@ -230,23 +230,20 @@ interface ResolvableProvider {
   readonly id: string
   available(): boolean
   state?(llmProvider: string | undefined): Promise<WebCapabilityState>
-  ready?(llmProvider: string | undefined): Promise<boolean>
 }
 
 /**
  * Ask the provider an operation selects why it can or cannot authenticate for one chat route.
  * @param select - the operation's selection; throws its {@link WebError} when no provider qualifies.
  * @param llmProvider - the provider route id of the model request, when known.
- * @returns the provider's state; `ready` when it declares neither `state()` nor `ready()`, and
- *   when selection fails, because the operation reports that failure itself.
+ * @returns the provider's state; `ready` when it declares no `state()`, and when selection fails,
+ *   because the operation reports that failure itself.
  */
 async function selectedProviderState(select: () => ResolvableProvider, llmProvider: string | undefined): Promise<WebCapabilityState> {
   let provider: ResolvableProvider
   try { provider = select() }
   catch (_selectionFailure) { return 'ready' /* The operation surfaces the same failure when called. */ }
-  if (provider.state !== undefined) return await provider.state(llmProvider)
-  if (provider.ready === undefined) return 'ready'
-  return await provider.ready(llmProvider) ? 'ready' : 'missing'
+  return await provider.state?.(llmProvider) ?? 'ready'
 }
 
 /**

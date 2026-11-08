@@ -46,7 +46,7 @@ afterAll(async () => {
 describe('dispatchDeepSeekWeb redirect policy', () => {
   it.each([301, 302, 303, 307, 308])('rejects HTTP %i before contacting Location', async (status) => {
     targetRequests.length = 0
-    await expect(dispatchDeepSeekWeb({ apiKey: TEST_API_KEY }, {
+    await expect(dispatchDeepSeekWeb({ resolveApiKey: async () => TEST_API_KEY }, {
       endpoint: `${redirectOrigin}/${status}`, body: { query: TEST_QUERY }, decode: value => value,
       apiKeyHeaders: key => ({ 'x-api-key': key }),
       guidance: { subject: 'Search', plugin: 'web-search-deepseek', field: 'baseURL', label: 'Messages API base URL', page: 'Web search' },

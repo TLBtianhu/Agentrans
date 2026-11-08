@@ -99,7 +99,7 @@ This section explains the design decisions behind the tools; the observable beha
 
 The package is built on one separation and one registration rule:
 
-- **The consumer owns the model-facing contract.** Tool names, schemas, snake_case argument names, prompt sections, result bounds, formatting, and presentation all live here; provider selection stays entirely inside `ctx.web`. The tools never call a provider's `available()` or `ready()` and never enumerate providers — their only execution path is `ctx.web.search()` / `ctx.web.fetch()`, and `ctx.web.searchReady()` / `ctx.web.fetchReady()` answer readiness.
+- **The consumer owns the model-facing contract.** Tool names, schemas, snake_case argument names, prompt sections, result bounds, formatting, and presentation all live here; provider selection stays entirely inside `ctx.web`. The tools never call a provider's `available()` or `state()` and never enumerate providers — their only execution path is `ctx.web.search()` / `ctx.web.fetch()`, and `ctx.web.searchReady()` / `ctx.web.fetchReady()` answer readiness.
 - **Enablement drives registration.** A tool registers when enabled in config, independent of backend availability, so plugin load order and HMR timing never enter the model-facing contract. Credential state enters only through per-request search readiness, which removes `web_search` from one request without unregistering it.
 
 ### Source map

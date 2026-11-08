@@ -80,7 +80,7 @@ const page = await ctx.web.fetch({ url: 'https://example.com' })
 <a id="search-readiness"></a>
 ### 搜索与抓取就绪
 
-`searchReady(llmProvider?)` 与 `fetchReady(llmProvider?)` 询问 `search()` 或 `fetch()` 会选中的提供方：为该对话路由上的模型请求发起的操作是否有可发送的凭据；[`dsh-tool-web`](../tool-web/README.zh.md#search-readiness) 据此决定每个模型步骤是否准入 `web_search` 与 `web_fetch`。提供方通过可选的 `state(llmProvider)` 回答，它是只检查配置的判断，禁止发起网络调用，返回 `ready`、`missing`、`invalid`、`unentitled` 或 `unreachable` 之一；只声明 `ready(llmProvider)` 的提供方回答 `ready` 或 `missing`，两者都未声明的视为就绪。`searchCapabilityState(llmProvider?)` 与 `fetchCapabilityState(llmProvider?)` 返回该值，供界面说明该修什么，两个 `*Ready` 方法正是它的布尔投影。选择失败时两者都回答就绪，因为对应操作会把该失败报告为结构化 `WebError`。就绪判断从不改变选中哪个提供方。
+`searchReady(llmProvider?)` 与 `fetchReady(llmProvider?)` 询问 `search()` 或 `fetch()` 会选中的提供方：为该对话路由上的模型请求发起的操作是否有可发送的凭据；[`dsh-tool-web`](../tool-web/README.zh.md#search-readiness) 据此决定每个模型步骤是否准入 `web_search` 与 `web_fetch`。提供方通过可选的 `state(llmProvider)` 回答，它是只检查配置的判断，必须不发起网络调用，返回 `ready`、`missing`、`invalid`、`unentitled` 或 `unreachable` 之一；未声明 `state()` 的提供方视为就绪。`searchCapabilityState(llmProvider?)` 与 `fetchCapabilityState(llmProvider?)` 返回该值，供界面说明该修什么，两个 `*Ready` 方法正是它的布尔投影。选择失败时两者都回答就绪，因为对应操作会把该失败报告为结构化 `WebError`。就绪判断从不改变选中哪个提供方。
 
 ```text
 // false only when the selected provider cannot authenticate this route's operations:

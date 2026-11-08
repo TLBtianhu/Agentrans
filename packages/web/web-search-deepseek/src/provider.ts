@@ -99,8 +99,6 @@ export interface DeepSeekSearchProviderOptions {
    * `undefined` selects API-key authentication.
    */
   resolveAccountToken?: (endpoint: string) => Promise<string | undefined>
-  /** Literal DeepSeek API key; when present it wins over {@link resolveApiKey}. */
-  apiKey?: string
   /** Resolve the current DeepSeek API key for one search operation. */
   resolveApiKey?: () => Promise<string | undefined>
   /** Credential reference named by missing-credential diagnostics. */
@@ -212,7 +210,7 @@ export class DeepSeekSearchProvider implements WebSearchProvider {
 
   available(): boolean {
     const options = this.resolveOptions()
-    return ((options.apiKey?.length ?? 0) > 0 || options.resolveApiKey !== undefined || options.resolveAccountToken !== undefined)
+    return (options.resolveApiKey !== undefined || options.resolveAccountToken !== undefined)
       && URL.canParse(options.baseURL)
       && isPositiveInteger(options.maxTokens)
       && isPositiveInteger(options.maxUses)
@@ -329,7 +327,6 @@ export class DeepSeekSearchProvider implements WebSearchProvider {
    */
   private async apiKey(options: DeepSeekSearchProviderOptions, signal?: AbortSignal): Promise<string> {
     throwIfSearchAborted(signal)
-    if (options.apiKey !== undefined && options.apiKey.length > 0) return options.apiKey
     const { resolveApiKey } = options
     const resolved = resolveApiKey === undefined ? undefined : await resolveCredential(resolveApiKey, signal)
     if (resolved !== undefined && resolved.length > 0) return resolved

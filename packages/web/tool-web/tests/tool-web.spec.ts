@@ -1120,9 +1120,9 @@ describe('web tool admission per model step', () => {
         searched.push(request.query)
         return Promise.resolve({ sources: [], truncated: false })
       },
-      ready: (llmProvider) => {
+      state: (llmProvider) => {
         asked.push(llmProvider)
-        return Promise.resolve(llmProvider !== undefined && readyRoutes.includes(llmProvider))
+        return Promise.resolve(llmProvider !== undefined && readyRoutes.includes(llmProvider) ? 'ready' : 'missing')
       },
     }
   }
@@ -1145,9 +1145,9 @@ describe('web tool admission per model step', () => {
         fetched.push(request.url)
         return Promise.resolve({ url: request.url, statusCode: 200, body: { kind: 'text', content: 'ok' }, truncated: false })
       },
-      ready: (llmProvider) => {
+      state: (llmProvider) => {
         asked.push(llmProvider)
-        return Promise.resolve(llmProvider !== undefined && readyRoutes.includes(llmProvider))
+        return Promise.resolve(llmProvider !== undefined && readyRoutes.includes(llmProvider) ? 'ready' : 'missing')
       },
     }
   }

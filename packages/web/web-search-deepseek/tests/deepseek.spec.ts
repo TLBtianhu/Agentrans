@@ -38,12 +38,21 @@ async function rejectedWebError(operation: Promise<unknown>): Promise<WebError> 
 }
 
 const options = {
-  apiKey: 'ds-key',
+  resolveApiKey: async () => 'ds-key',
   baseURL: 'https://api.deepseek.test/anthropic/v1',
   model: 'deepseek-chat',
   apiVersion: '2023-06-01',
   maxTokens: 4096,
   maxUses: 5,
+}
+
+/** The same options with no credential source, for the missing-key paths. */
+const optionsWithoutKey = {
+  baseURL: options.baseURL,
+  model: options.model,
+  apiVersion: options.apiVersion,
+  maxTokens: options.maxTokens,
+  maxUses: options.maxUses,
 }
 
 function jsonResponse(body: unknown, init: ResponseInit = {}): Response {
@@ -164,7 +173,7 @@ describe('mapAnthropicResponse', () => {
 
 describe('DeepSeekSearchProvider availability', () => {
   it('is unavailable without a key', () => {
-    expect(searchProvider({ ...options, apiKey: '' }).available()).toBe(false)
+    expect(searchProvider({ ...optionsWithoutKey }).available()).toBe(false)
   })
 
   it('is available with a key', () => {
@@ -172,7 +181,7 @@ describe('DeepSeekSearchProvider availability', () => {
   })
 
   it('is available with only an account token resolver', () => {
-    expect(searchProvider({ ...options, apiKey: '', resolveAccountToken: async () => 'account-token' }).available()).toBe(true)
+    expect(searchProvider({ ...optionsWithoutKey, resolveAccountToken: async () => 'account-token' }).available()).toBe(true)
   })
 
   it('is misconfigured when the base URL is unparseable', () => {
@@ -316,7 +325,7 @@ describe('DeepSeekSearchProvider account authentication', () => {
     const resolveApiKey = vi.fn(async () => 'resolved-key')
     const controller = new AbortController()
     controller.abort(new Error('caller stopped'))
-    await expect(searchProvider({ ...options, apiKey: '', resolveAccountToken, resolveApiKey })
+    await expect(searchProvider({ ...optionsWithoutKey, resolveAccountToken, resolveApiKey })
       .search({ query: 'q' }, controller.signal))
       .rejects.toThrow(expect.objectContaining({ code: 'WEB_ABORTED' }))
     expect(resolveAccountToken).not.toHaveBeenCalled()
@@ -328,7 +337,6 @@ describe('DeepSeekSearchProvider account authentication', () => {
     const resolveApiKey = vi.fn(() => Promise.reject(new Error('must not run')))
     await expect(searchProvider({
       ...options,
-      apiKey: '',
       resolveAccountToken: async () => {
         controller.abort(new Error('caller stopped'))
         return undefined
@@ -356,8 +364,8 @@ describe('DeepSeekSearchProvider settings changes mid-search', () => {
   it('serves one search from one section even when settings land during credential resolution', async () => {
     // The section the search starts on, and the one a user commits while the
     // credential is still resolving.
-    const before = { ...options, apiKey: '', baseURL: 'https://before.test/v1', model: 'model-before', maxUses: 2 }
-    const after = { ...options, apiKey: '', baseURL: 'https://after.test/v1', model: 'model-after', maxUses: 9 }
+    const before = { ...optionsWithoutKey, baseURL: 'https://before.test/v1', model: 'model-before', maxUses: 2 }
+    const after = { ...optionsWithoutKey, baseURL: 'https://after.test/v1', model: 'model-after', maxUses: 9 }
     let current = before
     let commitSettings = () => {}
     const resolveApiKey = () => new Promise<string>((resolve) => {
@@ -390,7 +398,6 @@ describe('DeepSeekSearchProvider error handling', () => {
     controller.abort(new Error('caller stopped'))
     await expect(searchProvider({
       ...options,
-      apiKey: '',
       resolveApiKey,
       recordRequest,
     }).search({ query: 'q' }, controller.signal))
@@ -408,7 +415,6 @@ describe('DeepSeekSearchProvider error handling', () => {
     const controller = new AbortController()
     const search = searchProvider({
       ...options,
-      apiKey: '',
       resolveApiKey,
       recordRequest,
     }).search({ query: 'q' }, controller.signal)
@@ -425,7 +431,6 @@ describe('DeepSeekSearchProvider error handling', () => {
     const controller = new AbortController()
     await expect(searchProvider({
       ...options,
-      apiKey: '',
       resolveApiKey: async () => 'resolved-key',
     }).search({ query: 'q' }, controller.signal)).resolves.toMatchObject({ truncated: false })
     const [, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit]
@@ -436,7 +441,6 @@ describe('DeepSeekSearchProvider error handling', () => {
     const controller = new AbortController()
     await expect(searchProvider({
       ...options,
-      apiKey: '',
       resolveApiKey: () => Promise.reject(new Error('credential backend failed')),
     }).search({ query: 'q' }, controller.signal))
       .rejects.toThrow(expect.objectContaining({
@@ -446,7 +450,7 @@ describe('DeepSeekSearchProvider error handling', () => {
   })
 
   it('uses the default credential reference when no resolver is configured', async () => {
-    await expect(searchProvider({ ...options, apiKey: '' }).search({ query: 'q' }))
+    await expect(searchProvider(optionsWithoutKey).search({ query: 'q' }))
       .rejects.toThrow('DeepSeek search has no API key for "DEEPSEEK_API_KEY"')
   })
 
@@ -456,7 +460,6 @@ describe('DeepSeekSearchProvider error handling', () => {
     vi.stubGlobal('fetch', fetchMock)
     await expect(searchProvider({
       ...options,
-      apiKey: '',
       resolveApiKey: () => {
         controller.abort(new Error('resolver cancelled caller'))
         return Promise.resolve('unused-key')

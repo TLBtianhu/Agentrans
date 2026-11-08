@@ -20,10 +20,13 @@ const searchProvider = (options: DeepSeekSearchApiOptions): DeepSeekSearchApiPro
   new DeepSeekSearchApiProvider(() => options)
 
 const options = {
-  apiKey: 'ds-key',
+  resolveApiKey: async () => 'ds-key',
   baseURL: 'https://api.deepseek.test/api/v1/tools',
   count: 10,
 }
+
+/** The same options with no credential source, for the missing-key paths. */
+const optionsWithoutKey = { baseURL: options.baseURL, count: options.count }
 
 function jsonResponse(body: unknown, init: ResponseInit = {}): Response {
   return new Response(JSON.stringify(body), { status: 200, headers: { 'content-type': 'application/json' }, ...init })
@@ -83,7 +86,7 @@ describe('mapSearchResponse', () => {
 
 describe('DeepSeekSearchApiProvider availability', () => {
   it('is unavailable without a key', () => {
-    expect(searchProvider({ ...options, apiKey: '' }).available()).toBe(false)
+    expect(searchProvider(optionsWithoutKey).available()).toBe(false)
   })
 
   it('is available with a key', () => {
@@ -91,7 +94,7 @@ describe('DeepSeekSearchApiProvider availability', () => {
   })
 
   it('is available with only an account token resolver', () => {
-    expect(searchProvider({ ...options, apiKey: '', resolveAccountToken: async () => 'account-token' }).available()).toBe(true)
+    expect(searchProvider({ ...optionsWithoutKey, resolveAccountToken: async () => 'account-token' }).available()).toBe(true)
   })
 
   it('is misconfigured when the base URL is unparseable', () => {

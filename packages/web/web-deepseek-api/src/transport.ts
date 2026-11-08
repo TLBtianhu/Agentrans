@@ -21,8 +21,6 @@ const USER_AGENT = 'deepseek-harness/0.0.1'
 export interface DeepSeekWebAuth {
   /** Resolve an allowed account token; undefined selects API-key authentication. */
   resolveAccountToken?: (endpoint: string) => Promise<string | undefined>
-  /** Literal API key; takes precedence over the credential resolver. */
-  apiKey?: string
   /** Resolve the current API key without retaining it. */
   resolveApiKey?: () => Promise<string | undefined>
   /** Credential reference named by missing-key diagnostics. */
@@ -128,7 +126,7 @@ export async function deepSeekWebCredentialState(
  * @returns Whether a literal key, key resolver, or account token source is present.
  */
 export function hasDeepSeekWebCredential(auth: DeepSeekWebAuth): boolean {
-  return (auth.apiKey?.length ?? 0) > 0 || auth.resolveApiKey !== undefined || auth.resolveAccountToken !== undefined
+  return auth.resolveApiKey !== undefined || auth.resolveAccountToken !== undefined
 }
 
 /** Narrow a remote JSON object.
@@ -296,7 +294,6 @@ async function authHeaders(
  */
 async function resolveApiKey(options: DeepSeekWebAuth, signal?: AbortSignal): Promise<string> {
   throwIfSearchAborted(signal)
-  if (options.apiKey !== undefined && options.apiKey.length > 0) return options.apiKey
   const { resolveApiKey } = options
   const resolved = resolveApiKey === undefined ? undefined : await resolveCredential(resolveApiKey, signal)
   if (resolved !== undefined && resolved.length > 0) return resolved

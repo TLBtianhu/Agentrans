@@ -1,7 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { WebError } from '@deepseek-ai/dsh-web'
 import { dispatchDeepSeekWeb, type DeepSeekWebAuth } from '../src/transport.ts'
-const options = { apiKey: 'ds-key', baseURL: 'https://api.deepseek.test/anthropic/v1' }
+const options = { resolveApiKey: async () => 'ds-key', baseURL: 'https://api.deepseek.test/anthropic/v1' }
+
+/** The same options with no credential source, for the missing-key paths. */
+const optionsWithoutKey = { baseURL: options.baseURL }
 function searchProvider(auth: DeepSeekWebAuth & { baseURL: string; recordRequest?: (endpoint: string) => void }) {
   return { search: (body: { query: string }, signal?: AbortSignal) => dispatchDeepSeekWeb(auth, {
     endpoint: `${auth.baseURL}/messages`, body, decode: value => value,
@@ -109,7 +112,7 @@ describe('DeepSeek web account authentication', () => {
     const resolveApiKey = vi.fn(async () => 'resolved-key')
     const controller = new AbortController()
     controller.abort(new Error('caller stopped'))
-    await expect(searchProvider({ ...options, apiKey: '', resolveAccountToken, resolveApiKey })
+    await expect(searchProvider({ ...optionsWithoutKey, resolveAccountToken, resolveApiKey })
       .search({ query: 'q' }, controller.signal))
       .rejects.toThrow(expect.objectContaining({ code: 'WEB_ABORTED' }))
     expect(resolveAccountToken).not.toHaveBeenCalled()
@@ -121,7 +124,6 @@ describe('DeepSeek web account authentication', () => {
     const resolveApiKey = vi.fn(() => Promise.reject(new Error('must not run')))
     await expect(searchProvider({
       ...options,
-      apiKey: '',
       resolveAccountToken: async () => {
         controller.abort(new Error('caller stopped'))
         return undefined
@@ -156,7 +158,6 @@ describe('DeepSeek web cancellation and failures', () => {
     controller.abort(new Error('caller stopped'))
     await expect(searchProvider({
       ...options,
-      apiKey: '',
       resolveApiKey,
       recordRequest,
     }).search({ query: 'q' }, controller.signal))
@@ -174,7 +175,6 @@ describe('DeepSeek web cancellation and failures', () => {
     const controller = new AbortController()
     const search = searchProvider({
       ...options,
-      apiKey: '',
       resolveApiKey,
       recordRequest,
     }).search({ query: 'q' }, controller.signal)
@@ -191,7 +191,6 @@ describe('DeepSeek web cancellation and failures', () => {
     const controller = new AbortController()
     await expect(searchProvider({
       ...options,
-      apiKey: '',
       resolveApiKey: async () => 'resolved-key',
     }).search({ query: 'q' }, controller.signal)).resolves.toMatchObject({ truncated: false })
     const [, init] = fetchMock.mock.calls[0]!
@@ -202,7 +201,6 @@ describe('DeepSeek web cancellation and failures', () => {
     const controller = new AbortController()
     await expect(searchProvider({
       ...options,
-      apiKey: '',
       resolveApiKey: () => Promise.reject(new Error('credential backend failed')),
     }).search({ query: 'q' }, controller.signal))
       .rejects.toThrow(expect.objectContaining({
@@ -212,7 +210,7 @@ describe('DeepSeek web cancellation and failures', () => {
   })
 
   it('uses the default credential reference when no resolver is configured', async () => {
-    await expect(searchProvider({ ...options, apiKey: '' }).search({ query: 'q' }))
+    await expect(searchProvider(optionsWithoutKey).search({ query: 'q' }))
       .rejects.toThrow('DeepSeek web access has no API key for "DEEPSEEK_API_KEY"')
   })
 
@@ -222,7 +220,6 @@ describe('DeepSeek web cancellation and failures', () => {
     vi.stubGlobal('fetch', fetchMock)
     await expect(searchProvider({
       ...options,
-      apiKey: '',
       resolveApiKey: () => {
         controller.abort(new Error('resolver cancelled caller'))
         return Promise.resolve('unused-key')
