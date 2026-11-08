@@ -45,7 +45,7 @@ kind: "package-reference"
 
 `baseURL` 填写完整的 API 基础地址，包含路径前缀，但不包含操作名。默认值请求 `https://api.deepseek.com/v1/tools/search` 和 `https://api.deepseek.com/v1/tools/fetch`；使用其他前缀（例如 `/api/v1/tools`）的部署需要填写其完整基础地址。
 
-直接构造任一 provider 时也可传入字面 `apiKey`，它优先于解析器。插件配置只暴露 `apiKeyEnv`，因此通过这些插件设置的密钥不会写进配置文件。
+插件配置只暴露 `apiKeyEnv`；仍携带 `apiKey` 的配置在加载时失败，错误信息会指出该字段以及密钥应放的位置。直接构造任一 provider 时改为传入 `resolveApiKey` 解析器，因此没有任何代码路径从配置里读密钥。
 
 真实 API 测试要求同时设置 `DEEPSEEK_API_KEY` 和 `DEEPSEEK_SEARCH_API_TEST_BASE_URL`，后者包含 API 路径前缀。
 

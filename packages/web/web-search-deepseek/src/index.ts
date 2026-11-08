@@ -168,10 +168,28 @@ async function searchState(
 }
 
 /**
+ * Reject the retired literal-key field.
+ *
+ * Configuration validation keeps keys the schema does not declare, so a key left behind by
+ * an older configuration would otherwise sit in the resolved section unread: searches would
+ * report no credential while the user could see one in the file.
+ * @param config - the resolved plugin configuration.
+ * @throws Error naming the field and where the key belongs now.
+ */
+function assertNoRetiredKey(config: Config): void {
+  if (Object.hasOwn(config, 'apiKey')) {
+    throw new Error('web-search-deepseek: "apiKey" is no longer configurable; '
+      + 'store the key through the credentials service (the web Models page writes it) '
+      + 'or export it in the launching environment, and remove apiKey from this entry')
+  }
+}
+
+/**
  * Register the DeepSeek search provider with `ctx.web`. Its `state()` answers why a search
  * for a model request on the given route can or cannot authenticate.
  */
 export function apply(ctx: Context, config: Config): void {
+  assertNoRetiredKey(config)
   const options = () => resolveOptions(ctx, {
     apiKeyEnv: config.apiKeyEnv.get(), baseURL: config.baseURL.get(), model: config.model.get(),
     apiVersion: config.apiVersion.get(), maxTokens: config.maxTokens.get(), maxUses: config.maxUses.get(),

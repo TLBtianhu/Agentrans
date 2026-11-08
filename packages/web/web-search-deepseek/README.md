@@ -54,7 +54,7 @@ Load the web service and the provider; the key resolves from `ctx.credentials` w
 
 The generated [configuration catalog](../../../docs/config-catalog.md#deepseek-aidsh-web-search-deepseek) lists every accepted field. Each search captures options from the live Config references.
 
-Constructing `DeepSeekSearchProvider` directly also accepts a literal `apiKey`, which wins over the resolver. Plugin configuration exposes only `apiKeyEnv`, so a secret set through this plugin never lives in a configuration file.
+Plugin configuration exposes only `apiKeyEnv`, and a configuration that still carries `apiKey` fails at load with a message naming the field and where the key belongs. Constructing `DeepSeekSearchProvider` directly takes a `resolveApiKey` resolver instead, so no code path reads a key from configuration.
 
 <a id="authentication"></a>
 ### Authentication

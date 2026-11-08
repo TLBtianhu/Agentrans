@@ -54,7 +54,7 @@ kind: "package-reference"
 
 生成的[配置目录](../../../docs/config-catalog.zh.md#deepseek-aidsh-web-search-deepseek) 列出所有接受的字段。每次搜索从即时 Config 引用捕获选项。
 
-直接构造 `DeepSeekSearchProvider` 时也可传入字面 `apiKey`，它优先于解析器。插件配置只暴露 `apiKeyEnv`，因此通过本插件设置的密钥不会写进配置文件。
+插件配置只暴露 `apiKeyEnv`；仍携带 `apiKey` 的配置在加载时失败，错误信息会指出该字段以及密钥应放的位置。直接构造 `DeepSeekSearchProvider` 时改为传入 `resolveApiKey` 解析器，因此没有任何代码路径从配置里读密钥。
 
 <a id="authentication"></a>
 ### 鉴权

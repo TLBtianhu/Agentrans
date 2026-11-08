@@ -70,6 +70,15 @@ describe('DeepSeek Fetch API', () => {
     expect(fetchProvider(optionsWithoutKey).available()).toBe(false)
     expect(fetchProvider({ ...options, baseURL: 'not a url' }).available()).toBe(false)
   })
+  it('rejects a retired literal apiKey at plugin construction', async () => {
+    const ctx = new Context()
+    try {
+      await ctx.plugin(WebRuntime, {})
+      await expect(ctx.plugin(webApiPlugin, { apiKey: 'ds-key' } as never))
+        .rejects.toThrow(/"apiKey" is no longer configurable/)
+    } finally { await ctx.fiber.dispose() }
+  })
+
   it('unregisters both providers with its plugin fiber', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => jsonResponse({ title: '', content: 'body' })))
     const ctx = new Context()

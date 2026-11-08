@@ -71,7 +71,30 @@ function latestUserQuestion(session: Session | undefined): string | undefined {
  * @param ctx - plugin context owning both registrations.
  * @param config - live settings, read once per operation.
  */
+/**
+ * Reject the retired literal-key field.
+ *
+ * Configuration validation keeps keys the schema does not declare, so a key left behind by
+ * an older configuration would otherwise sit in the resolved section unread: operations would
+ * report no credential while the user could see one in the file.
+ * @param config - the resolved plugin configuration.
+ * @throws Error naming the field and where the key belongs now.
+ */
+function assertNoRetiredKey(config: Config): void {
+  if (Object.hasOwn(config, 'apiKey')) {
+    throw new Error('web-deepseek-api: "apiKey" is no longer configurable; '
+      + 'store the key through the credentials service (the web Models page writes it) '
+      + 'or export it in the launching environment, and remove apiKey from this entry')
+  }
+}
+
+/** Register both DeepSeek web APIs with `ctx.web`. Their `state()` answers why an operation
+ * for a model request on the given route can or cannot authenticate.
+ * @param ctx - plugin context owning both registrations.
+ * @param config - live settings, read once per operation.
+ */
 export function apply(ctx: Context, config: Config): void {
+  assertNoRetiredKey(config)
   const keyConfig = () => ({ apiKeyEnv: config.apiKeyEnv.get() })
   const auth = () => deepSeekWebAuth(ctx, keyConfig())
   const state = (llmProvider: string | undefined) =>

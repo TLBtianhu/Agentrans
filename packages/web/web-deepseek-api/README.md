@@ -45,7 +45,7 @@ Mount the plugin alongside `dsh-web` and select its providers. Shipped profiles 
 
 Fill `baseURL` with the complete API base, including its path prefix and excluding the operation name. The default reaches `https://api.deepseek.com/v1/tools/search` and `https://api.deepseek.com/v1/tools/fetch`; a deployment with another prefix, such as `/api/v1/tools`, needs its complete base.
 
-Constructing either provider directly also accepts a literal `apiKey`, which wins over the resolver. Plugin configuration exposes only `apiKeyEnv`, so a secret set through these plugins never lives in a configuration file.
+Plugin configuration exposes only `apiKeyEnv`, and a configuration that still carries `apiKey` fails at load with a message naming the field and where the key belongs. Constructing either provider directly takes a `resolveApiKey` resolver instead, so no code path reads a key from configuration.
 
 Run the real API tests with `DEEPSEEK_API_KEY` and `DEEPSEEK_SEARCH_API_TEST_BASE_URL`; both are required, and the latter includes the API path prefix.
 
