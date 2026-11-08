@@ -16,6 +16,9 @@ export const zh = {
   'input.contextDismiss': '放弃本次重试',
 
   'quote.remove': '移除引用',
+  'input.formula': '插入公式',
+  'math.edit': '编辑公式',
+  'math.placeholder': '输入 TeX 公式',
   'shortcut.newline': '换行',
   'shortcut.complementary': '使用互补的 Queue／Steer 方式',
   'shortcut.slash': '打开命令菜单',
@@ -412,6 +415,9 @@ export const en = {
   'input.contextDismiss': 'Dismiss retry',
 
   'quote.remove': 'Remove quote',
+  'input.formula': 'Insert formula',
+  'math.edit': 'Edit formula',
+  'math.placeholder': 'Type a TeX formula',
   'shortcut.newline': 'New line',
   'shortcut.complementary': 'Use the complementary Queue / Steer action',
   'shortcut.slash': 'Open command menu',
@@ -807,6 +813,9 @@ export const ja = {
   'input.contextDismiss': '再試行を中止',
 
   'quote.remove': '引用を削除',
+  'input.formula': '数式を挿入',
+  'math.edit': '数式を編集',
+  'math.placeholder': 'TeX 数式を入力',
   'shortcut.newline': '改行',
   'shortcut.complementary': '補助のキュー / 実行中の指示変更を使用',
   'shortcut.slash': 'コマンドメニューを開く',
@@ -1200,6 +1209,9 @@ export const es = {
   'input.contextDismiss': 'Descartar reintento',
 
   'quote.remove': 'Eliminar cotización',
+  'input.formula': 'Insertar fórmula',
+  'math.edit': 'Editar fórmula',
+  'math.placeholder': 'Escribe una fórmula TeX',
   'shortcut.newline': 'Nueva linea',
   'shortcut.complementary': 'Usar la acción alternativa de poner en cola o redirigir',
   'shortcut.slash': 'Abrir menú de comandos',
@@ -1595,6 +1607,9 @@ export const fr = {
   'input.contextDismiss': 'Abandonner l’essai',
 
   'quote.remove': 'Supprimer le devis',
+  'input.formula': 'Insérer une formule',
+  'math.edit': 'Modifier la formule',
+  'math.placeholder': 'Saisir une formule TeX',
   'shortcut.newline': 'Nouvelle ligne',
   'shortcut.complementary': 'Utiliser l’action alternative de mise en attente ou de guidage',
   'shortcut.slash': 'Ouvrir le menu des commandes',
@@ -1990,6 +2005,9 @@ export const de = {
   'input.contextDismiss': 'Wiederholung verwerfen',
 
   'quote.remove': 'Zitat entfernen',
+  'input.formula': 'Formel einfügen',
+  'math.edit': 'Formel bearbeiten',
+  'math.placeholder': 'TeX-Formel eingeben',
   'shortcut.newline': 'Neue Zeile',
   'shortcut.complementary': 'Die alternative Aktion zum Vormerken oder Lenken verwenden',
   'shortcut.slash': 'Befehlsmenü öffnen',
@@ -2385,6 +2403,9 @@ export const ru = {
   'input.contextDismiss': 'Отказаться от повтора',
 
   'quote.remove': 'Удалить цитату',
+  'input.formula': 'Вставить формулу',
+  'math.edit': 'Изменить формулу',
+  'math.placeholder': 'Введите формулу TeX',
   'shortcut.newline': 'Новая линия',
   'shortcut.complementary': 'Использовать альтернативное действие: поставить в очередь или направить',
   'shortcut.slash': 'Открыть командное меню',
@@ -2780,6 +2801,9 @@ export const pt = {
   'input.contextDismiss': 'Descartar tentativa',
 
   'quote.remove': 'Remover cotação',
+  'input.formula': 'Inserir fórmula',
+  'math.edit': 'Editar fórmula',
+  'math.placeholder': 'Digite uma fórmula TeX',
   'shortcut.newline': 'Nova linha',
   'shortcut.complementary': 'Usar a ação alternativa de enfileirar ou orientar',
   'shortcut.slash': 'Abrir menu de comando',

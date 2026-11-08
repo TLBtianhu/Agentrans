@@ -16,6 +16,7 @@ import type { CommandClaim } from '../../contract/input.ts'
 import { $isQuoteNode } from './QuoteNode.tsx'
 import { $isReferenceChipNode } from './chip-node.tsx'
 import { $isCommandChipNode } from './command-chip-node.tsx'
+import { $isMathNode } from './math-node.tsx'
 
 /** The detect-projection stand-in for one chip (object replacement character). */
 export const ATOMIC_CHAR = '￼'
@@ -82,7 +83,7 @@ export function $composerLayout(): ComposerLayout {
     const kids = element.getChildren()
     children.set(element.getKey(), kids.map(kid => kid.getKey()))
     for (const kid of kids) {
-      if ($isReferenceChipNode(kid) || $isCommandChipNode(kid) || $isQuoteNode(kid)) {
+      if ($isReferenceChipNode(kid) || $isCommandChipNode(kid) || $isQuoteNode(kid) || $isMathNode(kid)) {
         pushLeaf('chip', kid, ATOMIC_CHAR, kid.getTextContent())
       } else if ($isTextNode(kid)) {
         const text = kid.getTextContent()

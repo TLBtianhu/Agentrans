@@ -38,6 +38,8 @@ import { queueDockEntry } from './queue/QueueDock.tsx'
 import { EnterBehaviorRow } from './settings/EnterBehaviorRow.tsx'
 import type { EnterBehaviorRowInjected } from './settings/EnterBehaviorRow.tsx'
 import { ConversationRoot } from './skeleton/ConversationRoot.tsx'
+import { MathInsertButton } from './skeleton/MathInsertButton.tsx'
+import type { MathInsertInjected } from './skeleton/MathInsertButton.tsx'
 import { ConversationContent } from './skeleton/ConversationContent.tsx'
 import { ConversationPanel } from './skeleton/ConversationPanel.tsx'
 import { ConversationHeader } from './skeleton/ConversationHeader.tsx'
@@ -185,6 +187,18 @@ export function apply(ctx: Context, config: Config = Config({})): void {
     yield slots.register({ name: 'conversation.user.text.node', key: 'text', priority: 100 }, PlainUserText)
     yield slots.register({ name: 'conversation.user.text.node', key: 'session', priority: 100 }, SessionReference)
   })
+
+  // The formula entry lives beside the model seat: the island itself is owned by
+  // the editor, so this control only forwards the gesture to the session's shell.
+  slots.inject('conversation.input.right', () => slots.register({
+    name: 'conversation.input.right',
+    id: 'formula',
+    order: 20,
+    locale: NS,
+    inject: (sessionId: SessionId): MathInsertInjected => ({
+      insert: () => { inputHub.shell(sessionId).insertMath() },
+    }),
+  }, MathInsertButton))
 
   ctx.effect(() => ctx.locale.register(NS, { zh, en, ja, es, fr, de, ru, pt }), 'ui-conversation: dictionaries')
   const t = ctx.locale.bind(NS)

@@ -39,6 +39,7 @@ export function ParticleSystemView({
   run, onCommand, readOnly = false, t,
 }: ParticleSystemViewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const runtimeFailureMessage = t('scene.particleRuntimeFailed')
   const { state, playing, failed } = run
   const { time, particles, trails } = state
 
@@ -48,10 +49,10 @@ export function ParticleSystemView({
     drawNativeScene(canvas, () => {
       renderParticleSystem(spec, canvas, 900, 420, { time, particles, trails }, scenePaletteFor(canvas))
     }, onRuntimeReport === undefined ? undefined : (report) => {
-      const failure = run.failure ?? { code: 'PARTICLE_RUNTIME_FAILED', message: 'Particle advancement failed' }
+      const failure = run.failure ?? { code: 'PARTICLE_RUNTIME_FAILED', message: runtimeFailureMessage }
       onRuntimeReport(failed && report.status === 'ready' ? { status: 'error', error: failure } : report)
     })
-  }, [spec, time, particles, trails, failed, run.failure, onRuntimeReport])
+  }, [spec, time, particles, trails, failed, run.failure, runtimeFailureMessage, onRuntimeReport])
 
   useEffect(() => {
     onStateChange?.(observeParticleState(state))

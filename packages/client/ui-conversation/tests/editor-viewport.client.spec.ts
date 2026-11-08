@@ -24,6 +24,7 @@ function fixture(viewport: { height: number; offsetTop: number; pageTop: number 
   const runtime: DraftEditorRuntime = new DraftEditorRuntime({
     onUpdate: () => { runtime.refreshProjection() },
     quoteLabels: () => ({ remove: 'Remove quote' }),
+    mathLabels: () => ({ edit: 'Edit formula', placeholder: 'Type a TeX formula' }),
     openReference: () => false,
     lexicon: () => new Map(), resolveLexicon: () => undefined,
   })

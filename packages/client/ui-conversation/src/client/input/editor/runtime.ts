@@ -17,6 +17,8 @@ import { QuoteNode, $createQuoteNode, $isQuoteNode, REMOVE_QUOTE_COMMAND } from 
 import type { QuoteNodeLabels } from './QuoteNode.tsx'
 import { registerReferenceActivation } from './reference-activation.ts'
 import { ReferenceChipNode, $createReferenceChipNode } from './chip-node.tsx'
+import { MathNode, $createMathNode } from './math-node.tsx'
+import type { MathNodeLabels } from './math-node.tsx'
 import { CommandChipNode, $createCommandChipNode, registerCommandChipSeat } from './command-chip-node.tsx'
 import { registerCommandChipSelection } from './command-chip-selection.ts'
 import { registerTextRefDecoration, rescanTextRefs, TextRefNode } from './text-ref.ts'
@@ -31,6 +33,7 @@ type Lexicon = ReadonlyMap<'/' | '@', readonly string[]>
 interface DraftEditorRuntimeDeps {
   readonly onUpdate: () => void
   readonly quoteLabels: () => QuoteNodeLabels
+  readonly mathLabels: () => MathNodeLabels
   readonly openReference: (source: string | undefined, reference: Pick<ReferenceInsert, 'ref' | 'appearance'>) => boolean
   readonly lexicon: () => Lexicon
   readonly resolveLexicon: () => ObservableSnapshot<Lexicon> | undefined
@@ -83,7 +86,7 @@ export class DraftEditorRuntime {
   constructor(private readonly deps: DraftEditorRuntimeDeps) {
     this.editor = createEditor({
       namespace: 'dsh-composer',
-      nodes: [ReferenceChipNode, CommandChipNode, TextRefNode, QuoteNode],
+      nodes: [ReferenceChipNode, CommandChipNode, TextRefNode, QuoteNode, MathNode],
       onError: (error) => { throw error },
     })
   }
@@ -104,6 +107,7 @@ export class DraftEditorRuntime {
     const unregister = mergeRegister(
       registerPlainText(this.editor),
       this.editor.registerNodeTransform(QuoteNode, (node) => { node.setLabels(this.deps.quoteLabels()) }),
+      this.editor.registerNodeTransform(MathNode, (node) => { node.setLabels(this.deps.mathLabels()) }),
       this.editor.registerCommand(REMOVE_QUOTE_COMMAND, key => this.removeQuote(key), COMMAND_PRIORITY_CRITICAL),
       this.editor.registerCommand(KEY_BACKSPACE_COMMAND, event => this.deleteAdjacentQuote(event, true), COMMAND_PRIORITY_BEFORE_CRITICAL),
       this.editor.registerCommand(KEY_DELETE_COMMAND, event => this.deleteAdjacentQuote(event, false), COMMAND_PRIORITY_BEFORE_CRITICAL),
@@ -340,6 +344,24 @@ export class DraftEditorRuntime {
       const nodes = references.flatMap(ref => [$createReferenceChipNode(ref), $createTextNode(' ')])
       if (before !== '' && !/\s$/u.test(before)) nodes.unshift($createTextNode(' '))
       applied = $replaceDetectSpanWithNodes({ start: at, end: at }, nodes)
+    }, PASTE_TAG)
+    return applied
+  }
+
+  /**
+   * Insert one empty formula island at the retained draft selection as an
+   * independent undo edit, leaving the caret able to reach it.
+   * @param labels - current localized editor controls.
+   * @returns whether the insertion position accepted the node.
+   */
+  insertMath(labels: MathNodeLabels): boolean {
+    let applied = false
+    this.applyEdit(() => {
+      const projection = $projectComposer(key => this.occurrenceIdOf(key))
+      const at = projection.selection?.end ?? projection.detectText.length
+      const node = $createMathNode('')
+      node.setLabels(labels)
+      applied = $replaceDetectSpanWithNodes({ start: at, end: at }, [node, $createTextNode(' ')])
     }, PASTE_TAG)
     return applied
   }

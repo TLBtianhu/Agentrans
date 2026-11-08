@@ -42,6 +42,7 @@ function fixture(start = 1, end = 4) {
   const runtime: DraftEditorRuntime = new DraftEditorRuntime({
     onUpdate: () => { runtime.refreshProjection(); onUpdate() },
     quoteLabels: () => ({ remove: 'Remove quote' }),
+    mathLabels: () => ({ edit: 'Edit formula', placeholder: 'Type a TeX formula' }),
     openReference: () => false,
     lexicon: () => new Map(), resolveLexicon: () => undefined,
   })

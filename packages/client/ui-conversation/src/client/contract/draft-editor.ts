@@ -86,6 +86,11 @@ export interface ComposerKeyboard {
   /** Insert pasted plain text over the current editor selection (reference-placeholder-sanitized). */
   paste(text: string): void
   /**
+   * Insert one empty formula island at the caret.
+   * @returns whether the composer accepted it.
+   */
+  insertMath(): boolean
+  /**
    * The live selection as a detect-coordinate span (menu-launcher synthetic
    * hits replace it on pick); an absent selection answers a collapsed span at
    * the document end.

@@ -24,6 +24,7 @@ import type {
 } from '../contract/draft-editor.ts'
 import type { PromptContextInput } from '@deepseek-ai/dsh-api-session-controller/types'
 import type { InputSubmitMode, MessageSubmission, MessageSubmissionState } from '../contract/composer-submission.ts'
+import type { MathNodeLabels } from './editor/math-node.tsx'
 import { serializeDraftPrompt } from './prompt.ts'
 import { SubmitMachine } from './machine.ts'
 import { resolveDraftInput, snapshotDraft } from '../draft.ts'
@@ -79,6 +80,8 @@ export interface SessionInputDeps {
   quoteInsertionAllowed?: () => boolean
   /** Current localized quote removal copy. */
   quoteRemoveLabel?: () => string
+  /** Localized chrome for formula islands. */
+  mathLabels?: () => MathNodeLabels
   /** Command-plane attachment plumbing (the hub owns the conversation face and the copy). */
   commandAttachments: {
     /** Resolve ordered draft ids to wire payloads without sending them; rejects when an id no longer resolves. */
@@ -193,6 +196,7 @@ export class SessionInputShell implements SessionInput {
     this.draftEditor = new DraftEditorRuntime({
       onUpdate: () => { this.onEditorUpdate() },
       quoteLabels: () => ({ remove: this.deps.quoteRemoveLabel?.() ?? '' }),
+      mathLabels: () => this.deps.mathLabels?.() ?? { edit: '', placeholder: '' },
       openReference: (source, reference) =>
         this.deps.inputTriggers?.()?.openReference(source, reference) ?? false,
       lexicon: () => this.lexicon.getSnapshot(),
@@ -247,6 +251,17 @@ export class SessionInputShell implements SessionInput {
   insertQuote(text: string): boolean {
     if (this.disposed || this.snapshot.phase !== 'plain' || this.deps.quoteInsertionAllowed?.() === false || text.trim() === '') return false
     const inserted = this.draftEditor.insertQuote(text.replace(/\r\n?/gu, '\n'), { remove: this.deps.quoteRemoveLabel?.() ?? '' })
+    if (inserted) this.focus()
+    return inserted
+  }
+
+  /**
+   * Insert one empty formula island at the caret.
+   * @returns whether the composer accepted it.
+   */
+  insertMath(): boolean {
+    if (this.disposed || this.snapshot.phase !== 'plain') return false
+    const inserted = this.draftEditor.insertMath(this.deps.mathLabels?.() ?? { edit: '', placeholder: '' })
     if (inserted) this.focus()
     return inserted
   }
