@@ -1,10 +1,11 @@
 /** `/models` decoding and the listing request lifecycle. */
 import { createServer } from 'node:http'
+import { createRequire } from 'node:module'
 import type { IncomingMessage, Server, ServerResponse } from 'node:http'
 import { afterEach, describe, expect, it } from 'vitest'
 import { APP_IDENTITY } from '@deepseek-ai/dsh-llm'
 import { deadline } from '@deepseek-ai/dsh-timeout'
-import { LISTING_TIMEOUT, MAX_BADGE_TEXT_LENGTH, parseModelListing, requestModelListing } from '../src/listing.ts'
+import { DEEPSEEK_CLIENT_COMPATIBILITY, LISTING_TIMEOUT, MAX_BADGE_TEXT_LENGTH, parseModelListing, requestModelListing } from '../src/listing.ts'
 import type { ListedCapabilities } from '../src/listing.ts'
 
 /** The listing the service returned to an account token on 2026-09-24. */
@@ -29,6 +30,19 @@ const MESSAGES = { api_capabilities: { anthropic_messages: {} } }
 const only = (row: object) => parseModelListing({ data: [{ id: 'm', ...row }] }).entries[0]
 
 describe('parseModelListing', () => {
+  it('keeps protocol requirements separate from the public product identity', () => {
+    const manifest = createRequire(import.meta.url)('../package.json') as { version: string }
+    expect(DEEPSEEK_CLIENT_COMPATIBILITY).toEqual({ key: 'deepseek-harness', version: manifest.version })
+    expect(APP_IDENTITY.product).toBe('agentrans')
+    expect(only({ ...MESSAGES, client_requirements: {
+      'deepseek-harness': { min_version: '99.0.0' }, agentrans: { min_version: '0.0.1' },
+    } })?.requirement).toEqual({ kind: 'min-version', version: '99.0.0' })
+    expect(only({ ...MESSAGES, client_metadata: {
+      agentrans: { badge: { text: 'Wrong key', tone: 'info' } },
+      'deepseek-harness': { badge: { text: 'Compatible', tone: 'info' } },
+    } })?.badge).toEqual({ kind: 'badge', badge: { text: 'Compatible', tone: 'info' } })
+  })
+
   it('decodes the service listing', () => {
     expect(parseModelListing(LISTING)).toEqual({
       skipped: 0,
@@ -62,12 +76,12 @@ describe('parseModelListing', () => {
   it.each([
     [undefined, { kind: 'none' }],
     [{ other: { min_version: '9.0.0' } }, { kind: 'none' }],
-    [{ [APP_IDENTITY.product]: {} }, { kind: 'none' }],
-    [{ [APP_IDENTITY.product]: { min_version: '0.2.0-alpha.1' } }, { kind: 'min-version', version: '0.2.0-alpha.1' }],
+    [{ [DEEPSEEK_CLIENT_COMPATIBILITY.key]: {} }, { kind: 'none' }],
+    [{ [DEEPSEEK_CLIENT_COMPATIBILITY.key]: { min_version: '0.2.0-alpha.1' } }, { kind: 'min-version', version: '0.2.0-alpha.1' }],
     ['0.2.0', { kind: 'invalid' }],
-    [{ [APP_IDENTITY.product]: '0.2.0' }, { kind: 'invalid' }],
-    [{ [APP_IDENTITY.product]: { min_version: 2 } }, { kind: 'invalid' }],
-    [{ [APP_IDENTITY.product]: { min_version: '' } }, { kind: 'invalid' }],
+    [{ [DEEPSEEK_CLIENT_COMPATIBILITY.key]: '0.2.0' }, { kind: 'invalid' }],
+    [{ [DEEPSEEK_CLIENT_COMPATIBILITY.key]: { min_version: 2 } }, { kind: 'invalid' }],
+    [{ [DEEPSEEK_CLIENT_COMPATIBILITY.key]: { min_version: '' } }, { kind: 'invalid' }],
   ])('reads client requirements %j', (requirements, expected) => {
     expect(only({ ...MESSAGES, ...requirements === undefined ? {} : { client_requirements: requirements } })?.requirement).toEqual(expected)
   })
@@ -110,8 +124,8 @@ describe('parseModelListing', () => {
       .toEqual({ usable: true, facts: { inputModalities: ['text'] } })
   })
 
-  const OWN = `client_metadata["${APP_IDENTITY.product}"]`
-  const showing = (badge: unknown) => ({ ...MESSAGES, client_metadata: { [APP_IDENTITY.product]: { badge } } })
+  const OWN = `client_metadata["${DEEPSEEK_CLIENT_COMPATIBILITY.key}"]`
+  const showing = (badge: unknown) => ({ ...MESSAGES, client_metadata: { [DEEPSEEK_CLIENT_COMPATIBILITY.key]: { badge } } })
   const longest = '十'.repeat(MAX_BADGE_TEXT_LENGTH)
   it.each([
     [{ text: '1017', tone: 'info' }, { text: '1017', tone: 'info' }],
@@ -133,25 +147,25 @@ describe('parseModelListing', () => {
     null,
     {},
     { other: { badge: { text: '1017' } } },
-    { [APP_IDENTITY.product]: null },
-    { [APP_IDENTITY.product]: { other_field: 1 } },
-    { [APP_IDENTITY.product]: { badge: null } },
+    { [DEEPSEEK_CLIENT_COMPATIBILITY.key]: null },
+    { [DEEPSEEK_CLIENT_COMPATIBILITY.key]: { other_field: 1 } },
+    { [DEEPSEEK_CLIENT_COMPATIBILITY.key]: { badge: null } },
   ])('declares no badge for client_metadata %j', (metadata) => {
     expect(only({ ...MESSAGES, client_metadata: metadata })).not.toHaveProperty('badge')
   })
 
   it('reads badges only from client_metadata', () => {
     const badge = { text: '1017' }
-    expect(only({ ...MESSAGES, badge, client_requirements: { [APP_IDENTITY.product]: { badge } } })).not.toHaveProperty('badge')
+    expect(only({ ...MESSAGES, badge, client_requirements: { [DEEPSEEK_CLIENT_COMPATIBILITY.key]: { badge } } })).not.toHaveProperty('badge')
   })
 
   it.each([
     ['1017', 'client_metadata is not an object'],
     [['1017'], 'client_metadata is not an object'],
-    [{ [APP_IDENTITY.product]: '1017' }, `${OWN} is not an object`],
-    [{ [APP_IDENTITY.product]: [] }, `${OWN} is not an object`],
-    [{ [APP_IDENTITY.product]: { badge: '1017' } }, `${OWN}.badge is not an object`],
-    [{ [APP_IDENTITY.product]: { badge: ['1017'] } }, `${OWN}.badge is not an object`],
+    [{ [DEEPSEEK_CLIENT_COMPATIBILITY.key]: '1017' }, `${OWN} is not an object`],
+    [{ [DEEPSEEK_CLIENT_COMPATIBILITY.key]: [] }, `${OWN} is not an object`],
+    [{ [DEEPSEEK_CLIENT_COMPATIBILITY.key]: { badge: '1017' } }, `${OWN}.badge is not an object`],
+    [{ [DEEPSEEK_CLIENT_COMPATIBILITY.key]: { badge: ['1017'] } }, `${OWN}.badge is not an object`],
   ])('rejects client_metadata %j without hiding the entry', (metadata, reason) => {
     const entry = only({ ...MESSAGES, client_metadata: metadata })
     expect(entry?.badge).toEqual({ kind: 'invalid', reason })
@@ -188,7 +202,7 @@ describe('parseModelListing', () => {
 
   it('rejects an own "__proto__" translation key', () => {
     const body: unknown = JSON.parse(
-      `{"data":[{"id":"m","client_metadata":{"${APP_IDENTITY.product}":{"badge":{"text":{"en":"New","__proto__":"x"}}}}}]}`,
+      `{"data":[{"id":"m","client_metadata":{"${DEEPSEEK_CLIENT_COMPATIBILITY.key}":{"badge":{"text":{"en":"New","__proto__":"x"}}}}}]}`,
     )
     expect(parseModelListing(body).entries[0]?.badge).toEqual({ kind: 'invalid', reason: unreadableText })
   })
@@ -222,6 +236,9 @@ describe('requestModelListing', () => {
       'x-dsh-auth-token': 'fixture-token',
       'user-agent': expect.stringContaining(`${APP_IDENTITY.product}/${APP_IDENTITY.version}`) as string,
     })
+    for (const name of ['x-deepseek-harness-user-id', 'x-deepseek-harness-session-id', 'x-deepseek-harness-compact']) {
+      expect(headers).not.toHaveProperty(name)
+    }
   })
 
   it.each([

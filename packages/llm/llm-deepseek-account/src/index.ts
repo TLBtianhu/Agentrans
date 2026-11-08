@@ -1,10 +1,11 @@
 /** Account-token authentication, the account model listing, and version gating for the DeepSeek account route. */
 import type {} from '@deepseek-ai/cordis-plugin-loader'
 import type { Context } from '@deepseek-ai/cordis'
-import { ACCOUNT_QUOTA_EXCEEDED_CODE, APP_IDENTITY, LlmError, QUOTA_EXCEEDED_CODE } from '@deepseek-ai/dsh-llm'
+import { ACCOUNT_QUOTA_EXCEEDED_CODE, LlmError, QUOTA_EXCEEDED_CODE } from '@deepseek-ai/dsh-llm'
 import type {} from '@deepseek-ai/dsh-deepseek-account'
 import { launchEnvironmentOf } from '@deepseek-ai/dsh-launch-environment'
 import {
+  DEEPSEEK_CLIENT_COMPATIBILITY,
   catalogModelInfo, createModelListingCache, refuseListedModel, registerDeepSeekProvider, requestModelListing, resolveAdapterOptions,
   resolveListedCatalog,
 } from '@deepseek-ai/dsh-llm-deepseek'
@@ -64,7 +65,7 @@ export function apply(ctx: Context, config: Config): void {
       supported,
       overrides: resolved.modelOverrides,
       routeMaxTokens: resolved.protocol.maxTokens,
-      clientVersion: APP_IDENTITY.version,
+      clientVersion: DEEPSEEK_CLIENT_COMPATIBILITY.version,
     })
     if (view.listing !== loggedListing) {
       loggedListing = view.listing

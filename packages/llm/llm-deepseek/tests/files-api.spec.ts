@@ -65,6 +65,10 @@ describe('DeepSeekFilesClient', () => {
       expect(headers.get('x-api-key')).toBe('key')
       expect(headers.get('anthropic-version')).toBe('2023-06-01')
       expect(headers.get('anthropic-beta')).toBe('files-api-2025-04-14')
+      expect(headers.get('user-agent')).toBe(userAgent())
+      for (const name of ['x-deepseek-harness-user-id', 'x-deepseek-harness-session-id', 'x-deepseek-harness-compact']) {
+        expect(headers.has(name)).toBe(false)
+      }
       expect(headers.has('authorization')).toBe(false)
       const form = init?.body as FormData
       expect(form.get('purpose')).toBeNull()

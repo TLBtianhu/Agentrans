@@ -1,10 +1,11 @@
 /** API-key authentication, credential-gated discovery, and the official model listing for the official DeepSeek route. */
 import type { Context } from '@deepseek-ai/cordis'
-import { APP_IDENTITY, assertUsableApiKey, LlmError } from '@deepseek-ai/dsh-llm'
+import { assertUsableApiKey, LlmError } from '@deepseek-ai/dsh-llm'
 import type { LlmModelBadge } from '@deepseek-ai/dsh-llm'
 import type {} from '@deepseek-ai/cordis-plugin-loader'
 import { launchEnvironmentOf } from '@deepseek-ai/dsh-launch-environment'
 import {
+  DEEPSEEK_CLIENT_COMPATIBILITY,
   catalogModelInfo, createModelListingCache, refuseListedModel, registerDeepSeekProvider, requestModelListing, resolveListedCatalog,
 } from '@deepseek-ai/dsh-llm-deepseek'
 import type { CatalogRefusal, DeepSeekCatalogModel, ListingView, ModelListing } from '@deepseek-ai/dsh-llm-deepseek'
@@ -71,7 +72,7 @@ export function apply(ctx: Context, config: Config): void {
       supported: connection.models,
       overrides: {},
       routeMaxTokens: connection.maxTokens,
-      clientVersion: APP_IDENTITY.version,
+      clientVersion: DEEPSEEK_CLIENT_COMPATIBILITY.version,
     })
     if (view.listing !== reportedListing) {
       reportedListing = view.listing

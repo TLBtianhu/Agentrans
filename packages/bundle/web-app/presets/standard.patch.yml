@@ -126,6 +126,8 @@
             name: '@deepseek-ai/dsh-artifact/tool'
           - id: scene
             name: '@deepseek-ai/dsh-artifact/scene-tool'
+          - id: artifact-runtime
+            name: '@deepseek-ai/dsh-artifact-runtime/tool'
           - id: tool-plugin-manager
             name: '@deepseek-ai/dsh-plugin-manager/tools'
             disabled: !!js "!ctx.get('profileContext')"
