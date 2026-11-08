@@ -41,7 +41,9 @@ export function apply(ctx: Context): void {
       + 'Optional style for flowchart, function-plot, particle-system, timeline, and network-graph: editorial (default), transit-map, blueprint, math-proof-lecture, or particles. '
       + 'Interactive explanations default to this scene tool, not to workspace files; only write a workspace file when the user explicitly asks for a standalone HTML file or program. '
       + 'Follow the artifact-design style reference for the visual idiom appropriate to the content. '
-      + 'Two Scenes may share one comparison group with independent control and variant roles.',
+      + 'Two Scenes may share one comparison group with independent control and variant roles. '
+      + 'A successful result confirms validated source, not a running renderer. When artifact_runtime is available, '
+      + 'inspect the returned scene id and exact revision for current readiness or error reports before claiming it runs.',
     parameters: {
       action: { type: 'string', required: true, enum: ['create', 'update'], description: 'Create a new scene or replace an existing scene at its next revision.' },
       kind: { type: 'string', required: true, enum: ['function-plot', 'flowchart', 'particle-system', 'timeline', 'network-graph', 'map'], description: 'Scene primitive supported by the current SceneCatalog.' },

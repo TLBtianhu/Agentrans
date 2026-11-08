@@ -50,7 +50,11 @@ function experimentalClientReferences(roster: Awaited<ReturnType<typeof readClie
 
 it('activates the actual default Client registry without experimental packages', async (test) => {
   await withDefaultWeb(test, async ({ url, request }) => {
-    const browser = await chromium.launch({ timeout: test.task.timeout })
+    const executablePath = process.env.DSH_PLAYWRIGHT_EXECUTABLE_PATH
+    const browser = await chromium.launch({
+      timeout: test.task.timeout,
+      ...(executablePath === undefined ? {} : { executablePath }),
+    })
     test.onTestFinished(async () => { await browser.close() })
     try {
       const page = await newEnglishPage(browser)
@@ -88,10 +92,25 @@ it('activates the actual default Client registry without experimental packages',
       await page.getByRole('tree', { name: 'Sessions' }).waitFor({ state: 'visible' })
       const roster = await page.evaluate(readClientRoster)
       const host = await request('roster')
+      for (const name of [
+        '@deepseek-ai/dsh-session-log-deepseek',
+        '@deepseek-ai/dsh-plugin-package-inventory-deepseek',
+        '@deepseek-ai/dsh-session-telemetry-otel',
+        '@deepseek-ai/dsh-host-product-telemetry-otel',
+        '@deepseek-ai/dsh-client-product-analytics',
+        '@deepseek-ai/dsh-client-ui-settings-session-log',
+      ]) {
+        const entry = host.entries.find(entry => entry.name === name)
+        expect(entry, name).toBeDefined()
+        expect(entry?.state, name).toBeUndefined()
+        expect(host.plugins.some(plugin => plugin.owner === name), name).toBe(false)
+      }
       expect(roster.entries.map(entry => entry.name).sort()).toEqual(host.client.entries.map(entry => entry.id).sort())
       expect(roster.entries.every(entry => entry.state === FiberState.ACTIVE)).toBe(true)
       expect(roster.plugins.length).toBeGreaterThan(roster.entries.length)
       expect(roster.plugins.some(plugin => plugin.modules.includes('@deepseek-ai/dsh-client-ui-layout'))).toBe(true)
+      expect(roster.entries.some(entry => entry.name === '@deepseek-ai/dsh-client-ui-settings-session-log')).toBe(false)
+      expect(roster.modules).not.toContain('@deepseek-ai/dsh-client-ui-settings-session-log')
       expect(experimentalClientReferences(roster)).toEqual([])
       const contaminatedHost = await request('mount-experimental-entry')
       const experimentalName = '@deepseek-ai/dsh-experimental-client-ui-agent-team'

@@ -1,10 +1,13 @@
 /** Native FunctionPlot renderer for validated SceneSpec values. */
 import { useEffect, useMemo, useRef, useState } from 'react'
+import type { RuntimeReport } from '@deepseek-ai/dsh-artifact-runtime/types'
+import { drawNativeScene } from './native-runtime.ts'
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
-import { evaluateExpression, parseExpression, type JsonValue } from '@deepseek-ai/dsh-util-values'
+import { parseExpression, type JsonValue } from '@deepseek-ai/dsh-util-values'
 import { recordSceneVideo } from './scene-video.ts'
 import { renderFunctionPlot } from './renderers/function-plot.ts'
+import { analyzeFunction } from './renderers/function-analysis.ts'
 import type { FunctionPlotSpec } from '@deepseek-ai/dsh-artifact/scene'
 import type { ArtifactId } from '@deepseek-ai/dsh-artifact/types'
 import type { ArtifactPlacement, RecordArtifactAction } from './protocol.ts'
@@ -16,6 +19,9 @@ interface FunctionPlotViewProps {
   readonly revision: number
   readonly placement: ArtifactPlacement
   readonly recordAction: RecordArtifactAction
+  readonly canRecord?: boolean
+  readonly recordPending?: boolean
+  readonly onRuntimeReport?: ((report: RuntimeReport) => void) | undefined
   readonly onStateChange?: ((state: JsonValue) => void) | undefined
   readonly t: PropsLocale<'artifact'>['t']
 }
@@ -39,7 +45,9 @@ const FALLBACK_SIZE: CanvasSize = { width: 640, height: 300 }
  * @param props - SceneSpec, Artifact identity, placement, confirmation callback, and locale seat.
  * @returns An interactive native function-plot editor.
  */
-export function FunctionPlotView({ spec, artifactId, revision, placement, recordAction, onStateChange, t }: FunctionPlotViewProps) {
+export function FunctionPlotView({
+  spec, artifactId, revision, placement, recordAction, canRecord = true, recordPending = false, onRuntimeReport, onStateChange, t,
+}: FunctionPlotViewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const plotRef = useRef<HTMLDivElement | null>(null)
   const dragRef = useRef({ active: false, x: 0 })
@@ -64,25 +72,9 @@ export function FunctionPlotView({ spec, artifactId, revision, placement, record
   const sweepKey = Object.keys(spec.parameters)[0]
   const sweep = sweepKey === undefined ? undefined : spec.parameters[sweepKey]
 
-  const evaluateAt = (fn: ParsedFunction, x: number): number => evaluateExpression(fn.node, {
-    ...parameters, x, t: x, pi: Math.PI, e: Math.E,
-  })
-  const derivativeAt = (x: number): number => {
-    if (!currentFunction) return 0
-    const h = 0.001
-    return (evaluateAt(currentFunction, x + h) - evaluateAt(currentFunction, x - h)) / (2 * h)
-  }
-  const integralAt = (x: number): number => {
-    if (!currentFunction) return 0
-    const steps = 200
-    const width = x / steps
-    let total = 0
-    for (let index = 0; index <= steps; index++) {
-      const weight = index === 0 || index === steps ? 0.5 : 1
-      total += evaluateAt(currentFunction, index * width) * weight
-    }
-    return total * width
-  }
+  const analysis = currentFunction === undefined
+    ? { value: null, derivative: null, integral: null }
+    : analyzeFunction(currentFunction.node, parameters, traceX)
 
   // The canvas is drawn in CSS pixels: sizing the backing store from the
   // stage's measured box keeps the plot sharp and un-stretched in every
@@ -106,10 +98,10 @@ export function FunctionPlotView({ spec, artifactId, revision, placement, record
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas || !currentFunction) return
-    renderFunctionPlot(spec, canvas, size.width, size.height, {
+    drawNativeScene(canvas, () => { renderFunctionPlot(spec, canvas, size.width, size.height, {
       traceX, scale, pan, parameters, currentFunctionId: currentFunction.id, showDerivative, showIntegral,
-    })
-  }, [spec, currentFunction, functions, parameters, traceX, scale, pan, showDerivative, showIntegral, size])
+    }) }, onRuntimeReport)
+  }, [spec, currentFunction, functions, parameters, traceX, scale, pan, showDerivative, showIntegral, size, onRuntimeReport])
 
   // React's onWheel is passive, so preventDefault cannot stop the page from
   // scrolling. A native non-passive listener is required for an explicit zoom.
@@ -160,9 +152,10 @@ export function FunctionPlotView({ spec, artifactId, revision, placement, record
   }
 
   const confirm = async (): Promise<void> => {
+    if (!canRecord || recordPending) return
     if (!currentFunction) return
     await recordAction(artifactId, revision, 'plot.inspected', {
-      x: traceX, parameters, derivative: derivativeAt(traceX), integral: integralAt(traceX), zoom: scale,
+      x: traceX, parameters, derivative: analysis.derivative, integral: analysis.integral, zoom: scale,
     }, true)
   }
 
@@ -190,9 +183,7 @@ export function FunctionPlotView({ spec, artifactId, revision, placement, record
     }, duration * 1000)
   }
 
-  const derivative = derivativeAt(traceX)
-  const integral = integralAt(traceX)
-  const currentValue = currentFunction ? evaluateAt(currentFunction, traceX) : 0
+  const { value: currentValue, derivative, integral } = analysis
 
   // A comparison host reads the current analysis as a local state report;
   // reporting it never wakes the Agent by itself.
@@ -205,9 +196,9 @@ export function FunctionPlotView({ spec, artifactId, revision, placement, record
 
   const readout: readonly { readonly symbol: string; readonly value: string }[] = [
     { symbol: t('scene.trace'), value: traceX.toFixed(2) },
-    { symbol: 'f(x)', value: currentFunction ? currentValue.toFixed(3) : '—' },
-    { symbol: 'f′(x)', value: currentFunction ? derivative.toFixed(3) : '—' },
-    { symbol: '∫', value: currentFunction ? integral.toFixed(3) : '—' },
+    { symbol: 'f(x)', value: currentValue === null ? '—' : currentValue.toFixed(3) },
+    { symbol: 'f′(x)', value: derivative === null ? '—' : derivative.toFixed(3) },
+    { symbol: '∫', value: integral === null ? '—' : integral.toFixed(3) },
   ]
 
   return (
@@ -293,7 +284,7 @@ export function FunctionPlotView({ spec, artifactId, revision, placement, record
           }}>{t('scene.step')}</Button>
           <Button size="sm" variant="ghost" className={css.toggle} onClick={reset}>{t('scene.reset')}</Button>
         </div>
-        <Button size="sm" variant="outline" onClick={() => { void confirm() }}>{t('scene.confirm')}</Button>
+        {canRecord && <Button size="sm" variant="outline" disabled={recordPending} onClick={() => { void confirm() }}>{t('scene.confirm')}</Button>}
         <Button size="sm" variant="ghost" className={css.toggle} data-selected={recording ? '' : undefined}
           aria-pressed={recording} onClick={exportVideo}>{recording ? t('scene.stopRecording') : t('scene.exportVideo')}</Button>
         <p className={css.hint}>{t('scene.hint')}</p>

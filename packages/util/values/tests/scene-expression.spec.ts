@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { evaluateExpression, parseExpression } from '../src/index.ts'
+import { ExpressionDomainError, evaluateExpression, parseExpression } from '../src/index.ts'
 
 describe('scene expression parser', () => {
   it('evaluates whitelisted functions and parameters without executing source', () => {
@@ -15,5 +15,18 @@ describe('scene expression parser', () => {
     expect(() => parseExpression('pow(2)', [])).toThrow('requires exactly 2 arguments')
     expect(() => parseExpression('1/0', [])).not.toThrow()
     expect(() => evaluateExpression(parseExpression('1/0', []), {})).toThrow('finite')
+  })
+
+  it.each(['sqrt(-1)', 'log(0)', '1/0', 'exp(1000)', '1e308*1e308'])('distinguishes the mathematical domain failure in %s', (expression) => {
+    expect(() => evaluateExpression(parseExpression(expression, []), {})).toThrow(ExpressionDomainError)
+  })
+
+  it('keeps missing and non-finite variables separate from mathematical domain failures', () => {
+    const node = parseExpression('a*x', ['a'])
+    for (const variables of [{ x: 1 }, { x: 1, a: Number.NaN }]) {
+      const evaluate = (): number => evaluateExpression(node, variables)
+      expect(evaluate).toThrow(Error)
+      expect(evaluate).not.toThrow(ExpressionDomainError)
+    }
   })
 })

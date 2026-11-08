@@ -2,8 +2,9 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import AgentRegistry, { type Agent } from '@deepseek-ai/dsh-agent'
 import { Session, SessionId } from '@deepseek-ai/dsh-session'
+import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
 import ArtifactService from '../src/index.ts'
-import { normalizeSceneSpec } from '../src/scene.ts'
+import { normalizeSceneSpec, SceneValidationError } from '../src/scene.ts'
 import type { ArtifactPrepareInput } from '../src/types.ts'
 
 const contexts: Context[] = []
@@ -38,9 +39,15 @@ function input(overrides: Partial<ArtifactPrepareInput> = {}): ArtifactPrepareIn
 }
 
 describe('SceneSpec validation and persistence', () => {
+  it.each(['constructor', '__proto__', 'toString'])('rejects inherited catalog kind %s as an unsupported scene', (kind) => {
+    expect(() => normalizeSceneSpec({ ...spec, kind })).toThrow(SceneValidationError)
+    expect(() => normalizeSceneSpec({ ...spec, kind })).toThrow(`unsupported scene kind: ${kind}`)
+  })
+
   it('normalizes a valid function-plot spec and commits it as format scene', async () => {
     const ctx = new Context()
     contexts.push(ctx)
+    await ctx.plugin(SessionProjectionRegistry)
     await ctx.plugin(AgentRegistry)
     await ctx.plugin(ArtifactService)
     const agent = makeAgent(ctx)
@@ -64,6 +71,7 @@ describe('SceneSpec validation and persistence', () => {
   it('does not commit an invalid SceneSpec', async () => {
     const ctx = new Context()
     contexts.push(ctx)
+    await ctx.plugin(SessionProjectionRegistry)
     await ctx.plugin(AgentRegistry)
     await ctx.plugin(ArtifactService)
     const agent = makeAgent(ctx)
@@ -75,6 +83,7 @@ describe('SceneSpec validation and persistence', () => {
   it('preserves comparison metadata on a SceneSpec snapshot', async () => {
     const ctx = new Context()
     contexts.push(ctx)
+    await ctx.plugin(SessionProjectionRegistry)
     await ctx.plugin(AgentRegistry)
     await ctx.plugin(ArtifactService)
     const agent = makeAgent(ctx)

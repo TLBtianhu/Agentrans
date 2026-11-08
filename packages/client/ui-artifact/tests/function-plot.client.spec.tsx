@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
 import { FunctionPlotView } from '../src/client/FunctionPlotView.tsx'
 import { en } from '../src/client/locales.ts'
@@ -8,6 +8,8 @@ import type { FunctionPlotSpec } from '@deepseek-ai/dsh-artifact/scene'
 import type { ArtifactId, RecordArtifactAction } from '../src/client/protocol.ts'
 
 const t = makeTranslate(en)
+
+beforeEach(() => { vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null) })
 
 const spec: FunctionPlotSpec = {
   kind: 'function-plot',
@@ -33,6 +35,54 @@ afterEach(() => {
 })
 
 describe('FunctionPlotView', () => {
+  it.each([
+    { expression: 'sqrt(x)', x: 0, value: '0.000', derivative: null, integral: 0 },
+    { expression: 'log(x)', x: 1, value: '0.000', derivative: expect.closeTo(1, 4), integral: null },
+    { expression: '1/x', x: 0, value: '—', derivative: null, integral: null },
+  ])('keeps $expression usable and confirms unavailable readings as null', async ({ expression, x, value, derivative, integral }) => {
+    const recordAction = vi.fn<RecordArtifactAction>().mockResolvedValue(undefined)
+    const onStateChange = vi.fn()
+    const domainSpec: FunctionPlotSpec = {
+      ...spec,
+      functions: [{ id: 'domain', label: expression, expression }],
+      viewport: { x: [-1, 4], y: [-2, 4] },
+      trace: { x, derivative: false, integral: false },
+    }
+    render(<FunctionPlotView spec={domainSpec} artifactId={'a' as ArtifactId} revision={1} placement="inline"
+      recordAction={recordAction} onStateChange={onStateChange} t={t} />)
+    const readout = screen.getAllByRole('status')[0]!
+    expect(readout.textContent).toContain(`f(x)${value}`)
+    expect(readout.textContent).not.toMatch(/NaN|Infinity/)
+    expect(readout.textContent).toContain('—')
+    fireEvent.click(screen.getByRole('button', { name: 'Derivative' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Integral' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm analysis' }))
+    await waitFor(() => {
+      expect(recordAction).toHaveBeenCalledWith('a', 1, 'plot.inspected', {
+        x, parameters: { d: 0.4 }, derivative, integral, zoom: 1,
+      }, true)
+    })
+    expect(onStateChange).toHaveBeenLastCalledWith(expect.objectContaining({ derivative, integral }))
+  })
+
+  it('keeps parameter editing available while moving into and out of a function domain', () => {
+    const recordAction = vi.fn<RecordArtifactAction>().mockResolvedValue(undefined)
+    const domainSpec: FunctionPlotSpec = {
+      ...spec, functions: [{ id: 'root', label: 'sqrt(x-d)', expression: 'sqrt(x-d)' }],
+      trace: { x: 1, derivative: true, integral: true },
+    }
+    render(<FunctionPlotView spec={domainSpec} artifactId={'a' as ArtifactId} revision={1} placement="inline"
+      recordAction={recordAction} t={t} />)
+    fireEvent.change(screen.getByRole('slider'), { target: { value: '1.1' } })
+    expect(screen.getAllByRole('status')[0]?.textContent).toContain('f(x)—')
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm analysis' }))
+    expect(recordAction).toHaveBeenLastCalledWith('a', 1, 'plot.inspected', expect.objectContaining({
+      parameters: { d: 1.1 }, derivative: null, integral: null,
+    }), true)
+    fireEvent.change(screen.getByRole('slider'), { target: { value: '0.2' } })
+    expect(screen.getAllByRole('status')[0]?.textContent).toContain('f(x)0.894')
+  })
+
   it('renders the legend, readout, and parameter from the SceneSpec', () => {
     view()
     expect(screen.getAllByText('sin(x)').length).toBeGreaterThan(0)

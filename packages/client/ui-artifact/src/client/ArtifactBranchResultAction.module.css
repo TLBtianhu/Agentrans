@@ -1,0 +1,45 @@
+.root {
+  margin-top: 8px;
+  font-size: var(--dsh-content-font-size-secondary, 13px);
+}
+
+.preview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 0.5px solid var(--dsw-alias-border-l2);
+  border-radius: var(--dsw-radius-md);
+  background: var(--dsw-alias-bg-inset);
+}
+
+.conclusion {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.mode,
+.selectors,
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mode {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.values {
+  max-height: 200px;
+  overflow: auto;
+  white-space: pre-wrap;
+}
+
+.error {
+  margin: 0;
+  color: var(--dsw-alias-state-error-primary);
+}

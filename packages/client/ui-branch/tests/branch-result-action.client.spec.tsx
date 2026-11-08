@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render } from '@testing-library/react'
 import { bindSnapshotSelector, makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
 import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
-import type { SessionListState } from '@deepseek-ai/dsh-api-session-controller/client'
+import type { SessionBranchResultError, SessionListState } from '@deepseek-ai/dsh-api-session-controller/client'
 import { zh as commonZh } from '@deepseek-ai/dsh-client-locale/src/locales/zh.ts'
 import { SessionId, SessionSeq } from '@deepseek-ai/dsh-session/types'
 import { BranchResultAction, type BranchResultActionProps } from '../src/client/BranchResultAction.tsx'
@@ -106,6 +106,32 @@ describe('BranchResultAction', () => {
       [{ sessionId: parent, branchSessionId: child, resultSeq: 6 }],
       [{ sessionId: parent, branchSessionId: child, resultSeq: 6 }],
     ])
+  })
+
+  it('treats an evidence conflict as final and opens the parent without another return request', async () => {
+    const b = fixture()
+    const request = { sessionId: parent, branchSessionId: child, resultSeq: 6 }
+    const failure = Object.assign(new Error('Diagnostic text unrelated to the recovery action'), {
+      isDSHRemoteError: true as const, code: 'session/branch-result-conflict' as const,
+      details: { parentSessionId: parent, branchSessionId: child, resultSeq: 6 },
+    })
+    const error: Pick<SessionBranchResultError, 'rpcError' | 'request'> = Object.assign(
+      new Error('Client return failed'), { rpcError: failure, request },
+    )
+    b.returnBranchResult.mockRejectedValueOnce(error)
+    const view = render(<BranchResultAction {...b.props} />)
+    fireEvent.click(view.getByRole('button', { name: '回流到父分支' }))
+    fireEvent.click(view.getByRole('button', { name: '确认回流' }))
+    await vi.waitFor(() => {
+      expect(view.getByRole('alert').textContent).toBe('此结论已通过不同证据回流。请打开父对话查看已采纳的内容。')
+    })
+    expect(view.queryByRole('button', { name: '重试回流' })).toBeNull()
+    expect(view.queryByRole('button', { name: '确认回流' })).toBeNull()
+    expect(view.getByText('C1-result')).toBeTruthy()
+    expect(b.openSession).not.toHaveBeenCalled()
+    fireEvent.click(view.getByRole('button', { name: '打开父对话' }))
+    expect(b.openSession).toHaveBeenCalledExactlyOnceWith(parent)
+    expect(b.returnBranchResult).toHaveBeenCalledExactlyOnceWith(request)
   })
 
   it.each([

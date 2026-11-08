@@ -9,7 +9,7 @@ import {
 } from './scaffold.ts'
 import { connectFreshWorkspace } from './support.ts'
 
-const DIR = fileURLToPath(new URL('../../../snapshots/web/teaching-artifact', import.meta.url))
+const DIR = fileURLToPath(new URL('./fixtures/replay/teaching-artifact', import.meta.url))
 const FIXTURE = join(DIR, 'session.v4.jsonl')
 const MODE = webSnapshotMode()
 

@@ -1,6 +1,6 @@
 /** Public dsh launch resolution for the TypeScript SDK. */
 
-import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
@@ -33,18 +33,16 @@ function manifestPair(dsh: object, client: object): { dshUrl: string; clientUrl:
 }
 
 describe('SDK dsh launch resolution', () => {
-  it('resolves the same-version installed dsh entry by default', () => {
+  it('keeps a source SDK on the same-version source dsh entry', () => {
     const bin = installedDshBin()
     expect(bin.endsWith(join('apps', 'cli', 'lib', 'bin.js'))).toBe(true)
     const launch = resolveDshLaunch()
     expect(launch.command).toBe(process.execPath)
-    expect(launch.args).toEqual(existsSync(bin)
-      ? [bin, '--profile', 'sdk']
-      : [
-        '--import', import.meta.resolve('tsx/esm'), resolve(bin, '..', '..', 'src/bin.ts'),
-        '--profile', 'sdk',
-        '--patch', resolve(bin, '..', '..', 'src/sdk-source.cordis.patch.yml'),
-      ])
+    expect(launch.args).toEqual([
+      '--import', import.meta.resolve('tsx/esm'), resolve(bin, '..', '..', 'src/bin.ts'),
+      '--profile', 'sdk',
+      '--patch', resolve(bin, '..', '..', 'src/sdk-source.cordis.patch.yml'),
+    ])
     expect(launch.initializeTimeoutMs).toBe(DEFAULT_INITIALIZE_TIMEOUT_MS)
     expect(launch.description).toBe('dsh profile "sdk"')
   })
@@ -83,7 +81,7 @@ describe('SDK dsh launch resolution', () => {
     expect(launch.environment()).toEqual({ PATH: '/bin', DSH_HOME: join(caller, 'home') })
   })
 
-  it('falls back to the same package source entry through an absolute tsx loader', () => {
+  it.each([false, true])('selects source explicitly with a built bin present: %s', (builtPresent) => {
     const pair = manifestPair({ version: '1.0.0', bin: 'lib/bin.js' }, { version: '1.0.0' })
     const sourceBin = join(pair.root, 'src/bin.ts')
     const sourcePatch = join(pair.root, 'src/sdk-source.cordis.patch.yml')
@@ -92,14 +90,18 @@ describe('SDK dsh launch resolution', () => {
     writeFileSync(sourceBin, '')
     writeFileSync(sourcePatch, '[]\n')
     writeFileSync(sourceTsconfig, '{}\n')
+    if (builtPresent) {
+      mkdirSync(join(pair.root, 'lib'))
+      writeFileSync(join(pair.root, 'lib/bin.js'), 'throw new Error("stale built entry")\n')
+    }
 
-    expect(resolveDshNodeLaunchFromManifests(pair.dshUrl, pair.clientUrl, 'file:///tsx-loader.mjs'))
+    expect(resolveDshNodeLaunchFromManifests(pair.dshUrl, pair.clientUrl, 'source', 'file:///tsx-loader.mjs'))
       .toEqual({
         nodeArgs: ['--import', 'file:///tsx-loader.mjs', sourceBin],
         patches: [sourcePatch],
         environment: { TSX_TSCONFIG_PATH: sourceTsconfig },
       })
-    expect(resolveDshNodeLaunchFromManifests(pair.dshUrl, pair.clientUrl))
+    expect(resolveDshNodeLaunchFromManifests(pair.dshUrl, pair.clientUrl, 'source'))
       .toEqual({
         nodeArgs: ['--import', import.meta.resolve('tsx/esm'), sourceBin],
         patches: [sourcePatch],
@@ -107,17 +109,28 @@ describe('SDK dsh launch resolution', () => {
       })
   })
 
-  it('uses the built entry when the manifest bin exists', () => {
+  it('launches built artifacts without source files, source patches, or a TypeScript loader', () => {
     const pair = manifestPair({ version: '1.0.0', bin: 'lib/bin.js' }, { version: '1.0.0' })
     const bin = join(pair.root, 'lib/bin.js')
     mkdirSync(join(pair.root, 'lib'))
     writeFileSync(bin, '')
 
-    expect(resolveDshNodeLaunchFromManifests(pair.dshUrl, pair.clientUrl)).toEqual({
+    expect(resolveDshNodeLaunchFromManifests(pair.dshUrl, pair.clientUrl, 'built')).toEqual({
       nodeArgs: [bin],
       patches: [],
       environment: {},
     })
+  })
+
+  it('refuses a missing built bin even when a complete source checkout exists', () => {
+    const pair = manifestPair({ version: '1.0.0', bin: 'lib/bin.js' }, { version: '1.0.0' })
+    mkdirSync(join(pair.root, 'src'))
+    writeFileSync(join(pair.root, 'src/bin.ts'), '')
+    writeFileSync(join(pair.root, 'src/sdk-source.cordis.patch.yml'), '[]\n')
+    writeFileSync(join(pair.root, 'tsconfig.json'), '{}\n')
+
+    expect(() => resolveDshNodeLaunchFromManifests(pair.dshUrl, pair.clientUrl, 'built'))
+      .toThrow('is missing its built executable')
   })
 
   it.each([0, 1, 2])('fails loud when a source launch is missing required file set %s', (presentCount) => {
@@ -125,8 +138,10 @@ describe('SDK dsh launch resolution', () => {
     mkdirSync(join(pair.root, 'src'))
     const sourceFiles = ['src/bin.ts', 'src/sdk-source.cordis.patch.yml', 'tsconfig.json']
     for (const source of sourceFiles.slice(0, presentCount)) writeFileSync(join(pair.root, source), '')
-    expect(() => resolveDshNodeLaunchFromManifests(pair.dshUrl, pair.clientUrl, 'file:///tsx-loader.mjs'))
-      .toThrow('is missing its built executable')
+    mkdirSync(join(pair.root, 'lib'))
+    writeFileSync(join(pair.root, 'lib/bin.js'), '')
+    expect(() => resolveDshNodeLaunchFromManifests(pair.dshUrl, pair.clientUrl, 'source', 'file:///tsx-loader.mjs'))
+      .toThrow('is missing complete source launch files')
   })
 
   it('reads explicit and inherited environments when the child starts', () => {
@@ -150,6 +165,10 @@ describe('SDK dsh launch resolution', () => {
       const pair = manifestPair({ version, bin: 'bin.js' }, { version: '1.0.0' })
       expect(() => resolveDshBinFromManifests(pair.dshUrl, pair.clientUrl))
         .toThrow(`requires the same dsh version, got ${String(version)}`)
+      for (const mode of ['source', 'built'] as const) {
+        expect(() => resolveDshNodeLaunchFromManifests(pair.dshUrl, pair.clientUrl, mode))
+          .toThrow(`requires the same dsh version, got ${String(version)}`)
+      }
     },
   )
 

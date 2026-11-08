@@ -2,6 +2,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
+import type { RuntimeReport } from '@deepseek-ai/dsh-artifact-runtime/types'
+import { drawNativeScene } from './native-runtime.ts'
 import type { JsonValue } from '@deepseek-ai/dsh-util-values'
 import type { FlowchartSpec } from '@deepseek-ai/dsh-artifact/scene'
 import type { ArtifactId } from '@deepseek-ai/dsh-artifact/types'
@@ -15,6 +17,9 @@ interface FlowchartViewProps {
   readonly revision: number
   readonly placement: ArtifactPlacement
   readonly recordAction: RecordArtifactAction
+  readonly canRecord?: boolean
+  readonly recordPending?: boolean
+  readonly onRuntimeReport?: ((report: RuntimeReport) => void) | undefined
   readonly onStateChange?: ((state: JsonValue) => void) | undefined
   readonly t: PropsLocale<'artifact'>['t']
 }
@@ -31,7 +36,9 @@ interface LayoutNode {
  * @param props - SceneSpec, Artifact identity, placement, confirmation callback, and locale seat.
  * @returns An interactive flowchart with selectable nodes and path advancement.
  */
-export function FlowchartView({ spec, artifactId, revision, placement, recordAction, onStateChange, t }: FlowchartViewProps) {
+export function FlowchartView({
+  spec, artifactId, revision, placement, recordAction, canRecord = true, recordPending = false, onRuntimeReport, onStateChange, t,
+}: FlowchartViewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [selected, setSelected] = useState(spec.path?.[0] ?? spec.nodes[0]?.id ?? '')
   const [pathIndex, setPathIndex] = useState(0)
@@ -60,8 +67,8 @@ export function FlowchartView({ spec, artifactId, revision, placement, recordAct
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    renderFlowchart(spec, canvas, 900, 420, { selected, pathIndex })
-  }, [spec, selected, pathIndex])
+    drawNativeScene(canvas, () => { renderFlowchart(spec, canvas, 900, 420, { selected, pathIndex }) }, onRuntimeReport)
+  }, [spec, selected, pathIndex, onRuntimeReport])
 
   useEffect(() => {
     if (!playing || path.length === 0) return
@@ -83,6 +90,7 @@ export function FlowchartView({ spec, artifactId, revision, placement, recordAct
   }, [onStateChange, selected, pathIndex, currentId])
 
   const confirm = async (): Promise<void> => {
+    if (!canRecord || recordPending) return
     await recordAction(artifactId, revision, 'flow.inspected', { selected, pathIndex, node: currentId, path: [...path] }, true)
   }
 
@@ -130,7 +138,7 @@ export function FlowchartView({ spec, artifactId, revision, placement, recordAct
           <Button size="sm" variant="ghost" className={css.toggle} data-selected={playing ? '' : undefined}
             aria-pressed={playing} onClick={() => { setPlaying(value => !value) }}>{playing ? t('scene.pause') : t('scene.play')}</Button>
         </div>
-        <Button size="sm" variant="outline" onClick={() => { void confirm() }}>{t('scene.confirm')}</Button>
+        {canRecord && <Button size="sm" variant="outline" disabled={recordPending} onClick={() => { void confirm() }}>{t('scene.confirm')}</Button>}
         <p className={css.hint}>{t('scene.flowchartHint')}</p>
       </aside>
     </div>

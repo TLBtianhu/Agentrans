@@ -49,6 +49,15 @@ export type ExpressionNode =
 /** Finite numeric values indexed by variable name. */
 export type ExpressionVariables = Readonly<Record<string, number>>
 
+/** A mathematical operation has no finite real result for the supplied values. */
+export class ExpressionDomainError extends Error {
+  /** @param operation - Mathematical operation whose result is non-finite. */
+  constructor(readonly operation: string) {
+    super(`${operation} must be a finite number`)
+    this.name = 'ExpressionDomainError'
+  }
+}
+
 type Token =
   | { readonly type: 'number'; readonly value: number; readonly position: number }
   | { readonly type: 'identifier'; readonly value: string; readonly position: number }
@@ -347,6 +356,11 @@ function finite(value: number, description: string): number {
   return value
 }
 
+function finiteResult(value: number, operation: string): number {
+  if (!Number.isFinite(value)) throw new ExpressionDomainError(operation)
+  return value
+}
+
 function evaluateCall(name: FunctionName, args: readonly number[]): number {
   switch (name) {
     case 'sin': return Math.sin(at(args, 0))
@@ -368,7 +382,8 @@ function evaluateCall(name: FunctionName, args: readonly number[]): number {
  * @param node - Expression tree produced by {@link parseExpression}.
  * @param variables - Numeric values for every variable referenced by the tree.
  * @returns The finite numeric result.
- * @throws {Error} When a variable is missing or non-finite, or any intermediate or final result is non-finite.
+ * @throws {ExpressionDomainError} When a mathematical operation produces a non-finite intermediate or final result.
+ * @throws {Error} When a variable or literal is missing or non-finite, or the tree contains an unsupported node.
  */
 export function evaluateExpression(node: ExpressionNode, variables: ExpressionVariables): number {
   switch (node.type) {
@@ -377,22 +392,22 @@ export function evaluateExpression(node: ExpressionNode, variables: ExpressionVa
     case 'variable':
       return finite(variableValue(variables, node.name), `Variable "${node.name}"`)
     case 'unary':
-      return finite(-evaluateExpression(node.operand, variables), 'Unary operation result')
+      return finiteResult(-evaluateExpression(node.operand, variables), 'Unary operation result')
     case 'binary': {
       const left = evaluateExpression(node.left, variables)
       const right = evaluateExpression(node.right, variables)
       switch (node.operator) {
-        case '+': return finite(left + right, 'Addition result')
-        case '-': return finite(left - right, 'Subtraction result')
-        case '*': return finite(left * right, 'Multiplication result')
-        case '/': return finite(left / right, 'Division result')
-        case '^': return finite(Math.pow(left, right), 'Exponentiation result')
+        case '+': return finiteResult(left + right, 'Addition result')
+        case '-': return finiteResult(left - right, 'Subtraction result')
+        case '*': return finiteResult(left * right, 'Multiplication result')
+        case '/': return finiteResult(left / right, 'Division result')
+        case '^': return finiteResult(Math.pow(left, right), 'Exponentiation result')
         default: throw new Error('Unsupported binary operator')
       }
     }
     case 'call': {
       const args = node.args.map(argument => evaluateExpression(argument, variables))
-      return finite(evaluateCall(node.name, args), `Function "${node.name}" result`)
+      return finiteResult(evaluateCall(node.name, args), `Function "${node.name}" result`)
     }
     default:
       return assertNever(node)

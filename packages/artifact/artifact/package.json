@@ -26,6 +26,30 @@
       "types": "./lib/types/scene.d.ts",
       "default": "./lib/scene.js"
     },
+    "./particle-runtime": {
+      "types": "./lib/types/particle-runtime.d.ts",
+      "default": "./lib/particle-runtime.js"
+    },
+    "./capabilities": {
+      "types": "./lib/types/capabilities.d.ts",
+      "default": "./lib/capabilities.js"
+    },
+    "./runtime-values": {
+      "types": "./lib/types/runtime-values.d.ts",
+      "default": "./lib/runtime-values.js"
+    },
+    "./observation-comparison": {
+      "types": "./lib/types/observation-comparison.d.ts",
+      "default": "./lib/observation-comparison.js"
+    },
+    "./scene-export": {
+      "types": "./lib/types/scene-export.d.ts",
+      "default": "./lib/scene-export.js"
+    },
+    "./scene-renderers": {
+      "types": "./lib/types/scene-renderers.d.ts",
+      "default": "./lib/scene-renderers.js"
+    },
     "./scene-tool": {
       "types": "./lib/types/scene-tool.d.ts",
       "default": "./lib/scene-tool.js"
@@ -49,6 +73,12 @@
     "lib/index.js",
     "lib/tool.js",
     "lib/scene.js",
+    "lib/particle-runtime.js",
+    "lib/capabilities.js",
+    "lib/runtime-values.js",
+    "lib/observation-comparison.js",
+    "lib/scene-export.js",
+    "lib/scene-renderers.js",
     "lib/scene-tool.js",
     "lib/types/**/*.js",
     "lib/types/**/*.d.ts",
@@ -59,7 +89,8 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@deepseek-ai/schemastery": "workspace:~"
+    "@deepseek-ai/schemastery": "workspace:~",
+    "zod": "4.4.3"
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "workspace:~",
@@ -67,6 +98,8 @@
     "@deepseek-ai/dsh-brand": "workspace:*",
     "@deepseek-ai/dsh-llm": "workspace:*",
     "@deepseek-ai/dsh-session": "workspace:*",
+    "@deepseek-ai/dsh-session-input": "workspace:*",
+    "@deepseek-ai/dsh-session-projection": "workspace:*",
     "@deepseek-ai/dsh-tools": "workspace:*",
     "@deepseek-ai/dsh-typert-protocol": "workspace:*",
     "@deepseek-ai/dsh-util-values": "workspace:*"
@@ -77,6 +110,9 @@
     "@deepseek-ai/dsh-brand": "workspace:*",
     "@deepseek-ai/dsh-llm": "workspace:*",
     "@deepseek-ai/dsh-session": "workspace:*",
+    "@deepseek-ai/dsh-session-format": "workspace:*",
+    "@deepseek-ai/dsh-session-format-v3-to-v4": "workspace:*",
+    "@deepseek-ai/dsh-session-input": "workspace:*",
     "@deepseek-ai/dsh-session-projection": "workspace:*",
     "@deepseek-ai/dsh-system-prompt": "workspace:*",
     "@deepseek-ai/dsh-tool-executor-native": "workspace:*",

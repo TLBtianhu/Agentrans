@@ -21,6 +21,9 @@
       "path": "../../core/session"
     },
     {
+      "path": "../../session/session-projection"
+    },
+    {
       "path": "../../core/tools"
     },
     {
@@ -34,6 +37,9 @@
     },
     {
       "path": "../../util/values"
+    },
+    {
+      "path": "../../session/session-input"
     }
   ]
 }

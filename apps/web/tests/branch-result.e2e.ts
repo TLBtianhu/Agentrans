@@ -9,7 +9,7 @@ import {
 } from './scaffold.ts'
 import { connectFreshWorkspace } from './support.ts'
 
-const DIR = fileURLToPath(new URL('../../../snapshots/web/branch-result', import.meta.url))
+const DIR = fileURLToPath(new URL('./fixtures/replay/branch-result', import.meta.url))
 const PARENT_FIXTURE = join(DIR, 'session.v4.jsonl')
 const CHILD_FIXTURE = join(DIR, 'session.1.v4.jsonl')
 const MODE = webSnapshotMode()

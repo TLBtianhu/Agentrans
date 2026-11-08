@@ -1,12 +1,16 @@
 /** Native particle-system renderer for validated SceneSpec values. */
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
+import type { RuntimeReport } from '@deepseek-ai/dsh-artifact-runtime/types'
+import { drawNativeScene } from './native-runtime.ts'
 import type { JsonValue } from '@deepseek-ai/dsh-util-values'
-import type { ParticleSystemSpec, ParticleSpec } from '@deepseek-ai/dsh-artifact/scene'
+import type { ParticleSystemSpec } from '@deepseek-ai/dsh-artifact/scene'
+import { observeParticleState } from '@deepseek-ai/dsh-artifact/particle-runtime'
 import type { ArtifactId } from '@deepseek-ai/dsh-artifact/types'
 import { renderParticleSystem } from './renderers/particle-system.ts'
 import type { ArtifactPlacement, RecordArtifactAction } from './protocol.ts'
+import type { ParticleRun, ParticleRunCommand } from './particle-run.ts'
 import css from './FunctionPlotView.module.css'
 
 interface ParticleSystemViewProps {
@@ -15,13 +19,14 @@ interface ParticleSystemViewProps {
   readonly revision: number
   readonly placement: ArtifactPlacement
   readonly recordAction: RecordArtifactAction
+  readonly canRecord?: boolean
+  readonly recordPending?: boolean
+  readonly onRuntimeReport?: ((report: RuntimeReport) => void) | undefined
   readonly onStateChange?: ((state: JsonValue) => void) | undefined
+  readonly run: ParticleRun
+  readonly onCommand: (command: ParticleRunCommand) => void
+  readonly readOnly?: boolean
   readonly t: PropsLocale<'artifact'>['t']
-}
-
-interface TrailPoint {
-  readonly x: number
-  readonly y: number
 }
 
 /**
@@ -29,70 +34,36 @@ interface TrailPoint {
  * @param props - SceneSpec, Artifact identity, placement, confirmation callback, and locale seat.
  * @returns An interactive particle simulation with velocity vectors and trails.
  */
-export function ParticleSystemView({ spec, artifactId, revision, placement, recordAction, onStateChange, t }: ParticleSystemViewProps) {
+export function ParticleSystemView({
+  spec, artifactId, revision, placement, recordAction, canRecord = true, recordPending = false, onRuntimeReport, onStateChange,
+  run, onCommand, readOnly = false, t,
+}: ParticleSystemViewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [particles, setParticles] = useState<readonly ParticleSpec[]>(spec.particles)
-  const [time, setTime] = useState(0)
-  const [playing, setPlaying] = useState(false)
-  const [trails, setTrails] = useState<Readonly<Record<string, readonly TrailPoint[]>>>({})
-
-  const step = (): void => {
-    const dt = spec.timeStep
-    setParticles(current => current.map(particle => ({
-      ...particle,
-      vx: particle.vx + spec.gravity.x * dt,
-      vy: particle.vy + spec.gravity.y * dt,
-      x: particle.x + particle.vx * dt,
-      y: particle.y + particle.vy * dt,
-    })))
-    setTime(current => current + dt)
-    if (spec.trails) {
-      setTrails((current) => {
-        const next: Record<string, readonly TrailPoint[]> = { ...current }
-        for (const particle of particles) {
-          const existing = next[particle.id] ?? []
-          next[particle.id] = [...existing.slice(-120), { x: particle.x, y: particle.y }]
-        }
-        return next
-      })
-    }
-  }
-
-  const reset = (): void => {
-    setParticles(spec.particles)
-    setTime(0)
-    setPlaying(false)
-    setTrails({})
-  }
-
-  useEffect(() => {
-    if (!playing) return
-    const timer = window.setInterval(step, Math.max(16, spec.timeStep * 1000))
-    return () => { window.clearInterval(timer) }
-  }, [playing, particles, spec])
+  const { state, playing, failed } = run
+  const { time, particles, trails } = state
 
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    renderParticleSystem(spec, canvas, 900, 420, { time, particles, trails })
-  }, [spec, time, particles, trails])
+    drawNativeScene(canvas, () => {
+      renderParticleSystem(spec, canvas, 900, 420, { time, particles, trails })
+    }, onRuntimeReport === undefined ? undefined : (report) => {
+      const failure = run.failure ?? { code: 'PARTICLE_RUNTIME_FAILED', message: 'Particle advancement failed' }
+      onRuntimeReport(failed && report.status === 'ready' ? { status: 'error', error: failure } : report)
+    })
+  }, [spec, time, particles, trails, failed, run.failure, onRuntimeReport])
 
   useEffect(() => {
-    onStateChange?.({
-      time,
-      particles: particles.map(particle => ({ id: particle.id, x: particle.x, y: particle.y, vx: particle.vx, vy: particle.vy })),
-    })
-  }, [onStateChange, time, particles])
+    onStateChange?.(observeParticleState(state))
+  }, [onStateChange, state])
 
   const confirm = async (): Promise<void> => {
-    await recordAction(artifactId, revision, 'physics.inspected', {
-      time,
-      particles: particles.map(particle => ({ id: particle.id, x: particle.x, y: particle.y, vx: particle.vx, vy: particle.vy })),
-    }, true)
+    if (!canRecord || recordPending) return
+    await recordAction(artifactId, revision, 'physics.inspected', observeParticleState(state), true)
   }
 
   return (
-    <div className={css.workspace} data-placement={placement}>
+    <div className={css.workspace} data-placement={placement} data-particle-step={state.stepCount} data-particle-time={time}>
       <div className={css.stage}>
         <div className={css.legend}>
           <span className={css.legendItem} data-current="true"><i className={css.swatchAccent} aria-hidden="true" />{t('scene.particleSystem')}</span>
@@ -107,16 +78,20 @@ export function ParticleSystemView({ spec, artifactId, revision, placement, reco
           <div className={css.readoutItem}><span className={css.readoutLabel}>{t('scene.timeStep')}</span><span className={css.readoutValue}>{spec.timeStep.toFixed(3)}</span></div>
         </div>
       </div>
-      <aside className={css.panel} aria-label={t('scene.controls')}>
-        <div className={css.buttonRow}>
-          <Button size="sm" variant="ghost" className={css.toggle} data-selected={playing ? '' : undefined}
-            aria-pressed={playing} onClick={() => { setPlaying(value => !value) }}>{playing ? t('scene.pause') : t('scene.play')}</Button>
-          <Button size="sm" variant="ghost" className={css.toggle} onClick={step}>{t('scene.step')}</Button>
-          <Button size="sm" variant="ghost" className={css.toggle} onClick={reset}>{t('scene.reset')}</Button>
-        </div>
-        <Button size="sm" variant="outline" onClick={() => { void confirm() }}>{t('scene.confirm')}</Button>
-        <p className={css.hint}>{t('scene.particleHint')}</p>
-      </aside>
+      {!readOnly && (
+        <aside className={css.panel} aria-label={t('scene.controls')}>
+          <div className={css.buttonRow}>
+            <Button size="sm" variant="ghost" className={css.toggle} data-selected={playing ? '' : undefined}
+              aria-pressed={playing} disabled={failed}
+              onClick={() => { onCommand(playing ? 'pause' : 'play') }}>{playing ? t('scene.pause') : t('scene.play')}</Button>
+            <Button size="sm" variant="ghost" className={css.toggle} disabled={failed} onClick={() => { onCommand('step') }}>{t('scene.step')}</Button>
+            <Button size="sm" variant="ghost" className={css.toggle} onClick={() => { onCommand('reset') }}>{t('scene.reset')}</Button>
+          </div>
+          {failed && <p role="alert">{t('scene.particleFailed')}</p>}
+          {canRecord && <Button size="sm" variant="outline" disabled={recordPending} onClick={() => { void confirm() }}>{t('scene.confirm')}</Button>}
+          <p className={css.hint}>{t('scene.particleHint')}</p>
+        </aside>
+      )}
     </div>
   )
 }

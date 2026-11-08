@@ -2,6 +2,8 @@
 import { useEffect, useRef, useState } from 'react'
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
+import type { RuntimeReport } from '@deepseek-ai/dsh-artifact-runtime/types'
+import { drawNativeScene } from './native-runtime.ts'
 import type { JsonValue } from '@deepseek-ai/dsh-util-values'
 import type { TimelineSpec } from '@deepseek-ai/dsh-artifact/scene'
 import type { ArtifactId } from '@deepseek-ai/dsh-artifact/types'
@@ -15,6 +17,9 @@ interface TimelineViewProps {
   readonly revision: number
   readonly placement: ArtifactPlacement
   readonly recordAction: RecordArtifactAction
+  readonly canRecord?: boolean
+  readonly recordPending?: boolean
+  readonly onRuntimeReport?: ((report: RuntimeReport) => void) | undefined
   readonly onStateChange?: ((state: JsonValue) => void) | undefined
   readonly t: PropsLocale<'artifact'>['t']
 }
@@ -24,7 +29,9 @@ interface TimelineViewProps {
  * @param props - SceneSpec, Artifact identity, placement, confirmation callback, and locale seat.
  * @returns An interactive timeline with a draggable playhead and event stepping.
  */
-export function TimelineView({ spec, artifactId, revision, placement, recordAction, onStateChange, t }: TimelineViewProps) {
+export function TimelineView({
+  spec, artifactId, revision, placement, recordAction, canRecord = true, recordPending = false, onRuntimeReport, onStateChange, t,
+}: TimelineViewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const times = spec.events.map(event => event.time)
   const minTime = Math.min(...times)
@@ -36,8 +43,8 @@ export function TimelineView({ spec, artifactId, revision, placement, recordActi
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    renderTimeline(spec, canvas, 900, 420, { playhead })
-  }, [spec, playhead])
+    drawNativeScene(canvas, () => { renderTimeline(spec, canvas, 900, 420, { playhead }) }, onRuntimeReport)
+  }, [spec, playhead, onRuntimeReport])
 
   useEffect(() => {
     if (!playing) return
@@ -66,6 +73,7 @@ export function TimelineView({ spec, artifactId, revision, placement, recordActi
   }
 
   const confirm = async (): Promise<void> => {
+    if (!canRecord || recordPending) return
     await recordAction(artifactId, revision, 'timeline.inspected', { playhead, event: currentEvent?.id ?? null }, true)
   }
 
@@ -98,7 +106,7 @@ export function TimelineView({ spec, artifactId, revision, placement, recordActi
           <Button size="sm" variant="ghost" className={css.toggle} data-selected={playing ? '' : undefined}
             aria-pressed={playing} onClick={() => { setPlaying(value => !value) }}>{playing ? t('scene.pause') : t('scene.play')}</Button>
         </div>
-        <Button size="sm" variant="outline" onClick={() => { void confirm() }}>{t('scene.confirm')}</Button>
+        {canRecord && <Button size="sm" variant="outline" disabled={recordPending} onClick={() => { void confirm() }}>{t('scene.confirm')}</Button>}
         <p className={css.hint}>{t('scene.timelineHint')}</p>
       </aside>
     </div>

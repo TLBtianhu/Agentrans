@@ -1,5 +1,6 @@
 /** SceneSpec renderer dispatch: one place that maps a SceneSpec kind to its native component. */
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
+import type { RuntimeReport } from '@deepseek-ai/dsh-artifact-runtime/types'
 import type { JsonValue } from '@deepseek-ai/dsh-util-values'
 import type { SceneSpec } from '@deepseek-ai/dsh-artifact/scene'
 import type { ArtifactId } from '@deepseek-ai/dsh-artifact/types'
@@ -10,6 +11,7 @@ import { ParticleSystemView } from './ParticleSystemView.tsx'
 import { TimelineView } from './TimelineView.tsx'
 import { NetworkGraphView } from './NetworkGraphView.tsx'
 import { MapView } from './MapView.tsx'
+import type { ParticleRun, ParticleRunCommand } from './particle-run.ts'
 
 interface SceneNodeViewProps {
   readonly spec: SceneSpec
@@ -17,7 +19,13 @@ interface SceneNodeViewProps {
   readonly revision: number
   readonly placement: ArtifactPlacement
   readonly recordAction: RecordArtifactAction
+  readonly canRecord?: boolean
+  readonly recordPending?: boolean
+  readonly onRuntimeReport?: ((report: RuntimeReport) => void) | undefined
   readonly onStateChange?: ((state: JsonValue) => void) | undefined
+  readonly particleRun: ParticleRun | null
+  readonly onParticleCommand: (command: ParticleRunCommand) => void
+  readonly readOnly?: boolean
   readonly t: PropsLocale<'artifact'>['t']
 }
 
@@ -33,7 +41,8 @@ export function SceneNodeView(props: SceneNodeViewProps) {
     case 'flowchart':
       return <FlowchartView {...props} spec={props.spec} />
     case 'particle-system':
-      return <ParticleSystemView {...props} spec={props.spec} />
+      if (props.particleRun === null) throw new Error('Particle scene requires a revision-owned runtime')
+      return <ParticleSystemView {...props} spec={props.spec} run={props.particleRun} onCommand={props.onParticleCommand} />
     case 'timeline':
       return <TimelineView {...props} spec={props.spec} />
     case 'network-graph':

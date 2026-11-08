@@ -1,5 +1,6 @@
 /** Versioned SceneSpec definitions and validation for model-generated scenes. */
 import { parseExpression } from '@deepseek-ai/dsh-util-values'
+import type { ArtifactSourceCapabilities } from './capabilities.ts'
 
 /** Bounded numeric parameter exposed by a SceneSpec. */
 export interface SceneParameterSpec {
@@ -129,11 +130,12 @@ export interface MapSpec {
 /** Union of all currently supported declarative SceneSpec primitives. */
 export type SceneSpec = FunctionPlotSpec | FlowchartSpec | ParticleSystemSpec | TimelineSpec | NetworkGraphSpec | MapSpec
 
-/** Catalog entry owning one primitive's version and normalization. */
+/** Catalog entry owning one primitive's version, normalization, and source-supported operations. */
 export interface SceneCatalogEntry {
   readonly kind: SceneSpec['kind']
   readonly catalogVersion: number
   readonly normalize: (value: unknown) => SceneSpec
+  readonly sourceCapabilities: ArtifactSourceCapabilities
 }
 
 /** Error with the exact SceneSpec path that failed validation. */
@@ -374,14 +376,32 @@ export function normalizeTimeline(value: unknown): TimelineSpec {
   return { kind: 'timeline', events, ...(playhead === undefined ? {} : { playhead }), ...(timeline === undefined ? {} : { timeline }), style: value.style === undefined ? 'editorial' : normalizeStyle(value.style) }
 }
 
+const sourceDefaultCapabilities: ArtifactSourceCapabilities = Object.freeze({
+  observe: 'unsupported',
+  save: 'unsupported',
+  restore: 'unsupported',
+  compare: 'unsupported',
+  questionContext: 'unsupported',
+  exportHtml: 'source-defaults',
+})
+
+const particleSourceCapabilities: ArtifactSourceCapabilities = Object.freeze({
+  observe: 'particle',
+  save: 'particle',
+  restore: 'particle',
+  compare: 'saved-particle-pair',
+  questionContext: 'particle',
+  exportHtml: 'particle-checkpoint-or-source-defaults',
+})
+
 /** Versioned catalog of SceneSpec primitives available to model generation. */
 export const sceneCatalog: Readonly<Record<SceneSpec['kind'], SceneCatalogEntry>> = {
-  'function-plot': { kind: 'function-plot', catalogVersion: 1, normalize: normalizeFunctionPlot },
-  'flowchart': { kind: 'flowchart', catalogVersion: 1, normalize: normalizeFlowchart },
-  'particle-system': { kind: 'particle-system', catalogVersion: 1, normalize: normalizeParticleSystem },
-  'timeline': { kind: 'timeline', catalogVersion: 1, normalize: normalizeTimeline },
-  'network-graph': { kind: 'network-graph', catalogVersion: 1, normalize: normalizeNetworkGraph },
-  'map': { kind: 'map', catalogVersion: 1, normalize: normalizeMap },
+  'function-plot': { kind: 'function-plot', catalogVersion: 1, normalize: normalizeFunctionPlot, sourceCapabilities: sourceDefaultCapabilities },
+  'flowchart': { kind: 'flowchart', catalogVersion: 1, normalize: normalizeFlowchart, sourceCapabilities: sourceDefaultCapabilities },
+  'particle-system': { kind: 'particle-system', catalogVersion: 1, normalize: normalizeParticleSystem, sourceCapabilities: particleSourceCapabilities },
+  'timeline': { kind: 'timeline', catalogVersion: 1, normalize: normalizeTimeline, sourceCapabilities: sourceDefaultCapabilities },
+  'network-graph': { kind: 'network-graph', catalogVersion: 1, normalize: normalizeNetworkGraph, sourceCapabilities: sourceDefaultCapabilities },
+  'map': { kind: 'map', catalogVersion: 1, normalize: normalizeMap, sourceCapabilities: sourceDefaultCapabilities },
 }
 
 function normalizeMap(value: unknown): MapSpec {
@@ -439,7 +459,7 @@ function normalizeNetworkGraph(value: unknown): NetworkGraphSpec {
  */
 export function normalizeSceneSpec(value: unknown): SceneSpec {
   if (!isRecord(value) || typeof value.kind !== 'string') throw new SceneValidationError('/kind', 'must be a known scene kind')
+  if (!Object.hasOwn(sceneCatalog, value.kind)) throw new SceneValidationError('/kind', `unsupported scene kind: ${value.kind}`)
   const entry = sceneCatalog[value.kind as FunctionPlotSpec['kind']]
-  if (entry === undefined) throw new SceneValidationError('/kind', `unsupported scene kind: ${value.kind}`)
   return entry.normalize(value)
 }

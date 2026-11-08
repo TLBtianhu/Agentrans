@@ -105,6 +105,14 @@ export const VIEWER_ENDPOINT_CLASSES = {
   'session/updateQueue': 'owner-only', // owner edits queued input
   'session/returnBranchResult': 'owner-only', // owner confirms which child conclusion enters the parent
   'artifacts/record': 'owner-only', // owner confirms Artifact intent before it reaches the Agent
+  'artifacts/submitAction': 'owner-only', // owner confirms an immutable identity-bound Artifact input
+  'artifacts/saveObservation': 'owner-only', // owner retains a named observation in Session history
+  'artifacts/sendObservation': 'owner-only', // owner confirms a saved observation before Agent admission
+  'artifacts/confirmObservationComparison': 'owner-only', // owner confirms the fixed pair before Agent admission
+  'artifactBranchResults/returnResult': 'owner-only', // owner adopts a child conclusion with selected evidence
+  'artifactExports/create': 'owner-only', // owner freezes and stores an export
+  'artifactExports/read': 'owner-only', // exported HTML may contain private source
+  'artifactRuntime/attach': 'owner-only', // owner supplies live renderer reports; reports grant no authority
   'session/workspacePathApplications': 'owner-only', // owner applies a Workspace path
   'credentials/describe': 'owner-only', // owner credentials; secrets never reach a reader
   'credentials/set': 'owner-only', // owner credentials; secrets never reach a reader

@@ -164,6 +164,17 @@ const ALLOW = { kind: 'allow' }
 const deny = (reason: string) => ({ kind: 'deny', reason })
 
 describe('share reader access policy', () => {
+  it.each(['view', 'write'] as const)('keeps Artifact writes, exports and runtime reports owner-only for %s readers', async (mode) => {
+    const { decide, grants } = await fixture({ mode })
+    for (const action of ['artifacts/submitAction', 'artifacts/saveObservation', 'artifacts/sendObservation', 'artifacts/confirmObservationComparison',
+      'artifactBranchResults/returnResult', 'artifactExports/create', 'artifactExports/read', 'artifactRuntime/attach'] as const) {
+      for (const resource of [GLOBAL, session('source'), session('own-child')]) {
+        expect(decide(action, resource, CALL)).toEqual(deny('liveshare/read-only'))
+      }
+      expect(grants().some(grant => grant.actions.includes(action))).toBe(false)
+    }
+  })
+
   it.each([
     [{ published: false }, 'share-not-found'],
     [{ stopped: true }, 'share-stopped'],

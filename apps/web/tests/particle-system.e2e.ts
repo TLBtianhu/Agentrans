@@ -9,7 +9,7 @@ import {
 } from './scaffold.ts'
 import { connectFreshWorkspace } from './support.ts'
 
-const DIR = fileURLToPath(new URL('../../../snapshots/web/particle-system', import.meta.url))
+const DIR = fileURLToPath(new URL('./fixtures/replay/particle-system', import.meta.url))
 const FIXTURE = join(DIR, 'session.v4.jsonl')
 const MODE = webSnapshotMode()
 

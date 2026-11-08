@@ -18,7 +18,14 @@ export type BranchResultActionProps = PropsRuntime<'conversation.chat.assistant.
   & InjectFace<BranchResultActionInjected>
   & PropsLocale<'branch'>
 
-type Phase = 'idle' | 'preview' | 'pending' | 'error'
+type Phase = 'idle' | 'preview' | 'pending' | 'error' | 'conflict'
+
+function isBranchResultConflict(error: unknown): boolean {
+  if (error === null || typeof error !== 'object' || !('rpcError' in error)) return false
+  const failure = error.rpcError
+  return failure !== null && typeof failure === 'object' && 'code' in failure
+    && failure.code === 'session/branch-result-conflict'
+}
 
 /** Inline explicit confirmation for one durable assistant conclusion. */
 export function BranchResultAction({
@@ -36,15 +43,15 @@ export function BranchResultAction({
   if (!allowed || parentId === undefined || text.trim() === '') return null
 
   const confirm = async (): Promise<void> => {
-    if (inFlight.current) return
+    if (inFlight.current || phase === 'conflict') return
     inFlight.current = true
     setPhase('pending')
     try {
       await returnBranchResult({ sessionId: parentId, branchSessionId: sessionId, resultSeq: seq })
       setPhase('idle')
       openSession(parentId)
-    } catch (_error: unknown) {
-      setPhase('error')
+    } catch (error: unknown) {
+      setPhase(isBranchResultConflict(error) ? 'conflict' : 'error')
     } finally {
       inFlight.current = false
     }
@@ -66,10 +73,13 @@ export function BranchResultAction({
       <div className={css.preview}>
         <p className={css.previewText}>{text}</p>
         {phase === 'error' && <p className={css.error} role="alert">{t('result.failed')}</p>}
+        {phase === 'conflict' && <p className={css.error} role="alert">{t('result.conflict')}</p>}
         <div className={css.actions}>
-          <Button size="sm" variant="primary" disabled={pending} onClick={() => { void confirm() }}>
-            {t(phase === 'error' ? 'result.retry' : 'result.confirm')}
-          </Button>
+          {phase === 'conflict'
+            ? <Button size="sm" variant="primary" onClick={() => { openSession(parentId) }}>{t('result.openParent')}</Button>
+            : <Button size="sm" variant="primary" disabled={pending} onClick={() => { void confirm() }}>
+              {t(phase === 'error' ? 'result.retry' : 'result.confirm')}
+            </Button>}
           <Button size="sm" variant="ghost" disabled={pending} onClick={() => { setPhase('idle') }}>
             {t('result.cancel')}
           </Button>

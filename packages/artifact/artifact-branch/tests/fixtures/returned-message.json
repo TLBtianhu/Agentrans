@@ -1,0 +1,21 @@
+{
+  "id": "returned-evidence-message",
+  "role": "user",
+  "source": {
+    "kind": "branch-result",
+    "branchSessionId": "evidence-child",
+    "resultSeq": 13,
+    "resultMessageId": "child-conclusion",
+    "form": "notice"
+  },
+  "content": [
+    {
+      "type": "text",
+      "text": "At step 2, the lower-gravity trajectory stays higher."
+    },
+    {
+      "type": "text",
+      "text": "The user selected the following saved Artifact evidence to accompany this conclusion. This does not state that the assistant used it when producing the conclusion.\n{\"kind\":\"branch-result-artifact-evidence\",\"branchSessionId\":\"evidence-child\",\"evidence\":{\"kind\":\"comparison\",\"group\":\"gravity\",\"conditions\":{\"runtimeVersion\":1,\"stepCount\":2,\"timeStep\":0.1,\"time\":0.2},\"control\":{\"observationId\":\"control-saved\",\"label\":\"control\",\"artifact\":{\"artifactId\":\"control\",\"revision\":1,\"title\":\"control\",\"presentation\":\"inline\",\"comparison\":{\"group\":\"gravity\",\"role\":\"control\"},\"format\":\"scene\",\"spec\":{\"kind\":\"particle-system\",\"particles\":[{\"id\":\"p\",\"x\":1,\"y\":1,\"vx\":1,\"vy\":4,\"mass\":1}],\"gravity\":{\"x\":0,\"y\":-10},\"timeStep\":0.1,\"trails\":true,\"style\":\"editorial\"}},\"checkpoint\":{\"runtimeVersion\":1,\"stepCount\":2},\"values\":{\"time\":0.2,\"particles\":[{\"id\":\"p\",\"x\":1.2,\"y\":1.7,\"vx\":1,\"vy\":2}]}},\"variant\":{\"observationId\":\"variant-saved\",\"label\":\"variant\",\"artifact\":{\"artifactId\":\"variant\",\"revision\":1,\"title\":\"variant\",\"presentation\":\"inline\",\"comparison\":{\"group\":\"gravity\",\"role\":\"variant\"},\"format\":\"scene\",\"spec\":{\"kind\":\"particle-system\",\"particles\":[{\"id\":\"p\",\"x\":1,\"y\":1,\"vx\":1,\"vy\":4,\"mass\":1}],\"gravity\":{\"x\":0,\"y\":-5},\"timeStep\":0.1,\"trails\":true,\"style\":\"editorial\"}},\"checkpoint\":{\"runtimeVersion\":1,\"stepCount\":2},\"values\":{\"time\":0.2,\"particles\":[{\"id\":\"p\",\"x\":1.2,\"y\":1.75,\"vx\":1,\"vy\":3}]}}}}"
+    }
+  ]
+}

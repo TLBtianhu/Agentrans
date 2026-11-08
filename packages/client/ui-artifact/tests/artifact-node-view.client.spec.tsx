@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { sessionSnapshot } from '@deepseek-ai/dsh-client-test-runtime'
 import type { ComponentProps } from 'react'
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -6,10 +7,12 @@ import { makeTranslate, allowAllAccess, bindSnapshotSelector } from '@deepseek-a
 import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
 import type { SessionListState } from '@deepseek-ai/dsh-api-session-controller/client'
 import { SessionId } from '@deepseek-ai/dsh-session/types'
-import { ArtifactNodeView } from '../src/client/ArtifactNodeView.tsx'
+import { ArtifactNodeView } from './runtime-harness.tsx'
 import { artifactPresentationStore } from '../src/client/presentation.ts'
 import { en } from '../src/client/locales.ts'
-import type { ArtifactId, ArtifactSnapshot, RecordArtifactAction } from '../src/client/protocol.ts'
+import type {
+  ArtifactId, ArtifactSnapshot, ConfirmObservationComparison, RecordArtifactAction, SaveArtifactObservation, SendArtifactObservation,
+} from '../src/client/protocol.ts'
 
 const t = makeTranslate(en)
 const throwUnused = () => { throw new Error('unused standard prop') }
@@ -30,8 +33,8 @@ function props(revision = 1, recordAction: RecordArtifactAction = vi.fn().mockRe
     sessionId: SessionId('artifact-a'),
     useStore: bindSnapshotSelector(store.store),
     actions: store.actions,
-    useSession: throwUnused,
-    useProjection: throwUnused,
+    useSession: selector => selector(sessionSnapshot(SessionId('test-session'))),
+    useProjection: () => ({}),
     useConversation: throwUnused,
     useTrajectory: throwUnused,
     useChat: throwUnused,
@@ -56,6 +59,9 @@ function props(revision = 1, recordAction: RecordArtifactAction = vi.fn().mockRe
     useResource: throwUnused,
     ...allowAllAccess,
     recordAction,
+    saveObservation: vi.fn<SaveArtifactObservation>().mockRejectedValue(new Error('Observation save not used')),
+    sendObservation: vi.fn<SendArtifactObservation>().mockResolvedValue(undefined),
+    confirmObservationComparison: vi.fn<ConfirmObservationComparison>().mockResolvedValue(undefined),
     openFile: vi.fn(), inspectCall: undefined, forkAt: vi.fn(), loadImage: async () => { throw new Error('not used') },
     useTurnData: () => undefined,
     useDisclosure: () => { throw new Error('unused disclosure') },
@@ -85,6 +91,67 @@ afterEach(() => {
 })
 
 describe('ArtifactNodeView', () => {
+  it.each(['root', 'branch', 'subagent'] as const)('offers program context only through a supported %s prompt route', async (route) => {
+    const base = props()
+    const lifecycle = sessionSnapshot(base.sessionId)
+    base.useSession = bindSnapshotSelector(createSnapshotStore({ ...lifecycle, subagent: route === 'subagent'
+      ? { address: { parentSessionId: SessionId('parent'), childSessionId: base.sessionId, mode: 'continuable' as const }, parentAvailable: true }
+      : null }))
+    if (route === 'branch') base.useSessions = bindSnapshotSelector(createSnapshotStore<SessionListState>({
+      ids: [base.sessionId, SessionId('parent')], byId: {
+        [base.sessionId]: { id: base.sessionId, displayTitle: 'Branch', parentId: SessionId('parent'), running: false, retainedBy: {}, blank: false, updatedAt: 1 },
+        [SessionId('parent')]: { id: SessionId('parent'), displayTitle: 'Parent', running: false, retainedBy: {}, blank: false, updatedAt: 1 },
+      }, phase: 'ready', projectionsBySession: {},
+    }))
+    render(<ArtifactNodeView {...base} />)
+    const target = frame()
+    const identity = { artifactId: base.node.data.artifactId, revision: 1, renderer: 'html', runtimeId: target.dataset.artifactRuntimeId }
+    post(target, { kind: 'artifact-runtime-report', identity, report: { status: 'ready', capabilities: { state: true, commands: [] } } })
+    post(target, { kind: 'artifact-runtime-state', identity, state: { count: 1 } })
+    if (route === 'subagent') {
+      expect(screen.queryByRole('button', { name: en['promptContext.programAttach'] })).toBeNull()
+      expect(screen.getByText(en['route.subagentLocalOnly'])).toBeTruthy()
+      expect(screen.getByTitle('Report 1 preview')).toBeTruthy()
+    } else {
+      await waitFor(() => { expect(screen.getByRole('button', { name: en['promptContext.programAttach'] }).hasAttribute('disabled')).toBe(false) })
+      expect(screen.queryByText(en['promptContext.subagentUnsupported'])).toBeNull()
+      fireEvent.click(screen.getByRole('button', { name: en['promptContext.programAttach'] }))
+    }
+    expect(base.recordAction).not.toHaveBeenCalled()
+  })
+
+  it('treats a valid Object-property Artifact identity as an empty projected list and permits saving', () => {
+    const base = props()
+    const data = { artifactId: 'constructor' as ArtifactId, revision: 1, format: 'scene', title: 'Constructor', presentation: 'inline',
+      spec: { kind: 'particle-system', particles: [{ id: 'p', x: 0, y: 0, vx: 1, vy: 0, mass: 1 }],
+        gravity: { x: 0, y: 0 }, timeStep: 0.1, trails: false } } as const
+    render(<ArtifactNodeView {...base} node={{ ...base.node, data }} />)
+    expect(screen.getByText('No saved observations yet.')).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Save observation' }).hasAttribute('disabled')).toBe(false)
+  })
+  it('checks create and read permissions separately before exposing export actions', () => {
+    const base = props()
+    const scene = { artifactId: base.node.data.artifactId, revision: 1, format: 'scene', title: 'Protected', presentation: 'inline',
+      spec: { kind: 'flowchart', nodes: [], edges: [] } } as const
+    const record = { request: { exportId: 'protected-export', format: 'html', source: { kind: 'current', artifactId: scene.artifactId, revision: 1 } },
+      frozen: { artifact: scene, exporterVersion: 1, parameters: 'source-defaults' }, status: 'ready',
+      file: { attachmentId: 'sha256:abc', bytes: 8, name: 'protected.html' } }
+    const access = vi.fn().mockReturnValue(false)
+    const commands = { create: vi.fn(), download: vi.fn() }
+    const view = render(<ArtifactNodeView {...base} node={{ ...base.node, data: scene }} exports={commands}
+      useAccess={access} useProjection={vi.fn(key => key === 'artifactExports' ? { 'protected-export': record } : {}) as never} />)
+    expect(access).toHaveBeenCalledWith('artifactExports/create')
+    expect(access).toHaveBeenCalledWith('artifactExports/read')
+    expect(screen.queryByRole('button', { name: 'Export animation' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Download HTML' })).toBeNull()
+    view.rerender(<ArtifactNodeView {...base} node={{ ...base.node, data: scene }} exports={commands}
+      useAccess={vi.fn(method => method === 'artifactExports/read')}
+      useProjection={vi.fn(key => key === 'artifactExports' ? { 'protected-export': record } : {}) as never} />)
+    expect(screen.queryByRole('button', { name: 'Export animation' })).toBeNull()
+    expect(screen.getByRole('button', { name: 'Download HTML' })).toBeTruthy()
+    expect(commands.create).not.toHaveBeenCalled()
+    expect(commands.download).not.toHaveBeenCalled()
+  })
   it('renders an opaque srcDoc iframe, revision, local focus, and source inspection', () => {
     const base = props(1, undefined, 'focus')
     base.useSessions = bindSnapshotSelector(createSnapshotStore<SessionListState>({
@@ -136,7 +203,7 @@ describe('ArtifactNodeView', () => {
     view.unmount()
   })
 
-  it('exports a SceneSpec animation as a downloadable HTML document', () => {
+  it('exports a SceneSpec through the fixed-input service and delegates its file transfer', async () => {
     const base = props(1)
     base.node = {
       ...base.node,
@@ -151,15 +218,16 @@ describe('ArtifactNodeView', () => {
         },
       },
     }
-    const create = vi.fn(() => 'blob:animation')
-    const revoke = vi.fn()
-    vi.stubGlobal('URL', { ...URL, createObjectURL: create, revokeObjectURL: revoke })
-    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
-    render(<ArtifactNodeView {...base} />)
+    const create = vi.fn().mockResolvedValue({ request: { exportId: 'created' }, status: 'ready',
+      frozen: { sessionId: base.sessionId, artifact: base.node.data, exporterVersion: 1, parameters: 'source-defaults' },
+      file: { attachmentId: 'sha256:abc', bytes: 8, name: 'plot.html' } })
+    const download = vi.fn().mockResolvedValue({ status: 'requested' })
+    render(<ArtifactNodeView {...base} exports={{ create, download }} />)
     fireEvent.click(screen.getByRole('button', { name: 'Export animation' }))
-    expect(click).toHaveBeenCalledOnce()
+    await waitFor(() => { expect(download).toHaveBeenCalledOnce() })
     expect(create).toHaveBeenCalledOnce()
-    expect(revoke).toHaveBeenCalledWith('blob:animation')
+    expect(create.mock.calls[0]?.[0]).toMatchObject({ format: 'html',
+      source: { kind: 'current', artifactId: 'artifact-a', revision: 1 } })
   })
 
   it('forks an inquiry branch from the Artifact checkpoint without changing placement', () => {
@@ -221,7 +289,7 @@ describe('ArtifactNodeView', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Send to Agent' }))
     await waitFor(() => { expect(screen.queryByText('Action: approve')).toBeNull() })
-    expect(recordAction).toHaveBeenCalledExactlyOnceWith('artifact-a', 1, 'approve', { accepted: true }, true)
+    expect(recordAction).toHaveBeenCalledExactlyOnceWith('artifact-a', 1, 'approve', { accepted: true }, true, expect.any(String))
   })
 
   it('rejects a wrong source, revision, schema, and oversized message', () => {
@@ -287,7 +355,7 @@ describe('ArtifactNodeView', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Send to Agent' }))
     await waitFor(() => { expect(screen.queryByText('Action: approve')).toBeNull() })
-    expect(recordAction).toHaveBeenCalledExactlyOnceWith('artifact-a', 1, 'approve', { accepted: true }, true)
+    expect(recordAction).toHaveBeenCalledExactlyOnceWith('artifact-a', 1, 'approve', { accepted: true }, true, expect.any(String))
   })
 
   it('removes message listeners and transient state on revision update and unmount', async () => {
@@ -323,12 +391,32 @@ describe('ArtifactNodeView', () => {
     post(frame(), action())
     fireEvent.click(await screen.findByRole('button', { name: 'Send to Agent' }))
 
-    expect(await screen.findByRole('alert')).toHaveProperty('textContent', en['send.failed'])
+    expect(await screen.findByRole('alert')).toHaveProperty('textContent', en['actionSubmission.unknown'])
     expect(screen.getByText('Action: approve')).toBeTruthy()
-    fireEvent.click(screen.getByRole('button', { name: 'Retry sending to Agent' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Retry original action' }))
     await waitFor(() => { expect(screen.queryByText('Action: approve')).toBeNull() })
     expect(recordAction).toHaveBeenCalledTimes(2)
-    expect(recordAction).toHaveBeenNthCalledWith(2, 'artifact-a', 1, 'approve', { accepted: true }, true)
+    expect(recordAction).toHaveBeenNthCalledWith(2, 'artifact-a', 1, 'approve', { accepted: true }, true, expect.any(String))
+    expect(recordAction.mock.calls[1]).toEqual(recordAction.mock.calls[0])
+  })
+
+  it('retries only the captured HTML action identity and leaves later queued actions available', async () => {
+    const first = Promise.withResolvers<undefined>()
+    const recordAction = vi.fn<RecordArtifactAction>().mockReturnValueOnce(first.promise).mockResolvedValue(undefined)
+    render(<ArtifactNodeView {...props(1, recordAction)} />)
+    const target = frame()
+    post(target, action(1, 'first'))
+    fireEvent.click(screen.getByRole('button', { name: 'Send to Agent' }))
+    post(target, action(1, 'second'))
+    await act(async () => { first.reject(new Error('lost response')); await expect(first.promise).rejects.toThrow('lost response') })
+    expect(screen.getByRole('button', { name: 'Send to Agent' }).hasAttribute('disabled')).toBe(true)
+    fireEvent.click(screen.getByRole('button', { name: en['actionSubmission.retry'] }))
+    await screen.findByText('Action: second')
+    expect(recordAction.mock.calls[1]).toEqual(recordAction.mock.calls[0])
+    fireEvent.click(screen.getByRole('button', { name: 'Send to Agent' }))
+    await waitFor(() => { expect(recordAction).toHaveBeenCalledTimes(3) })
+    expect(recordAction.mock.calls[2]?.[2]).toBe('second')
+    expect(recordAction.mock.calls[2]?.[5]).not.toBe(recordAction.mock.calls[0]?.[5])
   })
 
   it('serializes confirmation and preserves actions that arrive during a send', async () => {
@@ -345,7 +433,7 @@ describe('ArtifactNodeView', () => {
       button.dispatchEvent(new MouseEvent('click', { bubbles: true }))
     })
     expect(recordAction).toHaveBeenCalledTimes(1)
-    expect(recordAction).toHaveBeenCalledWith('artifact-a', 1, 'first', { accepted: true }, true)
+    expect(recordAction).toHaveBeenCalledWith('artifact-a', 1, 'first', { accepted: true }, true, expect.any(String))
     await act(async () => { pending.resolve(undefined); await pending.promise })
     expect(await screen.findByText('Action: second')).toBeTruthy()
     expect(screen.queryByText('Action: first')).toBeNull()
@@ -365,7 +453,7 @@ describe('ArtifactNodeView', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Send to Agent' }))
     await waitFor(() => { expect(screen.queryByRole('alert')).toBeNull() })
     expect(screen.getByText('31 actions pending')).toBeTruthy()
-    expect(recordAction).toHaveBeenCalledWith('artifact-a', 1, 'action-0', { accepted: true }, true)
+    expect(recordAction).toHaveBeenCalledWith('artifact-a', 1, 'action-0', { accepted: true }, true, expect.any(String))
   })
 
   it('ignores a failed Remote completion after unmount', async () => {

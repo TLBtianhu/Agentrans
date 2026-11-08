@@ -26,7 +26,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
 import { mkdir, mkdtemp, readFile, readdir, realpath, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { basename, dirname, join, resolve } from 'node:path'
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import type { Page } from 'playwright'
 import { expect } from 'vitest'
@@ -163,6 +163,37 @@ async function ownsReplayFixture(replayFixture: string | undefined): Promise<boo
   if (!existsSync(manifestPath)) return false
   const manifest = parseSnapshotManifest(await readFile(manifestPath, 'utf8'), manifestPath)
   return manifest.session === undefined
+}
+
+/**
+ * Require a real recorded-session owner for canonical replay files inside the corpus.
+ * @param fixturePath - selected parent or child replay path.
+ * @param corpusRoot - top-level snapshots directory; explicit for isolated fixture tests.
+ */
+export async function assertCorpusReplayFixtureOwner(fixturePath: string, corpusRoot: string): Promise<void> {
+  if (parseSessionFixtureName(basename(fixturePath)) === undefined) return
+  const location = relative(resolve(corpusRoot), resolve(fixturePath))
+  if (isAbsolute(location) || location === '..' || location.startsWith(`..${sep}`)) return
+  const parts = location.split(sep)
+  if (parts.length !== 3) throw new Error(`${fixturePath}: corpus replay fixtures must belong to a profile/scenario directory`)
+  const [profile, scenario] = parts
+  const manifestPath = join(dirname(fixturePath), 'snapshot.yml')
+  let source: string
+  try { source = await readFile(manifestPath, 'utf8') }
+  catch (cause) {
+    throw new Error(`${manifestPath}: corpus replay fixtures require an owner manifest; keep input-only replay files with their app tests`, { cause })
+  }
+  const manifest = parseSnapshotManifest(source, manifestPath)
+  const profileMatches = profile === 'sdk'
+    ? manifest.profile === 'sdk' || manifest.profile === 'sdk-minimal'
+    : (profile === 'acp' || profile === 'web' || profile === 'session')
+      && manifest.profile === (profile === 'session' ? 'headless' : profile)
+  if (!profileMatches) throw new Error(`${manifestPath}: manifest profile must match the corpus directory`)
+  if (manifest.scenario !== scenario || manifest.composition === undefined
+    || manifest.recording === undefined || manifest.header === undefined) {
+    throw new Error(`${manifestPath}: corpus replay owners must declare matching scenario, composition, recording, and header metadata`)
+  }
+  if (manifest.session !== undefined) throw new Error(`${manifestPath}: a borrowing scenario cannot own replay Session files`)
 }
 
 /**
@@ -468,12 +499,6 @@ async function cleanupScaffoldWorld(ctx: Context, workspaceCwd: string, persiste
  * @returns the running scaffold.
  */
 export async function launchWebScaffold(options: LaunchOptions = {}): Promise<WebScaffold> {
-  requireDist()
-  const {
-    auditStartupEntries, composeEntries, createRuntimeResolution, initProfile,
-    mountRootInclude, readProfileManifest, readProfilePatches, loadProfileDirectory, loadOverlayPatches, PluginPackages,
-    bundlePatchPaths,
-  } = appBoot()
   const mode = webSnapshotMode()
   const replayFixture = options.replayFixture === undefined
     ? undefined
@@ -481,7 +506,17 @@ export async function launchWebScaffold(options: LaunchOptions = {}): Promise<We
   const replayChildFixtures = options.replayChildFixtures === undefined
     ? undefined
     : await Promise.all(options.replayChildFixtures.map(path => selectedSessionFixture(path)))
+  const corpusRoot = join(REPO_ROOT, 'snapshots')
+  for (const fixture of [...replayFixture === undefined ? [] : [replayFixture], ...replayChildFixtures ?? []]) {
+    await assertCorpusReplayFixtureOwner(fixture, corpusRoot)
+  }
   const compareReplaySession = options.compareReplaySession ?? await ownsReplayFixture(replayFixture)
+  requireDist()
+  const {
+    auditStartupEntries, composeEntries, createRuntimeResolution, initProfile,
+    mountRootInclude, readProfileManifest, readProfilePatches, loadProfileDirectory, loadOverlayPatches, PluginPackages,
+    bundlePatchPaths,
+  } = appBoot()
   const publicMount = options.publicMount
   // Chromium maps *.localhost to loopback without a resolver.
   const publicHost = publicMount === undefined ? undefined : 'public.localhost'

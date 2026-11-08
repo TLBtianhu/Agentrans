@@ -1,13 +1,16 @@
 // @vitest-environment jsdom
+import { sessionSnapshot } from '@deepseek-ai/dsh-client-test-runtime'
 import type { ComponentProps } from 'react'
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { makeTranslate, allowAllAccess, bindSnapshotSelector } from '@deepseek-ai/dsh-client-test-runtime'
 import { SessionId } from '@deepseek-ai/dsh-session/types'
-import { ArtifactNodeView } from '../src/client/ArtifactNodeView.tsx'
+import { ArtifactNodeView } from './runtime-harness.tsx'
 import { artifactPresentationStore, type ArtifactPresentationState } from '../src/client/presentation.ts'
 import { en } from '../src/client/locales.ts'
-import type { ArtifactId, ArtifactSnapshot, RecordArtifactAction } from '../src/client/protocol.ts'
+import type {
+  ArtifactId, ArtifactSnapshot, ConfirmObservationComparison, RecordArtifactAction, SaveArtifactObservation, SendArtifactObservation,
+} from '../src/client/protocol.ts'
 
 const t = makeTranslate(en)
 const throwUnused = () => { throw new Error('unused standard prop') }
@@ -38,8 +41,8 @@ function propsFor(id: string, presentation: Presentation, revision = 1): ViewPro
     sessionId: SessionId('session'),
     useStore: presentation.useStore,
     actions: presentation.actions,
-    useSession: throwUnused,
-    useProjection: throwUnused,
+    useSession: selector => selector(sessionSnapshot(SessionId('test-session'))),
+    useProjection: () => ({}),
     useConversation: throwUnused,
     useTrajectory: throwUnused,
     useChat: throwUnused,
@@ -64,6 +67,9 @@ function propsFor(id: string, presentation: Presentation, revision = 1): ViewPro
     useResource: throwUnused,
     ...allowAllAccess,
     recordAction,
+    saveObservation: vi.fn<SaveArtifactObservation>().mockRejectedValue(new Error('Observation save not used')),
+    sendObservation: vi.fn<SendArtifactObservation>().mockResolvedValue(undefined),
+    confirmObservationComparison: vi.fn<ConfirmObservationComparison>().mockResolvedValue(undefined),
     openFile: vi.fn(), inspectCall: undefined, forkAt: vi.fn(), loadImage: async () => { throw new Error('not used') },
     useTurnData: () => undefined,
     useDisclosure: () => { throw new Error('unused disclosure') },

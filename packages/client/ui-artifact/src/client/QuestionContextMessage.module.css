@@ -1,0 +1,26 @@
+.context {
+  display: block;
+  margin-top: 8px;
+  color: var(--dsw-alias-label-secondary);
+  font: var(--dsw-font-xs-13);
+  white-space: normal;
+}
+
+.context > summary {
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.label {
+  display: block;
+  margin-top: 8px;
+}
+
+.raw {
+  max-height: 320px;
+  max-width: 100%;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font: var(--dsw-font-xs-13);
+}

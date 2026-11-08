@@ -80,16 +80,21 @@ export function installedDshBin(): string {
  * Resolve the Node launch for one same-version dsh package.
  * @param dshManifestUrl - resolved URL of the dsh package manifest.
  * @param clientManifestUrl - resolved URL of the SDK client manifest.
+ * @param mode - source SDKs launch source; built SDKs require distribution artifacts.
  * @param sourceLoaderUrl - optional absolute tsx loader URL for deterministic tests.
- * @returns built output, or the source entry plus its compatibility patch and tsx environment.
+ * @returns the selected entry plus only that mode's patches and environment.
  */
 export function resolveDshNodeLaunchFromManifests(
   dshManifestUrl: string,
   clientManifestUrl: string,
+  mode: 'source' | 'built',
   sourceLoaderUrl?: string,
 ): DshNodeLaunch {
   const bin = resolveDshBinFromManifests(dshManifestUrl, clientManifestUrl)
-  if (existsSync(bin)) return { nodeArgs: [bin], patches: [], environment: {} }
+  if (mode === 'built') {
+    if (!existsSync(bin)) throw new Error(`@deepseek-ai/dsh is missing its built executable ${bin}; a built SDK requires distribution artifacts`)
+    return { nodeArgs: [bin], patches: [], environment: {} }
+  }
 
   const packageDir = dirname(fileURLToPath(dshManifestUrl))
   const sourceBin = resolve(packageDir, 'src/bin.ts')
@@ -97,7 +102,7 @@ export function resolveDshNodeLaunchFromManifests(
   const sourceTsconfig = resolve(packageDir, 'tsconfig.json')
   if (!existsSync(sourceBin) || !existsSync(sourcePatch) || !existsSync(sourceTsconfig)) {
     throw new Error(
-      `@deepseek-ai/dsh is missing its built executable ${bin} and complete source launch files ${sourceBin}, ${sourcePatch}, ${sourceTsconfig}`,
+      `@deepseek-ai/dsh is missing complete source launch files ${sourceBin}, ${sourcePatch}, ${sourceTsconfig}; a source SDK requires its source checkout`,
     )
   }
   const loader = sourceLoaderUrl ?? import.meta.resolve('tsx/esm')
@@ -109,13 +114,14 @@ export function resolveDshNodeLaunchFromManifests(
 }
 
 /**
- * Resolve the installed dsh package to a built or source Node launch.
+ * Resolve dsh in the same source or artifact plane as this SDK module.
  * @returns the launch descriptor for the current checkout or installed package.
  */
 function installedDshNodeLaunch(): DshNodeLaunch {
   return resolveDshNodeLaunchFromManifests(
     import.meta.resolve('@deepseek-ai/dsh/package.json'),
     new URL('../package.json', import.meta.url).href,
+    fileURLToPath(import.meta.url).endsWith('.ts') ? 'source' : 'built',
   )
 }
 

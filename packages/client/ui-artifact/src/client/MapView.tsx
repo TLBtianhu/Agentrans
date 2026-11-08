@@ -2,6 +2,8 @@
 import { useEffect, useRef, useState } from 'react'
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
+import type { RuntimeReport } from '@deepseek-ai/dsh-artifact-runtime/types'
+import { drawNativeScene } from './native-runtime.ts'
 import type { JsonValue } from '@deepseek-ai/dsh-util-values'
 import type { MapSpec } from '@deepseek-ai/dsh-artifact/scene'
 import type { ArtifactId } from '@deepseek-ai/dsh-artifact/types'
@@ -15,6 +17,9 @@ interface MapViewProps {
   readonly revision: number
   readonly placement: ArtifactPlacement
   readonly recordAction: RecordArtifactAction
+  readonly canRecord?: boolean
+  readonly recordPending?: boolean
+  readonly onRuntimeReport?: ((report: RuntimeReport) => void) | undefined
   readonly onStateChange?: ((state: JsonValue) => void) | undefined
   readonly t: PropsLocale<'artifact'>['t']
 }
@@ -24,21 +29,26 @@ interface MapViewProps {
  * @param props - SceneSpec, Artifact identity, placement, confirmation callback, and locale seat.
  * @returns An interactive map with a selected marker and its detail card.
  */
-export function MapView({ spec, artifactId, revision, placement, recordAction, onStateChange, t }: MapViewProps) {
+export function MapView({
+  spec, artifactId, revision, placement, recordAction, canRecord = true, recordPending = false, onRuntimeReport, onStateChange, t,
+}: MapViewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [selected, setSelected] = useState<string | undefined>(spec.path?.[0] ?? spec.markers[0]?.id)
 
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    renderMap(spec, canvas, 900, 420, { ...(selected === undefined ? {} : { selected }) })
-  }, [spec, selected])
+    drawNativeScene(canvas, () => {
+      renderMap(spec, canvas, 900, 420, { ...(selected === undefined ? {} : { selected }) })
+    }, onRuntimeReport)
+  }, [spec, selected, onRuntimeReport])
 
   useEffect(() => {
     onStateChange?.({ selected: selected ?? null })
   }, [onStateChange, selected])
 
   const confirm = async (): Promise<void> => {
+    if (!canRecord || recordPending) return
     await recordAction(artifactId, revision, 'map.inspected', { selected: selected ?? null }, true)
   }
 
@@ -90,7 +100,7 @@ export function MapView({ spec, artifactId, revision, placement, recordAction, o
             setSelected(ids[(index + 1) % ids.length])
           }}>{t('scene.next')}</Button>
         </div>
-        <Button size="sm" variant="outline" onClick={() => { void confirm() }}>{t('scene.confirm')}</Button>
+        {canRecord && <Button size="sm" variant="outline" disabled={recordPending} onClick={() => { void confirm() }}>{t('scene.confirm')}</Button>}
         <p className={css.hint}>{t('scene.mapHint')}</p>
       </aside>
     </div>

@@ -1,0 +1,61 @@
+{
+  "finalResponse": "The main SDK response remains unchanged.",
+  "questionEvents": [
+    {
+      "type": "user/message",
+      "seq": 3,
+      "time": 0,
+      "surfaceOp": "append",
+      "data": {
+        "role": "user",
+        "id": "program-state-message",
+        "source": {
+          "kind": "user",
+          "rpcId": "program-state-request"
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "Why does the counter show this value?"
+          },
+          {
+            "type": "text",
+            "text": "The user selected the following program-reported context for this question. The Host checked the source identity and revision; the runtime identity, status, state and error are Client/program reports, not independently verified or recomputed. This does not establish replayability or a causal conclusion.\n{\"kind\":\"artifact-question-context\",\"sessionId\":\"question-session\",\"facts\":{\"kind\":\"html-runtime\",\"artifact\":{\"artifactId\":\"reported-counter\",\"revision\":1,\"format\":\"html\",\"title\":\"Reported counter\",\"presentation\":\"inline\",\"source\":\"<!doctype html><html lang=\\\"en\\\"><head><meta charset=\\\"utf-8\\\"><title>Reported counter</title></head><body><output id=\\\"count\\\">0</output><button id=\\\"advance\\\">Advance</button><button id=\\\"fail\\\">Fail</button><script>let count=0;const draw=()=>{document.getElementById(\\\"count\\\").textContent=String(count)};document.getElementById(\\\"advance\\\").onclick=()=>{count+=1;draw();window.artifactRuntime.reportState({count})};document.getElementById(\\\"fail\\\").onclick=()=>{window.artifactRuntime.error(\\\"Counter failed on purpose\\\")};window.artifactRuntime.ready({state:()=>({count})});</script></body></html>\"},\"runtimeId\":\"program-state-instance\",\"attribution\":\"program-reported\",\"capture\":{\"status\":\"ready\",\"state\":{\"count\":2}}}}"
+          }
+        ]
+      }
+    }
+  ],
+  "questionNotifications": [
+    {
+      "method": "session.event",
+      "event": {
+        "type": "user/message",
+        "seq": 3,
+        "time": 0,
+        "surfaceOp": "append",
+        "data": {
+          "role": "user",
+          "id": "program-state-message",
+          "source": {
+            "kind": "user",
+            "rpcId": "program-state-request"
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "Why does the counter show this value?"
+            },
+            {
+              "type": "text",
+              "text": "The user selected the following program-reported context for this question. The Host checked the source identity and revision; the runtime identity, status, state and error are Client/program reports, not independently verified or recomputed. This does not establish replayability or a causal conclusion.\n{\"kind\":\"artifact-question-context\",\"sessionId\":\"question-session\",\"facts\":{\"kind\":\"html-runtime\",\"artifact\":{\"artifactId\":\"reported-counter\",\"revision\":1,\"format\":\"html\",\"title\":\"Reported counter\",\"presentation\":\"inline\",\"source\":\"<!doctype html><html lang=\\\"en\\\"><head><meta charset=\\\"utf-8\\\"><title>Reported counter</title></head><body><output id=\\\"count\\\">0</output><button id=\\\"advance\\\">Advance</button><button id=\\\"fail\\\">Fail</button><script>let count=0;const draw=()=>{document.getElementById(\\\"count\\\").textContent=String(count)};document.getElementById(\\\"advance\\\").onclick=()=>{count+=1;draw();window.artifactRuntime.reportState({count})};document.getElementById(\\\"fail\\\").onclick=()=>{window.artifactRuntime.error(\\\"Counter failed on purpose\\\")};window.artifactRuntime.ready({state:()=>({count})});</script></body></html>\"},\"runtimeId\":\"program-state-instance\",\"attribution\":\"program-reported\",\"capture\":{\"status\":\"ready\",\"state\":{\"count\":2}}}}"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "assistantTexts": [
+    "The main SDK response remains unchanged."
+  ]
+}

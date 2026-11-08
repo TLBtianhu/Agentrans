@@ -4,12 +4,13 @@ import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium, type Browser, type Page } from 'playwright'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { parseSessionLog } from '@deepseek-ai/dsh-llm-replay'
 import {
   assertFixtureInventory, fixtureUserPrompts, launchWebScaffold, watchConsole, webSnapshotMode, type WebScaffold,
 } from './scaffold.ts'
 import { connectFreshWorkspace } from './support.ts'
 
-const DIR = fileURLToPath(new URL('../../../snapshots/web/comparison-artifacts', import.meta.url))
+const DIR = fileURLToPath(new URL('./fixtures/replay/comparison-artifacts', import.meta.url))
 const FIXTURE = join(DIR, 'session.v4.jsonl')
 const MODE = webSnapshotMode()
 
@@ -52,8 +53,9 @@ describe.skipIf(MODE === 'record')('web e2e: comparison Artifacts', () => {
     }
   })
 
-  it('synchronizes two independent scenes and confirms one comparison result', async () => {
-    const prompts = fixtureUserPrompts(await readFile(FIXTURE, 'utf8'))
+  it('keeps legacy HTML interactive without claiming undeclared shared controls or state', async () => {
+    const fixture = await readFile(FIXTURE, 'utf8')
+    const prompts = fixtureUserPrompts(fixture)
     expect(prompts).toHaveLength(1)
     const firstTurn = scaffold.whenTurnSettled()
     const input = page.locator('[data-composer-input]').first()
@@ -74,22 +76,24 @@ describe.skipIf(MODE === 'record')('web e2e: comparison Artifacts', () => {
     await group.waitFor({ state: 'visible', timeout: 15_000 })
     const frames = group.locator('iframe[data-artifact-frame]:visible')
     await expect.poll(() => frames.count()).toBe(2)
-    const control = group.frameLocator('iframe[data-artifact-frame]').nth(0)
-    const variant = group.frameLocator('iframe[data-artifact-frame]').nth(1)
+    const control = group.locator('iframe[data-artifact-frame]').nth(0).contentFrame()
+    const variant = group.locator('iframe[data-artifact-frame]').nth(1).contentFrame()
 
-    await group.getByRole('button', { name: 'Step all', exact: true }).click()
+    expect(await group.getByRole('button', { name: 'Step all', exact: true }).count()).toBe(0)
+    expect(await group.getByRole('button', { name: 'Play all', exact: true }).count()).toBe(0)
+    expect(await group.getByRole('button', { name: 'Pause all', exact: true }).count()).toBe(0)
+    expect(await group.getByRole('button', { name: 'Reset all', exact: true }).count()).toBe(0)
+    await control.locator('#step').click()
+    await variant.locator('#step').click()
     await expect.poll(() => control.locator('#summary').textContent()).toContain('t = 0.10 s')
     await expect.poll(() => variant.locator('#summary').textContent()).toContain('t = 0.10 s')
 
-    await group.getByRole('button', { name: 'Play all', exact: true }).click()
-    await group.getByRole('button', { name: 'Pause all', exact: true }).click()
-    await expect.poll(() => control.locator('#summary').textContent()).toContain('paused')
-    await expect.poll(() => variant.locator('#summary').textContent()).toContain('paused')
-
-    await group.getByRole('button', { name: 'Reset all', exact: true }).click()
+    await control.locator('#reset').click()
+    await variant.locator('#reset').click()
     await expect.poll(() => control.locator('#summary').textContent()).toContain('t = 0.00 s')
     await expect.poll(() => variant.locator('#summary').textContent()).toContain('t = 0.00 s')
-    await group.getByRole('button', { name: 'Step all', exact: true }).click()
+    await control.locator('#step').click()
+    await variant.locator('#step').click()
     await expect.poll(() => control.locator('#summary').textContent()).toContain('t = 0.10 s')
     await expect.poll(() => variant.locator('#summary').textContent()).toContain('t = 0.10 s')
 
@@ -97,24 +101,23 @@ describe.skipIf(MODE === 'record')('web e2e: comparison Artifacts', () => {
     expect(session.snapshotEvents().filter(event => event.type === 'turn/start')).toHaveLength(1)
 
     const compare = group.getByRole('button', { name: 'Compare results', exact: true })
-    await expect.poll(() => compare.isEnabled()).toBe(true)
+    expect(await compare.isEnabled()).toBe(false)
+    await expect.poll(() => group.locator('[data-artifact-runtime-status="starting"]').count()).toBe(2)
+    // The retained recording's comparison facts can still be pasted as ordinary user text.
+    // Legacy frame reports cannot manufacture a supported comparison or an Artifact action.
+    const recorded = parseSessionLog(fixture).find(event => event.type === 'user/message' && event.data.source.kind === 'artifact-action')
+    if (recorded?.type !== 'user/message' || recorded.data.content[0]?.type !== 'text') throw new Error('Expected retained comparison text')
+    const question = recorded.data.content[0].text
     const secondTurn = scaffold.whenTurnSettled()
-    await compare.click()
+    await input.fill(question)
+    await input.press('Enter')
     expect(await secondTurn).toBe(sessionId)
 
     const actions = session.snapshotEvents().flatMap(event => event.type === 'user/message' && event.data.source.kind === 'artifact-action' ? [event.data] : [])
-    expect(actions).toHaveLength(1)
-    expect(actions[0]?.source).toEqual({ kind: 'artifact-action', artifactId: 'damping-control', revision: 1 })
-    const block = actions[0]?.content[0]
-    if (block?.type !== 'text') throw new Error('Comparison did not produce one text block')
-    expect(JSON.parse(block.text)).toEqual({
-      kind: 'artifact_action', artifactId: 'damping-control', revision: 1, action: 'comparison.completed',
-      payload: {
-        group: 'damping-study',
-        control: { artifactId: 'damping-control', revision: 1, state: { time: 0.1, amplitude: 1, frequency: 1.2, damping: 0.2 } },
-        variant: { artifactId: 'damping-variant', revision: 1, state: { time: 0.1, amplitude: 1, frequency: 1.2, damping: 0.5 } },
-      },
-    })
+    expect(actions).toHaveLength(0)
+    const questions = session.snapshotEvents().flatMap(event => event.type === 'user/message' && event.data.source.kind === 'user' ? [event.data] : [])
+    expect(questions).toHaveLength(2)
+    expect(questions[1]?.content).toEqual([{ type: 'text', text: question }])
     await page.getByText('The higher damping reduced the oscillation amplitude more quickly in the variant.', { exact: true }).waitFor({ state: 'visible' })
     expect(session.snapshotEvents().filter(event => event.type === 'turn/start')).toHaveLength(2)
     expect(tripwire.pageErrors).toEqual([])

@@ -1,0 +1,125 @@
+{
+  "finalResponse": "MAIN_RESPONSE",
+  "observationEvents": [
+    {
+      "type": "artifact/observations",
+      "seq": 3,
+      "time": 0,
+      "data": {
+        "artifactId": "experiment",
+        "observations": [
+          {
+            "observationId": "saved-a",
+            "label": "A",
+            "artifact": {
+              "artifactId": "experiment",
+              "revision": 1,
+              "format": "scene",
+              "title": "Experiment",
+              "presentation": "inline",
+              "spec": {
+                "kind": "particle-system",
+                "particles": [
+                  {
+                    "id": "p",
+                    "x": 0,
+                    "y": 1,
+                    "vx": 1,
+                    "vy": 0,
+                    "mass": 1
+                  }
+                ],
+                "gravity": {
+                  "x": 0,
+                  "y": -10
+                },
+                "timeStep": 0.1,
+                "trails": false
+              }
+            },
+            "checkpoint": {
+              "runtimeVersion": 1,
+              "stepCount": 2
+            },
+            "values": {
+              "time": 0.2,
+              "particles": [
+                {
+                  "id": "p",
+                  "x": 0.2,
+                  "y": 0.9,
+                  "vx": 1,
+                  "vy": -2
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "observationNotifications": [
+    {
+      "method": "session.event",
+      "event": {
+        "type": "artifact/observations",
+        "seq": 3,
+        "time": 0,
+        "data": {
+          "artifactId": "experiment",
+          "observations": [
+            {
+              "observationId": "saved-a",
+              "label": "A",
+              "artifact": {
+                "artifactId": "experiment",
+                "revision": 1,
+                "format": "scene",
+                "title": "Experiment",
+                "presentation": "inline",
+                "spec": {
+                  "kind": "particle-system",
+                  "particles": [
+                    {
+                      "id": "p",
+                      "x": 0,
+                      "y": 1,
+                      "vx": 1,
+                      "vy": 0,
+                      "mass": 1
+                    }
+                  ],
+                  "gravity": {
+                    "x": 0,
+                    "y": -10
+                  },
+                  "timeStep": 0.1,
+                  "trails": false
+                }
+              },
+              "checkpoint": {
+                "runtimeVersion": 1,
+                "stepCount": 2
+              },
+              "values": {
+                "time": 0.2,
+                "particles": [
+                  {
+                    "id": "p",
+                    "x": 0.2,
+                    "y": 0.9,
+                    "vx": 1,
+                    "vy": -2
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "assistantTexts": [
+    "MAIN_RESPONSE"
+  ]
+}

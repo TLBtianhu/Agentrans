@@ -1,0 +1,18 @@
+{
+  "role": "user",
+  "id": "question-message",
+  "source": {
+    "kind": "user",
+    "rpcId": "question-request"
+  },
+  "content": [
+    {
+      "type": "text",
+      "text": "Why are the two particles at these positions after six steps?"
+    },
+    {
+      "type": "text",
+      "text": "The user selected the following experiment context for this question. Particle values are recomputed by the Host from the recorded source and checkpoint; no causal conclusion is inferred.\n{\"kind\":\"artifact-question-context\",\"sessionId\":\"question-session\",\"facts\":{\"kind\":\"current-particle\",\"artifact\":{\"artifactId\":\"projectile-runtime\",\"revision\":1,\"format\":\"scene\",\"title\":\"Projectile runtime\",\"spec\":{\"kind\":\"particle-system\",\"particles\":[{\"id\":\"alpha\",\"x\":1,\"y\":1,\"vx\":3,\"vy\":8,\"mass\":1},{\"id\":\"beta\",\"x\":-1,\"y\":2,\"vx\":1,\"vy\":0,\"mass\":2}],\"gravity\":{\"x\":0,\"y\":-9.8},\"timeStep\":0.03333333333333333,\"trails\":true,\"timeline\":{\"duration\":2,\"fps\":30},\"style\":\"editorial\"},\"presentation\":\"inline\"},\"checkpoint\":{\"runtimeVersion\":1,\"stepCount\":6},\"values\":{\"time\":0.2,\"particles\":[{\"id\":\"alpha\",\"x\":1.6,\"y\":2.4366666666666665,\"vx\":3,\"vy\":6.04},{\"id\":\"beta\",\"x\":-0.8,\"y\":1.8366666666666667,\"vx\":1,\"vy\":-1.9600000000000002}]}}}"
+    }
+  ]
+}

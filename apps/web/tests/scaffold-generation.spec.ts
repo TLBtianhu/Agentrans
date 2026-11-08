@@ -1,9 +1,10 @@
 import { afterEach, describe, expect, it } from 'vitest'
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { parseSessionLog, prepareSessionSnapshotFixtureForComparison } from '@deepseek-ai/dsh-llm-replay'
 import {
+  assertCorpusReplayFixtureOwner,
   assertFixtureInventory,
   parseSeedFixture,
   recordedSessionFixturePath,
@@ -40,6 +41,74 @@ describe('Web seed stream timing', () => {
       previousEnd = 'time' in record ? record.time : record.time0 + record.dt.reduce((total, delta) => total + delta, 0)
     }
     expect(previousEnd).toBeGreaterThan(0)
+  })
+})
+
+describe('Web replay fixture ownership', () => {
+  async function fixture(profile = 'web'): Promise<{ root: string; corpus: string; directory: string; path: string }> {
+    const root = await mkdtemp(join(tmpdir(), 'dsh-web-replay-owner-'))
+    roots.push(root)
+    const corpus = join(root, 'snapshots')
+    const directory = join(corpus, profile, 'example')
+    await mkdir(directory, { recursive: true })
+    const path = join(directory, 'session.v4.jsonl')
+    await writeFile(path, `${JSON.stringify({ type: 'session', version: 4, id: '{{session:1}}' })}\n`)
+    return { root, corpus, directory, path }
+  }
+
+  function manifest(profile = 'web'): string {
+    return `version: 1\nscenario: example\nprofile: ${profile}\ncomposition: example\nrecording: authored\nheader:\n  class: example\n`
+  }
+
+  it('allows app-owned input-only replay files outside the corpus', async () => {
+    const { root, corpus } = await fixture()
+    for (const local of ['app-replay', 'snapshots-sibling']) {
+      const directory = join(root, local)
+      await mkdir(directory)
+      const path = join(directory, 'session.v4.jsonl')
+      await writeFile(path, '{"type":"session","version":4}\n')
+      await expect(assertCorpusReplayFixtureOwner(path, corpus)).resolves.toBeUndefined()
+    }
+    await expect(assertCorpusReplayFixtureOwner(join(corpus, 'notes.json'), corpus)).resolves.toBeUndefined()
+  })
+
+  it.each(['session.v4.jsonl', 'session.1.v4.jsonl'])('requires a corpus owner for %s', async (name) => {
+    const { corpus, directory } = await fixture()
+    const path = join(directory, name)
+    if (name !== 'session.v4.jsonl') await writeFile(path, '{"type":"session","version":4}\n')
+    await expect(assertCorpusReplayFixtureOwner(path, corpus))
+      .rejects.toThrow('corpus replay fixtures require an owner manifest')
+  })
+
+  it.each([
+    ['web', 'web'], ['session', 'headless'], ['sdk', 'sdk'], ['sdk', 'sdk-minimal'], ['acp', 'acp'],
+  ])('accepts a real %s corpus owner with profile %s for other test consumers', async (directoryProfile, profile) => {
+    const { corpus, directory, path } = await fixture(directoryProfile)
+    await writeFile(join(directory, 'snapshot.yml'), manifest(profile))
+    await expect(assertCorpusReplayFixtureOwner(path, corpus)).resolves.toBeUndefined()
+  })
+
+  it.each([
+    ['scenario: example\n', 'scenario: different\n'],
+    ['composition: example\n', ''],
+    ['recording: authored\n', ''],
+    ['header:\n  class: example\n', ''],
+  ])('requires complete matching owner metadata: %s', async (from, to) => {
+    const { corpus, directory, path } = await fixture()
+    await writeFile(join(directory, 'snapshot.yml'), manifest().replace(from, to))
+    await expect(assertCorpusReplayFixtureOwner(path, corpus))
+      .rejects.toThrow('matching scenario, composition, recording, and header metadata')
+  })
+
+  it('rejects a mismatched profile, malformed manifest, or borrowing scenario', async () => {
+    const { corpus, directory, path } = await fixture()
+    const manifestPath = join(directory, 'snapshot.yml')
+    await writeFile(manifestPath, manifest('headless'))
+    await expect(assertCorpusReplayFixtureOwner(path, corpus)).rejects.toThrow('profile must match')
+    await writeFile(manifestPath, `${manifest()}unexpected: true\n`)
+    await expect(assertCorpusReplayFixtureOwner(path, corpus)).rejects.toThrow('unknown field')
+    await writeFile(manifestPath, `${manifest()}session:\n  source: ../owner/session.v4.jsonl\n`)
+    await expect(assertCorpusReplayFixtureOwner(path, corpus)).rejects.toThrow('a borrowing scenario cannot own')
   })
 })
 

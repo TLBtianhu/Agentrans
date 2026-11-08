@@ -67,8 +67,10 @@
   color: var(--dsw-alias-label-tertiary);
 }
 
-.dockTabClose:hover {
-  color: var(--dsw-alias-label-primary);
+@media (hover: hover) {
+  .dockTabClose:hover {
+    color: var(--dsw-alias-label-primary);
+  }
 }
 
 /* The flow anchor keeps a return target while the card is portalled away. */
@@ -359,6 +361,69 @@
   place-items: center;
   border: 0.5px dashed var(--dsw-alias-border-l2);
   border-radius: var(--dsw-radius-md);
+  color: var(--dsw-alias-label-tertiary);
+  font: var(--dsw-font-xs-13);
+}
+
+.observations {
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px;
+  border-top: 0.5px solid var(--dsw-alias-border-l2);
+}
+
+.observationToolbar,
+.observationHistory {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.observationToolbar > span {
+  flex: 1 1 160px;
+  max-width: 320px;
+}
+
+.observationHistory {
+  padding: 10px 12px;
+  border-bottom: 0.5px solid var(--dsw-alias-border-l2);
+  font: var(--dsw-font-xs-13);
+}
+
+.observationList {
+  display: grid;
+  gap: 6px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.observationList > li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.observationDescription {
+  display: grid;
+  gap: 2px;
+  overflow-wrap: anywhere;
+  font: var(--dsw-font-xs-13);
+}
+
+.exportRequest {
+  display: grid;
+  gap: 4px;
+  overflow-wrap: anywhere;
+  font: var(--dsw-font-xs-13);
+}
+
+.observationHint,
+.observationDescription > span {
+  margin: 0;
   color: var(--dsw-alias-label-tertiary);
   font: var(--dsw-font-xs-13);
 }

@@ -1,0 +1,53 @@
+{
+  "request": {
+    "exportId": "export-a",
+    "source": {
+      "kind": "observation",
+      "artifactId": "experiment",
+      "observationId": "saved-a"
+    },
+    "format": "html"
+  },
+  "frozen": {
+    "artifact": {
+      "artifactId": "experiment",
+      "revision": 1,
+      "format": "scene",
+      "title": "Original experiment",
+      "presentation": "inline",
+      "spec": {
+        "kind": "particle-system",
+        "particles": [
+          {
+            "id": "p",
+            "x": 0,
+            "y": 1,
+            "vx": 1,
+            "vy": 0,
+            "mass": 1
+          }
+        ],
+        "gravity": {
+          "x": 0,
+          "y": -10
+        },
+        "timeStep": 0.1,
+        "trails": false
+      }
+    },
+    "observationId": "saved-a",
+    "checkpoint": {
+      "runtimeVersion": 1,
+      "stepCount": 2
+    },
+    "exporterVersion": 1,
+    "parameters": "particle-checkpoint",
+    "sessionId": "export-source"
+  },
+  "status": "ready",
+  "file": {
+    "attachmentId": "sha256:abababababababababababababababababababababababababababababababab",
+    "name": "experiment-r1-export-a.html",
+    "bytes": 1024
+  }
+}

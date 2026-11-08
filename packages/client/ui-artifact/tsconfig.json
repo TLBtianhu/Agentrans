@@ -27,6 +27,9 @@
       "path": "../../util/values"
     },
     {
+      "path": "../../util/crypto"
+    },
+    {
       "path": "../../test-support/client-runtime"
     },
     {
@@ -39,6 +42,9 @@
       "path": "../ui-conversation/tsconfig.client.json"
     },
     {
+      "path": "../ui-file-actions"
+    },
+    {
       "path": "../ui-primitives"
     },
     {
@@ -49,6 +55,24 @@
     },
     {
       "path": "../ui-slots"
+    },
+    {
+      "path": "../store"
+    },
+    {
+      "path": "../../artifact/artifact-branch"
+    },
+    {
+      "path": "../ui-workspace"
+    },
+    {
+      "path": "../../artifact/artifact-export"
+    },
+    {
+      "path": "../../artifact/artifact-followup"
+    },
+    {
+      "path": "../../artifact/artifact-runtime"
     }
   ]
 }

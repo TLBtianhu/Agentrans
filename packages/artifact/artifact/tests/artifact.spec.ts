@@ -85,6 +85,21 @@ function actionText(agent: RoutedAgent, wake: boolean): string {
 }
 
 describe('ArtifactService prepare and commit', () => {
+  it('reads independent current source values from the prepared Session without reading its log', async () => {
+    const { agent, service } = await setup()
+    const source = service.prepare(agent, createInput())
+    expect(service.currentSnapshot(agent, source.artifactId)).toBeUndefined()
+    service.commit(agent, source)
+    const logRead = vi.spyOn(agent.session, 'snapshotEvents').mockImplementation(() => { throw new Error('unexpected history read') })
+    const read = service.currentSnapshot(agent, source.artifactId)
+    expect(read).toEqual(source)
+    expect(read).not.toBe(source)
+    if (read === undefined) throw new Error('expected visible source')
+    Object.assign(read, { title: 'local copy' })
+    expect(service.currentSnapshot(agent, source.artifactId)?.title).toBe('Demo')
+    expect(logRead).not.toHaveBeenCalled()
+  })
+
   it('creates and updates complete snapshots with trimmed titles and increasing revisions', async () => {
     const { agent, service } = await setup()
     const created = service.prepare(agent, createInput())
@@ -171,7 +186,7 @@ describe('ArtifactService prepare and commit', () => {
       { ...valid, source: '' },
       { ...valid, presentation: 'other' },
     ]) {
-      expect(() => service.commit(agent, snapshot as ArtifactSnapshot)).toThrow(ArtifactError)
+      expect(() => { service.commit(agent, snapshot as ArtifactSnapshot) }).toThrow(ArtifactError)
     }
     expect(upserts(agent)).toEqual([])
   })
@@ -223,7 +238,7 @@ describe('ArtifactService record', () => {
     service.record(agent, 'demo' as ArtifactSnapshot['artifactId'], 1, 'refresh', [1, { ok: true }], true)
     expect(agent.steer).toHaveBeenCalledOnce()
     expect(agent.inject).not.toHaveBeenCalled()
-    expect(JSON.parse(actionText(agent, true)).action).toBe('refresh')
+    expect(JSON.parse(actionText(agent, true))).toMatchObject({ action: 'refresh' })
   })
 
   it('rejects unknown and stale revisions before routing', async () => {
@@ -290,6 +305,7 @@ describe('ArtifactService record', () => {
     const { agent } = await setup()
     const isolated = new Context()
     contexts.push(isolated)
+    await isolated.plugin(SessionProjectionRegistry)
     await isolated.plugin(ArtifactService)
     expect(() => isolated.artifacts.record(agent, 'demo' as ArtifactSnapshot['artifactId'], 1, 'go', null, false))
       .toThrow(expect.objectContaining({ code: 'AGENT_REGISTRY_UNAVAILABLE' }))
@@ -339,12 +355,13 @@ describe('artifact resource limits and configuration', () => {
   })
 
   it('validates schema defaults and direct-composition limits', async () => {
-    expect(ArtifactService.Config({})).toEqual({ maxSourceBytes: 262_144, maxActionBytes: 16_384 })
+    expect(ArtifactService.Config({})).toEqual({ maxSourceBytes: 262_144, maxActionBytes: 16_384, maxSavedObservationsPerArtifact: 32 })
     const directContext = new Context()
     contexts.push(directContext)
     expect(() => new ArtifactService(directContext, {})).not.toThrow()
     for (const config of [
       { maxSourceBytes: 0 }, { maxActionBytes: 1.5 }, { maxSourceBytes: Number.MAX_SAFE_INTEGER + 1 },
+      { maxSavedObservationsPerArtifact: 0 },
     ]) {
       expect(() => ArtifactService.Config(config)).toThrow()
       const ctx = new Context()
