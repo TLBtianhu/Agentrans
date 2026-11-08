@@ -2,6 +2,17 @@
 
 本文件记录当前开发工作区状态和 0.1.0 发布基线，供后续继续推进时对照。工作区完成项不代表已进入用户安装或发布物。
 
+## 已完成切片：场景调色板契约（主题概念第一步，2026-11-08）
+
+- 七个原生渲染器原本各自 `getComputedStyle(canvas)` 读 4–5 个 `--dsw-alias-*`。导出程序的 `:root` 从未声明这些变量，所以导出的 `editorial` 场景一直在用空字符串画线；多序列画面也只有 `accent` 一个颜色可选。这是“主题只是单文档调色板开关”的直接后果，不是一个配色瑕疵。
+- 新增 DOM-free 的 `packages/artifact/artifact/src/scene-palette.ts`：角色表 `ink / inkMuted / accent / success / surface / grid / highlight / series1..4` 与各自对应的 token 名；`resolveScenePalette(read)` 缺角色时抛 `ScenePaletteError` 点名角色与 token；`SCENE_STYLE_PALETTES` 声明每种风格的调色板所有者（`editorial` 为 `host`，`transit-map`/`blueprint`/`math-proof-lecture`/`particles` 为 `self-contained`）；`SCENE_STYLES` 成为类型、校验器与归属表共同的唯一列表。
+- 两端投递都接上：客户端视图用 `scenePaletteFor(canvas)` 从实时主题解析；导出物自带明暗两套 palette 并按 `prefers-color-scheme` 选一套交给同一批渲染器，导出因此顺带修好。渲染器不再读取文档。
+- 新增 ui-theme 样式表 `scene-palette.css`（第 9 张），`--dsw-alias-data-series-1..4` 与 `--dsw-alias-data-highlight` 映射到静态色阶，两套调色板下含义一致。粒子 `editorial` 分支改用 series 角色，多个粒子不再同色（唯一一处有意的视觉变化）。
+- 门禁：`scene-renderer-palette.spec.ts` 读取渲染器源码，禁止 `getComputedStyle`、`--dsw-` 与（已声明自足集合之外的）字面色，并校验归属表覆盖全部风格。反向证明：删掉某个角色的 CSS 值即抛 `ScenePaletteError`，视图报 error 而非静默绘制。
+- jsdom 没有 ui-theme，故新增 `scripts/test-scene-theme.ts` 注册进三个 vitest project 的 `setupFiles`，把角色值写到 `documentElement`；视图测试因此验证产品契约，而不是无主题表面。
+- 验证：`typecheck` 6/6；`doc-sync` 43/43（含此前长期红的 symlink 项）；`test:gui` 12808 通过、1 失败且唯一项为既有 `present-open.host.spec.ts` 的 Windows symlink `EPERM`；`ui-artifact` 357/357，`artifact` 与相关 546/546，`ui-theme` 全绿。`gen-cordis-catalog` 与 `gen-persistence-catalog` 因 `scene.ts` 行号变动已重新生成。
+- 尚未做：完整 `ResolvedTheme`（scheme/typography/motion/elevation 与 revision 一起发布）；iframe、欢迎窗、PWA 的主题通道；`data.axis`/`data.annotation` 等更多内容角色；默认主题改深色；应用深/系统浅与应用浅/系统深两向错配的真实截图验收。下一步是 iframe 与欢迎窗的通道统一，默认值最后再动。
+
 ## 已完成只读审计：架构一致性与主题契约（2026-11-08，未整改）
 
 - 本轮只读：阅读 MEMORY/PROGRESS/源码，并实跑 `apps/desktop/tests`、`apps/web/tests` 与 `verify-product-use`。未改源码、未提交、未联网、未调用模型、未读凭据。证据在 `C:\agent制作\.dev-data\qa\2026-11-08-architecture-theme-audit`（AUDIT.txt、THEME_CONTRACT_PLAN.txt）。
