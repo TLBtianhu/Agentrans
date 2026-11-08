@@ -36,6 +36,9 @@
       "path": "../../credentials/deepseek-account"
     },
     {
+      "path": "../../credentials/deepseek-issuer"
+    },
+    {
       "path": "../../util/http-proxy"
     }
   ]

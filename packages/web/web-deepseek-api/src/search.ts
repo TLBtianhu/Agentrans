@@ -4,6 +4,7 @@
  * @module @deepseek-ai/dsh-web-deepseek-api/search
  */
 import type { WebSearchProvider, WebSearchRequest, WebSearchResult } from '@deepseek-ai/dsh-web'
+import { DEEPSEEK_ENDPOINTS } from '@deepseek-ai/dsh-deepseek-issuer'
 import {
   dispatchDeepSeekWeb, hasDeepSeekWebCredential, invalidResponse, isRecord,
   type DeepSeekWebAuth, type DeepSeekWebGuidance,
@@ -13,7 +14,7 @@ import {
 export const DEEPSEEK_SEARCH_API_PROVIDER_ID = 'deepseek-search-api'
 
 /** Default Search and Fetch API base, including its `/v1/tools` prefix; `/search` and `/fetch` are appended. */
-export const DEEPSEEK_WEB_API_BASE_URL = 'https://api.deepseek.com/v1/tools'
+export const DEEPSEEK_WEB_API_BASE_URL = DEEPSEEK_ENDPOINTS['search-tools'].url
 
 /** Default Search API result count, the service's own default. */
 export const DEEPSEEK_DEFAULT_COUNT = 10

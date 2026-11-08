@@ -24,6 +24,9 @@
       "path": "../../credentials/credentials"
     },
     {
+      "path": "../../credentials/deepseek-issuer"
+    },
+    {
       "path": "../../../vendor/loader"
     },
     {

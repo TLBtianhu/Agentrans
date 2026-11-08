@@ -14,6 +14,7 @@ import z from '@deepseek-ai/schemastery'
 import type {} from '@deepseek-ai/dsh-agent'
 import type { Session } from '@deepseek-ai/dsh-session'
 import type {} from '@deepseek-ai/dsh-web'
+import { DEEPSEEK_API_KEY_REF } from '@deepseek-ai/dsh-deepseek-issuer'
 import { DeepSeekFetchApiProvider } from './fetch.ts'
 import { DEEPSEEK_DEFAULT_COUNT, DEEPSEEK_WEB_API_BASE_URL, DeepSeekSearchApiProvider } from './search.ts'
 import { deepSeekWebAuth, deepSeekWebCredentialReady } from './transport.ts'
@@ -48,7 +49,7 @@ export interface Config {
 
 export const Config = z.object({
   apiKey: z.string().role('secret').volatile(),
-  apiKeyEnv: z.string().role('credential-ref').default('DEEPSEEK_API_KEY').volatile(),
+  apiKeyEnv: z.string().role('credential-ref').default(DEEPSEEK_API_KEY_REF).volatile(),
   baseURL: z.string().default(DEEPSEEK_WEB_API_BASE_URL).volatile(),
   count: z.number().step(1).min(1).max(50).default(DEEPSEEK_DEFAULT_COUNT).volatile(),
   sendOriginalQuestion: z.boolean().default(true).volatile(),

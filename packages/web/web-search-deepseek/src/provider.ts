@@ -14,6 +14,7 @@ import type {
   WebSearchSource,
 } from '@deepseek-ai/dsh-web'
 import type { CredentialRef } from '@deepseek-ai/dsh-credentials'
+import { DEEPSEEK_ENDPOINTS } from '@deepseek-ai/dsh-deepseek-issuer'
 import type {} from '@deepseek-ai/dsh-session'
 import type {
   AnthropicError,
@@ -31,7 +32,7 @@ export const DEEPSEEK_PROVIDER_ID = 'deepseek-official'
  * `$DEEPSEEK_SEARCH_BASE_URL` overrides it independently of the conversation
  * adapter's endpoint. Both providers share the API key.
  */
-export const DEEPSEEK_DEFAULT_BASE_URL = 'https://api.deepseek.com/anthropic/v1'
+export const DEEPSEEK_DEFAULT_BASE_URL = DEEPSEEK_ENDPOINTS.search.url
 
 /** Default Anthropic-format model name (aligned with the repo's DeepSeek model vocabulary). */
 export const DEEPSEEK_DEFAULT_MODEL = 'deepseek-v4-flash'

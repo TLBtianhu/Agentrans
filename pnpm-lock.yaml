@@ -8509,6 +8509,12 @@ importers:
         specifier: workspace:*
         version: link:../../host/webserver
 
+  packages/credentials/deepseek-issuer:
+    devDependencies:
+      '@deepseek-ai/cordis':
+        specifier: workspace:~
+        version: link:../../../vendor/cordis
+
   packages/deliverables/deliverable-file-references:
     devDependencies:
       '@deepseek-ai/cordis':
@@ -13670,6 +13676,9 @@ importers:
       '@deepseek-ai/dsh-credentials':
         specifier: workspace:*
         version: link:../../credentials/credentials
+      '@deepseek-ai/dsh-deepseek-issuer':
+        specifier: workspace:*
+        version: link:../../credentials/deepseek-issuer
       '@deepseek-ai/dsh-launch-environment':
         specifier: workspace:*
         version: link:../../util/launch-environment
@@ -18133,6 +18142,9 @@ importers:
       '@deepseek-ai/dsh-deepseek-account':
         specifier: workspace:*
         version: link:../../credentials/deepseek-account
+      '@deepseek-ai/dsh-deepseek-issuer':
+        specifier: workspace:*
+        version: link:../../credentials/deepseek-issuer
       '@deepseek-ai/dsh-http-proxy':
         specifier: workspace:*
         version: link:../../util/http-proxy
@@ -18192,6 +18204,9 @@ importers:
       '@deepseek-ai/dsh-deepseek-account':
         specifier: workspace:*
         version: link:../../credentials/deepseek-account
+      '@deepseek-ai/dsh-deepseek-issuer':
+        specifier: workspace:*
+        version: link:../../credentials/deepseek-issuer
       '@deepseek-ai/dsh-http-proxy':
         specifier: workspace:*
         version: link:../../util/http-proxy

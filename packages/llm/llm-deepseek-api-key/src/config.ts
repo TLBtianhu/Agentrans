@@ -2,6 +2,7 @@
 import type { Volatile } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
 import { credentialRef, type CredentialRef } from '@deepseek-ai/dsh-credentials'
+import { DEEPSEEK_API_KEY_REF } from '@deepseek-ai/dsh-deepseek-issuer'
 import type { LaunchEnvironmentSnapshot } from '@deepseek-ai/dsh-launch-environment'
 import {
   deepSeekConfigFields, isBuiltInCatalog, modelListingConfigFields, modelListingURL, plainOptions as protocolOptions, PUBLIC_BASE_URL,
@@ -22,7 +23,7 @@ export interface Config extends ProtocolConfig, ModelListingConfig {
 export const Config = z.object({
   ...deepSeekConfigFields,
   ...modelListingConfigFields,
-  apiKeyEnv: z.string().role('credential-ref').default('DEEPSEEK_API_KEY').volatile(),
+  apiKeyEnv: z.string().role('credential-ref').default(DEEPSEEK_API_KEY_REF).volatile(),
 })
 /** Plain deployment inputs for the API-key provider. */
 export type Options = ProtocolOptions & ModelListingOptions & { apiKeyEnv?: string }
@@ -55,7 +56,7 @@ export function resolveAdapterOptions(config: Options, environment?: LaunchEnvir
   const listed = new URL(connection.baseURL).origin === OFFICIAL_ORIGIN && isBuiltInCatalog(connection.models)
   return {
     ...connection,
-    apiKeyEnv: credentialRef(apiKeyEnv ?? 'DEEPSEEK_API_KEY'),
+    apiKeyEnv: credentialRef(apiKeyEnv ?? DEEPSEEK_API_KEY_REF),
     ...listed ? { listing: { url: modelListingURL(connection.baseURL), ...timing } } : {},
   }
 }
