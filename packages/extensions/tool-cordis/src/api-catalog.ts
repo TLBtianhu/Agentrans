@@ -460,10 +460,93 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
     ],
   },
   {
+    key: 'artifactBranchResults',
+    summary: 'Artifact-owned API for manually attaching saved evidence to one branch conclusion.',
+    description: 'Artifact-owned API for manually attaching saved evidence to one branch conclusion.',
+    methods: [
+      {
+        signature: '@Remote({ resources: { session: (request: ArtifactBranchResultRequest) => [request.sessionId, request.branchSessionId] } }) async returnResult(request: ArtifactBranchResultRequest): Promise<SessionBranchResultValue>',
+        description: 'Return one child-owned conclusion with evidence selected by the user, without starting a model turn.',
+        parameters: [{ name: 'request', description: 'Direct parent, branch conclusion and branch-visible saved references; no text or coordinates are accepted.' }],
+        returns: 'Parent-local event and message ids after the durability checkpoint; identical retries reuse the receipt.',
+        throws: ['{RemoteError} For invalid lineage, unavailable evidence, oversized content, a busy parent or different earlier content. Other failures preserve an unknown outcome after append; retry the identical request to recover its receipt.'],
+      },
+    ],
+  },
+  {
+    key: 'artifactExports',
+    summary: 'Owns fixed HTML export inputs, explicit continuation, and verified result reads.',
+    description: 'Owns fixed HTML export inputs, explicit continuation, and verified result reads.',
+    methods: [
+      {
+        signature: '@Remote async create(agent: Agent, input: ArtifactHtmlExportRequest): Promise<ArtifactHtmlExportRecord>',
+        description: 'Capture and generate one Scene HTML export without adding model input.',
+        parameters: [{ name: 'agent', description: 'Exact live root owning the result record.' }, { name: 'input', description: 'Stable request identity and current-revision or saved-observation reference.' }],
+        returns: 'The settled record after flush; generation failures return a durable failed record.',
+        throws: ['{RemoteError} Before admission for invalid, conflicting, missing, stale, or over-limit requests. Append or flush failures retain an unknown outcome; retry the identical request to recover or explicitly continue it.'],
+      },
+      {
+        signature: '@Remote async read(agent: Agent, exportId: ArtifactExportId): Promise<Uint8Array>',
+        description: 'Read the exact stored file after the attachment provider verifies all bytes.',
+        parameters: [{ name: 'agent', description: 'Exact live root whose result records authorize the read.' }, { name: 'exportId', description: 'Ready export identity, never an arbitrary file reference or path.' }],
+        returns: 'Complete verified HTML bytes; a partial read never reaches the caller.',
+        throws: ['{RemoteError} When the export is not ready or its stored bytes are missing or corrupt.'],
+      },
+    ],
+  },
+  {
+    key: 'artifactRuntime',
+    summary: 'Owns only currently attached report streams; inspection reads authoritative source identity separately.',
+    description: 'Owns only currently attached report streams; inspection reads authoritative source identity separately.',
+    methods: [
+      {
+        signature: '@Remote({ mode: \'stream\', resources: { session: (sessionId: SessionId) => sessionId } }) async *attach(sessionId: SessionId, identity: ArtifactRuntimeIdentity, signal: AbortSignal): RemoteStream<RuntimeAck, RuntimeReport>',
+        description: 'Attach one stream-owned runtime report without opening a Session or activating an Agent. Registration records a Client claim, not proof that the named source exists or rendered successfully.',
+        parameters: [{ name: 'sessionId', description: 'Session resource whose rendered source the Client names.' }, { name: 'identity', description: 'Exact source revision and unique mounted runtime identity.' }, { name: 'signal', description: 'Carrier generation; cancellation, disconnect and disposal remove its live report.' }],
+        returns: 'Registration followed by a monotonic acknowledgement for each accepted replacement report.',
+        throws: ['{RemoteError} Invalid, duplicate, over-budget or unavailable streams retain no rejected report.'],
+      },
+      {
+        signature: 'inspect(agent: Agent, artifactId: ArtifactId, revision: number): ArtifactRuntimeInspection',
+        description: 'Inspect one exact current source and its connected matching runtime reports without adding input.',
+        parameters: [{ name: 'agent', description: 'Agent whose own Session supplies the authoritative current source.' }, { name: 'artifactId', description: 'Artifact to inspect in that Session.' }, { name: 'revision', description: 'Exact current source revision expected by the caller.' }],
+        returns: 'Detached source capabilities and active Client reports at this read; no report is a rendering proof.',
+        throws: ['{RemoteError} For absent or changed source revisions.'],
+      },
+      {
+        signature: 'async wait( agent: Agent, artifactId: ArtifactId, revision: number, waitMs: number, signal: AbortSignal, ): Promise<ArtifactRuntimeWaitResult>',
+        description: 'Wait once for any matching current run to report ready or error, including a not-yet-attached view. Reports remain independent Client assertions; this never executes code or wakes an Agent.',
+        parameters: [{ name: 'agent', description: 'Agent whose own Session supplies the authoritative current source.' }, { name: 'artifactId', description: 'Artifact to inspect in that Session.' }, { name: 'revision', description: 'Exact current source revision; replacement rejects instead of following the new source.' }, { name: 'waitMs', description: 'Positive integer duration within the configured maximum; it is never silently shortened.' }, { name: 'signal', description: 'Invocation cancellation; rejection preserves its reason and releases all wait resources.' }],
+        returns: 'All matching reports at settlement; expiration with starting reports, no reports, and disconnect are distinct.',
+        throws: ['{RemoteError} For unavailable source, invalid or over-capacity waits, and Session/service disposal.'],
+      },
+    ],
+  },
+  {
     key: 'artifacts',
     summary: '`ctx.artifacts`: validated artifact snapshots and user-action routing.',
     description: '`ctx.artifacts`: validated artifact snapshots and user-action routing.',
     methods: [
+      {
+        signature: 'currentSnapshot(agent: Agent, artifactId: ArtifactId): ArtifactSnapshot | undefined',
+        description: 'Read one source revision visible in an already prepared Session.',
+        parameters: [{ name: 'agent', description: 'Agent whose Session defines the visible source prefix.' }, { name: 'artifactId', description: 'Artifact identity within that Session.' }],
+        returns: 'An independent snapshot, or undefined when the source is not visible; no activation or I/O occurs.',
+      },
+      {
+        signature: 'resolveSavedObservation(agent: Agent, ref: SavedParticleObservationRef): SavedParticleObservation',
+        description: 'Read an original saved observation visible in one prepared Session.',
+        parameters: [{ name: 'agent', description: 'Agent whose Session owns the visible source prefix.' }, { name: 'ref', description: 'Artifact and saved-observation identity in that Session.' }],
+        returns: 'Independent saved source, checkpoint and recomputed particle values.',
+        throws: ['{ArtifactError} When the saved observation is not visible.'],
+      },
+      {
+        signature: 'resolveSceneSource(agent: Agent, selection: ArtifactExportSourceSelection): ArtifactExportSource',
+        description: 'Resolve a Scene selection to a complete original source and validated replay point.',
+        parameters: [{ name: 'agent', description: 'Agent whose prepared Session owns the source and saved observations.' }, { name: 'selection', description: 'Current source revision or a previously saved observation reference.' }],
+        returns: 'Independent complete source values; particle coordinates are recomputed.',
+        throws: ['{ArtifactError} For missing, stale, or unsupported sources.', '{ParticleRuntimeError} For invalid replay conditions.'],
+      },
       {
         signature: 'prepare(agent: Agent, input: ArtifactPrepareInput): ArtifactSnapshot',
         description: 'Validate and normalize one complete create or update without committing it.',
@@ -478,11 +561,39 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         throws: ['{ArtifactError} when the snapshot violates the same persistent validation as `prepare`.'],
       },
       {
+        signature: '@Remote saveObservation( agent: Agent, artifactId: ArtifactId, revision: number, observationId: ArtifactObservationId, label: string, checkpoint: ParticleCheckpoint, ): SavedParticleObservation',
+        description: 'Save a named particle observation without adding input or waking the Agent.',
+        parameters: [{ name: 'agent', description: 'Exact live root Agent owning the Session.' }, { name: 'artifactId', description: 'Particle Artifact to inspect.' }, { name: 'revision', description: 'Current source revision that produced the checkpoint.' }, { name: 'observationId', description: 'Client-generated retry identity, stable until the request succeeds.' }, { name: 'label', description: 'User label containing 1-80 characters after trimming.' }, { name: 'checkpoint', description: 'Runtime version and step count; coordinates are recomputed by the Host.' }],
+        returns: 'The immutable saved value; an identical retry returns the existing observation.',
+        throws: ['{RemoteError} `artifact/stale-revision` or `artifact/observation-limit`; no observation is appended.', '{ArtifactError} For conflicting retry identities, unsupported sources, or invalid caller input.', '{ParticleRuntimeError} For an invalid checkpoint or non-finite derived state; no event is appended.'],
+      },
+      {
+        signature: '@Remote sendObservation(agent: Agent, artifactId: ArtifactId, observationId: ArtifactObservationId, wake: boolean): ArtifactRecordResult',
+        description: 'Send an explicitly selected saved observation, including one from an older source revision.',
+        parameters: [{ name: 'agent', description: 'Exact live root Agent owning the saved observation.' }, { name: 'artifactId', description: 'Artifact under which the observation was saved.' }, { name: 'observationId', description: 'Durable observation identity; caller-supplied values are never used.' }, { name: 'wake', description: 'Whether to steer the Agent or inject without waking.' }],
+        returns: 'Inbox admission and the saved source revision; retries do not enqueue a second message.',
+        throws: ['{ArtifactError} For an unknown observation, invalid caller or oversized action; no source revision is changed.'],
+      },
+      {
+        signature: '@Remote confirmObservationComparison( agent: Agent, group: string, controlRef: SavedParticleObservationRef, variantRef: SavedParticleObservationRef, wake: boolean, ): ArtifactObservationComparisonResult',
+        description: 'Confirm one fixed control/variant observation pair as ordinary user input.',
+        parameters: [{ name: 'agent', description: 'Exact live root Agent whose Session resolves both saved references.' }, { name: 'group', description: 'Comparison group on the saved source revisions, independent of current revisions.' }, { name: 'controlRef', description: 'Saved control observation; Client coordinates are never accepted.' }, { name: 'variantRef', description: 'Saved variant observation with equal runtime, time step and step count.' }, { name: 'wake', description: 'Whether to steer the Agent or inject without waking.' }],
+        returns: 'The recomputed comparison; the same ordered pair is admitted at most once per Session.',
+        throws: ['{RemoteError} `artifact/comparison-rejected` for incompatible, missing or oversized observations; no input is added.', '{ArtifactError} For invalid references, group or caller. An admission failure may have committed input; retry the same pair.'],
+      },
+      {
         signature: '@Remote record( agent: Agent, artifactId: ArtifactId, revision: number, action: string, payload: JsonValue, wake: boolean, ): ArtifactRecordResult',
         description: 'Encode one user-reviewed artifact intent as a single-text-block UserMessage. The message is input, never an authorization to perform the named action.',
         parameters: [{ name: 'agent', description: 'Exact live root Agent owning the artifact Session.' }, { name: 'artifactId', description: 'Existing artifact identity.' }, { name: 'revision', description: 'Current artifact revision reviewed by the user.' }, { name: 'action', description: 'Trimmed 1-64 character action name matching `[A-Za-z][A-Za-z0-9._-]*`.' }, { name: 'payload', description: 'Lossless JSON payload included in the bounded text message.' }, { name: 'wake', description: '`false` injects without waking; `true` steers the Agent.' }],
         returns: 'Acceptance and the revision carried by the message.',
         throws: ['{ArtifactError} for a non-root caller, unknown or stale artifact, invalid action/payload, or an oversized complete message; no message is routed on validation failure.'],
+      },
+      {
+        signature: '@Remote async submitAction(agent: Agent, request: ArtifactActionRequest): Promise<ArtifactRecordResult>',
+        description: 'Admit one identified user action, or acknowledge the exact message accepted earlier in this Session.',
+        parameters: [{ name: 'agent', description: 'Exact live root Agent owning the action and receipt.' }, { name: 'request', description: 'Original request identity, reviewed source, action, payload and first-admission delivery policy.' }],
+        returns: 'Acceptance of that original message; retries do not dispatch or wake again.',
+        throws: ['{RemoteError} A known refusal, conflicting identity, unavailable admission service, or unknown dispatch outcome.'],
       },
     ],
   },
@@ -2696,6 +2807,12 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
     description: 'Host service backing the generated `ctx.remote.session` namespace.',
     methods: [
       {
+        signature: 'registerPromptContext(kind: string, resolve: (agent: Agent, value: import(\'@deepseek-ai/dsh-util-values\').JsonValue) => readonly TextBlock[]): () => void',
+        description: 'Register the domain owner of one optional prompt selection.',
+        parameters: [{ name: 'kind', description: 'unique selection kind.' }, { name: 'resolve', description: 'synchronous Host validation and model-visible text construction.' }],
+        returns: 'disposer that withdraws this registration.',
+      },
+      {
         signature: 'resolveAgent(sessionId: SessionId): Promise<ApiSessionAgentResult>',
         description: 'Resolve or resume one ordinary Session for another Host API domain.',
         parameters: [{ name: 'sessionId', description: 'Session identity whose Agent owns the operation.' }],
@@ -2780,7 +2897,7 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         description: 'Return one user-confirmed assistant conclusion to the direct parent without starting a model turn. A repeated `(parent, branch, resultSeq)` request returns the existing parent event.',
         parameters: [{ name: 'request', description: 'direct parent, ordinary branch, and child-owned durable assistant seq.' }],
         returns: 'the parent-local user/message receipt after its durability checkpoint.',
-        throws: ['RemoteError when lineage or the result is invalid, or the parent is running or under maintenance.'],
+        throws: ['RemoteError when lineage is invalid, the parent is busy, or the result was returned with different content. Other failures may follow a committed append; retry the same request to recover its receipt.'],
       },
       {
         signature: '@Remote(\'prompt\') async prompt(request: SessionPromptRequest, signal: AbortSignal): Promise<SessionPromptValue>',
@@ -2885,6 +3002,33 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         description: 'List file and directory candidates for one Agent\'s working directory.',
         parameters: [{ name: 'agent', description: 'target Agent resolved from the Session identity on the wire.' }, { name: 'query', description: 'path text following `@` or `@"`.' }, { name: 'signal', description: 'caller cancellation.' }],
         returns: 'deterministic path-only candidates from the composed provider.',
+      },
+    ],
+  },
+  {
+    key: 'sessionInputs',
+    summary: 'Owns one replayable receipt index and one process-local admission lifetime for every consumer.',
+    description: 'Owns one replayable receipt index and one process-local admission lifetime for every consumer.',
+    methods: [
+      {
+        signature: 'async run<T>(sessionId: SessionId, identity: SessionInputIdentity, input: T, job: (frozenInput: T) => SessionInputReceipt | Promise<SessionInputReceipt>): Promise<SessionInputReceipt>',
+        description: 'Reserve an input identity before any asynchronous preparation and join identical in-flight work. This operation owns no Agent activation or business validation; the job supplies those policies.',
+        parameters: [{ name: 'sessionId', description: 'Target Session identity; RPC and message identities have separate namespaces.' }, { name: 'identity', description: 'Stable Client identity for this admission attempt.' }, { name: 'input', description: 'Complete JSON request, including first-attempt delivery choices.' }, { name: 'job', description: 'Preparation and admission using only the detached frozen request.' }],
+        returns: 'The shared admission receipt; failures release only the in-flight reservation.',
+        throws: ['{SessionInputAdmissionError} For closing, invalid JSON or conflicting in-flight input.'],
+      },
+      {
+        signature: 'hasPromptReceipt(agent: Agent, requestId: SessionInputRequestId): boolean',
+        description: 'Read the original ordinary-prompt acceptance before resolving optional context or attachments.',
+        parameters: [{ name: 'agent', description: 'Agent whose already-prepared own Session supplies the receipts.' }, { name: 'requestId', description: 'Ordinary prompt identity; inherited aliases do not count.' }],
+        returns: 'Whether the original input was accepted, even if its queue item was edited or canceled.',
+      },
+      {
+        signature: 'admitMessage(agent: Agent, message: UserMessage, mode: SessionInputMode, validateFirst?: () => void): Promise<SessionInputReceipt>',
+        description: 'Admit one already-identified message or return its original acceptance before current-source validation. Delivery mode applies only once; a cold retry cannot change delivery or detect a mode-only difference.',
+        parameters: [{ name: 'agent', description: 'Exact live Agent; this method never resumes or activates another Agent.' }, { name: 'message', description: 'Complete immutable source and content with the Client\'s stable message identity.' }, { name: 'mode', description: 'First-admission delivery policy.' }, { name: 'validateFirst', description: 'Domain checks executed only before the first admission, never on an accepted retry.' }],
+        returns: 'Acceptance without replacing or re-enqueueing an accepted message.',
+        throws: ['{SessionInputAdmissionError} For unavailable Agent, identity conflict, or unconfirmed dispatch effects.'],
       },
     ],
   },
@@ -5626,16 +5770,64 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface ArchiveSessionOptions {\n    readonly stopActivity?: boolean;\n}',
   },
   {
+    name: 'ArtifactActionRequest',
+    declaration: 'export interface ArtifactActionRequest {\n    readonly requestId: MessageId;\n    readonly artifactId: ArtifactId;\n    readonly revision: number;\n    readonly action: string;\n    readonly payload: JsonValue;\n    readonly wake: boolean;\n}',
+  },
+  {
+    name: 'ArtifactBranchEvidenceSelection',
+    declaration: 'export type ArtifactBranchEvidenceSelection = {\n    readonly kind: \'observation\';\n    readonly observation: SavedParticleObservationRef;\n} | {\n    readonly kind: \'comparison\';\n    readonly group: string;\n    readonly control: SavedParticleObservationRef;\n    readonly variant: SavedParticleObservationRef;\n};',
+  },
+  {
+    name: 'ArtifactBranchResultRequest',
+    declaration: 'export interface ArtifactBranchResultRequest {\n    readonly sessionId: SessionId;\n    readonly branchSessionId: SessionId;\n    readonly resultSeq: number;\n    readonly evidence: ArtifactBranchEvidenceSelection;\n}',
+  },
+  {
     name: 'ArtifactComparison',
     declaration: 'export interface ArtifactComparison {\n    readonly group: string;\n    readonly role: \'control\' | \'variant\';\n}',
+  },
+  {
+    name: 'ArtifactExportId',
+    declaration: 'export type ArtifactExportId = Branded<\'ArtifactExportId\'>;',
+  },
+  {
+    name: 'ArtifactExportSource',
+    declaration: 'export interface ArtifactExportSource {\n    readonly artifact: SceneArtifactSnapshot;\n    readonly checkpoint?: ParticleCheckpoint;\n    readonly observationId?: ArtifactObservationId;\n}',
+  },
+  {
+    name: 'ArtifactExportSourceSelection',
+    declaration: 'export type ArtifactExportSourceSelection = {\n    readonly kind: \'current\';\n    readonly artifactId: ArtifactId;\n    readonly revision: number;\n    readonly checkpoint?: ParticleCheckpoint;\n} | {\n    readonly kind: \'observation\';\n    readonly artifactId: ArtifactId;\n    readonly observationId: ArtifactObservationId;\n};',
   },
   {
     name: 'ArtifactFormat',
     declaration: 'export type ArtifactFormat = \'html\' | \'scene\';',
   },
   {
+    name: 'ArtifactHtmlExportFailure',
+    declaration: 'export type ArtifactHtmlExportFailure = \'RENDER_FAILED\' | \'OUTPUT_TOO_LARGE\' | \'STORAGE_FAILED\';',
+  },
+  {
+    name: 'ArtifactHtmlExportInput',
+    declaration: 'export interface ArtifactHtmlExportInput extends ArtifactExportSource {\n    readonly sessionId: SessionId;\n    readonly exporterVersion: 1;\n    readonly parameters: \'source-defaults\' | \'particle-checkpoint\';\n}',
+  },
+  {
+    name: 'ArtifactHtmlExportRecord',
+    declaration: 'export type ArtifactHtmlExportRecord = {\n    readonly request: ArtifactHtmlExportRequest;\n    readonly frozen: ArtifactHtmlExportInput;\n} & ({\n    readonly status: \'pending\';\n} | {\n    readonly status: \'ready\';\n    readonly file: FileAttachmentRef;\n} | {\n    readonly status: \'failed\';\n    readonly failure: ArtifactHtmlExportFailure;\n});',
+  },
+  {
+    name: 'ArtifactHtmlExportRequest',
+    declaration: 'export interface ArtifactHtmlExportRequest {\n    readonly exportId: ArtifactExportId;\n    readonly source: ArtifactExportSourceSelection;\n    readonly format: \'html\';\n}',
+  },
+  {
     name: 'ArtifactId',
     declaration: 'export type ArtifactId = Branded<\'ArtifactId\'>;',
+  },
+  {
+    name: 'ArtifactObservationComparisonResult',
+    declaration: 'export interface ArtifactObservationComparisonResult {\n    readonly accepted: true;\n    readonly comparison: ParticleObservationComparison;\n}',
+  },
+  {
+    name: 'ArtifactObservationId',
+    declaration: 'export type ArtifactObservationId = Branded<\'ArtifactObservationId\'>;',
   },
   {
     name: 'ArtifactPrepareInput',
@@ -5650,12 +5842,48 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface ArtifactRecordResult {\n    readonly accepted: true;\n    readonly revision: number;\n}',
   },
   {
+    name: 'ArtifactRuntimeCapabilities',
+    declaration: 'export interface ArtifactRuntimeCapabilities {\n    readonly state: boolean;\n    readonly commands: readonly ArtifactRuntimeCommand[];\n}',
+  },
+  {
+    name: 'ArtifactRuntimeCommand',
+    declaration: 'export type ArtifactRuntimeCommand = \'play\' | \'pause\' | \'step\' | \'reset\';',
+  },
+  {
+    name: 'ArtifactRuntimeFailure',
+    declaration: 'export interface ArtifactRuntimeFailure {\n    readonly code: string;\n    readonly message: string;\n}',
+  },
+  {
+    name: 'ArtifactRuntimeId',
+    declaration: 'export type ArtifactRuntimeId = Branded<\'ArtifactRuntimeId\'>;',
+  },
+  {
+    name: 'ArtifactRuntimeIdentity',
+    declaration: 'export interface ArtifactRuntimeIdentity {\n    readonly artifactId: ArtifactId;\n    readonly revision: number;\n    readonly runtimeId: ArtifactRuntimeId;\n    readonly renderer: \'native\' | \'html\';\n}',
+  },
+  {
+    name: 'ArtifactRuntimeInspection',
+    declaration: 'export interface ArtifactRuntimeInspection {\n    readonly artifactId: ArtifactId;\n    readonly revision: number;\n    readonly title: string;\n    readonly format: ArtifactFormat;\n    readonly sceneKind?: SceneSpec[\'kind\'];\n    readonly sourceCapabilities: ArtifactSourceCapabilities;\n    readonly reportAuthority: \'client-reported\';\n    readonly runs: readonly ArtifactRuntimeRun[];\n}',
+  },
+  {
+    name: 'ArtifactRuntimeRun',
+    declaration: 'export type ArtifactRuntimeRun = {\n    readonly runtimeId: ArtifactRuntimeId;\n    readonly renderer: ArtifactRuntimeIdentity[\'renderer\'];\n} & RuntimeReport;',
+  },
+  {
+    name: 'ArtifactRuntimeWaitResult',
+    declaration: 'export interface ArtifactRuntimeWaitResult extends ArtifactRuntimeInspection {\n    readonly wait: {\n        readonly outcome: \'reported\' | \'timeout\' | \'no-active-report\' | \'disconnected\';\n        readonly limitMs: number;\n    };\n}',
+  },
+  {
     name: 'ArtifactSnapshot',
     declaration: 'export type ArtifactSnapshot = HtmlArtifactSnapshot | SceneArtifactSnapshot;',
   },
   {
     name: 'ArtifactSnapshotBase',
     declaration: 'export interface ArtifactSnapshotBase {\n    readonly artifactId: ArtifactId;\n    readonly revision: number;\n    readonly format: ArtifactFormat;\n    readonly title: string;\n    readonly presentation: ArtifactPresentation;\n    readonly comparison?: ArtifactComparison;\n}',
+  },
+  {
+    name: 'ArtifactSourceCapabilities',
+    declaration: 'export type ArtifactSourceCapabilities = {\n    readonly observe: \'particle\' | \'unsupported\';\n    readonly save: \'particle\' | \'unsupported\';\n    readonly restore: \'particle\' | \'unsupported\';\n    readonly compare: \'saved-particle-pair\' | \'unsupported\';\n    readonly questionContext: \'particle\' | \'program-reported\' | \'unsupported\';\n    readonly exportHtml: \'particle-checkpoint-or-source-defaults\' | \'source-defaults\' | \'unsupported\';\n};',
   },
   {
     name: 'AskOptions',
@@ -6450,6 +6678,18 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface FinishReasonMap {\n    \'stop\': {\n        kind: \'stop\';\n    };\n    \'tool-calls\': {\n        kind: \'tool-calls\';\n    };\n    \'max-tokens\': {\n        kind: \'max-tokens\';\n    };\n    \'aborted\': {\n        kind: \'aborted\';\n        failure: LlmFailure;\n    };\n    \'error\': {\n        kind: \'error\';\n        failure: LlmFailure;\n    };\n}',
   },
   {
+    name: 'FlowchartEdgeSpec',
+    declaration: 'export interface FlowchartEdgeSpec {\n    readonly from: string;\n    readonly to: string;\n    readonly label?: string;\n}',
+  },
+  {
+    name: 'FlowchartNodeSpec',
+    declaration: 'export interface FlowchartNodeSpec {\n    readonly id: string;\n    readonly label: string;\n    readonly x: number;\n    readonly y: number;\n}',
+  },
+  {
+    name: 'FlowchartSpec',
+    declaration: 'export interface FlowchartSpec {\n    readonly kind: \'flowchart\';\n    readonly nodes: readonly FlowchartNodeSpec[];\n    readonly edges: readonly FlowchartEdgeSpec[];\n    readonly path?: readonly string[];\n    readonly style?: SceneStyle;\n    readonly timeline?: {\n        readonly duration: number;\n        readonly fps: number;\n    };\n}',
+  },
+  {
     name: 'ForgeActionFailure',
     declaration: 'export interface ForgeActionFailure {\n    readonly code: \'unauthenticated\' | \'stale\' | \'failed\';\n    readonly message: string;\n}',
   },
@@ -6639,7 +6879,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'FunctionPlotSpec',
-    declaration: 'export interface FunctionPlotSpec {\n    readonly kind: \'function-plot\';\n    readonly functions: readonly SceneFunctionSpec[];\n    readonly parameters: Readonly<Record<string, SceneParameterSpec>>;\n    readonly viewport: {\n        readonly x: readonly [\n            number,\n            number\n        ];\n        readonly y: readonly [\n            number,\n            number\n        ];\n    };\n    readonly trace: {\n        readonly x: number;\n        readonly derivative: boolean;\n        readonly integral: boolean;\n    };\n    readonly timeline?: {\n        readonly duration: number;\n        readonly fps: number;\n    };\n}',
+    declaration: 'export interface FunctionPlotSpec {\n    readonly kind: \'function-plot\';\n    readonly functions: readonly SceneFunctionSpec[];\n    readonly parameters: Readonly<Record<string, SceneParameterSpec>>;\n    readonly viewport: {\n        readonly x: readonly [\n            number,\n            number\n        ];\n        readonly y: readonly [\n            number,\n            number\n        ];\n    };\n    readonly trace: {\n        readonly x: number;\n        readonly derivative: boolean;\n        readonly integral: boolean;\n    };\n    readonly style?: SceneStyle;\n    readonly timeline?: {\n        readonly duration: number;\n        readonly fps: number;\n    };\n}',
   },
   {
     name: 'GenerateOptions',
@@ -6696,6 +6936,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'GrantRecord',
     declaration: 'export interface GrantRecord {\n    readonly kind: \'grant\';\n    readonly payload: unknown;\n}',
+  },
+  {
+    name: 'GravitySpec',
+    declaration: 'export interface GravitySpec {\n    readonly x: number;\n    readonly y: number;\n}',
   },
   {
     name: 'HookBudget',
@@ -7118,6 +7362,14 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface ManualCompactAgentContext extends CompactionAgentContext {\n    runMaintenance<T>(task: (signal: AbortSignal) => Promise<T>): Promise<T>;\n}',
   },
   {
+    name: 'MapMarkerSpec',
+    declaration: 'export interface MapMarkerSpec {\n    readonly id: string;\n    readonly label: string;\n    readonly x: number;\n    readonly y: number;\n    readonly description?: string;\n}',
+  },
+  {
+    name: 'MapSpec',
+    declaration: 'export interface MapSpec {\n    readonly kind: \'map\';\n    readonly markers: readonly MapMarkerSpec[];\n    readonly path?: readonly string[];\n    readonly style?: SceneStyle;\n    readonly timeline?: {\n        readonly duration: number;\n        readonly fps: number;\n    };\n}',
+  },
+  {
     name: 'MarketCompatibility',
     declaration: 'export type MarketCompatibility = {\n    readonly compatible: true;\n} | {\n    readonly compatible: false;\n    readonly runtimeVersion: string;\n    readonly requirements: Readonly<Record<string, string>>;\n    readonly exempted: boolean;\n};',
   },
@@ -7378,6 +7630,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface NativeFileApplication {\n    readonly id: string;\n    readonly name: string;\n    readonly default: boolean;\n    readonly icon: string | null;\n}',
   },
   {
+    name: 'NetworkGraphSpec',
+    declaration: 'export interface NetworkGraphSpec {\n    readonly kind: \'network-graph\';\n    readonly nodes: readonly FlowchartNodeSpec[];\n    readonly edges: readonly FlowchartEdgeSpec[];\n    readonly style?: SceneStyle;\n    readonly timeline?: {\n        readonly duration: number;\n        readonly fps: number;\n    };\n}',
+  },
+  {
     name: 'NpmFileSource',
     declaration: 'export type NpmFileSource = \'jsdelivr\' | \'unpkg\' | \'npmmirror\';',
   },
@@ -7476,6 +7732,30 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'PaneOpenResult',
     declaration: 'export interface PaneOpenResult {\n    id: string;\n    isPlaced: boolean;\n    reason?: string;\n}',
+  },
+  {
+    name: 'ParticleCheckpoint',
+    declaration: 'export interface ParticleCheckpoint {\n    readonly runtimeVersion: typeof PARTICLE_RUNTIME_VERSION;\n    readonly stepCount: number;\n}',
+  },
+  {
+    name: 'ParticleObservation',
+    declaration: 'export type ParticleObservation = {\n    time: number;\n    particles: {\n        id: string;\n        x: number;\n        y: number;\n        vx: number;\n        vy: number;\n    }[];\n};',
+  },
+  {
+    name: 'ParticleObservationComparison',
+    declaration: 'export interface ParticleObservationComparison {\n    readonly kind: \'saved-particle-observation-comparison\';\n    readonly group: string;\n    readonly conditions: {\n        readonly runtimeVersion: ParticleCheckpoint[\'runtimeVersion\'];\n        readonly stepCount: number;\n        readonly timeStep: number;\n        readonly time: number;\n    };\n    readonly control: ParticleObservationComparisonSide;\n    readonly variant: ParticleObservationComparisonSide;\n}',
+  },
+  {
+    name: 'ParticleObservationComparisonSide',
+    declaration: 'export interface ParticleObservationComparisonSide {\n    readonly ref: SavedParticleObservationRef;\n    readonly label: string;\n    readonly revision: number;\n    readonly values: ParticleObservation;\n}',
+  },
+  {
+    name: 'ParticleSpec',
+    declaration: 'export interface ParticleSpec {\n    readonly id: string;\n    readonly x: number;\n    readonly y: number;\n    readonly vx: number;\n    readonly vy: number;\n    readonly mass: number;\n}',
+  },
+  {
+    name: 'ParticleSystemSpec',
+    declaration: 'export interface ParticleSystemSpec {\n    readonly kind: \'particle-system\';\n    readonly particles: readonly ParticleSpec[];\n    readonly gravity: GravitySpec;\n    readonly timeStep: number;\n    readonly trails: boolean;\n    readonly style?: SceneStyle;\n    readonly timeline?: {\n        readonly duration: number;\n        readonly fps: number;\n    };\n}',
   },
   {
     name: 'PatchHunk',
@@ -7728,6 +8008,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'PromptContext',
     declaration: 'export interface PromptContext {\n    readonly name: string;\n    readonly order: number;\n    readonly text: string | ((context: AssembleContext) => string);\n    readonly interpolate?: boolean;\n    readonly required?: boolean;\n}',
+  },
+  {
+    name: 'PromptContextInput',
+    declaration: 'export interface PromptContextInput {\n    readonly kind: string;\n    readonly value: JsonValue;\n}',
   },
   {
     name: 'PromptContextOrderName',
@@ -8058,6 +8342,14 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface RunnerFailureRule {\n    allowedExitCodes?: readonly number[];\n    fatalSignatures: readonly string[];\n    informationalLines?: readonly string[];\n}',
   },
   {
+    name: 'RuntimeAck',
+    declaration: 'export type RuntimeAck = {\n    readonly kind: \'attached\';\n} | {\n    readonly kind: \'accepted\';\n    readonly sequence: number;\n};',
+  },
+  {
+    name: 'RuntimeReport',
+    declaration: 'export type RuntimeReport = {\n    readonly status: \'starting\';\n} | {\n    readonly status: \'ready\';\n    readonly capabilities: ArtifactRuntimeCapabilities;\n} | {\n    readonly status: \'error\';\n    readonly error: ArtifactRuntimeFailure;\n};',
+  },
+  {
     name: 'SandboxEnforcement',
     declaration: 'export type SandboxEnforcement = \'full\' | \'partial\';',
   },
@@ -8076,6 +8368,14 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'SandboxPolicyRequest',
     declaration: 'export interface SandboxPolicyRequest {\n    session?: Session;\n    mode?: SandboxMode;\n}',
+  },
+  {
+    name: 'SavedParticleObservation',
+    declaration: 'export interface SavedParticleObservation {\n    readonly observationId: ArtifactObservationId;\n    readonly label: string;\n    readonly artifact: SceneArtifactSnapshot;\n    readonly checkpoint: ParticleCheckpoint;\n    readonly values: ParticleObservation;\n}',
+  },
+  {
+    name: 'SavedParticleObservationRef',
+    declaration: 'export interface SavedParticleObservationRef {\n    readonly artifactId: ArtifactId;\n    readonly observationId: ArtifactObservationId;\n}',
   },
   {
     name: 'SaveFileAttachment',
@@ -8107,7 +8407,11 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'SceneSpec',
-    declaration: 'export type SceneSpec = FunctionPlotSpec;',
+    declaration: 'export type SceneSpec = FunctionPlotSpec | FlowchartSpec | ParticleSystemSpec | TimelineSpec | NetworkGraphSpec | MapSpec;',
+  },
+  {
+    name: 'SceneStyle',
+    declaration: 'export type SceneStyle = \'editorial\' | \'transit-map\' | \'blueprint\' | \'math-proof-lecture\' | \'particles\';',
   },
   {
     name: 'ScheduleCatalogEntry',
@@ -8518,6 +8822,22 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export type SessionId = Branded<\'SessionId\'>;',
   },
   {
+    name: 'SessionInputIdentity',
+    declaration: 'export type SessionInputIdentity = {\n    readonly kind: \'rpc\';\n    readonly requestId: SessionInputRequestId;\n} | {\n    readonly kind: \'message\';\n    readonly messageId: MessageId;\n};',
+  },
+  {
+    name: 'SessionInputMode',
+    declaration: 'export type SessionInputMode = \'queue\' | \'steer\' | \'inject\';',
+  },
+  {
+    name: 'SessionInputReceipt',
+    declaration: 'export interface SessionInputReceipt {\n    readonly accepted: true;\n}',
+  },
+  {
+    name: 'SessionInputRequestId',
+    declaration: 'export type SessionInputRequestId = Branded<\'session-request-id\'>;',
+  },
+  {
     name: 'SessionInspection',
     declaration: 'export interface SessionInspection extends SessionStorageMetadata {\n    readonly events: readonly SessionEvent[];\n}',
   },
@@ -8703,7 +9023,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'SessionPromptRequest',
-    declaration: 'export interface SessionPromptRequest {\n    readonly requestId: SessionRequestId;\n    readonly sessionId: SessionId;\n    readonly mode: \'queue\' | \'steer\';\n    readonly content: readonly PromptContentPart[];\n    readonly clientTimeZone?: string;\n}',
+    declaration: 'export interface SessionPromptRequest {\n    readonly requestId: SessionRequestId;\n    readonly sessionId: SessionId;\n    readonly mode: \'queue\' | \'steer\';\n    readonly content: readonly PromptContentPart[];\n    readonly contexts?: readonly PromptContextInput[];\n    readonly clientTimeZone?: string;\n}',
   },
   {
     name: 'SessionPromptValue',
@@ -9584,6 +9904,14 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'TimedUserQuestionResult',
     declaration: 'export type TimedUserQuestionResult = AskUserQuestionAnswer | {\n    pending: true;\n    callId: ToolCallId;\n};',
+  },
+  {
+    name: 'TimelineEventSpec',
+    declaration: 'export interface TimelineEventSpec {\n    readonly id: string;\n    readonly label: string;\n    readonly time: number;\n    readonly description?: string;\n}',
+  },
+  {
+    name: 'TimelineSpec',
+    declaration: 'export interface TimelineSpec {\n    readonly kind: \'timeline\';\n    readonly events: readonly TimelineEventSpec[];\n    readonly playhead?: number;\n    readonly style?: SceneStyle;\n    readonly timeline?: {\n        readonly duration: number;\n        readonly fps: number;\n    };\n}',
   },
   {
     name: 'ToastOptions',

@@ -16,3 +16,7 @@ docs/persistence-changes/historical-formats/*.schema.json linguist-generated=tru
 
 # Unified patch blank context lines require their leading space.
 patches/*.patch whitespace=-blank-at-eol
+
+# Expected workspace fixtures mirror tool output byte for byte, including the
+# trailing blank line some tools write; the fixture is the oracle, not prose.
+snapshots/sdk/*/workspace.expected/** whitespace=-blank-at-eof

@@ -2,10 +2,12 @@
  * The Web development loop: build once, serve through `dsh web`, and keep every
  * browser-side artifact rebuilt on source edits, in one terminal.
  *
- * Stages, in order: `pnpm run build:artifacts` (skipped by `--skip-build`), three
+ * Stages, in order: `pnpm run build:artifacts` (skipped by `--skip-build`), source
+ * program generation, three
  * long-lived watchers, then `dsh web` (skipped by `--no-serve`). The watchers
  * exist because the compile shell links built lib products rather than
- * sources: `tsc -b tsconfig.client.json --watch` emits `lib/types` (the tsdown
+ * sources: the scene generator watches its source dependencies;
+ * `tsc -b tsconfig.client.json --watch` emits `lib/types` (the tsdown
  * lib entries are that emit, not `src`), tsdown watch bundles `lib/index.js`
  * and `lib/client.js`, and `vite build --watch` rewrites `apps/web/dist`, which
  * `dsh web` serves. A missing watcher does not fail — it silently shows the
@@ -50,6 +52,7 @@ import {
   repositoryClientBuildEnvironment,
 } from './client-build-environment.ts'
 import { pnpmInvocation } from './pnpm-invocation.ts'
+import { watchSceneBundles } from './generate-scene-bundles.ts'
 
 const repoRoot = fileURLToPath(new URL('..', import.meta.url))
 
@@ -391,6 +394,14 @@ if (isMain) {
     process.exit(1)
   }
 
+  // Embedded programs watch their source graphs, including expression helpers;
+  // generated constants must exist before the TypeScript watcher starts.
+  const sceneWatcher = await watchSceneBundles(repoRoot)
+  supervisor.add({
+    name: 'Scene export programs', exited: sceneWatcher.exited,
+    kill() { void sceneWatcher.dispose() },
+  })
+
   // tsc has no polling interval flag, so `--poll` selects its fixed-interval
   // watchers rather than an interval. Dropping that translation leaves tsc
   // natively watching on a network mount where inotify never fires: it stops
@@ -419,7 +430,7 @@ if (isMain) {
     // from source exactly as `pnpm dsh web` would.
     if (options.serve) {
       spawnStage(supervisor, 'dsh web', process.execPath, [
-        '--import', 'tsx/esm', 'apps/cli/src/bin.ts', 'web', ...options.appArgs,
+        '--import', 'tsx/esm', '--import', './scripts/agentrans-bootstrap.ts', 'apps/cli/src/bin.ts', 'web', ...options.appArgs,
       ], false)
     }
     console.log(
@@ -435,6 +446,7 @@ if (isMain) {
 
   const exitCode = await shutdown.promise
   await supervisor.stop({ signal: requested.signal, graceMs: STOP_GRACE_MS })
+  await sceneWatcher.dispose()
   for (const bundle of bundles) await bundle[Symbol.asyncDispose]()
   process.exit(exitCode)
 }

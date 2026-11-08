@@ -4,6 +4,7 @@
  */
 
 import { spawn, spawnSync } from 'node:child_process'
+import { existsSync } from 'node:fs'
 import { relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { parseArgs } from 'node:util'
@@ -13,7 +14,7 @@ import { pnpmCommand } from './release/process.ts'
 type CompilationMode = 'checked' | 'benchmark-emit'
 
 /** Identifier of one package-library build step. */
-export type LibraryStepId = 'host-src' | 'host-bundle' | 'host-typert' | 'desktop-bundle' | 'client-src' | 'client-bundle'
+export type LibraryStepId = 'host-src' | 'host-bundle' | 'host-typert' | 'desktop-bundle' | 'scene-programs' | 'client-src' | 'client-bundle'
 
 /** One package-library build step as a shell-free child-process invocation. */
 export interface LibraryStep {
@@ -124,7 +125,17 @@ export function compileReferencedProjects(
   face: 'host' | 'client',
   mode: CompilationMode = 'checked',
 ): void {
+  for (const step of sceneSteps(root, [])) runStep(root, step)
   runStep(root, compilerStep(root, face, mode, []))
+}
+
+function sceneSteps(root: string, needs: readonly LibraryStepId[]): LibraryStep[] {
+  if (!existsSync(resolve(root, 'packages/artifact/artifact/package.json'))) return []
+  return [{
+    id: 'scene-programs', label: 'Scene export programs', displayCommand: 'node scripts/generate-scene-bundles.ts',
+    command: process.execPath,
+    args: [fileURLToPath(new URL('generate-scene-bundles.ts', import.meta.url)), '--root', root], needs,
+  }]
 }
 
 function compilerStep(
@@ -175,9 +186,11 @@ function pnpmStep(id: LibraryStepId, label: string, args: readonly string[], nee
  * @throws If an aggregate configuration is invalid.
  */
 export function libraryBuildSteps(root: string, faces: 'host' | 'all', mode: CompilationMode = 'checked'): LibraryStep[] {
+  const scenes = sceneSteps(root, [])
   const host: LibraryStep[] = [
     typertStep(),
-    compilerStep(root, 'host', mode, ['host-typert']),
+    ...scenes,
+    compilerStep(root, 'host', mode, ['host-typert', ...scenes.map(step => step.id)]),
     pnpmStep('host-bundle', 'Host bundle', ['exec', 'tsdown', '--config-loader', 'native', '--env.DSH_BUILD_FACE', 'host'], ['host-src']),
   ]
   if (faces === 'host') return host
@@ -190,16 +203,17 @@ export function libraryBuildSteps(root: string, faces: 'host' | 'all', mode: Com
 }
 
 /**
- * List bundle-free metadata generation and package compilation steps.
- * Source-only Typert generation supplies declarations before Host compilation; Client
- * compilation follows the Host declarations. No step writes runtime bundles.
+ * List source generation and package compilation steps without library runtime bundling.
+ * Source-only Typert generation and Scene programs precede Host compilation; Client
+ * compilation follows the Host declarations.
  * @param root - Repository root containing the compiler configurations.
  * @param faces - `host` lists the Typert pass and Host compilation; `all` adds Client compilation.
  * @returns The steps in report order.
  * @throws If an aggregate configuration is invalid.
  */
 export function contractSteps(root: string, faces: 'host' | 'all'): LibraryStep[] {
-  const host = [typertStep(), compilerStep(root, 'host', 'checked', ['host-typert'])]
+  const scenes = sceneSteps(root, [])
+  const host = [typertStep(), ...scenes, compilerStep(root, 'host', 'checked', ['host-typert', ...scenes.map(step => step.id)])]
   if (faces === 'host') return host
   return [...host, compilerStep(root, 'client', 'checked', ['host-src'])]
 }

@@ -8,7 +8,8 @@ const root = resolve(import.meta.dirname, '..')
 const artifactGraph = {
   'native': [],
   'host-typert': [],
-  'host-src': ['native', 'host-typert'],
+  'scene-programs': [],
+  'host-src': ['native', 'host-typert', 'scene-programs'],
   'host-bundle': ['host-src'],
   'desktop-bundle': ['host-bundle'],
   'client-src': ['desktop-bundle'],
@@ -89,6 +90,13 @@ describe('repository build steps', () => {
     expect(graph(buildGates(root, 'artifacts'))).toEqual(artifactGraph)
   })
 
+  it.each(['artifacts', 'complete', 'typecheck'] as const)('generates embedded scene programs before Host compilation in %s', (scope) => {
+    const gates = buildGates(root, scope)
+    const generation = gates.find(gate => gate.id === 'scene-programs')
+    expect(generation?.args).toEqual([resolve(root, 'scripts/generate-scene-bundles.ts'), '--root', root])
+    expect(gates.find(gate => gate.id === 'host-src')?.needs).toContain('scene-programs')
+  })
+
   it('checks both aggregate programs without artifact predecessors', () => {
     const gates = buildGates(root, 'check')
     expect(graph(gates)).toEqual({ 'host-check': [], 'client-check': [] })
@@ -110,7 +118,8 @@ describe('repository build steps', () => {
     const gates = buildGates(root, 'typecheck')
     expect(graph(gates)).toEqual({
       'host-typert': [],
-      'host-src': ['host-typert'],
+      'scene-programs': [],
+      'host-src': ['host-typert', 'scene-programs'],
       'client-src': ['host-src'],
       'host-check': ['host-src'],
       'client-check': ['client-src'],

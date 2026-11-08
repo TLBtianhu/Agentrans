@@ -30,6 +30,10 @@ Every package below exports a Cordis plugin that a bundle patch can name in a Lo
 | Package | Config | Description |
 |---|---|---|
 | `@deepseek-ai/dsh-artifact` | yes | Session-backed interactive HTML and SceneSpec artifacts and their model-facing tools |
+| `@deepseek-ai/dsh-artifact-branch` | yes | Confirmed manual-branch conclusions with saved Artifact evidence |
+| `@deepseek-ai/dsh-artifact-export` | yes | Fixed-input Scene HTML exports with durable result files |
+| `@deepseek-ai/dsh-artifact-followup` | yes | Host-validated experimental context attached to ordinary questions |
+| `@deepseek-ai/dsh-artifact-runtime` | yes | Source-bound live Artifact runtime reports and model inspection |
 
 ## attachment
 
@@ -78,7 +82,7 @@ Every package below exports a Cordis plugin that a bundle patch can name in a Lo
 | `@deepseek-ai/dsh-client-ui-artifact` | no | Isolated HTML artifact Conversation cards with explicitly confirmed Agent actions |
 | `@deepseek-ai/dsh-client-ui-attachment` | no | Dynamic attachment presentation plugin for conversation input, message-image, and trajectory image slots |
 | `@deepseek-ai/dsh-client-ui-branch` | no | Inline confirmation for returning a manual-branch conclusion to its direct parent |
-| `@deepseek-ai/dsh-client-ui-brand-official` | no | Official DeepSeek Harness brand occupants for the Web client's sidebar slots |
+| `@deepseek-ai/dsh-client-ui-brand-official` | no | Agentrans brand occupants for the Web client's sidebar slots |
 | `@deepseek-ai/dsh-client-ui-chat` | no | Chat Conversation target, node definitions, renderers, and details surface |
 | `@deepseek-ai/dsh-client-ui-commands` | no | Client command surface: global directory cache, '/' source, three command UI kinds, popupSelect registry |
 | `@deepseek-ai/dsh-client-ui-context-menu` | no | Typed, plugin-extensible context menus with captured targets and shared Web presentation |
@@ -392,6 +396,7 @@ Every package below exports a Cordis plugin that a bundle patch can name in a Lo
 |---|---|---|
 | `@deepseek-ai/dsh-message-quotes` | no | Selected-text quotation and Markdown blockquote presentation |
 | `@deepseek-ai/dsh-session-checkpoint-policy` | no | Semantic session durability checkpoints before model requests and tool side effects |
+| `@deepseek-ai/dsh-session-input` | no | Shared identity admission for Session prompts and confirmed domain messages |
 | `@deepseek-ai/dsh-session-log-deepseek` | yes | Incremental lossless session-log request extension for the official DeepSeek LLM API |
 | `@deepseek-ai/dsh-session-persistence-jsonl` | yes | JSONL durable session persistence backend for the DeepSeek Harness |
 | `@deepseek-ai/dsh-session-projection` | no | Session-projection seam: the merge-extensible projection type table, the provider contract, and the ctx.sessionProjections registry serving whole current values of log-derived per-session state |

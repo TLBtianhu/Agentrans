@@ -186,9 +186,13 @@ it('discovers client-preset packages the shell links, excluding loader-delivered
 
 it('rebuilds a client-plugin bundle after its source changes', async () => {
   const root = await mkdtemp(join(tmpdir(), 'dsh-dev-web-watch-'))
+  const modules = join(import.meta.dirname, '..', 'node_modules')
+  const moduleSentinel = join(modules, 'typescript/package.json')
+  const originalModule = await readFile(moduleSentinel, 'utf8')
   let bundles: TsdownBundle[] = []
   try {
-    await symlink(join(import.meta.dirname, '..', 'node_modules'), join(root, 'node_modules'), 'dir')
+    // This fixture needs a directory alias, not symbolic-link semantics or Windows elevation.
+    await symlink(modules, join(root, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir')
     await writeFile(join(root, 'package.json'), JSON.stringify({ name: '@dsh-test/dev-web-watch', private: true, type: 'module' }))
     await writeFile(join(root, 'tsdown.config.ts'), `
 import { defineConfig } from 'tsdown'
@@ -216,5 +220,6 @@ export default defineConfig({
   } finally {
     for (const bundle of bundles) await bundle[Symbol.asyncDispose]()
     await rm(root, { recursive: true, force: true })
+    expect(await readFile(moduleSentinel, 'utf8')).toBe(originalModule)
   }
 }, 20_000)

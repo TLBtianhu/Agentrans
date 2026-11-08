@@ -333,6 +333,7 @@ export const CLIENT_SLOT_API: readonly ClientSlotEntry[] = [
     slotInject: '',
     declaredBy: 'an entry in \'conversation.chat.node\' (client-ui-chat), so it exists while that entry is mounted',
     occupants: [
+      'client-ui-artifact ArtifactBranchResultAction id \'artifact-branch-result\'',
       'client-ui-branch BranchResultAction id \'branch-result\'',
     ],
     replaceRisk: 'none',
@@ -1404,6 +1405,7 @@ export const CLIENT_SLOT_API: readonly ClientSlotEntry[] = [
     slotInject: '',
     declaredBy: 'factory \'conversation.content\' (client-ui-conversation), so it exists while that definition is registered',
     occupants: [
+      'client-ui-artifact ArtifactPromptContext id \'artifact-question-context\'',
       'client-ui-conversation QueueDock id \'queue\'',
       'client-ui-conversation TodoDock id \'todo\'',
       'client-ui-goal GoalDock id \'goal\'',
@@ -2271,11 +2273,13 @@ export const CLIENT_SLOT_API: readonly ClientSlotEntry[] = [
       'useAccess: (action: RemoteEndpoint) => boolean',
       'useTrajectory: UseTrajectory',
     ],
-    keyDomain: 'fixed by the owner\'s key table { [Id in UserTextId]: { node: UserTextNode<Id> } }, already taken: command, file, folder, quote, secret, session, skill, text',
+    keyDomain: 'fixed by the owner\'s key table { [Id in UserTextId]: { node: UserTextNode<Id> } }, already taken: artifact-program-context, artifact-question-context, command, file, folder, quote, secret, session, skill, text',
     hookContext: '',
     slotInject: '',
     declaredBy: 'factory \'conversation.user.text\' (client-ui-conversation), so it exists while that definition is registered',
     occupants: [
+      'client-ui-artifact QuestionContextMessage key \'artifact-question-context\'',
+      'client-ui-artifact ProgramContextMessage key \'artifact-program-context\'',
       'client-ui-conversation PlainUserText key \'text\'',
       'client-ui-conversation SessionReference key \'session\'',
       'client-ui-goal GoalCommandReference key \'command\'',

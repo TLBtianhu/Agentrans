@@ -10,11 +10,19 @@ import {
   EMPTY_WORKSPACE_MARKER,
   parseSnapshotManifest,
   parseSessionFixtureName,
+  parseToolSchemasSnapshot,
+  formatToolSchemasSnapshot,
+  parseSystemPromptSnapshot,
+  formatSystemPromptSnapshot,
   redactSessionSnapshotIds,
   scrubSystemPrompts,
   scrubToolSchemas,
   sessionFixtureFiles,
   sessionFixtureNames,
+  resolveToolSchemasSnapshotPath,
+  toolSchemasSnapshotFilename,
+  resolveSystemPromptSnapshotPath,
+  systemPromptSnapshotFilename,
   type SnapshotManifest,
 } from '@deepseek-ai/dsh-session-snapshot'
 import { assertSnapshotCorpusPolicy } from './session-snapshot-corpus-policy.ts'
@@ -157,6 +165,33 @@ it('keeps every recorded session owned, pinned, redacted, and header-scrubbed', 
       expect(existsSync(join(dir, 'stdout.expected.jsonl')), `${key}: ACP transcript outside ACP`).toBe(false)
     }
 
+    const schemaVariants = manifest.header.toolSchemasVariants ?? []
+    expect(localEntries.filter(name => /^tool-schemas\.[a-z][a-z0-9]*\.expected\.json$/u.test(name)).sort(), `${key}: declared tool-schema variants`)
+      .toEqual(schemaVariants.map(platform => toolSchemasSnapshotFilename(manifest.header, platform)).sort())
+    for (const platform of schemaVariants) {
+      const path = join(dir, toolSchemasSnapshotFilename(manifest.header, platform))
+      expect(await resolveToolSchemasSnapshotPath(dir, platform), `${key}: variant belongs to the final schema owner`).toBe(path)
+      const content = await readFile(path, 'utf8')
+      const schemas = parseToolSchemasSnapshot(content)
+      expect(content, `${key}: canonical ${platform} tool schemas`)
+        .toBe(formatToolSchemasSnapshot(schemas.initial, schemas.changes))
+      const shared = parseToolSchemasSnapshot(await readFile(join(dir, toolSchemasSnapshotFilename(manifest.header, 'linux')), 'utf8'))
+      expect(schemas.changes.length, `${key}: platform header sequence length`).toBe(shared.changes.length)
+    }
+    const promptVariants = manifest.header.systemPromptVariants ?? []
+    expect(localEntries.filter(name => /^system-prompt\.[a-z][a-z0-9]*\.expected\.md$/u.test(name)).sort(), `${key}: declared system-prompt variants`)
+      .toEqual(promptVariants.map(platform => systemPromptSnapshotFilename(manifest.header, platform)).sort())
+    for (const platform of promptVariants) {
+      const path = join(dir, systemPromptSnapshotFilename(manifest.header, platform))
+      expect(await resolveSystemPromptSnapshotPath(dir, platform), `${key}: variant belongs to the final prompt owner`).toBe(path)
+      const content = await readFile(path, 'utf8')
+      const prompt = parseSystemPromptSnapshot(content)
+      expect(content, `${key}: canonical ${platform} system prompt`)
+        .toBe(formatSystemPromptSnapshot(prompt.initial, prompt.changes))
+      const shared = parseSystemPromptSnapshot(await readFile(join(dir, systemPromptSnapshotFilename(manifest.header, 'linux')), 'utf8'))
+      expect(prompt.changes.length, `${key}: platform prompt sequence length`).toBe(shared.changes.length)
+    }
+
     if (manifest.header.pin === true) {
       const promptSource = byKey.get(referencedScenario(scenario, manifest.header.systemPromptSource ?? scenario.name))
       const schemaSource = byKey.get(referencedScenario(scenario, manifest.header.toolSchemasSource ?? scenario.name))
@@ -164,6 +199,8 @@ it('keeps every recorded session owned, pinned, redacted, and header-scrubbed', 
       expect(schemaSource, `${key}: tool-schema source`).toBeDefined()
       expect(existsSync(join((promptSource as Scenario).dir, 'system-prompt.expected.md')), `${key}: system-prompt sidecar`).toBe(true)
       expect(existsSync(join((schemaSource as Scenario).dir, 'tool-schemas.expected.json')), `${key}: tool-schema sidecar`).toBe(true)
+      expect(existsSync(await resolveToolSchemasSnapshotPath(dir)), `${key}: selected host tool-schema sidecar`).toBe(true)
+      expect(existsSync(await resolveSystemPromptSnapshotPath(dir)), `${key}: selected host system-prompt sidecar`).toBe(true)
       for (const [field, source] of [
         ['system-prompt.expected.md', promptSource],
         ['tool-schemas.expected.json', schemaSource],

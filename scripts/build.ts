@@ -26,6 +26,7 @@ import { pnpmCommand } from './release/process.ts'
 import { defaultParallelism, describeDefaultParallelism } from './parallelism.ts'
 import { runAggregate } from './run-gates.ts'
 import type { Gate } from './run-gates.ts'
+import { assertSourceArtifactBoundaries } from './verify-source-artifact-boundaries.ts'
 
 /**
  * Steps one build invocation runs: every artifact and check, only artifacts, only aggregate checks,
@@ -166,6 +167,7 @@ async function main(): Promise<number> {
   }
   const { scope, profile, serial } = parseBuildArguments(process.argv.slice(2))
   const root = resolve(import.meta.dirname, '..')
+  assertSourceArtifactBoundaries(root)
   const name = scope === 'complete' ? 'build' : scope === 'typecheck' ? 'typecheck' : `build:${scope}`
   const budget = defaultParallelism()
   const workers = (gates: readonly Gate[]) => ({

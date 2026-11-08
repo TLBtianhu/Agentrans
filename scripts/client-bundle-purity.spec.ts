@@ -282,6 +282,22 @@ describe('client bundle purity gate', () => {
     expect(() => resolveId('@deepseek-ai/dsh-goal/remote/nested')).toThrow(/purity/)
   })
 
+  it('inlines pure Artifact runtime, comparison, and export entries while rejecting services and nested paths', () => {
+    expect(resolveId('@deepseek-ai/dsh-artifact/particle-runtime')).toBeNull()
+    expect(resolveId('@deepseek-ai/dsh-artifact/observation-comparison')).toBeNull()
+    expect(resolveId('@deepseek-ai/dsh-artifact/scene-export')).toBeNull()
+    expect(resolveId('@deepseek-ai/dsh-artifact/scene-renderers')).toBeNull()
+    expect(resolveId('@deepseek-ai/dsh-artifact/capabilities')).toBeNull()
+    expect(resolveId('@deepseek-ai/dsh-artifact/runtime-values')).toBeNull()
+    for (const specifier of ['@deepseek-ai/dsh-artifact', '@deepseek-ai/dsh-artifact/tool',
+      '@deepseek-ai/dsh-artifact/scene-tool', '@deepseek-ai/dsh-artifact/particle-runtime/internal',
+      '@deepseek-ai/dsh-artifact/observation-comparison/internal',
+      '@deepseek-ai/dsh-artifact/scene-export/internal', '@deepseek-ai/dsh-artifact/scene-renderers/internal',
+      '@deepseek-ai/dsh-artifact/capabilities/internal', '@deepseek-ai/dsh-artifact/runtime-values/internal']) {
+      expect(() => resolveId(specifier)).toThrow(/purity/)
+    }
+  })
+
   it('throws on any other @deepseek-ai leak', () => {
     expect(() => resolveId('@deepseek-ai/dsh-agent')).toThrow(/purity/)
     expect(() => resolveId('@deepseek-ai/dsh-client-web')).toThrow(/purity/)

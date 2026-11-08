@@ -7,6 +7,7 @@
 import { existsSync, globSync, readFileSync } from 'node:fs'
 import { resolve, sep } from 'node:path'
 import { pathToFileURL } from 'node:url'
+import ts from 'typescript'
 
 type ManifestBin = string | Record<string, string>
 
@@ -21,6 +22,7 @@ interface RootManifest {
 interface LauncherPolicy {
   readonly kind: 'dsh-direct' | 'dsh-wrapper'
   readonly wrapper?: string
+  readonly productBootstrap?: boolean
 }
 
 /** Public product launcher plus the build-only WebWorker packer. */
@@ -54,11 +56,15 @@ const EXECUTABLE_SOURCE_ALLOWLIST = new Map<string, string>([
  * by name.
  */
 const ROOT_LAUNCHER_POLICIES = new Map<string, LauncherPolicy>([
+  ['dsh', { kind: 'dsh-direct', productBootstrap: true }],
   ['demo:ptc', { kind: 'dsh-wrapper', wrapper: 'scripts/demo-ptc.mjs' }],
   ['demo:inspector', { kind: 'dsh-direct' }],
-  ['start:web', { kind: 'dsh-direct' }],
-  ['dev:web', { kind: 'dsh-wrapper', wrapper: 'scripts/dev-web.ts' }],
+  ['start:web', { kind: 'dsh-direct', productBootstrap: true }],
+  ['dev:web', { kind: 'dsh-wrapper', wrapper: 'scripts/dev-web.ts', productBootstrap: true }],
 ])
+
+const PRODUCT_BOOTSTRAP = './scripts/agentrans-bootstrap.ts'
+const PRODUCT_SOURCE_PREFIX = `node --import tsx/esm --import ${PRODUCT_BOOTSTRAP} apps/cli/src/bin.ts`
 
 const SOURCE_PATTERNS = [
   '*.ts',
@@ -137,6 +143,35 @@ function referencesPackageEntry(source: string): boolean {
   return /packages\/[^/\s'"`]+\/[^/\s'"`]+\/(?:src|lib)\/[^\s'"`]+/.test(source)
 }
 
+function wrapperBootstrapsProduct(source: string): boolean {
+  const file = ts.createSourceFile('dev-web.ts', source, ts.ScriptTarget.Latest, true)
+  const required = ['--import', 'tsx/esm', '--import', PRODUCT_BOOTSTRAP, 'apps/cli/src/bin.ts']
+  let launches = 0
+  let valid = true
+  const visit = (node: ts.Node): void => {
+    if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === 'spawnStage') {
+      const name = node.arguments[1]
+      if (name && ts.isStringLiteral(name) && name.text === 'dsh web') {
+        launches++
+        const args = node.arguments[3]
+        if (!args || !ts.isArrayLiteralExpression(args) || !required.every((text, index) => {
+          const value = args.elements[index]
+          return value !== undefined && ts.isStringLiteral(value) && value.text === text
+        })) valid = false
+      }
+    }
+    ts.forEachChild(node, visit)
+  }
+  visit(file)
+  return launches > 0 && valid
+}
+
+function productBootstrapViolations(root: string, owner: string, configured: boolean): string[] {
+  if (!configured) return [`${owner}: product launch must preload ${PRODUCT_BOOTSTRAP} before the dsh entry`]
+  if (!existsSync(resolve(root, PRODUCT_BOOTSTRAP))) return [`${PRODUCT_BOOTSTRAP}: product bootstrap is missing`]
+  return []
+}
+
 function rootLauncherViolations(root: string): string[] {
   const manifestPath = resolve(root, 'package.json')
   if (!existsSync(manifestPath)) return []
@@ -154,6 +189,10 @@ function rootLauncherViolations(root: string): string[] {
     if (policy.kind === 'dsh-direct') {
       if (!referencesDshCli(command)) failures.push(`package.json scripts.${name}: application launcher script must launch apps/cli/src/bin.ts`)
       if (referencesPackageEntry(command)) failures.push(`package.json scripts.${name}: application launcher script must not launch a package entry directly`)
+      if (policy.productBootstrap) {
+        failures.push(...productBootstrapViolations(root, `package.json scripts.${name}`,
+          command === PRODUCT_SOURCE_PREFIX || command.startsWith(`${PRODUCT_SOURCE_PREFIX} `)))
+      }
       continue
     }
     const wrapper = policy.wrapper
@@ -169,6 +208,7 @@ function rootLauncherViolations(root: string): string[] {
     const source = readFileSync(wrapperPath, 'utf8')
     if (!referencesDshCli(source)) failures.push(`${wrapper}: application launcher wrapper must launch apps/cli/src/bin.ts`)
     if (referencesPackageEntry(source)) failures.push(`${wrapper}: application launcher wrapper must not launch a package entry directly`)
+    if (policy.productBootstrap) failures.push(...productBootstrapViolations(root, wrapper, wrapperBootstrapsProduct(source)))
   }
   return failures
 }

@@ -111,6 +111,7 @@ describe('application entrypoints', () => {
     expect(applicationEntrypointViolations(root)).toEqual([
       'package.json scripts.start:web: application launcher script must launch apps/cli/src/bin.ts',
       'package.json scripts.start:web: application launcher script must not launch a package entry directly',
+      'package.json scripts.start:web: product launch must preload ./scripts/agentrans-bootstrap.ts before the dsh entry',
     ])
   })
 
@@ -121,6 +122,81 @@ describe('application entrypoints', () => {
 
     expect(applicationEntrypointViolations(root)).toEqual([
       'scripts/dev-web.ts: application launcher wrapper must launch apps/cli/src/bin.ts',
+      'scripts/dev-web.ts: product launch must preload ./scripts/agentrans-bootstrap.ts before the dsh entry',
+    ])
+  })
+
+  it('accepts the product initializer before the ordinary dsh source entry', () => {
+    const root = fixture()
+    write(root, 'package.json', JSON.stringify({ scripts: {
+      dsh: 'node --import tsx/esm --import ./scripts/agentrans-bootstrap.ts apps/cli/src/bin.ts',
+      'start:web': 'node --import tsx/esm --import ./scripts/agentrans-bootstrap.ts apps/cli/src/bin.ts web',
+    } }))
+    write(root, 'scripts/agentrans-bootstrap.ts', "import { prepareProductState } from '../packages/boot/product-layout/src/launch-context.ts'\n")
+    expect(applicationEntrypointViolations(root)).toEqual([])
+  })
+
+  it.each(['dsh', 'start:web'])('rejects %s when its product initialization is absent', (name) => {
+    const root = fixture()
+    write(root, 'package.json', JSON.stringify({ scripts: { [name]: 'node --import tsx/esm apps/cli/src/bin.ts web' } }))
+    expect(applicationEntrypointViolations(root)).toEqual([
+      `package.json scripts.${name}: product launch must preload ./scripts/agentrans-bootstrap.ts before the dsh entry`,
+    ])
+  })
+
+  it('rejects initialization placed after the application entry', () => {
+    const root = fixture()
+    write(root, 'package.json', JSON.stringify({ scripts: {
+      dsh: 'node --import tsx/esm apps/cli/src/bin.ts --import ./scripts/agentrans-bootstrap.ts',
+    } }))
+    write(root, 'scripts/agentrans-bootstrap.ts', '// Instance initialization.\n')
+    expect(applicationEntrypointViolations(root)).toEqual([
+      'package.json scripts.dsh: product launch must preload ./scripts/agentrans-bootstrap.ts before the dsh entry',
+    ])
+  })
+
+  it('rejects a product command whose initializer is missing on disk', () => {
+    const root = fixture()
+    write(root, 'package.json', JSON.stringify({ scripts: {
+      dsh: 'node --import tsx/esm --import ./scripts/agentrans-bootstrap.ts apps/cli/src/bin.ts',
+    } }))
+    expect(applicationEntrypointViolations(root)).toEqual([
+      './scripts/agentrans-bootstrap.ts: product bootstrap is missing',
+    ])
+  })
+
+  it('accepts dev:web only when its actual application arguments preload the product', () => {
+    const root = fixture()
+    write(root, 'package.json', JSON.stringify({ scripts: { 'dev:web': 'tsx scripts/dev-web.ts' } }))
+    write(root, 'scripts/agentrans-bootstrap.ts', '// Instance initialization.\n')
+    write(root, 'scripts/dev-web.ts', "spawnStage(supervisor, 'dsh web', process.execPath, ['--import', 'tsx/esm', '--import', './scripts/agentrans-bootstrap.ts', 'apps/cli/src/bin.ts', 'web'], false)\n")
+    expect(applicationEntrypointViolations(root)).toEqual([])
+  })
+
+  it('does not count comments or unused strings as a dev:web preload', () => {
+    const root = fixture()
+    write(root, 'package.json', JSON.stringify({ scripts: { 'dev:web': 'tsx scripts/dev-web.ts' } }))
+    write(root, 'scripts/agentrans-bootstrap.ts', '// Instance initialization.\n')
+    write(root, 'scripts/dev-web.ts', [
+      "// '--import', './scripts/agentrans-bootstrap.ts'",
+      "const unused = './scripts/agentrans-bootstrap.ts'",
+      "spawnStage(supervisor, 'dsh web', process.execPath, ['--import', 'tsx/esm', 'apps/cli/src/bin.ts', 'web'], false)",
+    ].join('\n'))
+    expect(applicationEntrypointViolations(root)).toEqual([
+      'scripts/dev-web.ts: product launch must preload ./scripts/agentrans-bootstrap.ts before the dsh entry',
+    ])
+  })
+
+  it('rejects a second dev:web application call that bypasses initialization', () => {
+    const root = fixture()
+    write(root, 'package.json', JSON.stringify({ scripts: { 'dev:web': 'tsx scripts/dev-web.ts' } }))
+    write(root, 'scripts/agentrans-bootstrap.ts', '// Instance initialization.\n')
+    write(root, 'scripts/dev-web.ts', [
+      "spawnStage(supervisor, 'dsh web', process.execPath, ['--import', 'tsx/esm', '--import', './scripts/agentrans-bootstrap.ts', 'apps/cli/src/bin.ts', 'web'], false)",
+      "spawnStage(supervisor, 'dsh web', process.execPath, ['--import', 'tsx/esm', 'apps/cli/src/bin.ts', 'web'], false)",
+    ].join('\n'))
+    expect(applicationEntrypointViolations(root)).toEqual([
+      'scripts/dev-web.ts: product launch must preload ./scripts/agentrans-bootstrap.ts before the dsh entry',
     ])
   })
 

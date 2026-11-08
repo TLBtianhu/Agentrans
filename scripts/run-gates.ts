@@ -410,6 +410,7 @@ function i18nGates(includeDictionaries: boolean): Gate[] {
 
 function sharedHygieneGates(): Gate[] {
   return [
+    pnpmScript('source-artifact-boundaries', 'verify-source-artifact-boundaries', { label: 'source artifact boundaries' }),
     pnpmScript('optional-dependency-imports', 'verify-optional-dependency-imports', {
       label: 'optional dependency imports',
     }),

@@ -156,11 +156,23 @@ describe('publishableImage', () => {
     const { root } = fixture()
     const outside = mkdtempSync(join(tmpdir(), 'dsh-doc-site-outside-'))
     roots.push(outside)
-    writeFileSync(join(outside, 'secret.png'), 'not really a png\n')
-    symlinkSync(join(outside, 'secret.png'), join(root, 'packages/linked.png'))
+    const image = join(outside, 'secret.png')
+    writeFileSync(image, 'not really a png\n')
+    // Windows exercises escape through a junction, without requiring file-symlink
+    // privileges; POSIX still exercises a file symlink to the same outside file.
+    const link = join(root, 'packages', process.platform === 'win32' ? 'linked' : 'linked.png')
+    const candidate = process.platform === 'win32' ? join(link, 'secret.png') : link
+    if (process.platform === 'win32') symlinkSync(outside, link, 'junction')
+    else symlinkSync(image, link)
 
-    expect(publishableImage(join(root, 'packages/linked.png'), realpathSync(root))).toBeUndefined()
-    expect(publishableImage(join(outside, 'secret.png'), realpathSync(root))).toBeUndefined()
+    try {
+      expect(realpathSync(candidate)).toBe(realpathSync(image))
+      expect(publishableImage(candidate, realpathSync(root))).toBeUndefined()
+      expect(publishableImage(image, realpathSync(root))).toBeUndefined()
+      expect(readFileSync(image, 'utf8')).toBe('not really a png\n')
+    } finally {
+      unlinkSync(link)
+    }
   })
 
   it('refuses a directory', () => {
