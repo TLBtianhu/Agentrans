@@ -1,0 +1,47 @@
+name: Publish Desktop release
+
+on:
+  workflow_dispatch:
+    inputs:
+      package_run_id:
+        description: '打包运行 ID：该次运行产出的安装包、blockmap 与通道元数据将附加到 Release'
+        required: true
+        type: string
+      version:
+        description: '产物版本号：须与打包运行产出的文件名一致'
+        required: true
+        type: string
+      channel:
+        description: '更新通道：nightly 发布预发布，latest 发布正式 Release'
+        required: true
+        type: choice
+        options: [nightly, latest]
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: pnpm/action-setup@v5.0.0
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: '24'
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      # The packaging run keeps each target in its own artifact; one release carries both.
+      - name: Download packaged artifacts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p .desktop-download .desktop-assets
+          gh run download "${{ inputs.package_run_id }}" --dir .desktop-download
+          find .desktop-download -mindepth 2 -maxdepth 2 -type f -exec cp {} .desktop-assets/ \;
+      - name: Attach the assets to the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node --import tsx apps/desktop/scripts/publish-github-release.ts .desktop-assets "${{ inputs.version }}" "${{ inputs.channel }}"

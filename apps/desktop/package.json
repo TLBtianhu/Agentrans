@@ -38,7 +38,8 @@
     "package:mac:x64:dir": "tsx scripts/package-target.ts mac-x64 --dir",
     "package:win:x64": "tsx scripts/package-target.ts win-x64",
     "package:win:x64:unsigned": "tsx scripts/package-target.ts win-x64 --unsigned",
-    "package:win:x64:dir": "tsx scripts/package-target.ts win-x64 --dir"
+    "package:win:x64:dir": "tsx scripts/package-target.ts win-x64 --dir",
+    "publish:github": "tsx scripts/publish-github-release.ts"
   },
   "dependencies": {
     "electron-updater": "^6.8.9",
