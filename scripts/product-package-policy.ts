@@ -64,7 +64,5 @@ export const PRODUCT_PACKAGE_POLICY: Readonly<Record<string, ProductPackagePolic
   // capability, but no shipped composition mounts it: the product admits models and
   // Web access through the API-key issuer. Enabling sign-in means mounting these rows,
   // not rebuilding the clients.
-  'packages/credentials/deepseek-account-platform': { category: 'disabled', reason: 'System-browser sign-in and Platform session grants; the shipped compositions authenticate with an API-key issuer instead.' },
   'packages/llm/llm-deepseek-account': { category: 'disabled', reason: 'Model provider admitting account credentials; the shipped compositions admit the API-key provider only.' },
-  'packages/client/ui-settings-account': { category: 'disabled', reason: 'Account settings surface for the sign-in row above; it has no mounted owner while that row stays off.' },
 }

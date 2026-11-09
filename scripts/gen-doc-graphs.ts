@@ -497,9 +497,9 @@ const SERVICE_ROLES: ServiceRole[] = [
     pkg: 'deepseek-account',
     title: 'DeepSeek account',
     mode: 'seam',
-    implementations: ['deepseek-account-platform'],
-    consumers: ['api-account-controller', 'llm-deepseek'],
-    note: 'The Host owns browser authorization and local credentials; UI consumers receive state without tokens.',
+    implementations: ['llm-deepseek-account'],
+    consumers: ['llm-deepseek', 'web-search-deepseek'],
+    note: 'The seam carries account credentials for the model and search providers; no shipped composition mounts a sign-in provider.',
   },
   {
     key: 'authorization',

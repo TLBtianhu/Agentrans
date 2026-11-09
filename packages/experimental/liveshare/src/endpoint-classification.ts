@@ -82,17 +82,6 @@ export const VIEWER_ENDPOINT_CLASSES = {
   // No reader role names these and no plugin offers them today, so the conservative class is
   // owner-only. A plugin that intends to expose one reclassifies it as 'plugin-offered', which still
   // only makes it eligible for the declaration path; the owner's per-share selection is the grant.
-  'account/ackBonusNotified': 'owner-only', // owner account and sign-in; the served page never reads it
-  'account/cancelSignIn': 'owner-only', // owner account and sign-in; the served page never reads it
-  'account/getBalance': 'owner-only', // owner account and sign-in; the served page never reads it
-  'account/getProfile': 'owner-only', // owner account and sign-in; the served page never reads it
-  'account/getState': 'owner-only', // owner account and sign-in; the served page never reads it
-  'account/getUnnotifiedBonuses': 'owner-only', // owner account and sign-in; the served page never reads it
-  'account/hasRunningAccountTasks': 'owner-only', // owner account and sign-in; the served page never reads it
-  'account/signOut': 'owner-only', // owner account and sign-in; the served page never reads it
-  'account/startSignIn': 'owner-only', // owner account and sign-in; the served page never reads it
-  'account/watch': 'owner-only', // owner account and sign-in; the served page never reads it
-  'account/watchExpiry': 'owner-only', // owner account and sign-in; the served page never reads it
   'job/follow': 'owner-only', // owner background jobs
   'job/kill': 'owner-only', // owner background jobs
   'job/list': 'owner-only', // owner background jobs

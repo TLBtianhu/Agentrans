@@ -2,15 +2,8 @@
 import { Context, Service } from '@deepseek-ai/cordis'
 import type { AccountBonusBatch, AccountBonusOrderId, AccountClientMetadata, AccountDetails, AccountUserId, AccountView, SignInAttemptId } from './types.ts'
 export type { AccountBonusBatch, AccountBonusNotification, AccountBonusOrderId, AccountClientMetadata, AccountDetails, AccountProfile, AccountUserId, AccountWallet, AccountLinks, AccountView, SignInAttemptId, SignInAttemptView, SignInErrorCode } from './types.ts'
-export { isRunningAccountTask, installAccountTaskCancellation } from './account-tasks.ts'
 
 declare module '@deepseek-ai/cordis' {
-  interface Events {
-    /** Local grant removal has completed.
-     * @mode emit
-     */
-    'deepseek-account/signed-out'(): void
-  }
   interface Context {
     deepseekAccount: DeepSeekAccount
   }

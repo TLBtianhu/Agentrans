@@ -1,6 +1,6 @@
 /** HTTP lifecycle, routing and optional Cordis services under real composition. */
 import * as NativeToolExecutor from '@deepseek-ai/dsh-tool-executor-native'
-import { installAccountTaskCancellation, type DeepSeekAccount } from '@deepseek-ai/dsh-deepseek-account'
+import type { DeepSeekAccount } from '@deepseek-ai/dsh-deepseek-account'
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -365,22 +365,6 @@ describe('Cordis provider composition', () => {
     await chunks(ctx.llm.stream(options({ provider: 'deepseek-account' })))
     expect(token).toBe('replacement-login')
     expect(rejectToken).toHaveBeenCalledExactlyOnceWith('first-login')
-  })
-
-  it('finishes the active account turn when rejected credentials publish sign-out', async () => {
-    const { ctx } = await boot((response) => {
-      response.writeHead(401)
-      response.end(JSON.stringify({ error: { message: 'Authentication Fails (invalid dsh token)' } }))
-    })
-    ctx.provide('deepseekAccount', { resolveToken: async (_url: string): Promise<string | undefined> => 'fixture-token',
-      rejectToken: async (_token: string): Promise<void> => { ctx.emit('deepseek-account/signed-out') } } as DeepSeekAccount)
-    installAccountTaskCancellation(ctx)
-    const agent = await ctx.agentLoop.create(SessionId('inference-account-expiry'), { provider: 'deepseek-account', model: MODEL })
-    agent.followup(user('hello'))
-    await agent.whenIdle()
-    expect(agent.session.snapshotEvents().at(-1)?.data).toMatchObject({
-      reason: { kind: 'aborted', reason: { kind: 'hook', reason: 'deepseek-account/signed-out' } },
-    })
   })
 
   it('preserves the inference error when rejected credential removal fails', async () => {

@@ -90,7 +90,7 @@ Messages sends text, thinking, tool calls, and tool results as content blocks, r
 
 ### Account credentials
 
-`deepseek-official` resolves only its configured API-key reference. `deepseek-account` resolves only the stored grant from the [account provider](../../credentials/deepseek-account-platform/README.md), whose allowed `inferenceOrigin` defaults to `https://api.deepseek.com`. Neither route falls back to the other. Signing out removes the account grant and preserves API keys.
+`deepseek-official` resolves only its configured API-key reference. `deepseek-account` resolves only the stored grant from the [account seam](../../credentials/deepseek-account/README.md), whose allowed `inferenceOrigin` defaults to `https://api.deepseek.com`. No shipped composition mounts a sign-in provider, so only `deepseek-official` resolves in the product. Neither route falls back to the other.
 
 Messages and Files requests send account tokens as `x-dsh-auth-token` without a Bearer prefix; API keys use `x-api-key`. Neither credential mode follows redirects. The account provider owns HTTP 401 classification and credential invalidation; the transport passes failures to its callback.
 
