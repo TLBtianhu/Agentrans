@@ -1,0 +1,22 @@
+# Bilingual-pair consistency record for 2026-11-09-platform-client-identity.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-11-09-platform-client-identity.md
+/agent-note-platform-client-identity-belongs-to-the-embedding-client:
+  en: 15f67d6807c3b7ad
+  zh: b3e718375db87a5a
+/agent-note-platform-client-identity-belongs-to-the-embedding-client/problem:
+  en: 8602db4895b096d5
+  zh: 9f16cf7ab3d9ce71
+/agent-note-platform-client-identity-belongs-to-the-embedding-client/decision:
+  en: 31b31eb3a6e953a0
+  zh: ae02485e49df227b
+/agent-note-platform-client-identity-belongs-to-the-embedding-client/alternatives-considered:
+  en: 99ff50562e34847c
+  zh: e542cc4f2ba49c51
+/agent-note-platform-client-identity-belongs-to-the-embedding-client/consequences:
+  en: 1201fdbb8b43f8da
+  zh: 802a5a43fd3b419f
+/agent-note-platform-client-identity-belongs-to-the-embedding-client/testing:
+  en: 7891b0fc4e1fcad2
+  zh: 477aedf075022018
