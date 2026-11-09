@@ -29,6 +29,7 @@ it('flattens the packaging run into one directory before publishing it', () => {
   const steps = workflow.jobs.publish!.steps
   const download = steps.find(step => step.name === 'Download packaged artifacts')
   expect(download?.run).toContain('gh run download "${{ inputs.package_run_id }}"')
+  expect(download?.run).toContain('rm -rf .desktop-download/*-logs-*')
   expect(download?.run).toContain('find .desktop-download -mindepth 2 -maxdepth 2 -type f')
   expect(download?.env?.GH_TOKEN).toBe('${{ secrets.GITHUB_TOKEN }}')
 })

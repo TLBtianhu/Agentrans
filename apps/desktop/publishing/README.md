@@ -27,10 +27,10 @@ Publication needs a token with `contents: write` on the repository in `GH_TOKEN`
 
 ```sh
 pnpm run package:win:x64
-node --import tsx apps/desktop/scripts/publish-github-release.ts .desktop-build/artifacts <version> latest
+pnpm run publish:github -- .desktop-build/artifacts <version> latest
 ```
 
-The uploader collects the target's installer, blockmaps, and channel metadata from the artifact directory, then creates the release when absent and attaches each file. Tag names are `desktop-v<version>`, distinct from the `dsh-v*` tags the npm family publishes from.
+The uploader collects the target's installer, blockmaps, and channel metadata from the artifact directory, then creates the release when absent and attaches each file. Tag names are `desktop-v<version>`, distinct from the `dsh-v*` tags the npm family publishes from. The [release workflow](../../../.github/workflows/desktop-release.yml) runs the same uploader from a packaging run's artifacts, so a published release does not depend on the machine that built it.
 
 <a id="update-channel"></a>
 ## Update channel

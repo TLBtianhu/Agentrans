@@ -40,6 +40,8 @@ jobs:
           set -euo pipefail
           mkdir -p .desktop-download .desktop-assets
           gh run download "${{ inputs.package_run_id }}" --dir .desktop-download
+          # Diagnostics ride along in their own artifacts; a release carries installers and metadata only.
+          rm -rf .desktop-download/*-logs-*
           find .desktop-download -mindepth 2 -maxdepth 2 -type f -exec cp {} .desktop-assets/ \;
       - name: Attach the assets to the release
         env:

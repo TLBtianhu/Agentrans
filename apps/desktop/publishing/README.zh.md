@@ -27,10 +27,10 @@ description: "将已完成的 Desktop 安装包与更新元数据发布为 GitHu
 
 ```sh
 pnpm run package:win:x64
-node --import tsx apps/desktop/scripts/publish-github-release.ts .desktop-build/artifacts <version> latest
+pnpm run publish:github -- .desktop-build/artifacts <version> latest
 ```
 
-上传器会从产物目录收集该目标的安装包、blockmap 与通道元数据，Release 不存在时创建，然后逐个附加。标签名为 `desktop-v<version>`，与 npm 系列使用的 `dsh-v*` 区分。
+上传器会从产物目录收集该目标的安装包、blockmap 与通道元数据，Release 不存在时创建，然后逐个附加。标签名为 `desktop-v<version>`，与 npm 系列使用的 `dsh-v*` 区分。[发布工作流](../../../.github/workflows/desktop-release.yml)用同一个上传器处理一次打包运行的产物，因此发布不依赖构建它的机器。
 
 <a id="update-channel"></a>
 ## 更新通道
