@@ -143,19 +143,31 @@ const CONTENT_TYPES: Readonly<Record<string, string>> = {
 /**
  * Collect the packaged files a release must carry.
  * @param directory - electron-builder output directory for one target.
+ * @param version - Product version the artifacts must have been built from.
  * @returns assets in upload order, channel metadata last.
+ * @throws Error when the directory mixes versions or carries more than one feed.
  */
-export async function collectReleaseAssets(directory: string): Promise<GitHubReleaseAsset[]> {
+export async function collectReleaseAssets(directory: string, version: string): Promise<GitHubReleaseAsset[]> {
   const entries = await readdir(directory)
   const assets: GitHubReleaseAsset[] = []
   for (const name of entries.sort()) {
     const extension = name.slice(name.lastIndexOf('.'))
     const contentType = CONTENT_TYPES[extension]
     if (contentType === undefined) continue
+    // electron-builder writes the build version into every artifact name; publishing
+    // a directory that mixes versions would attach bytes to the wrong release. Channel
+    // metadata is named after the channel, so the binaries carry the check.
+    if (extension !== '.yml' && !name.includes(version)) {
+      throw new Error(`desktop publish: ${name} does not carry version ${version}`)
+    }
     assets.push({ path: join(directory, name), name, contentType })
   }
+  const feeds = assets.filter(asset => (asset.name ?? '').endsWith('.yml'))
+  if (feeds.length > 1) {
+    throw new Error(`desktop publish: ${directory} carries ${String(feeds.length)} channel metadata files; publish one target per release`)
+  }
   // The feed metadata must land after the binaries it references.
-  return [...assets.filter(asset => !(asset.name ?? '').endsWith('.yml')), ...assets.filter(asset => (asset.name ?? '').endsWith('.yml'))]
+  return [...assets.filter(asset => !(asset.name ?? '').endsWith('.yml')), ...feeds]
 }
 
 if (process.argv[1] !== undefined && process.argv[1].endsWith('publish-github-release.ts')) {
@@ -171,7 +183,7 @@ if (process.argv[1] !== undefined && process.argv[1].endsWith('publish-github-re
       repo: DESKTOP_UPDATE_REPOSITORY.repo,
       version,
       channel,
-      assets: await collectReleaseAssets(directory),
+      assets: await collectReleaseAssets(directory, version),
     })
     console.log(`published ${result.tag}: ${String(result.uploaded.length)} uploaded, ${String(result.skipped.length)} already present`)
     console.log(result.url)

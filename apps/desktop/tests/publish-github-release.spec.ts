@@ -3,7 +3,7 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { desktopGitHubReleaseTag, publishGitHubRelease, type GitHubReleaseAsset } from '../scripts/publish-github-release.ts'
+import { collectReleaseAssets, desktopGitHubReleaseTag, publishGitHubRelease, type GitHubReleaseAsset } from '../scripts/publish-github-release.ts'
 
 const directories: string[] = []
 
@@ -91,5 +91,33 @@ describe('desktop GitHub release publishing', () => {
     }) as unknown as typeof globalThis.fetch
     await publishGitHubRelease({ token: 't', owner: 'o', repo: 'r', version: '2.0.0', channel: 'nightly', assets: [] }, capturing)
     expect(JSON.parse(created[0] ?? '{}')).toMatchObject({ tag_name: 'desktop-v2.0.0', prerelease: true })
+  })
+})
+
+describe('release asset collection', () => {
+  it('orders the feed after the binaries it references', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'github-collect-'))
+    directories.push(directory)
+    for (const name of ['agentrans-1.2.3-win-x64.exe', 'agentrans-1.2.3-win-x64.exe.blockmap', 'latest.yml']) {
+      await writeFile(join(directory, name), 'bytes')
+    }
+    const assets = await collectReleaseAssets(directory, '1.2.3')
+    expect(assets.map(asset => asset.name)).toEqual(['agentrans-1.2.3-win-x64.exe', 'agentrans-1.2.3-win-x64.exe.blockmap', 'latest.yml'])
+  })
+
+  it('refuses an artifact built from another version', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'github-collect-'))
+    directories.push(directory)
+    await writeFile(join(directory, 'agentrans-1.2.2-win-x64.exe'), 'bytes')
+    await expect(collectReleaseAssets(directory, '1.2.3')).rejects.toThrow(/does not carry version 1\.2\.3/u)
+  })
+
+  it('refuses a directory that mixes two targets feeds', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'github-collect-'))
+    directories.push(directory)
+    for (const name of ['agentrans-1.2.3-win-x64.exe', 'latest.yml', 'latest-mac.yml']) {
+      await writeFile(join(directory, name), 'bytes')
+    }
+    await expect(collectReleaseAssets(directory, '1.2.3')).rejects.toThrow(/carries 2 channel metadata files/u)
   })
 })
