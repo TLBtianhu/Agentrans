@@ -10,7 +10,7 @@ import {
 } from '../scripts/macos-app-update-config.mjs'
 
 const roots: string[] = []
-const update = { publicUrl: 'https://desktop-updates.example.com/agentrans/feeds/mac-arm64/' }
+const update = { provider: 'generic' as const, publicUrl: 'https://desktop-updates.example.com/agentrans/feeds/mac-arm64/' }
 
 async function fixture(): Promise<{ appPath: string; resourcesDir: string }> {
   const root = await mkdtemp(join(tmpdir(), 'desktop-macos-update-config-'))
@@ -28,7 +28,7 @@ afterEach(async () => {
 describe('macOS packaged updater configuration', () => {
   it('uses the final generic Nightly provider configured for the build', () => {
     expect(resolveMacOSAppUpdateFeed([{ provider: 'generic', url: update.publicUrl, channel: 'nightly' }]))
-      .toEqual({ ...update, channel: 'nightly' })
+      .toEqual({ provider: 'generic', publicUrl: update.publicUrl, channel: 'nightly' })
     for (const publish of [undefined, [], [{ provider: 'github', channel: 'nightly', url: update.publicUrl }],
       [{ provider: 'generic', channel: 'invalid', url: update.publicUrl }]]) {
       expect(() => resolveMacOSAppUpdateFeed(publish)).toThrow(/macOS update config/u)

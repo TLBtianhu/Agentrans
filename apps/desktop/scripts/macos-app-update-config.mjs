@@ -31,24 +31,43 @@ export function resolveMacOSAppUpdateFeed(publish) {
     throw new Error('desktop macOS update config: publish must contain exactly one provider')
   }
   const provider = object(publish[0], 'publish provider')
-  if (provider.provider !== 'generic' || !['nightly', 'latest'].includes(provider.channel)) {
-    throw new Error('desktop macOS update config: publish provider must be generic with nightly or latest channel')
+  if (provider.provider === 'github') {
+    return {
+      provider: 'github',
+      owner: nonEmptyString(provider.owner, 'publish owner'),
+      repo: nonEmptyString(provider.repo, 'publish repository'),
+      channel: resolveDesktopUpdateChannel({ DSH_DESKTOP_UPDATE_CHANNEL: provider.releaseType === 'release' ? 'latest' : 'nightly' }),
+    }
   }
-  return { publicUrl: nonEmptyString(provider.url, 'publish provider URL'), channel: resolveDesktopUpdateChannel({ DSH_DESKTOP_UPDATE_CHANNEL: provider.channel }) }
+  if (provider.provider !== 'generic' || !['nightly', 'latest'].includes(provider.channel)) {
+    throw new Error('desktop macOS update config: publish provider must be generic with nightly or latest channel, or github')
+  }
+  return { provider: 'generic', publicUrl: nonEmptyString(provider.url, 'publish provider URL'), channel: resolveDesktopUpdateChannel({ DSH_DESKTOP_UPDATE_CHANNEL: provider.channel }) }
 }
 
 /**
  * Create the electron-updater configuration embedded before code signing.
- * @param {{ publicUrl: string, channel?: 'nightly' | 'latest' }} update - Resolved update feed.
+ * @param {{ provider?: 'github' | 'generic', owner?: string, repo?: string, publicUrl?: string, channel?: 'nightly' | 'latest' }} update - Resolved update feed.
  * @param {string} updaterCacheDirName - electron-builder application cache directory.
- * @returns {{ provider: 'generic', url: string, channel: 'nightly' | 'latest', updaterCacheDirName: string }} Packaged updater fields.
+ * @returns {{ provider: 'github' | 'generic', owner?: string, repo?: string, url?: string, channel: 'nightly' | 'latest', updaterCacheDirName: string }} Packaged updater fields.
  */
 export function createMacOSAppUpdateConfig(update, updaterCacheDirName) {
+  const channel = resolveDesktopUpdateChannel({ DSH_DESKTOP_UPDATE_CHANNEL: update.channel })
+  const cache = nonEmptyString(updaterCacheDirName, 'updater cache directory')
+  if (update.provider === 'github') {
+    return {
+      provider: 'github',
+      owner: nonEmptyString(update.owner, 'publish owner'),
+      repo: nonEmptyString(update.repo, 'publish repository'),
+      channel,
+      updaterCacheDirName: cache,
+    }
+  }
   return {
     provider: 'generic',
     url: nonEmptyString(update.publicUrl, 'public URL'),
-    channel: resolveDesktopUpdateChannel({ DSH_DESKTOP_UPDATE_CHANNEL: update.channel }),
-    updaterCacheDirName: nonEmptyString(updaterCacheDirName, 'updater cache directory'),
+    channel,
+    updaterCacheDirName: cache,
   }
 }
 
@@ -81,8 +100,13 @@ export async function verifyMacOSAppUpdateConfig(appPath, update, updaterCacheDi
     throw new Error(`desktop macOS update config: cannot read ${path}: ${error instanceof Error ? error.message : String(error)}`)
   }
   const config = object(parsed, CONFIG_FILENAME)
-  if (config.provider !== 'generic' || config.url !== update.publicUrl || config.channel !== resolveDesktopUpdateChannel({ DSH_DESKTOP_UPDATE_CHANNEL: update.channel })) {
-    throw new Error(`desktop macOS update config: ${path} does not match ${update.publicUrl}`)
+  const channel = resolveDesktopUpdateChannel({ DSH_DESKTOP_UPDATE_CHANNEL: update.channel })
+  const matches = update.provider === 'github'
+    ? config.provider === 'github' && config.owner === update.owner && config.repo === update.repo && config.channel === channel
+    : config.provider === 'generic' && config.url === update.publicUrl && config.channel === channel
+  if (!matches) {
+    const expected = update.provider === 'github' ? `${update.owner}/${update.repo}` : update.publicUrl
+    throw new Error(`desktop macOS update config: ${path} does not match ${expected}`)
   }
   const actualCacheDirName = nonEmptyString(config.updaterCacheDirName, `${CONFIG_FILENAME}.updaterCacheDirName`)
   if (updaterCacheDirName !== undefined && actualCacheDirName !== updaterCacheDirName) {

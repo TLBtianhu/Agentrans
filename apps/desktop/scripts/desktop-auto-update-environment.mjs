@@ -1,7 +1,7 @@
 /** Resolve the Desktop auto-update channel and its Tencent COS destination. */
 
 import { valid } from 'semver'
-import { assertUpstreamDesktopReleaseIdentity } from './desktop-release-environment.mjs'
+import { assertUpstreamDesktopReleaseIdentity, DESKTOP_UPDATE_REPOSITORY } from './desktop-release-environment.mjs'
 
 /** Environment variable that selects the Desktop update deployment. */
 export const DESKTOP_AUTO_UPDATE_ENV = 'DSH_DESKTOP_AUTO_UPDATE_ENV'
@@ -183,6 +183,40 @@ export function resolveDesktopAutoUpdateConfig(env, platform, arch) {
     keyPrefix,
     binaryKeyPrefix: `${releasePrefix}/bin/${target}${channel === 'latest' ? '/latest' : ''}`,
     publicUrl: `${origin}/${keyPrefix}/`,
+  }
+}
+
+/**
+ * Resolve the update transport a package embeds.
+ *
+ * `github` publishes through GitHub Releases and needs no hosting of our own;
+ * `generic` remains for a self-hosted static directory.
+ * @param {NodeJS.ProcessEnv} env - Packaging environment.
+ * @returns {'github' | 'generic'} Selected transport.
+ */
+export function resolveDesktopUpdateProvider(env) {
+  const value = env.DSH_DESKTOP_UPDATE_PROVIDER
+  if (value === undefined || value === '') return 'generic'
+  if (value !== 'github' && value !== 'generic') {
+    throw new Error('desktop auto-update: DSH_DESKTOP_UPDATE_PROVIDER must be github or generic')
+  }
+  return value
+}
+
+/**
+ * Resolve the GitHub Releases feed for a package.
+ * @param {NodeJS.ProcessEnv} env - Packaging environment.
+ * @returns {{ provider: 'github', owner: string, repo: string, channel: 'nightly' | 'latest', releaseType: 'release' | 'prerelease' }} Feed coordinates embedded at build time.
+ */
+export function resolveDesktopGitHubUpdateConfig(env) {
+  assertUpstreamDesktopReleaseIdentity(env.DSH_DESKTOP_APP_ID)
+  const channel = resolveDesktopUpdateChannel(env)
+  return {
+    provider: 'github',
+    owner: DESKTOP_UPDATE_REPOSITORY.owner,
+    repo: DESKTOP_UPDATE_REPOSITORY.repo,
+    channel,
+    releaseType: channel === 'latest' ? 'release' : 'prerelease',
   }
 }
 

@@ -21,7 +21,7 @@ import {
   resolveWindowsUpdatePublisher,
   scrubWindowsSigningEnvironment,
 } from './windows-sign.mjs'
-import { resolveDesktopAutoUpdateConfig } from './desktop-auto-update-environment.mjs'
+import { resolveDesktopAutoUpdateConfig, resolveDesktopGitHubUpdateConfig, resolveDesktopUpdateProvider } from './desktop-auto-update-environment.mjs'
 import { resolveDesktopBuildCommit } from './desktop-build-commit.mjs'
 import { resolveDesktopBuildVersion } from './desktop-build-version.mjs'
 import { resolveDesktopPolicyEnvironment } from './desktop-policy-environment.mjs'
@@ -118,7 +118,9 @@ function electronBuilderConfig(env, hostPlatform, hostArch, preparedRuntime, pre
   if (windowsSigner !== undefined) {
     installWindowsNsisBootstrapSigner({ sign: windowsSigner })
   }
-  const update = unsigned ? undefined : resolveDesktopAutoUpdateConfig(env, resolvedPlatform, resolvedArch)
+  const updateProvider = unsigned ? undefined : resolveDesktopUpdateProvider(env)
+  const githubUpdate = updateProvider === 'github' ? resolveDesktopGitHubUpdateConfig(env) : undefined
+  const update = updateProvider === 'github' ? undefined : unsigned ? undefined : resolveDesktopAutoUpdateConfig(env, resolvedPlatform, resolvedArch)
   if (preparedRuntime !== undefined) buildPaths.dsh = preparedRuntime
   // electron-builder merges extraMetadata into the packaged manifest, so a build version here reaches
   // the artifact names, the update feed, and the installed app.getVersion() the updater compares against.
@@ -291,6 +293,8 @@ function electronBuilderConfig(env, hostPlatform, hostArch, preparedRuntime, pre
       differentialPackage: true,
     },
     detectUpdateChannel: false,
-    publish: update === undefined ? null : [{ provider: 'generic', url: update.publicUrl, channel: update.channel }],
+    publish: githubUpdate !== undefined
+      ? [{ provider: 'github', owner: githubUpdate.owner, repo: githubUpdate.repo, releaseType: githubUpdate.releaseType }]
+      : update === undefined ? null : [{ provider: 'generic', url: update.publicUrl, channel: update.channel }],
   }
 }

@@ -33,6 +33,7 @@ async function fixture(arch: 'arm64' | 'x64' = 'arm64') {
   await mkdir(join(appPath, 'Contents', 'Resources'), { recursive: true })
   await writeFile(join(appPath, 'payload'), 'signed content')
   await writeMacOSAppUpdateConfig(join(appPath, 'Contents', 'Resources'), {
+    provider: 'generic',
     publicUrl: `https://desktop-updates.example.com/agentrans/0123456789abcdef0123456789abcdef/feeds/mac-${arch}/`,
   }, 'deepseek-harness-updater')
   const version = '1.2.3-alpha.1'

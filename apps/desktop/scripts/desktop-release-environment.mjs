@@ -6,6 +6,9 @@ export const DESKTOP_APP_ID_ENV = 'DSH_DESKTOP_APP_ID'
 /** Fixed identity of the separately configured Agentrans Windows distribution. */
 export const AGENTRANS_DESKTOP_APP_ID = 'com.agentrans.app'
 
+/** The public GitHub repository that publishes Desktop releases. */
+export const DESKTOP_UPDATE_REPOSITORY = Object.freeze({ owner: 'TLBtianhu', repo: 'Agentrans' })
+
 
 
 /**

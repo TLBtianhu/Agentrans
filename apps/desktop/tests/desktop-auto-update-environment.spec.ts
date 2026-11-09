@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
   desktopBuildRecordFilename,
+  resolveDesktopGitHubUpdateConfig,
+  resolveDesktopUpdateProvider,
   desktopUpdateMetadataFilename,
   resolveDesktopAutoUpdateConfig,
   resolveDesktopAutoUpdateEnvironment,
@@ -120,5 +122,21 @@ describe('desktop auto-update environment', () => {
     expect(desktopUpdateMetadataFilename('1.2.3-beta.2', 'win32')).toBe('nightly.yml')
     expect(() => desktopUpdateMetadataFilename('not-semver', 'darwin')).toThrow(/invalid Desktop version/u)
     expect(() => desktopUpdateMetadataFilename('1.2.3', 'linux')).toThrow(/unsupported metadata platform/u)
+  })
+})
+
+describe('desktop update transport', () => {
+  it('selects GitHub by default and rejects an unknown transport', () => {
+    expect(resolveDesktopUpdateProvider({})).toBe('generic')
+    expect(resolveDesktopUpdateProvider({ DSH_DESKTOP_UPDATE_PROVIDER: 'github' })).toBe('github')
+    expect(() => resolveDesktopUpdateProvider({ DSH_DESKTOP_UPDATE_PROVIDER: 's3' }))
+      .toThrow(/DSH_DESKTOP_UPDATE_PROVIDER/u)
+  })
+
+  it('derives one GitHub release type per channel', () => {
+    expect(resolveDesktopGitHubUpdateConfig({ DSH_DESKTOP_UPDATE_CHANNEL: 'latest' })).toMatchObject({
+      provider: 'github', owner: 'TLBtianhu', repo: 'Agentrans', channel: 'latest', releaseType: 'release',
+    })
+    expect(resolveDesktopGitHubUpdateConfig({})).toMatchObject({ channel: 'nightly', releaseType: 'prerelease' })
   })
 })

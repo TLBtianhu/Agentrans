@@ -4,6 +4,9 @@ export const DESKTOP_APP_ID_ENV: 'DSH_DESKTOP_APP_ID'
 /** Fixed identity of the separately configured Agentrans Windows distribution. */
 export const AGENTRANS_DESKTOP_APP_ID: 'com.agentrans.app'
 
+/** The public GitHub repository that publishes Desktop releases. */
+export const DESKTOP_UPDATE_REPOSITORY: Readonly<{ owner: string, repo: string }>
+
 /**
  * Refuse the Agentrans identity on generic upstream release and publication paths.
  * @param appId - Selected application identity, if supplied by the generic caller.

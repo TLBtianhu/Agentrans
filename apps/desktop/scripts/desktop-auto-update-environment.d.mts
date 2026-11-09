@@ -113,3 +113,29 @@ export function resolveDesktopUpdateChannel(env: NodeJS.ProcessEnv): 'nightly' |
  * @returns Trimmed setting value.
  */
 export function requiredEnvironmentValue(env: NodeJS.ProcessEnv, name: string): string
+
+/** Update transport a package embeds. */
+export type DesktopUpdateProvider = 'github' | 'generic'
+
+/** GitHub Releases feed embedded at build time. */
+export interface DesktopGitHubUpdateConfig {
+  readonly provider: 'github'
+  readonly owner: string
+  readonly repo: string
+  readonly channel: 'nightly' | 'latest'
+  readonly releaseType: 'release' | 'prerelease'
+}
+
+/**
+ * Resolve the update transport a package embeds.
+ * @param env - Packaging environment.
+ * @returns The selected transport; `generic` when unset.
+ */
+export function resolveDesktopUpdateProvider(env: NodeJS.ProcessEnv): DesktopUpdateProvider
+
+/**
+ * Resolve the GitHub Releases feed for a package.
+ * @param env - Packaging environment.
+ * @returns Feed coordinates embedded at build time.
+ */
+export function resolveDesktopGitHubUpdateConfig(env: NodeJS.ProcessEnv): DesktopGitHubUpdateConfig
