@@ -1,6 +1,6 @@
 /** Platform client identity headers derived from one call's metadata. */
 import { expect, it } from 'vitest'
-import { platformClientHeaders } from '../src/index.ts'
+import { mergePlatformCookies, platformClientHeaders } from '../src/platform-client-headers.ts'
 
 it.each([
   ['darwin', 'desktop-mac'], ['win32', 'desktop-win'], [null, 'web'],
@@ -17,4 +17,10 @@ it('selects zh_CN only for a Chinese primary language subtag', () => {
   expect(locale('zh')).toBe('zh_CN')
   expect(locale('ZH_hans')).toBe('zh_CN')
   for (const value of ['ja', 'ja-JP', 'en', 'en-US', 'fr-FR', 'English', '', 'zhx']) expect(locale(value)).toBe('en_US')
+})
+
+it('keeps unrelated cookies and lets the deployment value win', () => {
+  expect(mergePlatformCookies('route=user; gate=open', 'gate=private; extra=1'))
+    .toBe('route=user; gate=private; extra=1')
+  expect(mergePlatformCookies('', 'gate=private')).toBe('gate=private')
 })
