@@ -106,10 +106,10 @@ describe('Desktop local packaging configuration', () => {
       PATH: 'build-tools', HTTPS_PROXY: 'http://proxy.example:8080', DSH_DESKTOP_NPM_REGISTRY: 'https://registry.npmmirror.com',
       DSH_DESKTOP_APP_ID: 'com.example.release', DSH_DESKTOP_UNSIGNED: '0',
       DSH_DESKTOP_AUTO_UPDATE_ENV: 'production',
-      DOWNLOAD_PROD_ORIGIN: 'https://updates.example.com', DSH_DESKTOP_MANDATORY_UPDATE_CONFIG: 'invalid-json',
+      DSH_DESKTOP_MANDATORY_UPDATE_CONFIG: 'invalid-json',
       DSH_DESKTOP_MANDATORY_UPDATE_PROD_ORIGIN: 'https://policy.example.com',
       DSH_DESKTOP_MACOS_SIGNING_IDENTITY: 'Release identity', CSC_LINK: 'missing.p12',
-      APPLE_API_KEY: 'missing.p8', DOWNLOAD_PROD_COS_SECRET_KEY: 'unused-secret',
+      APPLE_API_KEY: 'missing.p8',
     }
     const local = localMacOSPackageEnvironment(parent)
     expect(local).toEqual({

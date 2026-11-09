@@ -6,6 +6,7 @@ import { mkdir, mkdtemp, realpath, writeFile } from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { resolveDesktopGitHubUpdateConfig } from './desktop-auto-update-environment.mjs'
 import { resolveWindowsUpdatePublisher } from './windows-sign.mjs'
 
 assert.equal(process.platform, 'win32', 'Authenticode qualification requires Windows')
@@ -36,6 +37,8 @@ try {
   const before = { signed: await digest(signed), unsigned: await digest(unsigned) }
   const platformSpecificBuildOptions = { signtoolOptions: { publisherName } }
   const manager = new WindowsSignToolManager({ platformSpecificBuildOptions })
+  // Mirror the shipped feed so the metadata path under test is the product's own.
+  const feed = resolveDesktopGitHubUpdateConfig({})
   // Keep builder/updater metadata code real; no packaging, key lookup, HTTP, or installer entry runs.
   const metadata = await getAppUpdatePublishConfiguration({
     platform: Platform.WINDOWS,
@@ -44,7 +47,7 @@ try {
     signingManager: { value: Promise.resolve(manager) },
     isForceCodeSigningVerification: true,
     info: {},
-    config: { publish: [{ provider: 'generic', url: 'https://unused.invalid/', channel: 'nightly' }] },
+    config: { publish: [{ provider: 'github', owner: feed.owner, repo: feed.repo, releaseType: feed.releaseType }] },
     expandMacro: value => value,
   }, null, 1, true)
   assert.deepEqual(metadata.publisherName, [publisherName])
