@@ -1,7 +1,7 @@
 /** Non-default package roles retained outside the experimental group. */
 
 /** Product role that does not require a default runtime mount. */
-export type ProductPackageCategory = 'optional' | 'sdk' | 'build' | 'test' | 'web-distribution' | 'declarations'
+export type ProductPackageCategory = 'optional' | 'disabled' | 'sdk' | 'build' | 'test' | 'web-distribution' | 'declarations'
 
 /** One explicitly maintained package role and its reason. */
 export interface ProductPackagePolicy {
@@ -52,11 +52,19 @@ export const PRODUCT_PACKAGE_POLICY: Readonly<Record<string, ProductPackagePolic
 
   // Shipped rows the product keeps switched off. Each stays in the composition so an
   // explicit overlay can audit or enable it, but no default profile activates it.
-  'packages/client/ui-settings-session-log': { category: 'optional', reason: 'Upload settings row for the session log contribution; the shipped Web and Desktop compositions disable it.' },
-  'packages/host/product-telemetry-otel': { category: 'optional', reason: 'Host product telemetry exporter; the shipped Web composition disables product analytics.' },
-  'packages/llm/plugin-package-inventory-deepseek': { category: 'optional', reason: 'Active package inventory request field; the shipped compositions disable the contribution.' },
-  'packages/session/session-log-deepseek': { category: 'optional', reason: 'DeepSeek-specific API session log field; the shipped compositions disable the contribution.' },
-  'packages/session/session-telemetry': { category: 'optional', reason: 'Service definition for the session telemetry seam consumed by the disabled OTel sink.' },
-  'packages/session/session-telemetry-otel': { category: 'optional', reason: 'OTel session telemetry sink; the shipped compositions disable it.' },
-  'packages/web/web-deepseek-api': { category: 'optional', reason: 'Alternative search and fetch provider registering on ctx.web; the shipped composition selects the search and HTTP fetch providers instead.' },
+  'packages/client/ui-settings-session-log': { category: 'disabled', reason: 'Upload settings row for the session log contribution; the shipped Web and Desktop compositions disable it.' },
+  'packages/host/product-telemetry-otel': { category: 'disabled', reason: 'Host product telemetry exporter; the shipped Web composition disables product analytics.' },
+  'packages/llm/plugin-package-inventory-deepseek': { category: 'disabled', reason: 'Active package inventory request field; the shipped compositions disable the contribution.' },
+  'packages/session/session-log-deepseek': { category: 'disabled', reason: 'DeepSeek-specific API session log field; the shipped compositions disable the contribution.' },
+  'packages/session/session-telemetry': { category: 'disabled', reason: 'Service definition for the session telemetry seam consumed by the disabled OTel sink.' },
+  'packages/session/session-telemetry-otel': { category: 'disabled', reason: 'OTel session telemetry sink; the shipped compositions disable it.' },
+  'packages/web/web-deepseek-api': { category: 'disabled', reason: 'Search and fetch providers bound to the account integration; the shipped composition selects the API-key search and HTTP fetch rows instead.' },
+
+  // DeepSeek account delivery stays in the tree because upstream ships it as a base
+  // capability, but no shipped composition mounts it: the product admits models and
+  // Web access through the API-key issuer. Enabling sign-in means mounting these rows,
+  // not rebuilding the clients.
+  'packages/credentials/deepseek-account-platform': { category: 'disabled', reason: 'System-browser sign-in and Platform session grants; the shipped compositions authenticate with an API-key issuer instead.' },
+  'packages/llm/llm-deepseek-account': { category: 'disabled', reason: 'Model provider admitting account credentials; the shipped compositions admit the API-key provider only.' },
+  'packages/client/ui-settings-account': { category: 'disabled', reason: 'Account settings surface for the sign-in row above; it has no mounted owner while that row stays off.' },
 }

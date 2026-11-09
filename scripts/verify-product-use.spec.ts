@@ -281,6 +281,16 @@ describe('product package use', () => {
     expect(failures(root, { 'packages/core/missing': { category: 'optional', reason: 'Missing.' } })).toContain('stale package policy')
   })
 
+  it('accepts a shipped-but-off package and rejects that role for test infrastructure', () => {
+    const root = fixture()
+    const directory = 'packages/llm/llm-disabled'
+    pkg(root, directory, '@deepseek-ai/dsh-llm-disabled')
+    expect(failures(root, { [directory]: { category: 'disabled', reason: 'Shipped row no profile mounts.' } })).toBe('')
+    const testDirectory = 'packages/test-support/probe'
+    pkg(root, testDirectory, '@deepseek-ai/dsh-test-probe')
+    expect(failures(root, { [testDirectory]: { category: 'disabled', reason: 'Shipped row no profile mounts.' } })).toContain('invalid policy category disabled')
+  })
+
   it('requires a declared Web distribution package to remain source-reachable', () => {
     const root = fixture()
     const directory = 'packages/client/web'
