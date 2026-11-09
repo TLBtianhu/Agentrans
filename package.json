@@ -159,6 +159,7 @@
     "verify-cordis-config": "tsx scripts/verify-cordis-config.ts",
     "verify-config-keys": "tsx scripts/verify-config-keys.ts",
     "verify-bundle-overrides": "tsx scripts/verify-bundle-overrides.ts",
+    "verify-disabled-package-imports": "tsx scripts/verify-disabled-package-imports.ts",
     "rescope-vendor": "tsx scripts/rescope-vendor.ts",
     "rescope-vendor:check": "tsx scripts/rescope-vendor.ts --check",
     "verify-client-domain-graph": "tsx scripts/verify-client-domain-graph.ts",
