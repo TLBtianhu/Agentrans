@@ -14,6 +14,7 @@ import { startCosLoopback } from './cos-loopback.ts'
 
 const temporaryDirectories: string[] = []
 const TEST_ORIGIN = 'https://desktop-updates.example.com'
+const PRODUCTION_ORIGIN = 'https://updates.example.com'
 const TEST_BUCKET = 'test-download-bucket-1250000000'
 const RELEASE_ID = '0123456789abcdef0123456789abcdef'
 const PRODUCTION_BUCKET = 'production-download-bucket-1250000000'
@@ -51,16 +52,14 @@ async function fixture(
 
   const [os, arch] = target.split('-') as ['mac' | 'win', 'arm64' | 'x64']
   const base = `deepseek-harness-${version}-${os}-${arch}`
-  const origin = environment === 'test'
-    ? TEST_ORIGIN
-    : 'https://download.deepseek.com'
+  const origin = environment === 'test' ? TEST_ORIGIN : PRODUCTION_ORIGIN
   await writeFile(join(artifactsRoot, `${target}-release.json`), `${JSON.stringify({
     schemaVersion: 1,
     channel,
     target,
     version,
     environment,
-    publicUrl: `${origin}/dsh-desk/${environment === 'test' ? `${RELEASE_ID}/` : ''}feeds/${target}/`,
+    publicUrl: `${origin}/agentrans/${environment === 'test' ? `${RELEASE_ID}/` : ''}feeds/${target}/`,
   })}\n`)
 
   if (os === 'mac') {
@@ -104,6 +103,7 @@ async function fixture(
       : {
         DSH_DESKTOP_UPDATE_CHANNEL: channel,
         DSH_DESKTOP_AUTO_UPDATE_ENV: 'production',
+        DOWNLOAD_PROD_ORIGIN: 'https://updates.example.com',
         DOWNLOAD_PROD_COS_BUCKET: PRODUCTION_BUCKET,
       },
   }
@@ -189,14 +189,14 @@ describe('desktop upload plan', () => {
     const paths = await fixture('win-x64', '1.2.3', 'production')
     const plan = await createDesktopUploadPlan('win-x64', paths)
     expect(plan.artifacts.map(artifact => artifact.key)).toEqual([
-      'dsh-desk/bin/win-x64/deepseek-harness-1.2.3-win-x64.exe',
-      'dsh-desk/bin/win-x64/deepseek-harness-1.2.3-win-x64.exe.blockmap',
-      'dsh-desk/feeds/win-x64/nightly.yml',
+      'agentrans/bin/win-x64/deepseek-harness-1.2.3-win-x64.exe',
+      'agentrans/bin/win-x64/deepseek-harness-1.2.3-win-x64.exe.blockmap',
+      'agentrans/feeds/win-x64/nightly.yml',
     ])
     expect(load(plan.artifacts[2]!.contents!)).toMatchObject({
       version: '1.2.3',
       files: [{
-        url: 'https://download.deepseek.com/dsh-desk/bin/win-x64/deepseek-harness-1.2.3-win-x64.exe',
+        url: 'https://updates.example.com/agentrans/bin/win-x64/deepseek-harness-1.2.3-win-x64.exe',
         sha512: digest('signed NSIS executable fixture'),
       }],
     })
@@ -209,7 +209,7 @@ describe('desktop upload plan', () => {
     expect(plan).toMatchObject({
       environment: 'test',
       version: '1.2.3',
-      publicUrl: `https://desktop-updates.example.com/dsh-desk/${RELEASE_ID}/feeds/mac-arm64/`,
+      publicUrl: `https://desktop-updates.example.com/agentrans/${RELEASE_ID}/feeds/mac-arm64/`,
       bucket: TEST_BUCKET,
     })
     expect(plan.artifacts.map(artifact => artifact.filename)).toEqual([
@@ -226,7 +226,7 @@ describe('desktop upload plan', () => {
   it.each(['mac-arm64', 'mac-x64', 'win-x64'] as const)('publishes every %s object and YAML reference inside the test release directory', async (target) => {
     const paths = await fixture(target)
     const plan = await createDesktopUploadPlan(target, paths)
-    const prefix = `dsh-desk/${RELEASE_ID}`
+    const prefix = `agentrans/${RELEASE_ID}`
     const payload = plan.artifacts.find(artifact => artifact.filename.endsWith(target === 'win-x64' ? '.exe' : '.zip'))!
     for (const artifact of plan.artifacts) {
       expect(artifact.key).toBe(`${prefix}/${artifact.channelMetadata ? 'feeds' : 'bin'}/${target}/${artifact.filename}`)
@@ -271,7 +271,7 @@ describe('desktop upload plan', () => {
       'nightly.yml',
     ])
     expect(plan).toMatchObject({
-      publicUrl: 'https://download.deepseek.com/dsh-desk/feeds/win-x64/',
+      publicUrl: 'https://updates.example.com/agentrans/feeds/win-x64/',
       bucket: PRODUCTION_BUCKET,
     })
   })

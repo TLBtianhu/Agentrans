@@ -24,9 +24,9 @@ for (const platform of ['macos', 'windows'] as const) {
           ...(template.githubApp ? { githubApp: { ...template.githubApp, privateKeyFile: join(root, 'absent-key.pem') } } : {}) }
         const output = join(root, 'publishing', `${preset}.json`)
         await writeFile(output, JSON.stringify(config))
-        await expect(readDesktopPublishConfig(root, preset)).resolves.toEqual(config)
+        await expect(readDesktopPublishConfig(root, preset, { DOWNLOAD_PROD_ORIGIN: config.origin })).resolves.toEqual(config)
         await writeFile(output, JSON.stringify({ ...config, bucket: undefined }))
-        const failure = readDesktopPublishConfig(root, preset)
+        const failure = readDesktopPublishConfig(root, preset, { DOWNLOAD_PROD_ORIGIN: config.origin })
         await expect(failure).rejects.toHaveProperty('name', 'ZodError')
         await expect(failure).rejects.toHaveProperty('issues.0.path', ['bucket'])
       } finally { await rm(root, { recursive: true, force: true }) }

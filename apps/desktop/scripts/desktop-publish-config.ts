@@ -22,11 +22,13 @@ export type DesktopPublishConfig = z.infer<typeof schema>
  * @param preset Selected deployment from the retained package.
  * @returns Validated public configuration; production requires App configuration.
  */
-export async function readDesktopPublishConfig(configRoot: string, preset: 'test' | 'production'): Promise<DesktopPublishConfig> {
+export async function readDesktopPublishConfig(configRoot: string, preset: 'test' | 'production', env: NodeJS.ProcessEnv = process.env): Promise<DesktopPublishConfig> {
   if (!isAbsolute(configRoot)) throw new Error('desktop publish: configuration root must be absolute')
   const config = schema.parse(JSON.parse(await readFile(join(configRoot, 'publishing', `${preset}.json`), 'utf8')))
-  if (preset === 'production' && (config.origin !== 'https://download.deepseek.com' || !config.githubApp)) {
-    throw new Error('desktop publish: production requires its fixed origin and GitHub App configuration')
+  // A production package embeds this origin in every user's updater, so it must
+  // be a product-owned one rather than any origin the operator happens to pass.
+  if (preset === 'production' && (config.origin !== env.DOWNLOAD_PROD_ORIGIN || !config.githubApp)) {
+    throw new Error('desktop publish: production requires DOWNLOAD_PROD_ORIGIN to match the configured origin and a GitHub App configuration')
   }
   return config
 }

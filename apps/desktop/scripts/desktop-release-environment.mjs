@@ -6,6 +6,8 @@ export const DESKTOP_APP_ID_ENV = 'DSH_DESKTOP_APP_ID'
 /** Fixed identity of the separately configured Agentrans Windows distribution. */
 export const AGENTRANS_DESKTOP_APP_ID = 'com.agentrans.app'
 
+
+
 /**
  * Refuse the Agentrans identity on generic upstream release and publication paths.
  * @param {string | undefined} appId - Selected application identity, if the generic caller supplies one.

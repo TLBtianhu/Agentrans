@@ -127,7 +127,8 @@ describe('desktop package target', () => {
       DSH_DESKTOP_WINDOWS_KEY_CONTAINER: 'container',
       DSH_DESKTOP_WINDOWS_SIGNTOOL: 'C:\\tools\\signtool.exe',
       DSH_DESKTOP_AUTO_UPDATE_ENV: 'production',
-    })).toEqual({ DSH_DESKTOP_AUTO_UPDATE_ENV: 'production' })
+      DOWNLOAD_PROD_ORIGIN: 'https://updates.example.com',
+    })).toEqual({ DSH_DESKTOP_AUTO_UPDATE_ENV: 'production', DOWNLOAD_PROD_ORIGIN: 'https://updates.example.com' })
   })
 
   it('keeps COS credentials out of every packaging subprocess', () => {
@@ -140,11 +141,13 @@ describe('desktop package target', () => {
       DOWNLOAD_PROD_COS_SECRET_ID: 'production-id',
       DOWNLOAD_PROD_COS_SECRET_KEY: 'production-key',
       DSH_DESKTOP_AUTO_UPDATE_ENV: 'production',
+      DOWNLOAD_PROD_ORIGIN: 'https://updates.example.com',
     })).toEqual({
       DOWNLOAD_TEST_ORIGIN: 'https://desktop-updates.example.com',
       DOWNLOAD_TEST_COS_BUCKET: 'test-download-bucket',
       DOWNLOAD_PROD_COS_BUCKET: 'production-download-bucket',
       DSH_DESKTOP_AUTO_UPDATE_ENV: 'production',
+      DOWNLOAD_PROD_ORIGIN: 'https://updates.example.com',
     })
   })
 })
