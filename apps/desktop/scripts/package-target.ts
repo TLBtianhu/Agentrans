@@ -38,13 +38,6 @@ const WINDOWS_SIGNING_ENV_NAMES = [
   'DSH_DESKTOP_WINDOWS_SIGNATURE_CACHE_DIR',
   'DSH_DESKTOP_WINDOWS_SIGNATURE_CACHE_CONCURRENCY',
 ] as const
-const DESKTOP_UPLOAD_CREDENTIAL_ENV_NAMES = new Set([
-  'DOWNLOAD_TEST_COS_SECRET_ID',
-  'DOWNLOAD_TEST_COS_SECRET_KEY',
-  'DOWNLOAD_PROD_COS_SECRET_ID',
-  'DOWNLOAD_PROD_COS_SECRET_KEY',
-])
-
 /** `--build-version` value that numbers a build after the ones already taken. */
 const AUTOMATIC_BUILD_VERSION = 'auto'
 
@@ -111,16 +104,6 @@ export function desktopElectronBuilderEnvironment(environment: NodeJS.ProcessEnv
     CSC_IDENTITY_AUTO_DISCOVERY: 'false',
     DSH_DESKTOP_UNSIGNED: '1',
   }
-}
-
-/**
- * Remove upload-only COS credentials from every packaging subprocess.
- * @param environment - Packaging command environment.
- * @returns A copy without Desktop upload credentials.
- */
-export function withoutDesktopUploadCredentials(environment: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
-  return Object.fromEntries(Object.entries(environment)
-    .filter(([name]) => !DESKTOP_UPLOAD_CREDENTIAL_ENV_NAMES.has(name)))
 }
 
 function isTargetName(value: string): value is DesktopPackageTargetName {
@@ -435,8 +418,8 @@ export async function packageTarget(
     rmSync(`${releaseRecordPath}.tmp`, { force: true })
   }
   const artifactsRoot = desktopArtifactOutput(buildPaths, invocation).directory
-  const buildEnv = withoutWindowsSigningEnvironment(withoutDesktopUploadCredentials(
-    desktopElectronBuilderEnvironment(environment, invocation.unsigned)))
+  const buildEnv = withoutWindowsSigningEnvironment(
+    desktopElectronBuilderEnvironment(environment, invocation.unsigned))
   const targetEnv: NodeJS.ProcessEnv = {
     ...buildEnv,
     DSH_DESKTOP_MACOS_SKIP_NOTARIZATION: invocation.skipNotarization ? '1' : '0',
