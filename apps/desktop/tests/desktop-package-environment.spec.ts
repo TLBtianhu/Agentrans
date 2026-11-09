@@ -9,8 +9,7 @@ const WINDOWS = { platform: 'win32', arch: 'x64' } as const
 const MACOS = { platform: 'darwin', arch: 'arm64' } as const
 const POLICY = { DSH_DESKTOP_MANDATORY_UPDATE_TEST_ORIGIN: 'https://policy.example.com',
   DSH_DESKTOP_MANDATORY_UPDATE_CONFIG: JSON.stringify({ allowedAuthOrigins: ['https://login.example.com'] }) }
-const RELEASE = { ...POLICY, DSH_DESKTOP_APP_ID: 'com.example.desktop', DOWNLOAD_TEST_ORIGIN: 'https://updates.example.com',
-  DOWNLOAD_TEST_RELEASE_ID: '0123456789abcdef0123456789abcdef' }
+const RELEASE = { ...POLICY, DSH_DESKTOP_APP_ID: 'com.example.desktop', DSH_DESKTOP_AUTO_UPDATE_ENV: 'test' }
 const MAC_IDENTITY = { DSH_DESKTOP_MACOS_SIGNING_IDENTITY: 'Example Company (TEAMID1234)', DSH_DESKTOP_MACOS_TEAM_ID: 'TEAMID1234' }
 
 async function withDirectory(action: (directory: string) => Promise<void>): Promise<void> {
@@ -194,20 +193,17 @@ describe('Desktop local packaging configuration', () => {
     })
   })
 
-  it.each(['win32', 'darwin'] as const)('owns the %s release ID in its platform file', async (platform) => {
+  it.each(['win32', 'darwin'] as const)('owns the %s deployment in its platform file', async (platform) => {
     await withDirectory(async (directory) => {
       const settings = Object.entries(RELEASE).map(([name, value]) => `${name}='${value}'`).join('\n') + '\n'
       const file = join(directory, platform === 'win32' ? '.env.windows' : '.env.macos')
-      const parent = { DOWNLOAD_TEST_RELEASE_ID: 'a'.repeat(32) }
+      const parent = { DSH_DESKTOP_AUTO_UPDATE_ENV: 'production', DSH_DESKTOP_APP_ID: 'com.example.stale' }
       await writeFile(file, settings)
-      expect(loadDesktopPackageEnvironment(platform, parent, directory).DOWNLOAD_TEST_RELEASE_ID).toBe(RELEASE.DOWNLOAD_TEST_RELEASE_ID)
-      await writeFile(file, settings.replace(`DOWNLOAD_TEST_RELEASE_ID='${RELEASE.DOWNLOAD_TEST_RELEASE_ID}'\n`, ''))
+      expect(loadDesktopPackageEnvironment(platform, parent, directory).DSH_DESKTOP_AUTO_UPDATE_ENV).toBe('test')
+      await writeFile(file, settings.replace("DSH_DESKTOP_AUTO_UPDATE_ENV='test'\n", ''))
       const missing = loadDesktopPackageEnvironment(platform, parent, directory)
-      expect(missing.DOWNLOAD_TEST_RELEASE_ID).toBeUndefined()
-      expect(() => {
-        validateDesktopPackageEnvironment(missing, platform === 'win32' ? WINDOWS : MACOS)
-      }).toThrow(/DOWNLOAD_TEST_RELEASE_ID/u)
-      expect(parent.DOWNLOAD_TEST_RELEASE_ID).toBe('a'.repeat(32))
+      expect(missing.DSH_DESKTOP_AUTO_UPDATE_ENV).toBeUndefined()
+      expect(parent.DSH_DESKTOP_AUTO_UPDATE_ENV).toBe('production')
     })
   })
 
@@ -245,7 +241,7 @@ describe('Desktop local packaging configuration', () => {
     }).toThrow(/reverse-DNS/u)
     expect(() => {
       validateDesktopPackageEnvironment({ ...POLICY, DSH_DESKTOP_APP_ID: RELEASE.DSH_DESKTOP_APP_ID }, WINDOWS)
-    }).toThrow(/DOWNLOAD_TEST_ORIGIN/u)
+    }).toThrow(/DSH_DESKTOP_WINDOWS_CER_FILE/u)
     expect(() => {
       validateDesktopPackageEnvironment(RELEASE, WINDOWS)
     }).toThrow(/DSH_DESKTOP_WINDOWS_CER_FILE/u)

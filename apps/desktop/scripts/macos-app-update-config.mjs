@@ -31,18 +31,15 @@ export function resolveMacOSAppUpdateFeed(publish) {
     throw new Error('desktop macOS update config: publish must contain exactly one provider')
   }
   const provider = object(publish[0], 'publish provider')
-  if (provider.provider === 'github') {
-    return {
-      provider: 'github',
-      owner: nonEmptyString(provider.owner, 'publish owner'),
-      repo: nonEmptyString(provider.repo, 'publish repository'),
-      channel: resolveDesktopUpdateChannel({ DSH_DESKTOP_UPDATE_CHANNEL: provider.releaseType === 'release' ? 'latest' : 'nightly' }),
-    }
+  if (provider.provider !== 'github') {
+    throw new Error('desktop macOS update config: publish provider must be github')
   }
-  if (provider.provider !== 'generic' || !['nightly', 'latest'].includes(provider.channel)) {
-    throw new Error('desktop macOS update config: publish provider must be generic with nightly or latest channel, or github')
+  return {
+    provider: 'github',
+    owner: nonEmptyString(provider.owner, 'publish owner'),
+    repo: nonEmptyString(provider.repo, 'publish repository'),
+    channel: resolveDesktopUpdateChannel({ DSH_DESKTOP_UPDATE_CHANNEL: provider.releaseType === 'release' ? 'latest' : 'nightly' }),
   }
-  return { provider: 'generic', publicUrl: nonEmptyString(provider.url, 'publish provider URL'), channel: resolveDesktopUpdateChannel({ DSH_DESKTOP_UPDATE_CHANNEL: provider.channel }) }
 }
 
 /**
@@ -53,21 +50,12 @@ export function resolveMacOSAppUpdateFeed(publish) {
  */
 export function createMacOSAppUpdateConfig(update, updaterCacheDirName) {
   const channel = resolveDesktopUpdateChannel({ DSH_DESKTOP_UPDATE_CHANNEL: update.channel })
-  const cache = nonEmptyString(updaterCacheDirName, 'updater cache directory')
-  if (update.provider === 'github') {
-    return {
-      provider: 'github',
-      owner: nonEmptyString(update.owner, 'publish owner'),
-      repo: nonEmptyString(update.repo, 'publish repository'),
-      channel,
-      updaterCacheDirName: cache,
-    }
-  }
   return {
-    provider: 'generic',
-    url: nonEmptyString(update.publicUrl, 'public URL'),
+    provider: 'github',
+    owner: nonEmptyString(update.owner, 'publish owner'),
+    repo: nonEmptyString(update.repo, 'publish repository'),
     channel,
-    updaterCacheDirName: cache,
+    updaterCacheDirName: nonEmptyString(updaterCacheDirName, 'updater cache directory'),
   }
 }
 

@@ -1,14 +1,21 @@
 /** Resolved fields required to embed a macOS updater feed. */
-export type MacOSAppUpdateFeed =
-  | { readonly provider: 'github'; readonly owner: string; readonly repo: string; readonly channel?: 'nightly' | 'latest' }
-  | { readonly provider: 'generic'; readonly publicUrl: string; readonly channel?: 'nightly' | 'latest' }
+export interface MacOSAppUpdateFeed {
+  readonly provider: 'github'
+  readonly owner: string
+  readonly repo: string
+  readonly channel?: 'nightly' | 'latest'
+}
 
 /** Packaged electron-updater configuration for macOS. */
-export type MacOSAppUpdateConfig =
-  | { readonly provider: 'github'; readonly owner: string; readonly repo: string; readonly channel: 'nightly' | 'latest'; readonly updaterCacheDirName: string }
-  | { readonly provider: 'generic'; readonly url: string; readonly channel: 'nightly' | 'latest'; readonly updaterCacheDirName: string }
+export interface MacOSAppUpdateConfig {
+  readonly provider: 'github'
+  readonly owner: string
+  readonly repo: string
+  readonly channel: 'nightly' | 'latest'
+  readonly updaterCacheDirName: string
+}
 
-/** Resolve the one macOS feed from the final electron-builder configuration. */
+/** Resolve the GitHub feed from the final electron-builder configuration. */
 export function resolveMacOSAppUpdateFeed(publish: unknown): MacOSAppUpdateFeed
 
 /** Create the electron-updater configuration embedded before code signing. */

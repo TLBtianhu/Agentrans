@@ -1,14 +1,11 @@
-/** Resolve the Desktop auto-update channel and its Tencent COS destination. */
+/** Resolve the Desktop auto-update channel, target, deployment, and packaged artifact names. */
 
 import { valid } from 'semver'
 import { assertUpstreamDesktopReleaseIdentity, DESKTOP_UPDATE_REPOSITORY } from './desktop-release-environment.mjs'
 
-/** Environment variable that selects the Desktop update deployment. */
-export const DESKTOP_AUTO_UPDATE_ENV = 'DSH_DESKTOP_AUTO_UPDATE_ENV'
-
 /**
  * Resolve the channel embedded in the installer; omitted local settings retain nightly.
- * @param {NodeJS.ProcessEnv} env Packaging or upload settings.
+ * @param {NodeJS.ProcessEnv} env Packaging settings.
  * @returns {'nightly' | 'latest'} Validated channel.
  */
 export function resolveDesktopUpdateChannel(env) {
@@ -17,41 +14,12 @@ export function resolveDesktopUpdateChannel(env) {
   return channel
 }
 
-const UPDATE_ENVIRONMENTS = {
-  test: {
-    originEnvName: 'DOWNLOAD_TEST_ORIGIN',
-    fixedOrigin: undefined,
-    bucketEnvName: 'DOWNLOAD_TEST_COS_BUCKET',
-    secretIdEnvName: 'DOWNLOAD_TEST_COS_SECRET_ID',
-    secretKeyEnvName: 'DOWNLOAD_TEST_COS_SECRET_KEY',
-  },
-  production: {
-    originEnvName: 'DOWNLOAD_PROD_ORIGIN',
-    // The product states its own origin once, at packaging time. An unset value
-    // fails the build instead of embedding the origin of the vendor it was forked from.
-    fixedOrigin: undefined,
-    bucketEnvName: 'DOWNLOAD_PROD_COS_BUCKET',
-    secretIdEnvName: 'DOWNLOAD_PROD_COS_SECRET_ID',
-    secretKeyEnvName: 'DOWNLOAD_PROD_COS_SECRET_KEY',
-  },
-}
-
-const UPDATE_TARGETS = new Set(['mac-arm64', 'mac-x64', 'win-x64'])
+/** Environment variable that selects the Desktop release deployment. */
+export const DESKTOP_AUTO_UPDATE_ENV = 'DSH_DESKTOP_AUTO_UPDATE_ENV'
 
 /**
- * Name the fixed installer object shared by uploading and cache refresh.
- * @param {'mac-arm64' | 'mac-x64' | 'win-x64'} target Supported Desktop target.
- * @returns {string} Fixed download filename.
- */
-export function desktopLatestInstallerFilename(target) {
-  if (!UPDATE_TARGETS.has(target)) throw new Error(`desktop upload: unsupported target ${target}`)
-  const windows = target === 'win-x64'
-  return `dsh-latest-${windows ? 'windows' : 'macos'}-${target === 'mac-arm64' ? 'arm64' : 'x64'}.${windows ? 'exe' : 'dmg'}`
-}
-
-/**
- * Resolve the update deployment, defaulting local release work to test.
- * @param {NodeJS.ProcessEnv} env - Packaging or upload environment.
+ * Resolve the release deployment a policy or package declares, defaulting to test.
+ * @param {NodeJS.ProcessEnv} env - Packaging environment.
  * @returns {'test' | 'production'} Validated deployment name.
  */
 export function resolveDesktopAutoUpdateEnvironment(env) {
@@ -61,26 +29,25 @@ export function resolveDesktopAutoUpdateEnvironment(env) {
   }
   return value
 }
+const UPDATE_TARGETS = new Set(['mac-arm64', 'mac-x64', 'win-x64'])
 
 /**
- * Resolve one supported platform and architecture to its update directory.
- * @param {NodeJS.Platform} platform - Target Node.js platform.
- * @param {string} arch - Target Node.js architecture.
- * @returns {'mac-arm64' | 'mac-x64' | 'win-x64'} Update target directory.
+ * Resolve the packaged target name for a host platform and architecture.
+ * @param {NodeJS.Platform} platform - Host platform.
+ * @param {string} arch - Host architecture.
+ * @returns {'mac-arm64' | 'mac-x64' | 'win-x64'} Supported target name.
  */
 export function resolveDesktopAutoUpdateTarget(platform, arch) {
-  const os = platform === 'darwin' ? 'mac' : platform === 'win32' ? 'win' : platform
-  const target = `${os}-${arch}`
-  if (!UPDATE_TARGETS.has(target)) {
-    throw new Error(`desktop auto-update: unsupported target ${target}`)
-  }
-  return target
+  if (platform === 'darwin' && arch === 'arm64') return 'mac-arm64'
+  if (platform === 'darwin' && arch === 'x64') return 'mac-x64'
+  if (platform === 'win32' && arch === 'x64') return 'win-x64'
+  throw new Error(`desktop auto-update: unsupported target ${platform} ${arch}`)
 }
 
 /**
- * Return the local completion record filename for one packaged target.
- * @param {'mac-arm64' | 'mac-x64' | 'win-x64'} target - Supported release target.
- * @returns {string} Filename stored beside electron-builder artifacts.
+ * Name one target's build record in the artifact directory.
+ * @param {'mac-arm64' | 'mac-x64' | 'win-x64'} target Supported Desktop target.
+ * @returns {string} Build record filename.
  */
 export function desktopBuildRecordFilename(target) {
   if (!UPDATE_TARGETS.has(target)) {
@@ -108,103 +75,10 @@ export function desktopUpdateMetadataFilename(version, platform, channel = 'nigh
 }
 
 /**
- * Read one required release setting without accepting whitespace-only values.
- * @param {NodeJS.ProcessEnv} env - Packaging or upload environment.
- * @param {string} name - Environment variable to read.
- * @returns {string} Trimmed setting.
- */
-export function requiredEnvironmentValue(env, name) {
-  const value = env[name]?.trim()
-  if (value === undefined || value === '') {
-    throw new Error(`desktop auto-update: ${name} must be set to a non-empty value`)
-  }
-  return value
-}
-
-/**
- * Normalize an HTTPS origin and reject paths or credentials.
- * @param {string} value - Candidate origin.
- * @param {string} name - Environment variable used in diagnostics.
- * @returns {string} Normalized HTTPS origin without a trailing slash.
- */
-function httpsOrigin(value, name) {
-  let parsed
-  try {
-    parsed = new URL(value)
-  }
-  catch {
-    throw new Error(`desktop auto-update: ${name} must be an absolute HTTPS origin`)
-  }
-  if (parsed.protocol !== 'https:'
-    || parsed.username !== ''
-    || parsed.password !== ''
-    || parsed.pathname !== '/'
-    || parsed.search !== ''
-    || parsed.hash !== '') {
-    throw new Error(`desktop auto-update: ${name} must be an absolute HTTPS origin without a path, credentials, query, or fragment`)
-  }
-  return parsed.origin
-}
-
-/**
- * Resolve the public updater URL and object prefixes for one release target.
- * @param {NodeJS.ProcessEnv} env - Packaging or upload environment.
- * @param {NodeJS.Platform} platform - Target Node.js platform.
- * @param {string} arch - Target Node.js architecture.
- * @returns {{ environment: 'test' | 'production', channel: 'nightly' | 'latest', target: 'mac-arm64' | 'mac-x64' | 'win-x64', origin: string, publicUrl: string, keyPrefix: string, binaryKeyPrefix: string }} Resolved updater configuration.
- * @throws {Error} When the test deployment lacks a valid HTTPS origin or a 32-character lowercase hexadecimal release ID.
- */
-export function resolveDesktopAutoUpdateConfig(env, platform, arch) {
-  assertUpstreamDesktopReleaseIdentity(env.DSH_DESKTOP_APP_ID)
-  const channel = resolveDesktopUpdateChannel(env)
-  const environment = resolveDesktopAutoUpdateEnvironment(env)
-  const target = resolveDesktopAutoUpdateTarget(platform, arch)
-  const deployment = UPDATE_ENVIRONMENTS[environment]
-  let origin = typeof deployment.fixedOrigin === 'function' ? deployment.fixedOrigin() : deployment.fixedOrigin
-  if (origin === undefined) {
-    const { originEnvName } = deployment
-    if (originEnvName === undefined) throw new Error('desktop auto-update: selected deployment has no origin')
-    origin = httpsOrigin(requiredEnvironmentValue(env, originEnvName), originEnvName)
-  }
-  let releasePrefix = 'agentrans'
-  if (environment === 'test') {
-    const releaseId = requiredEnvironmentValue(env, 'DOWNLOAD_TEST_RELEASE_ID')
-    if (!/^[a-f0-9]{32}$/u.test(releaseId)) {
-      throw new Error('desktop auto-update: DOWNLOAD_TEST_RELEASE_ID must contain 32 lowercase hexadecimal characters')
-    }
-    releasePrefix += `/${releaseId}`
-  }
-  const keyPrefix = `${releasePrefix}/feeds/${target}`
-  return {
-    environment,
-    channel,
-    target,
-    origin,
-    keyPrefix,
-    binaryKeyPrefix: `${releasePrefix}/bin/${target}${channel === 'latest' ? '/latest' : ''}`,
-    publicUrl: `${origin}/${keyPrefix}/`,
-  }
-}
-
-/**
- * Resolve the update transport a package embeds.
+ * Resolve the GitHub Releases feed a packaged application embeds.
  *
- * `github` publishes through GitHub Releases and needs no hosting of our own;
- * `generic` remains for a self-hosted static directory.
- * @param {NodeJS.ProcessEnv} env - Packaging environment.
- * @returns {'github' | 'generic'} Selected transport.
- */
-export function resolveDesktopUpdateProvider(env) {
-  const value = env.DSH_DESKTOP_UPDATE_PROVIDER
-  if (value === undefined || value === '') return 'generic'
-  if (value !== 'github' && value !== 'generic') {
-    throw new Error('desktop auto-update: DSH_DESKTOP_UPDATE_PROVIDER must be github or generic')
-  }
-  return value
-}
-
-/**
- * Resolve the GitHub Releases feed for a package.
+ * The release type carries the channel: a nightly build reads prereleases and a
+ * latest build reads published releases, so neither offers the other's builds.
  * @param {NodeJS.ProcessEnv} env - Packaging environment.
  * @returns {{ provider: 'github', owner: string, repo: string, channel: 'nightly' | 'latest', releaseType: 'release' | 'prerelease' }} Feed coordinates embedded at build time.
  */
@@ -217,24 +91,5 @@ export function resolveDesktopGitHubUpdateConfig(env) {
     repo: DESKTOP_UPDATE_REPOSITORY.repo,
     channel,
     releaseType: channel === 'latest' ? 'release' : 'prerelease',
-  }
-}
-
-/**
- * Resolve the public updater URL and private COS destination for one upload target.
- * @param {NodeJS.ProcessEnv} env - Upload environment.
- * @param {NodeJS.Platform} platform - Target Node.js platform.
- * @param {string} arch - Target Node.js architecture.
- * @returns {{ environment: 'test' | 'production', channel: 'nightly' | 'latest', target: 'mac-arm64' | 'mac-x64' | 'win-x64', origin: string, publicUrl: string, keyPrefix: string, binaryKeyPrefix: string, bucket: string, secretIdEnvName: string, secretKeyEnvName: string }} Resolved upload configuration.
- * @throws {Error} When the selected deployment lacks a bucket or valid updater configuration.
- */
-export function resolveDesktopUploadConfig(env, platform, arch) {
-  const update = resolveDesktopAutoUpdateConfig(env, platform, arch)
-  const deployment = UPDATE_ENVIRONMENTS[update.environment]
-  return {
-    ...update,
-    bucket: requiredEnvironmentValue(env, deployment.bucketEnvName),
-    secretIdEnvName: deployment.secretIdEnvName,
-    secretKeyEnvName: deployment.secretKeyEnvName,
   }
 }

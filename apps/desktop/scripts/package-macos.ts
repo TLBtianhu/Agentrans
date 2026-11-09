@@ -12,9 +12,7 @@ import {
 } from './desktop-release-environment.mjs'
 import {
   desktopUpdateMetadataFilename,
-  resolveDesktopAutoUpdateConfig,
   resolveDesktopGitHubUpdateConfig,
-  resolveDesktopUpdateProvider,
 } from './desktop-auto-update-environment.mjs'
 import { verifyMacOSAppUpdateConfig, type MacOSAppUpdateFeed } from './macos-app-update-config.mjs'
 import { verifyMacOSNotarizedApplication, verifyMacOSSignature } from './verify-macos-signature.mjs'
@@ -81,12 +79,8 @@ export async function packageMacOSArtifacts(
   const expected = resolveMacOSSigningEnvironment(environment)
   const credentials = resolveMacOSNotarizationEnvironment(environment)
   // The packaged feed must match what electron-builder publishes, so both derive it the same way.
-  const update = resolveDesktopUpdateProvider(environment) === 'github'
-    ? resolveDesktopGitHubUpdateConfig(environment)
-    : resolveDesktopAutoUpdateConfig(environment, 'darwin', arch)
-  const feed: MacOSAppUpdateFeed = 'provider' in update
-    ? { provider: 'github', owner: update.owner, repo: update.repo, channel: update.channel }
-    : { provider: 'generic', publicUrl: update.publicUrl, channel: update.channel }
+  const update = resolveDesktopGitHubUpdateConfig(environment)
+  const feed: MacOSAppUpdateFeed = { provider: 'github', owner: update.owner, repo: update.repo, channel: update.channel }
   const appPath = join(artifactsRoot, arch === 'arm64' ? 'mac-arm64' : 'mac', `${DESKTOP_PRODUCT_NAME}.app`)
   const root = await mkdtemp(join(dirname(artifactsRoot), 'notarization-'))
   const zipApp = join(root, 'zip', basename(appPath))

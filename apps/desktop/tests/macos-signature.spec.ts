@@ -88,9 +88,10 @@ describe('desktop macOS release signature', () => {
         writeUpdateInfo: false,
       },
       publish: [{
-        provider: 'generic',
-        url: 'https://desktop-updates.example.com/agentrans/0123456789abcdef0123456789abcdef/feeds/mac-arm64/',
-        channel: 'nightly',
+        provider: 'github',
+        owner: 'TLBtianhu',
+        repo: 'Agentrans',
+        releaseType: 'prerelease',
       }],
     })
     expect(typeof config.artifactBuildCompleted).toBe('function')
