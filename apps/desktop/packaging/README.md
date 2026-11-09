@@ -59,7 +59,7 @@ Pass the confirmed version to the packaging command as `--build-version`, which 
 pnpm --dir apps/desktop run package:win:x64 --build-version 0.1.6-alpha.1.20260916.1
 ```
 
-`--build-version auto` proposes the next index for today, reading the published objects in the destination bucket and falling back to this target's local output directory when no bucket is configured or the listing cannot finish within its deadline. Confirm the proposal it prints before an upload; a run script forwards `--` on its own, and the packaging entry accepts it either way.
+`--build-version auto` proposes the next index for today, numbering after the assets already attached to this repository's releases and falling back to this target's local output directory when GitHub answers incompletely. Confirm the proposal it prints before publishing; a run script forwards `--` on its own, and the packaging entry accepts it either way.
 
 A production release publishes the product version and takes no `--build-version`. Uploading one tags the packaged commit as `desktop-v<version>` once the artifacts are public; a build from a modified checkout is not tagged, and a tagging failure prints the command to run by hand rather than failing a completed upload. Test and local builds are deliberately left untagged, and every artifact records `dshBuildCommit` and `dshBuildDirty` in its manifest so a build handed over directly remains traceable.
 

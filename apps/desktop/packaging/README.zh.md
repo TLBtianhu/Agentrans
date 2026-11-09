@@ -59,7 +59,7 @@ Desktop 手动 CI 使用独立的未发布构建标识：`auto` 追加 UTC 日�
 pnpm --dir apps/desktop run package:win:x64 --build-version 0.1.6-alpha.1.20260916.1
 ```
 
-`--build-version auto` 会给出当天的下一个序号：读取目标 bucket 中已发布的对象，未配置 bucket 或列举未能在期限内完成时回退到本目标的本地输出目录。上传前请确认它打印的版本号；run script 会自行透传 `--`，打包入口两种写法都接受。
+`--build-version auto` 会给出当天的下一个序号：按本仓库 Release 上已附加的资产计数，GitHub 回答不完整时回退到本目标的本地输出目录。发布前请确认它打印的版本号；run script 会自行透传 `--`，打包入口两种写法都接受。
 
 production 发布使用产品版本本身，不传 `--build-version`。其上传成功后会把打包所用 commit 打成 `desktop-v<版本>` 标签；来自有改动工作区的构建不打标签，打标签失败也只打印手工命令，不会让已完成的上传变成失败。test 与本地构建有意不留标签，而所有产物的清单都记录 `dshBuildCommit` 与 `dshBuildDirty`，直接分发的构建同样可溯源。
 
