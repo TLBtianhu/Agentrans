@@ -1,5 +1,3 @@
-/** Environment variable that selects the Desktop release deployment. */
-export const DESKTOP_AUTO_UPDATE_ENV: 'DSH_DESKTOP_AUTO_UPDATE_ENV'
 
 /** Supported packaged target names. */
 export type DesktopAutoUpdateTarget = 'mac-arm64' | 'mac-x64' | 'win-x64'

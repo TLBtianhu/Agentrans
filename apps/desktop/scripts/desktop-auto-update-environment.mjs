@@ -1,4 +1,4 @@
-/** Resolve the Desktop auto-update channel, target, deployment, and packaged artifact names. */
+/** Resolve the Desktop auto-update channel, target, and packaged artifact names. */
 
 import { valid } from 'semver'
 import { assertUpstreamDesktopReleaseIdentity, DESKTOP_UPDATE_REPOSITORY } from './desktop-release-environment.mjs'
@@ -14,21 +14,6 @@ export function resolveDesktopUpdateChannel(env) {
   return channel
 }
 
-/** Environment variable that selects the Desktop release deployment. */
-export const DESKTOP_AUTO_UPDATE_ENV = 'DSH_DESKTOP_AUTO_UPDATE_ENV'
-
-/**
- * Resolve the release deployment a policy or package declares, defaulting to test.
- * @param {NodeJS.ProcessEnv} env - Packaging environment.
- * @returns {'test' | 'production'} Validated deployment name.
- */
-export function resolveDesktopAutoUpdateEnvironment(env) {
-  const value = env[DESKTOP_AUTO_UPDATE_ENV]?.trim() || 'test'
-  if (value !== 'test' && value !== 'production') {
-    throw new Error(`desktop auto-update: ${DESKTOP_AUTO_UPDATE_ENV} must be "test" or "production"`)
-  }
-  return value
-}
 const UPDATE_TARGETS = new Set(['mac-arm64', 'mac-x64', 'win-x64'])
 
 /**
