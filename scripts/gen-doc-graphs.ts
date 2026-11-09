@@ -109,7 +109,7 @@ const GROUP_ORDER = [
   'ui',
 ]
 
-const SERVICE_ROLES: ServiceRole[] = [
+export const SERVICE_ROLES: ServiceRole[] = [
   {
     key: 'actionCards',
     pkg: 'action-cards',
