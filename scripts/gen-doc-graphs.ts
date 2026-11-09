@@ -5,7 +5,7 @@
  * `--check` verifies the generated set.
  */
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, globSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, relative, resolve } from 'node:path'
 import ts from 'typescript'
 import { projectCordisCatalog } from '@deepseek-ai/dsh-typert-generator'
@@ -26,6 +26,7 @@ import {
   translationPairSourcePredicate,
 } from './translation-pairing.ts'
 import { TypeScriptProject } from './ts-project.ts'
+import { DEFAULT_PROFILE_BUNDLES, PROFILE_TEMPLATES } from '../packages/util/official-bundles/src/bundles.ts'
 
 const root = resolve(import.meta.dirname, '..')
 type Pkg = PackageGraphNode
@@ -49,6 +50,8 @@ interface ServiceRole {
 interface ExamplePlugin {
   id: string
   name: string
+  /** Mount state: a literal 	rue, a loader expression, or absent. */
+  state: 'mounted' | 'disabled' | 'conditional'
 }
 
 interface EventRelation {
@@ -1125,9 +1128,9 @@ function renderCapabilitySeams(pkgs: Pkg[], services: readonly ServiceEntry[]): 
 function parseExampleCordis(rel: string): ExamplePlugin[] {
   const text = readFileSync(resolve(root, rel), 'utf8')
   const plugins: ExamplePlugin[] = []
-  let current: { id: string; name?: string } | null = null
+  let current: { id: string; name?: string; state?: ExamplePlugin['state'] } | null = null
   const flush = (): void => {
-    if (current?.name) plugins.push({ id: current.id, name: current.name })
+    if (current?.name) plugins.push({ id: current.id, name: current.name, state: current.state ?? 'mounted' })
   }
   for (const line of text.split('\n')) {
     // Top-level rows (`- id:`) and bundle-patch insert rows (`    - id:`).
@@ -1139,6 +1142,10 @@ function parseExampleCordis(rel: string): ExamplePlugin[] {
     }
     const name = /^\s+name:\s+(.+?)\s*$/.exec(line)
     if (name?.[1] !== undefined && current) current.name = stripYamlScalar(name[1])
+    // A row the composition keeps but no profile activates, either literally
+    // or through a loader expression the doc cannot evaluate.
+    const disabled = /^\s+disabled:\s+(.+?)\s*$/.exec(line)
+    if (disabled?.[1] !== undefined && current) current.state = disabled[1] === 'true' ? 'disabled' : 'conditional'
   }
   flush()
   return plugins
@@ -1160,6 +1167,82 @@ const APP_EXAMPLES = [
 ]
 
 type AppExample = typeof APP_EXAMPLES[number]
+
+/** One bundle patch file a shipped profile layers. */
+interface BundleLayer {
+  /** Repository-relative patch path, the value a reader follows to change the row. */
+  readonly layer: string
+  /** Rows the layer declares, in file order. */
+  readonly rows: readonly ExamplePlugin[]
+}
+
+/**
+ * Resolve one bundle package to its patch files.
+ * @param name - package name as the shipped profile names it.
+ * @returns the layers in declaration order.
+ */
+function bundleLayers(name: string): BundleLayer[] {
+  for (const manifestPath of globSync('packages/*/*/package.json').map(path => path.replaceAll('\\', '/'))) {
+    const manifest = JSON.parse(readFileSync(resolve(root, manifestPath), 'utf8')) as {
+      name?: string
+      dsh?: { bundle?: { patch?: string | string[] } }
+    }
+    if (manifest.name !== name) continue
+    const patch = manifest.dsh?.bundle?.patch
+    if (patch === undefined) throw new Error(`${manifestPath}: ${name} must declare dsh.bundle.patch`)
+    const directory = manifestPath.replace(/\/package\.json$/, '')
+    return (Array.isArray(patch) ? patch : [patch]).map((entry) => {
+      const layer = `${directory}/${entry.replace(/^\.\//, '')}`
+      return { layer, rows: parseExampleCordis(layer) }
+    })
+  }
+  throw new Error(`${name}: no workspace package declares this bundle`)
+}
+
+/**
+ * Compose one shipped profile the way the launcher does: later layers replace a row.
+ * @param bundles - bundle names in profile order.
+ * @returns effective rows with the layer that supplied each one.
+ */
+function composeProfile(bundles: readonly string[]): { row: ExamplePlugin; layer: string }[] {
+  const composed = new Map<string, { row: ExamplePlugin; layer: string }>()
+  for (const name of bundles) {
+    for (const layer of bundleLayers(name)) {
+      for (const row of layer.rows) composed.set(row.id, { row, layer: layer.layer })
+    }
+  }
+  return [...composed.values()]
+}
+
+/**
+ * Render the effective row table for every shipped profile.
+ * @param profiles - shipped profiles and their bundle stacks.
+ * @returns Markdown lines appended to the composition page.
+ */
+function renderProfileRows(profiles: readonly { name: string; bundles: readonly string[] }[]): string[] {
+  const lines = [
+    '<a id="shipped-profile-rows"></a>',
+    '## Shipped profile rows',
+    '',
+    'Each table lists the rows that profile actually composes, the layer that supplied the row, and whether any profile activates it. A `disabled` row stays in the composition so an overlay can enable it by id, and no profile mounts it by default. A later layer replaces a row\'s whole `config` value instead of merging keys, which is why the layer column matters when a row looks different from its bundle default.',
+    '',
+  ]
+  for (const profile of profiles) {
+    const rows = composeProfile(profile.bundles)
+    const inactive = rows.filter(entry => entry.row.state !== 'mounted').length
+    lines.push(
+      `### \`${profile.name}\``,
+      '',
+      `${String(rows.length)} rows; ${String(inactive)} are not unconditionally mounted.`,
+      '',
+      '| Row id | Package / module | State | Source layer |',
+      '| --- | --- | --- | --- |',
+      ...rows.map(entry => `| \`${entry.row.id}\` | \`${entry.row.name}\` | \`${entry.row.state}\` | [\`${entry.layer}\`](${linkFromDoc('apps/cli/composition.md', entry.layer)}) |`),
+      '',
+    )
+  }
+  return lines
+}
 
 function renderAppComposition(example: AppExample): string {
   const plugins = parseExampleCordis(example.config)
@@ -1185,6 +1268,11 @@ function renderAppComposition(example: AppExample): string {
     ...plugins.map(plugin => `| \`${plugin.id}\` | \`${plugin.name}\` |`),
     '',
     `Source config: [\`${example.config}\`](${linkFromDoc(example.rel, example.config)}).`,
+    '',
+    ...renderProfileRows([
+      ...Object.entries(PROFILE_TEMPLATES).map(([name, template]) => ({ name, bundles: template.bundles })),
+      { name: 'default', bundles: DEFAULT_PROFILE_BUNDLES },
+    ]),
   )
   lines.push('', ...maintenanceFooter(maintenance))
   return lines.join('\n')
