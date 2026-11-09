@@ -24,7 +24,6 @@ import {
 import { resolveDesktopGitHubUpdateConfig } from './desktop-auto-update-environment.mjs'
 import { resolveDesktopBuildCommit } from './desktop-build-commit.mjs'
 import { resolveDesktopBuildVersion } from './desktop-build-version.mjs'
-import { resolveDesktopPolicyEnvironment } from './desktop-policy-environment.mjs'
 import { desktopArtifactOutput, desktopTargetBuildPaths, resolveDesktopBuildTarget } from './desktop-build-paths.mjs'
 import { DESKTOP_ARTIFACT_SLUG, DESKTOP_PRODUCT_NAME } from './desktop-product-identity.mjs'
 import { installWindowsDirectoryInstaller } from './windows-directory-installer.mjs'
@@ -53,24 +52,24 @@ export function createElectronBuilderConfig(
   preparedRuntime = undefined,
   preparedRuntimeVersion = undefined,
 ) {
-  return electronBuilderConfig(env, hostPlatform, hostArch, preparedRuntime, preparedRuntimeVersion, 'required')
+  return electronBuilderConfig(env, hostPlatform, hostArch, preparedRuntime, preparedRuntimeVersion)
 }
 
 /**
- * Create an unsigned Windows artifact without embedding a remote mandatory-update policy.
- * The caller must explicitly select Windows and unsigned mode; ordinary releases retain required policy validation.
+ * Create the unsigned Windows artifact configuration Agentrans ships as its own installer.
+ * The product identifier is this repository's, so the ordinary release-identity guard does not apply.
  * @param {NodeJS.ProcessEnv} env - Packaging environment with DSH_DESKTOP_UNSIGNED=1.
  * @param {NodeJS.Platform} hostPlatform - Build-host platform used when no target override exists.
  * @param {string} hostArch - Build-host architecture used when no target override exists.
- * @returns {ReturnType<typeof createElectronBuilderConfig>} Windows configuration with no policy or update feed.
+ * @returns {ReturnType<typeof createElectronBuilderConfig>} Unsigned Windows configuration without an update feed.
  */
-export function createUnsignedWindowsConfigWithoutPolicy(env = process.env, hostPlatform = process.platform, hostArch = process.arch) {
-  return electronBuilderConfig(env, hostPlatform, hostArch, undefined, undefined, 'none')
+export function createAgentransInstallerBuilderConfig(env = process.env, hostPlatform = process.platform, hostArch = process.arch) {
+  return electronBuilderConfig(env, hostPlatform, hostArch, undefined, undefined, true)
 }
 
-function electronBuilderConfig(env, hostPlatform, hostArch, preparedRuntime, preparedRuntimeVersion, policyMode) {
+function electronBuilderConfig(env, hostPlatform, hostArch, preparedRuntime, preparedRuntimeVersion, ownReleaseIdentity = false) {
   const appId = resolveDesktopAppId(env)
-  if (policyMode === 'required') assertUpstreamDesktopReleaseIdentity(appId)
+  if (!ownReleaseIdentity) assertUpstreamDesktopReleaseIdentity(appId)
   const targetPlatform = env.DSH_DESKTOP_TARGET_PLATFORM
   const resolvedPlatform = targetPlatform ?? hostPlatform
   const resolvedArch = env.DSH_DESKTOP_TARGET_ARCH ?? hostArch
@@ -85,10 +84,6 @@ function electronBuilderConfig(env, hostPlatform, hostArch, preparedRuntime, pre
   if (skipNotarization && (unsigned || resolvedPlatform !== 'darwin')) throw new Error('Skipping notarization requires a signed macOS build')
   const packagesMacOS = targetPlatform === 'darwin' || (targetPlatform === undefined && hostPlatform === 'darwin')
   const packagesWindows = resolvedPlatform === 'win32'
-  if (policyMode === 'none' && (!packagesWindows || !unsigned)) {
-    throw new Error('desktop package: disabling mandatory-update policy requires explicitly unsigned Windows packaging')
-  }
-  const policy = policyMode === 'none' || (packagesMacOS && unsigned) ? undefined : resolveDesktopPolicyEnvironment(env)
   if (resolvedPlatform === 'win32') installWindowsDirectoryInstaller()
   const macOSSigning = packagesMacOS && !unsigned ? resolveMacOSSigningEnvironment(env) : undefined
   if (packagesMacOS && !unsigned && !skipNotarization) resolveMacOSNotarizationEnvironment(env)
@@ -133,7 +128,6 @@ function electronBuilderConfig(env, hostPlatform, hostArch, preparedRuntime, pre
     extraMetadata: {
       dshDesktopAppId: appId,
       dshDesktopUpdateChannel: update?.channel ?? 'nightly',
-      ...(policy === undefined ? {} : { dshMandatoryUpdatePolicy: policy }),
       version: buildVersion,
       ...packaged === undefined ? {} : { dshBuildCommit: packaged.commit, dshBuildDirty: packaged.dirty },
     },
@@ -165,7 +159,6 @@ function electronBuilderConfig(env, hostPlatform, hostArch, preparedRuntime, pre
       'lib/operation-report-worker.js',
       'lib/welcome/**/*',
       'lib/preload-app.cjs',
-      'lib/preload-mandatory.cjs',
       'lib/preload-platform-account.cjs',
       'lib/preload-update-dialog.cjs',
       'lib/preload-welcome.cjs',
@@ -218,9 +211,6 @@ function electronBuilderConfig(env, hostPlatform, hostArch, preparedRuntime, pre
         primaryRuntimeDestination = join(context.appOutDir, 'resources', 'runtime', 'primary-runtime')
         dshDestination = join(context.appOutDir, 'resources', 'app.asar.unpacked', 'dsh')
       }
-      if (policy === undefined) return
-      const { resolveDesktopPolicyConfig } = await import('../lib/types/mandatory-update-policy.js')
-      resolveDesktopPolicyConfig(policy)
     },
     afterPack: async context => {
       const { verifyDesktopRuntime } = await import('../lib/types/runtime-tree.js')

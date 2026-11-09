@@ -7,7 +7,6 @@ import { fileURLToPath } from 'node:url'
 import { app, BrowserWindow, ipcMain, nativeTheme, protocol } from 'electron'
 import { resolveDesktopLocale } from '../../lib/types/locale.js'
 import { UPDATE_DIALOG_IPC } from '../../lib/types/update-dialog.js'
-import { MANDATORY_IPC } from '../../lib/types/mandatory-update-ipc.js'
 
 const directory = fileURLToPath(new URL('../../.desktop-build/qualification/', import.meta.url))
 mkdirSync(directory, { recursive: true })
@@ -33,12 +32,11 @@ async function main() {
   ipcMain.handle(UPDATE_DIALOG_IPC.status, () => ({ revision: 1, locale: locale.id,
     title: 'Check for updates', message: 'Update ready', detail: 'Shell palette qualification',
     buttons: ['Install', 'Later'], cancelId: 1, closeLabel: 'Close', technicalDetails: 'Details', technicalDetailsLabel: 'Details' }))
-  ipcMain.handle(MANDATORY_IPC.status, () => ({ locale, policy: { blocking: true, checking: false },
     update: { phase: 'error', failedOperation: 'download', version: '1.0.0', technicalDetails: 'Details' }, deferred: false }))
   try {
     assert.equal(await readFile(new URL('../../lib/welcome/design-platform.css', import.meta.url), 'utf8'),
       await readFile(new URL('../../../../packages/client/ui-theme/src/styles/design-platform.css', import.meta.url), 'utf8'))
-    for (const document of ['update-dialog', 'mandatory-update']) {
+    for (const document of ['update-dialog']) {
       for (const initial of ['light', 'dark']) {
         nativeTheme.themeSource = initial
         const window = new BrowserWindow({ show: true, width: 600, height: 650,

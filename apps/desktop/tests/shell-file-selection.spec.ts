@@ -62,14 +62,10 @@ it.each([
   await writeFile(join(appDir, 'package.json'), JSON.stringify(manifest))
   const desktopConfig = createElectronBuilderConfig({
     DSH_DESKTOP_APP_ID: 'com.example.shell-files',
-    DSH_DESKTOP_MANDATORY_UPDATE_TEST_ORIGIN: 'https://policy.example.com',
-    DSH_DESKTOP_MANDATORY_UPDATE_CONFIG: JSON.stringify({ allowedAuthOrigins: ['https://login.example.com'] }),
     DSH_DESKTOP_UNSIGNED: platform === 'win32' ? '1' : '0',
     DSH_DESKTOP_MACOS_SIGNING_IDENTITY: 'Example Company (TEAMID1234)',
     DSH_DESKTOP_MACOS_TEAM_ID: 'TEAMID1234',
     APPLE_KEYCHAIN_PROFILE: 'shell-files-test',
-    DOWNLOAD_TEST_ORIGIN: 'https://desktop-updates.example.com',
-    DOWNLOAD_TEST_RELEASE_ID: '0123456789abcdef0123456789abcdef',
   }, platform, arch)
   const config: Configuration = {
     files: desktopConfig.files.map(file => typeof file === 'string' ? file : { ...file, filter: [...file.filter] }),

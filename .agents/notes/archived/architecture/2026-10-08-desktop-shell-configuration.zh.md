@@ -1,6 +1,7 @@
 # Agent Note: Desktop 壳层配置独立于 Host
 
 Status: implemented
+Archived: 2026-11-09
 
 [English](2026-10-08-desktop-shell-configuration.md) | 中文
 

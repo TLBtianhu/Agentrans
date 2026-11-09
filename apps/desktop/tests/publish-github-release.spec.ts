@@ -84,7 +84,9 @@ describe('desktop GitHub release publishing', () => {
     const nightly = fakeGitHub()
     const created: string[] = []
     const capturing = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
-      if (String(input).endsWith('/releases') && init?.body !== undefined) created.push(String(init.body))
+      const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
+      const body = init?.body
+      if (url.endsWith('/releases') && typeof body === 'string') created.push(body)
       return nightly.fetch(input, init)
     }) as unknown as typeof globalThis.fetch
     await publishGitHubRelease({ token: 't', owner: 'o', repo: 'r', version: '2.0.0', channel: 'nightly', assets: [] }, capturing)

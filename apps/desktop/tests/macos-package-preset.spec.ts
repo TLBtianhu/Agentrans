@@ -13,7 +13,7 @@ it('loads machine signing credentials independently of the checkout and rejects 
     await mkdir(join(root, 'secrets'))
     const preset = join(root, 'presets/test.env')
     const secrets = join(root, 'secrets/macos-signing.env')
-    await writeFile(preset, 'DSH_DESKTOP_AUTO_UPDATE_ENV=test\nDSH_DESKTOP_MACOS_PACK_CONCURRENCY=2\nDSH_DESKTOP_MACOS_SIGNATURE_CACHE_DIR=/machine/cache\n')
+    await writeFile(preset, 'DSH_DESKTOP_MACOS_PACK_CONCURRENCY=2\nDSH_DESKTOP_MACOS_SIGNATURE_CACHE_DIR=/machine/cache\n')
     await writeFile(secrets, 'CSC_LINK=../certificates/app.p12\nCSC_KEY_PASSWORD=machine-secret\nAPPLE_API_KEY=../certificates/key.p8\n')
     const env = { DSH_PACKAGING_PRESET: 'test', DSH_PACKAGING_CONFIG_DIR: root, CSC_KEY_PASSWORD: 'ambient-secret' }
     for (const options of [{}, { prepareOnly: true }]) {
@@ -29,7 +29,7 @@ it('loads machine signing credentials independently of the checkout and rejects 
     expect(() => loadDesktopPackageEnvironment('darwin', env)).toThrow(/cannot read/u)
     await writeFile(secrets, 'DSH_DESKTOP_MACOS_DOWNLOAD_PROXY=http://localhost:1234\n')
     expect(() => loadDesktopPackageEnvironment('darwin', env)).toThrow(/unsupported setting/u)
-    await writeFile(preset, 'DSH_DESKTOP_AUTO_UPDATE_ENV=test\nCSC_KEY_PASSWORD=private-value\n')
+    await writeFile(preset, 'CSC_KEY_PASSWORD=private-value\n')
     expect(() => loadDesktopPackageEnvironment('darwin', env)).toThrow(/unsupported setting CSC_KEY_PASSWORD/u)
     expect(() => loadDesktopPackageEnvironment('darwin', env)).not.toThrow(/private-value/u)
   } finally {
@@ -67,10 +67,7 @@ it.each(['arm64', 'x64'])('records %s debugging artifact paths only for an expli
     await mkdir(join(root, 'secrets'))
     await writeFile(join(root, 'certificate.p12'), 'fixture')
     await writeFile(join(root, 'presets/test.env'), [
-      'DSH_DESKTOP_APP_ID=com.example.fixture', 'DSH_DESKTOP_AUTO_UPDATE_ENV=test',
-      'DSH_DESKTOP_MANDATORY_UPDATE_TEST_ORIGIN=https://policy.example.com',
-      'DSH_DESKTOP_MANDATORY_UPDATE_CONFIG={"allowedAuthOrigins":["https://login.example.com"]}',
-      'DOWNLOAD_TEST_ORIGIN=https://updates.example.com', 'DOWNLOAD_TEST_RELEASE_ID=0123456789abcdef0123456789abcdef',
+      'DSH_DESKTOP_APP_ID=com.example.fixture',
     ].join('\n'))
     await writeFile(join(root, 'secrets/macos-signing.env'), [
       'CSC_LINK=../certificate.p12', 'CSC_KEY_PASSWORD=fixture-password',

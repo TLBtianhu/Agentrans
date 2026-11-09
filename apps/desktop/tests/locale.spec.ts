@@ -44,7 +44,7 @@ describe('desktop locale dictionaries', () => {
     for (const key of ['welcomeSignIn', 'welcomeApiKey', 'welcomeKeyBack', 'welcomeSessionExpired']) {
       expect(messages).not.toHaveProperty(key)
     }
-    expect(messages.policyLogin.length).toBeGreaterThan(0)
+    expect(Object.keys(messages).filter(key => /^(?:policyLogin|mandatory)/u.test(key))).toEqual([])
   })
 
   it('formats named values without consuming unknown placeholders', () => {

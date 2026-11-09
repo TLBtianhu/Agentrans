@@ -125,9 +125,7 @@ describe('desktop package target', () => {
       DSH_DESKTOP_WINDOWS_TOKEN_PIN: 'token-secret',
       DSH_DESKTOP_WINDOWS_KEY_CONTAINER: 'container',
       DSH_DESKTOP_WINDOWS_SIGNTOOL: 'C:\\tools\\signtool.exe',
-      DSH_DESKTOP_AUTO_UPDATE_ENV: 'production',
-      DOWNLOAD_PROD_ORIGIN: 'https://updates.example.com',
-    })).toEqual({ DSH_DESKTOP_AUTO_UPDATE_ENV: 'production', DOWNLOAD_PROD_ORIGIN: 'https://updates.example.com' })
+    })).toEqual({})
   })
 })
 

@@ -1,6 +1,7 @@
 # Agent Note: Desktop shell configuration independent of the Host
 
 Status: implemented
+Archived: 2026-11-09
 
 English | [中文](2026-10-08-desktop-shell-configuration.zh.md)
 

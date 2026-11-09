@@ -1,6 +1,6 @@
 /** Agentrans's unsigned Windows artifact configuration; no credential files or remote release settings are loaded. */
 import { join } from 'node:path'
-import { createUnsignedWindowsConfigWithoutPolicy } from './electron-builder-config.mjs'
+import { createAgentransInstallerBuilderConfig } from './electron-builder-config.mjs'
 import { AGENTRANS_DESKTOP_APP_ID } from './desktop-release-environment.mjs'
 import { DESKTOP_ARTIFACT_SLUG, DESKTOP_PRODUCT_NAME } from './desktop-product-identity.mjs'
 import { scrubWindowsSigningEnvironment } from './windows-sign.mjs'
@@ -35,8 +35,7 @@ export function agentransInstallerEnvironment(environment) {
       throw new Error(`Agentrans installer requires ${name}=${expected}`)
     }
   }
-  for (const name of ['DSH_DESKTOP_AUTO_UPDATE_ENV', 'DSH_DESKTOP_UPDATE_CHANNEL',
-    'DSH_DESKTOP_MANDATORY_UPDATE_TEST_ORIGIN', 'DSH_DESKTOP_MANDATORY_UPDATE_PROD_ORIGIN', 'DSH_DESKTOP_MANDATORY_UPDATE_CONFIG']) {
+  for (const name of ['DSH_DESKTOP_UPDATE_CHANNEL']) {
     if (normalized[name] !== undefined) throw new Error(`Agentrans installer does not accept remote release setting ${name}`)
   }
   return {
@@ -54,7 +53,7 @@ export function agentransInstallerEnvironment(environment) {
  * @returns {import('./agentrans-installer-config.mjs').AgentransInstallerConfig} Configuration that cannot publish or register dsh protocols.
  */
 export function createAgentransInstallerConfig({ environment, output, repositoryRoot }) {
-  const base = createUnsignedWindowsConfigWithoutPolicy(agentransInstallerEnvironment(environment), 'win32', 'x64')
+  const base = createAgentransInstallerBuilderConfig(agentransInstallerEnvironment(environment), 'win32', 'x64')
   const artifactName = `${DESKTOP_ARTIFACT_SLUG}-\${version}-win-x64-unsigned.\${ext}`
   return {
     ...base,
