@@ -180,11 +180,9 @@ jobs:
           if ($env:PACKAGE_SIGNING -eq 'unsigned') { $packageArgs += '--unsigned' }
           pnpm @packageArgs
           exit $LASTEXITCODE
-      - name: Retain complete package outside the checkout
+      # Publication reads these files from the run's artifacts, not from the machine that built them.
+      - name: Collect packaged artifacts outside the checkout
         id: retained
-        env:
-          PACKAGE_SOURCE_SHA: ${{ steps.checkout.outputs.commit }}
-          PACKAGE_VERSION: ${{ steps.settings.outputs.version }}
         run: node --import tsx apps/desktop/scripts/retain-desktop-ci.ts
       - name: Retain packaging diagnostics
         if: always() && steps.checkout.outcome == 'success'
