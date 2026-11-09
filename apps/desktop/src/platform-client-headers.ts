@@ -12,9 +12,9 @@ import type { AccountClientMetadata } from '@deepseek-ai/dsh-deepseek-account/ty
 /**
  * Identify native desktop API requests; null leaves non-desktop requests unchanged.
  * @param platform - Operating system supplied by the desktop composition.
- * @returns Platform request headers shared by account and update-policy clients.
+ * @returns the platform header for a desktop client, or none for a web client.
  */
-export function desktopClientHeaders(platform: 'darwin' | 'win32' | null): Record<string, string> {
+function desktopClientHeaders(platform: 'darwin' | 'win32' | null): Record<string, string> {
   if (platform === null) return {}
   return { 'x-client-platform': platform === 'win32' ? 'desktop-win' : 'desktop-mac' }
 }
