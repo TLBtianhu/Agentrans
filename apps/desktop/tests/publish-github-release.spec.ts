@@ -32,7 +32,7 @@ async function assetPath(name: string): Promise<string> {
 function fakeGitHub(existingAssets?: readonly string[]): { fetch: typeof globalThis.fetch; calls: { url: string; method: string }[] } {
   const calls: { url: string; method: string }[] = []
   const fetchImpl = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
-    const url = String(input)
+    const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
     calls.push({ url, method: init?.method ?? 'GET' })
     const respond = (status: number, body: unknown): Response => new Response(JSON.stringify(body), {
       status, headers: { 'Content-Type': 'application/json' },

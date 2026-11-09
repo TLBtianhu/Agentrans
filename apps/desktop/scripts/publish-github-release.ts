@@ -8,8 +8,9 @@
  * replaces bytes a user may already be downloading.
  */
 
-import { readFile } from 'node:fs/promises'
-import { basename } from 'node:path'
+import { readdir, readFile } from 'node:fs/promises'
+import { basename, join } from 'node:path'
+import { DESKTOP_UPDATE_REPOSITORY } from './desktop-release-environment.mjs'
 
 /** One packaged file to attach. */
 export interface GitHubReleaseAsset {
@@ -130,11 +131,49 @@ async function findOrCreateRelease(
   return await created.json() as GitHubRelease
 }
 
+/** Media types GitHub serves for the packaged file extensions. */
+const CONTENT_TYPES: Readonly<Record<string, string>> = {
+  '.exe': 'application/octet-stream',
+  '.dmg': 'application/x-apple-diskimage',
+  '.zip': 'application/zip',
+  '.blockmap': 'application/octet-stream',
+  '.yml': 'text/yaml',
+}
+
+/**
+ * Collect the packaged files a release must carry.
+ * @param directory - electron-builder output directory for one target.
+ * @returns assets in upload order, channel metadata last.
+ */
+export async function collectReleaseAssets(directory: string): Promise<GitHubReleaseAsset[]> {
+  const entries = await readdir(directory)
+  const assets: GitHubReleaseAsset[] = []
+  for (const name of entries.sort()) {
+    const extension = name.slice(name.lastIndexOf('.'))
+    const contentType = CONTENT_TYPES[extension]
+    if (contentType === undefined) continue
+    assets.push({ path: join(directory, name), name, contentType })
+  }
+  // The feed metadata must land after the binaries it references.
+  return [...assets.filter(asset => !(asset.name ?? '').endsWith('.yml')), ...assets.filter(asset => (asset.name ?? '').endsWith('.yml'))]
+}
+
 if (process.argv[1] !== undefined && process.argv[1].endsWith('publish-github-release.ts')) {
   const [directory, version, channel] = process.argv.slice(2)
   const token = process.env.GH_TOKEN ?? process.env.GITHUB_TOKEN
-  if (directory === undefined || version === undefined || channel === undefined || token === undefined) {
+  if (directory === undefined || version === undefined || (channel !== 'nightly' && channel !== 'latest') || token === undefined) {
     console.error('usage: publish-github-release <artifacts-dir> <version> <nightly|latest> (GH_TOKEN required)')
     process.exitCode = 1
+  } else {
+    const result = await publishGitHubRelease({
+      token,
+      owner: DESKTOP_UPDATE_REPOSITORY.owner,
+      repo: DESKTOP_UPDATE_REPOSITORY.repo,
+      version,
+      channel,
+      assets: await collectReleaseAssets(directory),
+    })
+    console.log(`published ${result.tag}: ${String(result.uploaded.length)} uploaded, ${String(result.skipped.length)} already present`)
+    console.log(result.url)
   }
 }

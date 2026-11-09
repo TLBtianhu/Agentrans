@@ -3,35 +3,26 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write apps/desktop/publishing/README.md
 /:
-  en: 32f414f3e27d5afd
-  zh: e16c49177f708c47
+  en: b4dda917488c9a85
+  zh: e68c03bddf73bf9c
 /desktop-publication:
   en: 03551b589405750e
   zh: ccbf7e38dcf5d452
 /desktop-publication/summary:
-  en: 722633597f74ace6
-  zh: 5303bcf5567a8511
+  en: 4a57a35b6bb9f4d3
+  zh: 13410da081f410c3
 /desktop-publication/table-of-contents:
-  en: 6217df1d38ff46aa
-  zh: 22375410c0816130
-/desktop-publication/publication-prerequisites:
-  en: b407de63118c9bf9
-  zh: de19f1ba9feacbbf
-/desktop-publication/deployment-and-test-release-identity:
-  en: 858e3261737e851a
-  zh: 28700b5c1e39fc1d
-/desktop-publication/publish-installers-and-update-feeds:
-  en: d34b97421844b5e6
-  zh: 48e3e5931faf9dec
-/desktop-publication/fixed-installer-downloads:
-  en: 193eb19fe799f223
-  zh: c146509412ff1d1e
-/desktop-publication/upload-credentials:
-  en: 47442fb912fa4d5d
-  zh: a21a0d67cd01724b
-/desktop-publication/upload-audit-and-recovery:
-  en: ec85f43ece09a5e3
-  zh: 2de5bf801c9c9e39
-/desktop-publication/dev-note:
-  en: b75c8458928b72b9
-  zh: 003ba4e17b4b5269
+  en: d0495a6241ecee0e
+  zh: 3d24512c36f433b1
+/desktop-publication/prerequisites:
+  en: 4075c593faaa51f8
+  zh: decdf10a6f07b5e2
+/desktop-publication/publish-a-release:
+  en: 9cebc281fa58d78a
+  zh: b2d0ba10f5ce19a6
+/desktop-publication/update-channel:
+  en: cb1233310efffcf8
+  zh: f9503f9e00bfd7f9
+/desktop-publication/repeat-publication:
+  en: 982a043cbe9fad79
+  zh: 517df40121af69eb

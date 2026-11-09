@@ -20,15 +20,14 @@
 import { readdir } from 'node:fs/promises'
 import { parse } from 'semver'
 import { desktopBuildVersionPrefix, validateDesktopBuildVersion } from './desktop-build-version.mjs'
-import { DESKTOP_AUTO_UPDATE_ENV, resolveDesktopUploadConfig } from './desktop-auto-update-environment.mjs'
-import { createDesktopCos, DESKTOP_COS_REGION } from './desktop-cos.ts'
+import { DESKTOP_UPDATE_REPOSITORY } from './desktop-release-environment.mjs'
 import type { DesktopPackageTargetName } from './package-target.ts'
 
-/** How long the whole bucket listing may take before the suggestion falls back to local artifacts. */
+/** How long the whole release listing may take before the suggestion falls back to local artifacts. */
 const LISTING_DEADLINE_MS = 8_000
 
-/** Objects one listing page may return. */
-const LISTING_PAGE_SIZE = 1000
+/** Releases one listing page may return. */
+const LISTING_PAGE_SIZE = 100
 
 /** Artifact name electron-builder writes for one build, on either platform; unsigned and unnotarized builds add a suffix. */
 const ARTIFACT = /(?:^|\/)deepseek-harness-(?<version>.+)-(?:mac|win)-(?:arm64|x64)(?:-unsigned|-unnotarized)?\.(?:exe|dmg|zip)$/u
@@ -87,51 +86,34 @@ async function localVersions(artifactsRoot: string): Promise<string[]> {
  * @returns Versions parsed from object names, or undefined when the bucket cannot be listed completely in time.
  */
 async function remoteVersions(options: DesktopBuildVersionSuggestionOptions): Promise<string[] | undefined> {
-  const platform = options.target === 'win-x64' ? 'win32' as const : 'darwin' as const
-  const arch = options.target === 'mac-arm64' ? 'arm64' : 'x64'
-  // An unconfigured destination has nothing to be unique against; an invalid one must not be mistaken for it.
-  if (options.environment[DESKTOP_AUTO_UPDATE_ENV] === undefined
-    && options.environment.DOWNLOAD_TEST_ORIGIN === undefined) return undefined
-  const update = resolveDesktopUploadConfig(options.environment, platform, arch)
-  const secretId = options.environment[update.secretIdEnvName]?.trim()
-  const secretKey = options.environment[update.secretKeyEnvName]?.trim()
-  if (secretId === undefined || secretId === '' || secretKey === undefined || secretKey === '') return undefined
-  // The SDK has no per-request abort, so its own timeout is what releases an unanswered socket.
-  const cos = createDesktopCos({ secretId, secretKey }, LISTING_DEADLINE_MS)
+  // Only the GitHub transport publishes somewhere this build can enumerate.
+  if (options.environment.DSH_DESKTOP_UPDATE_PROVIDER !== 'github') return undefined
   const deadline = Date.now() + LISTING_DEADLINE_MS
   const versions: string[] = []
-  let marker: string | undefined
   try {
-    do {
-      const page = await Promise.race([
-        new Promise<{ keys: string[]; next: string | undefined }>((resolveListing, rejectListing) => {
-          cos.getBucket({
-            Bucket: update.bucket, Region: DESKTOP_COS_REGION, MaxKeys: LISTING_PAGE_SIZE,
-            Prefix: `${update.binaryKeyPrefix}/deepseek-harness-`, ...marker === undefined ? {} : { Marker: marker },
-          }, (error, data) => {
-            if (error !== null && error !== undefined) rejectListing(error instanceof Error ? error : new Error(String(error)))
-            else {
-              resolveListing({
-                keys: (data?.Contents ?? []).map(object => object.Key),
-                next: data?.IsTruncated === 'true' ? data.NextMarker ?? data.Contents?.at(-1)?.Key : undefined,
-              })
-            }
-          })
-        }),
-        new Promise<never>((_resolveDeadline, rejectDeadline) => {
-          setTimeout(() => rejectDeadline(new Error('listing deadline')), Math.max(0, deadline - Date.now())).unref()
-        }),
-      ])
-      for (const key of page.keys) {
-        const version = ARTIFACT.exec(key)?.groups?.version
-        if (version !== undefined && parse(version) !== null) versions.push(version)
+    for (let page = 1; page <= 10; page += 1) {
+      const remaining = Math.max(1, deadline - Date.now())
+      const response = await fetch(
+        `https://api.github.com/repos/${DESKTOP_UPDATE_REPOSITORY.owner}/${DESKTOP_UPDATE_REPOSITORY.repo}/releases?per_page=${String(LISTING_PAGE_SIZE)}&page=${String(page)}`,
+        {
+          headers: { Accept: 'application/vnd.github+json', 'User-Agent': 'agentrans-desktop-package' },
+          signal: AbortSignal.timeout(remaining),
+        },
+      )
+      if (!response.ok) throw new Error(`GitHub releases answered ${String(response.status)}`)
+      const releases = await response.json() as { assets?: readonly { name: string }[] }[]
+      for (const release of releases) {
+        for (const asset of release.assets ?? []) {
+          const version = ARTIFACT.exec(asset.name)?.groups?.version
+          if (version !== undefined && parse(version) !== null) versions.push(version)
+        }
       }
-      marker = page.next
-    } while (marker !== undefined)
+      if (releases.length < LISTING_PAGE_SIZE || Date.now() > deadline) break
+    }
   }
   catch (unfinished) {
     // Numbering against a partial listing could reuse a published index, so an unfinished query yields nothing.
-    process.stdout.write(`desktop package: the update bucket did not answer completely (${
+    process.stdout.write(`desktop package: the release listing did not answer completely (${
       unfinished instanceof Error ? unfinished.message : String(unfinished)}); numbering from local artifacts\n`)
     return undefined
   }
