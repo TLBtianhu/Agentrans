@@ -10,7 +10,7 @@ const repositoryRoot = fileURLToPath(new URL('../../..', import.meta.url))
 const target = process.argv[3] ?? 'win-x64'
 const output = process.argv[2] ?? join(repositoryRoot, 'artifacts', 'agentrans-installer')
 
-const environment = agentransInstallerEnvironment(process.env)
+const environment = agentransInstallerEnvironment(process.env, target)
 const config = createAgentransInstallerConfig({ environment, output, repositoryRoot, target })
 await mkdir(output, { recursive: true })
 for (const name of Object.keys(process.env)) {
