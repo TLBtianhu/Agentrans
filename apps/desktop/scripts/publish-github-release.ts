@@ -165,9 +165,12 @@ export async function collectReleaseAssets(directory: string, version: string): 
     }
     assets.push({ path: join(directory, name), name, contentType })
   }
+  // A release carries one metadata file per platform: the Windows channel file and the macOS
+  // `<channel>-mac.yml`. Two files for the same platform mean two builds were mixed together.
   const feeds = assets.filter(asset => (asset.name ?? '').endsWith('.yml'))
-  if (feeds.length > 1) {
-    throw new Error(`desktop publish: ${directory} carries ${String(feeds.length)} channel metadata files; publish one target per release`)
+  const macFeeds = feeds.filter(asset => (asset.name ?? '').endsWith('-mac.yml'))
+  if (feeds.length - macFeeds.length > 1 || macFeeds.length > 1) {
+    throw new Error(`desktop publish: ${directory} carries ${String(feeds.length)} channel metadata files for one platform; publish one build per platform`)
   }
   // The feed metadata must land after the binaries it references.
   return [...assets.filter(asset => !(asset.name ?? '').endsWith('.yml')), ...feeds]

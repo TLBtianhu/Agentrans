@@ -122,13 +122,24 @@ describe('release asset collection', () => {
     await expect(collectReleaseAssets(directory, '1.2.3')).rejects.toThrow(/does not carry version 1\.2\.3/u)
   })
 
-  it('refuses a directory that mixes two targets feeds', async () => {
+  it('carries one channel metadata file per platform', async () => {
     const directory = await mkdtemp(join(tmpdir(), 'github-collect-'))
     directories.push(directory)
-    for (const name of ['agentrans-1.2.3-win-x64.exe', 'latest.yml', 'latest-mac.yml']) {
+    for (const name of ['agentrans-1.2.3-win-x64.exe', 'agentrans-1.2.3-mac-arm64-unsigned.dmg', 'latest.yml', 'latest-mac.yml']) {
       await writeFile(join(directory, name), 'bytes')
     }
-    await expect(collectReleaseAssets(directory, '1.2.3')).rejects.toThrow(/carries 2 channel metadata files/u)
+    const assets = await collectReleaseAssets(directory, '1.2.3')
+    expect(assets.filter(asset => (asset.name ?? '').endsWith('.yml')).map(asset => asset.name))
+      .toEqual(['latest-mac.yml', 'latest.yml'])
+  })
+
+  it('refuses two metadata files for one platform', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'github-collect-'))
+    directories.push(directory)
+    for (const name of ['agentrans-1.2.3-win-x64.exe', 'latest.yml', 'nightly.yml']) {
+      await writeFile(join(directory, name), 'bytes')
+    }
+    await expect(collectReleaseAssets(directory, '1.2.3')).rejects.toThrow(/for one platform/u)
   })
 })
 
