@@ -82,8 +82,9 @@ describe('desktop package target', () => {
       expect(parseDesktopPackageInvocation([name, '--unsigned'], 'darwin', 'arm64').unsigned).toBe(true)
       expect(parseDesktopPackageInvocation([name, '--unsigned', '--dir'], 'darwin', 'arm64').directory).toBe(true)
     }
-    expect(() => parseDesktopPackageInvocation(['--unsigned', '--prepare-only'], 'win32', 'x64'))
-      .toThrow(/cannot use --prepare-only/u)
+    // Preparing an unsigned runtime is how an unsigned installer obtains its packaged tree.
+    expect(parseDesktopPackageInvocation(['--unsigned', '--prepare-only'], 'win32', 'x64'))
+      .toMatchObject({ unsigned: true, prepareOnly: true })
   })
 
   it('removes ambient certificate inputs for unsigned builds and overrides an inherited signing mode', () => {

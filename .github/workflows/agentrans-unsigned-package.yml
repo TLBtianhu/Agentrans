@@ -49,6 +49,13 @@ jobs:
       - name: Install locked dependencies
         run: pnpm install --frozen-lockfile
 
+      # The installer entry packages a prepared tree; this prepares it without producing an
+      # installer of its own, which is the step the signed lanes get from their full package run.
+      - name: Prepare the packaged runtime
+        env:
+          DSH_DESKTOP_APP_ID: com.agentrans.app
+        run: pnpm run package:desktop:win:x64 --unsigned --prepare-only --build-version ${{ inputs.version }}
+
       - name: Build the unsigned installer
         run: node apps/desktop/scripts/package-agentrans-installer.mjs artifacts/agentrans-installer
 
