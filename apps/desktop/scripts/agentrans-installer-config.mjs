@@ -6,11 +6,10 @@ import { DESKTOP_ARTIFACT_SLUG, DESKTOP_PRODUCT_NAME } from './desktop-product-i
 import { scrubWindowsSigningEnvironment } from './windows-sign.mjs'
 
 const PRODUCT_NAME = DESKTOP_PRODUCT_NAME
-const TARGET_SETTINGS = {
-  DSH_DESKTOP_APP_ID: AGENTRANS_DESKTOP_APP_ID,
-  DSH_DESKTOP_TARGET_PLATFORM: 'win32',
-  DSH_DESKTOP_TARGET_ARCH: 'x64',
-  DSH_DESKTOP_UNSIGNED: '1',
+/** Platform and architecture each supported target builds for. */
+const TARGETS = {
+  'win-x64': { platform: 'win32', arch: 'x64' },
+  'mac-arm64': { platform: 'darwin', arch: 'arm64' },
 }
 
 /**
@@ -20,7 +19,15 @@ const TARGET_SETTINGS = {
  * @param {NodeJS.ProcessEnv} environment - Parent process environment; never modified or loaded from dotenv.
  * @returns {NodeJS.ProcessEnv} Explicit product settings for configuration and the builder process.
  */
-export function agentransInstallerEnvironment(environment) {
+export function agentransInstallerEnvironment(environment, target = 'win-x64') {
+  const selected = TARGETS[target]
+  if (selected === undefined) throw new Error(`Agentrans installer does not support target ${String(target)}`)
+  const TARGET_SETTINGS = {
+    DSH_DESKTOP_APP_ID: AGENTRANS_DESKTOP_APP_ID,
+    DSH_DESKTOP_TARGET_PLATFORM: selected.platform,
+    DSH_DESKTOP_TARGET_ARCH: selected.arch,
+    DSH_DESKTOP_UNSIGNED: '1',
+  }
   const settings = new Map()
   for (const [name, value] of Object.entries(environment)) {
     if (value === undefined || /^DSH_DESKTOP_WINDOWS_/iu.test(name)) continue
@@ -54,9 +61,9 @@ export function createAgentransInstallerConfig({ environment, output, repository
   if (target !== 'win-x64' && target !== 'mac-arm64') {
     throw new Error(`Agentrans installer does not support target ${String(target)}`)
   }
-  const platform = target === 'win-x64' ? 'win32' : 'darwin'
-  const arch = target === 'win-x64' ? 'x64' : 'arm64'
-  const base = createAgentransInstallerBuilderConfig(agentransInstallerEnvironment(environment), platform, arch)
+  const platform = TARGETS[target].platform
+  const arch = TARGETS[target].arch
+  const base = createAgentransInstallerBuilderConfig(agentransInstallerEnvironment(environment, target), platform, arch)
   const artifactName = `${DESKTOP_ARTIFACT_SLUG}-\${version}-${target}-unsigned.\${ext}`
   const shared = {
     ...base,

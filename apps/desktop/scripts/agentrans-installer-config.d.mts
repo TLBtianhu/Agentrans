@@ -26,7 +26,7 @@ export interface AgentransInstallerConfig extends Omit<DesktopElectronBuilderCon
  * @param environment - Parent environment, never modified or loaded from dotenv.
  * @returns Explicit product settings; conflicting target, policy or release settings are refused.
  */
-export function agentransInstallerEnvironment(environment: NodeJS.ProcessEnv): NodeJS.ProcessEnv
+export function agentransInstallerEnvironment(environment: NodeJS.ProcessEnv, target?: 'win-x64' | 'mac-arm64'): NodeJS.ProcessEnv
 
 /**
  * Resolve product metadata and versioned output through the shared unsigned builder.
