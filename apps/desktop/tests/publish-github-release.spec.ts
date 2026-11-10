@@ -106,6 +106,15 @@ describe('release asset collection', () => {
     expect(assets.map(asset => asset.name)).toEqual(['agentrans-1.2.3-win-x64.exe', 'agentrans-1.2.3-win-x64.exe.blockmap', 'latest.yml'])
   })
 
+  it('ignores the builder diagnostics file', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'github-collect-'))
+    directories.push(directory)
+    for (const name of ['agentrans-1.2.3-win-x64.exe', 'latest.yml', 'builder-debug.yml']) {
+      await writeFile(join(directory, name), 'bytes')
+    }
+    const assets = await collectReleaseAssets(directory, '1.2.3')
+    expect(assets.map(asset => asset.name)).toEqual(['agentrans-1.2.3-win-x64.exe', 'latest.yml'])
+  })
   it('refuses an artifact built from another version', async () => {
     const directory = await mkdtemp(join(tmpdir(), 'github-collect-'))
     directories.push(directory)

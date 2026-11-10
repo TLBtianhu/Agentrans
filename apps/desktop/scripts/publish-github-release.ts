@@ -152,6 +152,8 @@ export async function collectReleaseAssets(directory: string, version: string): 
   const entries = await readdir(directory)
   const assets: GitHubReleaseAsset[] = []
   for (const name of entries.sort()) {
+    // electron-builder writes this diagnostic beside the artifacts; it is not a release asset.
+    if (name === 'builder-debug.yml') continue
     const extension = name.slice(name.lastIndexOf('.'))
     const contentType = CONTENT_TYPES[extension]
     if (contentType === undefined) continue
