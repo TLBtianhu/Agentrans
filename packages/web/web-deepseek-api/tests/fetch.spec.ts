@@ -74,7 +74,7 @@ describe('DeepSeek Fetch API', () => {
     const ctx = new Context()
     try {
       await ctx.plugin(WebRuntime, {})
-      await expect(ctx.plugin(webApiPlugin, { apiKey: 'ds-key' } as never))
+      await expect(ctx.plugin(webApiPlugin, { apiKey: 'ds-key' }))
         .rejects.toThrow(/"apiKey" is no longer configurable/)
     } finally { await ctx.fiber.dispose() }
   })

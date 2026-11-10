@@ -67,7 +67,7 @@ describe.skipIf(MODE === 'record')('web e2e: Artifact interaction', () => {
     expect(upserts.map(snapshot => snapshot.revision)).toEqual([1, 2])
     expect(upserts[1]?.title).toBe('Interactive counter — revised')
 
-    const frame = page.frameLocator('iframe[data-artifact-frame]:visible').last()
+    const frame = page.locator('iframe[data-artifact-frame]:visible').last().contentFrame()
     await expect.poll(() => frame.locator('h1').textContent()).toBe('Revision two')
     await frame.locator('#increment').click()
     await expect.poll(() => frame.locator('#value').textContent()).toBe('1')

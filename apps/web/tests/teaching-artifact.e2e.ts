@@ -71,7 +71,7 @@ describe.skipIf(MODE === 'record')('web e2e: teaching Artifact', () => {
     }
     const artifactFrame = page.locator('iframe[data-artifact-frame]').filter({ visible: true }).last()
     await artifactFrame.waitFor({ state: 'visible', timeout: 15_000 })
-    const frame = page.frameLocator('iframe[data-artifact-frame]:visible').last()
+    const frame = page.locator('iframe[data-artifact-frame]:visible').last().contentFrame()
 
     await frame.locator('#angle').selectOption('45')
     await frame.locator('#predict-hit').click()
@@ -111,7 +111,7 @@ describe.skipIf(MODE === 'record')('web e2e: teaching Artifact', () => {
     })
 
     await page.getByText('Revision 2', { exact: true }).waitFor({ state: 'visible' })
-    const updatedFrame = page.frameLocator('iframe[data-artifact-frame]:visible').last()
+    const updatedFrame = page.locator('iframe[data-artifact-frame]:visible').last().contentFrame()
     await expect.poll(() => updatedFrame.locator('#feedback').textContent()).toBe('Prediction matched: 45° reached the target.')
     await page.getByText('Your prediction was correct: 45° reached the target.', { exact: true }).waitFor({ state: 'visible' })
     expect(session.snapshotEvents().flatMap(event => event.type === 'artifact/upsert' ? [event.data.revision] : [])).toEqual([1, 2])

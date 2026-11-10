@@ -77,7 +77,7 @@ describe.skipIf(webSnapshotMode() === 'record')('web e2e: function domain and an
     const download = await downloadReady
     const stream = await download.createReadStream()
     const chunks: Buffer[] = []
-    for await (const chunk of stream) chunks.push(Buffer.from(chunk))
+    for await (const chunk of stream) chunks.push(Buffer.from(chunk as Buffer))
     const html = Buffer.concat(chunks).toString('utf8')
     const exportedContext = await browser.newContext()
     try {

@@ -74,11 +74,11 @@ async function probe(source: string, cwd: string, upstream: string, instanceRoot
     '--input-type=module', '--eval',
     'console.log(JSON.stringify({ home: process.env.DSH_HOME, agents: process.env.DSH_AGENTS_HOME, context: JSON.parse(process.env.AGENTRANS_LAUNCH_CONTEXT) }))',
   ], { cwd, env: environment, timeout: 15_000 })
-  const result: {
+  const result = JSON.parse(stdout) as {
     home: string
     agents: string
     context: { purpose: string; instanceRoot: string; codeRoot: string; resourcesRoot: string }
-  } = JSON.parse(stdout)
+  }
   return result
 }
 

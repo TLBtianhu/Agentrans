@@ -71,7 +71,7 @@ describe.skipIf(MODE === 'record')('web e2e: flowchart Artifact', () => {
     }
     const artifactFrame = page.locator('iframe[data-artifact-frame]').filter({ visible: true }).last()
     await artifactFrame.waitFor({ state: 'visible', timeout: 15_000 })
-    const frame = page.frameLocator('iframe[data-artifact-frame]:visible').last()
+    const frame = page.locator('iframe[data-artifact-frame]:visible').last().contentFrame()
 
     await frame.locator('[data-node-id="manipulate"]').click()
     await frame.locator('#step').click()

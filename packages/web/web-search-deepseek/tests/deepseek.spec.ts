@@ -581,7 +581,7 @@ describe('web-search-deepseek plugin registration', () => {
   it('rejects a retired literal apiKey at plugin construction', async () => {
     const ctx = new Context()
     await ctx.plugin(WebRuntime, { searchProvider: DEEPSEEK_PROVIDER_ID })
-    await expect(ctx.plugin(deepseekPlugin, { apiKey: 'ds-key' } as never))
+    await expect(ctx.plugin(deepseekPlugin, { apiKey: 'ds-key' }))
       .rejects.toThrow(/"apiKey" is no longer configurable/)
   })
 

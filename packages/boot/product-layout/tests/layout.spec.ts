@@ -90,7 +90,8 @@ describe('runtime activation', () => {
     expect(config).toContain(`executable = ${join(runtimeDir, 'Scripts', 'python.exe')}`)
     expect(config).toContain('include-system-site-packages = false')
     expect(config).toContain('command = do-not-run')
-    expect(JSON.parse(await readFile(join(runtimeDir, 'active-runtime.json'), 'utf8')).state).toBe('active')
+    const activeState = JSON.parse(await readFile(join(runtimeDir, 'active-runtime.json'), 'utf8')) as { state: string }
+    expect(activeState.state).toBe('active')
   })
 
   it('does not write active state when self-test fails', async () => {
