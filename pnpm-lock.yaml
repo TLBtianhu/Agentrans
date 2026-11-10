@@ -773,6 +773,9 @@ importers:
       '@deepseek-ai/dsh-product-layout':
         specifier: workspace:*
         version: link:../../packages/boot/product-layout
+      '@deepseek-ai/dsh-shortcut-protocol':
+        specifier: workspace:*
+        version: link:../../packages/util/shortcut-protocol
       '@deepseek-ai/dsh-util-file-drag':
         specifier: workspace:*
         version: link:../../packages/util/file-drag
@@ -3910,6 +3913,9 @@ importers:
       '@deepseek-ai/dsh-host-webserver':
         specifier: workspace:*
         version: link:../../host/webserver
+      '@deepseek-ai/dsh-shortcut-protocol':
+        specifier: workspace:*
+        version: link:../../util/shortcut-protocol
 
   packages/client/store:
     devDependencies:
@@ -17877,6 +17883,18 @@ importers:
       '@types/semver':
         specifier: ^7.8.0
         version: 7.8.0
+
+  packages/util/shortcut-protocol:
+    dependencies:
+      '@deepseek-ai/dsh-brand':
+        specifier: workspace:*
+        version: link:../brand
+      '@deepseek-ai/dsh-util-crypto':
+        specifier: workspace:*
+        version: link:../crypto
+      '@deepseek-ai/dsh-util-values':
+        specifier: workspace:*
+        version: link:../values
 
   packages/util/time:
     dependencies:
