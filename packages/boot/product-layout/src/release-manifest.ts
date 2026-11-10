@@ -82,14 +82,17 @@ export async function computeReleaseDigest(filePath: string): Promise<ReleaseDig
   const hash = createHash('sha256')
   let size = 0
   for await (const chunk of createReadStream(filePath)) {
-    hash.update(chunk)
-    size += chunk.length
+    const bytes = chunk as Buffer
+    hash.update(bytes)
+    size += bytes.length
   }
   return { size, sha256: hash.digest('hex') }
 }
 
 function assertManifest(manifest: ReleaseManifest): void {
-  if (manifest.algorithm !== 'ed25519') throw new ReleaseVerificationError('RELEASE_UNSUPPORTED_ALGORITHM', 'Release algorithm must be ed25519')
+  // The manifest arrives from a file, so the declared literal is the value being checked.
+  const algorithm: string = manifest.algorithm
+  if (algorithm !== 'ed25519') throw new ReleaseVerificationError('RELEASE_UNSUPPORTED_ALGORITHM', 'Release algorithm must be ed25519')
   if (typeof manifest.fileName !== 'string' || manifest.fileName.length === 0 || manifest.fileName.includes('/') || manifest.fileName.includes('\\')) {
     throw new ReleaseVerificationError('RELEASE_INVALID_MANIFEST', 'Release fileName must be a plain filename')
   }

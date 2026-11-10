@@ -47,22 +47,14 @@ async function fileExists(path: string): Promise<boolean> {
 export function relocatePyvenv(source: string, runtimeRoot: string): string {
   const scripts = join(runtimeRoot, 'Scripts')
   const executable = join(scripts, 'python.exe')
-  let hasHome = false
-  let hasExecutable = false
-  let hasSystemPackages = false
-  const lines = source.split(/\r?\n/).map((line) => {
-    if (/^home\s*=/.test(line)) {
-      hasHome = true
-      return `home = ${scripts}`
-    }
-    if (/^executable\s*=/.test(line)) {
-      hasExecutable = true
-      return `executable = ${executable}`
-    }
-    if (/^include-system-site-packages\s*=/.test(line)) {
-      hasSystemPackages = true
-      return 'include-system-site-packages = false'
-    }
+  const sourceLines = source.split(/\r?\n/)
+  const hasHome = sourceLines.some(line => /^home\s*=/.test(line))
+  const hasExecutable = sourceLines.some(line => /^executable\s*=/.test(line))
+  const hasSystemPackages = sourceLines.some(line => /^include-system-site-packages\s*=/.test(line))
+  const lines = sourceLines.map((line) => {
+    if (/^home\s*=/.test(line)) return `home = ${scripts}`
+    if (/^executable\s*=/.test(line)) return `executable = ${executable}`
+    if (/^include-system-site-packages\s*=/.test(line)) return 'include-system-site-packages = false'
     return line
   })
   if (!hasHome) lines.push(`home = ${scripts}`)
