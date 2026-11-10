@@ -8,6 +8,9 @@ import { gt, valid } from 'semver'
 import type { DesktopUpdateState } from './ipc.ts'
 import { DesktopUpdateHttpExecutor } from './update-http-executor.ts'
 import { DesktopUpdatePreparationError } from './update-error.ts'
+import type { DownloadedUpdateVerification } from './update-verification.ts'
+import { createGitHubUpdateVerification } from './update-verification.ts'
+import { UPDATE_SIGNING_PUBLIC_KEY } from './update-signing-key.ts'
 
 const { autoUpdater } = electronUpdater
 
@@ -15,6 +18,7 @@ const { autoUpdater } = electronUpdater
 export class DesktopUpdateCoordinator {
   private current: DesktopUpdateState = { phase: 'idle' }
   private candidate: string | undefined
+  private releaseTag: string | undefined
   private downloaded = false
   private disposed = false
   private checkOperation: Promise<DesktopUpdateState> | undefined
@@ -56,6 +60,10 @@ export class DesktopUpdateCoordinator {
     private readonly currentVersion: () => string = () => app.getVersion(),
     private readonly downloadResult?: (success: boolean, reason?: string) => void,
     private readonly channel: 'nightly' | 'latest' = 'nightly',
+    private readonly verification: DownloadedUpdateVerification = createGitHubUpdateVerification({
+      resourcesPath: process.resourcesPath,
+      publicKeyBase64: UPDATE_SIGNING_PUBLIC_KEY,
+    }),
   ) {
     if (updater === autoUpdater) {
       // electron-updater omits this internal transport property from its public declarations.
@@ -110,7 +118,10 @@ export class DesktopUpdateCoordinator {
       if (version !== this.candidate) throw new Error('desktop update: download confirmation is stale')
       this.setState({ phase: 'downloading', version, percent: 0 })
       try {
-        await this.updater.downloadUpdate()
+        const downloaded = await this.updater.downloadUpdate()
+        // electron-updater proves the bytes match the channel metadata; the
+        // published signature is what proves who wrote them.
+        await this.verification.verify(downloaded, this.releaseTag)
         if (!this.downloaded) throw new Error('desktop update: platform preparation did not report readiness')
         this.downloadResult?.(true)
         return this.setState({ phase: 'ready', version })
@@ -191,6 +202,8 @@ export class DesktopUpdateCoordinator {
       if (valid(version) === null) throw new Error('desktop update: feed version is invalid')
       if (this.channel === 'latest' && version.includes('-')) throw new Error('desktop update: latest feed contains a prerelease')
       this.candidate = result.isUpdateAvailable && gt(version, this.currentVersion()) ? version : undefined
+      // The GitHub provider adds the resolved release tag at runtime; its public type omits it.
+      this.releaseTag = this.candidate === undefined ? undefined : (result.updateInfo as UpdateInfo & { tag?: string }).tag
       return this.setState(this.candidate === undefined ? { phase: 'idle' } : { phase: 'available', version })
     } catch (error) {
       return this.failure(error, 'check')

@@ -1,9 +1,10 @@
 /** GitHub Releases publishing of packaged Desktop artifacts. */
 import { mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { generateKeyPairSync } from 'node:crypto'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { collectReleaseAssets, desktopGitHubReleaseTag, publishGitHubRelease, type GitHubReleaseAsset } from '../scripts/publish-github-release.ts'
+import { collectReleaseAssets, desktopGitHubReleaseTag, publishGitHubRelease, signReleaseAssets, type GitHubReleaseAsset } from '../scripts/publish-github-release.ts'
 
 const directories: string[] = []
 
@@ -119,5 +120,31 @@ describe('release asset collection', () => {
       await writeFile(join(directory, name), 'bytes')
     }
     await expect(collectReleaseAssets(directory, '1.2.3')).rejects.toThrow(/carries 2 channel metadata files/u)
+  })
+})
+
+describe('release artifact signatures', () => {
+  it('writes one signature per artifact and names it beside the artifact', async () => {
+    const { privateKey } = generateKeyPairSync('ed25519')
+    const directory = await mkdtemp(join(tmpdir(), 'github-sign-'))
+    directories.push(directory)
+    for (const name of ['agentrans-1.2.3-win-x64.exe', 'latest.yml']) {
+      await writeFile(join(directory, name), 'bytes')
+    }
+    const assets = await collectReleaseAssets(directory, '1.2.3')
+    const signed = await signReleaseAssets(assets, privateKey.export({ format: 'der', type: 'pkcs8' }).toString('base64'))
+    expect(signed.map(asset => asset.name)).toEqual([
+      'agentrans-1.2.3-win-x64.exe', 'latest.yml',
+      'agentrans-1.2.3-win-x64.exe.sig', 'latest.yml.sig',
+    ])
+    expect(signed.at(-1)?.contentType).toBe('text/plain')
+  })
+
+  it('rejects a signing key that is not an Ed25519 private key', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'github-sign-'))
+    directories.push(directory)
+    await writeFile(join(directory, 'agentrans-1.2.3-win-x64.exe'), 'bytes')
+    const assets = await collectReleaseAssets(directory, '1.2.3')
+    await expect(signReleaseAssets(assets, 'not-a-key')).rejects.toThrow(/signing key/u)
   })
 })

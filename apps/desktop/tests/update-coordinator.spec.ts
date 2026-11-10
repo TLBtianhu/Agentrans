@@ -62,14 +62,15 @@ function fixture(channel: 'nightly' | 'latest' = 'nightly', version = '1.1.0-alp
   const quitAndInstall = vi.fn()
   const beforeRestart = vi.fn(async () => true)
   const downloadResult = vi.fn()
+  const verify = vi.fn(async () => {})
   const states: DesktopUpdateState[] = []
   const updater = Object.assign(events, { checkForUpdates, downloadUpdate, quitAndInstall }) as unknown as AppUpdater
   const coordinator = new DesktopUpdateCoordinator(
     (state) => { states.push(state); return state },
-    beforeRestart, updater, () => true, () => version, downloadResult, channel,
+    beforeRestart, updater, () => true, () => version, downloadResult, channel, { verify },
   )
   coordinators.push(coordinator)
-  return { coordinator, updater, events, states, checkForUpdates, downloadUpdate, quitAndInstall, beforeRestart, downloadResult }
+  return { coordinator, updater, events, states, checkForUpdates, downloadUpdate, quitAndInstall, beforeRestart, downloadResult, verify }
 }
 
 describe('desktop update coordinator', () => {
@@ -129,6 +130,16 @@ describe('desktop update coordinator', () => {
     expect(f.events.listenerCount('error')).toBe(0)
   })
 
+  it('refuses an update whose signature does not verify', async () => {
+    const f = fixture()
+    f.verify.mockRejectedValueOnce(new Error('desktop update: verified-package does not match its published signature'))
+    await f.coordinator.check()
+    const state = await f.coordinator.download('1.1.0-rc.2')
+    expect(state.phase).toBe('error')
+    expect(f.downloadResult).toHaveBeenCalledWith(false, 'download_failed')
+    expect(f.verify).toHaveBeenCalledWith(['verified-package'], undefined)
+    expect(f.quitAndInstall).not.toHaveBeenCalled()
+  })
   it('checks, downloads on demand, then requires separate installation approval', async () => {
     const f = fixture()
     await f.coordinator.check()

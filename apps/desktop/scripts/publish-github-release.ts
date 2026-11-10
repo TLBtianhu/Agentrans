@@ -8,8 +8,9 @@
  * replaces bytes a user may already be downloading.
  */
 
-import { readdir, readFile } from 'node:fs/promises'
+import { readdir, readFile, writeFile } from 'node:fs/promises'
 import { basename, join } from 'node:path'
+import { privateKeyFromBase64, signFileDigest, signatureAssetName } from '../src/update-signature.ts'
 import { DESKTOP_UPDATE_REPOSITORY } from './desktop-release-environment.mjs'
 
 /** One packaged file to attach. */
@@ -170,11 +171,42 @@ export async function collectReleaseAssets(directory: string, version: string): 
   return [...assets.filter(asset => !(asset.name ?? '').endsWith('.yml')), ...feeds]
 }
 
+/**
+ * Write a detached signature beside every collected artifact.
+ *
+ * The installer is what an update installs, so a release that cannot be verified
+ * is a release no installed build should accept. Signing happens before upload
+ * and covers every artifact, which keeps the channel metadata under the same
+ * digest as the binaries it points at.
+ * @param assets - Artifacts the release will carry.
+ * @param signingKeyBase64 - DER PKCS#8 Ed25519 key from the release environment.
+ * @returns the artifacts followed by one signature asset per artifact.
+ */
+export async function signReleaseAssets(
+  assets: readonly GitHubReleaseAsset[],
+  signingKeyBase64: string,
+): Promise<GitHubReleaseAsset[]> {
+  const privateKey = privateKeyFromBase64(signingKeyBase64)
+  const signatures: GitHubReleaseAsset[] = []
+  for (const asset of assets) {
+    const path = `${asset.path}.sig`
+    await writeFile(path, await signFileDigest(asset.path, privateKey))
+    signatures.push({ path, name: signatureAssetName(asset.name ?? basename(asset.path)), contentType: 'text/plain' })
+  }
+  return [...assets, ...signatures]
+}
+
 if (process.argv[1] !== undefined && process.argv[1].endsWith('publish-github-release.ts')) {
   const [directory, version, channel] = process.argv.slice(2)
   const token = process.env.GH_TOKEN ?? process.env.GITHUB_TOKEN
+  const signingKey = process.env.DSH_UPDATE_SIGNING_KEY
   if (directory === undefined || version === undefined || (channel !== 'nightly' && channel !== 'latest') || token === undefined) {
     console.error('usage: publish-github-release <artifacts-dir> <version> <nightly|latest> (GH_TOKEN required)')
+    process.exitCode = 1
+  } else if (signingKey === undefined || signingKey === '') {
+    // An unsigned release would install on every build that trusts the key, so
+    // publishing without one is refused rather than silently skipped.
+    console.error('desktop publish: DSH_UPDATE_SIGNING_KEY is required; collect the signing key secret before publishing')
     process.exitCode = 1
   } else {
     const result = await publishGitHubRelease({
@@ -183,7 +215,7 @@ if (process.argv[1] !== undefined && process.argv[1].endsWith('publish-github-re
       repo: DESKTOP_UPDATE_REPOSITORY.repo,
       version,
       channel,
-      assets: await collectReleaseAssets(directory, version),
+      assets: await signReleaseAssets(await collectReleaseAssets(directory, version), signingKey),
     })
     console.log(`published ${result.tag}: ${String(result.uploaded.length)} uploaded, ${String(result.skipped.length)} already present`)
     console.log(result.url)

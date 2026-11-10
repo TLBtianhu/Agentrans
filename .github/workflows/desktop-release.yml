@@ -46,4 +46,6 @@ jobs:
       - name: Attach the assets to the release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Signs every artifact; a release without this key is refused, not published unsigned.
+          DSH_UPDATE_SIGNING_KEY: ${{ secrets.DSH_UPDATE_SIGNING_KEY }}
         run: node --import tsx apps/desktop/scripts/publish-github-release.ts .desktop-assets "${{ inputs.version }}" "${{ inputs.channel }}"

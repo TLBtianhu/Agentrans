@@ -300,6 +300,8 @@ Packaging embeds one GitHub release feed and the channel the build serves: `late
 
 Earlier releases consulted a hosted mandatory-update policy and could offer a test-only sign-in window. Both belonged to the hosted download service this product no longer runs, and the product carries no account login.
 
+Every published artifact carries a detached Ed25519 signature, and the application verifies the downloaded installer against a public key pinned in its source before the update may install. The private key exists only in the release environment as DSH_UPDATE_SIGNING_KEY; publishing without it fails instead of producing an unsigned release. A signature that is missing or does not match ends the download with a visible failure, because the alternative is installing bytes nobody vouched for. Rotating the key means publishing one build that carries the next public key.
+
 ### Local updater qualification
 
 Ordinary update HTTP requests have a per-connection inactivity deadline: no response headers or no further response bytes for `60000` ms fails the operation. `DSH_DESKTOP_UPDATE_HTTP_IDLE_TIMEOUT_MS` accepts an integer from `1000` through `2147483647` to adjust it; active downloads have no total-duration deadline. Failed downloads retain the retry indicator and require another user action.
