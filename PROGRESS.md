@@ -2,6 +2,13 @@
 
 本文件记录当前开发工作区状态和 0.1.0 发布基线，供后续继续推进时对照。工作区完成项不代表已进入用户安装或发布物。
 
+## 已完成：单一托管打包工作流与 Intel Mac（2026-11-10）
+
+- 两条托管打包工作流（Windows / macOS）合并为 .github/workflows/agentrans-hosted-package.yml：一个 	arget 输入选择 runner、设置文件、prepare 脚本与产物名；两个平台共用同一份步骤，PowerShell 在两个镜像上都能跑。
+- 安装器入口与共享配置新增 mac-x64，Windows 专属的
+sis 段不再出现在 macOS 配置里。
+- Intel 构建在 arm64 runner 上需要 Rosetta 才能启动打包后的应用做自检，lane 里按目标条件安装。
+- 已知限制：同一个版本的两个 macOS 架构会各自产出 lpha-mac.yml，发布到同一 Release 时会互相覆盖；要同时发布两个架构需要一次同时构建两个架构（或改用 universal 包），尚未实现。
 ## 已完成：lint 基线归零（2026-11-10）
 
 - pnpm run lint：**0 warnings / 0 errors**（6772 个文件，90 条规则），起点是 70 条、27 个文件。
@@ -28,7 +35,8 @@
 - 发布管线从 COS/EdgeOne/CDN 收敛为只走 GitHub Releases：删掉 generic provider、bucket/凭据/CDN purge/资格脚本与相关测试、npm scripts 与 CI 工作流；electron-updater 只保留 provider: 'github'。
 - 强制更新线整条删除：策略服务、测试登录窗口、desktop/settings.json、DSH_DESKTOP_MANDATORY_UPDATE_* 与 DSH_DESKTOP_AUTO_UPDATE_ENV（79 文件，+112/−4452），并补了升级指南；旧 .env.windows 里残留的键现在会让打包**响亮失败**而不是被静默忽略。
 - eat/first-slice 快进合并到 main（41 提交）。仓库第一次真正有默认分支内容；gh run list 的首条运行即由此产生。
-- 新增四个仓库级门禁并注册进 un-gates（doc-sync 43 → 47）：erify-config-keys（87 行配置与其声明的 schema 键比对）、erify-bundle-overrides（6 处 bundle 覆盖必须重述全部键）、erify-disabled-package-imports（372 个包不得运行时依赖 8 个 shipped-but-off 包）、erify-seam-roles（33 条 seam 的 definition/consumer 不得 import provider）。
+- 新增四个仓库级门禁并注册进
+un-gates（doc-sync 43 → 47）：erify-config-keys（87 行配置与其声明的 schema 键比对）、erify-bundle-overrides（6 处 bundle 覆盖必须重述全部键）、erify-disabled-package-imports（372 个包不得运行时依赖 8 个 shipped-but-off 包）、erify-seam-roles（33 条 seam 的 definition/consumer 不得 import provider）。
 - deepseekAccount seam 重构：线协议工具（platformClientHeaders/mergePlatformCookies/platformWireLocale/desktopClientHeaders）从定义包迁到唯一调用方 pps/desktop/src/platform-client-headers.ts，定义包只剩接口/类型（167 → 112 行，无运行时函数）；决策记录在 .agents/notes/implemented/architecture/2026-11-09-platform-client-identity.md。
 - 更新可信链（方案 B）：发布时为每个产物生成 Ed25519 detached 签名（覆盖 SHA-256 摘要，避免整包进内存），应用在 download() 内用固定公钥验签，失败即 error 且不进入可安装状态；私钥只在仓库 secret DSH_UPDATE_SIGNING_KEY，缺密钥时发布拒绝执行。
 - 给产品自己的 feed：createAgentransInstallerBuilderConfig 现在内嵌 owner/repo/channel，安装器产出 lpha.yml（而不是 latest.yml）并把 channel: alpha 写进 pp-update.yml；Release tag 由 desktop-v<version> 改为 <version>，因为 electron-updater 会跳过 semver 解析失败的 tag。
