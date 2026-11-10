@@ -10,6 +10,7 @@ const PRODUCT_NAME = DESKTOP_PRODUCT_NAME
 const TARGETS = {
   'win-x64': { platform: 'win32', arch: 'x64' },
   'mac-arm64': { platform: 'darwin', arch: 'arm64' },
+  'mac-x64': { platform: 'darwin', arch: 'x64' },
 }
 
 /**
@@ -58,15 +59,16 @@ export function agentransInstallerEnvironment(environment, target = 'win-x64') {
  * @returns {import('./agentrans-installer-config.mjs').AgentransInstallerConfig} Configuration that cannot publish or register dsh protocols.
  */
 export function createAgentransInstallerConfig({ environment, output, repositoryRoot, target = 'win-x64' }) {
-  if (target !== 'win-x64' && target !== 'mac-arm64') {
+  if (target !== 'win-x64' && target !== 'mac-arm64' && target !== 'mac-x64') {
     throw new Error(`Agentrans installer does not support target ${String(target)}`)
   }
   const platform = TARGETS[target].platform
   const arch = TARGETS[target].arch
   const base = createAgentransInstallerBuilderConfig(agentransInstallerEnvironment(environment, target), platform, arch)
+  const { nsis: baseNsis, ...baseWithoutNsis } = base
   const artifactName = `${DESKTOP_ARTIFACT_SLUG}-\${version}-${target}-unsigned.\${ext}`
   const shared = {
-    ...base,
+    ...baseWithoutNsis,
     appId: AGENTRANS_DESKTOP_APP_ID,
     productName: PRODUCT_NAME,
     artifactName,
@@ -81,14 +83,14 @@ export function createAgentransInstallerConfig({ environment, output, repository
       { from: join(repositoryRoot, 'distribution/keys'), to: 'distribution/keys' },
     ],
   }
-  if (target === 'mac-arm64') {
+  if (target !== 'win-x64') {
     // The unsigned entry cannot notarize or carry a Developer ID signature, so the bundle is ad-hoc
     // signed at most and Gatekeeper warns on first open until a certificate exists.
     return { ...shared, mac: { ...base.mac, identity: null, notarize: false } }
   }
   return {
     ...shared,
-    nsis: { ...base.nsis, uninstallDisplayName: PRODUCT_NAME, shortcutName: PRODUCT_NAME, artifactName,
+    nsis: { ...baseNsis, uninstallDisplayName: PRODUCT_NAME, shortcutName: PRODUCT_NAME, artifactName,
       allowToChangeInstallationDirectory: false },
   }
 }

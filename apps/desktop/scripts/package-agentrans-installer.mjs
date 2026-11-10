@@ -20,6 +20,8 @@ Object.assign(process.env, environment)
 
 const targets = target === 'mac-arm64'
   ? Platform.MAC.createTarget(['dmg', 'zip'], Arch.arm64)
-  : Platform.WINDOWS.createTarget(['nsis'], Arch.x64)
+  : target === 'mac-x64'
+    ? Platform.MAC.createTarget(['dmg', 'zip'], Arch.x64)
+    : Platform.WINDOWS.createTarget(['nsis'], Arch.x64)
 await build({ projectDir: appRoot, targets, publish: 'never', config })
 console.log(JSON.stringify({ output, productName: config.productName, appId: config.appId, version: config.extraMetadata.version }))

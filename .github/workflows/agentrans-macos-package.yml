@@ -21,21 +21,28 @@ on:
         options: [nightly, latest]
         default: nightly
         required: true
+      arch:
+        description: '目标架构：arm64 为本机架构，x64 从 arm64 runner 交叉构建'
+        type: choice
+        options: [arm64, x64]
+        default: arm64
+        required: true
 
 permissions:
   contents: read
 
 concurrency:
-  group: agentrans-macos-unsigned-package
+  group: agentrans-macos-unsigned-package-${{ inputs.arch }}
   cancel-in-progress: false
 
 jobs:
   package:
     runs-on: macos-latest
-    timeout-minutes: 120
+    timeout-minutes: 150
     env:
       DSH_DESKTOP_UPDATE_CHANNEL: ${{ inputs.channel }}
       DSH_TELEMETRY_DISABLED: '1'
+      TARGET: mac-${{ inputs.arch }}
     steps:
       - uses: actions/checkout@v5
 
@@ -58,10 +65,10 @@ jobs:
       # The installer entry packages a prepared tree; this prepares it without
       # producing an artifact of its own.
       - name: Prepare the packaged runtime
-        run: pnpm run package:desktop:mac:arm64 --unsigned --prepare-only --build-version ${{ inputs.version }}
+        run: pnpm run package:desktop:mac:${{ inputs.arch }} --unsigned --prepare-only --build-version ${{ inputs.version }}
 
       - name: Build the unsigned application
-        run: node apps/desktop/scripts/package-agentrans-installer.mjs artifacts/agentrans-installer mac-arm64
+        run: node apps/desktop/scripts/package-agentrans-installer.mjs artifacts/agentrans-installer "$TARGET"
 
       - name: List the packaged files
         run: ls -R apps/desktop/artifacts/agentrans-installer
@@ -69,7 +76,7 @@ jobs:
       - name: Publish the packaged files for this run
         uses: actions/upload-artifact@v4
         with:
-          name: agentrans-macos-arm64
+          name: agentrans-macos-${{ inputs.arch }}
           path: |
             apps/desktop/artifacts/agentrans-installer/*
             !apps/desktop/artifacts/agentrans-installer/builder-debug.yml
