@@ -23,7 +23,7 @@ describe('function-plot rendering at domain gaps', () => {
       beginPath: () => { points = [] },
       moveTo: (x: number, y: number) => { coordinate('move', x, y) },
       lineTo: (x: number, y: number) => { coordinate('line', x, y) },
-      stroke: () => { strokes.push({ color: String(context.strokeStyle), points: [...points] }) },
+      stroke: () => { strokes.push({ color: typeof context.strokeStyle === 'string' ? context.strokeStyle : '', points: [...points] }) },
       clearRect: vi.fn(), fillRect: vi.fn(), closePath: vi.fn(), fill: vi.fn(), setLineDash: vi.fn(),
       arc: (x: number, y: number) => { expect(Number.isFinite(x) && Number.isFinite(y)).toBe(true) },
       fillText: vi.fn(),
