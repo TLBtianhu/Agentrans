@@ -4,11 +4,12 @@
 
 ## 已完成：单一托管打包工作流与 Intel Mac（2026-11-10）
 
-- 两条托管打包工作流（Windows / macOS）合并为 .github/workflows/agentrans-hosted-package.yml：一个 	arget 输入选择 runner、设置文件、prepare 脚本与产物名；两个平台共用同一份步骤，PowerShell 在两个镜像上都能跑。
-- 安装器入口与共享配置新增 mac-x64，Windows 专属的
-sis 段不再出现在 macOS 配置里。
+- 两条托管打包工作流（Windows / macOS）合并为 `.github/workflows/agentrans-hosted-package.yml`：一个 `target` 输入选择 runner、设置文件、prepare 脚本与产物名；两个平台共用同一份步骤，PowerShell 在两个镜像上都能跑。
+- 安装器入口与共享配置新增 `mac-x64`，Windows 专属的 `nsis` 段不再出现在 macOS 配置里。
 - Intel 构建在 arm64 runner 上需要 Rosetta 才能启动打包后的应用做自检，lane 里按目标条件安装。
-- 已知限制：同一个版本的两个 macOS 架构会各自产出 lpha-mac.yml，发布到同一 Release 时会互相覆盖；要同时发布两个架构需要一次同时构建两个架构（或改用 universal 包），尚未实现。
+- 已知限制：同一个版本的两个 macOS 架构会各自产出 `alpha-mac.yml`，发布到同一 Release 时会互相覆盖；要同时发布两个架构需要一次同时构建两个架构（或改用 universal 包），尚未实现。
+- 托管验证：合并后的工作流用 `mac-x64` 与 `win-x64` 各实跑一次，均成功（run 42854365096 / 42858836181）。
+
 ## 已完成：lint 基线归零（2026-11-10）
 
 - pnpm run lint：**0 warnings / 0 errors**（6772 个文件，90 条规则），起点是 70 条、27 个文件。
