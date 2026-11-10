@@ -1,4 +1,4 @@
-/** Build the Agentrans Windows installer with the shared Electron/NSIS production configuration. */
+/** Build the Agentrans installer for one target with the shared unsigned production configuration. */
 import { build, Platform, Arch } from 'electron-builder'
 import { mkdir } from 'node:fs/promises'
 import { join } from 'node:path'
@@ -7,20 +7,19 @@ import { agentransInstallerEnvironment, createAgentransInstallerConfig } from '.
 
 const appRoot = fileURLToPath(new URL('..', import.meta.url))
 const repositoryRoot = fileURLToPath(new URL('../../..', import.meta.url))
+const target = process.argv[3] ?? 'win-x64'
 const output = process.argv[2] ?? join(repositoryRoot, 'artifacts', 'agentrans-installer')
 
 const environment = agentransInstallerEnvironment(process.env)
-const config = createAgentransInstallerConfig({ environment, output, repositoryRoot })
+const config = createAgentransInstallerConfig({ environment, output, repositoryRoot, target })
 await mkdir(output, { recursive: true })
 for (const name of Object.keys(process.env)) {
   if (!Object.hasOwn(environment, name)) delete process.env[name]
 }
 Object.assign(process.env, environment)
 
-await build({
-  projectDir: appRoot,
-  targets: Platform.WINDOWS.createTarget(['nsis'], Arch.x64),
-  publish: 'never',
-  config,
-})
+const targets = target === 'mac-arm64'
+  ? Platform.MAC.createTarget(['dmg', 'zip'], Arch.arm64)
+  : Platform.WINDOWS.createTarget(['nsis'], Arch.x64)
+await build({ projectDir: appRoot, targets, publish: 'never', config })
 console.log(JSON.stringify({ output, productName: config.productName, appId: config.appId, version: config.extraMetadata.version }))

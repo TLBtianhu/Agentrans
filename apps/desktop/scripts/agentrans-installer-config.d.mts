@@ -29,7 +29,7 @@ export interface AgentransInstallerConfig extends Omit<DesktopElectronBuilderCon
 export function agentransInstallerEnvironment(environment: NodeJS.ProcessEnv): NodeJS.ProcessEnv
 
 /**
- * Resolve product metadata and versioned output through the shared unsigned Windows builder.
+ * Resolve product metadata and versioned output through the shared unsigned builder.
  * @param options - Parent environment and output roots; the builder owns version resolution.
  * @returns Configuration with the product's own feed and no dsh protocol registration.
  */
@@ -37,4 +37,6 @@ export function createAgentransInstallerConfig(options: {
   readonly environment: NodeJS.ProcessEnv
   readonly output: string
   readonly repositoryRoot: string
+  /** Release target; the Windows NSIS installer when omitted. */
+  readonly target?: 'win-x64' | 'mac-arm64'
 }): AgentransInstallerConfig
