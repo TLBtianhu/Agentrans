@@ -483,6 +483,15 @@ export async function packageTarget(
       '--pack-destination',
       buildPaths.packedDsh,
     ], buildEnv, REPOSITORY_ROOT)
+    // The private Host depends on a private layout package, and a family pack skips private
+    // members, so the packaged set must carry it explicitly or the closure cannot be resolved.
+    await executePreparation([
+      '--dir',
+      'packages/boot/product-layout',
+      'pack',
+      '--pack-destination',
+      buildPaths.packedDsh,
+    ], buildEnv, REPOSITORY_ROOT)
     await executePreparation(['run', 'release:pack', '--family', 'vendor', '--out', buildPaths.packedVendor, ...packArguments], buildEnv, REPOSITORY_ROOT)
     rmSync(buildPaths.packedLandlock, { recursive: true, force: true })
     mkdirSync(buildPaths.packedLandlock, { recursive: true })
