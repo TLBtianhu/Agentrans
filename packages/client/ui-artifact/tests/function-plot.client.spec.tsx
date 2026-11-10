@@ -37,7 +37,7 @@ afterEach(() => {
 describe('FunctionPlotView', () => {
   it.each([
     { expression: 'sqrt(x)', x: 0, value: '0.000', derivative: null, integral: 0 },
-    { expression: 'log(x)', x: 1, value: '0.000', derivative: expect.closeTo(1, 4), integral: null },
+    { expression: 'log(x)', x: 1, value: '0.000', derivative: 1, integral: null },
     { expression: '1/x', x: 0, value: '—', derivative: null, integral: null },
   ])('keeps $expression usable and confirms unavailable readings as null', async ({ expression, x, value, derivative, integral }) => {
     const recordAction = vi.fn<RecordArtifactAction>().mockResolvedValue(undefined)
@@ -57,12 +57,20 @@ describe('FunctionPlotView', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Derivative' }))
     fireEvent.click(screen.getByRole('button', { name: 'Integral' }))
     fireEvent.click(screen.getByRole('button', { name: 'Confirm analysis' }))
-    await waitFor(() => {
-      expect(recordAction).toHaveBeenCalledWith('a', 1, 'plot.inspected', {
-        x, parameters: { d: 0.4 }, derivative, integral, zoom: 1,
-      }, true)
-    })
-    expect(onStateChange).toHaveBeenLastCalledWith(expect.objectContaining({ derivative, integral }))
+    await waitFor(() => { expect(recordAction).toHaveBeenCalled() })
+    const call = recordAction.mock.lastCall
+    expect(call?.[0]).toBe('a')
+    expect(call?.[1]).toBe(1)
+    expect(call?.[2]).toBe('plot.inspected')
+    expect(call?.[4]).toBe(true)
+    const inspected = call?.[3] as { derivative: number | null }
+    if (derivative === null) expect(inspected.derivative).toBeNull()
+    else expect(inspected.derivative).toBeCloseTo(derivative, 4)
+    expect(call?.[3]).toMatchObject({ x, parameters: { d: 0.4 }, integral, zoom: 1 })
+    const reported = onStateChange.mock.lastCall?.[0] as { derivative: number | null; integral: number | null }
+    expect(reported.integral).toEqual(integral)
+    if (derivative === null) expect(reported.derivative).toBeNull()
+    else expect(reported.derivative).toBeCloseTo(derivative, 4)
   })
 
   it('keeps parameter editing available while moving into and out of a function domain', () => {

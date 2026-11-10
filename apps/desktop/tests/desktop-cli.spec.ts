@@ -26,7 +26,7 @@ it.skipIf(process.platform !== 'win32').each(['system-bin', undefined])('dispatc
   vi.stubEnv('DSH_AGENTS_HOME', 'must-not-use-upstream-agents')
   vi.stubEnv(PRODUCT_LAUNCH_CONTEXT_ENV, undefined)
   const root = realpathSync(mkdtempSync(join(tmpdir(), 'agentrans-cli-instance-')))
-  onTestFinished(() => rmSync(root, { recursive: true, force: true }))
+  onTestFinished(() => { rmSync(root, { recursive: true, force: true }) })
   const instance = join(root, 'Application 中文 with spaces')
   const resources = join(instance, 'app', 'resources')
   mkdirSync(resources, { recursive: true })
@@ -58,7 +58,7 @@ it.skipIf(process.platform !== 'win32').each(['system-bin', undefined])('dispatc
 
 it('shares one verification instance with the packaged GUI without writing payload or foreign homes', async () => {
   const root = realpathSync(mkdtempSync(join(tmpdir(), 'agentrans-cli-verification-')))
-  onTestFinished(() => rmSync(root, { recursive: true, force: true }))
+  onTestFinished(() => { rmSync(root, { recursive: true, force: true }) })
   const instance = join(root, 'Application 中文 with spaces')
   const resources = join(instance, 'app', 'resources')
   const appPath = join(resources, 'app.asar')
@@ -98,7 +98,7 @@ it('shares one verification instance with the packaged GUI without writing paylo
 
 it('rejects a foreign verification payload before changing paths or creating state', async () => {
   const root = realpathSync(mkdtempSync(join(tmpdir(), 'agentrans-cli-foreign-payload-')))
-  onTestFinished(() => rmSync(root, { recursive: true, force: true }))
+  onTestFinished(() => { rmSync(root, { recursive: true, force: true }) })
   const instance = join(root, 'Application')
   const resources = join(instance, 'app', 'resources')
   const foreignCode = join(root, 'foreign-payload')

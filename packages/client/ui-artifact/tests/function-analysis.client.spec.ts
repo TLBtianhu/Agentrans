@@ -14,7 +14,10 @@ describe('function analysis', () => {
 
   it('does not claim an improper logarithm integral from a singular zero endpoint', () => {
     const node = parseExpression('log(x)', [])
-    expect(analyzeFunction(node, {}, 1)).toEqual({ value: 0, derivative: expect.closeTo(1, 5), integral: null })
+    const reading = analyzeFunction(node, {}, 1)
+    expect(reading.value).toBe(0)
+    expect(reading.derivative).toBeCloseTo(1, 5)
+    expect(reading.integral).toBeNull()
     expect(analyzeFunction(node, {}, 0)).toEqual({ value: null, derivative: null, integral: null })
   })
 
@@ -23,9 +26,10 @@ describe('function analysis', () => {
   })
 
   it('preserves signed integration and finite parameter-dependent readings', () => {
-    expect(analyzeFunction(parseExpression('a*x', ['a']), { a: 2 }, -1)).toEqual({
-      value: -2, derivative: expect.closeTo(2, 8), integral: expect.closeTo(1, 8),
-    })
+    const reading = analyzeFunction(parseExpression('a*x', ['a']), { a: 2 }, -1)
+    expect(reading.value).toBe(-2)
+    expect(reading.derivative).toBeCloseTo(2, 8)
+    expect(reading.integral).toBeCloseTo(1, 8)
   })
 
   it('marks numerical overflow unavailable without leaking a non-finite result', () => {

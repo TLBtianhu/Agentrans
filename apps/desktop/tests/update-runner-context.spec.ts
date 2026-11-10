@@ -26,10 +26,11 @@ vi.mock('node:child_process', async importOriginal => ({
 }))
 vi.mock('node:module', async (importOriginal) => {
   const actual = await importOriginal<typeof import('node:module')>()
-  return { ...actual, createRequire: (...args: Parameters<typeof actual.createRequire>) => {
+  return Object.assign({}, actual, { createRequire: (...args: Parameters<typeof actual.createRequire>) => {
     const require = actual.createRequire(...args)
-    return Object.assign((name: string) => name === 'electron' ? electronPath.value : require(name), require)
-  } }
+    const load = (name: string): unknown => require(name)
+    return Object.assign((name: string) => name === 'electron' ? electronPath.value : load(name), require)
+  } })
 })
 vi.mock('node:fs/promises', async (importOriginal) => {
   const actual = await importOriginal<typeof import('node:fs/promises')>()

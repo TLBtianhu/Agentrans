@@ -9,7 +9,7 @@ import { configureDesktopProduct } from '../src/product-context.ts'
 
 function fixture() {
   const root = realpathSync(mkdtempSync(join(tmpdir(), 'agentrans-desktop-context-')))
-  onTestFinished(() => rmSync(root, { recursive: true, force: true }))
+  onTestFinished(() => { rmSync(root, { recursive: true, force: true }) })
   const source = join(root, 'source')
   const instance = join(root, 'installed')
   const resources = join(instance, 'app', 'resources')
