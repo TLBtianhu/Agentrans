@@ -2,6 +2,14 @@
 
 本文件记录当前开发工作区状态和 0.1.0 发布基线，供后续继续推进时对照。工作区完成项不代表已进入用户安装或发布物。
 
+## 已完成：macOS 托管打包并入同一 Release（2026-11-10）
+
+- 新增 .github/workflows/agentrans-macos-package.yml（macos-latest，未签名、不公证），产出 .dmg、.zip、.zip.blockmap 与 lpha-mac.yml。
+- 安装器入口改为按 target 构建（win-x64 / mac-arm64），环境绑定目标平台；Windows 与 macOS 共用同一份配置与同一个发布脚本。
+- 同一 Release 现在同时承载两个平台：0.2.2-alpha.2 共 14 个资产，Windows 与 macOS 各自的产物和 .sig，以及 lpha.yml / lpha-mac.yml。
+- 发布脚本改为"每个平台最多一份通道元数据"，同一平台混入两份仍然拒绝。
+- 修掉两处 macOS 专有问题：运行时构建根与 smoke home 建在 /var 符号链接之下（产品拒绝状态目录穿过符号链接，改为先 realpath）；安装器环境把平台钉死为 Windows。
+- 线上验签：lpha-mac.yml 与 macOS .blockmap 均通过固定公钥校验。
 ## 已完成：第一次真实发布（2026-11-10）
 
 - 发布链路第一次完整跑通，且全程在 GitHub 托管 runner 上：Package Agentrans · Windows · hosted（run 42802517740）→ Publish Desktop release（run 42804959634）。
