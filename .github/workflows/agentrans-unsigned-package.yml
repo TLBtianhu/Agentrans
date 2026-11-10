@@ -49,11 +49,19 @@ jobs:
       - name: Install locked dependencies
         run: pnpm install --frozen-lockfile
 
+      # Packaging reads its settings from a git-ignored file, so the lane writes only the two
+      # settings it needs rather than copying the template's stale release credentials.
+      - name: Write the packaging settings this lane uses
+        shell: pwsh
+        run: |
+          @'
+          DSH_DESKTOP_APP_ID=com.agentrans.app
+          DSH_DESKTOP_WINDOWS_COMPRESSION_LEVEL=3
+          '@ | Set-Content -Path apps/desktop/.env.windows -Encoding utf8
+
       # The installer entry packages a prepared tree; this prepares it without producing an
       # installer of its own, which is the step the signed lanes get from their full package run.
       - name: Prepare the packaged runtime
-        env:
-          DSH_DESKTOP_APP_ID: com.agentrans.app
         run: pnpm run package:desktop:win:x64 --unsigned --prepare-only --build-version ${{ inputs.version }}
 
       - name: Build the unsigned installer
