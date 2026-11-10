@@ -1,0 +1,94 @@
+name: Package Agentrans · hosted
+
+# Hosted-runner packaging for the unsigned Agentrans application.
+#
+# The self-hosted lanes exist for signed release builds, which need a hardware
+# token, a signing environment, and an Apple Developer ID. This lane builds the
+# same application without any of them so the packaging, publishing, and update
+# chain can be exercised without that hardware. Its artifacts are unsigned:
+# Windows warns on first install and macOS warns on first open, and those
+# warnings are the certificates' problem, not this workflow's.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '构建版本，例如 0.2.2-alpha.3（须为合法 semver；latest 通道要求稳定版本）'
+        type: string
+        required: true
+      channel:
+        description: '更新通道：nightly 读取预发布，latest 读取正式版本'
+        type: choice
+        options: [nightly, latest]
+        default: nightly
+        required: true
+      target:
+        description: '打包目标'
+        type: choice
+        options: [win-x64, mac-arm64, mac-x64]
+        default: win-x64
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: agentrans-hosted-package-${{ inputs.target }}
+  cancel-in-progress: false
+
+jobs:
+  package:
+    runs-on: ${{ startsWith(inputs.target, 'win') && 'windows-latest' || 'macos-latest' }}
+    timeout-minutes: 150
+    env:
+      DSH_DESKTOP_UPDATE_CHANNEL: ${{ inputs.channel }}
+      DSH_TELEMETRY_DISABLED: '1'
+      TARGET: ${{ inputs.target }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v5.0.0
+
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: '24'
+          cache: pnpm
+
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Packaging reads its settings from a git-ignored file, so the lane writes only the
+      # settings it needs rather than copying the template's stale release credentials.
+      # PowerShell runs on both images, so the same step serves either platform.
+      - name: Write the packaging settings this lane uses
+        shell: pwsh
+        run: |
+          $lines = @('DSH_DESKTOP_APP_ID=com.agentrans.app')
+          if ($env:TARGET -like 'win-*') { $lines += 'DSH_DESKTOP_WINDOWS_COMPRESSION_LEVEL=3' }
+          $file = if ($env:TARGET -like 'win-*') { 'apps/desktop/.env.windows' } else { 'apps/desktop/.env.macos' }
+          Set-Content -Path $file -Value $lines -Encoding utf8
+
+      # The installer entry packages a prepared tree; this prepares it without producing an
+      # installer of its own, which is the step the signed lanes get from their full package run.
+      - name: Prepare the packaged runtime
+        shell: pwsh
+        run: |
+          $script = if ($env:TARGET -eq 'win-x64') { 'package:desktop:win:x64' } else { 'package:desktop:mac:' + ($env:TARGET -replace '^mac-', '') }
+          pnpm run $script --unsigned --prepare-only --build-version ${{ inputs.version }}
+
+      - name: Build the unsigned application
+        run: node apps/desktop/scripts/package-agentrans-installer.mjs artifacts/agentrans-installer "$TARGET"
+
+      - name: List the packaged files
+        shell: pwsh
+        run: Get-ChildItem -Recurse apps/desktop/artifacts/agentrans-installer | Select-Object -ExpandProperty FullName
+
+      - name: Publish the packaged files for this run
+        uses: actions/upload-artifact@v4
+        with:
+          name: agentrans-${{ inputs.target }}
+          path: |
+            apps/desktop/artifacts/agentrans-installer/*
+            !apps/desktop/artifacts/agentrans-installer/builder-debug.yml
+          if-no-files-found: error
+          compression-level: 0
