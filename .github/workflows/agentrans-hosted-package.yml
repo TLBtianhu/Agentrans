@@ -68,6 +68,12 @@ jobs:
           $file = if ($env:TARGET -like 'win-*') { 'apps/desktop/.env.windows' } else { 'apps/desktop/.env.macos' }
           Set-Content -Path $file -Value $lines -Encoding utf8
 
+      # The preparation starts the packaged application once to prove it runs. An Intel build on an
+      # arm64 runner needs Rosetta before that check can pass.
+      - name: Install Rosetta for the Intel build
+        if: inputs.target == 'mac-x64'
+        run: sudo softwareupdate --install-rosetta --agree-to-license
+
       # The installer entry packages a prepared tree; this prepares it without producing an
       # installer of its own, which is the step the signed lanes get from their full package run.
       - name: Prepare the packaged runtime
