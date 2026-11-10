@@ -2,6 +2,13 @@
 
 本文件记录当前开发工作区状态和 0.1.0 发布基线，供后续继续推进时对照。工作区完成项不代表已进入用户安装或发布物。
 
+## 已完成：第一次真实发布（2026-11-10）
+
+- 发布链路第一次完整跑通，且全程在 GitHub 托管 runner 上：Package Agentrans · Windows · hosted（run 42802517740）→ Publish Desktop release（run 42804959634）。
+- 产物：0.2.2-alpha.2（prerelease）共 6 个资产——安装器 290 MB、blockmap、lpha.yml，以及三者各自的 .sig。
+- 用编译进应用的公钥对已发布字节验签：lpha.yml 与 .blockmap 均通过，篡改副本被拒。
+- 为此修掉的真实缺陷（都只在干净检出上暴露）：桌面 bundle 依赖客户端包的构建产物（协议抽到 packages/util/shortcut-protocol）；该包需要自包含打包，否则托管 runner 上解析不到它的依赖；客户端 bundler 需要把它列为可内联包；私有 dsh-product-layout 必须与私有 Host 一起打进包集合；uilder-debug.yml 被发布脚本误当成第二份通道元数据；安装器输出目录在 pps/desktop 下而非仓库根。
+- 仍未做：macOS 打包与公证、Windows 签名证书。当前产物未签名，首次安装会出现 SmartScreen 警告。
 ## 已完成：单通道发布、五个门禁与自签更新链（2026-11-10）
 
 - 发布管线从 COS/EdgeOne/CDN 收敛为只走 GitHub Releases：删掉 generic provider、bucket/凭据/CDN purge/资格脚本与相关测试、npm scripts 与 CI 工作流；electron-updater 只保留 provider: 'github'。
