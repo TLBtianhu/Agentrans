@@ -153,6 +153,11 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
+function stringAt(value: unknown, path: string): string {
+  if (typeof value !== 'string') throw new SceneValidationError(path, 'must be a string')
+  return value
+}
+
 function numberAt(value: unknown, path: string): number {
   if (typeof value !== 'number' || !Number.isFinite(value)) throw new SceneValidationError(path, 'must be a finite number')
   return value
@@ -357,7 +362,7 @@ export function normalizeTimeline(value: unknown): TimelineSpec {
     }
     return {
       id: item.id, label: item.label.trim(), time: numberAt(item.time, `${path}/time`),
-      ...(item.description === undefined ? {} : { description: String(item.description) }),
+      ...(item.description === undefined ? {} : { description: stringAt(item.description, `${path}/description`) }),
     }
   }).sort((a, b) => a.time - b.time)
   let playhead: number | undefined
@@ -427,7 +432,7 @@ function normalizeMap(value: unknown): MapSpec {
     return {
       id: item.id, label: item.label.trim(),
       x: numberAt(item.x, `${path}/x`), y: numberAt(item.y, `${path}/y`),
-      ...(item.description === undefined ? {} : { description: String(item.description) }),
+      ...(item.description === undefined ? {} : { description: stringAt(item.description, `${path}/description`) }),
     }
   })
   const ids = new Set(markers.map(marker => marker.id))

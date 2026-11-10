@@ -4,7 +4,7 @@ import z from '@deepseek-ai/schemastery'
 import type { Agent } from '@deepseek-ai/dsh-agent'
 import { defineTool, type ToolExecution } from '@deepseek-ai/dsh-tools'
 import { ArtifactError } from './index.ts'
-import type { ArtifactComparison, ArtifactSnapshot } from './types.ts'
+import type { ArtifactSnapshot } from './types.ts'
 
 export const name = 'scene'
 export const inject = ['tools']
@@ -77,28 +77,29 @@ export function apply(ctx: Context): void {
       },
       render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }],
     },
-    async execute(args, exec): Promise<SceneToolResult> {
+    execute(args, exec): Promise<SceneToolResult> {
       if (exec.agent === undefined) throw new ArtifactError('scene requires an agent Session', 'BAD_INPUT')
-      if (args.kind !== 'function-plot' && args.kind !== 'flowchart' && args.kind !== 'particle-system' && args.kind !== 'timeline' && args.kind !== 'network-graph' && args.kind !== 'map') throw new ArtifactError(`unsupported scene kind: ${String(args.kind)}`, 'BAD_SCENE_SPEC')
+      const kind: string = args.kind
+      if (kind !== 'function-plot' && kind !== 'flowchart' && kind !== 'particle-system' && kind !== 'timeline' && kind !== 'network-graph' && kind !== 'map') throw new ArtifactError(`unsupported scene kind: ${kind}`, 'BAD_SCENE_SPEC')
       const snapshot = artifacts.prepare(exec.agent, {
-        action: args.action as 'create' | 'update',
-        artifactId: String(args.sceneId),
-        title: String(args.title),
+        action: args.action,
+        artifactId: args.sceneId,
+        title: args.title,
         spec: args.spec as never,
-        presentation: args.presentation as 'inline' | 'focus',
+        presentation: args.presentation,
         format: 'scene',
-        ...args.comparison === undefined ? {} : { comparison: args.comparison as ArtifactComparison },
-        ...args.baseRevision === undefined ? {} : { baseRevision: args.baseRevision as number },
+        ...args.comparison === undefined ? {} : { comparison: args.comparison },
+        ...args.baseRevision === undefined ? {} : { baseRevision: args.baseRevision },
       })
       exec.signal.throwIfAborted()
       pending.set(exec, { agent: exec.agent, snapshot })
-      return {
+      return Promise.resolve({
         sceneId: snapshot.artifactId,
         revision: snapshot.revision,
         title: snapshot.title,
         kind: snapshot.format === 'scene' ? snapshot.spec.kind : 'function-plot',
         presentation: snapshot.presentation,
-      }
+      })
     },
   }))
   ctx.on('tools/result', (exec, result) => {
