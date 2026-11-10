@@ -3,7 +3,7 @@
 import { afterEach, expect, it, vi } from 'vitest'
 import { installNativeKeyboard } from '../src/client/native.ts'
 import { ShortcutRegistry } from '../src/client/registry.ts'
-import type { DesktopShortcutInput, ShortcutCommandId } from '../src/protocol.ts'
+import type { DesktopShortcutInput, ShortcutCommandId } from '@deepseek-ai/dsh-shortcut-protocol'
 
 afterEach(() => { document.body.replaceChildren() })
 

@@ -1,6 +1,6 @@
 /** Explicit browser and Desktop preference adapters; Desktop never falls back to browser storage. */
-import { ShortcutPersistence } from '../protocol.ts'
-import type { DesktopShortcutsApi, ShortcutConfigSnapshot, ShortcutDefinition, ShortcutPlatform } from '../protocol.ts'
+import { ShortcutPersistence } from '@deepseek-ai/dsh-shortcut-protocol'
+import type { DesktopShortcutsApi, ShortcutConfigSnapshot, ShortcutDefinition, ShortcutPlatform } from '@deepseek-ai/dsh-shortcut-protocol'
 
 /** Browser-profile and origin-local preference key. */
 export const SHORTCUT_STORAGE_KEY = 'dsh.keybindings.v1'

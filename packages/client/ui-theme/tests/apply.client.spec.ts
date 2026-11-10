@@ -14,7 +14,7 @@ import { AppearanceRow } from '../src/client/AppearanceRow.tsx'
 import type { createAppearanceRowStore, createFontRowStore } from '../src/client/settings-store.ts'
 import { FontSettingsGroup } from '../src/client/FontSettingsGroup.tsx'
 import type { Shortcuts, ShortcutContext, ShortcutFixedInput, ShortcutGesture, ShortcutPlatform } from '@deepseek-ai/dsh-client-shortcuts/client'
-import { bindingKey, normalizeBinding, presentBinding } from '@deepseek-ai/dsh-client-shortcuts/protocol'
+import { bindingKey, normalizeBinding, presentBinding } from '@deepseek-ai/dsh-shortcut-protocol'
 import { ShortcutRegistry } from '../../shortcuts/src/client/registry.ts'
 
 // These specs assert the shipped Chinese copy. The lane has no jsdom `window`,

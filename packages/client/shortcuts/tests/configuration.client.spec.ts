@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { bindingIssue, editShortcutDocument, effectiveShortcuts, normalizeBinding, overlappingBindings, parseBinding,
-  parseShortcutDefinitions, parseShortcutDocument, parseShortcutEdit } from '../src/protocol.ts'
-import type { ShortcutCommandId, ShortcutDefinition, ShortcutDocument } from '../src/protocol.ts'
+  parseShortcutDefinitions, parseShortcutDocument, parseShortcutEdit } from '@deepseek-ai/dsh-shortcut-protocol'
+import type { ShortcutCommandId, ShortcutDefinition, ShortcutDocument } from '@deepseek-ai/dsh-shortcut-protocol'
 
 const id = (value: string) => value as ShortcutCommandId
 it('distinguishes identical two-key chords from pairs sharing only one key', () => {

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
-import { bindingKey, initialShortcutConfig, normalizeBinding, presentBinding } from '../src/protocol.ts'
-import type { ShortcutCommandId } from '../src/protocol.ts'
+import { bindingKey, initialShortcutConfig, normalizeBinding, presentBinding } from '@deepseek-ai/dsh-shortcut-protocol'
+import type { ShortcutCommandId } from '@deepseek-ai/dsh-shortcut-protocol'
 import { ShortcutRegistry } from '../src/client/registry.ts'
 import { isWebBindingAllowed } from '@deepseek-ai/dsh-shortcut-protocol'
 

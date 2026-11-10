@@ -2,7 +2,7 @@
 import { modalSelector, observeComposition } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { ShortcutContext, ShortcutFixedInput } from './types.ts'
 import type { ShortcutRegistry } from './registry.ts'
-import type { ShortcutPlatform, ShortcutRuntime } from '../protocol.ts'
+import type { ShortcutPlatform, ShortcutRuntime } from '@deepseek-ai/dsh-shortcut-protocol'
 
 /**
  * Detect the visiting device, never the server operating system.

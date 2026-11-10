@@ -776,9 +776,15 @@ importers:
       '@deepseek-ai/dsh-shortcut-protocol':
         specifier: workspace:*
         version: link:../../packages/util/shortcut-protocol
+      '@deepseek-ai/dsh-util-crypto':
+        specifier: workspace:*
+        version: link:../../packages/util/crypto
       '@deepseek-ai/dsh-util-file-drag':
         specifier: workspace:*
         version: link:../../packages/util/file-drag
+      '@deepseek-ai/dsh-util-values':
+        specifier: workspace:*
+        version: link:../../packages/util/values
       '@deepseek-ai/node-addon-system':
         specifier: workspace:~
         version: link:../../native/system/packages/entry
@@ -6377,6 +6383,9 @@ importers:
       '@deepseek-ai/dsh-client-ui-slots':
         specifier: workspace:*
         version: link:../ui-slots
+      '@deepseek-ai/dsh-shortcut-protocol':
+        specifier: workspace:*
+        version: link:../../util/shortcut-protocol
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -7000,6 +7009,9 @@ importers:
       '@deepseek-ai/dsh-settings':
         specifier: workspace:*
         version: link:../../settings/settings
+      '@deepseek-ai/dsh-shortcut-protocol':
+        specifier: workspace:*
+        version: link:../../util/shortcut-protocol
       clsx:
         specifier: ^2.0.0
         version: 2.1.1

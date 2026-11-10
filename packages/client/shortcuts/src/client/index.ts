@@ -4,8 +4,8 @@ import type { Context } from '@deepseek-ai/cordis'
 import type {} from '@deepseek-ai/dsh-client-locale/client'
 import { ShortcutRegistry } from './registry.ts'
 import { detectEnvironment, installKeyboard } from './dom.ts'
-import { bindingIssue, initialShortcutConfig, normalizeBinding, overlappingBindings, presentBinding } from '../protocol.ts'
-import type { DesktopKeyboardApi, DesktopShortcutsApi, ShortcutSaveResult } from '../protocol.ts'
+import { bindingIssue, initialShortcutConfig, normalizeBinding, overlappingBindings, presentBinding } from '@deepseek-ai/dsh-shortcut-protocol'
+import type { DesktopKeyboardApi, DesktopShortcutsApi, ShortcutSaveResult } from '@deepseek-ai/dsh-shortcut-protocol'
 import { desktopShortcutStorage, webShortcutStorage } from './storage.ts'
 import type { Shortcuts } from './types.ts'
 import type { ShortcutFixedInput } from './types.ts'
@@ -14,7 +14,7 @@ import { Config } from '../config.ts'
 
 export type { ShortcutCatalogEntry, ShortcutCommand, ShortcutContext, ShortcutGesture, Shortcuts } from './types.ts'
 export type { ShortcutFixedInput, ShortcutFixedCommand, ShortcutFixedCatalogEntry } from './types.ts'
-export type { ShortcutBinding, ShortcutCommandId, ShortcutPlatform, ShortcutRuntime } from '../protocol.ts'
+export type { ShortcutBinding, ShortcutCommandId, ShortcutPlatform, ShortcutRuntime } from '@deepseek-ai/dsh-shortcut-protocol'
 
 declare module '@deepseek-ai/cordis' {
   interface Context {

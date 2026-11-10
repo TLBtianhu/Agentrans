@@ -11,7 +11,7 @@
 import type { Context as ClientContext } from '@deepseek-ai/cordis'
 import type { BoundActions } from '@deepseek-ai/dsh-client-ui-slots'
 import type { ShortcutCommandId } from '@deepseek-ai/dsh-client-shortcuts/client'
-import type { NormalizedBinding } from '@deepseek-ai/dsh-client-shortcuts/protocol'
+import type { NormalizedBinding } from '@deepseek-ai/dsh-shortcut-protocol'
 // Type-only: the ctx.configForms Context merge. Cross-plugin collaboration
 // goes through the service, never a value import (client bundle purity gate).
 import type { ConfigForm } from '@deepseek-ai/dsh-client-ui-settings/client'

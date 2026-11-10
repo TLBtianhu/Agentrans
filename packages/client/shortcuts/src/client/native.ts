@@ -1,6 +1,6 @@
 /** Desktop gestures use live focus, modal state, and verified embedding ownership. */
 import { modalSelector } from '@deepseek-ai/dsh-client-ui-primitives'
-import type { DesktopKeyboardApi, ShortcutConfigSnapshot } from '../protocol.ts'
+import type { DesktopKeyboardApi, ShortcutConfigSnapshot } from '@deepseek-ai/dsh-shortcut-protocol'
 import type { ShortcutRegistry } from './registry.ts'
 
 /**

@@ -2,7 +2,7 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import clsx from 'clsx'
 import { ShortcutKeys, focusWithoutRing, observeComposition } from '@deepseek-ai/dsh-client-ui-primitives'
-import type { ShortcutBinding, ShortcutCommandId, ShortcutEdit, ShortcutRevision } from '@deepseek-ai/dsh-client-shortcuts/protocol'
+import type { ShortcutBinding, ShortcutCommandId, ShortcutEdit, ShortcutRevision } from '@deepseek-ai/dsh-shortcut-protocol'
 import type { ShortcutCatalogEntry } from '@deepseek-ai/dsh-client-shortcuts/client'
 import type { InjectFace, PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 import type { ReferenceInjected } from './Reference.tsx'

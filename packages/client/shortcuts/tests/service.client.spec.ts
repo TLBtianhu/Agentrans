@@ -3,8 +3,8 @@ import { afterEach, expect, it, vi } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import { LocaleRuntime } from '@deepseek-ai/dsh-client-locale/client'
 import ShortcutsService from '../src/client/index.ts'
-import { initialShortcutConfig } from '../src/protocol.ts'
-import type { DesktopKeyboardApi, DesktopShortcutsApi, ShortcutConfigSnapshot, ShortcutCommandId } from '../src/protocol.ts'
+import { initialShortcutConfig } from '@deepseek-ai/dsh-shortcut-protocol'
+import type { DesktopKeyboardApi, DesktopShortcutsApi, ShortcutConfigSnapshot, ShortcutCommandId } from '@deepseek-ai/dsh-shortcut-protocol'
 
 const disposers: (() => Promise<void>)[] = []
 afterEach(async () => {

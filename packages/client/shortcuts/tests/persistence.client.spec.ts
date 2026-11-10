@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
-import { ShortcutPersistence } from '../src/protocol.ts'
-import type { ShortcutCommandId, ShortcutConfigSnapshot, ShortcutDefinition, ShortcutEdit } from '../src/protocol.ts'
+import { ShortcutPersistence } from '@deepseek-ai/dsh-shortcut-protocol'
+import type { ShortcutCommandId, ShortcutConfigSnapshot, ShortcutDefinition, ShortcutEdit } from '@deepseek-ai/dsh-shortcut-protocol'
 
 const one = 'test.one' as ShortcutCommandId
 it('rejects an unsupported Web binding without writing preferences', async () => {

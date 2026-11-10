@@ -19,7 +19,7 @@ import { fileURLToPath } from 'node:url'
 import type { Browser, Page } from 'playwright'
 import { chromium } from 'playwright'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { initialShortcutConfig } from '@deepseek-ai/dsh-client-shortcuts/protocol'
+import { initialShortcutConfig } from '@deepseek-ai/dsh-shortcut-protocol'
 import {
   INTERACTIVE_SELECTOR, RECALL_MARK, isDraggableAt, type RegionRect,
 } from '@deepseek-ai/dsh-client-web/src/window-drag/regions.ts'

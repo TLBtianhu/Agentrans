@@ -7,7 +7,7 @@ import { installKeyboard } from '../src/client/dom.ts'
 import ShortcutsService from '../src/client/index.ts'
 import { ShortcutRegistry } from '../src/client/registry.ts'
 import type { ShortcutFixedCommand, ShortcutFixedInput } from '../src/client/types.ts'
-import type { ShortcutCommandId } from '../src/protocol.ts'
+import type { ShortcutCommandId } from '@deepseek-ai/dsh-shortcut-protocol'
 
 let dispose: (() => void) | undefined
 afterEach(() => { dispose?.(); document.body.replaceChildren(); vi.restoreAllMocks(); vi.useRealTimers(); localStorage.clear() })

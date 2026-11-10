@@ -6,7 +6,6 @@
     "tsBuildInfoFile": "lib/tsconfig.host.tsbuildinfo"
   },
   "include": [
-    "src/protocol.ts",
     "src/index.ts",
     "src/config.ts"
   ],

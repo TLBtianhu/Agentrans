@@ -1,8 +1,8 @@
 /** Physical shortcut chords share normalization, conflicts, and persistence rules. */
 import { expect, it, onTestFinished, vi } from 'vitest'
 import { bindingIssue, bindingKey, effectiveShortcuts, normalizeBinding, parseBinding, parseShortcutDocument,
-  parseShortcutDefinitions, presentBinding, ShortcutPersistence } from '../src/protocol.ts'
-import type { ShortcutBinding, ShortcutCommandId, ShortcutDefinition } from '../src/protocol.ts'
+  parseShortcutDefinitions, presentBinding, ShortcutPersistence } from '@deepseek-ai/dsh-shortcut-protocol'
+import type { ShortcutBinding, ShortcutCommandId, ShortcutDefinition } from '@deepseek-ai/dsh-shortcut-protocol'
 import { ShortcutRegistry } from '../src/client/registry.ts'
 
 const id = 'test.action' as ShortcutCommandId
