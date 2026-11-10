@@ -2,8 +2,8 @@
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { writeFileAtomic } from '@deepseek-ai/dsh-atomic-write'
-import { ShortcutPersistence } from '@deepseek-ai/dsh-client-shortcuts/protocol'
-import type { ShortcutConfigSnapshot, ShortcutPlatform } from '@deepseek-ai/dsh-client-shortcuts/protocol'
+import { ShortcutPersistence } from '@deepseek-ai/dsh-shortcut-protocol'
+import type { ShortcutConfigSnapshot, ShortcutPlatform } from '@deepseek-ai/dsh-shortcut-protocol'
 
 /**
  * Open the device configuration with atomic replacement.

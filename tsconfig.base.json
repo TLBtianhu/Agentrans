@@ -572,6 +572,7 @@
       "@deepseek-ai/dsh-session-turn-outline": ["./packages/session/session-turn-outline/src"],
       "@deepseek-ai/dsh-settings": ["./packages/settings/settings/src"],
       "@deepseek-ai/dsh-shell": ["./packages/shell/shell/src"],
+      "@deepseek-ai/dsh-shortcut-protocol": ["./packages/util/shortcut-protocol/src"],
       "@deepseek-ai/dsh-skill": ["./packages/skill/skill/src"],
       "@deepseek-ai/dsh-skill-badge": ["./packages/experimental/skill-badge/src"],
       "@deepseek-ai/dsh-skill-filesystem": ["./packages/skill/skill-filesystem/src"],

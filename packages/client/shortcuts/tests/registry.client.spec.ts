@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { bindingKey, initialShortcutConfig, normalizeBinding, presentBinding } from '../src/protocol.ts'
 import type { ShortcutCommandId } from '../src/protocol.ts'
 import { ShortcutRegistry } from '../src/client/registry.ts'
-import { isWebBindingAllowed } from '../src/binding.ts'
+import { isWebBindingAllowed } from '@deepseek-ai/dsh-shortcut-protocol'
 
 it.each(['macos', 'windows'] as const)('admits the existing single-modifier Web keys on %s', (platform) => {
   const primary = platform === 'macos' ? 'meta' : 'control'

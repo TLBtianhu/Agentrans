@@ -1,0 +1,34 @@
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write packages/util/shortcut-protocol/README.md
+/:
+  en: 2d1fad03a9001881
+  zh: 9c2f685f5f77d5bb
+/deepseek-ai-dsh-shortcut-protocol:
+  en: 0fe5c53ca82482c0
+  zh: ee83df757bd64fc7
+/deepseek-ai-dsh-shortcut-protocol/summary:
+  en: c15f8074c7219f5a
+  zh: 01fc7fcbca6c9b48
+/deepseek-ai-dsh-shortcut-protocol/table-of-contents:
+  en: b5a30705c7a4793d
+  zh: fcad5d341dbf0e22
+/deepseek-ai-dsh-shortcut-protocol/use-this-package:
+  en: a68051f4c6e5f9e6
+  zh: 3f30178b3e642bdc
+/deepseek-ai-dsh-shortcut-protocol/understand-the-implementation:
+  en: 0e29a5cc0fdef8ff
+  zh: b2bcc57d4db032fa
+/deepseek-ai-dsh-shortcut-protocol/model-experience:
+  en: 7018efaed3baf335
+  zh: d34480092ebaeb39
+/deepseek-ai-dsh-shortcut-protocol/model-experience/kv-cache-effect:
+  en: 435da6284ad96a6f
+  zh: 05f2032c00248748
+/deepseek-ai-dsh-shortcut-protocol/known-limitations-and-deferred-work:
+  en: 99f9dc399f2781d3
+  zh: d115c945cb002a10
+/deepseek-ai-dsh-shortcut-protocol/known-limitations-and-deferred-work/dev-note:
+  en: fca9eda133930207
+  zh: 4a95d2ee219cbddd
