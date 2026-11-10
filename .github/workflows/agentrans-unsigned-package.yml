@@ -71,6 +71,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: agentrans-windows-x64
-          path: artifacts/agentrans-installer/*
+          path: apps/desktop/artifacts/agentrans-installer/*
           if-no-files-found: error
           compression-level: 0
