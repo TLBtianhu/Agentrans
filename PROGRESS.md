@@ -2,6 +2,12 @@
 
 本文件记录当前开发工作区状态和 0.1.0 发布基线，供后续继续推进时对照。工作区完成项不代表已进入用户安装或发布物。
 
+## 已完成：lint 基线归零（2026-11-10）
+
+- pnpm run lint：**0 warnings / 0 errors**（6772 个文件，90 条规则），起点是 70 条、27 个文件。
+- 逐条按真实缺陷修，不屏蔽规则：模型发来的 description 不再被 String() 成 [object Object]；声称异步却从不等待的计划函数改成返回 Promise.resolve；被自身类型签名架空的校验按运行时值重新校验；测试里的非对称匹配器移出对象字面量，改为逐字段比较。
+- 唯一一处行级豁免：客户端 bundle 测试需要真正执行构建产物，注解就地说明理由。
+- 期间 	ypecheck 6/6、doc-sync 47/47 始终保持；受影响的 8 个测试包共约 900 个用例全绿。
 ## 已完成：macOS 托管打包并入同一 Release（2026-11-10）
 
 - 新增 .github/workflows/agentrans-macos-package.yml（macos-latest，未签名、不公证），产出 .dmg、.zip、.zip.blockmap 与 lpha-mac.yml。
