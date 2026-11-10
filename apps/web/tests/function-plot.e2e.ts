@@ -71,7 +71,7 @@ describe.skipIf(MODE === 'record')('web e2e: function plot Artifact', () => {
     }
     const artifactFrame = page.locator('iframe[data-artifact-frame]').filter({ visible: true }).last()
     await artifactFrame.waitFor({ state: 'visible', timeout: 15_000 })
-    const frame = page.frameLocator('iframe[data-artifact-frame]:visible').last()
+    const frame = page.locator('iframe[data-artifact-frame]:visible').last().contentFrame()
 
     await frame.locator('#integral').click()
     await frame.locator('#zoom-in').click()
@@ -89,7 +89,17 @@ describe.skipIf(MODE === 'record')('web e2e: function plot Artifact', () => {
     const actions = session.snapshotEvents().flatMap(event => event.type === 'user/message' && event.data.source.kind === 'artifact-action' ? [event.data] : [])
     const block = actions[0]?.content[0]
     if (block?.type !== 'text') throw new Error('Function plot did not produce one text block')
-    const payload = JSON.parse(block.text)
+    const payload = JSON.parse(block.text) as {
+      payload: {
+        time?: number
+        selected?: string
+        gravity?: number
+        position: { x: number; y: number }
+        velocity: { x: number; y: number }
+        derivative?: number
+        integral?: number
+      }
+    }
     expect(payload).toMatchObject({
       kind: 'artifact_action', artifactId: 'function-plot', revision: 1, action: 'plot.inspected',
       payload: { x: 1, parameter: 1.1, zoom: 1.25 },

@@ -81,7 +81,17 @@ describe.skipIf(MODE === 'record')('web e2e: SceneSpec function plot', () => {
     expect(actions).toHaveLength(1)
     const block = actions[0]?.content[0]
     if (block?.type !== 'text') throw new Error('SceneSpec did not produce one text block')
-    const payload = JSON.parse(block.text)
+    const payload = JSON.parse(block.text) as {
+      payload: {
+        time?: number
+        selected?: string
+        gravity?: number
+        position: { x: number; y: number }
+        velocity: { x: number; y: number }
+        derivative?: number
+        integral?: number
+      }
+    }
     expect(payload).toMatchObject({
       kind: 'artifact_action', artifactId: 'damped-oscillator', revision: 1, action: 'plot.inspected',
       payload: { x: 1, parameters: { d: 0.25, f: 1.2 }, zoom: 1 },

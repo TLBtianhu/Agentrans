@@ -71,7 +71,7 @@ describe.skipIf(MODE === 'record')('web e2e: particle-system Artifact', () => {
     }
     const artifactFrame = page.locator('iframe[data-artifact-frame]').filter({ visible: true }).last()
     await artifactFrame.waitFor({ state: 'visible', timeout: 15_000 })
-    const frame = page.frameLocator('iframe[data-artifact-frame]:visible').last()
+    const frame = page.locator('iframe[data-artifact-frame]:visible').last().contentFrame()
 
     for (let index = 0; index < 6; index++) await frame.locator('#step').click()
     await expect.poll(() => frame.locator('#time-value').textContent()).toBe('0.20')
@@ -86,7 +86,15 @@ describe.skipIf(MODE === 'record')('web e2e: particle-system Artifact', () => {
     expect(actions).toHaveLength(1)
     const block = actions[0]?.content[0]
     if (block?.type !== 'text') throw new Error('Particle-system did not produce one text block')
-    const payload = JSON.parse(block.text)
+    const payload = JSON.parse(block.text) as {
+      payload: {
+        time?: number
+        selected?: string
+        gravity?: number
+        position: { x: number; y: number }
+        velocity: { x: number; y: number }
+      }
+    }
     expect(payload).toMatchObject({
       kind: 'artifact_action', artifactId: 'projectile-motion', revision: 1, action: 'physics.inspected',
       payload: { selected: 'alpha', gravity: 9.8 },
