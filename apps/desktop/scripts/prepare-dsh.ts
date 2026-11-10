@@ -4,7 +4,7 @@ import { resolveMacOSSignatureCacheDirectory } from './macos-signature-cache-dir
 import { packagingStep } from './packaging-step.mjs'
 import { spawn } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import { copyFileSync, cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { copyFileSync, cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { delimiter, join, relative, resolve } from 'node:path'
 import { desktopNodeEnvironment } from '../src/node-environment.ts'
@@ -39,7 +39,9 @@ import { selectOfficeEngine } from '../../../scripts/libreoffice-packages.mjs'
 const APP_ROOT = resolve(import.meta.dirname, '..')
 const BUILD_PATHS = resolveDesktopTargetBuildPaths()
 const DSH_OUTPUT_ROOT = BUILD_PATHS.dsh
-const BUILD_ROOT = mkdtempSync(join(tmpdir(), 'dsh-desktop-runtime-'))
+// The product refuses a state directory that passes through a symlink, and macOS reaches its
+// temporary directory through /var, so the build root is created at the resolved location.
+const BUILD_ROOT = mkdtempSync(join(realpathSync(tmpdir()), 'dsh-desktop-runtime-'))
 const STORE_ROOT = BUILD_PATHS.pnpmStore
 const RUNTIME_ROOT = BUILD_PATHS.runtime
 const PNPM_BUILD_STATE = BUILD_PATHS.dshPnpm
