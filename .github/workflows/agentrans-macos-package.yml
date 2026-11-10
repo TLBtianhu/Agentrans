@@ -61,7 +61,10 @@ jobs:
         run: pnpm run package:desktop:mac:arm64 --unsigned --prepare-only --build-version ${{ inputs.version }}
 
       - name: Build the unsigned application
-        run: node apps/desktop/scripts/package-agentrans-installer.mjs apps/desktop/artifacts/agentrans-installer mac-arm64
+        run: node apps/desktop/scripts/package-agentrans-installer.mjs artifacts/agentrans-installer mac-arm64
+
+      - name: List the packaged files
+        run: ls -R apps/desktop/artifacts/agentrans-installer
 
       - name: Publish the packaged files for this run
         uses: actions/upload-artifact@v4
