@@ -1,0 +1,22 @@
+# Bilingual-pair consistency record for 2026-11-09-update-signature-pinned-key.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-11-09-update-signature-pinned-key.md
+/agent-note-a-pinned-key-proves-who-published-an-update:
+  en: 54ef59a3dab77ec0
+  zh: baf7721d590059b2
+/agent-note-a-pinned-key-proves-who-published-an-update/problem:
+  en: 45997c2b898f3d18
+  zh: 8073e808175393e2
+/agent-note-a-pinned-key-proves-who-published-an-update/decision:
+  en: 97492677bff635a0
+  zh: 941c4e8e926d5423
+/agent-note-a-pinned-key-proves-who-published-an-update/alternatives-considered:
+  en: 41878d43021c5558
+  zh: ddc43c92cf0108eb
+/agent-note-a-pinned-key-proves-who-published-an-update/consequences:
+  en: e2afa6c87c567cb3
+  zh: ac665ddfe51b8b2d
+/agent-note-a-pinned-key-proves-who-published-an-update/testing:
+  en: 4c349f5570d8cd61
+  zh: 1c3cb09650058968
