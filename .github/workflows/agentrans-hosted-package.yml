@@ -83,7 +83,7 @@ jobs:
           pnpm run $script --unsigned --prepare-only --build-version ${{ inputs.version }}
 
       - name: Build the unsigned application
-        run: node apps/desktop/scripts/package-agentrans-installer.mjs artifacts/agentrans-installer "$TARGET"
+        run: node apps/desktop/scripts/package-agentrans-installer.mjs artifacts/agentrans-installer ${{ inputs.target }}
 
       - name: List the packaged files
         shell: pwsh
