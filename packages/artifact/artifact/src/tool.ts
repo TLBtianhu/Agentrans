@@ -71,17 +71,17 @@ export function apply(ctx: Context): void {
       },
       render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }],
     },
-    async execute(args, exec): Promise<ArtifactToolResult> {
+    execute(args, exec): Promise<ArtifactToolResult> {
       if (exec.agent === undefined) throw new ArtifactError('artifact requires an agent Session', 'BAD_INPUT')
       const snapshot = artifacts.prepare(exec.agent, args)
       exec.signal.throwIfAborted()
       pending.set(exec, { agent: exec.agent, snapshot })
-      return {
+      return Promise.resolve({
         artifactId: snapshot.artifactId,
         revision: snapshot.revision,
         title: snapshot.title,
         presentation: snapshot.presentation,
-      }
+      })
     },
   }))
   ctx.on('tools/result', (exec, result) => {

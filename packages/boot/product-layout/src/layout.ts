@@ -28,11 +28,14 @@ export class ProductLayout {
    * @returns An immutable single-root layout.
    */
   static fromRoot(root: string, channel: ProductChannel): ProductLayout {
-    if (typeof root !== 'string' || root.trim().length === 0) throw new TypeError('ProductLayout root must be non-empty')
-    if (channel !== 'development' && channel !== 'portable' && channel !== 'installed') {
-      throw new TypeError(`Unsupported product channel: ${String(channel)}`)
+    // Both arrive from a caller outside this package, so the declared types are checked here.
+    const candidateRoot: string = root
+    if (typeof candidateRoot !== 'string' || candidateRoot.trim().length === 0) throw new TypeError('ProductLayout root must be non-empty')
+    const candidateChannel: string = channel
+    if (candidateChannel !== 'development' && candidateChannel !== 'portable' && candidateChannel !== 'installed') {
+      throw new TypeError(`Unsupported product channel: ${candidateChannel}`)
     }
-    const absoluteRoot = resolve(root)
+    const absoluteRoot = resolve(candidateRoot)
     const dataDir = join(absoluteRoot, 'data')
     return new ProductLayout(
       absoluteRoot,

@@ -34,9 +34,9 @@ export interface InstallResult {
  * @param appVersion - Version of the application payload to install.
  * @returns The paths to create, replace, preserve, and externally register.
  */
-export async function planInstall(layout: ProductLayout, appVersion: string): Promise<InstallPlan> {
+export function planInstall(layout: ProductLayout, appVersion: string): Promise<InstallPlan> {
   if (appVersion.trim().length === 0) throw new TypeError('Install appVersion must be non-empty')
-  return {
+  return Promise.resolve({
     layout,
     appVersion,
     create: [
@@ -50,7 +50,7 @@ export async function planInstall(layout: ProductLayout, appVersion: string): Pr
       ? ['windows:register-uninstall-entry', 'windows:register-start-menu-shortcut']
       : [],
     requiresAdmin: false,
-  }
+  })
 }
 
 function isEnoent(error: unknown): boolean {
