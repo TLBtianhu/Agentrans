@@ -2,7 +2,7 @@ import type { DesktopElectronBuilderConfig } from '../electron-builder.config.mj
 
 /** Explicit Agentrans identity and local-only output over the shared unsigned Windows configuration. */
 export interface AgentransInstallerConfig extends Omit<DesktopElectronBuilderConfig,
-  'protocols' | 'extraMetadata' | 'files' | 'extraResources' | 'nsis' | 'publish'> {
+  'protocols' | 'extraMetadata' | 'files' | 'extraResources' | 'nsis'> {
   readonly productName: string
   readonly protocols: readonly []
   readonly extraMetadata: DesktopElectronBuilderConfig['extraMetadata'] & {
@@ -17,7 +17,8 @@ export interface AgentransInstallerConfig extends Omit<DesktopElectronBuilderCon
     readonly shortcutName: string
     readonly artifactName: string
   }
-  readonly publish: null
+  /** The product's own feed; the build never uploads, so a publisher attaches the artifacts. */
+  readonly publish: NonNullable<DesktopElectronBuilderConfig['publish']>
 }
 
 /**
@@ -30,7 +31,7 @@ export function agentransInstallerEnvironment(environment: NodeJS.ProcessEnv): N
 /**
  * Resolve product metadata and versioned output through the shared unsigned Windows builder.
  * @param options - Parent environment and output roots; the builder owns version resolution.
- * @returns Configuration with no policy, publication or dsh protocol registration.
+ * @returns Configuration with the product's own feed and no dsh protocol registration.
  */
 export function createAgentransInstallerConfig(options: {
   readonly environment: NodeJS.ProcessEnv

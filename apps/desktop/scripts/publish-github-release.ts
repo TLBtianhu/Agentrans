@@ -50,7 +50,7 @@ export interface GitHubReleaseResult {
 
 /** Tag naming one Desktop release, distinct from the npm family's `dsh-v*`. */
 export function desktopGitHubReleaseTag(version: string): string {
-  return `desktop-v${version}`
+  return `v${version}`
 }
 
 /**

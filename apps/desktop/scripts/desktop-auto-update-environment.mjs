@@ -78,3 +78,24 @@ export function resolveDesktopGitHubUpdateConfig(env) {
     releaseType: channel === 'latest' ? 'release' : 'prerelease',
   }
 }
+
+/**
+ * Resolve the release feed the Agentrans installer embeds.
+ *
+ * The Agentrans entry owns its identity, so the upstream release-destination
+ * assertion does not apply: this feed names the product's own repository and the
+ * build's channel. Everything else matches the generic feed, so one publisher and
+ * one verifier serve both.
+ * @param {NodeJS.ProcessEnv} env - Packaging environment.
+ * @returns {{ provider: 'github', owner: string, repo: string, channel: 'nightly' | 'latest', releaseType: 'release' | 'prerelease' }} Feed coordinates embedded at build time.
+ */
+export function resolveDesktopAgentransUpdateConfig(env) {
+  const channel = resolveDesktopUpdateChannel(env)
+  return {
+    provider: 'github',
+    owner: DESKTOP_UPDATE_REPOSITORY.owner,
+    repo: DESKTOP_UPDATE_REPOSITORY.repo,
+    channel,
+    releaseType: channel === 'latest' ? 'release' : 'prerelease',
+  }
+}

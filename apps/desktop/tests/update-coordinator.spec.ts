@@ -156,7 +156,7 @@ describe('desktop update coordinator', () => {
       'available', 'downloading', 'downloading', 'verifying', 'ready', 'installing',
     ])
     expect(f.updater).toMatchObject({
-      autoDownload: false, autoInstallOnAppQuit: false, channel: 'nightly',
+      autoDownload: false, autoInstallOnAppQuit: false,
       allowPrerelease: true, allowDowngrade: false,
     })
   })
@@ -256,13 +256,14 @@ it.each([new DesktopUpdatePreparationError('stop-failed', 'private diagnostic'),
 
 
 it('keeps a stable-version nightly installation on nightly and rejects prereleases on latest', async () => {
+  // The channel decides which releases are eligible; the metadata file follows the candidate
+  // version's prerelease id, so no channel override is written.
   const nightly = fixture('nightly', '1.0.0')
-  expect(nightly.updater.channel).toBe('nightly')
+  expect(nightly.updater.channel).toBeUndefined()
   expect(nightly.updater.allowPrerelease).toBe(true)
   expect((await nightly.coordinator.check()).phase).toBe('available')
-  expect(nightly.updater.channel).toBe('nightly')
   const latest = fixture('latest', '1.0.0')
-  expect(latest.updater.channel).toBe('latest')
+  expect(latest.updater.channel).toBeUndefined()
   expect(latest.updater.allowPrerelease).toBe(false)
   expect(latest.updater.allowDowngrade).toBe(false)
   expect((await latest.coordinator.check()).phase).toBe('error')

@@ -1,6 +1,7 @@
 import { readInstallerLocales, renderInstallerStrings } from './installer-locales.mjs'
 import { officePackageDirectories } from '../../../scripts/libreoffice-packages.mjs'
 import { X509Certificate } from 'node:crypto'
+import semver from 'semver'
 import { readFileSync } from 'node:fs'
 import { readFile, writeFile } from 'node:fs/promises'
 import { join, relative, sep } from 'node:path'
@@ -21,7 +22,7 @@ import {
   resolveWindowsUpdatePublisher,
   scrubWindowsSigningEnvironment,
 } from './windows-sign.mjs'
-import { resolveDesktopGitHubUpdateConfig } from './desktop-auto-update-environment.mjs'
+import { resolveDesktopAgentransUpdateConfig, resolveDesktopGitHubUpdateConfig } from './desktop-auto-update-environment.mjs'
 import { resolveDesktopBuildCommit } from './desktop-build-commit.mjs'
 import { resolveDesktopBuildVersion } from './desktop-build-version.mjs'
 import { desktopArtifactOutput, desktopTargetBuildPaths, resolveDesktopBuildTarget } from './desktop-build-paths.mjs'
@@ -113,7 +114,11 @@ function electronBuilderConfig(env, hostPlatform, hostArch, preparedRuntime, pre
   if (windowsSigner !== undefined) {
     installWindowsNsisBootstrapSigner({ sign: windowsSigner })
   }
-  const update = unsigned ? undefined : resolveDesktopGitHubUpdateConfig(env)
+  // The Agentrans entry carries its own identity and its own feed; upstream builds keep the
+  // unsigned cutoff, because an unsigned upstream artifact cannot be delivered as an update.
+  const update = ownReleaseIdentity
+    ? resolveDesktopAgentransUpdateConfig(env)
+    : unsigned ? undefined : resolveDesktopGitHubUpdateConfig(env)
   const githubUpdate = update
   if (preparedRuntime !== undefined) buildPaths.dsh = preparedRuntime
   // electron-builder merges extraMetadata into the packaged manifest, so a build version here reaches
@@ -284,6 +289,14 @@ function electronBuilderConfig(env, hostPlatform, hostArch, preparedRuntime, pre
     detectUpdateChannel: false,
     publish: githubUpdate === undefined
       ? null
-      : [{ provider: 'github', owner: githubUpdate.owner, repo: githubUpdate.repo, releaseType: githubUpdate.releaseType }],
+      // electron-updater requests <prerelease>.yml for a prerelease version and latest.yml for a
+      // stable one, so the metadata file name follows the version rather than the selected channel.
+      : [{
+          provider: 'github',
+          owner: githubUpdate.owner,
+          repo: githubUpdate.repo,
+          releaseType: githubUpdate.releaseType,
+          channel: semver.prerelease(buildVersion)?.[0] ?? 'latest',
+        }],
   }
 }

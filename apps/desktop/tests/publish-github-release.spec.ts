@@ -57,7 +57,7 @@ const assets = async (names: readonly string[]): Promise<GitHubReleaseAsset[]> =
 
 describe('desktop GitHub release publishing', () => {
   it('names one tag per Desktop version', () => {
-    expect(desktopGitHubReleaseTag('1.2.3')).toBe('desktop-v1.2.3')
+    expect(desktopGitHubReleaseTag('1.2.3')).toBe('v1.2.3')
   })
 
   it('creates a missing release and uploads every asset', async () => {
@@ -66,7 +66,7 @@ describe('desktop GitHub release publishing', () => {
       token: 't', owner: 'o', repo: 'r', version: '1.2.3', channel: 'latest',
       assets: await assets(['Agentrans-1.2.3.exe', 'latest.yml']),
     }, github.fetch)
-    expect(result.tag).toBe('desktop-v1.2.3')
+    expect(result.tag).toBe('v1.2.3')
     expect(result.uploaded).toEqual(['Agentrans-1.2.3.exe', 'latest.yml'])
     expect(result.skipped).toEqual([])
   })
@@ -91,7 +91,7 @@ describe('desktop GitHub release publishing', () => {
       return nightly.fetch(input, init)
     }) as unknown as typeof globalThis.fetch
     await publishGitHubRelease({ token: 't', owner: 'o', repo: 'r', version: '2.0.0', channel: 'nightly', assets: [] }, capturing)
-    expect(JSON.parse(created[0] ?? '{}')).toMatchObject({ tag_name: 'desktop-v2.0.0', prerelease: true })
+    expect(JSON.parse(created[0] ?? '{}')).toMatchObject({ tag_name: 'v2.0.0', prerelease: true })
   })
 })
 

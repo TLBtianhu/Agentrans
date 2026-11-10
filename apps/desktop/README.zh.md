@@ -268,7 +268,7 @@ Windows NSIS 卸载程序删除应用与可重建缓存，默认保留用户数�
 
 使用 `node apps/desktop/scripts/test-windows-installer.mjs --uninstall-only --compile-only` 以每次运行唯一的带作用域包名编译独立的中英文夹具。省略 `--compile-only` 可对预置数据运行原生删除器回归，以及交互、静默、`--updated`、`/KEEP_APP_DATA` 和 `DSH_HOME` 位于 Electron 数据内的检查。编译本身不能证明已安装卸载行为。
 
-使用 `node apps/desktop/scripts/package-agentrans-installer.mjs` 构建 Agentrans 未签名 Windows 候选安装器，输出 `artifacts/agentrans-installer/agentrans-<version>-win-x64-unsigned.exe`。文件名和嵌入元数据采用同一个解析后的构建版本。此入口固定独立的 Agentrans 身份，关闭发布和协议注册，省略远程更新策略，并拒绝继承发布设置。安装包包含真实 Electron 应用、签名发布验签库和生产卸载入口。通用上游发布路径拒绝 Agentrans appId。Agentrans 签名发行与更新交付需另行配置。参见[分发边界](../../DISTRIBUTION.md)。
+使用 `node apps/desktop/scripts/package-agentrans-installer.mjs` 构建 Agentrans 未签名 Windows 候选安装器，输出 `artifacts/agentrans-installer/agentrans-<version>-win-x64-unsigned.exe`。文件名和嵌入元数据采用同一个解析后的构建版本。此入口固定独立的 Agentrans 身份，关闭发布和协议注册，省略远程更新策略，并拒绝继承发布设置。安装包包含真实 Electron 应用、签名发布验签库和生产卸载入口。通用上游发布路径拒绝 Agentrans appId。该构建会内嵌产品自己的 GitHub feed（owner、仓库、通道），因此已安装的 Agentrans 检查的是自己的 Release 而非上游的；元数据文件名跟随版本的预发布标识（`-alpha.N` 发布为 lpha.yml，稳定版本为 latest.yml），这正是 electron-updater 针对该版本请求的文件。构建期间禁止发布，Release 由后续步骤附加产物。参见[分发边界](../../DISTRIBUTION.md)。
 
 <a id="updates"></a>
 

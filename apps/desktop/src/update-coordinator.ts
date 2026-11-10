@@ -76,7 +76,8 @@ export class DesktopUpdateCoordinator {
     }
     this.updater.autoDownload = false
     this.updater.autoInstallOnAppQuit = false
-    this.updater.channel = channel
+    // The channel selects which releases are eligible, not which metadata file is read:
+    // electron-updater derives that file from the candidate version's prerelease id.
     this.updater.allowPrerelease = channel === 'nightly'
     // Selecting a channel can enable downgrade in electron-updater.
     this.updater.allowDowngrade = false

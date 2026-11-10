@@ -1,4 +1,4 @@
-/** Agentrans's unsigned Windows artifact configuration; no credential files or remote release settings are loaded. */
+/** Agentrans's unsigned Windows artifact configuration: its own release feed, and no credential files. */
 import { join } from 'node:path'
 import { createAgentransInstallerBuilderConfig } from './electron-builder-config.mjs'
 import { AGENTRANS_DESKTOP_APP_ID } from './desktop-release-environment.mjs'
@@ -15,7 +15,8 @@ const TARGET_SETTINGS = {
 
 /**
  * Bind one unsigned Windows artifact to its product identity and remove ambient signing credentials.
- * Conflicting target, policy or release settings are refused instead of silently changing their meaning.
+ * Conflicting target settings are refused instead of silently changing their meaning, and the
+ * update channel follows the product's own feed.
  * @param {NodeJS.ProcessEnv} environment - Parent process environment; never modified or loaded from dotenv.
  * @returns {NodeJS.ProcessEnv} Explicit product settings for configuration and the builder process.
  */
@@ -34,9 +35,6 @@ export function agentransInstallerEnvironment(environment) {
     if (normalized[name] !== undefined && normalized[name] !== expected) {
       throw new Error(`Agentrans installer requires ${name}=${expected}`)
     }
-  }
-  for (const name of ['DSH_DESKTOP_UPDATE_CHANNEL']) {
-    if (normalized[name] !== undefined) throw new Error(`Agentrans installer does not accept remote release setting ${name}`)
   }
   return {
     ...Object.fromEntries(Object.entries(scrubWindowsSigningEnvironment(normalized))
@@ -62,7 +60,6 @@ export function createAgentransInstallerConfig({ environment, output, repository
     artifactName,
     directories: { output },
     protocols: [],
-    publish: null,
     extraMetadata: { ...base.extraMetadata, agentransAppId: AGENTRANS_DESKTOP_APP_ID,
       agentransChannel: base.extraMetadata.dshDesktopUpdateChannel, name: 'agentrans' },
     files: [...base.files, 'installer/**/*'],

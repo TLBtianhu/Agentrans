@@ -55,3 +55,13 @@ export function desktopUpdateMetadataFilename(version: string, platform: NodeJS.
  * @returns Feed coordinates embedded at build time.
  */
 export function resolveDesktopGitHubUpdateConfig(env: NodeJS.ProcessEnv): DesktopGitHubUpdateConfig
+
+/**
+ * Resolve the GitHub Releases feed the Agentrans installer embeds.
+ *
+ * The Agentrans entry owns its identity, so the upstream release-destination
+ * assertion does not apply to it.
+ * @param env - Packaging environment.
+ * @returns Feed coordinates embedded at build time.
+ */
+export function resolveDesktopAgentransUpdateConfig(env: NodeJS.ProcessEnv): DesktopGitHubUpdateConfig
