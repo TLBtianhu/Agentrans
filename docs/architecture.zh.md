@@ -6,9 +6,9 @@
 
 ## Cordis
 
-[Cordis](cordis-primer.zh.md) 是 dsh 底层的框架：插件向共享上下文贡献服务、类型化事件和可逆的副作用。产品的每一部分都是插件，包括模型适配器、工具注册表、会话日志，以及 agent loop（智能体循环）本身，因此每个都可以从配置替换。
+[Cordis](cordis-primer.zh.md) 是 Agentrans 底层的框架：插件向共享上下文贡献服务、类型化事件和可逆的副作用。产品的每一部分都是插件，包括模型适配器、工具注册表、会话日志，以及 agent loop（智能体循环）本身，因此每个都可以从配置替换。
 
-不存在需要打补丁的特权内核：扩展 dsh 的方式是把插件挂载到其他插件旁边，而各项注册都是副作用，会在其插件卸载时撤销。
+不存在需要打补丁的特权内核：扩展 Agentrans 的方式是把插件挂载到其他插件旁边，而各项注册都是副作用，会在其插件卸载时撤销。
 
 ## Profile 与组合包
 
@@ -48,7 +48,7 @@ Python SDK 遵循相同的应用架构。其运行时 wheel 把普通 `agentrans
 
 ## 桌面应用
 
-[Electron 桌面应用](../apps/desktop/README.zh.md)在签名资源中携带精确匹配的 dsh 生产运行时，并拥有保留的 `$AGENTRANS_HOME/profiles/desktop`。共享 helper 初始化 profile 文件、协调 bundle，并解析安装与 bundle 的依赖而不替换 pnpm 拥有的包。产品启动器在加载应用前绑定代码与状态。源码开发、Windows 安装和隔离验收使用独立实例；GUI、内置 CLI 和 Host 共享同一上下文。通用引擎调用方自行选择根目录。
+[Electron 桌面应用](../apps/desktop/README.zh.md)在签名资源中携带精确匹配的 Agentrans 生产运行时，并拥有保留的 `$AGENTRANS_HOME/profiles/desktop`。共享 helper 初始化 profile 文件、协调 bundle，并解析安装与 bundle 的依赖而不替换 pnpm 拥有的包。产品启动器在加载应用前绑定代码与状态。源码开发、Windows 安装和隔离验收使用独立实例；GUI、内置 CLI 和 Host 共享同一上下文。通用引擎调用方自行选择根目录。
 
 Electron 使用 Electron Node 模式启动私有 Desktop Host。Host 调用共享 CLI profile runner 与完整 Web 应用。窗口立即加载打包 Web 资源，等待启动注入后在同一文档中激活客户端插件。Web 负责 RPC 与流；桌面载体将本地页面连接到已认证的 Host。Node IPC 承载启动注入、就绪、致命错误与关闭。Desktop 默认监听系统分配的端口，profile 配置可覆盖。壳拥有的 UI 通过内置 pnpm 执行插件事务，并遵循正常用户与 profile 配置。
 

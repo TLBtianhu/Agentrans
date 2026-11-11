@@ -174,7 +174,7 @@ Loader 结算后，app-boot 在仅 optional 条目未激活时输出警告。如
 当包级约定不够用时阅读以下页面。它们从共享启动机制逐步进入组合模型及其背后的决策证据。
 
 - [Cordis 入门](../../../docs/cordis-primer.zh.md)——Loader、`!!js` 配置表达式，以及 include/group 语义。
-- [dsh 应用](../../../apps/cli/README.zh.md)——消费这些 helper 的 `agentrans` bin。
+- [Agentrans 应用](../../../apps/cli/README.zh.md)——消费这些 helper 的 `agentrans` bin。
 - [@agentrans/cmdline](../cmdline/README.zh.md)——各 bin 使用的启动器到应用命令行交接。
 - [Profile 组合包](../../bundle/README.zh.md)——组合进 `agentrans --profile` 的可安装 patch 层。
 - [@agentrans/home-paths](../../util/home-paths/README.zh.md)——harness home 解析器（`resolveDshHome`）。

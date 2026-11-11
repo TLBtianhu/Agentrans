@@ -50,7 +50,7 @@ pnpm agentrans plugin --profile web remove @agentrans/experimental-auto-review
 
 ```sh
 agentrans plugin --profile headless add @agentrans/experimental-auto-review
-dsh headless --permission-mode auto --approval-policy never --json - < task.txt > run.jsonl
+agentrans headless --permission-mode auto --approval-policy never --json - < task.txt > run.jsonl
 ```
 
 如需从此 checkout 单次运行，可传入 `--patch /absolute/path/to/packages/experimental/auto-review/cordis.patch.yml`，无需安装 profile 层。Auto integration 不可用时，权限预设选择会在读取 stdin 或开始模型工作前失败。Auto 使用完全主机访问权限；此模式不需要 `--add-dir`。原生工具让每个工具 body 都经过审查；PTC 的直接 Node 效果仍不在审查范围内。

@@ -18,10 +18,10 @@
   en: e34b893161558c65
   zh: b5ffa89893cd475a
 /desktop-packaging/release-versions:
-  en: 7c474f52aabf01ee
-  zh: 746376966b79b86e
+  en: 0fac8e8dc88e1db2
+  zh: e5833b4b319cc93c
 /desktop-packaging/configuration-and-local-builds:
-  en: ebf1de8c54444e2b
+  en: fa0d04c5f83ca4de
   zh: ddb33bd3a362682e
 /desktop-packaging/windows-actions-packaging:
   en: 253e17998951931c
@@ -39,17 +39,17 @@
   en: e5a59c24ea7450ac
   zh: f2dab5036b1a01a6
 /desktop-packaging/directory-builds-and-preparation:
-  en: 5860c306375ddd63
-  zh: a76e3cdbbe25c79e
+  en: 6b5004694d80c1c9
+  zh: 371e90c4f39f7294
 /desktop-packaging/local-official-bundles-from-a-loopback-registry:
   en: d53fd6ef551c9f13
   zh: 860b67b705a10671
 /desktop-packaging/runtime-file-selection-and-installation-checks:
-  en: 40be91e80f5053ea
-  zh: 3c5c83b4b2a0f454
+  en: 9bfc71145e668bd6
+  zh: abc8685ab7359472
 /desktop-packaging/desktop-runtime-preparation:
-  en: 06093408ea3464a2
-  zh: 0754943f5fe9587a
+  en: 662adb90f705daa4
+  zh: 2e54c0304d541a56
 /desktop-packaging/installation-and-release-verification:
   en: 0737f33b24c88b13
   zh: 8740c99e55ae1136

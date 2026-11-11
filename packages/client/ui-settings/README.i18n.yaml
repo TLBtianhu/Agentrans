@@ -4,7 +4,7 @@
 #   pnpm run verify-translation-pairing --write packages/client/ui-settings/README.md
 /:
   en: 1d45d91595a921d5
-  zh: 2b117acaec0165a8
+  zh: 620f56add46410bb
 /agentrans-client-ui-settings:
   en: 7ed60a1183156e45
   zh: bdb0fe3525a1cfb7

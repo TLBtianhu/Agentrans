@@ -52,7 +52,7 @@ DeepSeek Harness 子进程使用产品启动器和一个显式的绝对路径 `A
   name: '@agentrans/subagent-acp'
   config:
     providerName: acp
-    command: dsh
+    command: Agentrans
     args: ['--profile', 'acp', '--patch', '/absolute/path/to/acp.patch.yml']
     permission: reject
     env:

@@ -15,7 +15,7 @@ Read the applicable references below and inspect the proposed or existing plugin
 
 ## Enable a shipped plugin
 
-A shipped bundle can resolve a plugin row and leave it `disabled`. The row id and its reason are in the shipped patch, `packages/bundle/*/cordis.patch.yml` in a source checkout. Write a workspace bundle whose patch overrides that row with `disabled: false` and inserts the Host rows it depends on; a source checkout's `apps/cli/config/examples/<feature>/cordis.yml` lists them for opt-in features. Packages shipped with dsh resolve from the Agentrans installation, so the bundle declares no dependencies on them. Install it with `install_bundle`.
+A shipped bundle can resolve a plugin row and leave it `disabled`. The row id and its reason are in the shipped patch, `packages/bundle/*/cordis.patch.yml` in a source checkout. Write a workspace bundle whose patch overrides that row with `disabled: false` and inserts the Host rows it depends on; a source checkout's `apps/cli/config/examples/<feature>/cordis.yml` lists them for opt-in features. Packages shipped with Agentrans resolve from the Agentrans installation, so the bundle declares no dependencies on them. Install it with `install_bundle`.
 
 ## Deliver a working plugin first
 

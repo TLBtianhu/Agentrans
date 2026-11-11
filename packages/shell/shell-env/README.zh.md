@@ -29,7 +29,7 @@ kind: "package-reference"
 
 ### 每次 shell 调用都会收到什么
 
-每次调用都会收到 `AGENTRANS_HOME`（Harness 主目录的绝对路径）、`AGENTRANS_SHELL=1`，agent 调用还会收到 `AGENTRANS_SESSION_ID`（调用方会话的 id）。启动器提供了 profile 上下文时，每次调用还会收到 `AGENTRANS_PROFILE`（profile 名）与 `AGENTRANS_PROFILE_DIR`（其绝对目录；其 `node_modules` 只存放 profile 自行安装的包，harness 自带的组合包从 dsh 安装目录解析）；不带 profile 启动的组合则两者都没有。
+每次调用都会收到 `AGENTRANS_HOME`（Harness 主目录的绝对路径）、`AGENTRANS_SHELL=1`，agent 调用还会收到 `AGENTRANS_SESSION_ID`（调用方会话的 id）。启动器提供了 profile 上下文时，每次调用还会收到 `AGENTRANS_PROFILE`（profile 名）与 `AGENTRANS_PROFILE_DIR`（其绝对目录；其 `node_modules` 只存放 profile 自行安装的包，harness 自带的组合包从 Agentrans 安装目录解析）；不带 profile 启动的组合则两者都没有。
 
 ### 添加你自己的环境事实
 

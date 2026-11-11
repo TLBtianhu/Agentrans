@@ -3,14 +3,14 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/bundle/web-app/README.md
 /:
-  en: c3a71f38ff5a4019
+  en: e21ed70205081f6e
   zh: 9ccfd4c1e273a1cb
 /agentrans-web-app:
   en: cdbc4b78c84d1def
   zh: 9885cf0827b1b266
 /agentrans-web-app/summary:
-  en: 6926305245d3285e
-  zh: 27f5858efbc2bca5
+  en: ae5dd447f0089ad7
+  zh: 91b37c260e74fa91
 /agentrans-web-app/table-of-contents:
   en: d152484eb41ac6b4
   zh: 09388d293f9be9cb

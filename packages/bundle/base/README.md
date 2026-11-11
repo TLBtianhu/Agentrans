@@ -1,5 +1,5 @@
 ---
-description: "The shared dsh core: model access, tools, durable sessions, and safety defaults for every agentrans --profile surface, for users composing or customizing a profile."
+description: "The shared Agentrans core: model access, tools, durable sessions, and safety defaults for every agentrans --profile surface, for users composing or customizing a profile."
 kind: "package-bundle"
 ---
 
@@ -25,7 +25,7 @@ Every base-backed `agentrans --profile` surface runs on `@agentrans/base`, so th
 <a id="use-this-package"></a>
 ## Use this package
 
-You get the dsh core automatically: the shipped `web`, `headless`, `sdk`, and `acp` profiles already include it, and a custom profile names it as its first bundle. After that, everything works with no further configuration.
+You get the Agentrans core automatically: the shipped `web`, `headless`, `sdk`, and `acp` profiles already include it, and a custom profile names it as its first bundle. After that, everything works with no further configuration.
 
 ### A minimal custom profile
 

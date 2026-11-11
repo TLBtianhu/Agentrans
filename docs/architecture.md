@@ -6,9 +6,9 @@ Read this before changing anything under `packages/`. It assumes you know Cordis
 
 ## Cordis
 
-[Cordis](cordis-primer.md) is the framework under dsh: plugins contribute services, typed events, and reversible effects to a shared context. Every part of the product is a plugin, including the model adapter, the tool registry, the session log, and the agent loop itself, so each is replaceable from configuration.
+[Cordis](cordis-primer.md) is the framework under Agentrans: plugins contribute services, typed events, and reversible effects to a shared context. Every part of the product is a plugin, including the model adapter, the tool registry, the session log, and the agent loop itself, so each is replaceable from configuration.
 
-There is no privileged core to patch: you extend dsh by mounting a plugin beside the others, and registrations are effects that unwind when their plugin unloads.
+There is no privileged core to patch: you extend Agentrans by mounting a plugin beside the others, and registrations are effects that unwind when their plugin unloads.
 
 ## Profiles and bundles
 
@@ -48,7 +48,7 @@ The Python SDK follows the same application architecture. Its runtime wheel pack
 
 ## Desktop application
 
-The [Electron desktop application](../apps/desktop/README.md) ships its exact dsh production runtime in signed resources and owns the reserved `$AGENTRANS_HOME/profiles/desktop`. Shared helpers initialize profile files, reconcile bundles, and resolve installation and bundle dependencies without replacing pnpm-owned packages. Product launchers bind code and state before application loading. Source development, Windows installations, and isolated verification use separate instances; GUI, bundled CLI, and Host share one context. Generic engine callers select their own roots.
+The [Electron desktop application](../apps/desktop/README.md) ships its exact Agentrans production runtime in signed resources and owns the reserved `$AGENTRANS_HOME/profiles/desktop`. Shared helpers initialize profile files, reconcile bundles, and resolve installation and bundle dependencies without replacing pnpm-owned packages. Product launchers bind code and state before application loading. Source development, Windows installations, and isolated verification use separate instances; GUI, bundled CLI, and Host share one context. Generic engine callers select their own roots.
 
 Electron starts the private Desktop Host in Electron Node mode. The Host invokes the shared CLI profile runner and complete Web application. The window immediately loads packaged Web assets and waits for boot injections before activating client plugins in the same document. Web owns RPC and streams; the desktop carrier connects the local page to the authenticated Host. Node IPC carries boot injections, readiness, fatal errors, and shutdown. Desktop listens on an OS-assigned port by default; profile configuration can override it. Shell-owned UI runs plugin transactions through bundled pnpm with normal user and profile configuration.
 

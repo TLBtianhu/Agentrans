@@ -1,5 +1,5 @@
 ---
-description: "Shared Loader boot support for dsh profiles and the temporary Python SDK runtime: environment layers, patches, diagnostics, and configuration preview."
+description: "Shared Loader boot support for Agentrans profiles and the temporary Python SDK runtime: environment layers, patches, diagnostics, and configuration preview."
 kind: "package-library"
 ---
 
@@ -174,7 +174,7 @@ The exports each own one stage of the boot: config resolution and snapshot repla
 Read these pages when the package-level contract is not enough. They move from the shared boot mechanics to the composition model and the decision evidence behind it.
 
 - [Cordis primer](../../../docs/cordis-primer.md) — Loader, `!!js` config expressions, and include/group semantics.
-- [dsh app](../../../apps/cli/README.md) — the `agentrans` bin that consumes these helpers.
+- [Agentrans app](../../../apps/cli/README.md) — the `agentrans` bin that consumes these helpers.
 - [@agentrans/cmdline](../cmdline/README.md) — the launcher-to-app command-line handoff the bins use.
 - [Profile bundles](../../bundle/README.md) — installable patch layers composed into `agentrans --profile`.
 - [@agentrans/home-paths](../../util/home-paths/README.md) — the Harness-home resolver (`resolveDshHome`).

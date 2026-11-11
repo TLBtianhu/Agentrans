@@ -3,7 +3,7 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/boot/app-boot/README.md
 /:
-  en: 822ef8977098c703
+  en: bec770d37e787815
   zh: c0673e854310840f
 /agentrans-app-boot:
   en: 8611bc2fec7a8f7f
@@ -51,8 +51,8 @@
   en: 541700d5c39e0ab4
   zh: 7522dbd9cd68c930
 /agentrans-app-boot/further-exploration:
-  en: 1abf0f582131ce48
-  zh: 0a2e3803fa122495
+  en: 071d6a55d6c74a6d
+  zh: a5f8e6aee5905287
 /agentrans-app-boot/model-experience:
   en: d2d0a21502d88c50
   zh: 82a60c7a490a6834

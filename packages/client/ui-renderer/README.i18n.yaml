@@ -4,13 +4,13 @@
 #   pnpm run verify-translation-pairing --write packages/client/ui-renderer/README.md
 /:
   en: 71a3c8b90b92794a
-  zh: 39acdcb577fd8c6d
+  zh: 57abfb221157f21d
 /agentrans-client-ui-renderer:
   en: 5751cdebe08f21b5
   zh: c323ffe773bfd066
 /agentrans-client-ui-renderer/summary:
   en: a0b9ef87eb98fcb6
-  zh: 30eeeafe02816780
+  zh: 9054adb2dd4f2496
 /agentrans-client-ui-renderer/table-of-contents:
   en: d152484eb41ac6b4
   zh: 09388d293f9be9cb

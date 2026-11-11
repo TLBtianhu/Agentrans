@@ -3,14 +3,14 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/bundle/headless/README.md
 /:
-  en: 68ff17b596cbc6aa
+  en: b471b08d91cf9d8d
   zh: 8c6f3d309403ba81
 /agentrans-headless:
   en: f7e1c0d02db308b5
   zh: 7a5632c89ba78643
 /agentrans-headless/summary:
-  en: 40e698f152705400
-  zh: 0910e3f301530c91
+  en: 2dc6d06ecbfad101
+  zh: e964b6a1fc5ed944
 /agentrans-headless/table-of-contents:
   en: d152484eb41ac6b4
   zh: 09388d293f9be9cb
@@ -18,8 +18,8 @@
   en: 4447012f4c84100d
   zh: faf579ae9f04c096
 /agentrans-headless/use-this-package/running-a-one-shot-task:
-  en: a306c3f696bdf427
-  zh: 4f1874c98732d3cc
+  en: f17583d9bce08a37
+  zh: 8fcef2ee7558d559
 /agentrans-headless/use-this-package/credentials:
   en: 04a71c89ec2ae62b
   zh: 67582db4fce189a7
@@ -33,11 +33,11 @@
   en: ac060bf78cf157b6
   zh: 5e099abb8c10b96b
 /agentrans-headless/use-this-package/machine-readable-output:
-  en: c8a90b16023eb04a
-  zh: 58eec3550ea70f34
+  en: 8449a15af155ba65
+  zh: f1adea3f534e68a1
 /agentrans-headless/use-this-package/when-to-use-it:
-  en: bedae552460d5142
-  zh: bdc9593fc7176d86
+  en: f31d01de2fbdcc8d
+  zh: 456879cdbf501c70
 /agentrans-headless/use-this-package/help-and-task-errors:
   en: 3f03a89f1fd8721a
   zh: cbeb0b94e152ad15
@@ -51,8 +51,8 @@
   en: 9e39b3a937e8b6ac
   zh: baffa23330d52f42
 /agentrans-headless/understand-the-implementation/exit-mapping:
-  en: c2466d3d8a26177a
-  zh: b75743bfa2e7723a
+  en: d14ff29755ea2527
+  zh: 43e96fd34efcb9ad
 /agentrans-headless/understand-the-implementation/source-map:
   en: 5a4cdbac5052424f
   zh: e94a850ef8816c0c

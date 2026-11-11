@@ -9,7 +9,7 @@ kind: "package-bundle"
 
 ## 概述
 
-`@agentrans/experimental-agent-team-profile` 让 [Agent Teams](../agent-team/README.zh.md) 的团队协作、工具和 Web 界面通过一个组合包启用。开启后可委派 teammate，并在 Web 中查看成员、任务看板和成员会话。普通 subagent 委派及名称重叠的全局 child control 会被禁用；Workflow 仍可创建 fresh 子代理。本包随 dsh 安装提供，默认关闭，可在插件页开启或添加到已初始化的 profile。
+`@agentrans/experimental-agent-team-profile` 让 [Agent Teams](../agent-team/README.zh.md) 的团队协作、工具和 Web 界面通过一个组合包启用。开启后可委派 teammate，并在 Web 中查看成员、任务看板和成员会话。普通 subagent 委派及名称重叠的全局 child control 会被禁用；Workflow 仍可创建 fresh 子代理。本包随 Agentrans 安装提供，默认关闭，可在插件页开启或添加到已初始化的 profile。
 
 ## 目录
 

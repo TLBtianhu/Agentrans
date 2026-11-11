@@ -9,7 +9,7 @@ kind: "package-bundle"
 
 ## 概述
 
-`@agentrans/headless` 从命令行运行一个 dsh 任务并打印最终答案，然后退出——没有 GUI、没有服务器、没有浏览器。输入 `agentrans --profile headless "run the tests"`，agent（智能体）会以与所有其他表层相同的模型、工具与安全默认值完成该任务。它非常适合脚本、CI 与一次性任务：进程不打开任何端口，也不会留下任何后台运行的东西。监督进程还可以通过按行 JSON 事件流（`--json`）驱动它，并用该事件流报告的标识（`--session-id`）在同一段对话上继续唤醒。退出码告诉你结果——任务完成时为 0，中止或出错时为 1。主要边界：每次调用只运行一个任务，没有交互式后续。
+`@agentrans/headless` 从命令行运行一个 Agentrans 任务并打印最终答案，然后退出——没有 GUI、没有服务器、没有浏览器。输入 `agentrans --profile headless "run the tests"`，agent（智能体）会以与所有其他表层相同的模型、工具与安全默认值完成该任务。它非常适合脚本、CI 与一次性任务：进程不打开任何端口，也不会留下任何后台运行的东西。监督进程还可以通过按行 JSON 事件流（`--json`）驱动它，并用该事件流报告的标识（`--session-id`）在同一段对话上继续唤醒。退出码告诉你结果——任务完成时为 0，中止或出错时为 1。主要边界：每次调用只运行一个任务，没有交互式后续。
 
 ## 目录
 
@@ -33,7 +33,7 @@ kind: "package-bundle"
 agentrans --profile headless "run the tests"
 ```
 
-agent 会完成该任务，把提供方的每个非空推理（reasoning）增量流式写入 stderr 的 `dsh: reasoning:` 段，然后把最终答案写入 stdout 并退出。连续推理增量保持在同一段中；提供方未给尾换行时，runner 会在后续输出前结束该段。没有推理内容的成功运行保持 stderr 为空；失败时退出码为 1，并以 `dsh: <code>: <message>` 向 stderr 写入错误。任务来自位置参数，参数省略或为单独的 `-` 时则来自 stdin；空白位置参数或空管道会在任何执行开始之前被拒绝。位置参数会原样作为任务，stdin 不会被读取，因此想让管道内容进入提示词时，请把完整提示写进管道；管道任务会原样发送，包括结尾换行。
+agent 会完成该任务，把提供方的每个非空推理（reasoning）增量流式写入 stderr 的 `Agentrans: reasoning:` 段，然后把最终答案写入 stdout 并退出。连续推理增量保持在同一段中；提供方未给尾换行时，runner 会在后续输出前结束该段。没有推理内容的成功运行保持 stderr 为空；失败时退出码为 1，并以 `Agentrans: <code>: <message>` 向 stderr 写入错误。任务来自位置参数，参数省略或为单独的 `-` 时则来自 stdin；空白位置参数或空管道会在任何执行开始之前被拒绝。位置参数会原样作为任务，stdin 不会被读取，因此想让管道内容进入提示词时，请把完整提示写进管道；管道任务会原样发送，包括结尾换行。
 
 ```sh
 { echo "Summarize these changes:"; git diff --stat; } | agentrans --profile headless
@@ -82,7 +82,7 @@ agent 会完成该任务，把提供方的每个非空推理（reasoning）增�
 
 ```sh
 git_dir=$(git rev-parse --path-format=absolute --git-common-dir)
-dsh headless --permission-mode workspace-write --add-dir "$git_dir" --json - < task.txt > run.jsonl
+agentrans headless --permission-mode workspace-write --add-dir "$git_dir" --json - < task.txt > run.jsonl
 ```
 
 `--add-dir` 接受可重复的执行环境物理绝对目录路径。共享 Git 目录允许暂存、提交和执行仓库钩子，而不授予父检出目录源文件的写权限。它授权该目录中的所有元数据，包括共享引用、钩子和配置。后续主机 Git 命令可能在沙箱之外执行修改后的钩子或配置；仅对可信任务使用此授权，并在运行主机 Git 操作前审查元数据变更。额外授权仅适用于本次调用，恢复会话时必须再次提供。随附配置档将其传给 `sandbox-policy`；runner 直接检查原始解析出的 CLI 授权。替换策略行的 overlay 必须包含 `ctx.headlessStartup.additionalWritableRoots`，否则 runner 会在模型工作前拒绝请求。[本地沙箱提供方](../../sandbox/sandbox-local/README.zh.md)定义各平台的支持情况。
@@ -99,13 +99,13 @@ dsh headless --permission-mode workspace-write --add-dir "$git_dir" --json - < t
 
 ### 机器可读输出
 
-`--json` 用按行 JSON 事件流取代 stdout 的最终文本行，stderr 仅保留 `dsh:` 诊断信息。事件流以 `session`（携带本次运行使用的标识）开头、以 `final` 结尾，其间为 `status`、`text`、`thinking`、`tool_call` 与 `tool_result` 事件。`text` 与 `thinking` 只从已提交的 assistant 消息投影，因此被重试或丢弃的尝试不会进入事件流；它们在步骤提交时到达，而不是逐 token 到达，默认模式的 stderr 推理仍是唯一的实时文本通道。终止 `final` 事件携带精确的 `sessionId`、持久化轮次的 `reason`（最后一轮没有终止事件时为 `null`），以及与默认模式相同的无损答案；该事件不做限长；其他每个字符串与对象键上限为 8 KiB，超出时标记 `truncated`，单条事件行（含换行）上限为 32 KiB——超长事件保留标量字段、丢弃结构化字段，极端情况下只剩 `type` 与 `truncated`，嵌套达到 64 层及以上的负载会在该深度被截断。空工具参数字符串会投影为 `{}`，与执行器实际运行的值一致；而 JSON 无法往返的参数——例如溢出为 `Infinity` 的数字 `1e400`——会保留原始文本，而不是 `JSON.stringify` 会报告的 `null`。runner 在轮次之外抛出的失败会写出 `error` 事件并在没有 `final` 的情况下结束事件流，同时向 stderr 写入 `dsh:` 行；若 profile 自身的插件加载失败，进程会在 runner 挂载前退出，该情形只保留 loader 的 stderr 诊断。轮次内失败的运行仍会以 `final` 事件（通常为空）结束且没有 `error` 事件，因此格式良好的事件流也可能描述一次失败的运行：请在判断任务报告前检查进程退出状态和 `final.reason`。
+`--json` 用按行 JSON 事件流取代 stdout 的最终文本行，stderr 仅保留 `Agentrans:` 诊断信息。事件流以 `session`（携带本次运行使用的标识）开头、以 `final` 结尾，其间为 `status`、`text`、`thinking`、`tool_call` 与 `tool_result` 事件。`text` 与 `thinking` 只从已提交的 assistant 消息投影，因此被重试或丢弃的尝试不会进入事件流；它们在步骤提交时到达，而不是逐 token 到达，默认模式的 stderr 推理仍是唯一的实时文本通道。终止 `final` 事件携带精确的 `sessionId`、持久化轮次的 `reason`（最后一轮没有终止事件时为 `null`），以及与默认模式相同的无损答案；该事件不做限长；其他每个字符串与对象键上限为 8 KiB，超出时标记 `truncated`，单条事件行（含换行）上限为 32 KiB——超长事件保留标量字段、丢弃结构化字段，极端情况下只剩 `type` 与 `truncated`，嵌套达到 64 层及以上的负载会在该深度被截断。空工具参数字符串会投影为 `{}`，与执行器实际运行的值一致；而 JSON 无法往返的参数——例如溢出为 `Infinity` 的数字 `1e400`——会保留原始文本，而不是 `JSON.stringify` 会报告的 `null`。runner 在轮次之外抛出的失败会写出 `error` 事件并在没有 `final` 的情况下结束事件流，同时向 stderr 写入 `Agentrans:` 行；若 profile 自身的插件加载失败，进程会在 runner 挂载前退出，该情形只保留 loader 的 stderr 诊断。轮次内失败的运行仍会以 `final` 事件（通常为空）结束且没有 `error` 事件，因此格式良好的事件流也可能描述一次失败的运行：请在判断任务报告前检查进程退出状态和 `final.reason`。
 
 `tool_result.error` 存在时，在相同输出限制内保留持久化的 `{ name, code, reason? }` 错误字段。`AUTO_REVIEW_DENIED` 标识最终策略拒绝；`AUTO_REVIEW_FAILED` 标识 reviewer 失败。两者都不会执行调用 body。截断记录可能省略结构化详情；需要完整理由时读取持久 Session。
 
 ### 何时使用
 
-在脚本化或自动化的 dsh 运行中使用 headless——CI 步骤、批处理任务、从终端快速获取答案。当需要多轮交互会话或 GUI 时请避免它；浏览器表层（[@agentrans/web-app](../web-app/README.zh.md)）负责这类场景。进程只为本次运行而存活，不打开监听端口，并且自行退出，因此适合等待进程结束的流水线。当监督进程需要进度而不只是答案时，`--json` 提供事件流，`--session-id` 则让后续调用继续同一段对话。
+在脚本化或自动化的 Agentrans 运行中使用 headless——CI 步骤、批处理任务、从终端快速获取答案。当需要多轮交互会话或 GUI 时请避免它；浏览器表层（[@agentrans/web-app](../web-app/README.zh.md)）负责这类场景。进程只为本次运行而存活，不打开监听端口，并且自行退出，因此适合等待进程结束的流水线。当监督进程需要进度而不只是答案时，`--json` 提供事件流，`--session-id` 则让后续调用继续同一段对话。
 
 ### 帮助与任务错误
 
@@ -131,7 +131,7 @@ patch 叠加在 `@agentrans/base` 之上：继承投影缓存与共享 PTC 运�
 
 ### 退出映射
 
-最终 `turn/end` 完成时退出码为 0；任何其他结果——aborted、error，或所属区间内没有轮次——退出码为 1。结束原因为 `error` 时还会向 stderr 写入 `dsh: <code>: <message>`。若实时 Agent 失败后没有提交更晚的 `turn/end`，则视为直接驱动器失败，包括汇总轮次的开始或结束无法持久化；更早的已完成轮次不能使该次运行成功。直接驱动器失败（例如 Agent 创建失败或不可用的 `--session-id`）向 stderr 写入 `dsh: <message>` 并退出 1，且在 `--json` 模式下额外发出一个 `error` 事件，不发出 `final` 事件。
+最终 `turn/end` 完成时退出码为 0；任何其他结果——aborted、error，或所属区间内没有轮次——退出码为 1。结束原因为 `error` 时还会向 stderr 写入 `Agentrans: <code>: <message>`。若实时 Agent 失败后没有提交更晚的 `turn/end`，则视为直接驱动器失败，包括汇总轮次的开始或结束无法持久化；更早的已完成轮次不能使该次运行成功。直接驱动器失败（例如 Agent 创建失败或不可用的 `--session-id`）向 stderr 写入 `Agentrans: <message>` 并退出 1，且在 `--json` 模式下额外发出一个 `error` 事件，不发出 `final` 事件。
 
 ### 源码地图
 

@@ -19,13 +19,13 @@ The `web`, `headless`, `sdk`, `sdk-minimal`, and `acp` profiles auto-initialize 
 Omit the option to boot the profile without resetting it. An unknown template or a shipped target name fails before the target changes. Unknown-template diagnostics name the valid templates. Replacement is committed before bundle resolution and application boot, so a later failure leaves the new profile on disk. All three config-dump modes accept the option and replace the target without booting it.
 
 ```sh
-dsh rescue --from-default-profile web
-dsh rescue
+agentrans rescue --from-default-profile web
+agentrans rescue
 ```
 
 ### App arguments
 
-The launcher's flags come first and end at the first token it does not recognize; everything from there on is handed to the booted profile verbatim through `ctx.cmdlineArgs`, where any injected app plugin may parse it ([`@agentrans/cmdline`](../../../packages/boot/cmdline/README.md)). `dsh rescue --from-default-profile web --no-open` therefore resets rescue before handing `--no-open` to Web, `agentrans --profile web --port 8080` reaches the web app's `--port`, `agentrans --profile web --help` prints that app's help and boots nothing, and `agentrans --help` (no profile to hand it to) prints the launcher's own. `-V`/`--version` prints the launcher's version when it appears before the app-argument boundary.
+The launcher's flags come first and end at the first token it does not recognize; everything from there on is handed to the booted profile verbatim through `ctx.cmdlineArgs`, where any injected app plugin may parse it ([`@agentrans/cmdline`](../../../packages/boot/cmdline/README.md)). `Agentrans rescue --from-default-profile web --no-open` therefore resets rescue before handing `--no-open` to Web, `agentrans --profile web --port 8080` reaches the web app's `--port`, `agentrans --profile web --help` prints that app's help and boots nothing, and `agentrans --help` (no profile to hand it to) prints the launcher's own. `-V`/`--version` prints the launcher's version when it appears before the app-argument boundary.
 
 A composition mounts once. An ordinary plugin injects `cmdlineArgs`, parses this app's arguments, and provides what it resolved as a service; each row configured from flags injects that service, and Loader waits for it before evaluating the row's config (`port: !!js ctx.webStartup.port ?? 3080`). A flag therefore beats the value written beside it. This precedence requires the row to retain that expression; a user patch that replaces the whole `config` with literals removes the runtime read. Help and rejected arguments request exit — nonzero for a rejection, 0 for help — without activating rows that depend on the provider's service. With HMR enabled, a patch-file edit re-evaluates expressions against services that are still up, so it cannot reset a served port.
 
@@ -41,7 +41,7 @@ The shipped apps own these command lines:
 | `sdk-minimal` | no options; stdio carries the same JSON-RPC protocol |
 | `acp` | no options; stdio carries ACP (Agent Client Protocol) |
 
-A one-shot task (`agentrans --profile headless "run the tests"`) creates one fresh persisted Agent through the core registry, submits the task, waits for quiescence, and flushes the Session before deriving the last non-empty assistant text and final `turn/end` reason from its durable interval. It streams non-empty provider reasoning deltas to stderr under a `dsh: reasoning:` heading, prints only the final text on stdout, and exits 0 for `completed`, else 1; a successful response with no reasoning leaves stderr empty. An invocation with no task is a usage error from that app. The shipped headless profile mounts no browser Connection, HTTP server, Web runtime, or browser client, and opens no listening port.
+A one-shot task (`agentrans --profile headless "run the tests"`) creates one fresh persisted Agent through the core registry, submits the task, waits for quiescence, and flushes the Session before deriving the last non-empty assistant text and final `turn/end` reason from its durable interval. It streams non-empty provider reasoning deltas to stderr under a `Agentrans: reasoning:` heading, prints only the final text on stdout, and exits 0 for `completed`, else 1; a successful response with no reasoning leaves stderr empty. An invocation with no task is a usage error from that app. The shipped headless profile mounts no browser Connection, HTTP server, Web runtime, or browser client, and opens no listening port.
 
 Inspect the composed tree without booting it:
 
@@ -67,7 +67,7 @@ Earlier union branches that may alter inputs and dictionary keys that may rename
 
 Collection imports trusted modules and may invoke Config getters and lazy builders, but never applies plugins, executes transform callbacks, or evaluates configuration expressions. Imports can block or retain process handles before or after output; automated callers should enforce an external timeout. The dump does not force-exit or own disposal of import-time resources. Ordinary import/builder stdout is routed to stderr; direct file-descriptor writes are not intercepted. Profile preparation retains YAML dump initialization writes. Only schema declarations are emitted, not actual configured values; declared defaults and raw plugin errors can still contain sensitive data. Review output before sharing. See [app-boot](../../../packages/boot/app-boot/README.md) for the collector API.
 
-Treat the output as a regenerated, pre-stable reference, not a versioned persisted catalog. `$schema` identifies the JSON Schema validation dialect; `x-cordis` follows dsh releases. Regenerate after changing dsh or plugins, and follow `$ref` and `configRef` rather than hard-coding definition names, ordering, or text. Incompatible dialect changes select a new `$schema`; annotation changes do not use Session-format migrations.
+Treat the output as a regenerated, pre-stable reference, not a versioned persisted catalog. `$schema` identifies the JSON Schema validation dialect; `x-cordis` follows Agentrans releases. Regenerate after changing Agentrans or plugins, and follow `$ref` and `configRef` rather than hard-coding definition names, ordering, or text. Incompatible dialect changes select a new `$schema`; annotation changes do not use Session-format migrations.
 
 <a id="startup-diagnostics"></a>
 ## Startup diagnostics
@@ -102,7 +102,7 @@ agentrans plugin --profile tui remove turtle-ui
 agentrans --profile tui
 ```
 
-Git-hosted plugins that ship sources build during install through their `prepare` script, which pnpm ≥10 blocks until the consumer allows it: the first `add` fails with pnpm's `allowBuilds` hint (and a dsh pointer at the profile's `pnpm-workspace.yaml`); copy the printed key there and re-run. Installing a built tarball or a local checkout needs no allowance.
+Git-hosted plugins that ship sources build during install through their `prepare` script, which pnpm ≥10 blocks until the consumer allows it: the first `add` fails with pnpm's `allowBuilds` hint (and a Agentrans pointer at the profile's `pnpm-workspace.yaml`); copy the printed key there and re-run. Installing a built tarball or a local checkout needs no allowance.
 
 ## Web profile
 

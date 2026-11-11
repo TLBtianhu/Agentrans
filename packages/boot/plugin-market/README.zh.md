@@ -36,7 +36,7 @@ kind: "package-reference"
 | `detailImageMaxBytes` | `5242880` | 与详细介绍文档一同提供的图片的最大大小。 |
 | `detailRepositoryMaxBytes` | `52428800` | 单条 Git 命令向一个部分克隆增加的最大数据量；获取时增加的数据量超过该值的仓库不被读取。 |
 | `detailCacheMaxBytes` | `524288000` | 所有部分克隆的最大总大小；每次获取后，超出时删除最近最少使用的部分克隆。 |
-| `detailCacheDir` | `.plugin-market/repositories` | 部分克隆所在的目录，相对于 profile 目录；服务在 dsh profile 之外运行时必须以绝对路径配置。 |
+| `detailCacheDir` | `.plugin-market/repositories` | 部分克隆所在的目录，相对于 profile 目录；服务在 Agentrans profile 之外运行时必须以绝对路径配置。 |
 | `detailGitTimeoutMs` | `60000` | 克隆回退方式中单条 Git 命令的时限。 |
 | `detailNpmFileSources` | `['jsdelivr', 'unpkg', 'npmmirror']` | 按顺序读取的 npm 文件 CDN；一次读取的 `npmFileSources` 把其中列出的 CDN 移到最前，本列表未列出的 CDN 不会被请求。 |
 | `detailGitlabHosts` | `['gitlab.com']` | 通过 GitLab 仓库文件 API 提供公开仓库的主机，比较时不区分大小写。 |

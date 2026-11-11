@@ -1,5 +1,5 @@
 ---
-description: "App-owned command lines for dsh app bins: your app parses its own flags, --help, and exit behavior from the launcher's remaining arguments."
+description: "App-owned command lines for Agentrans app bins: your app parses its own flags, --help, and exit behavior from the launcher's remaining arguments."
 kind: "package-library"
 ---
 

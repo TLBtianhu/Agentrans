@@ -12,22 +12,22 @@
 
 `agentrans <name>` 是 `agentrans --profile <name>` 的简写，启动位于 `$AGENTRANS_HOME/profiles/<name>` 的 profile。简写中的名称必须紧跟 `agentrans`；`plugin` 仍为插件管理命令，因此启动同名 profile 时须使用 `agentrans --profile plugin`。生效配置树以空根节点为起点，依次叠加 profile manifest（元数据清单）的 `agentrans.profile.bundles` 列表中指定的各组合包 patch、profile 自身的 `cordis.patch.yml`、home 级的 `$AGENTRANS_HOME/cordis.patch.yml`（这是各 profile 共享的机器本地偏好，因此优先于逐 profile 配置层），以及按 argv 顺序指定的各个 `--patch <path>` 覆盖层。对同一配置行，后应用的层优先。patch 会替换目标行的整个 `config` 值，而不是深度合并其中的键；patch 也可以插入新行。最终 YAML 组合决定是否由 `agentrans-hmr` 监视配置；未启用 HMR 时，更改需要重启。配置解析、schema 校验、模块解析或插件启动失败时，系统会报告错误并以非零状态退出。收到 SIGINT 或 SIGTERM 时，挂载的根节点会先 dispose（资源释放）再退出。
 
-组合包名称先从 dsh 安装目录解析，再从 profile 目录解析。因此，内置组合包（`@agentrans/base`、`@agentrans/web-app`、`@agentrans/headless`、`@agentrans/sdk-app`、`@agentrans/sdk-minimal`、`@agentrans/acp-app`）始终来自当前运行的 `agentrans` 所属的安装；树外组合包来自 profile 中由 pnpm 管理的 `node_modules`。挂载配置行前，launcher 会按此顺序遍历安装与所选 bundle，并将生成的不可变 runtime resolution 安装到 Node 的解析器中。启动不会创建共享或 profile 自有的 fallback 链接。profile 已安装包保留原生优先级；profile 初始化和包管理器写入与运行时解析相互独立。
+组合包名称先从 Agentrans 安装目录解析，再从 profile 目录解析。因此，内置组合包（`@agentrans/base`、`@agentrans/web-app`、`@agentrans/headless`、`@agentrans/sdk-app`、`@agentrans/sdk-minimal`、`@agentrans/acp-app`）始终来自当前运行的 `agentrans` 所属的安装；树外组合包来自 profile 中由 pnpm 管理的 `node_modules`。挂载配置行前，launcher 会按此顺序遍历安装与所选 bundle，并将生成的不可变 runtime resolution 安装到 Node 的解析器中。启动不会创建共享或 profile 自有的 fallback 链接。profile 已安装包保留原生优先级；profile 初始化和包管理器写入与运行时解析相互独立。
 
 `web`、`headless`、`sdk`、`sdk-minimal` 和 `acp` profile 首次使用时会从随附模板自动初始化（`web`：base + web-app，实时应用 patch；`headless`：base + headless，只在启动时应用 patch；`sdk`：base + sdk-app，只在启动时应用 patch；`sdk-minimal`：独立组合包，只在启动时应用 patch；`acp`：base + acp-app，只在启动时应用 patch）。其他缺失的 profile 会显式报错，并提示运行 `agentrans plugin --profile <name> add <package>`。
 
-`agentrans --profile <name> --from-default-profile <template>` 会在启动前，用上述五个随附模板之一的全新副本替换自定义目标。目标名称不能是任何大小写形式的随附 profile 名称。launcher 先在目标旁边的暂存目录中组装新 profile 并移动到目标位置，再删除原有的目标目录，包括其中已安装的依赖和用户 patch。移动失败时会恢复原有目录。如果恢复也失败，或进程在两次重命名之间停止，原有目录会保留在 `$AGENTRANS_HOME/profiles/.<name>.staging-*/previous`，供手动恢复。多个进程并发替换同一目标时，至少有一个会成功，且目标中只保留一份完整副本。该副本把模板当前的组合包列表写进一份依赖为空、用户 patch 为空的新 manifest。它不会读取 `<template>` 指定的本地同名 profile，不会复制其依赖或 patch，也不会持久化继承字段；模板列表之后的变化不会改写新 profile。复制列表中指名的内置组合包仍从当前 dsh 安装目录解析。替换成功不会增加 launcher 输出。
+`agentrans --profile <name> --from-default-profile <template>` 会在启动前，用上述五个随附模板之一的全新副本替换自定义目标。目标名称不能是任何大小写形式的随附 profile 名称。launcher 先在目标旁边的暂存目录中组装新 profile 并移动到目标位置，再删除原有的目标目录，包括其中已安装的依赖和用户 patch。移动失败时会恢复原有目录。如果恢复也失败，或进程在两次重命名之间停止，原有目录会保留在 `$AGENTRANS_HOME/profiles/.<name>.staging-*/previous`，供手动恢复。多个进程并发替换同一目标时，至少有一个会成功，且目标中只保留一份完整副本。该副本把模板当前的组合包列表写进一份依赖为空、用户 patch 为空的新 manifest。它不会读取 `<template>` 指定的本地同名 profile，不会复制其依赖或 patch，也不会持久化继承字段；模板列表之后的变化不会改写新 profile。复制列表中指名的内置组合包仍从当前 Agentrans 安装目录解析。替换成功不会增加 launcher 输出。
 
 去掉该选项即可在不重置的情况下启动该 profile。未知模板或随附目标名称会在目标被改动之前失败；未知模板的诊断会列出有效模板。替换在组合包解析和应用启动之前提交，因此后续失败仍会把新 profile 留在磁盘上。三种配置 dump 模式都接受该选项，并在不启动应用的情况下替换目标。
 
 ```sh
-dsh rescue --from-default-profile web
-dsh rescue
+agentrans rescue --from-default-profile web
+agentrans rescue
 ```
 
 ### 应用参数
 
-启动器自身的 flag 必须写在最前面，并在遇到第一个无法识别的 token 时结束；从该 token 开始的所有内容都会通过 `ctx.cmdlineArgs` 原样交给已启动的 profile，注入该 profile 的任意应用插件都可以解析这些内容（[`@agentrans/cmdline`](../../../packages/boot/cmdline/README.zh.md)）。因此，`dsh rescue --from-default-profile web --no-open` 会先重置 rescue，再把 `--no-open` 交给 Web；`agentrans --profile web --port 8080` 会将 `--port` 交给 web 应用；`agentrans --profile web --help` 只打印该应用的帮助信息，不启动应用；`agentrans --help` 没有可供交付参数的 profile，因此会打印启动器自身的帮助信息。`-V`/`--version` 位于应用参数边界之前时，会打印启动器的版本。
+启动器自身的 flag 必须写在最前面，并在遇到第一个无法识别的 token 时结束；从该 token 开始的所有内容都会通过 `ctx.cmdlineArgs` 原样交给已启动的 profile，注入该 profile 的任意应用插件都可以解析这些内容（[`@agentrans/cmdline`](../../../packages/boot/cmdline/README.zh.md)）。因此，`Agentrans rescue --from-default-profile web --no-open` 会先重置 rescue，再把 `--no-open` 交给 Web；`agentrans --profile web --port 8080` 会将 `--port` 交给 web 应用；`agentrans --profile web --help` 只打印该应用的帮助信息，不启动应用；`agentrans --help` 没有可供交付参数的 profile，因此会打印启动器自身的帮助信息。`-V`/`--version` 位于应用参数边界之前时，会打印启动器的版本。
 
 每套组合只会挂载一次。普通插件注入 `cmdlineArgs`，解析所属应用的参数，并将解析结果作为服务提供。每个从 flag 取值的配置行都会注入该服务；Loader 会等到服务激活后，再对该行的配置求值（`port: !!js ctx.webStartup.port ?? 3080`），因此 flag 的优先级高于配置行中写明的值。要维持这一优先级，配置行必须保留该表达式；如果用户 patch 用字面量替换整个 `config`，也会随之移除运行时读取。帮助参数和被拒绝的参数都会请求退出：参数被拒绝时以非零状态退出，显示帮助时以 0 退出；依赖该提供方服务的配置行不会激活。启用 HMR 时，编辑 patch 文件会根据仍在运行的服务重新计算表达式，因此不会重置当前正在使用的端口。
 
@@ -43,7 +43,7 @@ dsh rescue
 | `sdk-minimal` | 无选项；stdio 携带相同的 JSON-RPC 协议 |
 | `acp` | 无选项；stdio 携带 ACP（Agent Client Protocol） |
 
-一次性任务（`agentrans --profile headless "run the tests"`）通过核心注册表创建一个全新的持久化 Agent（智能体），提交任务、等待完全停稳并对会话执行 flush，再从其持久化事件区间中推导最后一个非空 assistant 文本与最终 `turn/end` 原因。它在 `dsh: reasoning:` 标题下将非空的提供方推理（reasoning）增量流式写入 stderr，只在 stdout 打印最终文本，并在原因为 `completed` 时以 0 退出，否则以 1 退出；没有推理内容的成功响应会保持 stderr 为空。没有任务的调用是该应用的用法错误。随附 headless profile 不挂载浏览器 Connection、HTTP 服务器、Web 运行时或浏览器客户端，也不会打开监听端口。
+一次性任务（`agentrans --profile headless "run the tests"`）通过核心注册表创建一个全新的持久化 Agent（智能体），提交任务、等待完全停稳并对会话执行 flush，再从其持久化事件区间中推导最后一个非空 assistant 文本与最终 `turn/end` 原因。它在 `Agentrans: reasoning:` 标题下将非空的提供方推理（reasoning）增量流式写入 stderr，只在 stdout 打印最终文本，并在原因为 `completed` 时以 0 退出，否则以 1 退出；没有推理内容的成功响应会保持 stderr 为空。没有任务的调用是该应用的用法错误。随附 headless profile 不挂载浏览器 Connection、HTTP 服务器、Web 运行时或浏览器客户端，也不会打开监听端口。
 
 可在不启动的情况下检查组合出的配置树：
 
@@ -69,7 +69,7 @@ agentrans --profile web --patch ./extra.yml --dump-config
 
 收集会导入可信模块，也可能调用 Config getter 和 lazy builder，但绝不应用插件、执行 transform 回调或求值配置表达式。导入可能在输出前后阻塞或保留进程句柄；自动调用方应设置外部超时。dump 不强制退出，也不持有导入期间资源的释放职责。导入或 builder 对 stdout 的常规写入转向 stderr；直接写文件描述符不被拦截。profile 准备保留 YAML dump 的初始化写入。输出只有 schema 声明，没有实际配置值；声明的默认值和插件原始错误仍可能含敏感数据，分享前应检查。收集器 API 参见 [app-boot](../../../packages/boot/app-boot/README.zh.md)。
 
-输出是可重新生成的 pre-stable 参考，不是单独版本化的持久化目录。`$schema` 标识 JSON Schema 验证方言；`x-cordis` 随 dsh 版本演进。更改 dsh 或插件后应重新生成，并跟随 `$ref` 和 `configRef`，而非硬编码定义名、顺序或文本。不兼容的方言变更使用新的 `$schema`；注释变更不采用 Session 格式迁移。
+输出是可重新生成的 pre-stable 参考，不是单独版本化的持久化目录。`$schema` 标识 JSON Schema 验证方言；`x-cordis` 随 Agentrans 版本演进。更改 Agentrans 或插件后应重新生成，并跟随 `$ref` 和 `configRef`，而非硬编码定义名、顺序或文本。不兼容的方言变更使用新的 `$schema`；注释变更不采用 Session 格式迁移。
 
 <a id="startup-diagnostics"></a>
 ## 启动诊断

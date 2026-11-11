@@ -1,5 +1,5 @@
 ---
-description: "Installation-owned lists of official dsh bundles (shipped profile templates, the default list, and the optional, on-demand, and retired bundles) and the plugin manager's protected and presented packages."
+description: "Installation-owned lists of official Agentrans bundles (shipped profile templates, the default list, and the optional, on-demand, and retired bundles) and the plugin manager's protected and presented packages."
 kind: "package-library"
 ---
 
@@ -79,7 +79,7 @@ Repository checks read the lists in `src/bundles.ts` as TypeScript literals with
 
 <a id="known-limitations-and-deferred-work"></a>
 
-- **Lists are compiled into the installation** — changing a list requires a new dsh release; a profile cannot extend the optional or on-demand lists.
+- **Lists are compiled into the installation** — changing a list requires a new Agentrans release; a profile cannot extend the optional or on-demand lists.
 
 <a id="dev-note"></a>
 ### Dev Note

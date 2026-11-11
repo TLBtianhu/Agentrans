@@ -36,7 +36,7 @@ The optional [custom plugin indexes bundle](../../experimental/plugin-market-bun
 | `detailImageMaxBytes` | `5242880` | Largest image served beside a detail document. |
 | `detailRepositoryMaxBytes` | `52428800` | Largest amount one Git command adds to a partial clone; a repository whose fetch adds more is not read. |
 | `detailCacheMaxBytes` | `524288000` | Largest total size of the partial clones; least recently used ones are deleted beyond it after each fetch. |
-| `detailCacheDir` | `.plugin-market/repositories` | Directory of the partial clones, relative to the profile directory; required, as an absolute path, when the service runs outside a dsh profile. |
+| `detailCacheDir` | `.plugin-market/repositories` | Directory of the partial clones, relative to the profile directory; required, as an absolute path, when the service runs outside a Agentrans profile. |
 | `detailGitTimeoutMs` | `60000` | Deadline of one Git command of the clone fallback. |
 | `detailNpmFileSources` | `['jsdelivr', 'unpkg', 'npmmirror']` | npm file CDNs read in order; a read's `npmFileSources` moves the CDNs it names first, and CDNs this list omits are not asked. |
 | `detailGitlabHosts` | `['gitlab.com']` | Hosts whose GitLab repository files API serves public repositories, compared without letter case. |

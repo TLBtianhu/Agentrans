@@ -22,7 +22,7 @@ boot 组负责启动 profile 应用并管理其已安装组合。`app-boot` 解�
 
 | 包 | 职责 | ctx 键 |
 |---|---|---|
-| [`app-boot`](app-boot/README.zh.md) | 从 `cordis.yml` 启动 dsh 应用：加载 `.env`、应用 profile 与 patch 层，并清晰报告启动失败 | （供各 bin 使用的库） |
+| [`app-boot`](app-boot/README.zh.md) | 从 `cordis.yml` 启动 Agentrans 应用：加载 `.env`、应用 profile 与 patch 层，并清晰报告启动失败 | （供各 bin 使用的库） |
 | [`product-layout`](product-layout/README.zh.md) | 负责单根目录分发布局、安装清单、集成状态和运行时激活 | （供分发使用的库） |
 | [`cmdline`](cmdline/README.zh.md) | 让应用持有自己的 flag、`--help` 与退出码；启动器自身 flag 之后的一切原样传入 | `cmdlineArgs`、`appExit` |
 | [`hmr`](hmr/README.zh.md) | 协调模块与配置重载，并与包修改互斥执行 | `hmr` |
@@ -33,7 +33,7 @@ boot 组负责启动 profile 应用并管理其已安装组合。`app-boot` 解�
 <a id="related-documentation"></a>
 ## 相关文档
 
-- [dsh 应用](../../apps/cli/README.zh.md)——在其启动序列中使用这些 helper 的 `agentrans` bin。
+- [Agentrans 应用](../../apps/cli/README.zh.md)——在其启动序列中使用这些 helper 的 `agentrans` bin。
 - [Profile 组合包](../bundle/README.zh.md)——可由 `agentrans --profile` 组合挂载的可安装 patch 层。
 - [@agentrans/home-paths](../util/home-paths/README.zh.md)——两个包都依赖的 harness home 解析器。
 - [@agentrans/cmdline](cmdline/README.zh.md)——flag 家族如何由应用持有而非启动器。

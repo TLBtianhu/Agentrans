@@ -3,7 +3,7 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/boot/cmdline/README.md
 /:
-  en: 29e1bbea853a5634
+  en: 3b2d011748698b0d
   zh: ef6bc8af7a8ae1dc
 /agentrans-cmdline:
   en: 67c4baa9709a7988

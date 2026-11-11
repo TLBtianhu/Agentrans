@@ -3,8 +3,8 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write docs/user/develop/basic/publish.md
 /package-and-install-a-plugin:
-  en: a377176f8350397f
-  zh: ad31798212b31f97
+  en: c8345af0d09ef4b0
+  zh: 7c387419a89ac327
 /package-and-install-a-plugin/two-concepts-two-manifests:
   en: 71d70e524d72d995
   zh: f65d649f9b5b18d0
@@ -15,11 +15,11 @@
   en: 22fe1009320c3aab
   zh: 9709a04ee477a5ee
 /package-and-install-a-plugin/install-into-a-profile:
-  en: 1e74df71e14c31ce
-  zh: 041a715625bc20e1
+  en: 3b02f9e273e96abe
+  zh: fea70b038ae087aa
 /package-and-install-a-plugin/the-loading-order:
   en: 76e8b6f07cb69d9c
-  zh: 3347deda28ba46c9
+  zh: b756661eaf52e01d
 /package-and-install-a-plugin/give-a-surface-bundle-its-own-command-line:
   en: 324db363312af60b
   zh: 80d25da9a3af5d2b

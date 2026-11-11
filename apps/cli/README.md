@@ -28,7 +28,7 @@ agentrans --profile web --port 8080       # --port belongs to the web app
 agentrans --profile tui --resume <id>     # example, assuming the tui profile is installed; --resume belongs to the terminal app
 agentrans --profile headless "run the tests"
 agentrans --profile web --help            # the web app's flags, not the launcher's
-dsh --help                          # the launcher's own help
+agentrans --help                          # the launcher's own help
 ```
 
 <a id="profiles"></a>

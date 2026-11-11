@@ -92,7 +92,7 @@ Requests that need the key use its current stored value, so rotating the key tak
 
 ### What can go wrong
 
-- **A stored key outranks the launching environment** — while a value is stored, `DEEPSEEK_API_KEY=… dsh` (or a CI secret, a container `-e`) does not apply; `unset` the stored key to use the exported one.
+- **A stored key outranks the launching environment** — while a value is stored, `DEEPSEEK_API_KEY=… Agentrans` (or a CI secret, a container `-e`) does not apply; `unset` the stored key to use the exported one.
 - **An empty value cannot be stored** — storing an empty string is refused; remove the key instead.
 - **Key values never appear in configuration UIs or diagnostics** — the UI shows whether a key is set, where it comes from, and whether you can change it; the value itself stays in the store.
 

@@ -1,5 +1,5 @@
 ---
-description: "Ready-made dsh profile bundles for the shared core, browser GUI, one-shot task, ACP, and SDK application surfaces."
+description: "Ready-made Agentrans profile bundles for the shared core, browser GUI, one-shot task, ACP, and SDK application surfaces."
 kind: "package-group"
 ---
 
@@ -34,7 +34,7 @@ In-box bundles resolve from the Agentrans installation; out-of-tree bundles inst
 <a id="related-documentation"></a>
 ## Related documentation
 
-- [dsh app](../../apps/cli/README.md) — the `agentrans` command that starts a profile.
+- [Agentrans app](../../apps/cli/README.md) — the `agentrans` command that starts a profile.
 - [app-boot](../boot/app-boot/README.md) — how profiles are resolved, layered, and customized.
 - [Profile plugin bundles note](../../.agents/notes/implemented/architecture/2026-08-05-profile-plugin-bundles.md) — the profile and bundle composition design.
 - [Generated composition graph](../../apps/cli/composition.md) — the exact composition each shipped profile uses.

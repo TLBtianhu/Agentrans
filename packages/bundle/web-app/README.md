@@ -1,5 +1,5 @@
 ---
-description: "The browser GUI for dsh: interactive chat, model and settings management, and session history, for users running the agentrans web surface."
+description: "The browser GUI for Agentrans: interactive chat, model and settings management, and session history, for users running the agentrans web surface."
 kind: "package-bundle"
 ---
 
@@ -13,7 +13,7 @@ Custom deployments that explicitly enable these plugins own their collection pol
 
 ## Summary
 
-Run `agentrans --profile web` for browser chat, model and settings management, and session history, with the same model access, tools, and safety defaults as other dsh surfaces. Startup prints a tokenized URL and normally opens the default browser; SSH sessions and `--no-open` require manual opening. You can change the port, allow extra authorities, bind one concrete local IP, and serve HTTPS from a certificate you supply; wildcard addresses are rejected. Remote access uses an advertised HTTP(S) URL behind a prefix-stripping proxy, listener TLS, or plain HTTP on a non-loopback bind. Use the headless profile for one-shot command-line tasks.
+Run `agentrans --profile web` for browser chat, model and settings management, and session history, with the same model access, tools, and safety defaults as other Agentrans surfaces. Startup prints a tokenized URL and normally opens the default browser; SSH sessions and `--no-open` require manual opening. You can change the port, allow extra authorities, bind one concrete local IP, and serve HTTPS from a certificate you supply; wildcard addresses are rejected. Remote access uses an advertised HTTP(S) URL behind a prefix-stripping proxy, listener TLS, or plain HTTP on a non-loopback bind. Use the headless profile for one-shot command-line tasks.
 
 ## Table of Contents
 

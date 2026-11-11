@@ -52,7 +52,7 @@ A DeepSeek Harness child uses the product launcher and an explicit absolute `AGE
   name: '@agentrans/subagent-acp'
   config:
     providerName: acp
-    command: dsh
+    command: Agentrans
     args: ['--profile', 'acp', '--patch', '/absolute/path/to/acp.patch.yml']
     permission: reject
     env:

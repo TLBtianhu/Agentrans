@@ -3,14 +3,14 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/util/official-bundles/README.md
 /:
-  en: 6ef5705aaf6fee34
-  zh: e587b9572fc644bf
+  en: f338f381c8085b26
+  zh: d1b7397ae7c230bb
 /agentrans-official-bundles:
   en: 3d47a69c622b80ec
   zh: eedc50adaee7d076
 /agentrans-official-bundles/summary:
   en: f85f9517acd7d08d
-  zh: c67d893c66c7be1a
+  zh: 2124adbdaf45169a
 /agentrans-official-bundles/table-of-contents:
   en: 80b31a934611cb4a
   zh: 05f3f7f9cb2fd881
@@ -39,8 +39,8 @@
   en: ec418c9554da3d1d
   zh: 77c4d87cbd2d3666
 /agentrans-official-bundles/known-limitations-and-deferred-work:
-  en: 6631976cc7404166
-  zh: edb2094b17bc4009
+  en: 525f88680da9a9b0
+  zh: ee19d882874c807c
 /agentrans-official-bundles/known-limitations-and-deferred-work/dev-note:
   en: e67f633dc6fe7773
   zh: 3bb0c20c93f16f98

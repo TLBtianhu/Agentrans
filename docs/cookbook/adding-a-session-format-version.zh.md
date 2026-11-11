@@ -37,7 +37,7 @@
 
 按照包检查清单为 N→N+1 创建库，而非挂载插件。恒等正文转换仅是最初的接线骨架。[V2 到 V3 规范](../../packages/session/session-format-v2-to-v3/README.zh.md#v2-to-v3-specification)是明确转换与保留规则的固定示例，而不是可继续扩展或视为恒等转换的迁移边。
 
-在 manifest（元数据清单）中声明 `dsh.sessionFormatMigration`，包含数值 `from: N` 和 `to: N+1`、导出路径，以及导出的迁移、源 codec、目标 codec、目标 header 校验器和目标恢复器。复用前一条迁移边所属包导出的源 codec，并依赖该包；不要复制或重新定义已发布 codec。从新包导出目标 codec 和校验器。将迁移边加入 catalog 的直接依赖，并添加工作区的 TypeScript 路径与项目引用。
+在 manifest（元数据清单）中声明 `Agentrans.sessionFormatMigration`，包含数值 `from: N` 和 `to: N+1`、导出路径，以及导出的迁移、源 codec、目标 codec、目标 header 校验器和目标恢复器。复用前一条迁移边所属包导出的源 codec，并依赖该包；不要复制或重新定义已发布 codec。从新包导出目标 codec 和校验器。将迁移边加入 catalog 的直接依赖，并添加工作区的 TypeScript 路径与项目引用。
 
 在添加新迁移边声明的同时，将[核心 Session 类型](../../packages/core/session/src/types.ts)中的 `SESSION_FORMAT_VERSION` 设为 N+1，然后生成 catalog。下面的命令只生成已声明的迁移链；它不会实现新版本：
 

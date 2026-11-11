@@ -51,7 +51,7 @@ const manifest: DshPackageManifest = {
 
 | 字段 | 含义 |
 |---|---|
-| `dsh.manifestVersion` | manifest（元数据清单）格式标识；声明的格式为 `1`，独立于 npm 包版本和 Session 格式版本。 |
+| `Agentrans.manifestVersion` | manifest（元数据清单）格式标识；声明的格式为 `1`，独立于 npm 包版本和 Session 格式版本。 |
 | `dsh.bundle.platforms` | 可选的非空 Node Host 平台名称列表，例如 `["darwin"]`；省略时允许所有操作系统。启动器和插件管理器在组合或选择该组合包前检查此字段。 |
 | `engines.agentrans` | 作者声明的兼容 DSH 版本，使用 SemVer 范围，也可填写精确的预发布版本。此字段与 `engines.node`、`engines.npm` 并列；engines 对象可省略 `agentrans`。 |
 
@@ -93,7 +93,7 @@ const manifest: DshPackageManifest = {
 <a id="known-limitations-and-deferred-work"></a>
 
 - **仅提供静态类型。** 消费方读取并校验所需的 JSON 字段，再将共享声明适配为运行时数据。本包不提供解析器、getter helper、文件检查或默认值。
-- **兼容性仅作声明。** 当前安装器和加载器不强制检查 `dsh.manifestVersion` 或 `engines.agentrans`；声明范围不会拒绝不兼容的宿主，也不会校验 SemVer 语法。
+- **兼容性仅作声明。** 当前安装器和加载器不强制检查 `Agentrans.manifestVersion` 或 `engines.agentrans`；声明范围不会拒绝不兼容的宿主，也不会校验 SemVer 语法。
 
 <a id="dev-note"></a>
 ### 开发备注

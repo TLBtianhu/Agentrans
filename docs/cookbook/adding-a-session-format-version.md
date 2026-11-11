@@ -37,7 +37,7 @@ Before changing the writer, use the [archive command](../persistence-changes/his
 
 Follow the package checklist to create a library for N→N+1, not a mounted plugin. An identity body conversion is only an initial wiring scaffold. The [V2-to-V3 specification](../../packages/session/session-format-v2-to-v3/README.md#v2-to-v3-specification) is a fixed example of explicit transformations and preservation rules, not an edge to extend or treat as an identity conversion.
 
-Declare `dsh.sessionFormatMigration` with numeric `from: N` and `to: N+1`, an export path, and the exported migration, source codec, target codec, target-header validator, and target restorer. Reuse the source codec exported by the preceding edge package and depend on that package; do not copy or redefine a released codec. Export the target codec and validators from the new package. Add the edge as a direct dependency of the catalog and add the workspace’s TypeScript paths and project references.
+Declare `Agentrans.sessionFormatMigration` with numeric `from: N` and `to: N+1`, an export path, and the exported migration, source codec, target codec, target-header validator, and target restorer. Reuse the source codec exported by the preceding edge package and depend on that package; do not copy or redefine a released codec. Export the target codec and validators from the new package. Add the edge as a direct dependency of the catalog and add the workspace’s TypeScript paths and project references.
 
 Set `SESSION_FORMAT_VERSION` in [core Session types](../../packages/core/session/src/types.ts) to N+1 alongside the new edge declarations, then generate the catalog. The command below generates only the declared chain; it does not implement a new version:
 
