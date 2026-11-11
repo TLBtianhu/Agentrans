@@ -10,6 +10,14 @@
 - 已知限制：同一个版本的两个 macOS 架构会各自产出 `alpha-mac.yml`，发布到同一 Release 时会互相覆盖；要同时发布两个架构需要一次同时构建两个架构（或改用 universal 包），尚未实现。
 - 托管验证：合并后的工作流用 `mac-x64` 与 `win-x64` 各实跑一次，均成功（run 42854365096 / 42858836181）。
 
+## 已完成：0.1.0 正式发布（2026-11-11）
+
+- 打包工作流新增 `target=all`：一次运行内并行产出 `agentrans-win-x64` 与 `agentrans-mac`，因为发布工作流只下载**一个**运行的产物。
+- 打包运行 [43071046158](https://github.com/TLBtianhu/Agentrans/actions/runs/43071046158) 成功（20 分钟），发布运行 [43076622437](https://github.com/TLBtianhu/Agentrans/actions/runs/43076622437) 成功。
+- Release `v0.1.0`：21 个资产，稳定版（非草稿、非预发布）。
+- 校验：`latest.yml` 与 `latest-mac.yml` **各只有一份**；两者 `version: 0.1.0`；`latest-mac.yml` 的 `files` 同时列出 `mac-arm64` 与 `mac-x64` 的 zip。
+- 发布签名密钥在仓库里仍叫 `DSH_UPDATE_SIGNING_KEY`，工作流现在读新名并以旧名兜底；新密钥建好后删掉兜底。
+- `docs/cli-help` 的 `dsh` 残留已修：生成器改为从 `apps/cli/package.json` 的 bin 名取命令名，四个 bundle 应用（acp/headless/sdk/web）也改为 `agentrans --profile …`。
 ## 已完成：与上游身份彻底分离（2026-11-11）
 
 三项改名全部落地，每阶段都过了门禁并在托管 runner 上验证：
