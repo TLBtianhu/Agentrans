@@ -98,6 +98,16 @@ export interface InstalledEntry {
 }
 
 /** A release sequence: its members, its version baseline, and its tag naming. */
+/** Framework packages under the shared scope that version independently of the harness. */
+const FRAMEWORK_PACKAGE = /^@agentrans\/(?:cordis(?:-|$)|cosmokit$|schemastery$|node-addon-system(?:-|$))/u
+
+/**
+ * @param name - Dependency name from a packed manifest.
+ * @returns Whether the name belongs to the harness release family.
+ */
+function isHarnessPackage(name: string): boolean {
+  return name.startsWith('@agentrans/') && !FRAMEWORK_PACKAGE.test(name)
+}
 export abstract class ReleaseFamily {
   /** Workflow-facing `--family` identifier. */
   abstract readonly id: string
@@ -407,7 +417,8 @@ class DshFamily extends ReleaseFamily {
       const dependencies = manifest[section]
       if (dependencies === null || typeof dependencies !== 'object' || Array.isArray(dependencies)) continue
       for (const [name, range] of Object.entries(dependencies)) {
-        if (name !== '@agentrans/cli' && !name.startsWith('@agentrans/')) continue
+        // Vendored foundation packages share the scope but keep their own version line.
+        if (!isHarnessPackage(name)) continue
         if (range !== member.version) {
           throw new Error(`${member.name}: packed ${section}.${name} must equal ${member.version}, got ${String(range)}`)
         }

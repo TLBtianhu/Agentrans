@@ -300,7 +300,7 @@ describe('release pack CLI', () => {
 
     expect(result.status).not.toBe(0)
     expect(result.stderr).toContain('@agentrans/expected produced no tarball')
-    expect(existsSync(join(root, 'packed', 'deepseek-ai-renamed-1.2.3.tgz'))).toBe(true)
+    expect(existsSync(join(root, 'packed', 'agentrans-renamed-1.2.3.tgz'))).toBe(true)
     expect(existsSync(join(root, 'packed', PUBLISH_ORDER_FILE))).toBe(false)
   })
 
