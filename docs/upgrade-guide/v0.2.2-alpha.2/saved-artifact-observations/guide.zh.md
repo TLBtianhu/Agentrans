@@ -9,7 +9,7 @@ description: "Artifact 恢复现在依赖 Session Projection，旧读取器会�
 
 ## 变更
 
-`dsh-artifact` 依赖 `dsh-session-projection`，并在开放同步源码读取前等待注册完成。随产品提供的 base 组合已包含该服务。此前单独挂载 Artifact 的自定义组合需要补上依赖。
+`@agentrans/artifact` 依赖 `dsh-session-projection`，并在开放同步源码读取前等待注册完成。随产品提供的 base 组合已包含该服务。此前单独挂载 Artifact 的自定义组合需要补上依赖。
 
 保存粒子观察会写入必需的 `artifact/observations` 事件，包含单个 Artifact 的完整已保存列表，以及各自的源码修订、运行检查点和计算观察值。不含这些事件的已有 Session 仍可读取。不认识该事件的旧读取器会明确拒绝 Session；跳过它会丢失已保存实验。保存或恢复不会创建模型输入。
 

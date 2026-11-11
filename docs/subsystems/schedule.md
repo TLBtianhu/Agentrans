@@ -19,7 +19,7 @@ The README defines [when tasks upgrade](../../packages/schedule/schedule/README.
 <a id="recurrence-rules"></a>
 ## Recurrence rules
 
-[`dsh-util-time`](../../packages/util/time/README.md) owns reusable `Cron` and `RRule` parsing and bounded occurrence arithmetic. Both parsed values expose their authoritative expression and zone, `next(after)`, and `resolve(scheduledAt, acceptedAt)`. Parsers return an accepted value or a rejection reason; Schedule maps reasons to its own input errors and owns record validation, admission limits, persistence, and dispatch.
+[`@agentrans/util-time`](../../packages/util/time/README.md) owns reusable `Cron` and `RRule` parsing and bounded occurrence arithmetic. Both parsed values expose their authoritative expression and zone, `next(after)`, and `resolve(scheduledAt, acceptedAt)`. Parsers return an accepted value or a rejection reason; Schedule maps reasons to its own input errors and owns record validation, admission limits, persistence, and dispatch.
 
 Every stored `scheduledAt` is a canonical RFC 3339 UTC instant with millisecond precision and a year from 0001 through 9999. Decoding never recalculates it from current zone data. Latest-only catch-up preserves that committed floor, delivers the latest due occurrence once, and commits the first future occurrence. Exhaustion leaves the task stored as `ended`.
 

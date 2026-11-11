@@ -19,7 +19,7 @@ CUA provider 通过 `ctx.cuaAccess` 提供系统权限状态、用户主动申�
 
 ## 选择提供方
 
-在同一组合中挂载 [`dsh-computer-use`](../../packages/computer-use/computer-use/README.zh.md) 和一个提供方。两个 Cua Driver 提供方都是公开发布到 npm 的实验性包，均需显式启用。
+在同一组合中挂载 [`@agentrans/computer-use`](../../packages/computer-use/computer-use/README.zh.md) 和一个提供方。两个 Cua Driver 提供方都是公开发布到 npm 的实验性包，均需显式启用。
 
 | 提供方 | 运行时 |
 |---|---|

@@ -19,7 +19,7 @@ The client projection and Host state types move to `dsh-agent/types`; the API pa
 
 ## Migration
 
-1. In custom Cordis compositions, mount `dsh-session-projection` with `dsh-agent-loop`. The loop constructs `agent.model`; consumers need no separate model-selection service.
+1. In custom Cordis compositions, mount `dsh-session-projection` with `@agentrans/agent-loop`. The loop constructs `agent.model`; consumers need no separate model-selection service.
 2. Replace mutable references and selection hooks with `agent.model.select(selection)` after validation. Read with `current()`. Keep `installModelSelection(agentCtx)` in Agent setup for switch notices and remove its old selection argument. Do not add `agent/request` listeners.
 3. Set the output cap through `AgentOptions.maxTokens`. Other per-request control overrides have no replacement API; retain an existing listener where that behavior is still required.
 4. To override a saved route during programmatic resume, merge the configured selection with the saved explicit effort only when the route is unchanged and the configuration omits effort, then call `agent.model.select(selection)` in the Agent setup callback. Supplying `agentOptions` alone provides only a fallback for a Session without a selection or request.

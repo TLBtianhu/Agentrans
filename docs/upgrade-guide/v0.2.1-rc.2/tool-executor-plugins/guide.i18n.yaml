@@ -3,14 +3,14 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write docs/upgrade-guide/v0.2.1-rc.2/tool-executor-plugins/guide.md
 /:
-  en: 3b1ca9e0f78709e0
-  zh: 13f23adcc722f319
+  en: f8547b5ef97ee085
+  zh: 1ea65b32a29affd4
 /mount-a-tool-executor:
   en: 73002a2963b9ea27
   zh: a67ea382d7c70c61
 /mount-a-tool-executor/change:
-  en: 274231c8e874a7d3
-  zh: 6f455ecf726d69db
+  en: 10303b884cce9b5d
+  zh: cc7760e9bab0e30a
 /mount-a-tool-executor/migration:
-  en: bd4d3c70ca71a815
-  zh: 7e8952694849ba02
+  en: 432865f6d051833a
+  zh: f7e6dfdcdc1c4901

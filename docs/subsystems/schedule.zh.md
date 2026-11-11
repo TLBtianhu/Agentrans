@@ -19,7 +19,7 @@ README 定义[任务何时升级](../../packages/schedule/schedule/README.zh.md#
 <a id="recurrence-rules"></a>
 ## 重复规则
 
-[`dsh-util-time`](../../packages/util/time/README.zh.md) 负责可复用的 `Cron`、`RRule` 解析及有界发生时点计算。两种解析值均暴露其权威表达式、时区、`next(after)` 和 `resolve(scheduledAt, acceptedAt)`。解析器返回接受值或拒绝原因；Schedule 将原因映射为自身输入错误，并负责记录验证、准入限制、持久化与投递。
+[`@agentrans/util-time`](../../packages/util/time/README.zh.md) 负责可复用的 `Cron`、`RRule` 解析及有界发生时点计算。两种解析值均暴露其权威表达式、时区、`next(after)` 和 `resolve(scheduledAt, acceptedAt)`。解析器返回接受值或拒绝原因；Schedule 将原因映射为自身输入错误，并负责记录验证、准入限制、持久化与投递。
 
 每个已存 `scheduledAt` 都是带毫秒精度、年份为 0001 至 9999 的规范 RFC 3339 UTC 时刻。解码不会根据当前时区数据重新计算它。只追赶最新一次的策略保留该已提交下界，投递最新到期时点一次，再提交第一个未来时点。规则耗尽后任务以 `ended` 状态保留。
 

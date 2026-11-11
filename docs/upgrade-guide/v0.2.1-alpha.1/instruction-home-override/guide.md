@@ -11,7 +11,7 @@ English | [中文](guide.zh.md)
 
 `@agentrans/agent-instructions` removed its `dshHome` config field. The plugin resolves the harness home through `resolveDshHome()` from `@agentrans/home-paths`, like every other harness consumer: the home is `$AGENTRANS_HOME` when it is set and non-blank, otherwise `~/.dsh`, with tilde expansion.
 
-A `cordis.yml`, profile patch, or `--patch` overlay that still sets `dshHome` on the `agent-instructions` row has no effect: the row keeps the stray key and the plugin ignores it, so instruction loading follows the process home. Other providers, such as `dsh-skill-filesystem` and `dsh-shell-env`, keep their own home fields; this removal covers the instruction loader only.
+A `cordis.yml`, profile patch, or `--patch` overlay that still sets `dshHome` on the `agent-instructions` row has no effect: the row keeps the stray key and the plugin ignores it, so instruction loading follows the process home. Other providers, such as `@agentrans/skill-filesystem` and `@agentrans/shell-env`, keep their own home fields; this removal covers the instruction loader only.
 
 ## Migration
 

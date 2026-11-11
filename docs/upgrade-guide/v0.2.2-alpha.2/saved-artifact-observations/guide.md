@@ -9,7 +9,7 @@ English | [中文](guide.zh.md)
 
 ## Change
 
-`dsh-artifact` requires `dsh-session-projection` and awaits its registration before exposing synchronous source reads. The shipped base composition already includes this service. Custom compositions that mounted Artifact without it must add the dependency.
+`@agentrans/artifact` requires `dsh-session-projection` and awaits its registration before exposing synchronous source reads. The shipped base composition already includes this service. Custom compositions that mounted Artifact without it must add the dependency.
 
 Saving a particle observation writes a required `artifact/observations` event containing the complete saved list for one Artifact, including each source revision, runtime checkpoint, and computed observation. Existing Sessions without these events remain readable. Older readers that do not recognize the event explicitly refuse the Session; skipping it would lose saved experiments. Saving or restoring does not create model input.
 

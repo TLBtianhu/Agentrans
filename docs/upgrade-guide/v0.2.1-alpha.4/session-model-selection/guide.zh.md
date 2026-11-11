@@ -19,7 +19,7 @@ ACP（Agent Client Protocol）的模型与推理强度变更从下一个模型�
 
 ## 迁移
 
-1. 在自定义 Cordis 组合中将 `dsh-session-projection` 与 `dsh-agent-loop` 一起挂载。循环构建 `agent.model`；消费方不需要独立的模型选择服务。
+1. 在自定义 Cordis 组合中将 `dsh-session-projection` 与 `@agentrans/agent-loop` 一起挂载。循环构建 `agent.model`；消费方不需要独立的模型选择服务。
 2. 将可变引用与选择 hook 替换为校验后的 `agent.model.select(selection)`，使用 `current()` 读取选择。在 Agent setup 中保留 `installModelSelection(agentCtx)` 以提供切换提示，并移除原来的选择参数。不要添加 `agent/request` 监听器。
 3. 通过 `AgentOptions.maxTokens` 设置输出上限。其他逐请求控制参数覆盖没有替代 API；仍需要该行为时，保留现有监听器。
 4. 要在程序化恢复时覆盖已保存路由，先形成配置选择，仅在路由不变且配置省略强度时保留已保存的显式强度，再在 Agent setup 回调中调用 `agent.model.select(selection)`。仅提供 `agentOptions` 时，它只为没有选择或请求记录的 Session 提供回退值。

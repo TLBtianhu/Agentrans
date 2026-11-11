@@ -12,7 +12,7 @@ Store 接管的实例仅在进入 `SessionStore` 且同步 `session/created` 分
 
 setup 失败后会保留已经写入持久化存储的构造历史和 setup 事件。因此，带 seed 的创建（包括 fork）失败后可能留下已存储的 Session，其标识不能再用于新建。
 
-权限默认值在 `agent/created` 中初始化，因此只创建 Session 不再固定这些默认值。`dsh-permission-presets` 除既有依赖外，现在还要求 `agents` 服务。
+权限默认值在 `agent/created` 中初始化，因此只创建 Session 不再固定这些默认值。`@agentrans/permission-presets` 除既有依赖外，现在还要求 `agents` 服务。
 
 ## 迁移
 
@@ -21,5 +21,5 @@ setup 失败后会保留已经写入持久化存储的构造历史和 setup 事�
 3. 将写入和依赖 Agent 的工作移出 `session/created` 监听器。在 setup 或 `agent/created` 中写入；使用 setup 提供的 Agent 或 `agent/created` 载荷，不要在 Session 宣告期间查找 Agent。
 4. 将 setup 内监听所属 Session 的 `session/created` 的代码改为监听 `agent/created`。需要观察 Session 创建时，应在工厂创建开始前安装监听作用域。
 5. 创建失败但已持久化历史时，使用 `ctx.agents.resume({ resumeSessionId })` 重试，不要对同一 id 再次调用 `create()`；保留存储历史用于恢复。
-6. 挂载 `dsh-permission-presets` 的自定义 profile 也必须挂载提供 `agents` 的 `dsh-agent`，并等待权限插件激活后再创建 Agent。
+6. 挂载 `@agentrans/permission-presets` 的自定义 profile 也必须挂载提供 `agents` 的 `@agentrans/agent`，并等待权限插件激活后再创建 Agent。
 7. 验证创建观察者看到预期的注册表状态、权限完成初始化、创建失败后能恢复存储历史，以及被拒绝的追加不会改变历史。

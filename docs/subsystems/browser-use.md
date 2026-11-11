@@ -6,7 +6,7 @@ Browser use lets a model inspect and operate web pages through a configured back
 
 ## Choose a provider
 
-Mount [`dsh-browser-use`](../../packages/browser-use/browser-use/README.md) and one provider in the same composition. The providers are experimental public npm packages and require explicit activation. Their initial browser engine is Chromium.
+Mount [`@agentrans/browser-use`](../../packages/browser-use/browser-use/README.md) and one provider in the same composition. The providers are experimental public npm packages and require explicit activation. Their initial browser engine is Chromium.
 
 | Provider | Integration |
 |---|---|

@@ -20,7 +20,7 @@ A **bundle** is a distribution format for Cordis config rows and the code they m
 
 Each declares itself in its own `package.json` under a `agentrans` field: `agentrans.profile` lists a profile's bundles, and `agentrans.bundle` points at a bundle's patch file.
 
-[`dsh-base`](../packages/bundle/base/README.md) is the shared first layer of the `web`, `headless`, `sdk`, and `acp` profiles: model adapters, tools, persistence, sandbox and approval policy, settings, credentials, telemetry. [`dsh-web-app`](../packages/bundle/web-app/README.md) adds the browser application, [`dsh-headless`](../packages/bundle/headless/README.md) adds a one-shot runner with no server, [`dsh-sdk-app`](../packages/bundle/sdk-app/README.md) adds the SDK JSON-RPC server, and [`dsh-acp-app`](../packages/bundle/acp-app/README.md) adds the automation-only ACP server. [`dsh-sdk-minimal`](../packages/bundle/sdk-minimal/README.md) is the deliberate exception: one bundle owns its complete explicit SDK tree and does not apply `dsh-base`.
+[`@agentrans/base`](../packages/bundle/base/README.md) is the shared first layer of the `web`, `headless`, `sdk`, and `acp` profiles: model adapters, tools, persistence, sandbox and approval policy, settings, credentials, telemetry. [`@agentrans/web-app`](../packages/bundle/web-app/README.md) adds the browser application, [`@agentrans/headless`](../packages/bundle/headless/README.md) adds a one-shot runner with no server, [`@agentrans/sdk-app`](../packages/bundle/sdk-app/README.md) adds the SDK JSON-RPC server, and [`@agentrans/acp-app`](../packages/bundle/acp-app/README.md) adds the automation-only ACP server. [`@agentrans/sdk-minimal`](../packages/bundle/sdk-minimal/README.md) is the deliberate exception: one bundle owns its complete explicit SDK tree and does not apply `@agentrans/base`.
 
 Layers apply to an empty entry list: the profile's ordered bundles, its `cordis.patch.yml`, the home patch, then `--patch` overlays. A patch targets a row by id and replaces its whole config, or inserts new rows. A `preset` patch applies these operations inside that declaration’s `config.plugins`, with the same layer precedence.
 
@@ -149,7 +149,7 @@ New behavior attaches to a documented extension point. Changing the loop itself 
 | Add a model-facing capability | register on `ctx.tools`; its schema joins prompt assembly |
 | Give one session a different capability set | compose an agent preset; a service row there needs an `isolate` realm |
 | Add shell execution | register a `ctx.shell` backend; the local one spawns through `ctx.subprocess` |
-| Add persistent terminal execution | register a `ctx.terminals` backend plus `dsh-tool-terminal` |
+| Add persistent terminal execution | register a `ctx.terminals` backend plus `@agentrans/tool-terminal` |
 | Add a human command | register on `ctx.commands`; it dispatches without a model turn |
 | Manage background jobs | register on `ctx.jobs`; `job_*` tools read or stop jobs |
 | Start a Session from an external webhook | register a trusted rule on `ctx.webhookRuntime` and mount a provider adapter |

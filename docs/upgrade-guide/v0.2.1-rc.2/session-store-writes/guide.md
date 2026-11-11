@@ -12,7 +12,7 @@ English | [中文](guide.zh.md)
 
 A failed setup retains constructor history and setup events already written to persistence. A failed seeded creation, including a fork, can therefore leave a stored Session; its identity is no longer available for a new creation.
 
-Permission defaults are initialized during `agent/created`, so creating a bare Session no longer pins them. `dsh-permission-presets` now requires the `agents` service as well as its existing dependencies.
+Permission defaults are initialized during `agent/created`, so creating a bare Session no longer pins them. `@agentrans/permission-presets` now requires the `agents` service as well as its existing dependencies.
 
 ## Migration
 
@@ -21,5 +21,5 @@ Permission defaults are initialized during `agent/created`, so creating a bare S
 3. Move writes and Agent-dependent work out of `session/created` listeners. Use setup or `agent/created` for writes; use the supplied Agent in setup and the `agent/created` payload instead of looking up an Agent during Session announcement.
 4. Replace setup-installed observers of their own `session/created` with `agent/created` listeners. Keep Session creation observers in a scope installed before factory creation starts.
 5. After failed creation with persisted history, retry with `ctx.agents.resume({ resumeSessionId })` instead of `create()` on the same id. Retain the stored history for recovery.
-6. Custom profiles mounting `dsh-permission-presets` must also mount `dsh-agent`, the provider of `agents`, and await permission plugin activation before creating Agents.
+6. Custom profiles mounting `@agentrans/permission-presets` must also mount `@agentrans/agent`, the provider of `agents`, and await permission plugin activation before creating Agents.
 7. Verify that creation observers see the expected registry state, permission initialization completes, failed creation can resume its stored history, and rejected appends leave history unchanged.

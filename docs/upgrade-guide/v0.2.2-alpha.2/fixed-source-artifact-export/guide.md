@@ -9,7 +9,7 @@ English | [中文](guide.zh.md)
 
 ## Change
 
-Native Scene HTML export now persists the original source, replay conditions and file receipt through the optional `dsh-artifact-export` Web Host plugin. The shipped Web composition mounts it. Custom Web compositions must provide this service, attachment file storage and the existing file-actions Client service to use the export controls. Headless Artifact use does not require it.
+Native Scene HTML export now persists the original source, replay conditions and file receipt through the optional `@agentrans/artifact-export` Web Host plugin. The shipped Web composition mounts it. Custom Web compositions must provide this service, attachment file storage and the existing file-actions Client service to use the export controls. Headless Artifact use does not require it.
 
 Export writes a required `artifact/export` event. Existing Sessions without exports remain readable; a reader that does not recognize this event refuses affected Sessions. No format-version bump or automatic downgrade is provided. Exported HTML includes fixed source identity; non-particle scenes still use source defaults rather than local UI parameters.
 

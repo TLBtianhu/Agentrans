@@ -11,7 +11,7 @@ description: "`agent-instructions` 行不再接受 `dshHome`；指令加载始�
 
 `@agentrans/agent-instructions` 移除了 `dshHome` 配置字段。该插件通过 `@agentrans/home-paths` 的 `resolveDshHome()` 解析 harness home，与 harness 其他消费方一致：`$AGENTRANS_HOME` 已设置且非空白时以它为准，否则使用 `~/.dsh`，并展开波浪号。
 
-`cordis.yml`、profile patch 或 `--patch` overlay 中 `agent-instructions` 行上残留的 `dshHome` 不再有任何效果：该行会保留这个多余键，插件忽略它，指令加载跟随进程 home。其他 provider（如 `dsh-skill-filesystem`、`dsh-shell-env`）保留各自的 home 字段；本次删除只覆盖指令加载器。
+`cordis.yml`、profile patch 或 `--patch` overlay 中 `agent-instructions` 行上残留的 `dshHome` 不再有任何效果：该行会保留这个多余键，插件忽略它，指令加载跟随进程 home。其他 provider（如 `@agentrans/skill-filesystem`、`@agentrans/shell-env`）保留各自的 home 字段；本次删除只覆盖指令加载器。
 
 ## 迁移
 

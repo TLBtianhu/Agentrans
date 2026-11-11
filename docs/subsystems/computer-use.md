@@ -19,7 +19,7 @@ The CUA provider owns `ctx.cuaAccess` for system-permission status, explicit sys
 
 ## Choose a provider
 
-Mount [`dsh-computer-use`](../../packages/computer-use/computer-use/README.md) and one provider in the same composition. Both Cua Driver providers are experimental public npm packages and require explicit activation.
+Mount [`@agentrans/computer-use`](../../packages/computer-use/computer-use/README.md) and one provider in the same composition. Both Cua Driver providers are experimental public npm packages and require explicit activation.
 
 | Provider | Runtime |
 |---|---|

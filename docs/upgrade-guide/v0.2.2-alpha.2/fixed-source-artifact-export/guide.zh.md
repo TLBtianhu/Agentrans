@@ -9,7 +9,7 @@ description: "持久 Artifact HTML 导出需要认识导出事件的 Session 读
 
 ## 变更
 
-原生 Scene HTML 导出现在通过可选的 `dsh-artifact-export` Web Host 插件持久保存原始源码、重放条件和文件回执。预置 Web 组合已挂载此插件。自定义 Web 组合需要提供该服务、附件文件存储和已有的 file-actions Client 服务，才能使用导出控件。无界面 Artifact 使用不要求此插件。
+原生 Scene HTML 导出现在通过可选的 `@agentrans/artifact-export` Web Host 插件持久保存原始源码、重放条件和文件回执。预置 Web 组合已挂载此插件。自定义 Web 组合需要提供该服务、附件文件存储和已有的 file-actions Client 服务，才能使用导出控件。无界面 Artifact 使用不要求此插件。
 
 导出会写入必需的 `artifact/export` 事件。没有导出的既有 Session 仍可读取；不认识该事件的读取器会拒绝受影响的 Session。不提升格式版本，也不自动降级。导出 HTML 包含固定来源身份；非粒子场景仍按源码默认条件生成，不捕获局部 UI 参数。
 

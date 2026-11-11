@@ -9,7 +9,7 @@ description: "SDK 初始化要求外围 profile 注册模型适配器，不再�
 
 ## 变更
 
-当 `initialize.provider` 为 `deepseek-official` 且尚无适配器负责该路由时，`dsh-sdk-jsonrpc-server` 不再挂载官方 DeepSeek 适配器。所有提供方都必须已由外围组合注册。缺少路由时，初始化以 `no adapter registered for provider "<id>"` 拒绝；初始化不会启用其他提供方。
+当 `initialize.provider` 为 `deepseek-official` 且尚无适配器负责该路由时，`@agentrans/sdk-jsonrpc-server` 不再挂载官方 DeepSeek 适配器。所有提供方都必须已由外围组合注册。缺少路由时，初始化以 `no adapter registered for provider "<id>"` 拒绝；初始化不会启用其他提供方。
 
 随附的 `sdk` 与 `sdk-minimal` profile 已注册官方适配器。依赖隐式挂载的自定义 profile 和直接使用 `HarnessSdkJsonRpcServer` 的调用方须显式提供它。现有自定义与回放适配器保留其注册路由。
 

@@ -9,7 +9,7 @@ English | [中文](guide.zh.md)
 
 ## Change
 
-`dsh-sdk-jsonrpc-server` no longer mounts the official DeepSeek adapter when `initialize.provider` is `deepseek-official` and no adapter owns that route. Every provider must already be registered by the surrounding composition. Missing routes reject initialization with `no adapter registered for provider "<id>"`; initialization does not activate another provider.
+`@agentrans/sdk-jsonrpc-server` no longer mounts the official DeepSeek adapter when `initialize.provider` is `deepseek-official` and no adapter owns that route. Every provider must already be registered by the surrounding composition. Missing routes reject initialization with `no adapter registered for provider "<id>"`; initialization does not activate another provider.
 
 The shipped `sdk` and `sdk-minimal` profiles already register the official adapter. Custom profiles and direct users of `HarnessSdkJsonRpcServer` that relied on implicit mounting must supply it explicitly. Existing custom and replay adapters retain their registered routes.
 

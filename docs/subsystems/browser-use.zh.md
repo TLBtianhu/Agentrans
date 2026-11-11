@@ -6,7 +6,7 @@
 
 ## 选择提供方
 
-在同一组合中挂载 [`dsh-browser-use`](../../packages/browser-use/browser-use/README.zh.md) 和一个提供方。这些提供方是实验性公共 npm 包，需要显式激活。它们最初支持的浏览器引擎是 Chromium。
+在同一组合中挂载 [`@agentrans/browser-use`](../../packages/browser-use/browser-use/README.zh.md) 和一个提供方。这些提供方是实验性公共 npm 包，需要显式激活。它们最初支持的浏览器引擎是 Chromium。
 
 | 提供方 | 集成方式 |
 |---|---|

@@ -13,7 +13,7 @@ English | [中文](guide.zh.md)
 
 ## Migration
 
-1. When the old total must hold, halve `maxBytes` in the `@agentrans/agent-instructions` row of the deployment's `cordis.yml` or patch; `dsh-base` keeps `65536`. `maxBytes` is part of the baseline identity, so every session resumed after the change receives one complete replacement baseline.
+1. When the old total must hold, halve `maxBytes` in the `@agentrans/agent-instructions` row of the deployment's `cordis.yml` or patch; `@agentrans/base` keeps `65536`. `maxBytes` is part of the baseline identity, so every session resumed after the change receives one complete replacement baseline.
 
    ```yaml
    - name: '@agentrans/agent-instructions'

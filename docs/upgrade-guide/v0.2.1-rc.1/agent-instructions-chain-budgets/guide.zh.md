@@ -13,7 +13,7 @@ description: "@agentrans/agent-instructions 的 maxBytes 分别限制每条指�
 
 ## 迁移
 
-1. 若仍须遵守原来的总量，在部署的 `cordis.yml` 或 patch 中 `@agentrans/agent-instructions` 配置行里把 `maxBytes` 减半；`dsh-base` 保持 `65536`。`maxBytes` 属于基线标识，因此修改后恢复的每个会话都会收到一次完整的替代基线。
+1. 若仍须遵守原来的总量，在部署的 `cordis.yml` 或 patch 中 `@agentrans/agent-instructions` 配置行里把 `maxBytes` 减半；`@agentrans/base` 保持 `65536`。`maxBytes` 属于基线标识，因此修改后恢复的每个会话都会收到一次完整的替代基线。
 
    ```yaml
    - name: '@agentrans/agent-instructions'
