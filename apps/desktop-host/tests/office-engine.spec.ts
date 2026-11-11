@@ -42,7 +42,7 @@ it('resolves engine manifests to physical directories and leaves unrelated modul
   const f = fixture()
   // Node 24.13 require.resolve bypasses hooks; Electron's require.resolve is covered by packaged Office smoke.
   expect(f.require('@deepseek-ai/libreoffice-kit-darwin-arm64/package.json'))
-    .toMatchObject({ path: realpathSync(dirname(join(f.root, 'app.asar.unpacked', 'dsh', f.manifest))) })
+    .toMatchObject({ path: realpathSync(dirname(join(f.root, 'app.asar.unpacked', 'agentrans', f.manifest))) })
   expect((f.require('node:fs') as typeof import('node:fs')).realpathSync).toBe(realpathSync)
   expect(f.require('@deepseek-ai/libreoffice-kit/package.json')).toEqual({ name: '@deepseek-ai/libreoffice-kit' })
 })
@@ -50,7 +50,7 @@ it('resolves engine manifests to physical directories and leaves unrelated modul
 it('resolves an absolute engine manifest to its unpacked copy', () => {
   const f = fixture()
   expect(f.require(join(f.runtime, f.manifest)))
-    .toMatchObject({ path: realpathSync(dirname(join(f.root, 'app.asar.unpacked', 'dsh', f.manifest))) })
+    .toMatchObject({ path: realpathSync(dirname(join(f.root, 'app.asar.unpacked', 'agentrans', f.manifest))) })
 })
 
 it.each(['exports', 'main'] as const)('refreshes a cached plugin %s while Office resolution stays active', (field) => {
@@ -110,7 +110,7 @@ it('resolves an engine through a directory alias', () => {
   symlinkSync(join(f.root, 'app.asar'), alias, 'junction')
   const require: (specifier: string) => unknown = createRequire(join(alias, 'dsh', 'package.json'))
   expect(require('@deepseek-ai/libreoffice-kit-darwin-arm64/package.json'))
-    .toMatchObject({ path: realpathSync(dirname(join(f.root, 'app.asar.unpacked', 'dsh', f.manifest))) })
+    .toMatchObject({ path: realpathSync(dirname(join(f.root, 'app.asar.unpacked', 'agentrans', f.manifest))) })
 })
 
 it('rejects an engine resolved elsewhere inside the archive', () => {

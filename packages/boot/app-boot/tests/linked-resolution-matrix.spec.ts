@@ -319,7 +319,7 @@ class MatrixFixture {
   setup(): void {
     const value = this.scenario
     manifest(this.installDir, {
-      name: '@agentrans/dsh', version: '1.0.0',
+      name: '@agentrans/cli', version: '1.0.0',
       dependencies: value.inRuntime ? { [value.name]: '*' } : {},
     })
     if (value.inRuntime) this.package(this.runtimeDir, 'runtime')

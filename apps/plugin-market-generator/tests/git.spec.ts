@@ -96,7 +96,7 @@ it('lists Git versions from release tags and the default branch by reading objec
     'packages/a/locale/en.json': JSON.stringify({ meta: { title: 'Alpha', description: 'Does A' } }),
     'packages/a/icon.svg': '<svg/>',
     'packages/b/package.json': bundle('@s/b', '2.0.0', { keywords: ['head'] }),
-    'packages/d/package.json': JSON.stringify({ ...JSON.parse(bundle('@s/d', '0.1.0')), peerDependencies: { '@agentrans/dsh': 'workspace:>=1' } }),
+    'packages/d/package.json': JSON.stringify({ ...JSON.parse(bundle('@s/d', '0.1.0')), peerDependencies: { '@agentrans/cli': 'workspace:>=1' } }),
     // A package that turns private on the default branch is not listed, not even at its earlier public tag.
     'packages/e/package.json': bundle('@s/e', '1.0.1', { private: true }),
   })

@@ -115,7 +115,7 @@ describe('Python runtime executable builder CLI', () => {
     expect(cliManifest.dependencies).not.toHaveProperty('@agentrans/subprocess-local')
     expect(cliManifest.devDependencies).toHaveProperty('@agentrans/subprocess-local')
     expect(runtimeManifest.dependencies).toHaveProperty('@agentrans/subprocess-local')
-    expect(bootstrap).toContain("import('@agentrans/dsh/lib/bin.js')")
+    expect(bootstrap).toContain("import('@agentrans/cli/lib/bin.js')")
     expect(bootstrap).toContain('await runCli({ packageManager })')
     expect(bootstrap).toContain("import('@agentrans/subprocess-local/runner')")
     expect(bootstrap).toContain('await runSelectedSubprocessRunner(selection)')

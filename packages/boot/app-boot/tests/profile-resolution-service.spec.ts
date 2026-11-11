@@ -57,7 +57,7 @@ describe('profile package metadata service', () => {
     const root = realpathSync.native(mkdtempSync(join(tmpdir(), 'dsh-package-service-refresh-')))
     roots.push(root)
     const installAnchor = join(root, 'install', 'package.json')
-    file(installAnchor, JSON.stringify({ name: '@agentrans/dsh', version: '0.0.0' }))
+    file(installAnchor, JSON.stringify({ name: '@agentrans/cli', version: '0.0.0' }))
     const profileDir = join(root, 'profiles', 'test')
     initProfile(profileDir, ['extra'])
     const bundleDir = join(profileDir, 'node_modules', 'extra')

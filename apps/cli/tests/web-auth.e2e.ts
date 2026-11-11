@@ -91,7 +91,7 @@ async function startWeb(root: string, dshHome: string, port: number): Promise<Ru
     }, 90_000)
     const append = (chunk: Buffer | string): void => {
       output = `${output}${String(chunk)}`.slice(-100_000)
-      const match = /dsh web: (http:\/\/[^\s]+)/u.exec(output)
+      const match = /agentrans web: (http:\/\/[^\s]+)/u.exec(output)
       if (settled || match?.[1] === undefined) return
       settled = true
       clearTimeout(timer)
@@ -151,7 +151,7 @@ function describeSettings(port: number, host: string, cookie?: string): Promise<
   })
 }
 
-describe('dsh web authentication through the real CLI', () => {
+describe('agentrans web authentication through the real CLI', () => {
   it('rejects a forged loopback Host and preserves the browser cookie across restart', { timeout: 180_000 }, async () => {
     const root = await mkdtemp(join(tmpdir(), 'dsh-web-auth-real-cli-'))
     const dshHome = join(root, '.dsh')

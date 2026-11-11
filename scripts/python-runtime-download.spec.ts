@@ -22,8 +22,8 @@ async function fixture() {
   await file(join(root, 'node/node_modules/@agentrans/http-proxy/index.mjs'), 'export async function installProxyFromEnvironment(env) { if (typeof env.get !== "function") throw new Error("missing environment lookup"); return async () => {} }')
   await file(join(root, 'node/node_modules/@agentrans/sandbox-windows-acl/package.json'), '{"type":"module","exports":{"./runner":"./runner.mjs"}}')
   await file(join(root, 'node/node_modules/@agentrans/sandbox-windows-acl/runner.mjs'), '')
-  await file(join(root, 'node/node_modules/@agentrans/dsh/package.json'), '{"type":"module"}')
-  await file(join(root, 'node/node_modules/@agentrans/dsh/lib/bin.js'), `
+  await file(join(root, 'node/node_modules/@agentrans/cli/package.json'), '{"type":"module"}')
+  await file(join(root, 'node/node_modules/@agentrans/cli/lib/bin.js'), `
     export async function runCli(options = {}) {
       const result = process.argv[2] ? { argv: process.argv.slice(2) }
         : { primary: process.env.DSH_BUNDLED_PRIMARY_RUNTIME, office: process.env.DSH_BUNDLED_OFFICE_CLI };

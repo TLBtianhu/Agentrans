@@ -115,7 +115,7 @@ export async function createPackedInstallation(temporaryPrefix: string, extraPac
   const sourceDirectories = [root, ...[...packages.values()].map(member => member.directory)]
   const initialLinks = await workspaceLinks(sourceDirectories)
   onTestFinished(async () => { expect(await workspaceLinks(sourceDirectories)).toEqual(initialLinks) })
-  const closure = packedWorkspaceClosure('@agentrans/dsh', packages)
+  const closure = packedWorkspaceClosure('@agentrans/cli', packages)
   // These idle-profile tests create no Session or confined process. The native
   // platform packages load lazily for those operations and have separate smokes.
   const supportsIdleProfile = (member: WorkspacePackage) => (

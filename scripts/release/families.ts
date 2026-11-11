@@ -397,7 +397,7 @@ class DshFamily extends ReleaseFamily {
 
   /** Publish every advertised on-demand package before the installation that offers it. */
   protected override publicationPrerequisites(member: ReleaseMember): readonly string[] {
-    return member.name === '@agentrans/dsh' ? ON_DEMAND_BUNDLES : []
+    return member.name === '@agentrans/cli' ? ON_DEMAND_BUNDLES : []
   }
 
   /** Require the packed DSH runtime graph to stay on the shared exact release version. */
@@ -407,7 +407,7 @@ class DshFamily extends ReleaseFamily {
       const dependencies = manifest[section]
       if (dependencies === null || typeof dependencies !== 'object' || Array.isArray(dependencies)) continue
       for (const [name, range] of Object.entries(dependencies)) {
-        if (name !== '@agentrans/dsh' && !name.startsWith('@agentrans/')) continue
+        if (name !== '@agentrans/cli' && !name.startsWith('@agentrans/')) continue
         if (range !== member.version) {
           throw new Error(`${member.name}: packed ${section}.${name} must equal ${member.version}, got ${String(range)}`)
         }
@@ -415,7 +415,7 @@ class DshFamily extends ReleaseFamily {
     }
   }
 
-  readonly installedEntry = { packageName: '@agentrans/dsh', binPath: 'lib/bin.js' }
+  readonly installedEntry = { packageName: '@agentrans/cli', binPath: 'lib/bin.js' }
 }
 
 /** `vendor/*`: every package keeps its own version line, so every package has its own tag. */

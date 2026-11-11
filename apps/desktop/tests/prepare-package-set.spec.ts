@@ -29,12 +29,12 @@ describe('desktop package-set selection', () => {
 
   it('includes only the available internal production closure', () => {
     const available = new Map<string, PackedDesktopPackage>([
-      ['@agentrans/dsh', packed('@agentrans/dsh', {
+      ['@agentrans/cli', packed('@agentrans/cli', {
         dependencies: { '@agentrans/base': '^1.0.0', external: '^2.0.0' },
         optionalDependencies: { '@agentrans/platform-package': '1.0.0', '@agentrans/missing-platform': '1.0.0' },
       })],
       ['@agentrans/desktop-host', packed('@agentrans/desktop-host', {
-        dependencies: { '@agentrans/dsh': '^1.0.0' },
+        dependencies: { '@agentrans/cli': '^1.0.0' },
       })],
       ['@agentrans/base', packed('@agentrans/base', {
         peerDependencies: { '@agentrans/cordis': '^1.0.0' },
@@ -45,7 +45,7 @@ describe('desktop package-set selection', () => {
     ])
     expect(selectDesktopPackageClosure(available, { platform: 'win32', arch: 'x64' }).map(entry => entry.manifest.name)).toEqual([
       '@agentrans/cordis',
-      '@agentrans/dsh',
+      '@agentrans/cli',
       '@agentrans/base',
       '@agentrans/desktop-host',
       '@agentrans/platform-package',
@@ -56,22 +56,22 @@ describe('desktop package-set selection', () => {
     '@agentrans/base', '@agentrans/cordis', '@deepseek-ai/node-addon-system',
   ])('rejects required prepared package %s absent from the packed release inputs', (dependency) => {
     const available = new Map<string, PackedDesktopPackage>([
-      ['@agentrans/dsh', packed('@agentrans/dsh', {
+      ['@agentrans/cli', packed('@agentrans/cli', {
         dependencies: { [dependency]: '^1.0.0' },
       })],
       ['@agentrans/desktop-host', packed('@agentrans/desktop-host', {
-        dependencies: { '@agentrans/dsh': '^1.0.0' },
+        dependencies: { '@agentrans/cli': '^1.0.0' },
       })],
     ])
     expect(() => selectDesktopPackageClosure(available, { platform: 'win32', arch: 'x64' })).toThrow(/unpacked package/u)
     expect(() => selectDesktopPackageClosure(new Map([
-      ['@agentrans/dsh', packed('@agentrans/dsh')],
+      ['@agentrans/cli', packed('@agentrans/cli')],
     ]), { platform: 'win32', arch: 'x64' })).toThrow(/omit @agentrans\/desktop-host/u)
   })
 
   it('leaves independently published Office packages to npm resolution', () => {
     const available = new Map<string, PackedDesktopPackage>([
-      ['@agentrans/dsh', packed('@agentrans/dsh', {
+      ['@agentrans/cli', packed('@agentrans/cli', {
         dependencies: {
           '@deepseek-ai/libreoffice-kit': '0.0.1',
           '@deepseek-ai/libreoffice-kit-wasm': '0.0.1',
@@ -80,7 +80,7 @@ describe('desktop package-set selection', () => {
       ['@agentrans/desktop-host', packed('@agentrans/desktop-host')],
     ])
     expect(selectDesktopPackageClosure(available, { platform: 'win32', arch: 'x64' }).map(entry => entry.manifest.name)).toEqual([
-      '@agentrans/dsh', '@agentrans/desktop-host',
+      '@agentrans/cli', '@agentrans/desktop-host',
     ])
   })
 
@@ -102,7 +102,7 @@ describe('desktop package-set selection', () => {
 const macProvider = '@agentrans/experimental-cua-macos'
 const cuaBundle = '@agentrans/cua-bundle'
 const targetManifests = () => new Map<string, PackedDesktopPackage>([
-  ['@agentrans/dsh', packed('@agentrans/dsh', { dependencies: { [cuaBundle]: '1.0.0' } })],
+  ['@agentrans/cli', packed('@agentrans/cli', { dependencies: { [cuaBundle]: '1.0.0' } })],
   ['@agentrans/desktop-host', packed('@agentrans/desktop-host')],
   [cuaBundle, packed(cuaBundle, {
     optionalDependencies: { [macProvider]: '1.0.0' }, dependencies: { '@agentrans/cua': '1.0.0' },

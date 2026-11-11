@@ -14,7 +14,7 @@
     "koffi": "3.1.1",
     "@deepseek-ai/libreoffice-kit": "^0.1.5",
     "@agentrans/cordis": "workspace:~",
-    "@agentrans/dsh": "workspace:*",
+    "@agentrans/cli": "workspace:*",
     "@agentrans/agent": "workspace:*",
     "@agentrans/app-boot": "workspace:*",
     "@agentrans/client-connection": "workspace:*",

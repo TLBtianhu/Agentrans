@@ -1202,7 +1202,7 @@ it.each(['disabled', 'removed', 'incompatible', 'dynamic'] as const)('never eval
   if (kind === 'incompatible') {
     const path = join(f.dir, 'node_modules', 'addon', 'package.json')
     file(path, JSON.stringify({ name: 'addon', version: '2.0.0', type: 'module', exports: './index.mjs',
-      peerDependencies: { '@agentrans/dsh': '<0.0.0' }, dsh: { bundle: { patch: './cordis.patch.yml' } } }))
+      peerDependencies: { '@agentrans/cli': '<0.0.0' }, dsh: { bundle: { patch: './cordis.patch.yml' } } }))
   } else if (kind === 'removed') {
     f.select(['other'])
   } else {

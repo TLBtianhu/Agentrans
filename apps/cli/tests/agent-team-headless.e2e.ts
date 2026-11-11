@@ -16,7 +16,7 @@ function records(content: string): Record<string, unknown>[] {
   return content.split('\n').filter(Boolean).map(line => JSON.parse(line) as Record<string, unknown>)
 }
 
-describe('dsh run with Agent Teams enabled', () => {
+describe('agentrans run with Agent Teams enabled', () => {
   it('runs two teammates, direct peer messages, dependent tasks, waiting, and final aggregation', async () => {
     const cwd = await mkdtemp(join(tmpdir(), 'dsh-agent-team-headless-'))
     try {

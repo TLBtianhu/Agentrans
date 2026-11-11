@@ -28,7 +28,7 @@ it('boots default Web with the shipped Schedule rows, without experimental modul
     ]))
     expect(roster.entries.some(entry => entry.name.endsWith('/runtime-roster-observer.js') && entry.state === FiberState.ACTIVE)).toBe(true)
     expect(roster.plugins.length).toBeGreaterThan(roster.entries.length)
-    expect(roster.modules.some(url => modulePackage(url) === '@agentrans/dsh')).toBe(true)
+    expect(roster.modules.some(url => modulePackage(url) === '@agentrans/cli')).toBe(true)
     expect(roster.client.entries.length).toBeGreaterThan(0)
     const browser = roster.entries.find(entry => entry.name === '@agentrans/client-ui-sidebar-browser')
     expect(browser).toBeDefined()

@@ -16,5 +16,5 @@ description: "SDK 按导入入口选择源码或构建运行时，不再根据�
 ## 迁移
 
 1. 从源码运行 SDK 测试时保留仓库的源码 alias。已有 `apps/cli/lib/bin.js` 不再覆盖这些源码导入。
-2. 使用发布 SDK 前，准备其同版本 `@agentrans/dsh` 可执行文件。在 checkout 中运行 `pnpm run build`；不完整的已安装负载应修复，不能依赖源码回退。
+2. 使用发布 SDK 前，准备其同版本 `@agentrans/cli` 可执行文件。在 checkout 中运行 `pnpm run build`；不完整的已安装负载应修复，不能依赖源码回退。
 3. 嵌入方若有意使用另一份已准备的 CLI，显式通过 `dshBin` 传入路径。调用提供方前确认实际 profile 与包版本。参见 [SDK 客户端](../../../../packages/sdk/client/README.zh.md)。

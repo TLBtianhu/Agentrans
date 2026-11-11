@@ -39,7 +39,7 @@ function packageSetProject(): {
   const dshBody = Buffer.from('dsh')
   const baseBody = Buffer.from('base')
   const hostBody = Buffer.from('host')
-  const dsh = record('@agentrans/dsh', 'dsh.tgz', dshBody)
+  const dsh = record('@agentrans/cli', 'dsh.tgz', dshBody)
   const base = record('@agentrans/base', 'dsh-base.tgz', baseBody)
   const host = record('@agentrans/desktop-host', 'dsh-desktop-host.tgz', hostBody)
   writeFileSync(join(packageDir, dsh.file), dshBody)
@@ -47,7 +47,7 @@ function packageSetProject(): {
   writeFileSync(join(packageDir, host.file), hostBody)
   writeFileSync(join(root, DESKTOP_PACKAGE_SET_FILE), `${JSON.stringify({
     schemaVersion: 1,
-    packages: [dsh, base, host],
+    packages: [base, dsh, host],
   })}\n`)
   return { root, dsh, base, host }
 }
@@ -62,7 +62,7 @@ describe('desktop core package set', () => {
     const packageSet = verifyDesktopCorePackageSet(root, '1.2.3')
     expect(desktopDshPackageSpec(packageSet)).toBe('file:./desktop-packages/dsh.tgz')
     expect(desktopCorePackageOverrides(packageSet)).toEqual({
-      '@agentrans/dsh': 'file:./desktop-packages/dsh.tgz',
+      '@agentrans/cli': 'file:./desktop-packages/dsh.tgz',
       '@agentrans/base': 'file:./desktop-packages/dsh-base.tgz',
       '@agentrans/desktop-host': 'file:./desktop-packages/dsh-desktop-host.tgz',
     })
@@ -73,9 +73,9 @@ describe('desktop core package set', () => {
     expect(() => verifyDesktopCorePackageSet(root, '2.0.0')).toThrow(/does not match Desktop/u)
     expect(() => parseDesktopCorePackageSet({
       schemaVersion: 1,
-      packages: [dsh, base, { ...host, version: '2.0.0' }],
-    }, '1.2.3')).toThrow(/dsh-desktop-host@2\.0\.0 does not match Desktop 1\.2\.3/u)
-    expect(() => parseDesktopCorePackageSet({ schemaVersion: 1, packages: [base, dsh, host] }))
+      packages: [base, dsh, { ...host, version: '2.0.0' }],
+    }, '1.2.3')).toThrow(/@agentrans\/desktop-host@2\.0\.0 does not match Desktop 1\.2\.3/u)
+    expect(() => parseDesktopCorePackageSet({ schemaVersion: 1, packages: [dsh, base, host] }))
       .toThrow(/sorted by name/u)
     writeFileSync(join(root, DESKTOP_PACKAGES_DIR, dsh.file), 'changed')
     expect(() => verifyDesktopCorePackageSet(root, '1.2.3')).toThrow(/integrity check failed/u)
@@ -84,18 +84,18 @@ describe('desktop core package set', () => {
   })
 
   it('rejects registry resolutions for names supplied by the local package set', () => {
-    const dsh = record('@agentrans/dsh', 'dsh.tgz', Buffer.from('dsh'))
+    const dsh = record('@agentrans/cli', 'dsh.tgz', Buffer.from('dsh'))
     const host = record('@agentrans/desktop-host', 'host.tgz', Buffer.from('host'))
     const packageSet = parseDesktopCorePackageSet({ schemaVersion: 1, packages: [dsh, host] })
     expect(() => {
       verifyDesktopCoreLockfile(
-        "packages:\n  '@agentrans/dsh@file:desktop-packages/dsh.tgz':\n    resolution: {}\n",
+        "packages:\n  '@agentrans/cli@file:desktop-packages/dsh.tgz':\n    resolution: {}\n",
         packageSet,
       )
     }).not.toThrow()
     expect(() => {
       verifyDesktopCoreLockfile(
-        "packages:\n  '@agentrans/dsh@1.2.3':\n    resolution: {integrity: sha512-registry}\n",
+        "packages:\n  '@agentrans/cli@1.2.3':\n    resolution: {integrity: sha512-registry}\n",
         packageSet,
       )
     }).toThrow(/outside the local package set/u)

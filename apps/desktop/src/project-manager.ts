@@ -26,7 +26,7 @@ import { initProfile, removeLinkProjections, sanitizeProfile } from '@agentrans/
 import { PROFILE_TEMPLATES, type ProfileTemplate } from '@agentrans/official-bundles'
 
 const PROJECT_NAME = '@agentrans/desktop-runtime'
-const DSH_PACKAGE = '@agentrans/dsh'
+const DSH_PACKAGE = '@agentrans/cli'
 const CORE_BUILD_PACKAGE = '@agentrans/subprocess-local'
 const WEB_PROFILE = PROFILE_TEMPLATES.web as ProfileTemplate
 const WORKSPACE_SETTINGS = 'nodeLinker: hoisted\nautoInstallPeers: false\n'

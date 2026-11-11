@@ -27,7 +27,7 @@ async function main(): Promise<void> {
   prepareProductState(launchContext)
   applyProductLaunchEnvironment(launchContext, process.env)
   const { loadLayeredEnv, loadProfileDirectory, reportSkippedBundles } = await import('@agentrans/app-boot')
-  const { runProfile } = await import('@agentrans/dsh/profile-boot')
+  const { runProfile } = await import('@agentrans/cli/profile-boot')
   const runId = randomUUID() as PluginOperationRunId
   if (process.connected) process.send?.({ type: 'starting', runId }, (error) => { if (error !== null) console.error(error) })
   const runtimeDir = process.argv[2] as string

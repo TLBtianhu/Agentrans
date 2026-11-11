@@ -173,7 +173,7 @@ it('denies a row whose peer metadata cannot be validated', async () => {
   const f = fixture()
   f.plugin('malformed-plugin')
   writeFileSync(join(f.dir, 'node_modules', 'malformed-plugin', 'package.json'),
-    JSON.stringify({ name: 'malformed-plugin', version: '1.0.0', peerDependencies: ['@agentrans/dsh'] }))
+    JSON.stringify({ name: 'malformed-plugin', version: '1.0.0', peerDependencies: ['@agentrans/cli'] }))
   expect(await f.run(insert('malformed-plugin'))).toEqual([])
   expect(f.warnings.join('\n')).toContain('cannot be validated')
 })

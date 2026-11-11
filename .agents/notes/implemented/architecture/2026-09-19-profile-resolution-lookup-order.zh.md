@@ -137,7 +137,7 @@ ESM 与 CommonJS 两个适配器调用同一个路由函数，主线程与 Harne
 
 manifest 的写法与 harness 自身的包相同：需要与宿主共享实例的 dsh 包同时声明在 `peerDependencies` 与 `devDependencies`，peer 让 `R/node_modules` 上的位置被占据，dev 副本给编译器和独立测试使用；第三方依赖以及 `@agentrans/brand`、`@agentrans/util-values` 这类无状态 dsh 工具包放在 `dependencies`。修改 `peerDependencies` 后，重新加载插件时的新解析会使用新声明；已加载模块的生命周期仍由 Node 和 Cordis 管理。版本相同也不会让不同目录中的副本共享模块局部状态。仅把 scope 标记改成 `Symbol.for` 同样无法共享 scope 父关系、carrier key 或注册表；承载身份的运行时必须解析到 Host 实例。
 
-另两种可用布局：插件仓库自装 `@agentrans/dsh` 并从仓库里启动 `pnpm exec dsh --profile <name>`；或把 dsh 包 link 到本机源码仓并从源码仓启动。两者让运行中的 dsh 与仓库里的副本本来就是同一份，但 linked 插件不要求使用这两种布局。
+另两种可用布局：插件仓库自装 `@agentrans/cli` 并从仓库里启动 `pnpm exec dsh --profile <name>`；或把 dsh 包 link 到本机源码仓并从源码仓启动。两者让运行中的 dsh 与仓库里的副本本来就是同一份，但 linked 插件不要求使用这两种布局。
 
 ## Alternatives considered
 

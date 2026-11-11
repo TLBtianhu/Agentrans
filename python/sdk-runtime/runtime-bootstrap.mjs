@@ -106,7 +106,7 @@ if (resource !== undefined) {
         env: { PATH: `${dirname(node)}${delimiter}${process.env.PATH ?? ''}` } }
     }
   }
-  const { runCli } = await import('@agentrans/dsh/lib/bin.js')
+  const { runCli } = await import('@agentrans/cli/lib/bin.js')
   await runCli({ packageManager })
 } else {
   Reflect.deleteProperty(process.env, selectorName)

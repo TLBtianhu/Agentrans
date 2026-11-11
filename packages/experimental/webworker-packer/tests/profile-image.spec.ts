@@ -39,7 +39,7 @@ describe('profile roster', () => {
 
   it('names the CLI manifest as the installation', () => {
     expect(installationManifest(repoRoot)).toEqual({
-      name: '@agentrans/dsh',
+      name: '@agentrans/cli',
       manifest: join(repoRoot, 'apps/cli/package.json'),
     })
   })

@@ -24,7 +24,7 @@ The served launch path (apps/cli, app-boot) carries no Preview-specific code; th
 
 - **packer**
   - Package roster = `PROFILE_TEMPLATES[profile].bundles` + `OPTIONAL_BUNDLES` + the rows named in those bundles' patch files; the bundle packages themselves also enter the image (patches, locale, and icon through the publish view). Both tables are read from `@agentrans/official-bundles`, the same source the Plugins page uses.
-  - The image carries a manifest-only `node_modules/@agentrans/dsh/package.json` (a verbatim copy of `apps/cli/package.json`) as the installation anchor, and the image manifest names it in `installation`.
+  - The image carries a manifest-only `node_modules/@agentrans/cli/package.json` (a verbatim copy of `apps/cli/package.json`) as the installation anchor, and the image manifest names it in `installation`.
   - The image carries no composed configuration and no `config/cordis.yml`; the image manifest records the `profile` the Worker boots.
   - The image carries a home patch, `home/cordis.patch.yml`: for each row the runtime's `PLATFORM_ENTRY_CONFIG` names (`session-persistence-jsonl`), the config the template's bundle layers compose with the required fields over it (`compression: none`). A patch replaces a row's whole config, so the composed fields stay; the bundle files read at pack time are the ones in the image.
 - **Worker**

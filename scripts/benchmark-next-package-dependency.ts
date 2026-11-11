@@ -19,7 +19,7 @@ import {
   type WorkspacePackageManifest,
 } from './verify-package-dependencies.ts'
 
-const TARGET_PACKAGE = '@agentrans/dsh'
+const TARGET_PACKAGE = '@agentrans/cli'
 const CORDIS = '@agentrans/cordis'
 
 interface Options {

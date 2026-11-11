@@ -78,7 +78,7 @@ const standardReleaseMemberDirectory = new RegExp(
 const desktopApplicationDirectory = 'apps/desktop'
 const localArtifactDirs = new Set(['node_modules'])
 const appPackageFiles: Readonly<Record<string, readonly string[]>> = {
-  '@agentrans/dsh': ['lib/*.js', 'lib/types/*.d.ts'],
+  '@agentrans/cli': ['lib/*.js', 'lib/types/*.d.ts'],
   '@agentrans/desktop-host': [
     'lib/index.js', 'lib/cli.js',
   ],
@@ -465,7 +465,7 @@ function isReleaseMemberDirectory(dir: string): boolean {
  */
 export function checkDshFamilyVersion(manifest: PackageManifest, expected: string | undefined): string | undefined {
   const name = manifest.name
-  if (name !== '@agentrans/dsh' && name?.startsWith('@agentrans/') !== true) return undefined
+  if (name !== '@agentrans/cli' && name?.startsWith('@agentrans/') !== true) return undefined
   if (manifest.version !== expected) {
     return `${name}: package.json version must match root version ${expected ?? '(missing)'}`
   }
@@ -650,7 +650,7 @@ export function checkExperimentalDependencyIsolation(
   const errors: string[] = []
   for (const { dir, manifest } of manifests) {
     if (!standardReleaseMemberDirectory.test(dir) && dir !== 'python/sdk-runtime') continue
-    const offered = manifest.name === '@agentrans/dsh' ? new Set(optionalBundles) : new Set<string>()
+    const offered = manifest.name === '@agentrans/cli' ? new Set(optionalBundles) : new Set<string>()
     for (const section of runtimeDependencySections) {
       for (const [name, range] of Object.entries(manifest[section] ?? {})) {
         const experimental = experimentalNames.has(name) || isExperimentalPackageName(name)
@@ -684,7 +684,7 @@ export function checkWorkspaceProtocol(manifests: readonly WorkspaceManifest[]):
     for (const section of dependencySections) {
       for (const [name, range] of Object.entries(manifest[section] ?? {})) {
         if (!members.has(name)) continue
-        const expected = name === '@agentrans/dsh' || name.startsWith('@agentrans/')
+        const expected = name === '@agentrans/cli' || name.startsWith('@agentrans/')
           ? 'workspace:*'
           : vendors.has(name) ? 'workspace:~' : undefined
         if (expected !== undefined ? range === expected : range.startsWith('workspace:')) continue

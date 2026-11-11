@@ -28,8 +28,8 @@
 Usage: agentrans [--profile] <name> [options] [app-args...]
        dsh plugin --profile <name> <pnpm-args...>
 
-dsh: boot a Agentrans profile — an ordered stack of plugin-bundle patch layers
-under your own overrides.
+agentrans: boot a Agentrans profile — an ordered stack of plugin-bundle patch
+layers under your own overrides.
 
 Arguments:
   args                           arguments for the booted profile's app (see:

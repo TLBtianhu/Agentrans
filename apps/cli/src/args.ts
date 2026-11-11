@@ -12,7 +12,7 @@
  *
  * `dsh <name>` abbreviates `agentrans --profile <name>`; `plugin` manages a profile's
  * plugin dependencies by forwarding to pnpm.
- * @module @agentrans/dsh/args
+ * @module @agentrans/cli/args
  */
 
 import { Command, CommanderError, InvalidArgumentError } from 'commander'
@@ -153,7 +153,7 @@ export function parseDshArgs(argv: readonly string[], version: string, manageDes
     .name('agentrans')
     .version(version, '-V, --version', 'output the version number')
     .usage('[--profile] <name> [options] [app-args...]\n       dsh plugin --profile <name> <pnpm-args...>')
-    .description('dsh: boot a Agentrans profile — an ordered stack of plugin-bundle patch layers under your own overrides.')
+    .description('agentrans: boot a Agentrans profile — an ordered stack of plugin-bundle patch layers under your own overrides.')
     .addHelpText('after', HELP_EXAMPLES)
     .exitOverride()
     // The launcher's flags come first and end at the first token it does not
@@ -211,6 +211,6 @@ export function parseDshArgs(argv: readonly string[], version: string, manageDes
     return process.exit(error instanceof CommanderError ? error.exitCode : 1)
   }
   /* v8 ignore next -- an action resolves or Commander throws */
-  if (resolved === undefined) throw new Error('dsh: no invocation resolved')
+  if (resolved === undefined) throw new Error('agentrans: no invocation resolved')
   return resolved
 }

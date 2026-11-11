@@ -463,7 +463,7 @@ describe('loadProfile', () => {
     })
     const manifestPath = join(anchor, '..', 'node_modules', 'guarded', 'package.json')
     writeFileSync(manifestPath, JSON.stringify({
-      ...JSON.parse(readFileSync(manifestPath, 'utf8')) as object, peerDependencies: { '@agentrans/dsh': '999.0.0' },
+      ...JSON.parse(readFileSync(manifestPath, 'utf8')) as object, peerDependencies: { '@agentrans/cli': '999.0.0' },
     }))
     const dir = resolveProfileDir('demo', tmp())
     initProfile(dir, ['guarded', 'kept'])

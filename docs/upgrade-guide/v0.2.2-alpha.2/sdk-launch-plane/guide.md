@@ -16,5 +16,5 @@ Workspace TypeScript SDK imports now always launch the matching source CLI with 
 ## Migration
 
 1. Keep repository source aliases when running SDK tests from source. Existing `apps/cli/lib/bin.js` no longer overrides those source imports.
-2. Before using the published SDK, prepare its same-version `@agentrans/dsh` executable. In a checkout, run `pnpm run build`; an incomplete installed payload must be repaired rather than relying on source fallback.
+2. Before using the published SDK, prepare its same-version `@agentrans/cli` executable. In a checkout, run `pnpm run build`; an incomplete installed payload must be repaired rather than relying on source fallback.
 3. If your embedding intentionally uses a separately prepared CLI, pass its path as `dshBin`. Confirm the launched profile and package versions before exercising a provider. See the [SDK client](../../../../packages/sdk/client/README.md).

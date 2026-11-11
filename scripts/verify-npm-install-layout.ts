@@ -10,7 +10,7 @@ import {
   type RegistryIndex,
 } from './benchmark-npm-resolution.ts'
 
-const DSH_PACKAGE = '@agentrans/dsh'
+const DSH_PACKAGE = '@agentrans/cli'
 const CORDIS_PACKAGE = '@agentrans/cordis'
 const NESTED_DSH_ALIAS = 'dsh-previous'
 const NESTED_DSH_PATH = `node_modules/${NESTED_DSH_ALIAS}`

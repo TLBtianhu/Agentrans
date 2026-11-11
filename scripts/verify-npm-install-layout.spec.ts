@@ -11,9 +11,9 @@ function validLayout(): NpmPackageLock {
   return {
     lockfileVersion: 3,
     packages: {
-      '': { dependencies: { '@agentrans/dsh': '0.2.0', 'dsh-previous': 'npm:@agentrans/dsh@0.1.0' } },
+      '': { dependencies: { '@agentrans/cli': '0.2.0', 'dsh-previous': 'npm:@agentrans/cli@0.1.0' } },
       'node_modules/@agentrans/cordis': { version: '4.0.1' },
-      'node_modules/@agentrans/dsh': {
+      'node_modules/@agentrans/cli': {
         version: '0.2.0',
         dependencies: { '@agentrans/child': '^0.2.0' },
         peerDependencies: { '@agentrans/cordis': '^4.0.1' },
@@ -24,7 +24,7 @@ function validLayout(): NpmPackageLock {
       },
       'node_modules/@agentrans/leaf': { version: '0.2.0' },
       'node_modules/dsh-previous': {
-        name: '@agentrans/dsh',
+        name: '@agentrans/cli',
         version: '0.1.0',
         dependencies: { '@agentrans/child': '^0.1.0' },
         peerDependencies: { '@agentrans/cordis': '^4.0.1' },
@@ -41,8 +41,8 @@ function validLayout(): NpmPackageLock {
 describe('npm install layout verifier', () => {
   it('creates two incompatible versions of every DSH package', () => {
     const index: RegistryIndex = new Map([
-      ['@agentrans/dsh', new Map([['0.1.1-rc.2', {
-        name: '@agentrans/dsh',
+      ['@agentrans/cli', new Map([['0.1.1-rc.2', {
+        name: '@agentrans/cli',
         version: '0.1.1-rc.2',
         dependencies: { '@agentrans/child': '^0.1.1-rc.2' },
         peerDependencies: { '@agentrans/cordis': '^4.0.1' },
@@ -59,13 +59,13 @@ describe('npm install layout verifier', () => {
 
     const dual = buildDualDshRegistry(index, '0.1.1-rc.2')
 
-    expect([...dual.get('@agentrans/dsh')?.keys() ?? []]).toEqual(['0.1.0', '0.2.0'])
-    expect(dual.get('@agentrans/dsh')?.get('0.1.0')).toMatchObject({
+    expect([...dual.get('@agentrans/cli')?.keys() ?? []]).toEqual(['0.1.0', '0.2.0'])
+    expect(dual.get('@agentrans/cli')?.get('0.1.0')).toMatchObject({
       version: '0.1.0',
       dependencies: { '@agentrans/child': '^0.1.0' },
       peerDependencies: { '@agentrans/cordis': '^4.0.1' },
     })
-    expect(dual.get('@agentrans/dsh')?.get('0.2.0')).toMatchObject({
+    expect(dual.get('@agentrans/cli')?.get('0.2.0')).toMatchObject({
       version: '0.2.0',
       dependencies: { '@agentrans/child': '^0.2.0' },
     })

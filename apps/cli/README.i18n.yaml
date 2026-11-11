@@ -2,21 +2,21 @@
 # section, a hash of its English and Chinese blocks outside code blocks and generated regions.
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write apps/cli/README.md
-/agentrans-dsh:
-  en: 1654c7176d0e3373
-  zh: e318d83ecea8ee0f
-/agentrans-dsh/entry-modes:
+/agentrans-cli:
+  en: 3ad38ada3c343475
+  zh: 44cf833224908c48
+/agentrans-cli/entry-modes:
   en: 70d42fa25c61287f
   zh: bb96ab4a661e7fcb
-/agentrans-dsh/app-arguments:
+/agentrans-cli/app-arguments:
   en: cc03e6b75206661b
   zh: 99e41f4143198352
-/agentrans-dsh/profiles:
+/agentrans-cli/profiles:
   en: a0316a86a93b2318
   zh: 8abff9fb7ca5dc2b
-/agentrans-dsh/optional-overlays:
+/agentrans-cli/optional-overlays:
   en: 3a40ddc44e55f79c
   zh: 8d3949132e1ef93c
-/agentrans-dsh/development:
-  en: 8b47e41bc7f755e8
-  zh: 7c02e515bf17f334
+/agentrans-cli/development:
+  en: 857c6b967f810f08
+  zh: 99236ab962c292bb

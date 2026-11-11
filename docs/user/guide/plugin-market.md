@@ -134,7 +134,7 @@ Text fields marked `LocalizedText` are a string or an object of strings keyed by
 | `source` | yes | `{ "type": "npm", "registry"?: url }`, or `{ "type": "git", "url": https-url, "commit": 40-hex-sha, "path"?: directory }`. |
 | `engines.dsh` | no | SemVer range of DSH versions this version runs on; absent means any. |
 
-DSH installs an npm version as `name@version`, asking `registry` first when present, and a Git version as `git+<url>.git#<commit>` with `&path:/<path>` for a package in a subdirectory. `engines.dsh` should match the package's own `engines.dsh`, which DSH checks again at installation; a package without one is checked against its `@agentrans/dsh*` peer dependencies instead. The [format note](../../../.agents/notes/implemented/feature/2026-10-02-plugin-market-index-format.md) defines every rule.
+DSH installs an npm version as `name@version`, asking `registry` first when present, and a Git version as `git+<url>.git#<commit>` with `&path:/<path>` for a package in a subdirectory. `engines.dsh` should match the package's own `engines.dsh`, which DSH checks again at installation; a package without one is checked against its `@agentrans/cli*` peer dependencies instead. The [format note](../../../.agents/notes/implemented/feature/2026-10-02-plugin-market-index-format.md) defines every rule.
 
 <a id="further-exploration"></a>
 ## Further Exploration

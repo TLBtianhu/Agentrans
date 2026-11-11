@@ -38,7 +38,7 @@ Profile manifest 负责 patch 重载：
 
 ### TypeScript SDK 自定义
 
-`@agentrans/sdk-client` 依赖同版本的 `@agentrans/dsh` 包，解析其已安装 CLI 模块，通过当前 Node 可执行文件运行该模块，并默认选择 `sdk`。两层客户端都暴露 `dshBin`、`profile`、有序 `patches`、`dshHome`、进程 cwd、环境和超时；任意 command/argv 启动只保留为 fake-runtime 测试的内部适配器。
+`@agentrans/sdk-client` 依赖同版本的 `@agentrans/cli` 包，解析其已安装 CLI 模块，通过当前 Node 可执行文件运行该模块，并默认选择 `sdk`。两层客户端都暴露 `dshBin`、`profile`、有序 `patches`、`dshHome`、进程 cwd、环境和超时；任意 command/argv 启动只保留为 fake-runtime 测试的内部适配器。
 
 SDK 用户通过 profile 自定义插件。`dsh plugin --profile <name> ...` 管理持久依赖与组合包顺序，profile 的 `cordis.patch.yml` 负责持久配置项变更，启动时 `patches` 提供有序临时覆盖。自定义 profile 必须保留 `@agentrans/sdk-app` 或另一个 SDK 服务器配置项。相对 CLI 模块、patch、显式 home 与进程 cwd 路径会在 spawn 前变为绝对路径；初始化具有有限时限，诊断会写明所选 profile。
 
@@ -95,6 +95,6 @@ Python 运行时 wheel 将 [`python/sdk-runtime/runtime-bootstrap.mjs`](../../..
 - 用户通过具名 profile 与有序 patch 更改 SDK 应用的插件组合，使用与其他所有 dsh 应用相同的安装与解析模型。
 - 自定义 profile 可以在不启用服务器模块 HMR 的情况下获得实时配置监视，只有显式覆盖配置项才会启用源码模块替换。
 - 完整 SDK 与 ACP profile 共享完整 base 应用和同一份策略与工具；`sdk-minimal` 拥有自己的显式独立清单，快照会呈现这些刻意采用的组装差异。
-- 增加 `@agentrans/dsh` 会扩大 TypeScript 客户端的安装体积，换来确定的同版本运行时。
+- 增加 `@agentrans/cli` 会扩大 TypeScript 客户端的安装体积，换来确定的同版本运行时。
 - 受信任用户 patch 可以增加写入 stdout 的插件并破坏自己的协议流；随附 profile 保证纯净，不为任意第三方组合提供保证。
 - Python 打包普通 `dsh` profile 启动器，同时保留封闭原生运行时，wheel 用户无需系统 Node。

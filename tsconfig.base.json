@@ -94,8 +94,8 @@
       "@agentrans/experimental-claude-code-mods/types": ["./packages/experimental/claude-code-mods/src/types.ts"],
       // The example mods are source-only plugin entries; a source launch resolves the package subpath here.
       "@agentrans/experimental-claude-code-mods/examples/*": ["./packages/experimental/claude-code-mods/examples/*"],
-      "@agentrans/dsh/profile-boot": ["./apps/cli/src/profile-boot.ts"],
-      "@agentrans/dsh/lib/bin.js": ["./apps/cli/src/bin.ts"],
+      "@agentrans/cli/profile-boot": ["./apps/cli/src/profile-boot.ts"],
+      "@agentrans/cli/lib/bin.js": ["./apps/cli/src/bin.ts"],
       "@agentrans/browser-use": ["./packages/browser-use/browser-use/src/index.ts"],
       "@agentrans/browser-use/brand": ["./packages/browser-use/browser-use/src/brand.ts"],
       "@agentrans/experimental-browser-use-runtime": ["./packages/experimental/browser-use-runtime/src/index.ts"],

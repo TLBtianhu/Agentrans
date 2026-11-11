@@ -38,7 +38,7 @@ The shipped protocol profiles reserve stdout for protocol frames, expose help wi
 
 ### TypeScript SDK customization
 
-`@agentrans/sdk-client` depends on the same-version `@agentrans/dsh` package, resolves its installed CLI module, runs it through the current Node executable, and selects `sdk` by default. Both client layers expose `dshBin`, `profile`, ordered `patches`, `dshHome`, process cwd, environment, and timeouts; arbitrary command/argv launch remains an internal fake-runtime adapter.
+`@agentrans/sdk-client` depends on the same-version `@agentrans/cli` package, resolves its installed CLI module, runs it through the current Node executable, and selects `sdk` by default. Both client layers expose `dshBin`, `profile`, ordered `patches`, `dshHome`, process cwd, environment, and timeouts; arbitrary command/argv launch remains an internal fake-runtime adapter.
 
 SDK users customize plugins through profiles. `dsh plugin --profile <name> ...` manages persistent dependencies and bundle order, the profile's `cordis.patch.yml` owns persistent row changes, and launch `patches` supply ordered ephemeral overrides. A custom profile must retain `@agentrans/sdk-app` or another SDK server row. Relative CLI-module, patch, explicit home, and process-cwd paths become absolute before spawn, and initialization has a finite bound whose diagnostic names the selected profile.
 
@@ -95,6 +95,6 @@ The [ACP automation-only protocol](../simplification/2026-07-23-acp-automation-o
 - A user changes an SDK application's plugin composition through a named profile and ordered patches, using the same installation and resolution model as every other dsh application.
 - A custom profile receives live config watching without server module HMR and opts into source-module replacement only through an explicit row override.
 - The full SDK and ACP profiles share the complete base application and one set of policy and tools; `sdk-minimal` owns its explicit standalone roster, and snapshots present intentional assembled differences.
-- Adding `@agentrans/dsh` increases the TypeScript client's install size in exchange for a deterministic same-version runtime.
+- Adding `@agentrans/cli` increases the TypeScript client's install size in exchange for a deterministic same-version runtime.
 - Trusted user patches can add a plugin that writes to stdout and corrupt their own protocol stream; shipped profiles guarantee purity, not arbitrary third-party composition.
 - Python packages the ordinary `dsh` profile launcher while retaining a closed native runtime and no system-Node requirement for wheel users.

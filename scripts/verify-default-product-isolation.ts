@@ -78,8 +78,8 @@ export function verifyDefaultProductIsolation(root: string): ProductIsolationRes
     if (!existsSync(resolve(root, path))) failures.push(`missing default product root ${path}`)
   }
   const cli = directories.get(resolve(root, 'apps/cli'))
-  if (cli?.manifest.name !== '@agentrans/dsh') {
-    failures.push('apps/cli/package.json must identify @agentrans/dsh')
+  if (cli?.manifest.name !== '@agentrans/cli') {
+    failures.push('apps/cli/package.json must identify @agentrans/cli')
   }
   // The bundles the launcher ships switched off: each a runtime dependency of the installation that is a bundle
   // with an icon and locale display metadata for the plugin manager's Official group, none a default.

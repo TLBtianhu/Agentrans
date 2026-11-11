@@ -35,7 +35,7 @@ it('requires explicit acknowledgement, grants only the exact pair, lists and rev
   const runtime = getDshRuntimeVersion()
   expect(await runPlugin('test', ['allow-version', '@example/plugin@1.2.3', '--dsh-version', runtime, '--accept-risk'])).toBe(0)
   expect(stderr.mock.calls.map(call => call[0]).join('')).toMatchInlineSnapshot(`
-    "dsh: warning: allowing incompatible plugin versions can break the application or corrupt data. Approval applies only to the exact package and DSH versions.
+    "agentrans: warning: allowing incompatible plugin versions can break the application or corrupt data. Approval applies only to the exact package and DSH versions.
     "
   `)
   expect(stderr.mock.invocationCallOrder[0]).toBeLessThan(stdout.mock.invocationCallOrder[0]!)
@@ -81,19 +81,19 @@ it.each([0, 1])('forwards ordinary pnpm output and exit status %s', async (exitC
   expect(await runPlugin('test', ['list'])).toBe(exitCode)
   expect(stdout).toHaveBeenCalledWith('pnpm output')
   if (exitCode === 0) expect(stderr).not.toHaveBeenCalled()
-  else expect(stderr).toHaveBeenCalledWith('dsh: plugin command failed; diagnostics: /profile/log\n')
+  else expect(stderr).toHaveBeenCalledWith('agentrans: plugin command failed; diagnostics: /profile/log\n')
 })
 
 it('names the exact grant command for each package a compatibility check refused', async () => {
   const { stderr } = fixture()
   vi.mocked(runPluginCommand).mockResolvedValue({
     exitCode: 1, output: '', truncated: false, logPath: '/profile/log',
-    incompatible: [{ name: '@example/plugin', version: '1.2.3', runtimeVersion: '0.1.0', requirements: { '@agentrans/dsh': '^9.0.0' } }],
+    incompatible: [{ name: '@example/plugin', version: '1.2.3', runtimeVersion: '0.1.0', requirements: { '@agentrans/cli': '^9.0.0' } }],
   })
   expect(await runPlugin('test', ['add', '@example/plugin'])).toBe(1)
   expect(stderr.mock.calls.map(call => call[0])).toEqual([
-    'dsh: to accept the risk, run: dsh plugin --profile test allow-version @example/plugin@1.2.3 --dsh-version 0.1.0 --accept-risk\n',
-    'dsh: plugin command failed; diagnostics: /profile/log\n',
+    'agentrans: to accept the risk, run: agentrans plugin --profile test allow-version @example/plugin@1.2.3 --dsh-version 0.1.0 --accept-risk\n',
+    'agentrans: plugin command failed; diagnostics: /profile/log\n',
   ])
 })
 
@@ -131,7 +131,7 @@ it.each([
   const args = arguments_.map(value => value === 'CURRENT' ? getDshRuntimeVersion() : value)
   expect(await runPlugin('desktop', args)).toBe(1)
   expect(stderr.mock.calls.map(call => call[0]).join('')).toMatchInlineSnapshot(`
-    "dsh: Error: Open DeepSeek Harness Desktop once to initialize its profile, then fully quit it before running dsh plugin --profile desktop.
+    "agentrans: Error: Open Agentrans Desktop once to initialize its profile, then fully quit it before running dsh plugin --profile desktop.
     "
   `)
   expect(existsSync(join(home, 'profiles', 'desktop'))).toBe(false)

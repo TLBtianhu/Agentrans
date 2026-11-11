@@ -42,7 +42,7 @@ const CORDIS = '@agentrans/cordis'
  * location that TypeScript scans when it computes module specifiers for every JSX file.
  */
 function workspaceRange(name: string): 'workspace:*' | 'workspace:~' {
-  return name === '@agentrans/dsh' || name.startsWith('@agentrans/') ? 'workspace:*' : 'workspace:~'
+  return name === '@agentrans/cli' || name.startsWith('@agentrans/') ? 'workspace:*' : 'workspace:~'
 }
 const RELEASE_MANIFEST_GLOB = 'packages/!(experimental)/*/package.json'
 /** Every package group, experimental included, follows the same published dependency policy. */

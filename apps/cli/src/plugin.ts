@@ -39,7 +39,7 @@ async function versionCommand(profile: string, args: readonly string[]): Promise
       request = { packageVersion, runtimeVersion }
     }
     if (command === 'allow-version') {
-      process.stderr.write('dsh: warning: allowing incompatible plugin versions can break the application or corrupt data. Approval applies only to the exact package and DSH versions.\n')
+      process.stderr.write('agentrans: warning: allowing incompatible plugin versions can break the application or corrupt data. Approval applies only to the exact package and DSH versions.\n')
     }
     const dir = resolveProfileDir(profile)
     if (profile !== 'desktop') await mkdir(dir, { recursive: true })
@@ -48,16 +48,16 @@ async function versionCommand(profile: string, args: readonly string[]): Promise
       else if (!existsSync(join(dir, 'package.json'))) initProfile(dir, PROFILE_TEMPLATES[profile]?.bundles ?? DEFAULT_PROFILE_BUNDLES)
       if (request === undefined) {
         const { exemptions, warnings } = readProfileCompatibility(dir)
-        for (const warning of warnings) process.stderr.write(`dsh: warning: ${warning}\n`)
+        for (const warning of warnings) process.stderr.write(`agentrans: warning: ${warning}\n`)
         process.stdout.write(JSON.stringify(exemptions, undefined, 2) + '\n')
       } else {
         await setProfileVersionExemption(dir, request.packageVersion, request.runtimeVersion, command === 'allow-version', acceptRisk)
-        process.stdout.write(`dsh: ${command === 'allow-version' ? 'allowed' : 'revoked'} ${request.packageVersion} for DSH ${request.runtimeVersion}\n`)
+        process.stdout.write(`agentrans: ${command === 'allow-version' ? 'allowed' : 'revoked'} ${request.packageVersion} for DSH ${request.runtimeVersion}\n`)
       }
     }, { waitMs: 120000 })
     return 0
   } catch (error) {
-    process.stderr.write(`dsh: ${String(error)}\n`)
+    process.stderr.write(`agentrans: ${String(error)}\n`)
     return 1
   }
 }
@@ -71,7 +71,7 @@ async function versionCommand(profile: string, args: readonly string[]): Promise
 export async function runPlugin(profile: string, args: readonly string[], packageManager?: ProfileContext['packageManager']): Promise<number> {
   if (profile === 'desktop') {
     try { requireDesktopProfile(resolveProfileDir(profile)) } catch (error) {
-      process.stderr.write(`dsh: ${String(error)}\n`)
+      process.stderr.write(`agentrans: ${String(error)}\n`)
       return 1
     }
   }
@@ -79,7 +79,7 @@ export async function runPlugin(profile: string, args: readonly string[], packag
   if (versionResult !== undefined) return versionResult
   const dir = resolveProfileDir(profile)
   if (existsSync(join(dir, 'package.json'))) {
-    for (const warning of readProfileCompatibility(dir).warnings) process.stderr.write(`dsh: warning: ${warning}\n`)
+    for (const warning of readProfileCompatibility(dir).warnings) process.stderr.write(`agentrans: warning: ${warning}\n`)
   }
   const context = { profile, dir, installAnchor: INSTALL_ANCHOR, cwd: process.cwd() }
   const options: PackageOperationOptions = {
@@ -96,13 +96,13 @@ export async function runPlugin(profile: string, args: readonly string[], packag
       return runProfilePnpm(context, args, options)
     }, { waitMs: 120000 })
     : await runPluginCommand(context, args, options)
-  if (result.exitCode === 127) process.stderr.write('dsh: pnpm was not found; install pnpm and make it available on PATH.\n')
+  if (result.exitCode === 127) process.stderr.write('agentrans: pnpm was not found; install pnpm and make it available on PATH.\n')
   for (const { name, version, runtimeVersion } of result.incompatible ?? []) {
-    process.stderr.write(`dsh: to accept the risk, run: dsh plugin --profile ${profile} allow-version ${name}@${version} --dsh-version ${runtimeVersion} --accept-risk\n`)
+    process.stderr.write(`agentrans: to accept the risk, run: agentrans plugin --profile ${profile} allow-version ${name}@${version} --dsh-version ${runtimeVersion} --accept-risk\n`)
   }
-  if (result.exitCode !== 0) process.stderr.write(`dsh: plugin command failed; diagnostics: ${result.logPath}\n`)
+  if (result.exitCode !== 0) process.stderr.write(`agentrans: plugin command failed; diagnostics: ${result.logPath}\n`)
   if (result.exitCode !== 0 && args.some(argument => /^git\+|^github:|\.git(?:#|$)/.test(argument))) {
-    process.stderr.write(`dsh: git-hosted plugins build on install via their prepare script, which pnpm blocks until allowed — add the exact key pnpm printed above under allowBuilds in ${join(resolveProfileDir(profile), 'pnpm-workspace.yaml')}, then re-run\n`)
+    process.stderr.write(`agentrans: git-hosted plugins build on install via their prepare script, which pnpm blocks until allowed — add the exact key pnpm printed above under allowBuilds in ${join(resolveProfileDir(profile), 'pnpm-workspace.yaml')}, then re-run\n`)
   }
   return result.exitCode
 }

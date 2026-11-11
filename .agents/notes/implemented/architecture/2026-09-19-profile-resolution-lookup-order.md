@@ -137,7 +137,7 @@ The plugin's own third-party dependencies are hoisted to `$DSH_HOME/profiles/<na
 
 Use the same manifest declarations as the harness packages: declare dsh packages whose instances must be shared with the host under both `peerDependencies` and `devDependencies`. The peer declaration occupies their positions at `R/node_modules`; the dev copies serve the compiler and standalone tests. Keep third-party dependencies and stateless dsh utilities such as `@agentrans/brand` and `@agentrans/util-values` under `dependencies`. After changing `peerDependencies`, new resolutions during a plugin reload use the new declaration; Node and Cordis still own the lifetime of already loaded modules. Equal package versions do not make copies from different directories share module-local state. Replacing only a scope tag with `Symbol.for` likewise cannot share scope parents, carrier keys, or registration tables; identity-bearing runtimes must resolve to the Host instance.
 
-Two other layouts remain available: install `@agentrans/dsh` in the plugin repository and run `pnpm exec dsh --profile <name>` there, or link dsh packages to a local source repository and start dsh from that repository. Both make the running dsh and the repository's copies identical, but linked plugins do not require either layout.
+Two other layouts remain available: install `@agentrans/cli` in the plugin repository and run `pnpm exec dsh --profile <name>` there, or link dsh packages to a local source repository and start dsh from that repository. Both make the running dsh and the repository's copies identical, but linked plugins do not require either layout.
 
 ## Alternatives considered
 

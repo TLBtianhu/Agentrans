@@ -21,7 +21,7 @@ export async function runDesktopCli(runtimeDir: string, supportDir: string): Pro
   prepareProductState(context)
   applyProductLaunchEnvironment(context, process.env)
   installOfficeEngineResolution(runtimeDir)
-  const { runCli } = await import('@agentrans/dsh/lib/bin.js')
+  const { runCli } = await import('@agentrans/cli/lib/bin.js')
   await runCli({
     manageDesktopProfile: true,
     packageManager: {

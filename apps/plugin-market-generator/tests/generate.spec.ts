@@ -91,14 +91,14 @@ it('lists every bundle version from the registry document that is neither deprec
   const packages: Packages = {
     'dsh-a': {
       '0.9.0': { time: '2026-01-01T00:00:00.000Z' },
-      '1.0.0': { time: '2026-02-01T00:00:00.000Z', manifest: { ...BUNDLE, keywords: ['old'], engines: { dsh: '>=0.2.0' }, peerDependencies: { '@agentrans/dsh': '9' } } },
+      '1.0.0': { time: '2026-02-01T00:00:00.000Z', manifest: { ...BUNDLE, keywords: ['old'], engines: { dsh: '>=0.2.0' }, peerDependencies: { '@agentrans/cli': '9' } } },
       '1.1.0': { time: '2026-03-01T00:00:00.000Z', manifest: { ...BUNDLE, deprecated: 'broken' } },
       '1.1.5': { time: '2026-03-15T00:00:00.000Z', manifest: { ...BUNDLE, private: true } },
       '1.2.0': {
         time: '2026-04-01T00:00:00.000Z',
         manifest: {
           ...BUNDLE, deprecated: '',
-          peerDependencies: { '@agentrans/dsh': '>=0.2.0', '@agentrans/agent': '>=0.2.0', '@agentrans/tools': '^0.2.0 || ^0.3.0', react: '18' },
+          peerDependencies: { '@agentrans/cli': '>=0.2.0', '@agentrans/agent': '>=0.2.0', '@agentrans/tools': '^0.2.0 || ^0.3.0', react: '18' },
         },
       },
       '1.3.0': { time: '2026-05-01T00:00:00.000Z', manifest: { ...BUNDLE, peerDependencies: { '@agentrans/agent': 'workspace:>=1' } } },

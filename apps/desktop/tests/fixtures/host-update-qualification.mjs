@@ -22,9 +22,9 @@ assert.equal(process.env.DSH_AGENTS_HOME, context.paths.dshAgentsHomeDir)
 const require = createRequire(join(project, 'package.json'))
 const { LlmAdapter, createUserMessage } = await import(pathToFileURL(require.resolve('@agentrans/llm')).href)
 const observed = []
-const { runProfile } = await import(pathToFileURL(require.resolve('@agentrans/dsh/profile-boot')).href)
+const { runProfile } = await import(pathToFileURL(require.resolve('@agentrans/cli/profile-boot')).href)
 const { loadLayeredEnv, loadProfileDirectory } = await import(pathToFileURL(require.resolve('@agentrans/app-boot')).href)
-const installAnchor = require.resolve('@agentrans/dsh/package.json')
+const installAnchor = require.resolve('@agentrans/cli/package.json')
 const running = await runProfile({ environment: loadLayeredEnv('dsh'), profile: 'desktop',
   resolvedProfile: { profile: loadProfileDirectory('dsh', project, installAnchor), installAnchor },
   patchFiles: [], args: ['--no-open', '--port', '0'] })

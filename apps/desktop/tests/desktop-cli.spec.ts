@@ -7,12 +7,12 @@ import { afterEach, expect, it, onTestFinished, vi } from 'vitest'
 import {
   PRODUCT_LAUNCH_CONTEXT_ENV, parseProductLaunchContext, resolveProductLaunchContext, serializeProductLaunchContext,
 } from '@agentrans/product-layout/launch-context'
-import { runCli } from '@agentrans/dsh/lib/bin.js'
+import { runCli } from '@agentrans/cli/lib/bin.js'
 import { runDesktopCli } from '../../desktop-host/src/cli.ts'
 import { installOfficeEngineResolution } from '../../desktop-host/src/office-engine.ts'
 import { configureDesktopProduct } from '../src/product-context.ts'
 
-vi.mock('@agentrans/dsh/lib/bin.js', () => ({ runCli: vi.fn() }))
+vi.mock('@agentrans/cli/lib/bin.js', () => ({ runCli: vi.fn() }))
 vi.mock('../../desktop-host/src/office-engine.ts', () => ({ installOfficeEngineResolution: vi.fn() }))
 
 afterEach(() => {

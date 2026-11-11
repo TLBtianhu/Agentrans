@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Command-line entry for dsh.
- * @module @agentrans/dsh/bin
+ * @module @agentrans/cli/bin
  */
 
 /* v8 ignore file -- built-bin acceptance exercises this self-executing dispatch. */
@@ -69,7 +69,7 @@ export async function runCli(options: RunCliOptions = {}): Promise<void> {
     }
     default:
       invocation satisfies never
-      throw new Error(`dsh: unhandled invocation mode ${JSON.stringify(invocation)}`)
+      throw new Error(`agentrans: unhandled invocation mode ${JSON.stringify(invocation)}`)
   }
 }
 

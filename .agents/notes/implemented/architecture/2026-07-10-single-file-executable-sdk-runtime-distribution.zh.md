@@ -32,7 +32,7 @@ exe 使用 [@yao-pkg/pkg](https://github.com/yao-pkg/pkg)（vercel/pkg 归档后
 确定性服务接口由打包后的 `dsh` 应用选择为插件：
 
 - [`packages/sdk/server`](../../../../packages/sdk/server/README.zh.md)（`@agentrans/sdk-jsonrpc-server`）：纯协议插件；执行 `apply` 时，在进程 stdio 上挂载 `HarnessSdkJsonRpcServer` 与按行分隔的 JSON-RPC 传输层，资源释放走 `ctx.effect()`。是否提供服务由 `cordis.yml` 决定；未挂载该插件的配置会启动一个不提供此服务的合法进程。协议级退出归插件所有（应答并确保 `shutdown` 响应发送完毕后，对根运行时执行 dispose（资源释放），让待处理的持久化操作完成，再调用 `exit(0)`；HMR（热模块替换）式卸载只停止服务，不退出进程）。
-- [`apps/cli`](../../../../apps/cli/README.zh.md)（`@agentrans/dsh`）：打包后的应用入口；其 `sdk` profile 挂载 `dsh-sdk-jsonrpc-server`，CLI 负责环境分层、profile 组合、stdin／signal 关闭与进程退出。
+- [`apps/cli`](../../../../apps/cli/README.zh.md)（`@agentrans/cli`）：打包后的应用入口；其 `sdk` profile 挂载 `dsh-sdk-jsonrpc-server`，CLI 负责环境分层、profile 组合、stdin／signal 关闭与进程退出。
 
 Python 客户端提供显式 Harness home，并选择 `sdk` profile 与有序 patch 文件。缺失 home、profile、bundle 或 server 配置项都会明确失败；不存在外部完整配置回退。[docs/architecture.md](../../../../docs/architecture.zh.md)负责该应用接口。
 

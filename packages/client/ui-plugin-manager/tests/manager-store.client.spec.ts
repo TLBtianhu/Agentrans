@@ -11,7 +11,7 @@ import type { PluginTab } from '../src/client/tab-ledger.ts'
 import type { ConfigLedger } from '../src/client/config-ledger.ts'
 import { installable, offeredRegistries, packageView, PluginManagerController, rowKey, sortPackages, updateCandidate } from '../src/client/manager-store.ts'
 
-const INCOMPATIBLE = { name: 'dsh-late', version: '2.0.0', runtimeVersion: '0.1.0', requirements: { '@agentrans/dsh': '^0.2.0' } }
+const INCOMPATIBLE = { name: 'dsh-late', version: '2.0.0', runtimeVersion: '0.1.0', requirements: { '@agentrans/cli': '^0.2.0' } }
 const ROW_ENTRY = 'include:sidebar' as PluginEntryId
 
 const BUNDLE: BundleInfo = {

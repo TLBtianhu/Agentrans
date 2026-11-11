@@ -866,7 +866,7 @@ importers:
       '@agentrans/deepseek-account':
         specifier: workspace:*
         version: link:../../packages/credentials/deepseek-account
-      '@agentrans/dsh':
+      '@agentrans/cli':
         specifier: workspace:*
         version: link:../cli
       '@agentrans/home-paths':
@@ -14513,7 +14513,7 @@ importers:
 
   packages/sdk/client:
     dependencies:
-      '@agentrans/dsh':
+      '@agentrans/cli':
         specifier: workspace:*
         version: link:../../../apps/cli
     devDependencies:
@@ -18467,7 +18467,7 @@ importers:
       '@agentrans/deepseek-llm-api-extensions':
         specifier: workspace:*
         version: link:../../packages/llm/deepseek-llm-api-extensions
-      '@agentrans/dsh':
+      '@agentrans/cli':
         specifier: workspace:*
         version: link:../../apps/cli
       '@agentrans/file-reference':

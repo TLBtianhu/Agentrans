@@ -30,12 +30,12 @@ export function writePackage(modules: string, name: string, fields: Record<strin
  * @returns Sealed runtime metadata.
  */
 export function runtimeFixture(root: string, version = '1.0.0', nodeVersion = '24.17.0'): DesktopRuntimeDescriptor {
-  const names = ['@agentrans/dsh', '@agentrans/desktop-host', '@agentrans/base', '@agentrans/web-app', '@agentrans/cordis']
+  const names = ['@agentrans/cli', '@agentrans/desktop-host', '@agentrans/base', '@agentrans/web-app', '@agentrans/cordis']
   for (const name of names) {
     const bundle = name === '@agentrans/base' || name === '@agentrans/web-app'
     const path = writePackage(join(root, 'node_modules'), name, {
       version,
-      ...(name === '@agentrans/dsh' ? { dependencies: Object.fromEntries(names.slice(1).map(dependency => [dependency, version])) } : {}),
+      ...(name === '@agentrans/cli' ? { dependencies: Object.fromEntries(names.slice(1).map(dependency => [dependency, version])) } : {}),
       ...(bundle ? { dsh: { bundle: { patch: './bundle.yml' } } } : {}),
     })
     if (bundle) writeFileSync(join(path, 'bundle.yml'), '[]\n')

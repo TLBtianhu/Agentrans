@@ -11,7 +11,7 @@
     "@agentrans/cordis-plugin-loader": "workspace:~",
     "@agentrans/cordis-plugin-timer": "workspace:~",
     "@agentrans/cosmokit": "workspace:~",
-    "@agentrans/dsh": "workspace:*",
+    "@agentrans/cli": "workspace:*",
     "@agentrans/acp": "workspace:*",
     "@agentrans/agent": "workspace:*",
     "@agentrans/agent-default-model": "workspace:*",

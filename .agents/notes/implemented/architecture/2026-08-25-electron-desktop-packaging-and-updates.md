@@ -22,7 +22,7 @@ Ship a small Electron shell and pinned pnpm; the [runtime reference](../../../..
 
 Electron owns the reserved profile at `.dsh/profiles/desktop`. The [bundled-runtime decision](2026-09-08-desktop-bundled-runtime-and-external-plugins.md) owns core resource storage, external plugin dependencies, shared package links, and profile reconciliation. The private Desktop Host remains outside the public CLI package and is never published to npm.
 
-One Desktop release number identifies the Electron artifact and its exact `@agentrans/dsh` and `@agentrans/desktop-host` dependencies. A release cannot select a different core version at build or runtime. Updating dsh therefore requires a new Electron release even when shell code is unchanged.
+One Desktop release number identifies the Electron artifact and its exact `@agentrans/cli` and `@agentrans/desktop-host` dependencies. A release cannot select a different core version at build or runtime. Updating dsh therefore requires a new Electron release even when shell code is unchanged.
 
 The Desktop Host exposes the shared Web plugin manager for its reserved profile and supplies bundled pnpm through launcher facts. The CLI reserves every case variant of the `desktop` name and rejects boot, config-dump, and plugin-management requests for it. Electron acquires its process-lifetime single-instance lock before profile recovery or Host startup; later launches focus or recreate the primary window without touching profile state.
 
