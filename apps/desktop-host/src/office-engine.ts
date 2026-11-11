@@ -24,8 +24,8 @@ export function installOfficeEngineResolution(runtimeDir: string): ModuleHooks |
   if (runtimeArchivePath(runtimeDir) === undefined) return undefined
   const root = realpathSync(runtimeDir)
   const archive = dirname(root)
-  const source = pathToFileURL(join(root, 'node_modules', '@agentrans', 'libreoffice-kit-')).href
-  const destination = pathToFileURL(join(`${archive}.unpacked`, relative(archive, root), 'node_modules', '@agentrans', 'libreoffice-kit-')).href
+  const source = pathToFileURL(join(root, 'node_modules', '@deepseek-ai', 'libreoffice-kit-')).href
+  const destination = pathToFileURL(join(`${archive}.unpacked`, relative(archive, root), 'node_modules', '@deepseek-ai', 'libreoffice-kit-')).href
   return registerHooks({
     resolve(specifier, context, nextResolve) {
       const resolved = nextResolve(specifier, context)
