@@ -28,7 +28,7 @@ export const inject: string[] = []
 
 /** Plugin config (all optional — the built-in facts resolve without defaults). */
 export interface Config {
-  /** DeepSeek Harness home directory exposed as `AGENTRANS_HOME`; defaults to `$AGENTRANS_HOME` or `~/.dsh`. */
+  /** DeepSeek Harness home directory exposed as `AGENTRANS_HOME`; defaults to `$AGENTRANS_HOME` or `~/.agentrans`. */
   dshHome?: string
 }
 

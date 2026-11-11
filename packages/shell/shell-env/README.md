@@ -54,11 +54,11 @@ Contributors must declare every key they return; returning an undeclared or non-
 
 ### Choosing the Harness home
 
-The single config field picks the home directory exposed as `AGENTRANS_HOME`; the default resolution order is the `dshHome` config, then ambient `$AGENTRANS_HOME`, then `~/.dsh`.
+The single config field picks the home directory exposed as `AGENTRANS_HOME`; the default resolution order is the `dshHome` config, then ambient `$AGENTRANS_HOME`, then `~/.agentrans`.
 
 | Field | Default | Meaning |
 |---|---|---|
-| `dshHome` | `$AGENTRANS_HOME`, then `~/.dsh` | Absolute Harness home exposed as `AGENTRANS_HOME` |
+| `dshHome` | `$AGENTRANS_HOME`, then `~/.agentrans` | Absolute Harness home exposed as `AGENTRANS_HOME` |
 
 The generated [configuration catalog](../../../docs/config-catalog.md#agentransshell-env) is the exhaustive source for every accepted field and its JSDoc.
 

@@ -24,7 +24,7 @@
 
 - **npm scope**：`@deepseek-ai/dsh-*` → `@agentrans/*`，含 vendor 内的 Cordis 一层与门禁里硬编码的 scope 断言。
 - **命令**：`agentrans` → `agentrans`（`@agentrans/cli` 包、bin、启动器、185 处调用与文档）。
-- **环境变量**：`DSH_*` → `AGENTRANS_*`（1260 文件、5414 处），默认 home `~/.dsh` → `~/.agentrans`。
+- **环境变量**：`DSH_*` → `AGENTRANS_*`（1260 文件、5414 处），默认 home `~/.agentrans` → `~/.agentrans`。
 - 仍保留上游 scope 的只有被消费的依赖：`@deepseek-ai/libreoffice-kit*` 与 `@deepseek-ai/node-addon-system*`——它们是上游发布的包，不能改名。
 
 改名暴露的真实缺陷（都已修）：

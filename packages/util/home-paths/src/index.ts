@@ -182,7 +182,7 @@ function rootDisplay(resolvedRoot: string, defaultRoot: string, defaultLabel: st
  * Resolve the single-root DeepSeek Harness home.
  *
  * Precedence, highest first: an explicit configured path, `$AGENTRANS_HOME`, then
- * `~/.dsh`. The harness keeps all user data under one root. An empty or
+ * `~/.agentrans`. The harness keeps all user data under one root. An empty or
  * whitespace-only `$AGENTRANS_HOME` is treated as unset, so a blank override never
  * resolves the home to the current working directory.
  * @param configured - explicit harness-home override, which has highest precedence.
@@ -233,9 +233,9 @@ export function dshCachePath(optionsOrSegment: { dshHome?: string } | string = {
  * Describe a resolved harness home symbolically for user-facing display.
  *
  * It never returns an absolute machine path: the default home is labelled
- * `~/.dsh`, and any configured home is labelled `$AGENTRANS_HOME`.
+ * `~/.agentrans`, and any configured home is labelled `$AGENTRANS_HOME`.
  * @param resolvedHome - the absolute path returned by {@link resolveDshHome}.
- * @returns `~/.dsh` for the default home, otherwise `$AGENTRANS_HOME`.
+ * @returns `~/.agentrans` for the default home, otherwise `$AGENTRANS_HOME`.
  */
 export function dshHomeDisplay(resolvedHome: string): string {
   return rootDisplay(resolvedHome, defaultDshHome(), DEFAULT_AGENTRANS_HOME_DISPLAY, AGENTRANS_HOME_ENV)

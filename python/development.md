@@ -55,7 +55,7 @@ with DeepSeekHarness(agentrans_home="/absolute/path/to/test-dsh-home") as harnes
     print(harness.run("say hi").final_response)
 ```
 
-Alternatively export a non-empty `AGENTRANS_HOME`. The SDK rejects a launch that would silently use `~/.dsh`.
+Alternatively export a non-empty `AGENTRANS_HOME`. The SDK rejects a launch that would silently use `~/.agentrans`.
 
 ## Run against Node source
 

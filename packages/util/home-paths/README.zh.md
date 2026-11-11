@@ -31,12 +31,12 @@ kind: "package-library"
 ```ts
 import { resolveDshHome, dshHomePath, dshCachePath } from '@agentrans/home-paths'
 
-const home = resolveDshHome()                // configured path, else $AGENTRANS_HOME, else ~/.dsh
+const home = resolveDshHome()                // configured path, else $AGENTRANS_HOME, else ~/.agentrans
 const settings = dshHomePath('settings')     // join one child onto the resolved home
-const cache = dshCachePath('models')         // $AGENTRANS_HOME/cache/models, default ~/.dsh/cache/models
+const cache = dshCachePath('models')         // $AGENTRANS_HOME/cache/models, default ~/.agentrans/cache/models
 ```
 
-显式配置的路径优先级最高，然后是 `$AGENTRANS_HOME`，最后是默认的 `~/.dsh`。空或仅含空白的 `$AGENTRANS_HOME` 视为未设置，因此空白的覆盖值绝不会把主目录解析到当前工作目录。
+显式配置的路径优先级最高，然后是 `$AGENTRANS_HOME`，最后是默认的 `~/.agentrans`。空或仅含空白的 `$AGENTRANS_HOME` 视为未设置，因此空白的覆盖值绝不会把主目录解析到当前工作目录。
 
 `dshCachePath(...segments)` 从解析出的主目录下的 `cache` 目录派生路径。不传路径段时返回缓存目录本身。传入首个选项对象 `dshCachePath({ dshHome: home }, ...segments)` 可使用显式配置的主目录，遵循相同的优先级与波浪号展开规则。它返回绝对路径，不会创建目录。
 
@@ -53,7 +53,7 @@ agentsHomeDisplay(agents)            // ~/.agents, or $AGENTRANS_AGENTS_HOME for
 
 ### 展示主目录
 
-面向用户的路径请以符号形式渲染根目录，而不是机器路径：默认主目录显示为 `~/.dsh`，任何已配置的主目录显示为 `$AGENTRANS_HOME`，默认共享 agents 根目录显示为 `~/.agents`，任何已配置的共享 agents 根目录显示为 `$AGENTRANS_AGENTS_HOME`。两种展示形式都不会泄露机器的绝对路径。
+面向用户的路径请以符号形式渲染根目录，而不是机器路径：默认主目录显示为 `~/.agentrans`，任何已配置的主目录显示为 `$AGENTRANS_HOME`，默认共享 agents 根目录显示为 `~/.agents`，任何已配置的共享 agents 根目录显示为 `$AGENTRANS_AGENTS_HOME`。两种展示形式都不会泄露机器的绝对路径。
 
 ### 展开用户路径
 

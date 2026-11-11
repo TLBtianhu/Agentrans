@@ -55,7 +55,7 @@ with DeepSeekHarness(agentrans_home="/absolute/path/to/test-dsh-home") as harnes
     print(harness.run("say hi").final_response)
 ```
 
-也可以导出非空 `AGENTRANS_HOME`。SDK 会拒绝可能静默使用 `~/.dsh` 的启动。
+也可以导出非空 `AGENTRANS_HOME`。SDK 会拒绝可能静默使用 `~/.agentrans` 的启动。
 
 ## 针对 Node 源码运行
 

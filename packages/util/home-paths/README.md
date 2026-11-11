@@ -31,12 +31,12 @@ Use these helpers wherever a package must agree with the rest of the harness abo
 ```ts
 import { resolveDshHome, dshHomePath, dshCachePath } from '@agentrans/home-paths'
 
-const home = resolveDshHome()                // configured path, else $AGENTRANS_HOME, else ~/.dsh
+const home = resolveDshHome()                // configured path, else $AGENTRANS_HOME, else ~/.agentrans
 const settings = dshHomePath('settings')     // join one child onto the resolved home
-const cache = dshCachePath('models')         // $AGENTRANS_HOME/cache/models, default ~/.dsh/cache/models
+const cache = dshCachePath('models')         // $AGENTRANS_HOME/cache/models, default ~/.agentrans/cache/models
 ```
 
-An explicit configured path has the highest precedence, then `$AGENTRANS_HOME`, then the default `~/.dsh`. An empty or whitespace-only `$AGENTRANS_HOME` is treated as unset, so a blank override never resolves the home to the current working directory.
+An explicit configured path has the highest precedence, then `$AGENTRANS_HOME`, then the default `~/.agentrans`. An empty or whitespace-only `$AGENTRANS_HOME` is treated as unset, so a blank override never resolves the home to the current working directory.
 
 `dshCachePath(...segments)` derives paths from the resolved home's `cache` directory. With no segments it returns the cache directory itself. Pass an initial options object, `dshCachePath({ dshHome: home }, ...segments)`, to use an explicit configured home with the same precedence and tilde expansion. It returns an absolute path without creating directories.
 
@@ -53,7 +53,7 @@ agentsHomeDisplay(agents)            // ~/.agents, or $AGENTRANS_AGENTS_HOME for
 
 ### Displaying a home
 
-For user-facing paths, render a root symbolically rather than as a machine path: the default harness home displays as `~/.dsh`, any configured harness home as `$AGENTRANS_HOME`, the default shared agents root as `~/.agents`, and any configured shared agents root as `$AGENTRANS_AGENTS_HOME`. Neither display form leaks an absolute machine path.
+For user-facing paths, render a root symbolically rather than as a machine path: the default harness home displays as `~/.agentrans`, any configured harness home as `$AGENTRANS_HOME`, the default shared agents root as `~/.agents`, and any configured shared agents root as `$AGENTRANS_AGENTS_HOME`. Neither display form leaks an absolute machine path.
 
 ### Expanding user paths
 
