@@ -31,7 +31,7 @@ kind: "package-bundle"
 
 ```sh
 dsh plugin --profile headless add @agentrans/experimental-agent-team-profile
-dsh --profile headless "Use Agent Teams to split this task between two teammates, wait, and summarize."
+agentrans --profile headless "Use Agent Teams to split this task between two teammates, wait, and summarize."
 ```
 
 profile 必须已经包含 `@agentrans/base`，本层会使用其中的 Subagent 服务与提供方配置行。执行 `dsh plugin --profile <name> remove @agentrans/experimental-agent-team-profile` 移除本包时，bundle 也会从 profile 的有序层列表中移除。

@@ -29,7 +29,7 @@ function acpCommand(): Command {
     .helpOption('-h, --help', 'show this help')
     .addHelpText('after', `
 Example:
-  dsh --profile acp     serve ACP until the client disconnects
+  agentrans --profile acp     serve ACP until the client disconnects
 `)
 }
 

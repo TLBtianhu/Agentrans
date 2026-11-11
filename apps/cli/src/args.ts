@@ -7,10 +7,10 @@
  * their own flag families and print their own `--help` (see
  * `@agentrans/cmdline`). Launcher flags therefore come first: the first
  * token this parser does not recognize starts the inner arguments, so
- * `dsh --profile tui --resume abc` boots the tui profile with `--resume abc`,
- * and `dsh --profile web -h` prints the web app's help, not this one's.
+ * `agentrans --profile tui --resume abc` boots the tui profile with `--resume abc`,
+ * and `agentrans --profile web -h` prints the web app's help, not this one's.
  *
- * `dsh <name>` abbreviates `dsh --profile <name>`; `plugin` manages a profile's
+ * `dsh <name>` abbreviates `agentrans --profile <name>`; `plugin` manages a profile's
  * plugin dependencies by forwarding to pnpm.
  * @module @agentrans/dsh/args
  */
@@ -89,13 +89,13 @@ function rejectElectronProfile(program: Command, profile: string): void {
 /** The launcher's own help text; each app prints its own. */
 const HELP_EXAMPLES = `
 Examples:
-  dsh web                                   boot the web profile (same as: dsh --profile web)
+  agentrans web                                   boot the web profile (same as: dsh --profile web)
   dsh rescue --from-default-profile web
                                             recreate rescue from the shipped web template, then boot it
   dsh headless "run the tests"              answer one task, print the result, and exit
   dsh tui --patch ./extra.yml               boot a custom profile with one extra overlay
   dsh tui --resume <session>                arguments after the launcher flags reach the app
-  dsh web --help                            the web app's own flags and help
+  agentrans web --help                            the web app's own flags and help
   dsh plugin --profile tui add <package>    install a plugin into the tui profile
 `
 
@@ -150,7 +150,7 @@ export function parseDshArgs(argv: readonly string[], version: string, manageDes
   // inferred type would be circular through its own chain.
   const program: Command = new Command()
   program
-    .name('dsh')
+    .name('agentrans')
     .version(version, '-V, --version', 'output the version number')
     .usage('[--profile] <name> [options] [app-args...]\n       dsh plugin --profile <name> <pnpm-args...>')
     .description('dsh: boot a Agentrans profile — an ordered stack of plugin-bundle patch layers under your own overrides.')

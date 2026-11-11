@@ -1,4 +1,4 @@
-/** Recorded ACP protocol behavior through the shipped `dsh --profile acp` interface. */
+/** Recorded ACP protocol behavior through the shipped `agentrans --profile acp` interface. */
 
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'

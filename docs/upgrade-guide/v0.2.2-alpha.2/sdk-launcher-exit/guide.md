@@ -15,6 +15,6 @@ The plugin requires `appExit` or its runtime-only `exit` hook at mount. That hoo
 
 ## Migration
 
-1. Continue launching applications through `dsh --profile sdk`, `sdk-minimal`, or a custom profile. The launcher supplies `appExit`. Remove code that assumes the SDK plugin owns root disposal or forces process termination.
+1. Continue launching applications through `agentrans --profile sdk`, `sdk-minimal`, or a custom profile. The launcher supplies `appExit`. Remove code that assumes the SDK plugin owns root disposal or forces process termination.
 2. Hand-mounted plugin tests must provide `appExit` or the existing `exit` hook. Treat it as a request; a real application owner must perform teardown and process completion. Code using injected streams must release its own input activity.
 3. Verify the shutdown response and child exit independently. Success returns `{}` then exits 0; error responses and flush failures retain failure exit status. Keep the parent stdin pipe open while checking that the child completes naturally. The launcher's teardown deadline begins after its exit request and does not cover preceding SDK drain or response flush; client request and close timeouts remain separate.

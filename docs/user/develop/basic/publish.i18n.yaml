@@ -3,17 +3,17 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write docs/user/develop/basic/publish.md
 /package-and-install-a-plugin:
-  en: 0958da34d1ea9b49
-  zh: 66a024ba2f2faba2
+  en: cddbc1866312af64
+  zh: 6c1f97adda50c11a
 /package-and-install-a-plugin/two-concepts-two-manifests:
-  en: 341c334cee646f58
-  zh: 1ac8f40609a71123
+  en: 0c16d19515e7ea28
+  zh: 04b33b06e01d5131
 /package-and-install-a-plugin/two-concepts-two-manifests/the-bundle-manifest:
   en: 6615bcef2e2d3151
   zh: d830e43736ca6934
 /package-and-install-a-plugin/two-concepts-two-manifests/the-profile-manifest:
-  en: 00c4218e1af87e9d
-  zh: bd49e41ae376606c
+  en: 95046e9dca9ae1b5
+  zh: 01e3581367cce1e9
 /package-and-install-a-plugin/install-into-a-profile:
   en: 545708d4306a3746
   zh: 79c6634c6cb894a9

@@ -27,7 +27,7 @@ kind: "package-bundle"
 
 ### Profile 与构建要求
 
-manifest（元数据清单）声明可安装的 `dsh.bundle` 层和浏览器端入口。该组合包在被 profile 启用前保持隐藏，见[默认可见性与启用](#default-visibility-and-enabling)；受支持的应用仍通过 `dsh --profile` 启动。
+manifest（元数据清单）声明可安装的 `dsh.bundle` 层和浏览器端入口。该组合包在被 profile 启用前保持隐藏，见[默认可见性与启用](#default-visibility-and-enabling)；受支持的应用仍通过 `agentrans --profile` 启动。
 
 Owner、查看页和 Liveshare 服务端必须使用匹配的协议版本。构建包含 Owner 网关进程；查看页没有单独的构建。包版本、导出和发布内容由 [package.json](package.json) 声明。
 

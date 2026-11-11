@@ -1,4 +1,4 @@
-# TypeScript SDK snapshot-record patch over `dsh --profile sdk`.
+# TypeScript SDK snapshot-record patch over `agentrans --profile sdk`.
 
 # The fixture corpus must not depend on the developer's personal skill roots.
 # Ordinary product launches retain the sdk profile's default skill discovery.

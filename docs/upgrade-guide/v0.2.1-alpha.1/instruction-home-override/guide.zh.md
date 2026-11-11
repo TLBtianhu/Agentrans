@@ -17,4 +17,4 @@ description: "`agent-instructions` 行不再接受 `dshHome`；指令加载始�
 
 1. 从 `cordis.yml`、`$DSH_HOME/cordis.patch.yml`、`$DSH_HOME/profiles/<profile>/cordis.patch.yml` 以及任何 `--patch` overlay 的 `agent-instructions` 行中删除 `dshHome`。
 2. 若该覆盖原本指向非默认 home，改为在进程中导出 `DSH_HOME`，让所有 harness 消费方读取同一个 home。
-3. 用 `dsh --profile <profile> --dump-config` 确认 `agent-instructions` 行只剩其余字段，并确认新会话的首次请求在该文件存在时显示 `Instructions from: $DSH_HOME/AGENTS.md`（或 `~/.dsh/AGENTS.md`）。
+3. 用 `agentrans --profile <profile> --dump-config` 确认 `agent-instructions` 行只剩其余字段，并确认新会话的首次请求在该文件存在时显示 `Instructions from: $DSH_HOME/AGENTS.md`（或 `~/.dsh/AGENTS.md`）。

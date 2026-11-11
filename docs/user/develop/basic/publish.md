@@ -4,7 +4,7 @@ English | [中文](publish.zh.md)
 
 The previous tutorials loaded a local plugin through a `--patch` overlay. This tutorial packages it as an installable **bundle**, installs it into a **profile** with `dsh plugin add`, and explains the layer order that determines the composed configuration. It assumes the `dsh` CLI is installed. Complete [plugin configuration](./config.md) first.
 
-To use a fresh source checkout instead, complete the [run-from-source section](../../../../README.md#run-from-source), keep this tutorial's `hello-plugin` directory at the repository root, and run the remaining `dsh ...` commands from there as `pnpm dsh ...`. See [source execution](../../../../apps/cli/reference/README.md#source-execution) for build and launcher behavior.
+To use a fresh source checkout instead, complete the [run-from-source section](../../../../README.md#run-from-source), keep this tutorial's `hello-plugin` directory at the repository root, and run the remaining `dsh ...` commands from there as `pnpm agentrans ...`. See [source execution](../../../../apps/cli/reference/README.md#source-execution) for build and launcher behavior.
 
 ## Two concepts, two manifests
 
@@ -13,7 +13,7 @@ Installation is built on two concepts. Both are described by a `package.json`, b
 - A **bundle** is an npm package that ships a configuration layer. Its manifest declares `dsh.bundle`, answering "what does this package contribute?": a patch file that inserts or overrides plugin rows.
 - A **profile** is a directory under `$DSH_HOME/profiles/<name>` describing one runnable composition. Its manifest declares `dsh.profile`, answering "which bundles compose this setup, in what order?".
 
-A bundle is what you author and distribute; a profile is what a user boots with `dsh --profile <name>`. Nothing is both.
+A bundle is what you author and distribute; a profile is what a user boots with `agentrans --profile <name>`. Nothing is both.
 
 ### The bundle manifest
 
@@ -72,7 +72,7 @@ A profile directory holds two files:
 - `package.json` — the profile's out-of-tree plugin dependencies (managed by pnpm) plus the `dsh.profile` manifest with its ordered `bundles` list.
 - `cordis.patch.yml` — the user's own patch layer, applied after every bundle layer.
 
-You never write a profile manifest by hand: `dsh --profile <name> --from-default-profile <template>` can create or reset one from a shipped application template, while `dsh plugin` creates a base-backed profile and maintains its installed bundle list. The [CLI behavior reference](../../../../apps/cli/reference/README.md#profile-boot) owns the creation rules; the next section shows the plugin path.
+You never write a profile manifest by hand: `agentrans --profile <name> --from-default-profile <template>` can create or reset one from a shipped application template, while `dsh plugin` creates a base-backed profile and maintains its installed bundle list. The [CLI behavior reference](../../../../apps/cli/reference/README.md#profile-boot) owns the creation rules; the next section shows the plugin path.
 
 ## Install into a profile
 
@@ -111,8 +111,8 @@ Linking a broad checkout does not apply peer interception to the running install
 Verify the layer without booting, then boot:
 
 ```sh
-dsh --profile demo --dump-config   # shows a "# == dsh-hello-plugin" layer
-dsh --profile demo
+agentrans --profile demo --dump-config   # shows a "# == dsh-hello-plugin" layer
+agentrans --profile demo
 ```
 
 `dsh plugin --profile demo remove dsh-hello-plugin` removes both the dependency and the layer.

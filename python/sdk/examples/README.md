@@ -110,6 +110,6 @@ dsh plugin --profile sdk-minimal add file:/absolute/path/to/my-plugin-bundle
 
 Use `sdk-minimal` in that command to extend this example, or `sdk` to extend the full base-backed SDK profile. The Python call can also pass additional absolute patch paths in `patches=(...)`; later files win. A selected profile must retain `@agentrans/sdk-app` or another JSON-RPC server row. The example accepts no complete Cordis file or arbitrary process argv.
 
-The same runtime wheel packages the `web` profile and its frontend assets for direct CLI use: `dsh web` starts that separate application. A Python SDK client cannot select `web` because it has no JSON-RPC server row.
+The same runtime wheel packages the `web` profile and its frontend assets for direct CLI use: `agentrans web` starts that separate application. A Python SDK client cannot select `web` because it has no JSON-RPC server row.
 
 See the [Python SDK tutorial](../../../docs/user/guide/python-sdk.md) and [SDK reference](../README.md).

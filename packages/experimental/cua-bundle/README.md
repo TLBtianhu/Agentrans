@@ -28,7 +28,7 @@ In macOS Desktop, open **Plugins → Add plugin**, enter `@agentrans/cua-bundle`
 
 ```sh
 pnpm run build
-pnpm dsh web
+pnpm agentrans web
 ```
 
 For the source Desktop launcher and its separate development profile, follow [Desktop development](../../../apps/desktop/README.md). Enable Computer Use in each profile that needs it.

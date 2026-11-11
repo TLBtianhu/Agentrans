@@ -31,5 +31,5 @@ description: "工具执行模式从 dsh-tools 配置移至显式执行器插件�
 ```
 
 ```bash
-dsh --profile headless --patch ./ptc.yml "task"
+agentrans --profile headless --patch ./ptc.yml "task"
 ```

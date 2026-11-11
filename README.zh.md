@@ -30,7 +30,7 @@ Agent + Trans：一个通用编程 Agent 工作台，把解释转化为可执行
 ```powershell
 pnpm install
 pnpm run build
-pnpm dsh web --no-open --port 58910
+pnpm agentrans web --no-open --port 58910
 ```
 
 便携版与安装版的程序路径和数据路径必须彼此分离，并与上游 DSH 分离。打包前必须完成的外部身份审计见 [DISTRIBUTION.md](DISTRIBUTION.md)。

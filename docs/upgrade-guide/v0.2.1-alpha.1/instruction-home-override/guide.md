@@ -17,4 +17,4 @@ A `cordis.yml`, profile patch, or `--patch` overlay that still sets `dshHome` on
 
 1. Delete `dshHome` from the `agent-instructions` row in `cordis.yml`, `$DSH_HOME/cordis.patch.yml`, `$DSH_HOME/profiles/<profile>/cordis.patch.yml`, and any `--patch` overlay.
 2. Where the override pointed at a non-default home, export `DSH_HOME` for the process instead, so every harness consumer reads that home.
-3. Confirm with `dsh --profile <profile> --dump-config` that the `agent-instructions` row lists only its remaining fields, and that a new session's first request shows `Instructions from: $DSH_HOME/AGENTS.md` (or `~/.dsh/AGENTS.md`) when that file exists.
+3. Confirm with `agentrans --profile <profile> --dump-config` that the `agent-instructions` row lists only its remaining fields, and that a new session's first request shows `Instructions from: $DSH_HOME/AGENTS.md` (or `~/.dsh/AGENTS.md`) when that file exists.

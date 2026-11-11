@@ -6,7 +6,7 @@ English | [中文](2026-10-11-process-specific-prompt-values-in-runtime-context.
 
 ## Problem
 
-`dsh web` wrote two process-specific values directly into the system prompt: the implementation checkout path in the `harness:source` section (four directories above the web-app module) and the Web GUI URL in the `app:web-surface` section (the bound port or `publicUrl`). These operations change them without the user perceiving a system-prompt change:
+`agentrans web` wrote two process-specific values directly into the system prompt: the implementation checkout path in the `harness:source` section (four directories above the web-app module) and the Web GUI URL in the `app:web-surface` section (the bound port or `publicUrl`). These operations change them without the user perceiving a system-prompt change:
 
 | Operation | Changed value |
 |---|---|

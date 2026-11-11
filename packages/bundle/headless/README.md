@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-`dsh-headless` runs one dsh task from the command line and prints the final answer, then exits — no GUI, no server, no browser. Type `dsh --profile headless "run the tests"` and the agent handles it with the same model, tools, and safety defaults as every other surface. It suits scripts, CI, and one-off jobs: it opens no ports and leaves nothing running behind. It also offers a JSON event stream (`--json`) and `--session-id` to resume a conversation. Exit code 0 means the task completed; 1 means it aborted or errored. The boundary: one task per invocation, no interactive follow-up.
+`dsh-headless` runs one dsh task from the command line and prints the final answer, then exits — no GUI, no server, no browser. Type `agentrans --profile headless "run the tests"` and the agent handles it with the same model, tools, and safety defaults as every other surface. It suits scripts, CI, and one-off jobs: it opens no ports and leaves nothing running behind. It also offers a JSON event stream (`--json`) and `--session-id` to resume a conversation. Exit code 0 means the task completed; 1 means it aborted or errored. The boundary: one task per invocation, no interactive follow-up.
 
 ## Table of Contents
 
@@ -30,7 +30,7 @@ Run one task, get the final answer, and exit. The task is the command-line argum
 ### Running a one-shot task
 
 ```sh
-dsh --profile headless "run the tests"
+agentrans --profile headless "run the tests"
 ```
 
 The agent works through the task, streams each non-empty provider reasoning delta to stderr under a `dsh: reasoning:` heading, then prints the final answer on stdout and exits. Consecutive reasoning deltas stay in one section, and the runner closes that section before later output when the provider supplied no trailing newline. A successful run without reasoning keeps stderr empty; a failure exits 1 and prints `dsh: <code>: <message>` to stderr. The task comes from the positional argument, or from stdin when the argument is omitted or is a lone `-`; a blank positional argument or an empty pipe is rejected before anything runs. A positional task is used as-is and stdin is not read, so put the whole prompt in the pipe when you want piped input; a piped task is sent verbatim, its trailing newline included.
@@ -109,7 +109,7 @@ Use headless for scripted or automated dsh runs — CI steps, batch jobs, quick 
 
 ### Help and task errors
 
-`dsh --profile headless --help` prints the command's help text and exits without running anything. A whitespace-only positional task is a usage error on its own — nothing runs and the process exits 1, even when stdin is not a terminal, so an accidental blank argument never consumes a pipe. A task that is absent entirely is a usage error only when stdin is a terminal; otherwise the runner reads the task from stdin and rejects an empty result the same way. A lone `-` is the only stdin marker; mixing it with other task words is a usage error rather than a task that starts with a dash. In `--json` mode every usage error — including commander's own grammar rejections such as an unknown option or a missing option value — also writes an `error` event to stdout before the process exits, so a line-oriented supervisor sees a well-formed stream even when the runner never mounts; the event `message` carries the text without commander's `error: ` prefix.
+`agentrans --profile headless --help` prints the command's help text and exits without running anything. A whitespace-only positional task is a usage error on its own — nothing runs and the process exits 1, even when stdin is not a terminal, so an accidental blank argument never consumes a pipe. A task that is absent entirely is a usage error only when stdin is a terminal; otherwise the runner reads the task from stdin and rejects an empty result the same way. A lone `-` is the only stdin marker; mixing it with other task words is a usage error rather than a task that starts with a dash. In `--json` mode every usage error — including commander's own grammar rejections such as an unknown option or a missing option value — also writes an `error` event to stdout before the process exits, so a line-oriented supervisor sees a well-formed stream even when the runner never mounts; the event `message` carries the text without commander's `error: ` prefix.
 
 -----
 

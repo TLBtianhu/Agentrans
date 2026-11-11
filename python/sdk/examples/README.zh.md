@@ -110,6 +110,6 @@ dsh plugin --profile sdk-minimal add file:/absolute/path/to/my-plugin-bundle
 
 在该命令中使用 `sdk-minimal` 可扩展本示例，使用 `sdk` 则扩展基于完整 base 的 SDK profile。Python 调用也可以在 `patches=(...)` 中传入更多绝对 patch 路径；后面的文件优先。所选 profile 必须保留 `@agentrans/sdk-app` 或另一个 JSON-RPC server 配置项。该示例不接受完整 Cordis 文件或任意进程 argv。
 
-同一个运行时 wheel 包还打包了供直接 CLI（命令行界面）使用的 `web` profile 及其前端产物：`dsh web` 会启动这个独立应用。Python SDK 客户端不能选择 `web`，因为其中没有 JSON-RPC 服务器配置项。
+同一个运行时 wheel 包还打包了供直接 CLI（命令行界面）使用的 `web` profile 及其前端产物：`agentrans web` 会启动这个独立应用。Python SDK 客户端不能选择 `web`，因为其中没有 JSON-RPC 服务器配置项。
 
 另见 [Python SDK 教程](../../../docs/user/guide/python-sdk.zh.md) 与 [SDK 参考](../README.zh.md)。

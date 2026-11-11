@@ -31,5 +31,5 @@ English | [中文](guide.zh.md)
 ```
 
 ```bash
-dsh --profile headless --patch ./ptc.yml "task"
+agentrans --profile headless --patch ./ptc.yml "task"
 ```

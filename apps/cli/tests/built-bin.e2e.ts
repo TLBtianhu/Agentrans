@@ -643,7 +643,7 @@ describe.skipIf(!existsSync(dshBin))('dsh BUILT bin (node lib/bin.js, no tsx)', 
 
   it.skipIf(process.platform === 'win32')('runs through an installed-style symlink', async () => {
     const installation = mkdtempSync(join(tmpdir(), 'dsh-bin-link-'))
-    const installedBin = join(installation, 'dsh')
+    const installedBin = join(installation, 'agentrans')
     symlinkSync(dshBin, installedBin)
     try {
       const result = await execa(process.execPath, [installedBin, '--version'], {

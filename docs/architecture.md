@@ -31,7 +31,7 @@ Base includes [Plugin Manager](../packages/boot/plugin-manager/README.md) for We
 To see the tree your machine boots:
 
 ```sh
-dsh --profile web --dump-config
+agentrans --profile web --dump-config
 ```
 
 Any row it prints can be replaced by a patch of your own.
@@ -40,11 +40,11 @@ Composition mechanics are in [app-boot](../packages/boot/app-boot/README.md#prof
 
 ## Application launch
 
-Supported Node applications launch through named `dsh` profiles. The shipped profiles are `web`, `headless`, `sdk`, `sdk-minimal`, and `acp`, selected with `dsh --profile <name>` or `dsh <name>`. `plugin` names the management command; a profile with that name requires `--profile plugin`. The TypeScript SDK resolves its same-version `dsh` dependency and selects `sdk`; custom plugin composition remains a profile plus ordered patch files, not another executable or inline application tree. `sdk-minimal` is a repository-owned standalone bundle behind the same launcher, not a caller-supplied Cordis tree.
+Supported Node applications launch through named `dsh` profiles. The shipped profiles are `web`, `headless`, `sdk`, `sdk-minimal`, and `acp`, selected with `agentrans --profile <name>` or `dsh <name>`. `plugin` names the management command; a profile with that name requires `--profile plugin`. The TypeScript SDK resolves its same-version `dsh` dependency and selects `sdk`; custom plugin composition remains a profile plus ordered patch files, not another executable or inline application tree. `sdk-minimal` is a repository-owned standalone bundle behind the same launcher, not a caller-supplied Cordis tree.
 
 Vendored CLIs, build-only and test-only executables, direct in-process plugin mounting, and the private browser WebWorker preview are not Harness application launchers. [`verify-application-entrypoints`](../scripts/verify-application-entrypoints.ts) keeps every package bin, executable source, root demo, and the root `start:web` and `dev:web` scripts in an explicit class and rejects a Node application path that bypasses `dsh`.
 
-The Python SDK follows the same application architecture. Its runtime wheel packages the normal `dsh` CLI as `deepseek-harness-sdk-runtime-<platform>-<arch>`, and the client launches `dsh --profile sdk` with an explicit Harness home by default. The minimal example selects the shipped `sdk-minimal` profile. Python exposes profile selection and ordered patch files rather than a complete Cordis tree; persistent external plugins are installed through `dsh plugin`. The removed private direct-config carrier has no compatibility bin or fallback parser.
+The Python SDK follows the same application architecture. Its runtime wheel packages the normal `dsh` CLI as `deepseek-harness-sdk-runtime-<platform>-<arch>`, and the client launches `agentrans --profile sdk` with an explicit Harness home by default. The minimal example selects the shipped `sdk-minimal` profile. Python exposes profile selection and ordered patch files rather than a complete Cordis tree; persistent external plugins are installed through `dsh plugin`. The removed private direct-config carrier has no compatibility bin or fallback parser.
 
 ## Desktop application
 

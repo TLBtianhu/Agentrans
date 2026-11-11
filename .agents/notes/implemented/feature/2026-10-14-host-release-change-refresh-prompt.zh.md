@@ -6,7 +6,7 @@ Status: implemented
 
 ## Problem
 
-`dsh web` 升级后，或开发者在另一个 commit 上重启 `pnpm run dev:web` 后，已打开的浏览器页面会自动重连到新 Host，但页面的静态 shell 仍停在旧 release。协议一旦不兼容，页面会一直重连失败或报错，用户也不知道需要刷新。
+`agentrans web` 升级后，或开发者在另一个 commit 上重启 `pnpm run dev:web` 后，已打开的浏览器页面会自动重连到新 Host，但页面的静态 shell 仍停在旧 release。协议一旦不兼容，页面会一直重连失败或报错，用户也不知道需要刷新。
 
 技术原因：
 
@@ -119,7 +119,7 @@ class ClientEntries {
 - **自动调用 `location.reload()`**：可能丢失尚未保存的输入，而且应当让用户看到并确认刷新。
 - **把身份放进 API ready 帧（`ConnectionHostInfo`）**：协议不兼容时 ready 帧本身就可能解析失败，检测根本不会发生；暂停热替换仍然属于 `ClientEntries`。
 - **由 web-app 拼身份（CLI 版本 + web-app 版本 + commit），通过 `webApp` 服务和组合配置交给 modules**：要改 web-app 的服务接口、测试、文档和生成的 API 清单，还让 modules 等待 web-runtime 激活；两个版本号一起发布，分开读取没有区别。
-- **给 client-modules 加 `commit` 配置项，在组合配置里写 `!!js process.env.DSH_CLIENT_COMMIT_HASH`**：运行时读环境变量，而正式发布的 `dsh web` 不设置这个变量；commit 必须在构建时固化。
+- **给 client-modules 加 `commit` 配置项，在组合配置里写 `!!js process.env.DSH_CLIENT_COMMIT_HASH`**：运行时读环境变量，而正式发布的 `agentrans web` 不设置这个变量；commit 必须在构建时固化。
 - **client-modules 依赖 app-boot 读取 CLI 版本**：要新增依赖边、依赖策略分类、tsconfig 引用和 lockfile 改动，而本包自己的版本就是同一个数。
 - **把判断逻辑留在 `ClientEntries` 里**：调和与 release 比较是两件独立的事；拆出 gate 后 `ClientEntries` 只多几行。
 - **选择暂不刷新后应用另一个 release 的插件更新**：页面会在一个 release 的 shell 和静态库上运行另一个 release 的插件，其状态无法再用一个 release 描述；回到启动 release 时还得再问一次，而两个选择的结果完全相同。

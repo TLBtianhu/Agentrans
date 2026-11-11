@@ -2,7 +2,7 @@
 
 English | [中文](github-review.zh.md)
 
-This opt-in overlay adds a signed GitHub endpoint to `dsh web`. When a pull request in the configured repository changes from draft to ready for review, the rule creates a titled root Session under the repository's Web Workspace and starts a read-only review prompt.
+This opt-in overlay adds a signed GitHub endpoint to `agentrans web`. When a pull request in the configured repository changes from draft to ready for review, the rule creates a titled root Session under the repository's Web Workspace and starts a read-only review prompt.
 
 ## Prerequisites
 
@@ -27,7 +27,7 @@ Install both experimental packages into the Web profile first. Profiles do not i
 ```sh
 dsh plugin --profile web add @agentrans/webhook @agentrans/webhook-github
 export DSH_GITHUB_REVIEW_WORKSPACE=/path/to/deepseek-harness
-dsh web --patch "${DSH_HOME:-$HOME/.dsh}/profiles/web/node_modules/@agentrans/webhook-github/examples/github-review/cordis.yml"
+agentrans web --patch "${DSH_HOME:-$HOME/.dsh}/profiles/web/node_modules/@agentrans/webhook-github/examples/github-review/cordis.yml"
 ```
 
 The adapter distributes the example, which loads from the profile's installation directory so its rule module can resolve profile-installed peers. Do not run the rule from an arbitrary directory outside the profile. To customize it, copy both example files to `$DSH_HOME/profiles/web/github-review/`, edit the configuration, and point `--patch` at that copy of `cordis.yml`; use `~/.dsh` when `DSH_HOME` is unset.

@@ -77,7 +77,7 @@ interface RunningWeb {
 }
 
 /**
- * Boot the built CLI and wait for its `dsh web:` line and bound listener port.
+ * Boot the built CLI and wait for its `agentrans web:` line and bound listener port.
  * The marker plugin also polls for the interrupt file and emits `SIGTERM` on
  * the child's own process, because Windows has no deliverable SIGTERM.
  */

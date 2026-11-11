@@ -4,7 +4,7 @@
 
 前几篇教程通过 `--patch` overlay 加载本地插件。本教程把它打包成可安装的**组合包**（bundle），用 `dsh plugin add` 安装进一个 **profile**，并解释决定组合后配置的层顺序。本文假设 `dsh` CLI 已安装。请先完成[插件配置](./config.zh.md)。
 
-如果改用全新的源码 checkout，请先按照[从源码运行章节](../../../../README.zh.md#run-from-source)完成准备，将本教程的 `hello-plugin` 目录放在仓库根目录，并从该目录把下文的 `dsh ...` 命令改为 `pnpm dsh ...`。构建与启动器行为见[源码执行](../../../../apps/cli/reference/README.zh.md#source-execution)。
+如果改用全新的源码 checkout，请先按照[从源码运行章节](../../../../README.zh.md#run-from-source)完成准备，将本教程的 `hello-plugin` 目录放在仓库根目录，并从该目录把下文的 `dsh ...` 命令改为 `pnpm agentrans ...`。构建与启动器行为见[源码执行](../../../../apps/cli/reference/README.zh.md#source-execution)。
 
 ## 两个概念，两种 manifest
 
@@ -13,7 +13,7 @@
 - **组合包**是附带一个配置层的 npm 包。它的 manifest 声明 `dsh.bundle`，回答的是"这个包贡献什么？"：一个插入或覆盖插件行的 patch 文件。
 - **profile** 是位于 `$DSH_HOME/profiles/<name>` 下、描述一份可启动组合的目录。它的 manifest 声明 `dsh.profile`，回答的是"这套配置由哪些组合包按什么顺序组成？"。
 
-组合包是你编写并分发的东西；profile 是用户用 `dsh --profile <name>` 启动的东西。没有东西同时是两者。
+组合包是你编写并分发的东西；profile 是用户用 `agentrans --profile <name>` 启动的东西。没有东西同时是两者。
 
 ### 组合包 manifest
 
@@ -72,7 +72,7 @@ profile 目录包含两个文件：
 - `package.json` — profile 的树外插件依赖（由 pnpm 管理），加上 `dsh.profile` manifest 及其有序的 `bundles` 列表。
 - `cordis.patch.yml` — 用户自己的 patch 层，在每个组合包层之后应用。
 
-profile manifest 从不需要手写：`dsh --profile <name> --from-default-profile <template>` 可以从随附应用模板创建或重置 profile，`dsh plugin` 则创建一个以 base 为基础的 profile，并维护其中已安装的 bundle 列表。创建规则以 [CLI（命令行界面）行为参考](../../../../apps/cli/reference/README.zh.md#profile-boot)为准；下一节展示插件路径。
+profile manifest 从不需要手写：`agentrans --profile <name> --from-default-profile <template>` 可以从随附应用模板创建或重置 profile，`dsh plugin` 则创建一个以 base 为基础的 profile，并维护其中已安装的 bundle 列表。创建规则以 [CLI（命令行界面）行为参考](../../../../apps/cli/reference/README.zh.md#profile-boot)为准；下一节展示插件路径。
 
 ## 安装进 profile
 
@@ -111,8 +111,8 @@ dsh plugin --profile demo add ./hello-plugin
 先不启动、只验证该层，再启动：
 
 ```sh
-dsh --profile demo --dump-config   # shows a "# == dsh-hello-plugin" layer
-dsh --profile demo
+agentrans --profile demo --dump-config   # shows a "# == dsh-hello-plugin" layer
+agentrans --profile demo
 ```
 
 `dsh plugin --profile demo remove dsh-hello-plugin` 会同时移除依赖和对应的层。

@@ -1,4 +1,4 @@
-# Keyless generic ACP v1 control-surface patch over `dsh --profile acp`.
+# Keyless generic ACP v1 control-surface patch over `agentrans --profile acp`.
 
 - id: llm-deepseek
   name: '@agentrans/llm-deepseek-api-key'

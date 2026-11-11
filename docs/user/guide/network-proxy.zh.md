@@ -75,7 +75,7 @@ Node 只在进程启动时读取该变量，所以要在运行 `dsh` 之前导�
 让 agent 抓取一个页面，同时观察代理软件的连接日志：
 
 ```sh
-dsh --profile headless "fetch https://example.com and tell me the page title"
+agentrans --profile headless "fetch https://example.com and tell me the page title"
 ```
 
 如果请求没有出现在那里，确认变量确实进入了 DSH 自己的环境：

@@ -1,6 +1,6 @@
 /**
  * Keyless snapshot coverage for the TypeScript SDK path: each scenario spawns
- * the real `dsh --profile sdk` or `sdk-minimal` runtime through
+ * the real `agentrans --profile sdk` or `sdk-minimal` runtime through
  * `@agentrans/sdk-client`, drives recorded turns and standalone commands over stdio JSON-RPC,
  * and pins the SDK `RunResult`, the complete notification stream, and the
  * persisted session logs. Replay serves recorded model

@@ -195,7 +195,7 @@ export function apply(ctx: Context, config: Config): void {
     )
   }
   if (ctx.webServer.protocol === 'http:' && !isLoopbackHost(boundHost)) {
-    console.warn(`dsh web: listening on ${boundHost} over plain HTTP; restrict this port to a trusted proxy or network`)
+    console.warn(`agentrans web: listening on ${boundHost} over plain HTTP; restrict this port to a trusted proxy or network`)
   }
   // The bind URL belongs to this host. Under SSH, the operator reaches it
   // through a local forwarding address that this process cannot derive.
@@ -228,7 +228,7 @@ export function apply(ctx: Context, config: Config): void {
         const authenticatedUrl = connectionCtx.connection.authenticatedUrl(webUrl)
         ANNOUNCED_ROOTS.add(connectionCtx.root)
         if (config.printUrl) {
-          console.log(`dsh web: ${authenticatedUrl}`)
+          console.log(`agentrans web: ${authenticatedUrl}`)
         }
         if (handoffBrowser) {
           console.log('dsh web: opening the default browser; pass --no-open to disable')

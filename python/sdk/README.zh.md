@@ -108,7 +108,7 @@ with HarnessClient(HarnessConfig(dsh_home="/absolute/path/to/dsh-home")) as clie
 
 ```sh
 export DSH_HOME=/absolute/path/to/isolated-dsh-home
-dsh --profile sdk --dump-default-config >/dev/null
+agentrans --profile sdk --dump-default-config >/dev/null
 dsh plugin --profile sdk add file:/absolute/path/to/my-plugin-bundle
 ```
 

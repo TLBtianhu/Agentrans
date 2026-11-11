@@ -9,7 +9,7 @@ description: "`--from-default-profile` 现在会替换已存在的自定义 prof
 
 ## 变更
 
-此前目标 profile 已存在时，`dsh --profile <name> --from-default-profile <template>` 会以 `profile "<name>" already exists` 失败，残留的目标目录也会被拒绝。现在每次执行都会用模板的全新副本替换目标目录，然后启动它；带配置 dump flag 时则打印组合结果。原有目录会被删除，包括 `package.json` 中的依赖、已安装的 `node_modules` 和 `cordis.patch.yml`。任何大小写形式的随附 profile 名称仍不能作为目标。
+此前目标 profile 已存在时，`agentrans --profile <name> --from-default-profile <template>` 会以 `profile "<name>" already exists` 失败，残留的目标目录也会被拒绝。现在每次执行都会用模板的全新副本替换目标目录，然后启动它；带配置 dump flag 时则打印组合结果。原有目录会被删除，包括 `package.json` 中的依赖、已安装的 `node_modules` 和 `cordis.patch.yml`。任何大小写形式的随附 profile 名称仍不能作为目标。
 
 受影响的是在脚本或快捷方式中重复执行该命令（例如 `dsh rescue --from-default-profile web`），并期望后续执行保留该 profile 插件或 patch 的用户。
 

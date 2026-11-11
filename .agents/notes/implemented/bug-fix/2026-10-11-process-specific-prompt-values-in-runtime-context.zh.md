@@ -6,7 +6,7 @@ Status: implemented
 
 ## 问题
 
-`dsh web` 曾把两项随进程变化的值直接写进 system prompt：`harness:source` 段里的实现 checkout 路径（web-app 模块位置上溯四层），以及 `app:web-surface` 段里的 Web GUI URL（实际监听端口或 `publicUrl`）。下列操作都会改变它们，而用户感知不到 system prompt 变了：
+`agentrans web` 曾把两项随进程变化的值直接写进 system prompt：`harness:source` 段里的实现 checkout 路径（web-app 模块位置上溯四层），以及 `app:web-surface` 段里的 Web GUI URL（实际监听端口或 `publicUrl`）。下列操作都会改变它们，而用户感知不到 system prompt 变了：
 
 | 操作 | 变化的值 |
 |---|---|

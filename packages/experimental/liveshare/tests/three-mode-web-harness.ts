@@ -1,5 +1,5 @@
 /**
- * Isolated real `dsh web` instance for the three-mode acceptance driver.
+ * Isolated real `agentrans web` instance for the three-mode acceptance driver.
  *
  * The harness boots the shipped web profile in a private temp home and workspace and exposes the
  * shipped HTTP carrier. The model route is the deterministic keyless fixture beside this module;

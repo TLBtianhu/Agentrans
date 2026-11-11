@@ -23,7 +23,7 @@ Run `pnpm run gen-cli-help` to regenerate; run `pnpm run verify-cli-help` to che
 Invocations: `dsh --help`
 
 ```text
-Usage: dsh [--profile] <name> [options] [app-args...]
+Usage: agentrans [--profile] <name> [options] [app-args...]
        dsh plugin --profile <name> <pnpm-args...>
 
 dsh: boot a Agentrans profile — an ordered stack of plugin-bundle patch layers
@@ -47,13 +47,13 @@ Options:
                                  or --patch overlays and exit
 
 Examples:
-  dsh web                                   boot the web profile (same as: dsh --profile web)
+  agentrans web                                   boot the web profile (same as: dsh --profile web)
   dsh rescue --from-default-profile web
                                             recreate rescue from the shipped web template, then boot it
   dsh headless "run the tests"              answer one task, print the result, and exit
   dsh tui --patch ./extra.yml               boot a custom profile with one extra overlay
   dsh tui --resume <session>                arguments after the launcher flags reach the app
-  dsh web --help                            the web app's own flags and help
+  agentrans web --help                            the web app's own flags and help
   dsh plugin --profile tui add <package>    install a plugin into the tui profile
 
 ```
@@ -64,7 +64,7 @@ Examples:
 Invocations: `dsh plugin --help`
 
 ```text
-Usage: dsh plugin [options] [args...]
+Usage: agentrans plugin [options] [args...]
 
 manage a profile's plugins by forwarding the remaining arguments to pnpm in the
 profile directory
@@ -93,7 +93,7 @@ Options:
   -h, --help  show this help
 
 Example:
-  dsh --profile acp     serve ACP until the client disconnects
+  agentrans --profile acp     serve ACP until the client disconnects
 
 ```
 
@@ -125,11 +125,11 @@ Options:
   -h, --help                  show this help
 
 Examples:
-  dsh --profile headless "run the tests"          answer one task and exit
+  agentrans --profile headless "run the tests"          answer one task and exit
   echo "run the tests" | dsh --profile headless   read the task from stdin
-  dsh --profile headless --json "run the tests"   emit machine-readable run events
-  dsh --profile headless --session-id session-… "continue"   resume an existing Session
-  dsh --profile headless --permission-mode workspace-write --add-dir /repo/.git "commit the fix"
+  agentrans --profile headless --json "run the tests"   emit machine-readable run events
+  agentrans --profile headless --session-id session-… "continue"   resume an existing Session
+  agentrans --profile headless --permission-mode workspace-write --add-dir /repo/.git "commit the fix"
                                                         grant shared Git metadata for this task
 
 ```
@@ -140,7 +140,7 @@ Examples:
 Invocations: `dsh sdk --help`, `dsh --profile sdk --help`
 
 ```text
-Usage: dsh --profile sdk [options]
+Usage: agentrans --profile sdk [options]
 
 Serve DeepSeek Harness SDK clients over stdio JSON-RPC.
 
@@ -148,7 +148,7 @@ Options:
   -h, --help  show this help
 
 Example:
-  dsh --profile sdk     serve one SDK runtime until its client disconnects
+  agentrans --profile sdk     serve one SDK runtime until its client disconnects
 
 ```
 
@@ -158,7 +158,7 @@ Example:
 Invocations: `dsh sdk-minimal --help`, `dsh --profile sdk-minimal --help`
 
 ```text
-Usage: dsh --profile sdk-minimal [options]
+Usage: agentrans --profile sdk-minimal [options]
 
 Serve DeepSeek Harness SDK clients over stdio JSON-RPC.
 
@@ -166,7 +166,7 @@ Options:
   -h, --help  show this help
 
 Example:
-  dsh --profile sdk-minimal     serve one SDK runtime until its client disconnects
+  agentrans --profile sdk-minimal     serve one SDK runtime until its client disconnects
 
 ```
 
@@ -199,13 +199,13 @@ Options:
   -h, --help                     show this help
 
 Examples:
-  dsh --profile web                          serve on the composed host and port
-  dsh --profile web --no-open                serve without opening a browser
-  dsh --profile web --port 8080              serve on another port
-  dsh --profile web --host 10.0.0.7          bind one local interface address
-  dsh --profile web --public-url https://app.example/ui/ --trusted-host app.example
+  agentrans --profile web                          serve on the composed host and port
+  agentrans --profile web --no-open                serve without opening a browser
+  agentrans --profile web --port 8080              serve on another port
+  agentrans --profile web --host 10.0.0.7          bind one local interface address
+  agentrans --profile web --public-url https://app.example/ui/ --trusted-host app.example
                                              advertise a prefix-stripping HTTPS proxy entry and admit its authority
-  dsh --profile web --tls-cert ./server-chain.pem --tls-key ./server-key.pem
+  agentrans --profile web --tls-cert ./server-chain.pem --tls-key ./server-key.pem
                                              serve HTTPS with an existing certificate and key
 
 ```

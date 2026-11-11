@@ -10,13 +10,13 @@
 
 ## Profile 启动
 
-`dsh <name>` 是 `dsh --profile <name>` 的简写，启动位于 `$DSH_HOME/profiles/<name>` 的 profile。简写中的名称必须紧跟 `dsh`；`plugin` 仍为插件管理命令，因此启动同名 profile 时须使用 `dsh --profile plugin`。生效配置树以空根节点为起点，依次叠加 profile manifest（元数据清单）的 `dsh.profile.bundles` 列表中指定的各组合包 patch、profile 自身的 `cordis.patch.yml`、home 级的 `$DSH_HOME/cordis.patch.yml`（这是各 profile 共享的机器本地偏好，因此优先于逐 profile 配置层），以及按 argv 顺序指定的各个 `--patch <path>` 覆盖层。对同一配置行，后应用的层优先。patch 会替换目标行的整个 `config` 值，而不是深度合并其中的键；patch 也可以插入新行。最终 YAML 组合决定是否由 `dsh-hmr` 监视配置；未启用 HMR 时，更改需要重启。配置解析、schema 校验、模块解析或插件启动失败时，系统会报告错误并以非零状态退出。收到 SIGINT 或 SIGTERM 时，挂载的根节点会先 dispose（资源释放）再退出。
+`dsh <name>` 是 `agentrans --profile <name>` 的简写，启动位于 `$DSH_HOME/profiles/<name>` 的 profile。简写中的名称必须紧跟 `dsh`；`plugin` 仍为插件管理命令，因此启动同名 profile 时须使用 `agentrans --profile plugin`。生效配置树以空根节点为起点，依次叠加 profile manifest（元数据清单）的 `dsh.profile.bundles` 列表中指定的各组合包 patch、profile 自身的 `cordis.patch.yml`、home 级的 `$DSH_HOME/cordis.patch.yml`（这是各 profile 共享的机器本地偏好，因此优先于逐 profile 配置层），以及按 argv 顺序指定的各个 `--patch <path>` 覆盖层。对同一配置行，后应用的层优先。patch 会替换目标行的整个 `config` 值，而不是深度合并其中的键；patch 也可以插入新行。最终 YAML 组合决定是否由 `dsh-hmr` 监视配置；未启用 HMR 时，更改需要重启。配置解析、schema 校验、模块解析或插件启动失败时，系统会报告错误并以非零状态退出。收到 SIGINT 或 SIGTERM 时，挂载的根节点会先 dispose（资源释放）再退出。
 
 组合包名称先从 dsh 安装目录解析，再从 profile 目录解析。因此，内置组合包（`@agentrans/base`、`@agentrans/web-app`、`@agentrans/headless`、`@agentrans/sdk-app`、`@agentrans/sdk-minimal`、`@agentrans/acp-app`）始终来自当前运行的 `dsh` 所属的安装；树外组合包来自 profile 中由 pnpm 管理的 `node_modules`。挂载配置行前，launcher 会按此顺序遍历安装与所选 bundle，并将生成的不可变 runtime resolution 安装到 Node 的解析器中。启动不会创建共享或 profile 自有的 fallback 链接。profile 已安装包保留原生优先级；profile 初始化和包管理器写入与运行时解析相互独立。
 
 `web`、`headless`、`sdk`、`sdk-minimal` 和 `acp` profile 首次使用时会从随附模板自动初始化（`web`：base + web-app，实时应用 patch；`headless`：base + headless，只在启动时应用 patch；`sdk`：base + sdk-app，只在启动时应用 patch；`sdk-minimal`：独立组合包，只在启动时应用 patch；`acp`：base + acp-app，只在启动时应用 patch）。其他缺失的 profile 会显式报错，并提示运行 `dsh plugin --profile <name> add <package>`。
 
-`dsh --profile <name> --from-default-profile <template>` 会在启动前，用上述五个随附模板之一的全新副本替换自定义目标。目标名称不能是任何大小写形式的随附 profile 名称。launcher 先在目标旁边的暂存目录中组装新 profile 并移动到目标位置，再删除原有的目标目录，包括其中已安装的依赖和用户 patch。移动失败时会恢复原有目录。如果恢复也失败，或进程在两次重命名之间停止，原有目录会保留在 `$DSH_HOME/profiles/.<name>.staging-*/previous`，供手动恢复。多个进程并发替换同一目标时，至少有一个会成功，且目标中只保留一份完整副本。该副本把模板当前的组合包列表写进一份依赖为空、用户 patch 为空的新 manifest。它不会读取 `<template>` 指定的本地同名 profile，不会复制其依赖或 patch，也不会持久化继承字段；模板列表之后的变化不会改写新 profile。复制列表中指名的内置组合包仍从当前 dsh 安装目录解析。替换成功不会增加 launcher 输出。
+`agentrans --profile <name> --from-default-profile <template>` 会在启动前，用上述五个随附模板之一的全新副本替换自定义目标。目标名称不能是任何大小写形式的随附 profile 名称。launcher 先在目标旁边的暂存目录中组装新 profile 并移动到目标位置，再删除原有的目标目录，包括其中已安装的依赖和用户 patch。移动失败时会恢复原有目录。如果恢复也失败，或进程在两次重命名之间停止，原有目录会保留在 `$DSH_HOME/profiles/.<name>.staging-*/previous`，供手动恢复。多个进程并发替换同一目标时，至少有一个会成功，且目标中只保留一份完整副本。该副本把模板当前的组合包列表写进一份依赖为空、用户 patch 为空的新 manifest。它不会读取 `<template>` 指定的本地同名 profile，不会复制其依赖或 patch，也不会持久化继承字段；模板列表之后的变化不会改写新 profile。复制列表中指名的内置组合包仍从当前 dsh 安装目录解析。替换成功不会增加 launcher 输出。
 
 去掉该选项即可在不重置的情况下启动该 profile。未知模板或随附目标名称会在目标被改动之前失败；未知模板的诊断会列出有效模板。替换在组合包解析和应用启动之前提交，因此后续失败仍会把新 profile 留在磁盘上。三种配置 dump 模式都接受该选项，并在不启动应用的情况下替换目标。
 
@@ -27,7 +27,7 @@ dsh rescue
 
 ### 应用参数
 
-启动器自身的 flag 必须写在最前面，并在遇到第一个无法识别的 token 时结束；从该 token 开始的所有内容都会通过 `ctx.cmdlineArgs` 原样交给已启动的 profile，注入该 profile 的任意应用插件都可以解析这些内容（[`dsh-cmdline`](../../../packages/boot/cmdline/README.zh.md)）。因此，`dsh rescue --from-default-profile web --no-open` 会先重置 rescue，再把 `--no-open` 交给 Web；`dsh --profile web --port 8080` 会将 `--port` 交给 web 应用；`dsh --profile web --help` 只打印该应用的帮助信息，不启动应用；`dsh --help` 没有可供交付参数的 profile，因此会打印启动器自身的帮助信息。`-V`/`--version` 位于应用参数边界之前时，会打印启动器的版本。
+启动器自身的 flag 必须写在最前面，并在遇到第一个无法识别的 token 时结束；从该 token 开始的所有内容都会通过 `ctx.cmdlineArgs` 原样交给已启动的 profile，注入该 profile 的任意应用插件都可以解析这些内容（[`dsh-cmdline`](../../../packages/boot/cmdline/README.zh.md)）。因此，`dsh rescue --from-default-profile web --no-open` 会先重置 rescue，再把 `--no-open` 交给 Web；`agentrans --profile web --port 8080` 会将 `--port` 交给 web 应用；`agentrans --profile web --help` 只打印该应用的帮助信息，不启动应用；`dsh --help` 没有可供交付参数的 profile，因此会打印启动器自身的帮助信息。`-V`/`--version` 位于应用参数边界之前时，会打印启动器的版本。
 
 每套组合只会挂载一次。普通插件注入 `cmdlineArgs`，解析所属应用的参数，并将解析结果作为服务提供。每个从 flag 取值的配置行都会注入该服务；Loader 会等到服务激活后，再对该行的配置求值（`port: !!js ctx.webStartup.port ?? 3080`），因此 flag 的优先级高于配置行中写明的值。要维持这一优先级，配置行必须保留该表达式；如果用户 patch 用字面量替换整个 `config`，也会随之移除运行时读取。帮助参数和被拒绝的参数都会请求退出：参数被拒绝时以非零状态退出，显示帮助时以 0 退出；依赖该提供方服务的配置行不会激活。启用 HMR 时，编辑 patch 文件会根据仍在运行的服务重新计算表达式，因此不会重置当前正在使用的端口。
 
@@ -43,13 +43,13 @@ dsh rescue
 | `sdk-minimal` | 无选项；stdio 携带相同的 JSON-RPC 协议 |
 | `acp` | 无选项；stdio 携带 ACP（Agent Client Protocol） |
 
-一次性任务（`dsh --profile headless "run the tests"`）通过核心注册表创建一个全新的持久化 Agent（智能体），提交任务、等待完全停稳并对会话执行 flush，再从其持久化事件区间中推导最后一个非空 assistant 文本与最终 `turn/end` 原因。它在 `dsh: reasoning:` 标题下将非空的提供方推理（reasoning）增量流式写入 stderr，只在 stdout 打印最终文本，并在原因为 `completed` 时以 0 退出，否则以 1 退出；没有推理内容的成功响应会保持 stderr 为空。没有任务的调用是该应用的用法错误。随附 headless profile 不挂载浏览器 Connection、HTTP 服务器、Web 运行时或浏览器客户端，也不会打开监听端口。
+一次性任务（`agentrans --profile headless "run the tests"`）通过核心注册表创建一个全新的持久化 Agent（智能体），提交任务、等待完全停稳并对会话执行 flush，再从其持久化事件区间中推导最后一个非空 assistant 文本与最终 `turn/end` 原因。它在 `dsh: reasoning:` 标题下将非空的提供方推理（reasoning）增量流式写入 stderr，只在 stdout 打印最终文本，并在原因为 `completed` 时以 0 退出，否则以 1 退出；没有推理内容的成功响应会保持 stderr 为空。没有任务的调用是该应用的用法错误。随附 headless profile 不挂载浏览器 Connection、HTTP 服务器、Web 运行时或浏览器客户端，也不会打开监听端口。
 
 可在不启动的情况下检查组合出的配置树：
 
 ```sh
-dsh --profile web --dump-default-config
-dsh --profile web --patch ./extra.yml --dump-config
+agentrans --profile web --dump-default-config
+agentrans --profile web --patch ./extra.yml --dump-config
 ```
 
 `--dump-default-config` 只打印组合包各层；`--dump-config` 额外加上 profile 的 `cordis.patch.yml`、home 级的 `$DSH_HOME/cordis.patch.yml` 和 `--patch` overlay。两者都会打印注释，标明每行由哪个文件提供，以及哪些 overlay 修改过它；`!!js` 表达式保持未求值，插入行中的相对插件名以各自 patch 文件所在目录解析，找不到目标的 patch 会报告到 stderr。dump 操作会初始化缺失的 profile 文件。它不会运行应用的命令行参数提供方，因此展示的是解析任何应用参数之前的组合配置树；如果调用中包含应用参数，dump 会拒绝该调用。
@@ -101,30 +101,30 @@ pnpm 操作成功后会改变磁盘上的 Profile manifest 与组合包列表；
 ```sh
 dsh plugin --profile tui add github:deepseek-harness/turtle-ui
 dsh plugin --profile tui remove turtle-ui
-dsh --profile tui
+agentrans --profile tui
 ```
 
 随源码发布的 Git 托管插件会在安装期间通过 `prepare` 脚本构建，而 pnpm ≥10 默认会阻止该脚本，直到使用方明确允许。首次运行 `add` 会失败，并显示 pnpm 的 `allowBuilds` 提示；dsh 还会提示应修改该 profile 的 `pnpm-workspace.yaml`。将输出的键复制到该文件后，重新运行命令即可。安装已经构建好的 tarball 或本地 checkout 时，无需加入 `allowBuilds`。
 
 ## Web Profile
 
-`dsh web` 使用 profile 简写。启动器先解析自身的 flag，其余 flag 属于 web 应用，由组合包中的普通提供方解析。`--host` 与 `--port` 覆盖组合的监听器取值，`--tls-cert`/`--tls-key` 则设置监听器的 `tls` 证书对。host 必须指名一个具体的本机地址，不能是通配地址（`--host 0.0.0.0` 会以用法错误退出）；`hostname -i` 可能列出多个，请只传一个。可重复的 `--trusted-host` 值会收集到 `ctx.webStartup.trustedHosts`；部署表达式可以添加自己的 authority。`--no-open` 只对本次调用关闭默认浏览器交接。客户端插件 HMR（热模块替换）接收器始终挂载，在 `pnpm run dev:web` 重建客户端 bundle 之前保持空闲；该命令先构建一次，再启动这同一个启动器并持续重建客户端 bundle，加 `--no-serve` 则只运行 watcher、配合别处启动的 `dsh web`。
+`agentrans web` 使用 profile 简写。启动器先解析自身的 flag，其余 flag 属于 web 应用，由组合包中的普通提供方解析。`--host` 与 `--port` 覆盖组合的监听器取值，`--tls-cert`/`--tls-key` 则设置监听器的 `tls` 证书对。host 必须指名一个具体的本机地址，不能是通配地址（`--host 0.0.0.0` 会以用法错误退出）；`hostname -i` 可能列出多个，请只传一个。可重复的 `--trusted-host` 值会收集到 `ctx.webStartup.trustedHosts`；部署表达式可以添加自己的 authority。`--no-open` 只对本次调用关闭默认浏览器交接。客户端插件 HMR（热模块替换）接收器始终挂载，在 `pnpm run dev:web` 重建客户端 bundle 之前保持空闲；该命令先构建一次，再启动这同一个启动器并持续重建客户端 bundle，加 `--no-serve` 则只运行 watcher、配合别处启动的 `agentrans web`。
 
 `--public-url <url>` 公告唯一的 HTTP(S) 应用根——可带转发前缀——替代监听器的绑定地址 URL（回环绑定时为回环地址）。它不授予信任，因此浏览器可见的 authority 仍需用 `--trusted-host` 点名；[在反向代理之后发布 Web UI](../../../docs/user/guide/public-deployments.zh.md)列出了前置代理必须提供的内容。
 
 `--tls-cert <file>` 与 `--tls-key <file>` 让监听器以 HTTPS 取代明文 HTTP 提供服务。它们属于同一个设置：要么都给，要么都不给；两者各是相对进程工作目录解析的路径。证书文件包含完整证书链（含中间证书），密钥文件为不带口令的 PEM 私钥。文件缺失、不可读、为空或无效时启动失败，且绝不回退到 HTTP；由于载体只读取一次文件，且既不获取、不续期也不监视证书，替换后的证书对只有在重新加载监听器或重启进程后才生效。HTTPS 同样不授予信任：浏览器必须信任该证书并访问其名称覆盖的 authority，Connection 仍认证每个请求并校验 Host/Origin，而由于接收请求的监听器提供 HTTPS，会话 cookie 带 `Secure`。默认端口仍为 3080，`--public-url` 仍是相互独立的公告。
 
 ```sh
-dsh web
-dsh web --host "$(hostname -i | awk '{print $1}')" --public-url https://app.example/ --trusted-host app.example
-dsh web --tls-cert ./server-chain.pem --tls-key ./server-key.pem
-dsh web --no-open
-dsh web --patch ./extra.cordis.yml
-dsh web --dump-config
-dsh web --help
+agentrans web
+agentrans web --host "$(hostname -i | awk '{print $1}')" --public-url https://app.example/ --trusted-host app.example
+agentrans web --tls-cert ./server-chain.pem --tls-key ./server-key.pem
+agentrans web --no-open
+agentrans web --patch ./extra.cordis.yml
+agentrans web --dump-config
+agentrans web --help
 ```
 
-生产 Web 运行器需要已构建的包和前端产物（`pnpm run build`）。配置了 `--public-url` 时打印公告地址，否则打印采用监听器协议的绑定地址 URL（默认为 `http://127.0.0.1:3080`，配置 TLS 时为 `https://`）。Host/Origin 栅栏直接接受绑定 IP；代理或 DNS authority 仍需 `--trusted-host`。启动日志与默认浏览器交接都会等待完整 Loader 配置树结算。继承的 `SSH_CONNECTION` 或 `SSH_TTY` 非空时会抑制浏览器打开，但仍打印启动 URL。浏览器交接前会打印 `dsh web: opening the default browser; pass --no-open to disable`；若操作系统交接失败，stderr 会说明原因并指向启动 URL，服务器仍继续运行。
+生产 Web 运行器需要已构建的包和前端产物（`pnpm run build`）。配置了 `--public-url` 时打印公告地址，否则打印采用监听器协议的绑定地址 URL（默认为 `http://127.0.0.1:3080`，配置 TLS 时为 `https://`）。Host/Origin 栅栏直接接受绑定 IP；代理或 DNS authority 仍需 `--trusted-host`。启动日志与默认浏览器交接都会等待完整 Loader 配置树结算。继承的 `SSH_CONNECTION` 或 `SSH_TTY` 非空时会抑制浏览器打开，但仍打印启动 URL。浏览器交接前会打印 `agentrans web: opening the default browser; pass --no-open to disable`；若操作系统交接失败，stderr 会说明原因并指向启动 URL，服务器仍继续运行。
 
 进程关闭时，插件树最多有 5 秒完成 dispose。首次收到 `SIGINT` 或 `SIGTERM` 时会开始优雅排空：`SIGTERM` 是监督进程发出的常规停止请求，在所有运行模式下都以 0 退出；`SIGINT` 则报告 130。第二次收到信号时会立即强制退出。如果一次性运行在正常结束时已经卡在 dispose 阶段，第一次按下 `Ctrl+C` 就会直接升级为强制退出，而不会被忽略。
 
@@ -145,4 +145,4 @@ Web、headless 与 SDK 继承 base bundle 的原生工具执行；使用 [PTC ov
 <a id="source-execution"></a>
 ## 源码执行
 
-请在仓库根目录中，于全新 checkout 之后及产物需要更新时单独运行 `pnpm run build`，然后使用 `pnpm dsh <args...>`。`package.json` 中的脚本不会构建，而是通过 `node --import tsx/esm` 启动 `apps/cli/src/bin.ts`，并转发所有参数。Typert Host 产物缺失时，profile 启动会因不含构建指引的模块解析错误而失败。这些 Host 产物存在后，如果前端或 Client plugin 组合包缺失，启动会失败并提示运行 `pnpm run build`。启动器不会检查产物是否为最新，因此已有的陈旧组合包可能继续运行旧版浏览器代码，直至重新构建。该进程会继承启动环境，且 `runProfile` 会在任何 entry 挂载之前从该快照解析出站代理，因此 `HTTP_PROXY`／`HTTPS_PROXY`（以及写在 `.env` 层中的代理）无需任何额外开关即可生效。源码入口显式选择链接式 profile 解析，使 tsx workspace 导入与 profile 插件共享模块身份。安装形式会使用 runtime profile 解析直接启动构建后的 `apps/cli/lib/bin.js`，不会重新构建仓库。
+请在仓库根目录中，于全新 checkout 之后及产物需要更新时单独运行 `pnpm run build`，然后使用 `pnpm agentrans <args...>`。`package.json` 中的脚本不会构建，而是通过 `node --import tsx/esm` 启动 `apps/cli/src/bin.ts`，并转发所有参数。Typert Host 产物缺失时，profile 启动会因不含构建指引的模块解析错误而失败。这些 Host 产物存在后，如果前端或 Client plugin 组合包缺失，启动会失败并提示运行 `pnpm run build`。启动器不会检查产物是否为最新，因此已有的陈旧组合包可能继续运行旧版浏览器代码，直至重新构建。该进程会继承启动环境，且 `runProfile` 会在任何 entry 挂载之前从该快照解析出站代理，因此 `HTTP_PROXY`／`HTTPS_PROXY`（以及写在 `.env` 层中的代理）无需任何额外开关即可生效。源码入口显式选择链接式 profile 解析，使 tsx workspace 导入与 profile 插件共享模块身份。安装形式会使用 runtime profile 解析直接启动构建后的 `apps/cli/lib/bin.js`，不会重新构建仓库。

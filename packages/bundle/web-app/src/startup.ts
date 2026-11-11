@@ -1,5 +1,5 @@
 /**
- * The web app's command-line provider: it parses the `dsh --profile web` flag
+ * The web app's command-line provider: it parses the `agentrans --profile web` flag
  * family (`--host`, `--port`, `--public-url`, `--trusted-host`, `--no-open`, TLS)
  * and its `--help` text, then provides the immutable values as
  * {@link WEB_STARTUP_SERVICE}. Ordinary rows inject that service before
@@ -70,13 +70,13 @@ function webCommand(): Command {
     .option('--tls-key <file>', 'unencrypted PEM private key; requires --tls-cert')
     .addHelpText('after', `
 Examples:
-  dsh --profile web                          serve on the composed host and port
-  dsh --profile web --no-open                serve without opening a browser
-  dsh --profile web --port 8080              serve on another port
-  dsh --profile web --host 10.0.0.7          bind one local interface address
-  dsh --profile web --public-url https://app.example/ui/ --trusted-host app.example
+  agentrans --profile web                          serve on the composed host and port
+  agentrans --profile web --no-open                serve without opening a browser
+  agentrans --profile web --port 8080              serve on another port
+  agentrans --profile web --host 10.0.0.7          bind one local interface address
+  agentrans --profile web --public-url https://app.example/ui/ --trusted-host app.example
                                              advertise a prefix-stripping HTTPS proxy entry and admit its authority
-  dsh --profile web --tls-cert ./server-chain.pem --tls-key ./server-key.pem
+  agentrans --profile web --tls-cert ./server-chain.pem --tls-key ./server-key.pem
                                              serve HTTPS with an existing certificate and key
 `)
 }

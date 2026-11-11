@@ -10,7 +10,7 @@
 # Loader resolves their expressions only after it exists. The web-runtime row
 # validates the advertised public URL; Connection reads invocation authorities
 # directly from `webStartup`.
-# `dsh --profile web --help` provides no `webStartup`, so no server binds.
+# `agentrans --profile web --help` provides no `webStartup`, so no server binds.
 
 # ── surface-specific values the base deliberately omits ─────────────────────
 

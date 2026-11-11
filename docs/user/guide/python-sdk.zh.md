@@ -118,7 +118,7 @@ with DeepSeekHarness(
 print(result.final_response)
 ```
 
-SDK 会延迟启动内置的 `dsh --profile sdk-minimal` 进程，并复用到上下文管理器退出。Profile、其持久 patch、home patch 与任何有序 `patches` tuple 共同组成应用配置。不存在独立 Python 运行时 bin 或完整配置选项。
+SDK 会延迟启动内置的 `agentrans --profile sdk-minimal` 进程，并复用到上下文管理器退出。Profile、其持久 patch、home patch 与任何有序 `patches` tuple 共同组成应用配置。不存在独立 Python 运行时 bin 或完整配置选项。
 
 ## 安装或定义插件
 
@@ -133,13 +133,13 @@ SDK 会延迟启动内置的 `dsh --profile sdk-minimal` 进程，并复用到�
 
 ```sh [Linux/macOS]
 export DSH_HOME=/absolute/path/to/example-dsh-home
-dsh --profile sdk-minimal --dump-default-config >/dev/null
+agentrans --profile sdk-minimal --dump-default-config >/dev/null
 dsh plugin --profile sdk-minimal add file:/absolute/path/to/my-plugin-bundle
 ```
 
 ```powershell [Windows PowerShell]
 $env:DSH_HOME = "C:\work\example-dsh-home"
-dsh --profile sdk-minimal --dump-default-config | Out-Null
+agentrans --profile sdk-minimal --dump-default-config | Out-Null
 dsh plugin --profile sdk-minimal add file:C:/work/my-plugin-bundle
 ```
 
@@ -178,7 +178,7 @@ dsh plugin --profile sdk-minimal add file:C:/work/my-plugin-bundle
 
 图片读取需要支持图片输入的路由。自动压缩保留完整 Session 日志；模型与存储影响见[组合包参考](../../../packages/bundle/sdk-minimal/README.zh.md)。在这个 `sdk-minimal` 组合中，不支持的斜杠输入保持为普通提示词文本。
 
-已安装 wheel 仍会打包完整 `web` profile 与前端产物。如果 Python SDK 部署还需要浏览器应用，请针对显式 `DSH_HOME` 运行 `dsh web`；`web` 是独立 CLI 应用，不能为 Python SDK client 提供服务。
+已安装 wheel 仍会打包完整 `web` profile 与前端产物。如果 Python SDK 部署还需要浏览器应用，请针对显式 `DSH_HOME` 运行 `agentrans web`；`web` 是独立 CLI 应用，不能为 Python SDK client 提供服务。
 
 需要隔离 profile、插件、凭据、设置与会话时，应使用新的 home。独立工作应使用新的 session id；只有继续同一段持久对话和会话资源时，才同时复用 harness、home 与 id。
 

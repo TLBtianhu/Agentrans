@@ -75,7 +75,7 @@ Not every request DSH makes goes through the proxy:
 Ask the agent to fetch a page and watch your proxy application's connection log:
 
 ```sh
-dsh --profile headless "fetch https://example.com and tell me the page title"
+agentrans --profile headless "fetch https://example.com and tell me the page title"
 ```
 
 If the request does not appear there, confirm the variables survive into DSH's own environment:

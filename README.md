@@ -30,7 +30,7 @@ The source `dsh`, `start:web`, and `dev:web` commands initialize a per-worktree 
 ```powershell
 pnpm install
 pnpm run build
-pnpm dsh web --no-open --port 58910
+pnpm agentrans web --no-open --port 58910
 ```
 
 Portable and installed distributions must use separate program and data paths from each other and from upstream DSH. See [DISTRIBUTION.md](DISTRIBUTION.md) for the invariants and the external-identity audit required before packaging.

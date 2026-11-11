@@ -31,7 +31,7 @@ Add the package to an initialized profile, then run a task that asks the Lead to
 
 ```sh
 dsh plugin --profile headless add @agentrans/experimental-agent-team-profile
-dsh --profile headless "Use Agent Teams to split this task between two teammates, wait, and summarize."
+agentrans --profile headless "Use Agent Teams to split this task between two teammates, wait, and summarize."
 ```
 
 The profile must already contain `@agentrans/base`, whose Subagent services and provider rows this layer consumes. Removing the package with `dsh plugin --profile <name> remove @agentrans/experimental-agent-team-profile` removes the bundle from the profile's ordered layer list.

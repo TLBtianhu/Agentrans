@@ -1,6 +1,6 @@
 /**
  * Profile discovery, initialization, and patch-layer composition for the
- * `dsh --profile` launcher family.
+ * `agentrans --profile` launcher family.
  *
  * A profile is a directory under `$DSH_HOME/profiles/<name>` holding a
  * `package.json` (out-of-tree plugin dependencies plus the profile manifest
@@ -158,7 +158,7 @@ export interface RuntimeResolution {
 
 /**
  * Resolve a profile's directory under the Harness home.
- * @param name - the profile name (`dsh --profile <name>`).
+ * @param name - the profile name (`agentrans --profile <name>`).
  * @param home - the Harness home; defaults to {@link resolveDshHome}.
  * @returns the absolute profile directory (which may not exist yet).
  */

@@ -118,7 +118,7 @@ with DeepSeekHarness(
 print(result.final_response)
 ```
 
-The SDK starts the bundled `dsh --profile sdk-minimal` process lazily and reuses it until context-manager exit. The profile, its persistent patch, the home patch, and any ordered `patches` tuple form the application configuration. There is no separate Python runtime bin or complete-config option.
+The SDK starts the bundled `agentrans --profile sdk-minimal` process lazily and reuses it until context-manager exit. The profile, its persistent patch, the home patch, and any ordered `patches` tuple form the application configuration. There is no separate Python runtime bin or complete-config option.
 
 ## Install or define plugins
 
@@ -133,13 +133,13 @@ Use `dsh plugin` for dependencies and bundle layers that should persist in this 
 
 ```sh [Linux/macOS]
 export DSH_HOME=/absolute/path/to/example-dsh-home
-dsh --profile sdk-minimal --dump-default-config >/dev/null
+agentrans --profile sdk-minimal --dump-default-config >/dev/null
 dsh plugin --profile sdk-minimal add file:/absolute/path/to/my-plugin-bundle
 ```
 
 ```powershell [Windows PowerShell]
 $env:DSH_HOME = "C:\work\example-dsh-home"
-dsh --profile sdk-minimal --dump-default-config | Out-Null
+agentrans --profile sdk-minimal --dump-default-config | Out-Null
 dsh plugin --profile sdk-minimal add file:C:/work/my-plugin-bundle
 ```
 
@@ -178,7 +178,7 @@ The profile's sole bundle inserts the complete tree over an empty root and does 
 
 Image reading requires an image-capable route. Automatic compaction preserves the complete Session log; see the [bundle reference](../../../packages/bundle/sdk-minimal/README.md) for model and storage effects. In this `sdk-minimal` composition, unsupported slash input remains ordinary prompt text.
 
-The installed wheel still packages the full `web` profile and frontend assets. Run `dsh web` against an explicit `DSH_HOME` when a Python SDK deployment also needs the browser application; `web` is a separate CLI application and cannot serve a Python SDK client.
+The installed wheel still packages the full `web` profile and frontend assets. Run `agentrans web` against an explicit `DSH_HOME` when a Python SDK deployment also needs the browser application; `web` is a separate CLI application and cannot serve a Python SDK client.
 
 Use a fresh home when profiles, plugins, credentials, settings, and sessions must be isolated. Use a fresh session id for independent work; reuse a harness, home, and id only to continue the same durable conversation and session-owned resources.
 

@@ -108,7 +108,7 @@ it('hot-reloads a real client-plugin source edit without refreshing the page', a
   const failures: unknown[] = []
   try {
     subprocessFiber = await subprocessCtx.plugin(LocalSubprocessRuntime)
-    // Watchers only: the built `dsh web` below is the server under test, and the
+    // Watchers only: the built `agentrans web` below is the server under test, and the
     // built tree is this lane's precondition rather than something to rebuild.
     watcher = subprocessCtx.subprocess.spawn(spawnSpec(
       ['pnpm', 'run', 'dev:web', '--skip-build', '--no-serve'],

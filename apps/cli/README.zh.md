@@ -8,13 +8,13 @@
 
 | 命令 | 用途 |
 |---|---|
-| `dsh <name>` / `dsh --profile <name>` | 启动位于 `$DSH_HOME/profiles/<name>` 的指定 profile。 |
-| `dsh --profile <name> --from-default-profile <template>` | 用随附模板的全新副本替换自定义 profile，然后启动它。 |
-| `dsh --profile acp` | 通过 ACP stdio 为自动化客户端提供服务，直至断开连接。 |
-| `dsh --profile headless "job"` | 运行一个全新的持久化会话，打印最终答案并退出。 |
-| `dsh --profile sdk` | 通过 JSON-RPC stdio 为 SDK 客户端提供服务，直至关闭或断开连接。 |
-| `dsh --profile sdk-minimal` | 以独立极简 agent（智能体）配置树为 SDK 客户端提供服务。 |
-| `dsh web` | 启动 Web profile。 |
+| `dsh <name>` / `agentrans --profile <name>` | 启动位于 `$DSH_HOME/profiles/<name>` 的指定 profile。 |
+| `agentrans --profile <name> --from-default-profile <template>` | 用随附模板的全新副本替换自定义 profile，然后启动它。 |
+| `agentrans --profile acp` | 通过 ACP stdio 为自动化客户端提供服务，直至断开连接。 |
+| `agentrans --profile headless "job"` | 运行一个全新的持久化会话，打印最终答案并退出。 |
+| `agentrans --profile sdk` | 通过 JSON-RPC stdio 为 SDK 客户端提供服务，直至关闭或断开连接。 |
+| `agentrans --profile sdk-minimal` | 以独立极简 agent（智能体）配置树为 SDK 客户端提供服务。 |
+| `agentrans web` | 启动 Web profile。 |
 | `dsh plugin --profile <name> <pnpm args>` | 通过在 profile 目录中转发给 pnpm 来管理该 profile 的插件。 |
 
 运行命令时所在的目录将作为默认 workspace 根目录。`web`、`headless`、`sdk`、`sdk-minimal` 和 `acp` profile 在首次使用时会从随附模板自动初始化。使用 `--from-default-profile` 可以基于这些模板之一，在非内置名称处创建或重置其他 profile；通过 `dsh plugin` 则可以初始化一个以 base 为基础的 profile。`desktop` 名称保留给 Electron 持有的 profile，因此 CLI（命令行界面）会拒绝针对它的启动和配置 dump 请求。npm CLI 也会拒绝其插件管理请求；[Desktop 内置命令](../desktop/README.zh.md#bundled-command-runtime)可以使用该安装的运行时管理已初始化的 Desktop profile。
@@ -24,10 +24,10 @@
 启动器只解析自身的 flag，并将其后的所有内容交给已启动的 profile；注入该 profile 的任意应用插件都可以解析这份共享的不可变快照（[`dsh-cmdline`](../../packages/boot/cmdline/README.zh.md)）。启动器无法识别的第一个 token 标志着应用参数的开始：
 
 ```sh
-dsh --profile web --port 8080       # --port belongs to the web app
-dsh --profile tui --resume <id>     # example, assuming the tui profile is installed; --resume belongs to the terminal app
-dsh --profile headless "run the tests"
-dsh --profile web --help            # the web app's flags, not the launcher's
+agentrans --profile web --port 8080       # --port belongs to the web app
+agentrans --profile tui --resume <id>     # example, assuming the tui profile is installed; --resume belongs to the terminal app
+agentrans --profile headless "run the tests"
+agentrans --profile web --help            # the web app's flags, not the launcher's
 dsh --help                          # the launcher's own help
 ```
 
@@ -55,7 +55,7 @@ profile 目录包含一个 `package.json`，其中记录树外插件依赖，以
 
 ## 开发
 
-生产运行需要已构建的包与前端产物。请在仓库根目录单独运行 `pnpm run build`，然后使用 `pnpm dsh <args...>` 运行 TypeScript 入口并转发所有参数；模块解析约定以[源码执行参考](reference/README.zh.md#source-execution)为准。
+生产运行需要已构建的包与前端产物。请在仓库根目录单独运行 `pnpm run build`，然后使用 `pnpm agentrans <args...>` 运行 TypeScript 入口并转发所有参数；模块解析约定以[源码执行参考](reference/README.zh.md#source-execution)为准。
 
 `@agentrans/dsh/profile-boot` 导出向 Desktop Host 提供共享 profile 生命周期。已解析的应用 profile 为运行时包解析指定自己的安装锚点，同时沿用 Harness home patch、代理环境、遥测开关、patch 热重载和有界关闭。
 

@@ -65,11 +65,11 @@ function headlessCommand(): Command {
     .argument('[task...]', 'the task text; multiple words are joined by spaces, and `-` reads stdin')
     .addHelpText('after', `
 Examples:
-  dsh --profile headless "run the tests"          answer one task and exit
+  agentrans --profile headless "run the tests"          answer one task and exit
   echo "run the tests" | dsh --profile headless   read the task from stdin
-  dsh --profile headless --json "run the tests"   emit machine-readable run events
-  dsh --profile headless --session-id session-… "continue"   resume an existing Session
-  dsh --profile headless --permission-mode workspace-write --add-dir /repo/.git "commit the fix"
+  agentrans --profile headless --json "run the tests"   emit machine-readable run events
+  agentrans --profile headless --session-id session-… "continue"   resume an existing Session
+  agentrans --profile headless --permission-mode workspace-write --add-dir /repo/.git "commit the fix"
                                                         grant shared Git metadata for this task
 `)
 }

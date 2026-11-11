@@ -230,7 +230,7 @@ describe('web-app runtime glue', () => {
     const openBrowser = vi.fn(async () => {})
     internals.openBrowser = openBrowser
     apply(ctx, new Config({ openBrowser: false, printUrl: true, surfaceContext: true }))
-    await vi.waitFor(() => { expect(log).toHaveBeenCalledWith(`dsh web: http://${printed}:4567/?token=test-token`) })
+    await vi.waitFor(() => { expect(log).toHaveBeenCalledWith(`agentrans web: http://${printed}:4567/?token=test-token`) })
     expect(warn).not.toHaveBeenCalled()
     expect(openBrowser).not.toHaveBeenCalled()
   })
@@ -257,9 +257,9 @@ describe('web-app runtime glue', () => {
     // root names the bind address; startup warns that the port is plain HTTP.
     expect(warn).toHaveBeenCalledTimes(1)
     expect(warn).toHaveBeenCalledWith(
-      `dsh web: listening on ${bind} over plain HTTP; restrict this port to a trusted proxy or network`,
+      `agentrans web: listening on ${bind} over plain HTTP; restrict this port to a trusted proxy or network`,
     )
-    expect(log).toHaveBeenCalledWith(`dsh web: http://${printed}:4567/?token=test-token`)
+    expect(log).toHaveBeenCalledWith(`agentrans web: http://${printed}:4567/?token=test-token`)
     expect(openBrowser).toHaveBeenCalledWith(`http://${printed}:4567/?token=test-token`)
   })
 

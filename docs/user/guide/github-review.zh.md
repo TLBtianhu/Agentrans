@@ -2,7 +2,7 @@
 
 [English](github-review.md) | 中文
 
-此可选 overlay 会为 `dsh web` 增加一个签名 GitHub 端点。当已配置仓库中的 pull request 从 draft 变为 ready for review 时，规则会在该仓库的 Web Workspace 下创建带标题的根 Session，并启动只读评审提示词。
+此可选 overlay 会为 `agentrans web` 增加一个签名 GitHub 端点。当已配置仓库中的 pull request 从 draft 变为 ready for review 时，规则会在该仓库的 Web Workspace 下创建带标题的根 Session，并启动只读评审提示词。
 
 ## 前置条件
 
@@ -27,7 +27,7 @@ printf '%s\n' "$DSH_GITHUB_WEBHOOK_SECRET"
 ```sh
 dsh plugin --profile web add @agentrans/webhook @agentrans/webhook-github
 export DSH_GITHUB_REVIEW_WORKSPACE=/path/to/deepseek-harness
-dsh web --patch "${DSH_HOME:-$HOME/.dsh}/profiles/web/node_modules/@agentrans/webhook-github/examples/github-review/cordis.yml"
+agentrans web --patch "${DSH_HOME:-$HOME/.dsh}/profiles/web/node_modules/@agentrans/webhook-github/examples/github-review/cordis.yml"
 ```
 
 示例随 GitHub 适配器发布，并从 profile 的安装目录加载，因此规则模块能解析该 profile 安装的 peer。不要把规则单独放到 profile 之外的任意目录运行。需要定制时，将示例的两个文件复制到 `$DSH_HOME/profiles/web/github-review/`，修改其配置并把 `--patch` 指向复制后的 `cordis.yml`；未设置 `DSH_HOME` 时使用 `~/.dsh`。

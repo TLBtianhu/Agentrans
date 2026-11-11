@@ -8,13 +8,13 @@ The `dsh` command is the sole supported Node application launcher: profiles are 
 
 | Command | Purpose |
 |---|---|
-| `dsh <name>` / `dsh --profile <name>` | Boot the named profile under `$DSH_HOME/profiles/<name>`. |
-| `dsh --profile <name> --from-default-profile <template>` | Replace a custom profile with a fresh copy of a shipped template, then boot it. |
-| `dsh --profile acp` | Serve automation clients over ACP stdio until disconnect. |
-| `dsh --profile headless "job"` | Run one fresh persisted session, print the final answer, and exit. |
-| `dsh --profile sdk` | Serve SDK clients over JSON-RPC stdio until shutdown or disconnect. |
-| `dsh --profile sdk-minimal` | Serve SDK clients with the standalone minimal agent tree. |
-| `dsh web` | Boot the Web profile. |
+| `dsh <name>` / `agentrans --profile <name>` | Boot the named profile under `$DSH_HOME/profiles/<name>`. |
+| `agentrans --profile <name> --from-default-profile <template>` | Replace a custom profile with a fresh copy of a shipped template, then boot it. |
+| `agentrans --profile acp` | Serve automation clients over ACP stdio until disconnect. |
+| `agentrans --profile headless "job"` | Run one fresh persisted session, print the final answer, and exit. |
+| `agentrans --profile sdk` | Serve SDK clients over JSON-RPC stdio until shutdown or disconnect. |
+| `agentrans --profile sdk-minimal` | Serve SDK clients with the standalone minimal agent tree. |
+| `agentrans web` | Boot the Web profile. |
 | `dsh plugin --profile <name> <pnpm args>` | Manage a profile's plugins by forwarding to pnpm in the profile directory. |
 
 The invoking directory is the default workspace root. The `web`, `headless`, `sdk`, `sdk-minimal`, and `acp` profiles auto-initialize on first use from shipped templates. Create or reset another profile at a non-shipped name with `--from-default-profile`, or initialize a base-backed profile through `dsh plugin`. The `desktop` name is reserved for the Electron-owned profile, so the CLI rejects boot and config-dump requests for it. The npm CLI also rejects its plugin-management requests; the [Desktop-installed command](../desktop/README.md#bundled-command-runtime) can manage the initialized Desktop profile using that installation’s runtime.
@@ -24,10 +24,10 @@ The invoking directory is the default workspace root. The `web`, `headless`, `sd
 The launcher parses only its own flags and hands everything after them to the booted profile, where any injected app plugin may parse the shared immutable snapshot ([`dsh-cmdline`](../../packages/boot/cmdline/README.md)). The first token the launcher does not recognize starts the app's arguments:
 
 ```sh
-dsh --profile web --port 8080       # --port belongs to the web app
-dsh --profile tui --resume <id>     # example, assuming the tui profile is installed; --resume belongs to the terminal app
-dsh --profile headless "run the tests"
-dsh --profile web --help            # the web app's flags, not the launcher's
+agentrans --profile web --port 8080       # --port belongs to the web app
+agentrans --profile tui --resume <id>     # example, assuming the tui profile is installed; --resume belongs to the terminal app
+agentrans --profile headless "run the tests"
+agentrans --profile web --help            # the web app's flags, not the launcher's
 dsh --help                          # the launcher's own help
 ```
 
@@ -55,7 +55,7 @@ The [CLI behavior reference](reference/README.md) owns exact layer precedence, f
 
 ## Development
 
-Production runs require built package and frontend artifacts. From the repository root, run `pnpm run build` separately, then use `pnpm dsh <args...>` to run the TypeScript entry and forward every argument; the [source-execution reference](reference/README.md#source-execution) owns the module-resolution contract.
+Production runs require built package and frontend artifacts. From the repository root, run `pnpm run build` separately, then use `pnpm agentrans <args...>` to run the TypeScript entry and forward every argument; the [source-execution reference](reference/README.md#source-execution) owns the module-resolution contract.
 
 The `@agentrans/dsh/profile-boot` export provides the shared profile lifecycle to the Desktop host. A resolved application profile supplies its own installation anchor for runtime package resolution while retaining the Harness home patch, proxy environment, telemetry switch, patch reload, and bounded shutdown.
 
