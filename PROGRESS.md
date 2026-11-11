@@ -10,6 +10,20 @@
 - 已知限制：同一个版本的两个 macOS 架构会各自产出 `alpha-mac.yml`，发布到同一 Release 时会互相覆盖；要同时发布两个架构需要一次同时构建两个架构（或改用 universal 包），尚未实现。
 - 托管验证：合并后的工作流用 `mac-x64` 与 `win-x64` 各实跑一次，均成功（run 42854365096 / 42858836181）。
 
+## 进行中：把文档里的 dsh 清干净（2026-11-11）
+
+已改：默认 home 从 `~/.dsh` 改为 `~/.agentrans`（38 个 md + 7 个源文件 JSDoc + 重新生成的配置目录）；产品措辞 19 个文件；用户指南包名 11 个文件；514 篇包 README；72 篇应用/贡献者指南。
+
+**批量替换在这份仓库里有四个雷，踩过两次，已回滚重来**：
+
+1. 技能目录名以 `dsh-` 开头（`.agents/skills/dsh-doc`），被当成包名会打断链接与常驻指令。
+2. `ts type-equiv` 代码块逐字复制源码 JSDoc，改动任一侧都会让 `verify-type-equiv` 报 drift。
+3. ASCII 架构图靠固定列宽，包名变长会撑破方框。
+4. 生成文档（`docs/cli-help`、各 catalog、module-graph）只能由生成器改，手改必红。
+
+安全做法：按目录分批 → 跳过含 type 块或制表符的文件 → 重录译对 → 跑 `doc-sync` → 单独提交。
+
+剩余：`.agents/notes` 1130 篇（历史决策记录，含当时的旧名）、`docs/subsystems` 80 篇与 `docs/persistence-changes` 64 篇（受 type 块保护，需要与源码 JSDoc 同步改）、400 个文件里的大写 `DSH`（多为 "upstream DSH" 这类有意指代）。
 ## 已完成：0.1.0 正式发布（2026-11-11）
 
 - 打包工作流新增 `target=all`：一次运行内并行产出 `agentrans-win-x64` 与 `agentrans-mac`，因为发布工作流只下载**一个**运行的产物。
