@@ -252,7 +252,7 @@ export class ProgramWorker {
       .filter(key => !STARTUP_ENVIRONMENT_NAMES.has(key.toUpperCase()) && key.toUpperCase() !== 'ELECTRON_RUN_AS_NODE')
       .map(key => [key, undefined]))
     if (packaged) {
-      env.DSH_PTC_RUNTIME_NODE = '1'
+      env.AGENTRANS_PTC_RUNTIME_NODE = '1'
       env.NODE_OPTIONS = heapFlag
     }
     const handle = this.ctx.subprocess.spawn({ argv: this.confined?.argv ?? argv, cwd, env, stdio: { stdin: 'ignore', stdout: 'pipe', stderr: 'pipe', control: 'pipe' }, graceMs: this.config.graceMs })

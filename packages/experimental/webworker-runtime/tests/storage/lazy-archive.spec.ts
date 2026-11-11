@@ -59,7 +59,7 @@ describe('registration', () => {
       () => { vfs.renameSync('/dsh/node_modules/@scope/preview', '/dsh/moved') },
     ]
     for (const refusal of refusals) {
-      expect(refusal).toThrow(expect.objectContaining({ code: 'ERR_DSH_VFS_DEFERRED' }))
+      expect(refusal).toThrow(expect.objectContaining({ code: 'ERR_AGENTRANS_VFS_DEFERRED' }))
       expect(refusal).toThrow(/lazy archive lazy\/abc\.tar\.gz supplies/)
     }
     expect(() => { vfs.mkdirSync(`/dsh/${PDF}`) }).toThrow(expect.objectContaining({ code: 'EEXIST' }))
@@ -71,7 +71,7 @@ describe('registration', () => {
     const mutations: VfsMutation[] = []
     vfs.subscribe((mutation) => { mutations.push(mutation) })
     expect(() => { vfs.renameSync('/dsh/node_modules/@scope/preview', '/dsh/target') })
-      .toThrow(expect.objectContaining({ code: 'ERR_DSH_VFS_DEFERRED' }))
+      .toThrow(expect.objectContaining({ code: 'ERR_AGENTRANS_VFS_DEFERRED' }))
     expect(vfs.statSync('/dsh/target').isDirectory()).toBe(true)
     expect(vfs.existsSync(`/dsh/${PDF}`)).toBe(true)
     expect(mutations).toEqual([])
@@ -143,7 +143,7 @@ describe('fetch', () => {
   ])('refuses an archive with %s and leaves its files registered', async (_label, contents, message) => {
     const vfs = deferred(() => Promise.resolve(contents()))
     await expect(vfs.promises.readFile(`/dsh/${PDF}`)).rejects.toThrow(message)
-    expect(() => vfs.readFileSync(`/dsh/${PDF}`)).toThrow(expect.objectContaining({ code: 'ERR_DSH_VFS_DEFERRED' }))
+    expect(() => vfs.readFileSync(`/dsh/${PDF}`)).toThrow(expect.objectContaining({ code: 'ERR_AGENTRANS_VFS_DEFERRED' }))
   })
 
   it('opens a promise handle only after the archive arrived', async () => {
@@ -170,7 +170,7 @@ describe('node:fs bridge', () => {
   it('serves asynchronous faces after the fetch and refuses synchronous ones before it', async () => {
     const vfs = deferred(() => Promise.resolve(archive()))
     setActiveVfs(vfs)
-    expect(() => fs.readFileSync(`/dsh/${PDF}`)).toThrow(expect.objectContaining({ code: 'ERR_DSH_VFS_DEFERRED' }))
+    expect(() => fs.readFileSync(`/dsh/${PDF}`)).toThrow(expect.objectContaining({ code: 'ERR_AGENTRANS_VFS_DEFERRED' }))
     expect(fs.existsSync(`/dsh/${PDF}`)).toBe(true)
     expect(await fsp.readFile(`/dsh/${PDF}`, 'utf8')).toBe('module.exports = "pdf"\n')
 

@@ -20,18 +20,18 @@ vi.mock('node:fs/promises', async importOriginal => ({
 describe('installer preparation preserves application dependencies', () => {
   it.each(['win32', 'darwin'] as const)('rejects a missing release identity before signing on %s', async (platform) => {
     const { createElectronBuilderConfig } = await import('../scripts/electron-builder-config.mjs')
-    expect(() => createElectronBuilderConfig({}, platform, 'x64')).toThrow('DSH_DESKTOP_APP_ID')
+    expect(() => createElectronBuilderConfig({}, platform, 'x64')).toThrow('AGENTRANS_DESKTOP_APP_ID')
   })
   it.each(['win32', 'darwin'] as const)('preserves installer metadata and dependency ownership on %s', async (platform) => {
     execute.mockClear()
     write.mockClear()
     const env = {
-      DSH_DESKTOP_APP_ID: 'com.example.installer',
-      DSH_DESKTOP_TARGET_PLATFORM: platform,
-      DSH_DESKTOP_TARGET_ARCH: 'x64',
-      DSH_DESKTOP_UNSIGNED: platform === 'win32' ? '1' : '0',
-      DSH_DESKTOP_MACOS_SIGNING_IDENTITY: 'Example Company (TEAMID1234)',
-      DSH_DESKTOP_MACOS_TEAM_ID: 'TEAMID1234',
+      AGENTRANS_DESKTOP_APP_ID: 'com.example.installer',
+      AGENTRANS_DESKTOP_TARGET_PLATFORM: platform,
+      AGENTRANS_DESKTOP_TARGET_ARCH: 'x64',
+      AGENTRANS_DESKTOP_UNSIGNED: platform === 'win32' ? '1' : '0',
+      AGENTRANS_DESKTOP_MACOS_SIGNING_IDENTITY: 'Example Company (TEAMID1234)',
+      AGENTRANS_DESKTOP_MACOS_TEAM_ID: 'TEAMID1234',
       APPLE_KEYCHAIN_PROFILE: 'installer-test',
       DOWNLOAD_TEST_ORIGIN: 'https://desktop-updates.example.com'    }
     for (const [name, value] of Object.entries(env)) vi.stubEnv(name, value)
@@ -86,10 +86,10 @@ describe('installer preparation preserves application dependencies', () => {
   it('names unsigned Windows artifacts so they cannot pass for release builds', async () => {
     const { createElectronBuilderConfig } = await import('../scripts/electron-builder-config.mjs')
     const config = createElectronBuilderConfig({
-      DSH_DESKTOP_APP_ID: 'com.example.installer',
-      DSH_DESKTOP_TARGET_PLATFORM: 'win32',
-      DSH_DESKTOP_TARGET_ARCH: 'x64',
-      DSH_DESKTOP_UNSIGNED: '1',
+      AGENTRANS_DESKTOP_APP_ID: 'com.example.installer',
+      AGENTRANS_DESKTOP_TARGET_PLATFORM: 'win32',
+      AGENTRANS_DESKTOP_TARGET_ARCH: 'x64',
+      AGENTRANS_DESKTOP_UNSIGNED: '1',
     }, 'win32', 'x64')
     expect(config.artifactName).toBe('agentrans-${version}-${os}-${arch}-unsigned.${ext}')
   })
@@ -105,10 +105,10 @@ describe('installer preparation preserves application dependencies', () => {
     expect(referenced.size).toBeGreaterThan(0)
     const { createElectronBuilderConfig } = await import('../scripts/electron-builder-config.mjs')
     const config = createElectronBuilderConfig({
-      DSH_DESKTOP_APP_ID: 'com.example.installer',
+      AGENTRANS_DESKTOP_APP_ID: 'com.example.installer',
       DOWNLOAD_PROD_ORIGIN: 'https://updates.example.com',
-      DSH_DESKTOP_MACOS_SIGNING_IDENTITY: 'Example Company (TEAMID1234)',
-      DSH_DESKTOP_MACOS_TEAM_ID: 'TEAMID1234',
+      AGENTRANS_DESKTOP_MACOS_SIGNING_IDENTITY: 'Example Company (TEAMID1234)',
+      AGENTRANS_DESKTOP_MACOS_TEAM_ID: 'TEAMID1234',
       APPLE_KEYCHAIN_PROFILE: 'installer-test',
     }, 'darwin', 'arm64')
     const packaged = new Set(config.files.filter((entry): entry is string => typeof entry === 'string'))

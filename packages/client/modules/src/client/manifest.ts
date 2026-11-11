@@ -24,7 +24,7 @@
  * registered its factory before a consumer materializes.
  *
  * This file is the browser-safe contract face (zero node imports): the
- * `__DSH_BOOT__` wire types, the boot-manifest parser, and the boundaries around
+ * `__AGENTRANS_BOOT__` wire types, the boot-manifest parser, and the boundaries around
  * {@link ClientModuleSystem}. The package root is the host-side service that
  * composes the wire.
  */
@@ -90,7 +90,7 @@ export interface WebBootRelease {
   commit?: string
 }
 
-/** The composed client entry graph the host injects as `window.__DSH_BOOT__`. */
+/** The composed client entry graph the host injects as `window.__AGENTRANS_BOOT__`. */
 export interface WebBootGraph {
   /** Consistency anchor over the current entry and batch descriptors. */
   rev: string
@@ -220,15 +220,15 @@ export function stripClientSuffix(spec: string): string {
 }
 
 /**
- * Parse `window.__DSH_BOOT__` into the two consumer views. Wire boundary:
+ * Parse `window.__AGENTRANS_BOOT__` into the two consumer views. Wire boundary:
  * a missing or malformed graph throws (the shell shows the loud failure —
  * a page without a valid manifest cannot boot anything).
- * @param wire - the raw `window.__DSH_BOOT__` value.
+ * @param wire - the raw `window.__AGENTRANS_BOOT__` value.
  * @returns the manifest with optional plugin-view fields normalized.
  */
 export function parseBootManifest(wire: unknown): BootManifest {
   if (typeof wire !== 'object' || wire === null) {
-    throw new Error('client-modules: window.__DSH_BOOT__ is missing or not an object')
+    throw new Error('client-modules: window.__AGENTRANS_BOOT__ is missing or not an object')
   }
   const graph = wire as Record<string, unknown>
   if (typeof graph.rev !== 'string') {
@@ -408,7 +408,7 @@ export interface ClientModuleLoaderTarget {
 /** Window API of the web boot protocol: the host-injected graph and registration facade. */
 export interface DshWindow {
   /** Host-composed entry graph, injected before the shell bundle runs; wire-boundary raw until {@link parseBootManifest}. */
-  __DSH_BOOT__?: unknown
+  __AGENTRANS_BOOT__?: unknown
   /** HTML-installed facade: a pending registration queue, then the live module-system target. */
   __ModuleLoader__?: ClientModuleLoaderTarget
 }

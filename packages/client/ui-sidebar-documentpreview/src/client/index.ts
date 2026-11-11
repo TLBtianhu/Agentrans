@@ -87,7 +87,7 @@ export const inject = ['slots', 'locale', 'sidebarRightTabs', 'remote', 'remote.
  * @param ctx - client root context carrying the registry, slots, copy, and file readers.
  */
 export function apply(ctx: ClientContext): void {
-  const config = Config((globalThis as { __DSH_DOCUMENT_PREVIEW_CONFIG__?: unknown }).__DSH_DOCUMENT_PREVIEW_CONFIG__ ?? {})
+  const config = Config((globalThis as { __AGENTRANS_DOCUMENT_PREVIEW_CONFIG__?: unknown }).__AGENTRANS_DOCUMENT_PREVIEW_CONFIG__ ?? {})
   const previews = new DocumentPreviewRegistry()
   const disposePreviews = ctx.reflect.provide('documentPreviews', previews)
   ctx.effect(() => disposePreviews)

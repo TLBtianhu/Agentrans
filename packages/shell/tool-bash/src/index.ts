@@ -25,7 +25,7 @@ import type {} from '@agentrans/shell-env'
 import type { SandboxExecutionPolicy, SandboxMode } from '@agentrans/sandbox'
 import { ESCALATION_TARGETS, approveEscalation, sandboxPermissionsDescription, validateEscalationArgs } from '@agentrans/sandbox'
 import type { SandboxPolicyService } from '@agentrans/sandbox-policy'
-import { DSH_ENV_PREFIX } from '@agentrans/shell'
+import { AGENTRANS_ENV_PREFIX } from '@agentrans/shell'
 import type { ShellExecRequest, ShellExecSpec, ShellExecution, ShellRunResult } from '@agentrans/shell'
 import { processJob, processOutcome, processSources, ringDelta } from './background.ts'
 import { parseExitStatus, renderJobRead, renderPromoted, renderResult } from './render.ts'
@@ -90,7 +90,7 @@ function validateBashArgs(args: BashToolArgs, effectiveMode: SandboxMode | undef
 function bashDescription(): string {
   return 'Execute a bash command (`bash -c`) and return its stdout/stderr. '
     + 'Each call runs in a fresh shell; pass `workdir` instead of using `cd`. '
-    + `Managed \`$${DSH_ENV_PREFIX}*\` variables expose current harness environment facts. `
+    + `Managed \`$${AGENTRANS_ENV_PREFIX}*\` variables expose current harness environment facts. `
     + 'Long output is truncated to its tail; the full output is saved to a file whose path is reported when available. '
     + 'Provide `description` before `command` in the arguments. '
     + 'Before any delete or move, verify that the resolved absolute target path is the intended one; never run it against a computed path you have not checked. '

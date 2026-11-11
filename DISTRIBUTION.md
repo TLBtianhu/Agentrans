@@ -28,7 +28,7 @@
 
 ## 单根目录实现
 
-[product-layout](packages/boot/product-layout/README.md) 提供 `ProductLayout.fromRoot()`、安装清单、运行时激活、文件级便携/安装打包、范围卸载和用户级 Windows 注册。所有应用、数据、模型和运行时路径都从同一个根目录派生；DSH_HOME 与 DSH_AGENTS_HOME 位于 `data/dsh/` 下，它们只是 Agentrans 内部运行数据路径，不是外部 DSH 集成。打包只替换 `app`，默认保留 `data`、`models` 和 `runtime-envs`；卸载默认只删除 `app` 和可重建 cache，完整删除需要确认，Windows 注册最后处理。1.0 前不做旧结构迁移，也不跨实例共享资产。
+[product-layout](packages/boot/product-layout/README.md) 提供 `ProductLayout.fromRoot()`、安装清单、运行时激活、文件级便携/安装打包、范围卸载和用户级 Windows 注册。所有应用、数据、模型和运行时路径都从同一个根目录派生；AGENTRANS_HOME 与 AGENTRANS_AGENTS_HOME 位于 `data/dsh/` 下，它们只是 Agentrans 内部运行数据路径，不是外部 DSH 集成。打包只替换 `app`，默认保留 `data`、`models` 和 `runtime-envs`；卸载默认只删除 `app` 和可重建 cache，完整删除需要确认，Windows 注册最后处理。1.0 前不做旧结构迁移，也不跨实例共享资产。
 
 Windows 注册后端使用 HKCU 写入卸载项和开始菜单快捷方式，支持注册、验证和删除，不需要管理员权限；真实临时注册项 smoke 已通过。
 

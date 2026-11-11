@@ -176,10 +176,10 @@ function bundleTable(graph: WebBootGraph, plugins: readonly AssembledPlugin[]): 
 }
 
 interface FixtureWindow extends Window {
-  __DSH_BOOT__?: WebBootGraph
+  __AGENTRANS_BOOT__?: WebBootGraph
   __ModuleLoader__?: ClientModuleLoaderTarget
-  __DSH_TRANSPORT__?: { readonly rpc: RemoteMock['rpc'] }
-  __DSH_FILE_UPLOAD__?: { readonly fetch: AssembledRemote['fileUpload'] }
+  __AGENTRANS_TRANSPORT__?: { readonly rpc: RemoteMock['rpc'] }
+  __AGENTRANS_FILE_UPLOAD__?: { readonly fetch: AssembledRemote['fileUpload'] }
 }
 
 class ResizeObserverStub {
@@ -251,10 +251,10 @@ export function installAssembledBootEnv(): void {
     unmount = undefined
     mountedRemote = undefined
     cleanup()
-    delete win.__DSH_BOOT__
+    delete win.__AGENTRANS_BOOT__
     delete win.__ModuleLoader__
-    delete win.__DSH_TRANSPORT__
-    delete win.__DSH_FILE_UPLOAD__
+    delete win.__AGENTRANS_TRANSPORT__
+    delete win.__AGENTRANS_FILE_UPLOAD__
     document.body.innerHTML = ''
     document.head.querySelectorAll('style[data-plugin]').forEach((style) => { style.remove() })
     document.title = ''
@@ -282,16 +282,16 @@ export function mountAssembledApp(options: AssembledBootOptions = {}): Assembled
   const plugins = PLUGINS.filter(plugin => !excluded.has(plugin.id))
   const remote = createAssembledRemote(options.remote)
   mountedRemote = remote.mock
-  win.__DSH_TRANSPORT__ = { rpc: remote.mock.rpc }
-  win.__DSH_FILE_UPLOAD__ = { fetch: remote.fileUpload }
+  win.__AGENTRANS_TRANSPORT__ = { rpc: remote.mock.rpc }
+  win.__AGENTRANS_FILE_UPLOAD__ = { fetch: remote.fileUpload }
   history.replaceState(null, '', '/')
   const root = document.createElement('div')
   root.id = 'root'
   document.body.appendChild(root)
   const graph = bootGraph(plugins)
   const bundles = bundleTable(graph, plugins)
-  win.__DSH_BOOT__ = graph
-  const [facadeRow] = bootInjections(win.__DSH_BOOT__)
+  win.__AGENTRANS_BOOT__ = graph
+  const [facadeRow] = bootInjections(win.__AGENTRANS_BOOT__)
   if (facadeRow?.kind !== 'script') throw new Error('missing injected ModuleLoader facade row')
   ;(0, eval)(facadeRow.text)
   // Mirror the blocking Host-injected bootstrap batch before the Vite entry calls create().
@@ -352,7 +352,7 @@ export function hasClass(el: Element, name: string): boolean {
 
 /**
  * Whether this run rewrites its golden instead of comparing against it, set by
- * the snapshot gate's `DSH_SNAPSHOT` mode (`record` re-runs the scenarios from
+ * the snapshot gate's `AGENTRANS_SNAPSHOT` mode (`record` re-runs the scenarios from
  * scratch, `refresh` re-derives the expected text from the existing ones).
  */
-export const REFRESHING_GOLDEN = process.env.DSH_SNAPSHOT === 'record' || process.env.DSH_SNAPSHOT === 'refresh'
+export const REFRESHING_GOLDEN = process.env.AGENTRANS_SNAPSHOT === 'record' || process.env.AGENTRANS_SNAPSHOT === 'refresh'

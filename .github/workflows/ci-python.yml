@@ -15,7 +15,7 @@ env:
   PRIMARY_NODE_VERSION: '24'
   # CI runs must never report to the production telemetry endpoint baked
   # into apps/cli/cordis.yml (AppCLIEntry disables the row when set).
-  DSH_TELEMETRY_DISABLED: '1'
+  AGENTRANS_TELEMETRY_DISABLED: '1'
 
 # Cancel a superseded pull-request run on a new push, as in ci.yml.
 concurrency:
@@ -70,8 +70,8 @@ jobs:
   python-checks-passed:
     name: python checks passed
     runs-on: >-
-      ${{ vars.DSH_CI_FAILOVER_LINUX == 'blacksmith' && 'blacksmith-4vcpu-ubuntu-2404'
-          || vars.DSH_CI_FAILOVER_LINUX == 'selfhosted'
+      ${{ vars.AGENTRANS_CI_FAILOVER_LINUX == 'blacksmith' && 'blacksmith-4vcpu-ubuntu-2404'
+          || vars.AGENTRANS_CI_FAILOVER_LINUX == 'selfhosted'
           && github.event.pull_request.user.login != 'dependabot[bot]'
           && fromJSON('["self-hosted", "linux", "x64", "vm-backup"]')
           || 'ubuntu-latest' }}

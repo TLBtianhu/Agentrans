@@ -75,7 +75,7 @@ const harness = await vi.hoisted(async () => {
   let platformCloseDeferred: ReturnType<typeof deferred> | undefined
   const platformCloseAndWait = vi.fn(() => platformCloseDeferred?.promise ?? Promise.resolve())
   const readLoginShell = async (base: NodeJS.ProcessEnv) => ({
-    environment: { ...base, DSH_TEST_LOGIN_SHELL: 'login' }, failures: [{ shell: '/account/shell', reason: 'timeout' }],
+    environment: { ...base, AGENTRANS_TEST_LOGIN_SHELL: 'login' }, failures: [{ shell: '/account/shell', reason: 'timeout' }],
   })
   const loginShell = vi.fn((base: NodeJS.ProcessEnv, _config: unknown, _options: { signal?: AbortSignal }) => readLoginShell(base))
   const updateCheck = vi.fn(async (_manual?: boolean): Promise<DesktopUpdateState> => updateState)
@@ -419,15 +419,15 @@ beforeEach(() => {
   vi.spyOn(console, 'error').mockImplementation(() => {})
   vi.spyOn(console, 'info').mockImplementation(() => {})
   vi.spyOn(console, 'warn').mockImplementation(() => {})
-  vi.stubEnv('DSH_DESKTOP_PNPM_ENTRY', 'test-pnpm')
-  vi.stubEnv('DSH_DESKTOP_DSH_DIR', 'test-runtime')
-  vi.stubEnv('DSH_DESKTOP_PRIMARY_RUNTIME_DIR', 'test-primary-runtime')
+  vi.stubEnv('AGENTRANS_DESKTOP_PNPM_ENTRY', 'test-pnpm')
+  vi.stubEnv('AGENTRANS_DESKTOP_AGENTRANS_DIR', 'test-runtime')
+  vi.stubEnv('AGENTRANS_DESKTOP_PRIMARY_RUNTIME_DIR', 'test-primary-runtime')
   vi.stubGlobal('process', { ...process, platform: 'win32', arch: 'x64', resourcesPath: 'desktop-test-resources' })
-  vi.stubEnv('DSH_DESKTOP_HOST_INSPECT_PORT', undefined)
-  vi.stubEnv('DSH_DESKTOP_DEV_PROJECT_DIR', undefined)
-  vi.stubEnv('DSH_DESKTOP_MANDATORY_UPDATE_CONFIG', undefined)
-  vi.stubEnv('DSH_DESKTOP_UPDATE_JOURNAL_DIR', undefined)
-  vi.stubEnv('DSH_CLIENT_VERSION', '1.2.3')
+  vi.stubEnv('AGENTRANS_DESKTOP_HOST_INSPECT_PORT', undefined)
+  vi.stubEnv('AGENTRANS_DESKTOP_DEV_PROJECT_DIR', undefined)
+  vi.stubEnv('AGENTRANS_DESKTOP_MANDATORY_UPDATE_CONFIG', undefined)
+  vi.stubEnv('AGENTRANS_DESKTOP_UPDATE_JOURNAL_DIR', undefined)
+  vi.stubEnv('AGENTRANS_CLIENT_VERSION', '1.2.3')
   harness.analyticsEnabled = true
 })
 
@@ -600,7 +600,7 @@ describe('desktop main startup', () => {
     try {
       launchFixture.instanceRoot = directory
       const foreignDirectory = join(directory, 'foreign-journal')
-      vi.stubEnv('DSH_DESKTOP_UPDATE_JOURNAL_DIR', foreignDirectory)
+      vi.stubEnv('AGENTRANS_DESKTOP_UPDATE_JOURNAL_DIR', foreignDirectory)
       await readyForUpdate()
       harness.publishUpdate({ phase: 'error', failedOperation: 'download', version: '1.2.3', message: 'ENOSPC secret-url' })
       await invoke(DESKTOP_IPC.updatesOpen, 'app')
@@ -1375,9 +1375,9 @@ describe('desktop main startup', () => {
   })
 
   it('shares the failed-check deadline across focus and resume, while explicit checks reset polling', async () => {
-    vi.stubEnv('DSH_DESKTOP_UPDATE_CHECK_INTERVAL_MS', '1000')
-    vi.stubEnv('DSH_DESKTOP_UPDATE_CHECK_MAX_BACKOFF_MS', '4000')
-    vi.stubEnv('DSH_DESKTOP_UPDATE_CHECK_JITTER', '0')
+    vi.stubEnv('AGENTRANS_DESKTOP_UPDATE_CHECK_INTERVAL_MS', '1000')
+    vi.stubEnv('AGENTRANS_DESKTOP_UPDATE_CHECK_MAX_BACKOFF_MS', '4000')
+    vi.stubEnv('AGENTRANS_DESKTOP_UPDATE_CHECK_JITTER', '0')
     harness.updateCheck.mockResolvedValue({ phase: 'error', failedOperation: 'check', message: 'offline' })
     const host = await readyForUpdate()
     await vi.advanceTimersByTimeAsync(0)
@@ -1860,7 +1860,7 @@ describe('desktop main startup', () => {
     expect(harness.hosts).toHaveLength(0)
     finishRead()
     await harness.hostStarted.promise
-    expect(harness.hosts[0]!.environment?.DSH_TEST_LOGIN_SHELL).toBe('login')
+    expect(harness.hosts[0]!.environment?.AGENTRANS_TEST_LOGIN_SHELL).toBe('login')
     harness.hosts[0]!.ready.resolve()
     await Promise.all([boot, harness.navigated.promise])
     const { signal } = harness.loginShell.mock.calls[0]![2]
@@ -1894,8 +1894,8 @@ describe('desktop main startup', () => {
       profile: 'desktop-test-profile',
     })
     expect(harness.hosts[0]!.environment).not.toBe(process.env)
-    expect(harness.hosts[0]!.environment?.DSH_CLIENT_VERSION).toBe('1.2.3')
-    expect(harness.hosts[0]!.environment?.DSH_TEST_LOGIN_SHELL).toBe('login')
+    expect(harness.hosts[0]!.environment?.AGENTRANS_CLIENT_VERSION).toBe('1.2.3')
+    expect(harness.hosts[0]!.environment?.AGENTRANS_TEST_LOGIN_SHELL).toBe('login')
     expect(console.warn).toHaveBeenCalledWith('desktop login shell: /account/shell failed (timeout)')
     expect(harness.analytics).toHaveBeenCalledExactlyOnceWith({ eventName: 'desktop_app_launch', timestamp: Date.now(), attributes: {} })
     expect(harness.hosts[0]!.start).toHaveBeenCalledTimes(1)
@@ -1905,7 +1905,7 @@ describe('desktop main startup', () => {
 
   it('prepares an independent plugin profile for the unpackaged Host', async () => {
     harness.app.isPackaged = false
-    vi.stubEnv('DSH_DESKTOP_DSH_DIR', undefined)
+    vi.stubEnv('AGENTRANS_DESKTOP_AGENTRANS_DIR', undefined)
     await import('../src/main.ts')
     await harness.preparing.promise
     harness.prepared.resolve()
@@ -1921,11 +1921,11 @@ describe('desktop main startup', () => {
 
   it('fails an unpackaged launch that receives no primary runtime directory', async () => {
     harness.app.isPackaged = false
-    vi.stubEnv('DSH_DESKTOP_PRIMARY_RUNTIME_DIR', undefined)
+    vi.stubEnv('AGENTRANS_DESKTOP_PRIMARY_RUNTIME_DIR', undefined)
     await import('../src/main.ts')
     await harness.dialogShown.promise
     const options = harness.dialog.showMessageBox.mock.calls[0]![0] as MessageBoxOptions
-    expect(options.detail).toContain('DSH_DESKTOP_PRIMARY_RUNTIME_DIR is required for an unpackaged launch')
+    expect(options.detail).toContain('AGENTRANS_DESKTOP_PRIMARY_RUNTIME_DIR is required for an unpackaged launch')
     expect(harness.hosts).toHaveLength(0)
   })
 

@@ -361,7 +361,7 @@ async function bootPreview(site: Site, manifest: ImageManifest, browser: Browser
       interface PreviewTransport {
         fetch(input: string, init: RequestInit): Promise<Response>
       }
-      const transport = (globalThis as typeof globalThis & { __DSH_TRANSPORT__?: PreviewTransport }).__DSH_TRANSPORT__
+      const transport = (globalThis as typeof globalThis & { __AGENTRANS_TRANSPORT__?: PreviewTransport }).__AGENTRANS_TRANSPORT__
       if (transport === undefined) throw new Error('preview transport is absent after boot')
       const response = await transport.fetch('/api/session/list', {
         method: 'POST',
@@ -583,14 +583,14 @@ async function requestLazyChunk(page: Page, site: Site, manifest: ImageManifest)
   expect(fetched()).toBe(0)
   const chunk = await page.evaluate(async ({ id }) => {
     const transport = (globalThis as typeof globalThis & {
-      __DSH_TRANSPORT__?: { fetch(input: string, init: RequestInit): Promise<Response> }
-      __DSH_BOOT__?: { entries: Array<{ id: string; rev: string }> }
+      __AGENTRANS_TRANSPORT__?: { fetch(input: string, init: RequestInit): Promise<Response> }
+      __AGENTRANS_BOOT__?: { entries: Array<{ id: string; rev: string }> }
     })
-    const row = transport.__DSH_BOOT__?.entries.find(entry => entry.id === id)
-    if (transport.__DSH_TRANSPORT__ === undefined || row === undefined) throw new Error(`no boot graph row for ${id}`)
+    const row = transport.__AGENTRANS_BOOT__?.entries.find(entry => entry.id === id)
+    if (transport.__AGENTRANS_TRANSPORT__ === undefined || row === undefined) throw new Error(`no boot graph row for ${id}`)
     const results: Array<{ status: number; size: number }> = []
     for (let attempt = 0; attempt < 2; attempt += 1) {
-      const response = await transport.__DSH_TRANSPORT__.fetch(`/plugins/${id}/client.terminal.js?rev=${row.rev}`, { method: 'GET' })
+      const response = await transport.__AGENTRANS_TRANSPORT__.fetch(`/plugins/${id}/client.terminal.js?rev=${row.rev}`, { method: 'GET' })
       results.push({ status: response.status, size: (await response.text()).length })
     }
     return results
@@ -633,8 +633,8 @@ async function toggleOptionalBundles(page: Page): Promise<void> {
   const result = await page.evaluate(async () => {
     type Result<T> = { result: { ok: true; value: T } | { ok: false; error: { message: string } } }
     const transport = (globalThis as typeof globalThis & {
-      __DSH_TRANSPORT__?: { fetch(input: string, init: RequestInit): Promise<Response> }
-    }).__DSH_TRANSPORT__
+      __AGENTRANS_TRANSPORT__?: { fetch(input: string, init: RequestInit): Promise<Response> }
+    }).__AGENTRANS_TRANSPORT__
     if (transport === undefined) throw new Error('preview transport is absent after boot')
     const remote = async <T>(endpoint: string, args: object): Promise<T> => {
       const answered = await transport.fetch(`/api/${endpoint}`, {
@@ -749,8 +749,8 @@ async function toggleOptionalBundles(page: Page): Promise<void> {
 async function setBundle(page: Page, bundle: string, enabled: boolean): Promise<string> {
   return await page.evaluate(async ({ name, enabled }) => {
     const transport = (globalThis as typeof globalThis & {
-      __DSH_TRANSPORT__?: { fetch(input: string, init: RequestInit): Promise<Response> }
-    }).__DSH_TRANSPORT__
+      __AGENTRANS_TRANSPORT__?: { fetch(input: string, init: RequestInit): Promise<Response> }
+    }).__AGENTRANS_TRANSPORT__
     if (transport === undefined) throw new Error('preview transport is absent after boot')
     const answered = await transport.fetch('/api/pluginManager/setBundleEnabled', {
       method: 'POST',
@@ -812,8 +812,8 @@ async function bootEmptyPreview(origin: string, browser: Browser): Promise<void>
     await page.getByRole('textbox', { name: 'Choose workspace' }).waitFor({ timeout: HERO_TIMEOUT_MS })
     const sessionCount = await page.evaluate(async () => {
       const transport = (globalThis as typeof globalThis & {
-        __DSH_TRANSPORT__?: { fetch(input: string, init: RequestInit): Promise<Response> }
-      }).__DSH_TRANSPORT__
+        __AGENTRANS_TRANSPORT__?: { fetch(input: string, init: RequestInit): Promise<Response> }
+      }).__AGENTRANS_TRANSPORT__
       if (transport === undefined) throw new Error('empty preview transport is absent after boot')
       const response = await transport.fetch('/api/session/list', {
         method: 'POST',

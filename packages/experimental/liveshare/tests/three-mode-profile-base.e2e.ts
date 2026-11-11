@@ -32,9 +32,9 @@ async function run(cwd: string, home: string, args: readonly string[]) {
     // Source diagnostics use the hook the launch contract names; artifact acceptance uses built lib.
     sourceImport: 'tsx/esm',
     env: {
-      DSH_HOME: home,
-      DSH_AGENTS_HOME: join(cwd, '.agents'),
-      DSH_TELEMETRY_DISABLED: '1',
+      AGENTRANS_HOME: home,
+      AGENTRANS_AGENTS_HOME: join(cwd, '.agents'),
+      AGENTRANS_TELEMETRY_DISABLED: '1',
       DEEPSEEK_API_KEY: '',
       NODE_OPTIONS: [
         process.env.NODE_OPTIONS,

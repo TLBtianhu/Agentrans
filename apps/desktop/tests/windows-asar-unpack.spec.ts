@@ -47,7 +47,7 @@ afterEach(async () => {
 
 function unsignedWindowsConfig(appId: string, source: string) {
   return createElectronBuilderConfig({
-    DSH_DESKTOP_APP_ID: appId,    DSH_DESKTOP_UNSIGNED: '1',
+    AGENTRANS_DESKTOP_APP_ID: appId,    AGENTRANS_DESKTOP_UNSIGNED: '1',
   }, 'win32', 'x64', source)
 }
 
@@ -219,8 +219,8 @@ it.each([true, false])('validates the real builder hook for unsigned=%s', async 
   const certificate = join(input.root, 'certificate.cer')
   await writeFile(certificate, 'fixture public certificate')
   const config = createElectronBuilderConfig({
-    DSH_DESKTOP_APP_ID: 'com.example.unpack',    DSH_DESKTOP_TARGET_PLATFORM: 'win32', DSH_DESKTOP_TARGET_ARCH: 'x64', DSH_DESKTOP_UNSIGNED: unsigned ? '1' : '0',
-    DSH_DESKTOP_WINDOWS_CER_FILE: certificate, DOWNLOAD_TEST_ORIGIN: 'https://updates.example.com'  }, 'win32', 'x64', input.source)
+    AGENTRANS_DESKTOP_APP_ID: 'com.example.unpack',    AGENTRANS_DESKTOP_TARGET_PLATFORM: 'win32', AGENTRANS_DESKTOP_TARGET_ARCH: 'x64', AGENTRANS_DESKTOP_UNSIGNED: unsigned ? '1' : '0',
+    AGENTRANS_DESKTOP_WINDOWS_CER_FILE: certificate, DOWNLOAD_TEST_ORIGIN: 'https://updates.example.com'  }, 'win32', 'x64', input.source)
   // Qualification replaces files after creating the base configuration; builder owns a separate config object.
   input.config.asarUnpack = [...config.asarUnpack]
   await config.beforePack(input.context)

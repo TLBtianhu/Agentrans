@@ -76,7 +76,7 @@ interface Mounted {
 async function mount(
   config: Partial<Config> & {
     readonly state?: ReturnType<typeof stateFile>
-    /** Mount with no owner state file configured, so the DSH_HOME default is read. */
+    /** Mount with no owner state file configured, so the AGENTRANS_HOME default is read. */
     readonly useDshHome?: boolean
   } = {},
 ): Promise<Mounted> {
@@ -157,10 +157,10 @@ describe('configuration guards', () => {
     })
   })
 
-  it('derives its default owner state file from DSH_HOME', async () => {
+  it('derives its default owner state file from AGENTRANS_HOME', async () => {
     const root = mkdtempSync(join(tmpdir(), 'liveshare-dsh-home-'))
     roots.push(root)
-    vi.stubEnv('DSH_HOME', root)
+    vi.stubEnv('AGENTRANS_HOME', root)
     vi.stubEnv('LIVESHARE_OWNER_STATE_FILE', '')
     vi.stubEnv('LIVESHARE_OWNER_CREDENTIAL_FILE', '')
     const mounted = await mount({ useDshHome: true })
@@ -168,11 +168,11 @@ describe('configuration guards', () => {
     await mounted.ctx.fiber.dispose()
   })
 
-  it('falls back to the user home when neither DSH_HOME nor a state file is named', async () => {
+  it('falls back to the user home when neither AGENTRANS_HOME nor a state file is named', async () => {
     const root = mkdtempSync(join(tmpdir(), 'liveshare-home-'))
     roots.push(root)
     vi.stubEnv('HOME', root)
-    vi.stubEnv('DSH_HOME', '')
+    vi.stubEnv('AGENTRANS_HOME', '')
     vi.stubEnv('LIVESHARE_OWNER_STATE_FILE', '')
     vi.stubEnv('LIVESHARE_OWNER_CREDENTIAL_FILE', '')
     const mounted = await mount({ useDshHome: true })

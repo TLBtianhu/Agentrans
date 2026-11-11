@@ -15,7 +15,7 @@ import { describe, expect, it, onTestFinished } from 'vitest'
 const repoRoot = fileURLToPath(new URL('../../../', import.meta.url))
 const builtBin = join(repoRoot, 'apps/cli/lib/bin.js')
 const builtArtifactsExist = existsSync(builtBin)
-if (process.env.DSH_EXAMPLE_MODE === 'lib' && !builtArtifactsExist) {
+if (process.env.AGENTRANS_EXAMPLE_MODE === 'lib' && !builtArtifactsExist) {
   throw new Error('dsh config-schema acceptance requires built CLI artifacts in lib mode; run pnpm run build first')
 }
 const packageName = 'dsh-schema-acceptance-fixture'
@@ -26,7 +26,7 @@ const forbiddenApply = `
 import { writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 export function apply() {
-  writeFileSync(join(process.env.DSH_HOME, 'apply-ran'), 'unexpected')
+  writeFileSync(join(process.env.AGENTRANS_HOME, 'apply-ran'), 'unexpected')
   throw new Error('PLUGIN_APPLY_EXECUTED')
 }
 `
@@ -90,13 +90,13 @@ async function dump(
   const env = Object.fromEntries(Object.entries(process.env).filter(
     (entry): entry is [string, string] => entry[1] !== undefined
       && !/KEY|SECRET|TOKEN|PASSWORD/i.test(entry[0])
-      && !/^(DSH_|NODE_OPTIONS$|NODE_PATH$)/i.test(entry[0]),
+      && !/^(AGENTRANS_|NODE_OPTIONS$|NODE_PATH$)/i.test(entry[0]),
   ))
   const result = await execa(process.execPath, [
     builtBin, '--profile', profileName, format, ...args,
   ], {
     cwd: fixture.root,
-    env: { ...env, DSH_HOME: fixture.home, DSH_TELEMETRY_DISABLED: '1' },
+    env: { ...env, AGENTRANS_HOME: fixture.home, AGENTRANS_TELEMETRY_DISABLED: '1' },
     extendEnv: false,
     input: '',
     timeout: processTimeoutMs,

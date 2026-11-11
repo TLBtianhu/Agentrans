@@ -27,7 +27,7 @@ describe.skipIf(MODE === 'record')('web e2e: confirmed branch result', () => {
       compareReplaySession: false,
       paceMs: 10,
     })
-    const executablePath = process.env.DSH_PLAYWRIGHT_EXECUTABLE_PATH
+    const executablePath = process.env.AGENTRANS_PLAYWRIGHT_EXECUTABLE_PATH
     browser = await chromium.launch(executablePath === undefined ? {} : { executablePath })
     page = await browser.newPage({ viewport: { width: 1440, height: 960 }, locale: 'en-US' })
     tripwire = watchConsole(page)

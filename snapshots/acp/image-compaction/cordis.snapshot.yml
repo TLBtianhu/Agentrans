@@ -15,7 +15,7 @@
 - id: session-persistence-jsonl
   name: '@agentrans/session-persistence-jsonl'
   config:
-    root: !!js process.env.DSH_SNAPSHOT_SESSIONS_ROOT ?? './.sessions'
+    root: !!js process.env.AGENTRANS_SNAPSHOT_SESSIONS_ROOT ?? './.sessions'
     compression: none
 
 - id: agent-instructions

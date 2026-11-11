@@ -37,7 +37,7 @@ async function sourceFixture() {
   await mkdir(cwd)
   await mkdir(upstream)
   await writeFile(join(upstream, 'keep.txt'), 'unrelated product data')
-  await writeFile(join(cwd, '.env'), `DSH_HOME=${upstream}\nDSH_AGENTS_HOME=${upstream}\n`)
+  await writeFile(join(cwd, '.env'), `AGENTRANS_HOME=${upstream}\nAGENTRANS_AGENTS_HOME=${upstream}\n`)
   return { root, source, cwd, upstream }
 }
 
@@ -58,13 +58,13 @@ async function fileRecord(root: string): Promise<Record<string, string>> {
 async function probe(source: string, cwd: string, upstream: string, instanceRoot?: string) {
   const environment = { ...process.env }
   for (const key of Object.keys(environment)) {
-    if (['AGENTRANS_DEV_ROOT', 'AGENTRANS_LAUNCH_CONTEXT', 'DSH_HOME', 'DSH_AGENTS_HOME'].includes(key.toUpperCase())) {
+    if (['AGENTRANS_DEV_ROOT', 'AGENTRANS_LAUNCH_CONTEXT', 'AGENTRANS_HOME', 'AGENTRANS_AGENTS_HOME'].includes(key.toUpperCase())) {
       Reflect.deleteProperty(environment, key)
     }
   }
   Object.assign(environment, {
-    DSH_HOME: upstream,
-    DSH_AGENTS_HOME: upstream,
+    AGENTRANS_HOME: upstream,
+    AGENTRANS_AGENTS_HOME: upstream,
     AGENTRANS_LAUNCH_CONTEXT: '{"unexpected":"inherited-context"}',
     ...(instanceRoot === undefined ? {} : { AGENTRANS_DEV_ROOT: instanceRoot }),
   })
@@ -72,7 +72,7 @@ async function probe(source: string, cwd: string, upstream: string, instanceRoot
     '--import', tsxImport,
     '--import', pathToFileURL(join(source, 'scripts/agentrans-bootstrap.ts')).href,
     '--input-type=module', '--eval',
-    'console.log(JSON.stringify({ home: process.env.DSH_HOME, agents: process.env.DSH_AGENTS_HOME, context: JSON.parse(process.env.AGENTRANS_LAUNCH_CONTEXT) }))',
+    'console.log(JSON.stringify({ home: process.env.AGENTRANS_HOME, agents: process.env.AGENTRANS_AGENTS_HOME, context: JSON.parse(process.env.AGENTRANS_LAUNCH_CONTEXT) }))',
   ], { cwd, env: environment, timeout: 15_000 })
   const result = JSON.parse(stdout) as {
     home: string

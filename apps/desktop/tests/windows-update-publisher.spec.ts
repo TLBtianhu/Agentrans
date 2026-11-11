@@ -49,9 +49,9 @@ async function withCertificate(subject: unknown, action: (file: string, signTool
 
 describe('Windows update publisher', () => {
   beforeAll(() => {
-    vi.stubEnv('DSH_DESKTOP_APP_ID', 'com.example.publisher-test')
-    vi.stubEnv('DSH_DESKTOP_TARGET_PLATFORM', 'win32')
-    vi.stubEnv('DSH_DESKTOP_UNSIGNED', '1')
+    vi.stubEnv('AGENTRANS_DESKTOP_APP_ID', 'com.example.publisher-test')
+    vi.stubEnv('AGENTRANS_DESKTOP_TARGET_PLATFORM', 'win32')
+    vi.stubEnv('AGENTRANS_DESKTOP_UNSIGNED', '1')
   })
   afterAll(() => vi.unstubAllEnvs())
 
@@ -77,12 +77,12 @@ describe('Windows update publisher', () => {
     const { createElectronBuilderConfig } = await import('../electron-builder.config.mjs')
     await withCertificate({ CN: 'Publisher', O: 'Company', C: 'CN' }, async (file, signTool) => {
       const config = createElectronBuilderConfig({
-        DSH_DESKTOP_APP_ID: 'com.example.publisher-test',
-        ...(explicitTarget ? { DSH_DESKTOP_TARGET_PLATFORM: 'win32' } : {}),
-        DSH_DESKTOP_WINDOWS_CER_FILE: file,
-        DSH_DESKTOP_WINDOWS_SIGNTOOL: signTool,
-        DSH_DESKTOP_WINDOWS_KEY_CONTAINER: 'test-container',
-        DSH_DESKTOP_WINDOWS_TOKEN_PIN: 'test-pin',
+        AGENTRANS_DESKTOP_APP_ID: 'com.example.publisher-test',
+        ...(explicitTarget ? { AGENTRANS_DESKTOP_TARGET_PLATFORM: 'win32' } : {}),
+        AGENTRANS_DESKTOP_WINDOWS_CER_FILE: file,
+        AGENTRANS_DESKTOP_WINDOWS_SIGNTOOL: signTool,
+        AGENTRANS_DESKTOP_WINDOWS_KEY_CONTAINER: 'test-container',
+        AGENTRANS_DESKTOP_WINDOWS_TOKEN_PIN: 'test-pin',
         DOWNLOAD_PROD_ORIGIN: 'https://updates.example.com',
       }, 'win32', 'x64')
       expect(config.win.forceCodeSigning).toBe(true)

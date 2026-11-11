@@ -53,11 +53,11 @@ agent 会完成该任务，把提供方的每个非空推理（reasoning）增�
 <a id="credentials"></a>
 ### 凭据
 
-随附的 headless profile 禁用托管凭据存储，以及依赖它的 authorization 和 DeepSeek account 消费方。API 密钥路由依次使用启动环境、`<运行命令的目录>/.env` 和 `$DSH_HOME/.env`。GUI 保存的密钥和登录凭据不会被使用，存储文件保持原样。需要已保存登录凭据的提供方会失败，除非恢复存储认证；AWS profile 等提供方外部凭据链仍然可用。
+随附的 headless profile 禁用托管凭据存储，以及依赖它的 authorization 和 DeepSeek account 消费方。API 密钥路由依次使用启动环境、`<运行命令的目录>/.env` 和 `$AGENTRANS_HOME/.env`。GUI 保存的密钥和登录凭据不会被使用，存储文件保持原样。需要已保存登录凭据的提供方会失败，除非恢复存储认证；AWS profile 等提供方外部凭据链仍然可用。
 
 启动变量为空时，请取消导出该变量，让 `.env` 后备生效；已导出的空值会遮蔽后备值。
 
-要恢复存储认证，请把以下行加入 `$DSH_HOME/profiles/headless/cordis.patch.yml` 或 `--patch` 覆盖文件：
+要恢复存储认证，请把以下行加入 `$AGENTRANS_HOME/profiles/headless/cordis.patch.yml` 或 `--patch` 覆盖文件：
 
 ```yaml
 - id: credentials

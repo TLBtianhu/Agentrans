@@ -132,20 +132,20 @@ Use `dsh plugin` for dependencies and bundle layers that should persist in this 
 ::: code-group
 
 ```sh [Linux/macOS]
-export DSH_HOME=/absolute/path/to/example-dsh-home
+export AGENTRANS_HOME=/absolute/path/to/example-dsh-home
 agentrans --profile sdk-minimal --dump-default-config >/dev/null
 dsh plugin --profile sdk-minimal add file:/absolute/path/to/my-plugin-bundle
 ```
 
 ```powershell [Windows PowerShell]
-$env:DSH_HOME = "C:\work\example-dsh-home"
+$env:AGENTRANS_HOME = "C:\work\example-dsh-home"
 agentrans --profile sdk-minimal --dump-default-config | Out-Null
 dsh plugin --profile sdk-minimal add file:C:/work/my-plugin-bundle
 ```
 
 :::
 
-The first command initializes the shipped standalone profile. The second forwards package management to `pnpm`, then records any installed package that exports a `dsh.bundle` layer. Install `pnpm` only for this management command; launching the installed SDK does not need it. Edit `$DSH_HOME/profiles/sdk-minimal/cordis.patch.yml` for persistent row changes, or pass patch files from Python for per-launch changes.
+The first command initializes the shipped standalone profile. The second forwards package management to `pnpm`, then records any installed package that exports a `dsh.bundle` layer. Install `pnpm` only for this management command; launching the installed SDK does not need it. Edit `$AGENTRANS_HOME/profiles/sdk-minimal/cordis.patch.yml` for persistent row changes, or pass patch files from Python for per-launch changes.
 
 Another `profile` is valid when it includes `@agentrans/sdk-app` or another JSON-RPC server row. Missing server rows, unresolved plugins, and invalid patches fail during startup instead of falling back to another composition.
 
@@ -160,14 +160,14 @@ The bundled runtime includes `str_replace_editor`, but `sdk-minimal` omits it fr
       name: '@agentrans/tool-str-replace-editor'
 ```
 
-Pass `patches=("/absolute/path/to/editor.patch.yml",)` when constructing `DeepSeekHarness(profile="sdk-minimal", ...)`, or put the patch in `$DSH_HOME/profiles/sdk-minimal/cordis.patch.yml` for persistent configuration. On the next runtime launch, model requests include `str_replace_editor` beside the default tools. The local filesystem provider uses the runtime working directory for relative paths; like the minimal shell, it does not confine access to that directory. The same patch works with the standard `sdk` profile.
+Pass `patches=("/absolute/path/to/editor.patch.yml",)` when constructing `DeepSeekHarness(profile="sdk-minimal", ...)`, or put the patch in `$AGENTRANS_HOME/profiles/sdk-minimal/cordis.patch.yml` for persistent configuration. On the next runtime launch, model requests include `str_replace_editor` beside the default tools. The local filesystem provider uses the runtime working directory for relative paths; like the minimal shell, it does not confine access to that directory. The same patch works with the standard `sdk` profile.
 
 ## Understand the minimal profile
 
 | Property | Value |
 |---|---|
-| System prompt | `DSH_SYSTEM_PROMPT`, falling back to `You are a helpful software engineer assistant.` |
-| Model in `minimal.py` | `--model`, then `DSH_MODEL`, then `deepseek-v4-flash` |
+| System prompt | `AGENTRANS_SYSTEM_PROMPT`, falling back to `You are a helpful software engineer assistant.` |
+| Model in `minimal.py` | `--model`, then `AGENTRANS_MODEL`, then `deepseek-v4-flash` |
 | Model-facing tools | Persistent `bash` on Linux/macOS or `pwsh` on Windows, `read_image`, and `working_directory` |
 | Shell timeout | 300 seconds |
 | Optional runtime context | Absent |
@@ -178,7 +178,7 @@ The profile's sole bundle inserts the complete tree over an empty root and does 
 
 Image reading requires an image-capable route. Automatic compaction preserves the complete Session log; see the [bundle reference](../../../packages/bundle/sdk-minimal/README.md) for model and storage effects. In this `sdk-minimal` composition, unsupported slash input remains ordinary prompt text.
 
-The installed wheel still packages the full `web` profile and frontend assets. Run `agentrans web` against an explicit `DSH_HOME` when a Python SDK deployment also needs the browser application; `web` is a separate CLI application and cannot serve a Python SDK client.
+The installed wheel still packages the full `web` profile and frontend assets. Run `agentrans web` against an explicit `AGENTRANS_HOME` when a Python SDK deployment also needs the browser application; `web` is a separate CLI application and cannot serve a Python SDK client.
 
 Use a fresh home when profiles, plugins, credentials, settings, and sessions must be isolated. Use a fresh session id for independent work; reuse a harness, home, and id only to continue the same durable conversation and session-owned resources.
 

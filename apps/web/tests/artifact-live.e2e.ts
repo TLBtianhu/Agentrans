@@ -13,7 +13,7 @@ import {
 } from './scaffold.ts'
 import { connectFreshWorkspace } from './support.ts'
 
-const LIVE = process.env.DSH_ARTIFACT_LIVE === '1'
+const LIVE = process.env.AGENTRANS_ARTIFACT_LIVE === '1'
 const HAS_KEY = (process.env.DEEPSEEK_API_KEY?.length ?? 0) > 0
 const MODE = webSnapshotMode()
 const ID = 'live-particle-lab'
@@ -31,12 +31,12 @@ function object(value: unknown): Record<string, unknown> {
 
 describe.skipIf(!LIVE)('web live: real DeepSeek particle Artifact', () => {
   it('requires the explicit real-provider mode', () => {
-    expect(MODE, 'Live Artifact acceptance requires DSH_SNAPSHOT=record').toBe('record')
+    expect(MODE, 'Live Artifact acceptance requires AGENTRANS_SNAPSHOT=record').toBe('record')
   })
 
   it.skipIf(!HAS_KEY || MODE !== 'record')('creates, observes and revises the same experiment through real model calls', async (test) => {
-    const outputRoot = process.env.DSH_ARTIFACT_LIVE_OUTPUT_DIR
-    if (outputRoot === undefined || outputRoot.length === 0) throw new Error('Set DSH_ARTIFACT_LIVE_OUTPUT_DIR for live acceptance evidence')
+    const outputRoot = process.env.AGENTRANS_ARTIFACT_LIVE_OUTPUT_DIR
+    if (outputRoot === undefined || outputRoot.length === 0) throw new Error('Set AGENTRANS_ARTIFACT_LIVE_OUTPUT_DIR for live acceptance evidence')
     await mkdir(outputRoot, { recursive: true })
     const evidence = await mkdtemp(join(outputRoot, 'artifact-live-'))
     let scaffold: WebScaffold | undefined
@@ -83,7 +83,7 @@ describe.skipIf(!LIVE)('web live: real DeepSeek particle Artifact', () => {
         && entry.fiber?.state === FiberState.ACTIVE)).toBe(true)
       expect(entries.filter(entry => entry.options.name === '@agentrans/llm-replay')).toEqual([])
       expect([...world.ctx.registry.values()].some(runtime => runtime.name === 'llm-replay')).toBe(false)
-      const executablePath = process.env.DSH_PLAYWRIGHT_EXECUTABLE_PATH
+      const executablePath = process.env.AGENTRANS_PLAYWRIGHT_EXECUTABLE_PATH
       browser = await chromium.launch(executablePath === undefined ? {} : { executablePath })
       const view = await browser.newPage({ viewport: { width: 1440, height: 960 }, locale: 'en-US' })
       page = view

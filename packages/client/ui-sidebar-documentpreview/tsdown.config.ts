@@ -105,6 +105,6 @@ export default (options: Parameters<typeof bundle>[0]): UserConfig[] => bundle(o
       resolve: { ...config.inputOptions?.resolve, mainFields: ['browser', 'module', 'main'], aliasFields: [['browser']] },
     },
     plugins: [config.plugins, pdfWorker, excelWorker],
-    define: { ...config.define, __DSH_PDFJS_ASSETS__: pdfAssets() },
+    define: { ...config.define, __AGENTRANS_PDFJS_ASSETS__: pdfAssets() },
   } : config,
 )

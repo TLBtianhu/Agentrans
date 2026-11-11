@@ -55,8 +55,8 @@ describe('experimental Inspector Host plugin', () => {
 
     const rows: IndexInjection[] = []
     context.emit('webserver/index-inject', rows, PAGE_PEER)
-    const bootstrap = rows.find(row => row.kind === 'global' && row.name === '__DSH_INSPECTOR__')
-    expect(bootstrap).toMatchObject({ kind: 'global', name: '__DSH_INSPECTOR__' })
+    const bootstrap = rows.find(row => row.kind === 'global' && row.name === '__AGENTRANS_INSPECTOR__')
+    expect(bootstrap).toMatchObject({ kind: 'global', name: '__AGENTRANS_INSPECTOR__' })
     expect(log).toHaveBeenCalledWith(expect.stringMatching(/^dsh inspector: devtools:\/\//u))
     expect(context.inspector).toBeDefined()
     expect(registerRoute).toHaveBeenCalledWith(expect.objectContaining({ kind: 'prefix', path: '/inspector/devtools' }))

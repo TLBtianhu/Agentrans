@@ -3,11 +3,11 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write docs/subsystems/client-modules.md
 /client-modules:
-  en: e256a29cc5bc2726
-  zh: e181d6b1a6e5c647
+  en: 5f0d6a33860df07c
+  zh: eb34f09b1b40cdde
 /client-modules/the-wire:
-  en: 96b95cdb015c1af6
-  zh: 01e4144d91551c13
+  en: 481d0df275263358
+  zh: dc66412b76961aa5
 /client-modules/the-scan:
   en: f4d641734c47b129
   zh: 670819fb119ae688

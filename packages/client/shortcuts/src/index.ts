@@ -14,7 +14,7 @@ export { Config } from './config.ts'
  */
 export function apply(ctx: Context, config: Config): void {
   ctx.on('webserver/index-inject', (table) => {
-    table.push({ kind: 'global', name: '__DSH_SHORTCUTS_CONFIG__', value: config })
+    table.push({ kind: 'global', name: '__AGENTRANS_SHORTCUTS_CONFIG__', value: config })
   })
 }
 /* jscpd:ignore-end */

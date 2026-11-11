@@ -25,16 +25,16 @@ describe('Oxlint invocation', () => {
   })
 
   it('bounds both worker pools from one setting', () => {
-    expect(resolveOxlintInvocation(['.', '--fix'], { DSH_OXLINT_THREADS: '4', GOMAXPROCS: '12' })).toEqual({
+    expect(resolveOxlintInvocation(['.', '--fix'], { AGENTRANS_OXLINT_THREADS: '4', GOMAXPROCS: '12' })).toEqual({
       args: ['.', '--fix', '--threads=4'],
-      env: { DSH_OXLINT_THREADS: '4', GOMAXPROCS: '4' },
+      env: { AGENTRANS_OXLINT_THREADS: '4', GOMAXPROCS: '4' },
     })
   })
 
   it('uses location-preserving diagnostics in CI', () => {
-    expect(resolveOxlintInvocation(['.'], { CI: 'true', DSH_OXLINT_THREADS: '4' })).toEqual({
+    expect(resolveOxlintInvocation(['.'], { CI: 'true', AGENTRANS_OXLINT_THREADS: '4' })).toEqual({
       args: ['.', '--format=default', '--threads=4'],
-      env: { CI: 'true', DSH_OXLINT_THREADS: '4', GOMAXPROCS: '4' },
+      env: { CI: 'true', AGENTRANS_OXLINT_THREADS: '4', GOMAXPROCS: '4' },
     })
   })
 
@@ -44,12 +44,12 @@ describe('Oxlint invocation', () => {
   })
 
   it.each(['0', '-1', '1.5', 'auto'])('rejects invalid worker bound %s', (value) => {
-    expect(() => resolveOxlintInvocation(['.'], { DSH_OXLINT_THREADS: value }))
-      .toThrow('DSH_OXLINT_THREADS must be a positive integer')
+    expect(() => resolveOxlintInvocation(['.'], { AGENTRANS_OXLINT_THREADS: value }))
+      .toThrow('AGENTRANS_OXLINT_THREADS must be a positive integer')
   })
 
   it('rejects a competing direct worker bound', () => {
-    expect(() => resolveOxlintInvocation(['.', '--threads=2'], { DSH_OXLINT_THREADS: '4' }))
-      .toThrow('use DSH_OXLINT_THREADS instead')
+    expect(() => resolveOxlintInvocation(['.', '--threads=2'], { AGENTRANS_OXLINT_THREADS: '4' }))
+      .toThrow('use AGENTRANS_OXLINT_THREADS instead')
   })
 })

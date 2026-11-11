@@ -20,7 +20,7 @@ afterEach(() => { cleanup(); vi.unstubAllGlobals() })
 
 test('the composed native flow cancels through Desktop without invoking the Host chooser', async ({ start, remote }) => {
   const pick = vi.fn<() => Promise<string | null>>().mockResolvedValue(null)
-  vi.stubGlobal('__DSH_DIRECTORY_PICKER__', { pick })
+  vi.stubGlobal('__AGENTRANS_DIRECTORY_PICKER__', { pick })
   const client = await start()
   const entry = client.ctx.slots.entries('sidebar.workspaces.directoryFlow')[0]!
   const injected = (entry.inject as () => { pick: () => Promise<string | null> })()

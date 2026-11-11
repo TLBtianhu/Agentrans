@@ -231,12 +231,12 @@ export function applyProductLaunchEnvironment(
   environment: NodeJS.ProcessEnv,
   platform: NodeJS.Platform = process.platform,
 ): void {
-  const owned = new Set(['DSH_HOME', 'DSH_AGENTS_HOME', PRODUCT_LAUNCH_CONTEXT_ENV])
+  const owned = new Set(['AGENTRANS_HOME', 'AGENTRANS_AGENTS_HOME', PRODUCT_LAUNCH_CONTEXT_ENV])
   for (const key of Object.keys(environment)) {
     if (owned.has(platform === 'win32' ? key.toUpperCase() : key)) Reflect.deleteProperty(environment, key)
   }
-  environment.DSH_HOME = context.paths.dshHomeDir
-  environment.DSH_AGENTS_HOME = context.paths.dshAgentsHomeDir
+  environment.AGENTRANS_HOME = context.paths.dshHomeDir
+  environment.AGENTRANS_AGENTS_HOME = context.paths.dshAgentsHomeDir
   environment[PRODUCT_LAUNCH_CONTEXT_ENV] = serializeProductLaunchContext(context)
 }
 

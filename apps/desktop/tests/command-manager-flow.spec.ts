@@ -58,7 +58,7 @@ async function fixture(options: {
   }
   if (process.platform === 'darwin') {
     const shell = join(root, 'lookup-shell')
-    await writeFile(shell, '#!/bin/sh\nprintf "\\0DSH_COMMAND\\0"\ncat "$(dirname "$0")/selected-command"\nprintf "\\0"\n', { mode: 0o755 })
+    await writeFile(shell, '#!/bin/sh\nprintf "\\0AGENTRANS_COMMAND\\0"\ncat "$(dirname "$0")/selected-command"\nprintf "\\0"\n', { mode: 0o755 })
     await writeFile(join(root, 'selected-command'), state.activeCommand + '\n')
     external.shell = shell
   }

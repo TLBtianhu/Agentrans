@@ -9,7 +9,7 @@ import { Context, Service } from '@agentrans/cordis'
 import type { SandboxMode } from '@agentrans/sandbox'
 import type { ShellExecRequest, ShellExecSpec, ShellExecution } from './types.ts'
 
-export { DSH_ENV_PREFIX } from './types.ts'
+export { AGENTRANS_ENV_PREFIX } from './types.ts'
 export type {
   ShellExecRequest,
   ShellExecSpec,

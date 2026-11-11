@@ -71,7 +71,7 @@ describe('locale apply', () => {
     const ready = Promise.withResolvers<unknown>()
     const read = vi.fn(() => ready.promise)
     const onChange = vi.fn()
-    vi.stubGlobal('__DSH_LOCALE__', { read, onChange })
+    vi.stubGlobal('__AGENTRANS_LOCALE__', { read, onChange })
     const fiber = b.ctx.plugin({ inject: [...inject], apply })
     try {
       await vi.waitFor(() => { expect(read).toHaveBeenCalledOnce() })
@@ -91,7 +91,7 @@ describe('locale apply', () => {
     const b = await bench('zh')
     const ready = Promise.withResolvers<unknown>()
     const onChange = vi.fn()
-    vi.stubGlobal('__DSH_LOCALE__', { read: () => ready.promise, onChange })
+    vi.stubGlobal('__AGENTRANS_LOCALE__', { read: () => ready.promise, onChange })
     const fiber = b.ctx.plugin({ inject: [...inject], apply })
     try {
       expect(b.ctx.get('locale')).toBeUndefined()

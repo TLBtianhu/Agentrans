@@ -12,6 +12,6 @@ export { Config } from './config.ts'
  */
 export function apply(ctx: Context, config: Config): void {
   ctx.on('webserver/index-inject', (table) => {
-    table.push({ kind: 'global', name: '__DSH_DOCUMENT_PREVIEW_CONFIG__', value: config })
+    table.push({ kind: 'global', name: '__AGENTRANS_DOCUMENT_PREVIEW_CONFIG__', value: config })
   })
 }

@@ -41,8 +41,8 @@ jobs:
     runs-on: ${{ startsWith(inputs.target, 'win') && 'windows-latest' || 'macos-latest' }}
     timeout-minutes: 150
     env:
-      DSH_DESKTOP_UPDATE_CHANNEL: ${{ inputs.channel }}
-      DSH_TELEMETRY_DISABLED: '1'
+      AGENTRANS_DESKTOP_UPDATE_CHANNEL: ${{ inputs.channel }}
+      AGENTRANS_TELEMETRY_DISABLED: '1'
       TARGET: ${{ inputs.target }}
     steps:
       - uses: actions/checkout@v5
@@ -63,8 +63,8 @@ jobs:
       - name: Write the packaging settings this lane uses
         shell: pwsh
         run: |
-          $lines = @('DSH_DESKTOP_APP_ID=com.agentrans.app')
-          if ($env:TARGET -like 'win-*') { $lines += 'DSH_DESKTOP_WINDOWS_COMPRESSION_LEVEL=3' }
+          $lines = @('AGENTRANS_DESKTOP_APP_ID=com.agentrans.app')
+          if ($env:TARGET -like 'win-*') { $lines += 'AGENTRANS_DESKTOP_WINDOWS_COMPRESSION_LEVEL=3' }
           $file = if ($env:TARGET -like 'win-*') { 'apps/desktop/.env.windows' } else { 'apps/desktop/.env.macos' }
           Set-Content -Path $file -Value $lines -Encoding utf8
 

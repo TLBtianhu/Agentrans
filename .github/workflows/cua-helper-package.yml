@@ -42,8 +42,8 @@ jobs:
     outputs:
       artifact: ${{ steps.artifact.outputs.name }}
     env:
-      DSH_PACKAGING_PRESET: ${{ inputs.preset }}
-      DSH_TELEMETRY_DISABLED: '1'
+      AGENTRANS_PACKAGING_PRESET: ${{ inputs.preset }}
+      AGENTRANS_TELEMETRY_DISABLED: '1'
       PACKAGE_SOURCE_REF: ${{ inputs.source_ref }}
     steps:
       - uses: actions/checkout@v7.0.1
@@ -57,7 +57,7 @@ jobs:
           if(ref.startsWith("refs/pull/") || /^[a-f0-9]{40}$/i.test(ref)) throw Error("Select a trusted repository branch or release tag");
           const tag=ref.replace(/^refs\/tags\//, "");
           if(tag.startsWith("dsh-v") && tag!=="dsh-v"+JSON.parse(fs.readFileSync("package.json","utf8")).version) throw Error("Release tag must match product version");
-          if(!["test","production"].includes(process.env.DSH_PACKAGING_PRESET)) throw Error("Invalid preset");'
+          if(!["test","production"].includes(process.env.AGENTRANS_PACKAGING_PRESET)) throw Error("Invalid preset");'
       - uses: pnpm/action-setup@v5.0.0
         with:
           dest: ${{ runner.temp }}/setup-pnpm-cua-${{ github.run_id }}-${{ github.run_attempt }}

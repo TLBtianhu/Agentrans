@@ -18,7 +18,7 @@ function discoveredCatalog(url: string, source: string, mapUrl?: string, mapStat
     if (requestedUrl === mapUrl) return new Response(sourceMap, { status: mapStatus })
     throw new Error(`Unexpected source fetch: ${requestedUrl}`)
   })
-  vi.stubGlobal('__DSH_BOOT__', { entries: [{ id: '@agentrans/experimental-inspector', url, rev: 'abc' }] })
+  vi.stubGlobal('__AGENTRANS_BOOT__', { entries: [{ id: '@agentrans/experimental-inspector', url, rev: 'abc' }] })
   vi.stubGlobal('document', { baseURI: base })
   vi.stubGlobal('location', { href: 'https://client.test/mounted/session/selected' })
   vi.stubGlobal('fetch', fetch)

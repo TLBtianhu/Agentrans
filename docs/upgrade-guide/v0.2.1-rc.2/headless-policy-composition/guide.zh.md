@@ -19,7 +19,7 @@ headless 组合包在激活沙箱策略前，通过 `headlessStartup` 读取 `--
    - id: sandbox-policy
      inject: []
      config:
-       mode: !!js process.env.DSH_PERMISSION_MODE ?? 'workspace-write'
+       mode: !!js process.env.AGENTRANS_PERMISSION_MODE ?? 'workspace-write'
        workspaceRoot: !!js process.cwd()
    ```
 

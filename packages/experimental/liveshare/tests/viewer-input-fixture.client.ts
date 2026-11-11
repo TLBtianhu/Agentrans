@@ -26,7 +26,7 @@ export interface ViewerInputFixture {
  * @returns Access to the assembled input API and async cleanup.
  */
 export function installViewerInputFixture(): ViewerInputFixture {
-  const globals = ['__DSH_BOOT__', '__ModuleLoader__', '__DSH_LIVESHARE_VIEWER__', '__DSH_TRANSPORT__']
+  const globals = ['__AGENTRANS_BOOT__', '__ModuleLoader__', '__AGENTRANS_LIVESHARE_VIEWER__', '__AGENTRANS_TRANSPORT__']
   const saved = globals.map(key => [key, Object.getOwnPropertyDescriptor(globalThis, key)] as const)
   const savedLanguages = ['languages', 'language'].map(key =>
     [key, Object.getOwnPropertyDescriptor(navigator, key)] as const)

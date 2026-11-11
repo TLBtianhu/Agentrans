@@ -51,7 +51,7 @@ pnpm run build
 pnpm exec vitest run --config vitest.web.config.ts apps/web/tests/artifact-interaction.e2e.ts apps/web/tests/branch-result.e2e.ts
 ```
 
-Browser scenarios replay recorded model streams; they do not require provider credentials. Set `DSH_PLAYWRIGHT_EXECUTABLE_PATH` when Playwright must use an installed browser. The Artifact scenario covers create/update, counter interaction, and confirmation-only action admission. The branch scenario covers fork, preview, cancel, confirmed return, and no implicit parent turn.
+Browser scenarios replay recorded model streams; they do not require provider credentials. Set `AGENTRANS_PLAYWRIGHT_EXECUTABLE_PATH` when Playwright must use an installed browser. The Artifact scenario covers create/update, counter interaction, and confirmation-only action admission. The branch scenario covers fork, preview, cancel, confirmed return, and no implicit parent turn.
 
 ## Upstream and license
 

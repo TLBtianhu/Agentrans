@@ -68,8 +68,8 @@ try {
   const child = spawn(electron, [fileURLToPath(new URL('../tests/fixtures/workspace-updates.mjs', import.meta.url)), '--lang=zh-CN',
     ...(interactive ? ['--interactive'] : [])], {
     cwd: root, env: productLaunchEnvironment(context, { ...environment, USERPROFILE: root, HOME: root,
-      TEMP: root, TMP: root, TMPDIR: root, DSH_WORKSPACE_UPDATE_ROOT: root, DSH_WORKSPACE_UPDATE_TOKEN: randomUUID(),
-      DSH_DESKTOP_PRIMARY_RUNTIME_DIR: developmentRuntimeDirectory(), DSH_DESKTOP_OPEN_DEVTOOLS: '0' }),
+      TEMP: root, TMP: root, TMPDIR: root, AGENTRANS_WORKSPACE_UPDATE_ROOT: root, AGENTRANS_WORKSPACE_UPDATE_TOKEN: randomUUID(),
+      AGENTRANS_DESKTOP_PRIMARY_RUNTIME_DIR: developmentRuntimeDirectory(), AGENTRANS_DESKTOP_OPEN_DEVTOOLS: '0' }),
     // Hiding the GUI process suppresses its first window and can suspend renderer frame callbacks.
     stdio: 'inherit', windowsHide: false,
   })

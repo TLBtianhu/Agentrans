@@ -24,15 +24,15 @@ export function agentransInstallerEnvironment(environment, target = 'win-x64') {
   const selected = TARGETS[target]
   if (selected === undefined) throw new Error(`Agentrans installer does not support target ${String(target)}`)
   const TARGET_SETTINGS = {
-    DSH_DESKTOP_APP_ID: AGENTRANS_DESKTOP_APP_ID,
-    DSH_DESKTOP_TARGET_PLATFORM: selected.platform,
-    DSH_DESKTOP_TARGET_ARCH: selected.arch,
-    DSH_DESKTOP_UNSIGNED: '1',
+    AGENTRANS_DESKTOP_APP_ID: AGENTRANS_DESKTOP_APP_ID,
+    AGENTRANS_DESKTOP_TARGET_PLATFORM: selected.platform,
+    AGENTRANS_DESKTOP_TARGET_ARCH: selected.arch,
+    AGENTRANS_DESKTOP_UNSIGNED: '1',
   }
   const settings = new Map()
   for (const [name, value] of Object.entries(environment)) {
-    if (value === undefined || /^DSH_DESKTOP_WINDOWS_/iu.test(name)) continue
-    const key = /^DSH_DESKTOP_/iu.test(name) ? name.toUpperCase() : name
+    if (value === undefined || /^AGENTRANS_DESKTOP_WINDOWS_/iu.test(name)) continue
+    const key = /^AGENTRANS_DESKTOP_/iu.test(name) ? name.toUpperCase() : name
     if (settings.has(key) && settings.get(key) !== value) {
       throw new Error(`Agentrans installer received conflicting environment aliases for ${key}`)
     }

@@ -52,7 +52,7 @@ The Artifact owner resolves the exact current revision or saved observation. Par
 
 The private awaited `artifactExports` Projection restores complete current records without file I/O, rendering or Agent input. Its potentially large source copies are excluded from Session summaries. A pending record after restart means incomplete or unknown work; restoring it never starts a producer. Explicit continuation can finish that exact input. Process-local concurrent identical requests share one operation, and plugin disposal waits for admitted operations to settle.
 
-The local attachment provider stores files below the selected instance's `DSH_HOME/attachments/v1`. Development, verification and user instances therefore retain their existing filesystem separation. No export writes to source files or an arbitrary user-selected host path.
+The local attachment provider stores files below the selected instance's `AGENTRANS_HOME/attachments/v1`. Development, verification and user instances therefore retain their existing filesystem separation. No export writes to source files or an arbitrary user-selected host path.
 
 -----
 

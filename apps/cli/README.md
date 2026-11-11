@@ -8,7 +8,7 @@ The `dsh` command is the sole supported Node application launcher: profiles are 
 
 | Command | Purpose |
 |---|---|
-| `dsh <name>` / `agentrans --profile <name>` | Boot the named profile under `$DSH_HOME/profiles/<name>`. |
+| `dsh <name>` / `agentrans --profile <name>` | Boot the named profile under `$AGENTRANS_HOME/profiles/<name>`. |
 | `agentrans --profile <name> --from-default-profile <template>` | Replace a custom profile with a fresh copy of a shipped template, then boot it. |
 | `agentrans --profile acp` | Serve automation clients over ACP stdio until disconnect. |
 | `agentrans --profile headless "job"` | Run one fresh persisted session, print the final answer, and exit. |
@@ -40,7 +40,7 @@ Installation and profile startup enforce the declared `engines.dsh` range, or DS
 
 The tree composes over an empty root:
 - each bundle's patch in `dsh.profile.bundles` order
-- then the profile's `cordis.patch.yml`, then the home-level `$DSH_HOME/cordis.patch.yml`
+- then the profile's `cordis.patch.yml`, then the home-level `$AGENTRANS_HOME/cordis.patch.yml`
 - then `--patch` overlays
 
 Bundles named in `dsh.profile.bundles` resolve from the dsh installation first (`@agentrans/base`, `@agentrans/web-app`, `@agentrans/headless`, `@agentrans/sdk-app`, `@agentrans/sdk-minimal`, `@agentrans/acp-app`), then from the profile's own `node_modules`, where pnpm installs out-of-tree plugins.

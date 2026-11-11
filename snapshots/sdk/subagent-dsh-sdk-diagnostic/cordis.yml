@@ -15,7 +15,7 @@
   name: '@agentrans/session-persistence-jsonl'
   config:
     root: !!js dshHomePath('sessions')
-    compression: !!js "process.env.DSH_SNAPSHOT === undefined ? 'zstd' : 'none'"
+    compression: !!js "process.env.AGENTRANS_SNAPSHOT === undefined ? 'zstd' : 'none'"
 
 - id: session-log-deepseek
   name: '@agentrans/session-log-deepseek'
@@ -29,13 +29,13 @@
         providerName: dsh-sdk-diagnostic
         profile: sdk
         patches:
-          - !!js process.env.DSH_TEST_CHILD_PATCH
+          - !!js process.env.AGENTRANS_TEST_CHILD_PATCH
         dshHome: !!js dshHomePath('children/first')
         provider: mock
         model: mock-echo
         env:
-          DSH_TELEMETRY_DISABLED: '1'
-          DSH_TEST_CHILD_FAILURE: '1'
+          AGENTRANS_TELEMETRY_DISABLED: '1'
+          AGENTRANS_TEST_CHILD_FAILURE: '1'
     - id: tool-subagent-dsh-sdk-diagnostic
       name: '@agentrans/tool-subagent'
       config:
@@ -48,13 +48,13 @@
         providerName: dsh-sdk-diagnostic-second
         profile: sdk
         patches:
-          - !!js process.env.DSH_TEST_CHILD_PATCH
+          - !!js process.env.AGENTRANS_TEST_CHILD_PATCH
         dshHome: !!js dshHomePath('children/second')
         provider: mock
         model: mock-echo
         env:
-          DSH_TELEMETRY_DISABLED: '1'
-          DSH_TEST_CHILD_FAILURE: '1'
+          AGENTRANS_TELEMETRY_DISABLED: '1'
+          AGENTRANS_TEST_CHILD_FAILURE: '1'
     - id: tool-subagent-dsh-sdk-diagnostic-second
       name: '@agentrans/tool-subagent'
       config:

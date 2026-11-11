@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { Context } from '@agentrans/cordis'
 import { credentialRef } from '@agentrans/credentials'
 import LocalCredentialProvider from '@agentrans/credentials-local'
-import { DSH_LAUNCH_ENVIRONMENT_KEY, createLaunchEnvironmentSnapshot } from '@agentrans/launch-environment'
+import { AGENTRANS_LAUNCH_ENVIRONMENT_KEY, createLaunchEnvironmentSnapshot } from '@agentrans/launch-environment'
 import WebRuntime from '@agentrans/web'
 import * as webApiPlugin from '@agentrans/web-deepseek-api'
 
@@ -28,7 +28,7 @@ function captureAuthorization(): () => (string | null)[] {
  * @param environment - launch-environment variables.
  */
 async function mount(ctx: Context, config: Record<string, unknown>, environment: Record<string, string>): Promise<void> {
-  ctx.provide(DSH_LAUNCH_ENVIRONMENT_KEY, createLaunchEnvironmentSnapshot([{ source: 'process', values: environment }]))
+  ctx.provide(AGENTRANS_LAUNCH_ENVIRONMENT_KEY, createLaunchEnvironmentSnapshot([{ source: 'process', values: environment }]))
   await ctx.plugin(WebRuntime, { searchProvider: 'deepseek-search-api' })
   await ctx.plugin(webApiPlugin, { baseURL: BASE, ...config })
 }

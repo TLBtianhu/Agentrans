@@ -11,13 +11,13 @@ import { runProfilePnpm, type PackageOperationOptions } from '../src/operations.
 /** Holds the inherited pipes until its stop file appears, and ends on its own after a minute. */
 const HOLDER_SCRIPT = `
 const { existsSync } = require('node:fs')
-setInterval(() => { if (existsSync(process.env.DSH_DESCENDANT_STOP_FILE)) process.exit(0) }, 50)
+setInterval(() => { if (existsSync(process.env.AGENTRANS_DESCENDANT_STOP_FILE)) process.exit(0) }, 50)
 setTimeout(() => process.exit(0), 60000)
 `
 
 /** Writes a marker after the run is over, which only a stopped tree can prevent. */
 const LATE_SCRIPT = `
-setTimeout(() => { require('node:fs').writeFileSync(process.env.DSH_LATE_FILE, 'late') }, 1500)
+setTimeout(() => { require('node:fs').writeFileSync(process.env.AGENTRANS_LATE_FILE, 'late') }, 1500)
 setTimeout(() => process.exit(0), 60000)
 `
 
@@ -29,10 +29,10 @@ setTimeout(() => process.exit(0), 60000)
 const DRAIN_CHILD = `
 const { spawn } = require('node:child_process')
 const { writeFileSync } = require('node:fs')
-const descendant = spawn(process.execPath, [process.env.DSH_DESCENDANT_SCRIPT], {
+const descendant = spawn(process.execPath, [process.env.AGENTRANS_DESCENDANT_SCRIPT], {
   stdio: ['ignore', 'inherit', 'inherit'],
 })
-writeFileSync(process.env.DSH_DESCENDANT_PID_FILE, String(descendant.pid))
+writeFileSync(process.env.AGENTRANS_DESCENDANT_PID_FILE, String(descendant.pid))
 console.log('installed')
 setTimeout(() => process.exit(0), 50)
 `
@@ -41,10 +41,10 @@ setTimeout(() => process.exit(0), 50)
 const STALLED_CHILD = `
 const { spawn } = require('node:child_process')
 const { writeFileSync } = require('node:fs')
-const descendant = spawn(process.execPath, [process.env.DSH_DESCENDANT_SCRIPT], {
+const descendant = spawn(process.execPath, [process.env.AGENTRANS_DESCENDANT_SCRIPT], {
   stdio: ['ignore', 'inherit', 'inherit'],
 })
-writeFileSync(process.env.DSH_DESCENDANT_PID_FILE, String(descendant.pid))
+writeFileSync(process.env.AGENTRANS_DESCENDANT_PID_FILE, String(descendant.pid))
 console.log('installing')
 setTimeout(() => process.exit(0), 60000)
 `
@@ -95,8 +95,8 @@ function fixture(child: string, descendant: string) {
     command: process.execPath, args: ['-e', child], execution: 'service', outputBytes: 1000,
     activateNewBundles: false,
     env: {
-      DSH_DESCENDANT_PID_FILE: pidFile, DSH_DESCENDANT_STOP_FILE: stopFile,
-      DSH_DESCENDANT_SCRIPT: scriptFile, DSH_LATE_FILE: lateFile,
+      AGENTRANS_DESCENDANT_PID_FILE: pidFile, AGENTRANS_DESCENDANT_STOP_FILE: stopFile,
+      AGENTRANS_DESCENDANT_SCRIPT: scriptFile, AGENTRANS_LATE_FILE: lateFile,
     },
   }
   return { context: { home, profile: 'test', installAnchor, cwd: home }, pidFile, lateFile, options }
@@ -144,7 +144,7 @@ describe.skipIf(process.platform === 'win32')('a run with descendants', () => {
 it('waits for a run recorded by an exited operation before starting its own', async () => {
   const { context, lateFile, options } = fixture(
     // The run reports whether the recorded run had finished writing when it started.
-    'console.log(require("node:fs").existsSync(process.env.DSH_LATE_FILE) ? "started after" : "started before")', '',
+    'console.log(require("node:fs").existsSync(process.env.AGENTRANS_LATE_FILE) ? "started after" : "started before")', '',
   )
   const orphan = spawn(process.execPath, ['-e', `setTimeout(() => { require('node:fs').writeFileSync(${JSON.stringify(lateFile)}, 'late') }, 500)`], {
     stdio: 'ignore',

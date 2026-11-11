@@ -72,11 +72,11 @@ export function developmentLauncher(options: DevelopmentAppOptions, bundle: stri
   const environment = {
     AGENTRANS_DEV_ROOT: options.context.instanceRoot,
     [PRODUCT_LAUNCH_CONTEXT_ENV]: serializeProductLaunchContext(options.context),
-    DSH_HOME: options.context.paths.dshHomeDir,
-    DSH_AGENTS_HOME: options.context.paths.dshAgentsHomeDir,
-    DSH_DESKTOP_DEV_APP: '1',
-    DSH_DESKTOP_HOST_INSPECT_PORT: String(options.hostPort),
-    DSH_DESKTOP_OPEN_DEVTOOLS: options.openDevtools,
+    AGENTRANS_HOME: options.context.paths.dshHomeDir,
+    AGENTRANS_AGENTS_HOME: options.context.paths.dshAgentsHomeDir,
+    AGENTRANS_DESKTOP_DEV_APP: '1',
+    AGENTRANS_DESKTOP_HOST_INSPECT_PORT: String(options.hostPort),
+    AGENTRANS_DESKTOP_OPEN_DEVTOOLS: options.openDevtools,
     ELECTRON_ENABLE_LOGGING: '1',
   }
   const args = [

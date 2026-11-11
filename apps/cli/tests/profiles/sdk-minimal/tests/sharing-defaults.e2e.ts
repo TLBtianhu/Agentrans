@@ -86,7 +86,7 @@ it.each([false, true])('sdk-minimal keeps sharing opt-in through an actual SDK m
     env: { ...environment, HOME: home, USERPROFILE: home, LOCALAPPDATA: local, APPDATA: roaming,
       DEEPSEEK_API_KEY: 'local-sdk-minimal-key', DEEPSEEK_BASE_URL: `${origin}/anthropic`,
       NODE_OPTIONS: `--disable-warning=ExperimentalWarning --import=${networkGuard.href}`,
-      DSH_SNAPSHOT_NETWORK_AUDIT_FILE: auditFile },
+      AGENTRANS_SNAPSHOT_NETWORK_AUDIT_FILE: auditFile },
   })
   owned.harness = harness
   await harness.start()

@@ -384,10 +384,10 @@ export class MemoryVfs implements Vfs {
     const file = this.deferred.get(target)
     if (file === undefined) return
     const error = new Error(
-      `ERR_DSH_VFS_DEFERRED: ${syscall} cannot wait for '${target}', which lazy archive ${file.archive.name} `
+      `ERR_AGENTRANS_VFS_DEFERRED: ${syscall} cannot wait for '${target}', which lazy archive ${file.archive.name} `
       + 'supplies on its first asynchronous read',
     ) as VfsError
-    error.code = 'ERR_DSH_VFS_DEFERRED'
+    error.code = 'ERR_AGENTRANS_VFS_DEFERRED'
     error.path = target
     error.syscall = syscall
     throw error

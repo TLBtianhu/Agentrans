@@ -35,19 +35,19 @@ const signingEnvironment = process.argv.includes('--signed') ? loadDesktopPackag
 const signingRun = process.argv.includes('--signed')
   ? createPackagingRun(join(output, 'packaging-runs'), { target: 'installer-test' }) : undefined
 const sign = process.argv.includes('--signed') ? createWindowsTokenSigner({
-  certificateFile: signingEnvironment.DSH_DESKTOP_WINDOWS_CER_FILE,
-  signTool: signingEnvironment.DSH_DESKTOP_WINDOWS_SIGNTOOL,
-  tokenPin: signingEnvironment.DSH_DESKTOP_WINDOWS_TOKEN_PIN,
-  keyContainer: signingEnvironment.DSH_DESKTOP_WINDOWS_KEY_CONTAINER,
+  certificateFile: signingEnvironment.AGENTRANS_DESKTOP_WINDOWS_CER_FILE,
+  signTool: signingEnvironment.AGENTRANS_DESKTOP_WINDOWS_SIGNTOOL,
+  tokenPin: signingEnvironment.AGENTRANS_DESKTOP_WINDOWS_TOKEN_PIN,
+  keyContainer: signingEnvironment.AGENTRANS_DESKTOP_WINDOWS_KEY_CONTAINER,
   runDirectory: signingRun.directory,
 }) : undefined
 let succeeded = false
 try {
   Object.assign(process.env, {
-    DSH_DESKTOP_APP_ID: `com.deepseek.harness.installertest.n${id}`,
-    DSH_DESKTOP_TARGET_PLATFORM: 'win32', DSH_DESKTOP_TARGET_ARCH: 'x64',
-    DSH_DESKTOP_UNSIGNED: '1', CSC_IDENTITY_AUTO_DISCOVERY: 'false', ELECTRON_BUILDER_7Z_FILTER: 'BCJ',
-    ...signingRun ? { DSH_DESKTOP_PACKAGING_RUN_DIR: signingRun.directory } : {},
+    AGENTRANS_DESKTOP_APP_ID: `com.deepseek.harness.installertest.n${id}`,
+    AGENTRANS_DESKTOP_TARGET_PLATFORM: 'win32', AGENTRANS_DESKTOP_TARGET_ARCH: 'x64',
+    AGENTRANS_DESKTOP_UNSIGNED: '1', CSC_IDENTITY_AUTO_DISCOVERY: 'false', ELECTRON_BUILDER_7Z_FILTER: 'BCJ',
+    ...signingRun ? { AGENTRANS_DESKTOP_PACKAGING_RUN_DIR: signingRun.directory } : {},
   })
   const { createElectronBuilderConfig } = await import('../electron-builder.config.mjs')
   const childOptions = { env: scrubWindowsSigningEnvironment(process.env), windowsHide: true, maxBuffer: 8 * 1024 * 1024 }

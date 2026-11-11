@@ -11,8 +11,8 @@ import {
 describe('desktop auto-update environment', () => {
   it('defaults the channel to nightly and rejects an unknown one', () => {
     expect(resolveDesktopUpdateChannel({})).toBe('nightly')
-    expect(resolveDesktopUpdateChannel({ DSH_DESKTOP_UPDATE_CHANNEL: 'latest' })).toBe('latest')
-    expect(() => resolveDesktopUpdateChannel({ DSH_DESKTOP_UPDATE_CHANNEL: 'stable' }))
+    expect(resolveDesktopUpdateChannel({ AGENTRANS_DESKTOP_UPDATE_CHANNEL: 'latest' })).toBe('latest')
+    expect(() => resolveDesktopUpdateChannel({ AGENTRANS_DESKTOP_UPDATE_CHANNEL: 'stable' }))
       .toThrow(/invalid update channel/u)
   })
 
@@ -36,7 +36,7 @@ describe('desktop auto-update environment', () => {
     expect(resolveDesktopGitHubUpdateConfig({})).toMatchObject({
       provider: 'github', owner: 'TLBtianhu', repo: 'Agentrans', channel: 'nightly', releaseType: 'prerelease',
     })
-    expect(resolveDesktopGitHubUpdateConfig({ DSH_DESKTOP_UPDATE_CHANNEL: 'latest' }))
+    expect(resolveDesktopGitHubUpdateConfig({ AGENTRANS_DESKTOP_UPDATE_CHANNEL: 'latest' }))
       .toMatchObject({ channel: 'latest', releaseType: 'release' })
   })
 })

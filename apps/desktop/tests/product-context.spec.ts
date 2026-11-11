@@ -22,10 +22,10 @@ function fixture() {
 
 it('binds a packaged GUI and Chromium to the same instance as the bundled CLI', () => {
   const f = fixture()
-  const environment = { DSH_HOME: join(f.root, 'foreign-home'), DSH_AGENTS_HOME: join(f.root, 'foreign-agents') }
+  const environment = { AGENTRANS_HOME: join(f.root, 'foreign-home'), AGENTRANS_AGENTS_HOME: join(f.root, 'foreign-agents') }
   const context = configureDesktopProduct(f.app, f.resources, f.source, environment, 'win32')
-  expect(environment.DSH_HOME).toBe(join(f.instance, 'data', 'dsh', 'home'))
-  expect(environment.DSH_AGENTS_HOME).toBe(join(f.instance, 'data', 'dsh', 'agents'))
+  expect(environment.AGENTRANS_HOME).toBe(join(f.instance, 'data', 'dsh', 'home'))
+  expect(environment.AGENTRANS_AGENTS_HOME).toBe(join(f.instance, 'data', 'dsh', 'agents'))
   expect(f.app.setPath.mock.calls).toEqual([
     ['userData', context.paths.electronUserDataDir], ['sessionData', context.paths.electronUserDataDir],
     ['logs', context.paths.logsDir], ['crashDumps', context.paths.crashDumpsDir],
@@ -38,7 +38,7 @@ it('uses an explicit source instance without reading inherited Harness homes or 
   f.app.isPackaged = false
   writeFileSync(join(f.source, 'unchanged.txt'), 'source')
   const environment: NodeJS.ProcessEnv = {
-    DSH_HOME: join(f.root, 'foreign-home'), DSH_AGENTS_HOME: join(f.root, 'foreign-agents'),
+    AGENTRANS_HOME: join(f.root, 'foreign-home'), AGENTRANS_AGENTS_HOME: join(f.root, 'foreign-agents'),
     AGENTRANS_DEV_ROOT: join(f.root, 'development'),
     [PRODUCT_LAUNCH_CONTEXT_ENV]: serializeProductLaunchContext(resolveProductLaunchContext({
       purpose: 'user', instanceRoot: f.instance, codeRoot: join(f.instance, 'app'), resourcesRoot: f.resources,
@@ -60,7 +60,7 @@ it('retains an explicitly isolated verification instance for the same packaged p
   const environment: NodeJS.ProcessEnv = { [PRODUCT_LAUNCH_CONTEXT_ENV]: serializeProductLaunchContext(candidate) }
   const context = configureDesktopProduct(f.app, f.resources, f.source, environment)
   expect(context.instanceRoot).toBe(candidate.instanceRoot)
-  expect(environment.DSH_HOME).toBe(candidate.paths.dshHomeDir)
+  expect(environment.AGENTRANS_HOME).toBe(candidate.paths.dshHomeDir)
   expect(readdirSync(f.instance)).toEqual(['app'])
   expect(readdirSync(f.appPath)).toEqual([])
 })
@@ -73,14 +73,14 @@ it('rejects a verification override from a different payload before writing stat
   })
   const environment: NodeJS.ProcessEnv = {
     [PRODUCT_LAUNCH_CONTEXT_ENV]: serializeProductLaunchContext(candidate),
-    DSH_HOME: join(f.root, 'foreign-home'), DSH_AGENTS_HOME: join(f.root, 'foreign-agents'),
+    AGENTRANS_HOME: join(f.root, 'foreign-home'), AGENTRANS_AGENTS_HOME: join(f.root, 'foreign-agents'),
   }
   const before = { ...environment }
   expect(() => configureDesktopProduct(f.app, f.resources, f.source, environment))
     .toThrow(expect.objectContaining({ code: 'INVALID_LAUNCH_REQUEST' }))
   expect(readdirSync(f.instance)).toEqual(['app'])
   expect(existsSync(candidate.instanceRoot)).toBe(false)
-  expect(existsSync(environment.DSH_HOME!)).toBe(false)
+  expect(existsSync(environment.AGENTRANS_HOME!)).toBe(false)
   expect(environment).toEqual(before)
   expect(f.app.setPath).not.toHaveBeenCalled()
 })
@@ -98,7 +98,7 @@ it('binds an unpackaged verification app to its own code and resource anchors', 
   }
   const context = configureDesktopProduct(f.app, f.resources, f.source, environment, 'darwin')
   expect(context).toEqual(candidate)
-  expect(environment.DSH_HOME).toBe(candidate.paths.dshHomeDir)
+  expect(environment.AGENTRANS_HOME).toBe(candidate.paths.dshHomeDir)
   expect(f.app.setPath.mock.calls).toEqual([
     ['userData', candidate.paths.electronUserDataDir], ['sessionData', candidate.paths.electronUserDataDir],
     ['logs', candidate.paths.logsDir], ['crashDumps', candidate.paths.crashDumpsDir],

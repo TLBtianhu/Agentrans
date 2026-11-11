@@ -59,7 +59,7 @@ Status: implemented
 ### 3. 本地默认 worker 预算
 
 - **目的：** 按共享工作站或容器确定默认并行度；在这类环境中 Node 报告的是宿主 CPU 数而不是 CPU 配额。
-- **改动：** [`scripts/parallelism.ts`](../../../../scripts/parallelism.ts) 拥有默认值。`CI=true` 时它是 Node 报告的 CPU 数。否则，run-gates 调度器、`build`、`typecheck`、Oxlint 与 publint 的上限为 12（`LOCAL_PARALLELISM_CAP`），Vitest fork 与本地覆盖率预算的上限为 48（`LOCAL_TEST_PARALLELISM_CAP`）。`doc-sync`、`test:docs`、`hygiene` 与 `check:all` 的每个门禁都构建完整的 `ts.Program`，它们最多并发 8 个门禁，CI 中同样如此。显式的 `DSH_GATE_CONCURRENCY`、`DSH_OXLINT_THREADS`、`DSH_COVERAGE_MAX_WORKERS` 与 Vitest `--maxWorkers` 优先；CI 中，除非 run-gates 的 CI 环境设置了这些变量，Vitest 与 Oxlint 使用各自的默认值。[开发指南](../../../../docs/development.zh.md)向贡献者说明这些默认值。
+- **改动：** [`scripts/parallelism.ts`](../../../../scripts/parallelism.ts) 拥有默认值。`CI=true` 时它是 Node 报告的 CPU 数。否则，run-gates 调度器、`build`、`typecheck`、Oxlint 与 publint 的上限为 12（`LOCAL_PARALLELISM_CAP`），Vitest fork 与本地覆盖率预算的上限为 48（`LOCAL_TEST_PARALLELISM_CAP`）。`doc-sync`、`test:docs`、`hygiene` 与 `check:all` 的每个门禁都构建完整的 `ts.Program`，它们最多并发 8 个门禁，CI 中同样如此。显式的 `AGENTRANS_GATE_CONCURRENCY`、`AGENTRANS_OXLINT_THREADS`、`AGENTRANS_COVERAGE_MAX_WORKERS` 与 Vitest `--maxWorkers` 优先；CI 中，除非 run-gates 的 CI 环境设置了这些变量，Vitest 与 Oxlint 使用各自的默认值。[开发指南](../../../../docs/development.zh.md)向贡献者说明这些默认值。
 
 四种 fork 数下的 `pnpm run test`，运行的是第 8 项所替换的落盘版 `type-model.spec.ts`，32 个 worker 那次的 wall 由它决定：
 
@@ -106,7 +106,7 @@ Status: implemented
 
 ### 7. CLI help 读取并发运行；doc graphs 的探测做 memo
 
-- **CLI help：** [`scripts/gen-cli-help.ts`](../../../../scripts/gen-cli-help.ts) 中的 `prefetchHelp()` 在默认 worker 预算内启动 12 个顶层 `dsh … --help` 读取（启动器、`plugin`，以及每个 profile 的简写与 `--profile` 形式），每个读取使用独立的临时 `DSH_HOME` 与 `DSH_AGENTS_HOME`，并由按原顺序进行的遍历消费；嵌套读取共享同一上限。失败的读取在遍历请求该调用时才交给遍历；`close()` 中止排队与运行中的读取，并等待每个已启动的子进程结束。该门禁为 49.9/53.9 → 6.9/7.2 s。
+- **CLI help：** [`scripts/gen-cli-help.ts`](../../../../scripts/gen-cli-help.ts) 中的 `prefetchHelp()` 在默认 worker 预算内启动 12 个顶层 `dsh … --help` 读取（启动器、`plugin`，以及每个 profile 的简写与 `--profile` 形式），每个读取使用独立的临时 `AGENTRANS_HOME` 与 `AGENTRANS_AGENTS_HOME`，并由按原顺序进行的遍历消费；嵌套读取共享同一上限。失败的读取在遍历请求该调用时才交给遍历；`close()` 中止排队与运行中的读取，并等待每个已启动的子进程结束。该门禁为 49.9/53.9 → 6.9/7.2 s。
 - **doc graphs：** [`scripts/gen-doc-graphs.ts`](../../../../scripts/gen-doc-graphs.ts) 中的 `withMemoizedFileSystemProbes()` 在 `renderDocs` 运行期间对 `ts.sys` 的 `fileExists`、`directoryExists`、`realpath`、`readDirectory` 与 `getDirectories` 做 memo，使一次运行中的所有编译器 host 与配置解析共享同一个文件系统视图。运行期间工作区不得改变，写出页面之前恢复原方法。该门禁为 48.7/44.7 → 32.7/34.2 s。
 - **无损依据：** 两个生成器生成的页面逐字节一致。
 - **取舍：** 并发的 help 进程合计峰值约占 3.6 GB 内存。

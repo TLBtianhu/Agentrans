@@ -22,8 +22,8 @@ export const inject = ['slots', 'uiWorkspace', 'remoteAccess']
  */
 export function apply(ctx: ClientContext): void {
   const desktop = (globalThis as typeof globalThis & {
-    __DSH_DIRECTORY_PICKER__?: NativeFlowInjected
-  }).__DSH_DIRECTORY_PICKER__
+    __AGENTRANS_DIRECTORY_PICKER__?: NativeFlowInjected
+  }).__AGENTRANS_DIRECTORY_PICKER__
   const pick = desktop === undefined ? () => ctx.uiWorkspace.pickDirectory() : () => desktop.pick()
   const injected = (): NativeFlowInjected => ({ pick })
   // Both declaration lifetimes must be live before the pair installs; the

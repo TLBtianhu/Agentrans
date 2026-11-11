@@ -26,7 +26,7 @@ export interface InspectorService extends SharedInspectorService {}
 
 declare global {
   /** Host-injected Inspector Client connection parameters. */
-  var __DSH_INSPECTOR__: unknown
+  var __AGENTRANS_INSPECTOR__: unknown
 }
 
 declare module '@agentrans/cordis' {
@@ -55,7 +55,7 @@ export async function apply(ctx: Context): Promise<void> {
       ctx.logger.warn('experimental-inspector: Client connection failed; reconnect or reload the page to retry', error)
     })
   })
-  const injected = globalThis.__DSH_INSPECTOR__
+  const injected = globalThis.__AGENTRANS_INSPECTOR__
   if (injected !== undefined) await session.connect(parseInspectorClientBootstrap(injected))
   else await session.refresh()
 }

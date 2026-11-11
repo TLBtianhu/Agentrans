@@ -21,17 +21,17 @@
   en: d31e805c243cf3fe
   zh: 80316d815a304def
 /agentrans-web-app/use-this-package/configuration:
-  en: f6b6a675224e016d
-  zh: ca44afb833aa3a0c
+  en: 99f414351abecb0c
+  zh: 1a4cc8125d90515f
 /agentrans-web-app/use-this-package/listening-trust-and-public-deployments:
-  en: e6ddea1d2fc40501
-  zh: ff08b6fa3fc24136
+  en: 189ae10e0155d103
+  zh: 9770275cf82508dd
 /agentrans-web-app/use-this-package/running-over-ssh:
   en: 2d90df7fa808a31c
   zh: 8dad6a162f980731
 /agentrans-web-app/use-this-package/per-session-agent-setup:
-  en: fdf38cb6e1b24464
-  zh: c14a8bcac9d4e5cd
+  en: 69f97f4c0a8e0b5c
+  zh: 5f66c4e423e2919f
 /agentrans-web-app/understand-the-implementation:
   en: 323742a00cfe67b2
   zh: eff5245a82fc16e7
@@ -39,8 +39,8 @@
   en: a6d126f30b1594d7
   zh: 7f0ccc8a55d6f743
 /agentrans-web-app/understand-the-implementation/advertised-application-url:
-  en: 0b22e03e28d41420
-  zh: fd45a97dd4336c25
+  en: 2c307e26abba9232
+  zh: 56dc814b1824100e
 /agentrans-web-app/understand-the-implementation/readiness:
   en: 973128fd346869df
   zh: 54e6792f9f82a192
@@ -57,8 +57,8 @@
   en: 623bf8a0bf05599d
   zh: 398ded2e7b20c1ea
 /agentrans-web-app/model-experience/web-runtime-variable/what-the-model-sees:
-  en: ebaddc153ad7a835
-  zh: 21aa60f73d14f26c
+  en: 426661678ffabcd5
+  zh: 7cfc066cf1156756
 /agentrans-web-app/model-experience/web-runtime-variable/token-effect:
   en: 449fbfa3986f98f0
   zh: a7d66333594ab2dd

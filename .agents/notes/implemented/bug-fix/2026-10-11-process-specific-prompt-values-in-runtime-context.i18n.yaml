@@ -6,14 +6,14 @@
   en: 711ce3e3afb1f905
   zh: 2d4e4aea44043c4a
 /agent-note-process-specific-checkout-path-and-web-url-move-to-runtime-context/problem:
-  en: 215a4de929224285
-  zh: 4d7889357216e4d6
+  en: fcb707ddc8923e1f
+  zh: 1eacf84858b25231
 /agent-note-process-specific-checkout-path-and-web-url-move-to-runtime-context/decision:
   en: 5222f00fd05d3801
   zh: fcfa430a0fa5588c
 /agent-note-process-specific-checkout-path-and-web-url-move-to-runtime-context/decision/ownership:
-  en: 9e87c01c99b0bffd
-  zh: 97b64db13a5bd024
+  en: 62f3a0a0caa0fac6
+  zh: 8386b5d57098b248
 /agent-note-process-specific-checkout-path-and-web-url-move-to-runtime-context/decision/new-sessions:
   en: 1ee144c39905bb89
   zh: a6669d7ad394e41c
@@ -21,11 +21,11 @@
   en: 27c11e7ced286898
   zh: 944d051494b1498d
 /agent-note-process-specific-checkout-path-and-web-url-move-to-runtime-context/alternatives-considered:
-  en: c324412be4034c40
-  zh: 923ad612fc884be1
+  en: 9cfc886544300a2c
+  zh: 2cfa7d9414b9b0ce
 /agent-note-process-specific-checkout-path-and-web-url-move-to-runtime-context/consequences:
-  en: 8aa41ff08b848916
-  zh: bc1c1647ca0eb86a
+  en: 6f4e49e66cc21286
+  zh: 8c3d0eafe5b8588a
 /agent-note-process-specific-checkout-path-and-web-url-move-to-runtime-context/testing:
   en: 9667d1749bdf1547
   zh: 598dc39120c91228

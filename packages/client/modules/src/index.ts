@@ -1,7 +1,7 @@
 /**
  * Node half of the client module system (`dsh.client` dual-face package): scans
  * the host Loader's entries for packages declaring `dsh.client`, composes the
- * `window.__DSH_BOOT__` entry graph (wire single source: {@link WebBootEntry}
+ * `window.__AGENTRANS_BOOT__` entry graph (wire single source: {@link WebBootEntry}
  * in `./client/manifest.ts`) in module-graph order, serves one-or-more-plugin
  * combo scripts plus their source maps, package-local chunks, and the
  * content-revisioned `./assets/*` exports of active client packages,
@@ -632,7 +632,7 @@ window.__ModuleLoader__={
   for (const batch of bootstrap) {
     rows.push({ kind: 'script-src', placement: 'head', src: batch.url })
   }
-  rows.push({ kind: 'global', name: '__DSH_BOOT__', value: graph })
+  rows.push({ kind: 'global', name: '__AGENTRANS_BOOT__', value: graph })
   return rows
 }
 
@@ -672,7 +672,7 @@ export class ClientModuleRegistry extends Service {
     super(ctx, 'clientModules')
     const { version } = createRequire(import.meta.url)('../package.json') as { version: string }
     // The client build fixes this read into the built Host artifact.
-    const commit = process.env.DSH_CLIENT_COMMIT_HASH
+    const commit = process.env.AGENTRANS_CLIENT_COMMIT_HASH
     this.release = commit === undefined ? { version } : { version, commit }
     // Subscribe before seeding so a fiber arriving mid-activation lands in the
     // same dirty set (Set idempotence makes the overlap harmless). An entry-less
@@ -714,7 +714,7 @@ export class ClientModuleRegistry extends Service {
 
   /**
    * Current composed entry graph (stable object between changes).
-   * @returns the graph served as `window.__DSH_BOOT__`.
+   * @returns the graph served as `window.__AGENTRANS_BOOT__`.
    */
   graph(): WebBootGraph {
     return this.composed

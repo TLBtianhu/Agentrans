@@ -204,14 +204,14 @@ export async function signReleaseAssets(
 if (process.argv[1] !== undefined && process.argv[1].endsWith('publish-github-release.ts')) {
   const [directory, version, channel] = process.argv.slice(2)
   const token = process.env.GH_TOKEN ?? process.env.GITHUB_TOKEN
-  const signingKey = process.env.DSH_UPDATE_SIGNING_KEY
+  const signingKey = process.env.AGENTRANS_UPDATE_SIGNING_KEY
   if (directory === undefined || version === undefined || (channel !== 'nightly' && channel !== 'latest') || token === undefined) {
     console.error('usage: publish-github-release <artifacts-dir> <version> <nightly|latest> (GH_TOKEN required)')
     process.exitCode = 1
   } else if (signingKey === undefined || signingKey === '') {
     // An unsigned release would install on every build that trusts the key, so
     // publishing without one is refused rather than silently skipped.
-    console.error('desktop publish: DSH_UPDATE_SIGNING_KEY is required; collect the signing key secret before publishing')
+    console.error('desktop publish: AGENTRANS_UPDATE_SIGNING_KEY is required; collect the signing key secret before publishing')
     process.exitCode = 1
   } else {
     const result = await publishGitHubRelease({

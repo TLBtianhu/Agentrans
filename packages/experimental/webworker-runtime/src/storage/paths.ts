@@ -5,19 +5,19 @@
  */
 
 /** Virtual filesystem root; `process.cwd()` and every absolute path start here. */
-export const DSH_ROOT = '/dsh'
+export const AGENTRANS_ROOT = '/dsh'
 
-/** `$DSH_HOME`: durable-state directory inside the image. */
-export const DSH_HOME = `${DSH_ROOT}/home`
+/** `$AGENTRANS_HOME`: durable-state directory inside the image. */
+export const AGENTRANS_HOME = `${AGENTRANS_ROOT}/home`
 
 /** Flat, symlink-free package tree resolved by the worker module loader. */
-export const DSH_NODE_MODULES = `${DSH_ROOT}/node_modules`
+export const AGENTRANS_NODE_MODULES = `${AGENTRANS_ROOT}/node_modules`
 
 /** Image configuration directory: the VFS manifest and the shipped agent presets. */
-export const DSH_CONFIG = `${DSH_ROOT}/config`
+export const AGENTRANS_CONFIG = `${AGENTRANS_ROOT}/config`
 
 /** Default (empty) workspace directory. */
-export const DSH_WORKSPACE = `${DSH_ROOT}/workspace`
+export const AGENTRANS_WORKSPACE = `${AGENTRANS_ROOT}/workspace`
 
 /** Temporary directory reported by `os.tmpdir()`. */
-export const DSH_TMP = `${DSH_ROOT}/tmp`
+export const AGENTRANS_TMP = `${AGENTRANS_ROOT}/tmp`

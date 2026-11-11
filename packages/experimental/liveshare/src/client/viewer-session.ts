@@ -24,7 +24,7 @@ interface ViewerPageTarget {
 }
 
 interface ViewerTargetWindow {
-  __DSH_LIVESHARE_VIEWER__?: ViewerPageTarget
+  __AGENTRANS_LIVESHARE_VIEWER__?: ViewerPageTarget
 }
 
 /**
@@ -36,7 +36,7 @@ interface ViewerTargetWindow {
  * @param ctx - browser context of the viewer's module table.
  */
 export function openSharedSession(ctx: ClientContext): void {
-  const target = (globalThis as ViewerTargetWindow).__DSH_LIVESHARE_VIEWER__
+  const target = (globalThis as ViewerTargetWindow).__AGENTRANS_LIVESHARE_VIEWER__
   if (target === undefined || target.sessionId === '') return
   const sessions = ctx.get('sessions')
   if (sessions === undefined) return

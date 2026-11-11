@@ -4,8 +4,8 @@
  * `@agentrans/sdk-client`, drives recorded turns and standalone commands over stdio JSON-RPC,
  * and pins the SDK `RunResult`, the complete notification stream, and the
  * persisted session logs. Replay serves recorded model
- * responses via `llm-replay` (`cordis.snapshot.yml`); `DSH_SNAPSHOT=record`
- * re-records against the live API; `DSH_SNAPSHOT=refresh` replays committed
+ * responses via `llm-replay` (`cordis.snapshot.yml`); `AGENTRANS_SNAPSHOT=record`
+ * re-records against the live API; `AGENTRANS_SNAPSHOT=refresh` replays committed
  * fixtures and rewrites expected outputs.
  */
 
@@ -89,7 +89,7 @@ const MINIMAL_BASH_DESCRIPTION = `Run commands in a bash shell
 * Please avoid commands that may produce a very large amount of output.
 * Please run long lived commands in the background, e.g. 'sleep 10 &' or start a server in the background.`
 
-const mode = process.env.DSH_SNAPSHOT ?? 'replay'
+const mode = process.env.AGENTRANS_SNAPSHOT ?? 'replay'
 const recording = mode === 'record'
 const refreshing = mode === 'refresh'
 const sessionWriteMode = recording ? 'record' : refreshing ? 'refresh' : 'replay'
@@ -152,7 +152,7 @@ interface SdkAssertions {
 const SDK_ASSERTIONS: Readonly<Record<string, SdkAssertions>> = {
   'approval': {
     approvalOutcomes: ['allowed-once', 'rejected'],
-    environment: { DSH_PERMISSION_MODE: 'workspace-write' },
+    environment: { AGENTRANS_PERMISSION_MODE: 'workspace-write' },
     patches: [fileURLToPath(new URL('./approval/runtime.cordis.yml', import.meta.url))],
   },
 
@@ -172,34 +172,34 @@ const SDK_ASSERTIONS: Readonly<Record<string, SdkAssertions>> = {
   },
   'permission-switch': {
     expectedFinalResponse: 'SDK_PERMISSION_OK',
-    environment: { DSH_PERMISSION_MODE: 'danger-full-access' },
+    environment: { AGENTRANS_PERMISSION_MODE: 'danger-full-access' },
     patches: [fileURLToPath(new URL('./permission-switch/capture.cordis.yml', import.meta.url))],
     modelRequestsFile: 'permission-requests.jsonl',
     replayStandaloneCommands: true,
   },
   'command-identity': {
     expectedFinalResponse: 'SDK_PERMISSION_OK',
-    environment: { DSH_PERMISSION_MODE: 'danger-full-access' },
+    environment: { AGENTRANS_PERMISSION_MODE: 'danger-full-access' },
     patches: [fileURLToPath(new URL('./command-identity/runtime.cordis.yml', import.meta.url))],
     modelRequestsFile: 'command-identity-requests.jsonl',
     replayStandaloneCommands: true,
   },
   'plan-review': {
     expectedFinalResponse: 'SDK_PLAN_OK',
-    environment: { DSH_PERMISSION_MODE: 'workspace-write' },
+    environment: { AGENTRANS_PERMISSION_MODE: 'workspace-write' },
     patches: [fileURLToPath(new URL('./plan-review/capture.cordis.yml', import.meta.url))],
     modelRequestsFile: 'plan-requests.jsonl',
     replayStandaloneCommands: true,
     planReviews: ['keep', 'approve', 'dismiss'],
   },
   'goal-rounds': {
-    environment: { DSH_PERMISSION_MODE: 'workspace-write' },
+    environment: { AGENTRANS_PERMISSION_MODE: 'workspace-write' },
     patches: [fileURLToPath(new URL('./goal-rounds/capture.cordis.yml', import.meta.url))],
     modelRequestsFile: 'goal-requests.jsonl',
     replayStandaloneCommands: true,
   },
   'command-attachments': {
-    environment: { DSH_PERMISSION_MODE: 'workspace-write' },
+    environment: { AGENTRANS_PERMISSION_MODE: 'workspace-write' },
     patches: [fileURLToPath(new URL('./command-attachments/capture.cordis.yml', import.meta.url))],
     modelRequestsFile: 'command-attachment-requests.jsonl',
     replayStandaloneCommands: true,
@@ -241,14 +241,14 @@ const SDK_ASSERTIONS: Readonly<Record<string, SdkAssertions>> = {
     patches: [fileURLToPath(new URL('./subagent-spawn-in-process/runtime.cordis.yml', import.meta.url))],
   },
   'subagent-continuable': {
-    environment: { DSH_SNAPSHOT_HUMAN_STEER: '1' },
+    environment: { AGENTRANS_SNAPSHOT_HUMAN_STEER: '1' },
   },
   'subagent-dsh-sdk-diagnostic': {
-    expectedFinalResponse: 'PARENT_OBSERVED_DSH_SDK_DIAGNOSTIC',
-    environment: { DSH_TEST_CHILD_PATCH: dshSdkDiagnosticChildPatch },
+    expectedFinalResponse: 'PARENT_OBSERVED_AGENTRANS_SDK_DIAGNOSTIC',
+    environment: { AGENTRANS_TEST_CHILD_PATCH: dshSdkDiagnosticChildPatch },
   },
   'persistent-tools': {
-    environment: { DSH_SYSTEM_PROMPT: MINIMAL_SYSTEM_PROMPT },
+    environment: { AGENTRANS_SYSTEM_PROMPT: MINIMAL_SYSTEM_PROMPT },
     expectedTools: { bash: ['command'], str_replace_editor: ['command', 'path'], working_directory: [] },
     expectedSystem: MINIMAL_SYSTEM_PROMPT,
     expectedToolDescriptions: { bash: MINIMAL_BASH_DESCRIPTION },
@@ -258,7 +258,7 @@ const SDK_ASSERTIONS: Readonly<Record<string, SdkAssertions>> = {
     },
   },
   'persistent-tools-pwsh': {
-    environment: { DSH_SYSTEM_PROMPT: MINIMAL_SYSTEM_PROMPT },
+    environment: { AGENTRANS_SYSTEM_PROMPT: MINIMAL_SYSTEM_PROMPT },
     expectedFinalResponse: 'PERSISTENT_PWSH_TOOLS_OK',
     expectedTools: { pwsh: ['command'], str_replace_editor: ['command', 'path'], working_directory: [] },
     expectedSystem: MINIMAL_SYSTEM_PROMPT,
@@ -269,7 +269,7 @@ const SDK_ASSERTIONS: Readonly<Record<string, SdkAssertions>> = {
     },
   },
   'subagent-dsh-sdk-dynamic-route': {
-    environment: { DSH_TEST_PARENT_PROVIDER: 'deepseek-official' },
+    environment: { AGENTRANS_TEST_PARENT_PROVIDER: 'deepseek-official' },
     dshSdkChild: {
       config: dshSdkChildConfig,
       agentConfig: {
@@ -886,8 +886,8 @@ async function runScenario(scenario: CorpusScenario): Promise<{
     await mkdir(childHome, { recursive: true })
     childSessionsRoot = join(childHome, 'sessions')
     childEnvironment = {
-      DSH_TEST_CHILD_PATCHES: JSON.stringify([legacyChildPatch, childPatch]),
-      DSH_TEST_CHILD_HOME: childHome,
+      AGENTRANS_TEST_CHILD_PATCHES: JSON.stringify([legacyChildPatch, childPatch]),
+      AGENTRANS_TEST_CHILD_HOME: childHome,
     }
   }
   const workspaceDir = join(scenario.dir, 'workspace')
@@ -914,26 +914,26 @@ async function runScenario(scenario: CorpusScenario): Promise<{
   const env: Record<string, string> = {
     ...Object.fromEntries(Object.entries(process.env).filter(([, value]) => value !== undefined)) as Record<string, string>,
     ...recording ? {} : REPLAY_CREDENTIAL_ENV,
-    DSH_SNAPSHOT: mode,
-    DSH_SNAPSHOT_PROVIDER: route.provider,
-    DSH_SNAPSHOT_MODEL: route.model,
-    DSH_TELEMETRY_DISABLED: '1',
-    DSH_AGENTS_HOME: join(cwd, '.agents'),
+    AGENTRANS_SNAPSHOT: mode,
+    AGENTRANS_SNAPSHOT_PROVIDER: route.provider,
+    AGENTRANS_SNAPSHOT_MODEL: route.model,
+    AGENTRANS_TELEMETRY_DISABLED: '1',
+    AGENTRANS_AGENTS_HOME: join(cwd, '.agents'),
     NODE_OPTIONS: [process.env.NODE_OPTIONS, '--disable-warning=ExperimentalWarning'].filter(Boolean).join(' '),
     ...parentFixture === undefined ? {} : {
-      DSH_SNAPSHOT_FILE: parentFixture,
-      ...childFixtures.length > 0 ? { DSH_SNAPSHOT_CHILD_FILES: childFixtures.join(delimiter) } : {},
+      AGENTRANS_SNAPSHOT_FILE: parentFixture,
+      ...childFixtures.length > 0 ? { AGENTRANS_SNAPSHOT_CHILD_FILES: childFixtures.join(delimiter) } : {},
     },
     ...!recording && scenario.manifest.replay?.override === true
-      ? { DSH_SNAPSHOT_OVERRIDE: join(scenario.dir, 'replay.override.json') }
+      ? { AGENTRANS_SNAPSHOT_OVERRIDE: join(scenario.dir, 'replay.override.json') }
       : {},
     ...scenario.manifest.environment,
     ...assertions.environment,
     ...childEnvironment,
-    ...resumeReplayFile === undefined ? {} : { DSH_SNAPSHOT_OVERRIDE: resumeReplayFile },
+    ...resumeReplayFile === undefined ? {} : { AGENTRANS_SNAPSHOT_OVERRIDE: resumeReplayFile },
     ...recording ? {} : {
       NODE_OPTIONS: `--disable-warning=ExperimentalWarning --import=${replayNetworkGuard}`,
-      DSH_SNAPSHOT_NETWORK_AUDIT_FILE: networkAudit,
+      AGENTRANS_SNAPSHOT_NETWORK_AUDIT_FILE: networkAudit,
     },
   }
 
@@ -1121,7 +1121,7 @@ async function runScenario(scenario: CorpusScenario): Promise<{
             data: { turn: 2, message: { content: [{ type: 'text', text: 'SUBAGENT_SETTLED_NOTED' }] } },
           })
         }
-        if (scenario.manifest.environment?.DSH_SNAPSHOT_FEEDBACK === '1') {
+        if (scenario.manifest.environment?.AGENTRANS_SNAPSHOT_FEEDBACK === '1') {
           const feedback = result.events.filter(event => event.type.startsWith('feedback/'))
           expect(feedback.map(event => event.type)).toEqual([
             'feedback/record', 'feedback/record', 'feedback/message-put', 'feedback/message-put', 'feedback/message-delete',

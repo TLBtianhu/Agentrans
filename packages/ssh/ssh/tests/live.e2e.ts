@@ -20,9 +20,9 @@ import type { SubprocessHandle } from '@agentrans/subprocess'
 import { SshConnection, type Config } from '../src/index.ts'
 import { doneSchema, preparedSchema } from '../src/schemas.ts'
 
-const configPath = process.env.DSH_SSH_TEST_CONFIG
-const bootstrap = process.env.DSH_SSH_TEST_BOOTSTRAP
-const languageServer = process.env.DSH_SSH_TEST_LSP
+const configPath = process.env.AGENTRANS_SSH_TEST_CONFIG
+const bootstrap = process.env.AGENTRANS_SSH_TEST_BOOTSTRAP
+const languageServer = process.env.AGENTRANS_SSH_TEST_LSP
 const enabled = configPath !== undefined && process.platform !== 'win32'
 
 async function setup() {

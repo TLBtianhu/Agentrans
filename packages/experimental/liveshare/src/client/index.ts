@@ -3,7 +3,7 @@
  *
  * The served viewer page is the owner's own Web shell with every owner plugin, so this one face
  * decides which half it mounts from the page global the Relay's carrier installs
- * (`__DSH_LIVESHARE_VIEWER__`): absent on the owner's page, present on a viewer page.
+ * (`__AGENTRANS_LIVESHARE_VIEWER__`): absent on the owner's page, present on a viewer page.
  *
  * The owner half mounts the generated `liveshareShares` Remote before it contributes the header
  * action, because that action and its dialogs address every share-management call through it.

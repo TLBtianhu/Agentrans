@@ -43,7 +43,7 @@
 - id: sandbox-policy
   name: '@agentrans/sandbox-policy'
   config:
-    mode: !!js process.env.DSH_PERMISSION_MODE ?? 'workspace-write'
+    mode: !!js process.env.AGENTRANS_PERMISSION_MODE ?? 'workspace-write'
     workspaceRoot: /tmp
     additionalWritableRoots: !!js "[process.cwd() + '/extra']"
 

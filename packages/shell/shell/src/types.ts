@@ -10,7 +10,7 @@
 import type { SandboxEnforcement, SandboxExecutionPolicy, SandboxMode } from '@agentrans/sandbox'
 import type { CollectedOutput, DshEnvironment, SubprocessOutputReader } from '@agentrans/subprocess'
 
-export { DSH_ENV_PREFIX } from '@agentrans/subprocess'
+export { AGENTRANS_ENV_PREFIX } from '@agentrans/subprocess'
 export type { CollectedOutput, DshEnvironment, DshEnvironmentKey, SubprocessOutputRead, SubprocessOutputReader } from '@agentrans/subprocess'
 
 /**
@@ -92,8 +92,8 @@ export interface ShellExecRequest {
    */
   env?: Record<string, string> | undefined
   /**
-   * Harness-owned `DSH_*` variables for this execution (typed to managed
-   * keys). Executors discard ambient `DSH_*` entries before merging this
+   * Harness-owned `AGENTRANS_*` variables for this execution (typed to managed
+   * keys). Executors discard ambient `AGENTRANS_*` entries before merging this
    * snapshot last, so an unavailable current fact cannot inherit a stale
    * value from the harness process and a caller {@link env} entry cannot
    * displace a managed one.
@@ -130,7 +130,7 @@ export interface ShellExecSpec {
    * ordinary extra environment.
    */
   env?: Record<string, string> | undefined
-  /** Managed `DSH_*` snapshot (typed to managed keys); merges after {@link env}. */
+  /** Managed `AGENTRANS_*` snapshot (typed to managed keys); merges after {@link env}. */
   dshEnv?: DshEnvironment | undefined
   /** Resolved sandbox policy; ignored by executors that do not confine. */
   sandboxPolicy: SandboxExecutionPolicy | undefined

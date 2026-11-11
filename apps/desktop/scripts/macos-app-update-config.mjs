@@ -38,7 +38,7 @@ export function resolveMacOSAppUpdateFeed(publish) {
     provider: 'github',
     owner: nonEmptyString(provider.owner, 'publish owner'),
     repo: nonEmptyString(provider.repo, 'publish repository'),
-    channel: resolveDesktopUpdateChannel({ DSH_DESKTOP_UPDATE_CHANNEL: provider.releaseType === 'release' ? 'latest' : 'nightly' }),
+    channel: resolveDesktopUpdateChannel({ AGENTRANS_DESKTOP_UPDATE_CHANNEL: provider.releaseType === 'release' ? 'latest' : 'nightly' }),
   }
 }
 
@@ -49,7 +49,7 @@ export function resolveMacOSAppUpdateFeed(publish) {
  * @returns {{ provider: 'github' | 'generic', owner?: string, repo?: string, url?: string, channel: 'nightly' | 'latest', updaterCacheDirName: string }} Packaged updater fields.
  */
 export function createMacOSAppUpdateConfig(update, updaterCacheDirName) {
-  const channel = resolveDesktopUpdateChannel({ DSH_DESKTOP_UPDATE_CHANNEL: update.channel })
+  const channel = resolveDesktopUpdateChannel({ AGENTRANS_DESKTOP_UPDATE_CHANNEL: update.channel })
   return {
     provider: 'github',
     owner: nonEmptyString(update.owner, 'publish owner'),
@@ -88,7 +88,7 @@ export async function verifyMacOSAppUpdateConfig(appPath, update, updaterCacheDi
     throw new Error(`desktop macOS update config: cannot read ${path}: ${error instanceof Error ? error.message : String(error)}`)
   }
   const config = object(parsed, CONFIG_FILENAME)
-  const channel = resolveDesktopUpdateChannel({ DSH_DESKTOP_UPDATE_CHANNEL: update.channel })
+  const channel = resolveDesktopUpdateChannel({ AGENTRANS_DESKTOP_UPDATE_CHANNEL: update.channel })
   const matches = update.provider === 'github'
     ? config.provider === 'github' && config.owner === update.owner && config.repo === update.repo && config.channel === channel
     : config.provider === 'generic' && config.url === update.publicUrl && config.channel === channel

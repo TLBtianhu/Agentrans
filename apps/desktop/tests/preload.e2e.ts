@@ -77,7 +77,7 @@ describe.skipIf(!existsSync(preload('preload-app')))('built sandboxed Desktop pr
       expect(send).toHaveBeenCalledWith('dsh-desktop:native-theme-set', 'dark')
       browser.changeTheme('light')
       expect(send).toHaveBeenCalledWith('dsh-desktop:native-theme-set', 'light')
-      const bridge = exposed.get('__DSH_LOCALE__') as { read(): unknown; onChange(locale: string): void }
+      const bridge = exposed.get('__AGENTRANS_LOCALE__') as { read(): unknown; onChange(locale: string): void }
       bridge.read()
       expect(invoke).toHaveBeenCalledWith('dsh-desktop:locale-bootstrap')
       bridge.onChange('zh')

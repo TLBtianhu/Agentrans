@@ -84,7 +84,7 @@ it('binds CLI and Host to one verification root while preserving payload and old
     throw failure
   })
   await expect(smokeDesktopRuntime(current.dsh, 'test-electron', current.descriptor, {
-    DSH_HOME: current.oldHome, DSH_AGENTS_HOME: current.oldHome,
+    AGENTRANS_HOME: current.oldHome, AGENTRANS_AGENTS_HOME: current.oldHome,
     AGENTRANS_LAUNCH_CONTEXT: '{"foreign":true}', npm_config_userconfig: 'old-npmrc',
   }, current.runtime)).rejects.toBe(failure)
 
@@ -95,9 +95,9 @@ it('binds CLI and Host to one verification root while preserving payload and old
   expect(context.resourcesRoot).toBe(current.resources)
   expect(context.codeRoot).toBe(dirname(current.resources))
   expect(resolvePackagedLaunchContext(current.resources, environment.AGENTRANS_LAUNCH_CONTEXT)).toEqual(context)
-  expect(environment.DSH_HOME).toBe(context.paths.dshHomeDir)
-  expect(environment.DSH_AGENTS_HOME).toBe(context.paths.dshAgentsHomeDir)
-  expect(environment.DSH_DESKTOP_UPDATE_JOURNAL_DIR).toBe(context.paths.updateJournalDir)
+  expect(environment.AGENTRANS_HOME).toBe(context.paths.dshHomeDir)
+  expect(environment.AGENTRANS_AGENTS_HOME).toBe(context.paths.dshAgentsHomeDir)
+  expect(environment.AGENTRANS_DESKTOP_UPDATE_JOURNAL_DIR).toBe(context.paths.updateJournalDir)
   expect(environment.HOME).toBe(context.instanceRoot)
   expect(environment.USERPROFILE).toBe(context.instanceRoot)
   expect(environment.XDG_CONFIG_HOME).toBe(context.instanceRoot)

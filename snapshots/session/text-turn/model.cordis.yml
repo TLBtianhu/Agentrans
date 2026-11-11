@@ -4,5 +4,5 @@
 - id: agent-default-model
   name: '@agentrans/agent-default-model'
   config:
-    provider: !!js process.env.DSH_SNAPSHOT_PROVIDER
-    model: !!js process.env.DSH_SNAPSHOT_MODEL
+    provider: !!js process.env.AGENTRANS_SNAPSHOT_PROVIDER
+    model: !!js process.env.AGENTRANS_SNAPSHOT_MODEL

@@ -9,7 +9,7 @@ English | [中文](guide.zh.md)
 
 ## Change
 
-In v0.2.0-rc.2, switching on Automation tasks in the Plugins page appended `@agentrans/experimental-schedule-bundle` to `dsh.profile.bundles` in `$DSH_HOME/profiles/<name>/package.json`. That bundle inserted the `time-context`, `schedule`, and `ui-schedule` rows.
+In v0.2.0-rc.2, switching on Automation tasks in the Plugins page appended `@agentrans/experimental-schedule-bundle` to `dsh.profile.bundles` in `$AGENTRANS_HOME/profiles/<name>/package.json`. That bundle inserted the `time-context`, `schedule`, and `ui-schedule` rows.
 
 The next release removes the bundle. `@agentrans/web-app` mounts `schedule` and `ui-schedule` in every Web profile, and the `standard`, `cordis`, and `ptc` presets declare the clock reading and the four `schedule_*` tools; `minimal` declares neither ([details](../../../subsystems/schedule.md)).
 

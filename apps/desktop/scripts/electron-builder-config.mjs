@@ -59,7 +59,7 @@ export function createElectronBuilderConfig(
 /**
  * Create the unsigned Windows artifact configuration Agentrans ships as its own installer.
  * The product identifier is this repository's, so the ordinary release-identity guard does not apply.
- * @param {NodeJS.ProcessEnv} env - Packaging environment with DSH_DESKTOP_UNSIGNED=1.
+ * @param {NodeJS.ProcessEnv} env - Packaging environment with AGENTRANS_DESKTOP_UNSIGNED=1.
  * @param {NodeJS.Platform} hostPlatform - Build-host platform used when no target override exists.
  * @param {string} hostArch - Build-host architecture used when no target override exists.
  * @returns {ReturnType<typeof createElectronBuilderConfig>} Unsigned Windows configuration without an update feed.
@@ -71,16 +71,16 @@ export function createAgentransInstallerBuilderConfig(env = process.env, hostPla
 function electronBuilderConfig(env, hostPlatform, hostArch, preparedRuntime, preparedRuntimeVersion, ownReleaseIdentity = false) {
   const appId = resolveDesktopAppId(env)
   if (!ownReleaseIdentity) assertUpstreamDesktopReleaseIdentity(appId)
-  const targetPlatform = env.DSH_DESKTOP_TARGET_PLATFORM
+  const targetPlatform = env.AGENTRANS_DESKTOP_TARGET_PLATFORM
   const resolvedPlatform = targetPlatform ?? hostPlatform
-  const resolvedArch = env.DSH_DESKTOP_TARGET_ARCH ?? hostArch
-  if (env.DSH_DESKTOP_UNSIGNED !== undefined && !['0', '1'].includes(env.DSH_DESKTOP_UNSIGNED)) {
-    throw new Error('desktop package: DSH_DESKTOP_UNSIGNED must be 0 or 1')
+  const resolvedArch = env.AGENTRANS_DESKTOP_TARGET_ARCH ?? hostArch
+  if (env.AGENTRANS_DESKTOP_UNSIGNED !== undefined && !['0', '1'].includes(env.AGENTRANS_DESKTOP_UNSIGNED)) {
+    throw new Error('desktop package: AGENTRANS_DESKTOP_UNSIGNED must be 0 or 1')
   }
-  const unsigned = env.DSH_DESKTOP_UNSIGNED === '1'
-  const skipNotarization = env.DSH_DESKTOP_MACOS_SKIP_NOTARIZATION === '1'
-  if (env.DSH_DESKTOP_MACOS_SKIP_NOTARIZATION !== undefined && !['0', '1'].includes(env.DSH_DESKTOP_MACOS_SKIP_NOTARIZATION)) {
-    throw new Error('desktop package: DSH_DESKTOP_MACOS_SKIP_NOTARIZATION must be 0 or 1')
+  const unsigned = env.AGENTRANS_DESKTOP_UNSIGNED === '1'
+  const skipNotarization = env.AGENTRANS_DESKTOP_MACOS_SKIP_NOTARIZATION === '1'
+  if (env.AGENTRANS_DESKTOP_MACOS_SKIP_NOTARIZATION !== undefined && !['0', '1'].includes(env.AGENTRANS_DESKTOP_MACOS_SKIP_NOTARIZATION)) {
+    throw new Error('desktop package: AGENTRANS_DESKTOP_MACOS_SKIP_NOTARIZATION must be 0 or 1')
   }
   if (skipNotarization && (unsigned || resolvedPlatform !== 'darwin')) throw new Error('Skipping notarization requires a signed macOS build')
   const packagesMacOS = targetPlatform === 'darwin' || (targetPlatform === undefined && hostPlatform === 'darwin')
@@ -97,14 +97,14 @@ function electronBuilderConfig(env, hostPlatform, hostArch, preparedRuntime, pre
     `**/node_modules/@deepseek-ai/libreoffice-kit-${resolvedPlatform}-${resolvedArch}/**/*`]
   const windowsSigner = packagesWindows && !unsigned
     ? createWindowsTokenSigner({
-        certificateFile: env.DSH_DESKTOP_WINDOWS_CER_FILE,
-        signTool: env.DSH_DESKTOP_WINDOWS_SIGNTOOL,
-        tokenPin: env.DSH_DESKTOP_WINDOWS_TOKEN_PIN,
-        keyContainer: env.DSH_DESKTOP_WINDOWS_KEY_CONTAINER,
+        certificateFile: env.AGENTRANS_DESKTOP_WINDOWS_CER_FILE,
+        signTool: env.AGENTRANS_DESKTOP_WINDOWS_SIGNTOOL,
+        tokenPin: env.AGENTRANS_DESKTOP_WINDOWS_TOKEN_PIN,
+        keyContainer: env.AGENTRANS_DESKTOP_WINDOWS_KEY_CONTAINER,
         preserveSignature: async path => {
           for (const [sourceRoot, destinationRoot] of [[join(buildPaths.runtime, 'primary-runtime'), primaryRuntimeDestination], [buildPaths.dsh, dshDestination]]) {
             if (destinationRoot !== undefined && await preserveWindowsRuntimeSignature(path, {
-              sourceRoot, destinationRoot, runDirectory: env.DSH_DESKTOP_PACKAGING_RUN_DIR,
+              sourceRoot, destinationRoot, runDirectory: env.AGENTRANS_DESKTOP_PACKAGING_RUN_DIR,
             })) return true
           }
           return false
@@ -234,9 +234,9 @@ function electronBuilderConfig(env, hostPlatform, hostArch, preparedRuntime, pre
     afterSign: async context => {
       if (windowsSigner !== undefined) {
         await signWindowsCode(context.appOutDir, {
-          thumbprint: new X509Certificate(await readFile(env.DSH_DESKTOP_WINDOWS_CER_FILE)).fingerprint.replaceAll(':', ''),
+          thumbprint: new X509Certificate(await readFile(env.AGENTRANS_DESKTOP_WINDOWS_CER_FILE)).fingerprint.replaceAll(':', ''),
           sign: windowsSigner,
-          record: event => recordPackagingEvent(env.DSH_DESKTOP_PACKAGING_RUN_DIR, event),
+          record: event => recordPackagingEvent(env.AGENTRANS_DESKTOP_PACKAGING_RUN_DIR, event),
         })
         await verifyWindowsAsarUnpack(buildPaths.dsh, context.packager.getResourcesDir(context.appOutDir), windowsCode)
       }
@@ -265,7 +265,7 @@ function electronBuilderConfig(env, hostPlatform, hostArch, preparedRuntime, pre
       forceCodeSigning: !unsigned,
       signtoolOptions: {
         sign: windowsSigner,
-        publisherName: windowsSigner === undefined ? undefined : resolveWindowsUpdatePublisher(env.DSH_DESKTOP_WINDOWS_CER_FILE),
+        publisherName: windowsSigner === undefined ? undefined : resolveWindowsUpdatePublisher(env.AGENTRANS_DESKTOP_WINDOWS_CER_FILE),
         signingHashAlgorithms: ['sha256'],
       },
       target: ['nsis'],

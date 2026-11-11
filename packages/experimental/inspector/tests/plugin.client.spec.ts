@@ -74,13 +74,13 @@ describe('experimental Inspector Client plugin', () => {
     globalThis.WebSocket = nativeWebSocket
     globalThis.fetch = nativeFetch
     sessionStorage.clear()
-    delete globalThis.__DSH_INSPECTOR__
-    Reflect.deleteProperty(globalThis, '__DSH_BOOT__')
+    delete globalThis.__AGENTRANS_INSPECTOR__
+    Reflect.deleteProperty(globalThis, '__AGENTRANS_BOOT__')
   })
 
   it('removes the source on pagehide and reconnects once when the cached page resumes', async () => {
     vi.stubGlobal('WebSocket', FakeWebSocket)
-    globalThis.__DSH_INSPECTOR__ = bootstrap
+    globalThis.__AGENTRANS_INSPECTOR__ = bootstrap
     const ctx = new Context()
     try {
       await ctx.plugin({ apply }).await()
@@ -108,7 +108,7 @@ describe('experimental Inspector Client plugin', () => {
 
   it('provides ctx.inspector and sends observations after the Worker accepts the source', async () => {
     globalThis.WebSocket = FakeWebSocket as unknown as typeof WebSocket
-    globalThis.__DSH_INSPECTOR__ = bootstrap
+    globalThis.__AGENTRANS_INSPECTOR__ = bootstrap
     const ctx = new Context()
     const fiber = ctx.plugin({ apply })
     await fiber.await()
@@ -189,7 +189,7 @@ describe('experimental Inspector Client plugin', () => {
 
   it('keeps the realm source id and rotates the transport generation on reconnect', async () => {
     globalThis.WebSocket = FakeWebSocket as unknown as typeof WebSocket
-    globalThis.__DSH_INSPECTOR__ = bootstrap
+    globalThis.__AGENTRANS_INSPECTOR__ = bootstrap
     const ctx = new Context()
     const fiber = ctx.plugin({ apply })
     await fiber.await()
@@ -214,7 +214,7 @@ describe('experimental Inspector Client plugin', () => {
 
   it('keeps the logical source id when the Client plugin is recreated after a page refresh', async () => {
     globalThis.WebSocket = FakeWebSocket as unknown as typeof WebSocket
-    globalThis.__DSH_INSPECTOR__ = bootstrap
+    globalThis.__AGENTRANS_INSPECTOR__ = bootstrap
     const firstContext = new Context()
     const firstFiber = firstContext.plugin({ apply })
     await firstFiber.await()
@@ -283,7 +283,7 @@ describe('experimental Inspector Client plugin', () => {
 
   it('falls back to a page-lifetime source id when session storage is unavailable', async () => {
     globalThis.WebSocket = FakeWebSocket as unknown as typeof WebSocket
-    globalThis.__DSH_INSPECTOR__ = bootstrap
+    globalThis.__AGENTRANS_INSPECTOR__ = bootstrap
     vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
       throw new DOMException('storage disabled', 'SecurityError')
     })
@@ -300,7 +300,7 @@ describe('experimental Inspector Client plugin', () => {
 
   it('cancels an outstanding Client Runtime operation without sending a late response', async () => {
     globalThis.WebSocket = FakeWebSocket as unknown as typeof WebSocket
-    globalThis.__DSH_INSPECTOR__ = bootstrap
+    globalThis.__AGENTRANS_INSPECTOR__ = bootstrap
     const ctx = new Context()
     const fiber = ctx.plugin({ apply })
     await fiber.await()
@@ -355,7 +355,7 @@ describe('experimental Inspector Client plugin', () => {
 
   it('does not report queue loss again after a replacement absorbs it', async () => {
     globalThis.WebSocket = FakeWebSocket as unknown as typeof WebSocket
-    globalThis.__DSH_INSPECTOR__ = { ...bootstrap, maxQueuedRecords: 1 }
+    globalThis.__AGENTRANS_INSPECTOR__ = { ...bootstrap, maxQueuedRecords: 1 }
     const ctx = new Context()
     const fiber = ctx.plugin({ apply })
     await fiber.await()
@@ -391,8 +391,8 @@ describe('experimental Inspector Client plugin', () => {
 
   it('discovers and serves its built Client bundle through the source protocol', async () => {
     globalThis.WebSocket = FakeWebSocket as unknown as typeof WebSocket
-    globalThis.__DSH_INSPECTOR__ = bootstrap
-    Reflect.set(globalThis, '__DSH_BOOT__', {
+    globalThis.__AGENTRANS_INSPECTOR__ = bootstrap
+    Reflect.set(globalThis, '__AGENTRANS_BOOT__', {
       rev: 'graph',
       entries: [{
         id: '@agentrans/experimental-inspector',
@@ -511,7 +511,7 @@ describe('experimental Inspector Client plugin', () => {
 
   it('does not install a late bootstrap after disposal begins', async () => {
     vi.stubGlobal('WebSocket', FakeWebSocket)
-    globalThis.__DSH_INSPECTOR__ = bootstrap
+    globalThis.__AGENTRANS_INSPECTOR__ = bootstrap
     let respond!: (response: Response) => void
     const pending = new Promise<Response>((resolve) => { respond = resolve })
     const fetch = vi.fn(() => pending)
@@ -535,7 +535,7 @@ describe('experimental Inspector Client plugin', () => {
 
   it.each([true, false])('closes the Client source when registration fails (injected=%s)', async (injected) => {
     globalThis.WebSocket = FakeWebSocket as unknown as typeof WebSocket
-    if (injected) globalThis.__DSH_INSPECTOR__ = bootstrap
+    if (injected) globalThis.__AGENTRANS_INSPECTOR__ = bootstrap
     else vi.stubGlobal('fetch', vi.fn(async () => Response.json(bootstrap)))
     const ctx = new Context()
     ctx.provide('inspector', {
@@ -553,7 +553,7 @@ describe('experimental Inspector Client plugin', () => {
   it.each([true, false])('retains reconnect recovery after transport setup fails (injected=%s)', async (injected) => {
     vi.stubGlobal('WebSocket', FakeWebSocket)
     vi.stubGlobal('fetch', vi.fn(async () => Response.json(bootstrap)))
-    if (injected) globalThis.__DSH_INSPECTOR__ = bootstrap
+    if (injected) globalThis.__AGENTRANS_INSPECTOR__ = bootstrap
     vi.spyOn(ClientRealmSource, 'claim').mockRejectedValueOnce(new Error('identity temporarily unavailable'))
     const ctx = new Context()
     const warn = vi.spyOn(ctx.logger, 'warn').mockImplementation(() => {})
@@ -571,7 +571,7 @@ describe('experimental Inspector Client plugin', () => {
 
   it.each([true, false])('rejects invalid bootstrap data during startup (injected=%s)', async (injected) => {
     vi.stubGlobal('WebSocket', FakeWebSocket)
-    if (injected) globalThis.__DSH_INSPECTOR__ = null
+    if (injected) globalThis.__AGENTRANS_INSPECTOR__ = null
     else vi.stubGlobal('fetch', vi.fn(async () => Response.json(null)))
     const ctx = new Context()
     try {
@@ -595,7 +595,7 @@ describe('experimental Inspector Client plugin', () => {
 
   it('settles an aborted bootstrap refresh without warning after disposal', async () => {
     vi.stubGlobal('WebSocket', FakeWebSocket)
-    globalThis.__DSH_INSPECTOR__ = bootstrap
+    globalThis.__AGENTRANS_INSPECTOR__ = bootstrap
     const pending = Promise.withResolvers<Response>()
     const aborted = Promise.withResolvers<undefined>()
     const fetch = vi.fn((_url: string, init: RequestInit) => {
@@ -623,7 +623,7 @@ describe('experimental Inspector Client plugin', () => {
 
   it('joins service-consumer cleanup before claiming a replacement source', async () => {
     vi.stubGlobal('WebSocket', FakeWebSocket)
-    globalThis.__DSH_INSPECTOR__ = bootstrap
+    globalThis.__AGENTRANS_INSPECTOR__ = bootstrap
     vi.stubGlobal('fetch', vi.fn(async () => Response.json({ ...bootstrap, protocol: 'replacement-worker' })))
     const claimed = vi.spyOn(ClientRealmSource, 'claim')
     const started = Promise.withResolvers<undefined>()

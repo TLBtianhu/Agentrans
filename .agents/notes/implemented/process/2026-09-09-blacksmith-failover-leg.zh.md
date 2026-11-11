@@ -10,7 +10,7 @@ Status: implemented
 
 ## 决策
 
-`DSH_CI_FAILOVER_LINUX` 与 `DSH_CI_FAILOVER_WINDOWS` 额外接受值 `blacksmith`。任何仓库写者设置它时，该平台参与切换的作业按各作业配置的 vCPU 档位重定向到 Blacksmith 托管运行器；任何其它值（或未设置）保持今天的运行器，`selfhosted` 继续路由到自有池。与既有取值一样，这是写者可管理的仓库状态——无需合并，重跑受影响的作业即可——并且只在设置期间产生费用，这正是它作为明确的故障或实验选择、而非默认的原因。
+`AGENTRANS_CI_FAILOVER_LINUX` 与 `AGENTRANS_CI_FAILOVER_WINDOWS` 额外接受值 `blacksmith`。任何仓库写者设置它时，该平台参与切换的作业按各作业配置的 vCPU 档位重定向到 Blacksmith 托管运行器；任何其它值（或未设置）保持今天的运行器，`selfhosted` 继续路由到自有池。与既有取值一样，这是写者可管理的仓库状态——无需合并，重跑受影响的作业即可——并且只在设置期间产生费用，这正是它作为明确的故障或实验选择、而非默认的原因。
 
 `blacksmith` 下参与切换的作业：[ci.yml](../../../../.github/workflows/ci.yml) 中三个企业级 Linux 工作作业、`node-compat` 各腿与 `all-checks-passed` 判定作业，以及 [ci-windows.yml](../../../../.github/workflows/ci-windows.yml) 中三个 Windows 作业与 `windows-checks-passed` 判定作业，以及 [ci-python.yml](../../../../.github/workflows/ci-python.yml) 中的 `python-checks-passed` 判定作业，使用这些工作流为各作业声明的运行器规格；`expected-filenames`；sandbox 的 bwrap 腿；以及两个手动基准矩阵——其 4-32 vCPU 档位映射到 Blacksmith 等价档，64/96 核行保留自有池标签，因为 Blacksmith 没有对应档位。blacksmith 分支不带 Dependabot 排除：Blacksmith 运行器是临时的，因此把 Dependabot 留在托管池的持久虚拟机理由不适用。python-runtime 构建器整体保持托管：其 PR 与 master 调用方（`ci-python.yml` 与 `ci-master.yml` 中的 `python-runtime` 作业）会把真实 API 凭据（`DEEPSEEK_API_KEY_EXTERNAL`）传入该可复用工作流，其 macOS 与 arm64 单文件分支需要 GitHub 镜像，且其 wheel 产物供给 PyPI 发布链。docs-pages 工作流是 tag 派发的发布，因此同样保持托管。
 

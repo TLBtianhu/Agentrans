@@ -93,7 +93,7 @@ Owner 使用自己保留的校验值兑换代码，以仅所有者可读写的�
 
 ### 本包对外提供什么
 
-本包交付一个 Host 程序和一个浏览器端。公开入口包括 Host 导出（`lib/index.js`）、`./client`（`lib/client.js`，closure-factory bundle）、`./viewer-declarations`、分享管理 Remote 的 `./typert` 与 `./remote` 两个面、`./types`、组合包 patch `./cordis.patch.yml`，以及 locale JSON 文件。manifest 以 `dsh.client` 声明浏览器端，`platform` 为 `web`，并列出它需要的客户端服务；该入口读取 `__DSH_LIVESHARE_VIEWER__`：在被服务的查看页上挂载查看页 session 插件及其品牌、模型、权限、会话行与分享路径界面，否则先挂载 owner 生成的 Remote，再挂载 Session 头部操作。
+本包交付一个 Host 程序和一个浏览器端。公开入口包括 Host 导出（`lib/index.js`）、`./client`（`lib/client.js`，closure-factory bundle）、`./viewer-declarations`、分享管理 Remote 的 `./typert` 与 `./remote` 两个面、`./types`、组合包 patch `./cordis.patch.yml`，以及 locale JSON 文件。manifest 以 `dsh.client` 声明浏览器端，`platform` 为 `web`，并列出它需要的客户端服务；该入口读取 `__AGENTRANS_LIVESHARE_VIEWER__`：在被服务的查看页上挂载查看页 session 插件及其品牌、模型、权限、会话行与分享路径界面，否则先挂载 owner 生成的 Remote，再挂载 Session 头部操作。
 
 分享管理是一个 `liveshareShares` Typert Remote，共十二个方法——`create`、`list`、`stop`、`updatePermissions`、`setCapabilities`、`capabilities`、`relay`、`setRelay`、`identity`、`audit`、`testRelay` 与 `testPublish`——背后是 owner 宿主执行的操作。仅存的同源 HTTP 路由是四条 owner 登录与凭据路由：`/api/liveshare.ownerLoginStart`、`/api/liveshare.ownerLoginRedeem`、`/api/liveshare.ownerLoginCancel` 与 `/api/liveshare.ownerCredential`。
 

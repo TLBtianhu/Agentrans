@@ -67,11 +67,11 @@ const disabledIds = ['session-log-deepseek', 'plugin-package-inventory-deepseek'
 
 it.each(['desktop', 'web'])('keeps %s model requests and local feedback independent of disabled sharing', async (profile) => {
   root = await mkdtemp(join(tmpdir(), 'agentrans-sharing-defaults-'))
-  vi.stubEnv('DSH_HOME', root)
+  vi.stubEnv('AGENTRANS_HOME', root)
   vi.stubEnv('DEEPSEEK_API_KEY', 'local-deepseek-key')
   vi.stubEnv('LOCAL_PROVIDER_KEY', 'local-custom-key')
-  vi.stubEnv('DSH_CLIENT_VERSION', 'local-test')
-  vi.stubEnv('DSH_TELEMETRY_DISABLED', '')
+  vi.stubEnv('AGENTRANS_CLIENT_VERSION', 'local-test')
+  vi.stubEnv('AGENTRANS_TELEMETRY_DISABLED', '')
   const requests: { path: string; body: unknown }[] = []
   http = createServer((request, response) => {
     const chunks: Buffer[] = []

@@ -21,7 +21,7 @@ import Include from '@agentrans/cordis-plugin-include'
 import WebServer from '@agentrans/host-webserver'
 import type { NativeCommandRunner } from '@agentrans/native-command'
 import {
-  createLaunchEnvironmentSnapshot, DSH_LAUNCH_ENVIRONMENT_KEY, type LaunchEnvironmentLayerInput,
+  createLaunchEnvironmentSnapshot, AGENTRANS_LAUNCH_ENVIRONMENT_KEY, type LaunchEnvironmentLayerInput,
 } from '@agentrans/launch-environment'
 import * as OpenInApp from '../src/index.ts'
 import { internals } from '../src/internals.ts'
@@ -66,7 +66,7 @@ async function boot(layers: readonly LaunchEnvironmentLayerInput[] = []): Promis
   ].join('\n'))
 
   context = new Context()
-  context.provide(DSH_LAUNCH_ENVIRONMENT_KEY, createLaunchEnvironmentSnapshot(layers))
+  context.provide(AGENTRANS_LAUNCH_ENVIRONMENT_KEY, createLaunchEnvironmentSnapshot(layers))
   context.baseUrl = pathToFileURL(root).href + '/'
   context.provide('connection', { requestRejection: () => trust.rejection } as never)
   // The plugin resolves PATH names through the composition's subprocess

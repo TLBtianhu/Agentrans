@@ -8,11 +8,11 @@ Status: implemented
 
 profile 从自己的包项目加载插件。dsh 本体包和 bundle 内嵌的依赖不在 profile 的依赖树上，Node 默认的 `node_modules` 查找从 profile 出发找不到它们。
 
-解析规则需要能被开发者一句话复述：哪一段是普通 Node 行为，哪一段是 dsh 的干预，干预的范围到哪里为止。此前的运行时实现把 `$DSH_HOME/profiles/node_modules` 整层对所有包名隐藏，又为历史目录形状保留了专门的识别代码，规则无法用一句话说清，也无法判断某次解析结果是否符合预期。
+解析规则需要能被开发者一句话复述：哪一段是普通 Node 行为，哪一段是 dsh 的干预，干预的范围到哪里为止。此前的运行时实现把 `$AGENTRANS_HOME/profiles/node_modules` 整层对所有包名隐藏，又为历史目录形状保留了专门的识别代码，规则无法用一句话说清，也无法判断某次解析结果是否符合预期。
 
 ## Decision
 
-普通模块请求保留 Node 的祖先 `node_modules` 顺序。profile 内，runtime resolution 条目占据 `$DSH_HOME/profiles/node_modules` 上对应的包位置。对于已记录的树外链接目录中的 importer，每个候选 `D/node_modules` 只应用一条规则：包名同时出现在 `D/package.json` 的 `peerDependencies` 和 runtime resolution 中，就由运行时包占据该位置；否则 Node 尝试该位置的物理包。更近的候选先于更高祖先的 peer 声明。显式 CommonJS `paths` 始终绕过拦截。其余解析行为由 Node 负责。[不可变 generation 的构造、发布、Worker 继承与运行时载体](2026-09-09-profile-resolution-generations.zh.md)由既有 Note 记录，本篇不复述。
+普通模块请求保留 Node 的祖先 `node_modules` 顺序。profile 内，runtime resolution 条目占据 `$AGENTRANS_HOME/profiles/node_modules` 上对应的包位置。对于已记录的树外链接目录中的 importer，每个候选 `D/node_modules` 只应用一条规则：包名同时出现在 `D/package.json` 的 `peerDependencies` 和 runtime resolution 中，就由运行时包占据该位置；否则 Node 尝试该位置的物理包。更近的候选先于更高祖先的 peer 声明。显式 CommonJS `paths` 始终绕过拦截。其余解析行为由 Node 负责。[不可变 generation 的构造、发布、Worker 继承与运行时载体](2026-09-09-profile-resolution-generations.zh.md)由既有 Note 记录，本篇不复述。
 
 ### 一、解析规则
 
@@ -22,21 +22,21 @@ importer 指发起 `import` 或 `require` 的那个模块文件。Node 从 impor
 
 软链接按 Node 默认行为跟随到真实路径。一个模块一旦以真实路径加载，它后续 import 的主线就是真实路径的祖先链，与它被链接到哪里无关。
 
-下面这条链是全文表格引用的编号。importer 为 `$DSH_HOME/profiles/web/node_modules/my-plugin/index.js`：
+下面这条链是全文表格引用的编号。importer 为 `$AGENTRANS_HOME/profiles/web/node_modules/my-plugin/index.js`：
 
 ```text
-① $DSH_HOME/profiles/web/node_modules/my-plugin/node_modules
-② $DSH_HOME/profiles/web/node_modules
-③ $DSH_HOME/profiles/node_modules
-④ $DSH_HOME/node_modules
+① $AGENTRANS_HOME/profiles/web/node_modules/my-plugin/node_modules
+② $AGENTRANS_HOME/profiles/web/node_modules
+③ $AGENTRANS_HOME/profiles/node_modules
+④ $AGENTRANS_HOME/node_modules
 ⑤ /node_modules
 ```
 
 ① 是插件私有依赖，② 是 profile 安装的包，③ 是拦截层，runtime resolution 占据其中有条目的包目录，④ 是 Harness home，⑤ 是文件系统根。CommonJS 随后保留 `NODE_PATH` 与全局目录的查询，不在这些额外位置应用 peer 拦截。
 
-#### 2. 拦截层：runtime resolution 占据 `$DSH_HOME/profiles/node_modules/<包名>`
+#### 2. 拦截层：runtime resolution 占据 `$AGENTRANS_HOME/profiles/node_modules/<包名>`
 
-拦截层是 importer 所属 profile 目录（`$DSH_HOME/profiles/<name>`）之上的第一个祖先 `node_modules`。树内所有 profile 的这一层都是 `$DSH_HOME/profiles/node_modules`。
+拦截层是 importer 所属 profile 目录（`$AGENTRANS_HOME/profiles/<name>`）之上的第一个祖先 `node_modules`。树内所有 profile 的这一层都是 `$AGENTRANS_HOME/profiles/node_modules`。
 
 runtime resolution 中的每个包名，在这一层上占据 `<拦截层>/<包名>` 这个包目录的位置。对 `@agentrans/tools` 这样的本体包名，③ 上的包目录就是运行中安装的那一份；磁盘上同名的旧链接或旧目录不再是链上的成员。对 runtime resolution 没有的包名，③ 上的包目录就是磁盘上的物理内容。
 
@@ -64,14 +64,14 @@ runtime resolution 在 profile 启动时一次算出，由四部分组成。
 
 - installation 闭包：从当前运行的 dsh 包的 `package.json` 出发，沿 `dependencies` 与 `peerDependencies` 做广度优先遍历，每条边从声明它的 manifest 按 Node 规则解析，同一个包名由第一次找到的已安装包占有。闭包有数百条，约一半在 `@agentrans/` 作用域，一半是第三方库。这些条目对所有 profile 生效。
 - bundle-only 条目：profile 选中的、不属于闭包的 bundle，从它的 manifest 出发做同样的遍历，闭包已占有的包名不覆盖。这些条目只对选中该 bundle 的 profile 生效，用于让 Loader 从 profile 根按裸名导入 bundle 内嵌的插件。
-- 本地包名：profile 直接依赖中已经安装在 `$DSH_HOME/profiles/<name>/node_modules` 的包名。它们本来就在主线 ② 上，记录下来只为免去一次目录探测。
-- linked root：`$DSH_HOME/profiles/<name>/node_modules` 顶层与 `@scope/*` 里目标同时位于共享 profiles 树和当前 profile 目录之外的目录链接，记录链接名称与真实目录。目录自身的 manifest 可缺省。目标缺失或为文件的链接都排除。位于共享树外的应用自有 profile，不会把内部 pnpm store 链接登记为外部 root。
+- 本地包名：profile 直接依赖中已经安装在 `$AGENTRANS_HOME/profiles/<name>/node_modules` 的包名。它们本来就在主线 ② 上，记录下来只为免去一次目录探测。
+- linked root：`$AGENTRANS_HOME/profiles/<name>/node_modules` 顶层与 `@scope/*` 里目标同时位于共享 profiles 树和当前 profile 目录之外的目录链接，记录链接名称与真实目录。目录自身的 manifest 可缺省。目标缺失或为文件的链接都排除。位于共享树外的应用自有 profile，不会把内部 pnpm store 链接登记为外部 root。
 
 CLI 的安装锚点来自 `import.meta.url`，Node 已对它做过 realpath；Desktop Host 从其运行时目录拼出锚点，该目录不是软链接。两者的安装根目录都等于真实目录，bundle 发现与依赖遍历使用同一个位置。遍历中每一层依赖都以所属包的真实目录作为下一层的查找锚点，并记录声明它的 manifest 位置。命中后 Node 从这个声明位置解析，得到与该包自己内部 import 相同的结果。每个条目记录包名、包目录、版本、声明位置与作用域。已声明但未安装的依赖跳过；bundle 包根自身不成为条目。
 
 #### 5. hook 覆盖范围
 
-hook 只在 importer 位于 `$DSH_HOME/profiles/**` 或某个 linked root 之下时参与。builtin、相对路径、绝对路径、URL 请求，以及 importer 在这两处之外的一切请求，直接交给 Node。`require.resolve(request, { paths })` 同样直接交给 Node，包括路径指向 profile 或链接目录的情况。
+hook 只在 importer 位于 `$AGENTRANS_HOME/profiles/**` 或某个 linked root 之下时参与。builtin、相对路径、绝对路径、URL 请求，以及 importer 在这两处之外的一切请求，直接交给 Node。`require.resolve(request, { paths })` 同样直接交给 Node，包括路径指向 profile 或链接目录的情况。
 
 ESM 与 CommonJS 两个适配器调用同一个路由函数，主线程与 Harness 自有 Worker 都安装同一份 runtime resolution。实现位于 `packages/boot/app-boot/src/profile-resolution/resolver.ts`，runtime resolution 的构造位于 `packages/boot/app-boot/src/profile.ts`。
 
@@ -102,8 +102,8 @@ ESM 与 CommonJS 两个适配器调用同一个路由函数，主线程与 Harne
 
 | profile | 目录 | 拦截层 | 与 web 的差异 |
 |---|---|---|---|
-| web | `$DSH_HOME/profiles/web` | `$DSH_HOME/profiles/node_modules` | 基准 |
-| desktop | `$DSH_HOME/profiles/desktop` | `$DSH_HOME/profiles/node_modules` | 无。同一棵树、同一层；Desktop 的 Host 以 Node 模式运行同一套 resolver |
+| web | `$AGENTRANS_HOME/profiles/web` | `$AGENTRANS_HOME/profiles/node_modules` | 基准 |
+| desktop | `$AGENTRANS_HOME/profiles/desktop` | `$AGENTRANS_HOME/profiles/node_modules` | 无。同一棵树、同一层；Desktop 的 Host 以 Node 模式运行同一套 resolver |
 | 树外 profile | `loadProfileDirectory` 接受的任意目录 | 该目录之上的第一个祖先 `node_modules` | 规则相同；当前没有产品使用树外 profile，只有单元测试覆盖 |
 
 #### 表 3：插件被 link 到树外时的主线
@@ -129,7 +129,7 @@ ESM 与 CommonJS 两个适配器调用同一个路由函数，主线程与 Harne
 
 `dsh plugin --profile <name> add <包名 | git spec | file:../本地检出>` 把参数转发给 pnpm，在 profile 目录内以 hoisted 布局安装。profile 的 `pnpm-workspace.yaml` 设置 `autoInstallPeers: false`，插件声明为 peer 的 dsh 包不会被装进 profile，由拦截层提供当前运行安装的那一份，插件与 dsh 共用同一个模块实例。
 
-插件自己的第三方依赖被 hoist 到 `$DSH_HOME/profiles/<name>/node_modules`，按主线 ② 找到。与 installation 闭包同名时最近者优先，插件使用自己声明的版本。`file:` 形式把本地检出复制进 profile，随后的解析与注册表安装完全相同。
+插件自己的第三方依赖被 hoist 到 `$AGENTRANS_HOME/profiles/<name>/node_modules`，按主线 ② 找到。与 installation 闭包同名时最近者优先，插件使用自己声明的版本。`file:` 形式把本地检出复制进 profile，随后的解析与注册表安装完全相同。
 
 #### 2. 开发模式：插件仓库在 profile 树外
 
@@ -149,7 +149,7 @@ manifest 的写法与 harness 自身的包相同：需要与宿主共享实例�
 
 **在解析时识别 `.dsh-module-fallback` 形状的软链接并绕过。** 这会为不再产生的目录在查找路径里保留专门逻辑，每次解析都要付出判断。在 profile 加载时一次性删除这些投影能得到同样的结果：一个 bundle 被停用但仍装着时，它投影出来的插件不再遮住 runtime resolution 从另一个 bundle 选出的同名插件。
 
-**把拦截层所在的物理目录整层隐藏。** 与"其余解析与 Node 一致"冲突：放在 `$DSH_HOME/profiles/node_modules` 的非本体包会对所有 profile 不可见。
+**把拦截层所在的物理目录整层隐藏。** 与"其余解析与 Node 一致"冲突：放在 `$AGENTRANS_HOME/profiles/node_modules` 的非本体包会对所有 profile 不可见。
 
 **让 runtime resolution 的全部条目占据 `R/node_modules` 上的包目录。** 与 ③ 完全同形，但闭包里的几百个第三方库会遮住插件仓库自己安装的 `zod`、`yaml` 版本，与树内 ①② 赢 ③ 相反。只占据 peer 保住了「插件自己的第三方版本优先」。
 

@@ -25,7 +25,7 @@ const exampleConfig = fileURLToPath(new URL('../../../../snapshots/acp/escalatio
 const transportPatch = fileURLToPath(new URL('./fixtures/acp-transport.patch.yml', import.meta.url))
 const repoTsconfig = fileURLToPath(new URL('../../../../tsconfig.json', import.meta.url))
 
-// How to launch the child ACP profile (src via tsx / lib via plain node, per DSH_EXAMPLE_MODE).
+// How to launch the child ACP profile (src via tsx / lib via plain node, per AGENTRANS_EXAMPLE_MODE).
 // The subprocess seam scrubs ambient creds while spec.env merges after it, so the model key is
 // forwarded explicitly; TSX_TSCONFIG_PATH is added by the resolver in src mode only.
 function resolveChildLaunch(dshHome: string) {
@@ -37,8 +37,8 @@ function resolveChildLaunch(dshHome: string) {
     env: {
       ...process.env.DEEPSEEK_API_KEY !== undefined ? { DEEPSEEK_API_KEY: process.env.DEEPSEEK_API_KEY } : {},
       ...process.env.DEEPSEEK_BASE_URL !== undefined ? { DEEPSEEK_BASE_URL: process.env.DEEPSEEK_BASE_URL } : {},
-      DSH_HOME: dshHome,
-      DSH_PERMISSION_MODE: 'danger-full-access',
+      AGENTRANS_HOME: dshHome,
+      AGENTRANS_PERMISSION_MODE: 'danger-full-access',
     },
   })
 }

@@ -43,7 +43,7 @@ export async function smokeDesktopRuntime(
       HOME: home, USERPROFILE: home,
       XDG_CONFIG_HOME: home, XDG_CACHE_HOME: home, XDG_STATE_HOME: home,
       APPDATA: home, LOCALAPPDATA: home,
-      DSH_DESKTOP_UPDATE_JOURNAL_DIR: context.paths.updateJournalDir,
+      AGENTRANS_DESKTOP_UPDATE_JOURNAL_DIR: context.paths.updateJournalDir,
       npm_config_userconfig: join(home, 'npmrc'), npm_config_globalconfig: join(home, 'npmrc'),
       npm_config_store_dir: join(home, 'store'), npm_config_enable_global_virtual_store: 'false',
     })

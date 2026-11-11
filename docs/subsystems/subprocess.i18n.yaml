@@ -3,14 +3,14 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write docs/subsystems/subprocess.md
 /subprocess:
-  en: c69213d20e09877f
-  zh: d4a53675e93774d3
+  en: 77d36affe15224e6
+  zh: 335879c1803de103
 /subprocess/executable-lookup:
   en: be4ddc71906d893d
   zh: 49823ef13713dea0
 /subprocess/managed-environment-namespace-and-captured-output:
-  en: 379561c465f061a2
-  zh: 69f62888c5070a91
+  en: 50fd8244c8a36e7a
+  zh: 0ec15ef8cfdfa84d
 /subprocess/node-shaped-stdio-dispositions:
   en: f591b05b1c765670
   zh: e39f8bf1a6d02438

@@ -48,7 +48,7 @@ Modules Node 半按以下顺序向实际返回的 HTML 注入启动协议：
 1. 以 queue 模式安装 `window.__ModuleLoader__`，包含 `pendingQueue`、`load()` 与 `create()`。
 2. 开始预加载所有带 revision 的 application combo URL，其中包含 modules 之外的 row。
 3. 执行所有阻塞式 bootstrap combo URL；当前其中包含普通的 modules factory registration。
-4. 赋值 `window.__DSH_BOOT__`，其中包含全部调度描述及每个 row 的单资源 HMR combo URL。
+4. 赋值 `window.__AGENTRANS_BOOT__`，其中包含全部调度描述及每个 row 的单资源 HMR combo URL。
 5. 执行 Vite 主模块。
 
 Bootstrap combo 当前只登记 modules factory。启动内核把原始图与外壳 seed 传给 `__ModuleLoader__.create()`。Facade 移除 modules registration，用拒绝全部 external 的 `require` 函数将其物化，再调用其 `createClientModuleSystem` 导出。Modules bundle 解析图、构造并返回 `ClientModuleSystem`、把自身 exports 缓存为 modules row，并把同一 facade 切换到 live 模式。内核把该实例装成自身 Loader 的 `internal`，modules 插件从这里读取并提供 `ctx.modules`。因此 modules client face 保持零 external 的自举要求，也没有模块级系统身份。

@@ -205,7 +205,7 @@ describe('directory-picker-native client half', () => {
 
   it('uses the desktop bridge without calling the Host and preserves cancellation and errors', async () => {
     const pick = vi.fn<() => Promise<string | null>>().mockResolvedValue('/desktop/workspace')
-    vi.stubGlobal('__DSH_DIRECTORY_PICKER__', { pick })
+    vi.stubGlobal('__AGENTRANS_DIRECTORY_PICKER__', { pick })
     const b = await bench()
     b.declare()
     const fiber = b.ctx.plugin({ inject: [...inject], apply })

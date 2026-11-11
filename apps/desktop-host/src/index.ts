@@ -48,7 +48,7 @@ async function main(): Promise<void> {
         args: ['--expose-internals', process.argv[5]],
         env: {
           ELECTRON_RUN_AS_NODE: '1',
-          DSH_DESKTOP_NODE_EXECUTABLE: process.execPath,
+          AGENTRANS_DESKTOP_NODE_EXECUTABLE: process.execPath,
           PATH: `${process.argv[6] ?? ''}${delimiter}${process.env.PATH ?? ''}`,
         },
       },

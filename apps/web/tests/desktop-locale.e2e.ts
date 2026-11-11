@@ -38,9 +38,9 @@ describe.skipIf(MODE === 'record')('web e2e: native and Client locale preference
       const bridge = globalThis as typeof globalThis & {
         nativeLocaleRead(): Promise<unknown>
         nativeLocaleChanged(locale: string): Promise<void>
-        __DSH_LOCALE__: { read(): Promise<unknown>; onChange(locale: string): void }
+        __AGENTRANS_LOCALE__: { read(): Promise<unknown>; onChange(locale: string): void }
       }
-      bridge.__DSH_LOCALE__ = {
+      bridge.__AGENTRANS_LOCALE__ = {
         read: () => bridge.nativeLocaleRead(),
         onChange: (locale) => { void bridge.nativeLocaleChanged(locale) },
       }

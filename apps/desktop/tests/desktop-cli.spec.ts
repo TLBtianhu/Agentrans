@@ -22,8 +22,8 @@ afterEach(() => {
 
 it.skipIf(process.platform !== 'win32').each(['system-bin', undefined])('dispatches with bundled pnpm when PATH is %s', async (path) => {
   vi.stubEnv('PATH', path)
-  vi.stubEnv('DSH_HOME', 'must-not-use-upstream-home')
-  vi.stubEnv('DSH_AGENTS_HOME', 'must-not-use-upstream-agents')
+  vi.stubEnv('AGENTRANS_HOME', 'must-not-use-upstream-home')
+  vi.stubEnv('AGENTRANS_AGENTS_HOME', 'must-not-use-upstream-agents')
   vi.stubEnv(PRODUCT_LAUNCH_CONTEXT_ENV, undefined)
   const root = realpathSync(mkdtempSync(join(tmpdir(), 'agentrans-cli-instance-')))
   onTestFinished(() => { rmSync(root, { recursive: true, force: true }) })
@@ -35,8 +35,8 @@ it.skipIf(process.platform !== 'win32').each(['system-bin', undefined])('dispatc
 
   await runDesktopCli(runtime, support)
 
-  expect(process.env.DSH_HOME).toBe(join(instance, 'data', 'dsh', 'home'))
-  expect(process.env.DSH_AGENTS_HOME).toBe(join(instance, 'data', 'dsh', 'agents'))
+  expect(process.env.AGENTRANS_HOME).toBe(join(instance, 'data', 'dsh', 'home'))
+  expect(process.env.AGENTRANS_AGENTS_HOME).toBe(join(instance, 'data', 'dsh', 'agents'))
   expect(parseProductLaunchContext(process.env[PRODUCT_LAUNCH_CONTEXT_ENV]!)).toMatchObject({
     purpose: 'user', instanceRoot: instance, codeRoot: join(instance, 'app'), resourcesRoot: resources,
   })
@@ -49,7 +49,7 @@ it.skipIf(process.platform !== 'win32').each(['system-bin', undefined])('dispatc
       args: ['--expose-internals', join(support, 'primary-runtime', 'dependencies', 'pnpm', 'bin', 'pnpm.mjs')],
       env: {
         ELECTRON_RUN_AS_NODE: '1',
-        DSH_DESKTOP_NODE_EXECUTABLE: process.execPath,
+        AGENTRANS_DESKTOP_NODE_EXECUTABLE: process.execPath,
         PATH: `${join(support, 'bin')}${delimiter}${path ?? ''}`,
       },
     },
@@ -70,7 +70,7 @@ it('shares one verification instance with the packaged GUI without writing paylo
     codeRoot: join(instance, 'app'), resourcesRoot: resources,
   })
   const inherited = {
-    DSH_HOME: join(root, 'foreign-home'), DSH_AGENTS_HOME: join(root, 'foreign-agents'),
+    AGENTRANS_HOME: join(root, 'foreign-home'), AGENTRANS_AGENTS_HOME: join(root, 'foreign-agents'),
     [PRODUCT_LAUNCH_CONTEXT_ENV]: serializeProductLaunchContext(context),
   }
   for (const [key, value] of Object.entries(inherited)) vi.stubEnv(key, value)
@@ -80,8 +80,8 @@ it('shares one verification instance with the packaged GUI without writing paylo
   const runtime = join(appPath, 'dsh')
   await runDesktopCli(runtime, join(resources, 'runtime'))
   expect(parseProductLaunchContext(process.env[PRODUCT_LAUNCH_CONTEXT_ENV]!)).toEqual(guiContext)
-  expect(process.env.DSH_HOME).toBe(guiEnvironment.DSH_HOME)
-  expect(process.env.DSH_AGENTS_HOME).toBe(guiEnvironment.DSH_AGENTS_HOME)
+  expect(process.env.AGENTRANS_HOME).toBe(guiEnvironment.AGENTRANS_HOME)
+  expect(process.env.AGENTRANS_AGENTS_HOME).toBe(guiEnvironment.AGENTRANS_AGENTS_HOME)
   expect(app.setPath.mock.calls).toEqual([
     ['userData', context.paths.electronUserDataDir], ['sessionData', context.paths.electronUserDataDir],
     ['logs', context.paths.logsDir], ['crashDumps', context.paths.crashDumpsDir],
@@ -90,8 +90,8 @@ it('shares one verification instance with the packaged GUI without writing paylo
   expect(readdirSync(instance)).toEqual(['app'])
   expect(readdirSync(resources)).toEqual(['app.asar'])
   expect(readdirSync(appPath)).toEqual(['payload.txt'])
-  expect(existsSync(inherited.DSH_HOME)).toBe(false)
-  expect(existsSync(inherited.DSH_AGENTS_HOME)).toBe(false)
+  expect(existsSync(inherited.AGENTRANS_HOME)).toBe(false)
+  expect(existsSync(inherited.AGENTRANS_AGENTS_HOME)).toBe(false)
   expect(installOfficeEngineResolution).toHaveBeenCalledExactlyOnceWith(runtime)
   expect(runCli).toHaveBeenCalledOnce()
 })
@@ -109,12 +109,12 @@ it('rejects a foreign verification payload before changing paths or creating sta
     codeRoot: foreignCode, resourcesRoot: foreignCode,
   })
   const foreignHome = join(root, 'foreign-home')
-  vi.stubEnv('DSH_HOME', foreignHome)
-  vi.stubEnv('DSH_AGENTS_HOME', join(root, 'foreign-agents'))
+  vi.stubEnv('AGENTRANS_HOME', foreignHome)
+  vi.stubEnv('AGENTRANS_AGENTS_HOME', join(root, 'foreign-agents'))
   vi.stubEnv(PRODUCT_LAUNCH_CONTEXT_ENV, serializeProductLaunchContext(context))
   await expect(runDesktopCli(join(resources, 'app.asar', 'dsh'), join(resources, 'runtime')))
     .rejects.toMatchObject({ code: 'INVALID_LAUNCH_REQUEST' })
-  expect(process.env.DSH_HOME).toBe(foreignHome)
+  expect(process.env.AGENTRANS_HOME).toBe(foreignHome)
   expect(parseProductLaunchContext(process.env[PRODUCT_LAUNCH_CONTEXT_ENV]!)).toEqual(context)
   expect(existsSync(context.instanceRoot)).toBe(false)
   expect(existsSync(foreignHome)).toBe(false)

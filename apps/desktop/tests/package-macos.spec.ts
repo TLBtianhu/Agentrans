@@ -14,8 +14,8 @@ import { desktopElectronBuilderArguments, resolveDesktopPackageTarget } from '..
 import { writeMacOSAppUpdateConfig } from '../scripts/macos-app-update-config.mjs'
 
 const environment = {
-  DSH_DESKTOP_MACOS_SIGNING_IDENTITY: 'Example Company (TEAMID1234)',
-  DSH_DESKTOP_MACOS_TEAM_ID: 'TEAMID1234',
+  AGENTRANS_DESKTOP_MACOS_SIGNING_IDENTITY: 'Example Company (TEAMID1234)',
+  AGENTRANS_DESKTOP_MACOS_TEAM_ID: 'TEAMID1234',
   APPLE_KEYCHAIN_PROFILE: 'fixture-profile',
 }
 

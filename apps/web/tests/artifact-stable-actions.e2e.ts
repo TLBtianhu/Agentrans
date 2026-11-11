@@ -34,7 +34,7 @@ describe.skipIf(webSnapshotMode() === 'record')('web e2e: stable Artifact action
       replayProviders: [{ id: 'custom-provider', name: 'Custom Lab',
         models: [{ id: 'user-model', name: 'Custom Lab Model', contextWindow: 8192 }] }],
     })
-    const executablePath = process.env.DSH_PLAYWRIGHT_EXECUTABLE_PATH
+    const executablePath = process.env.AGENTRANS_PLAYWRIGHT_EXECUTABLE_PATH
     browser = await chromium.launch(executablePath === undefined ? {} : { executablePath })
     page = await browser.newPage({ viewport: { width: 1440, height: 960 }, locale: 'en-US' })
     tripwire = watchConsole(page)
@@ -110,7 +110,7 @@ describe.skipIf(webSnapshotMode() === 'record')('web e2e: stable Artifact action
     expect(JSON.parse(await nativeUnknown.locator('pre').textContent() ?? '')).toEqual(requests[0])
     expect(requests[0]?.revision).toBe(1)
     expect(await native.getByRole('button', { name: 'Confirm analysis', exact: true }).isEnabled()).toBe(false)
-    const screenshotDirectory = process.env.DSH_INTERACTION_JOURNEY_SCREENSHOT_DIR
+    const screenshotDirectory = process.env.AGENTRANS_INTERACTION_JOURNEY_SCREENSHOT_DIR
     if (screenshotDirectory !== undefined) {
       await page.setViewportSize({ width: 1440, height: 1800 })
       await native.scrollIntoViewIfNeeded()

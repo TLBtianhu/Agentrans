@@ -34,12 +34,12 @@
 ## 已完成：单通道发布、五个门禁与自签更新链（2026-11-10）
 
 - 发布管线从 COS/EdgeOne/CDN 收敛为只走 GitHub Releases：删掉 generic provider、bucket/凭据/CDN purge/资格脚本与相关测试、npm scripts 与 CI 工作流；electron-updater 只保留 provider: 'github'。
-- 强制更新线整条删除：策略服务、测试登录窗口、desktop/settings.json、DSH_DESKTOP_MANDATORY_UPDATE_* 与 DSH_DESKTOP_AUTO_UPDATE_ENV（79 文件，+112/−4452），并补了升级指南；旧 .env.windows 里残留的键现在会让打包**响亮失败**而不是被静默忽略。
+- 强制更新线整条删除：策略服务、测试登录窗口、desktop/settings.json、AGENTRANS_DESKTOP_MANDATORY_UPDATE_* 与 AGENTRANS_DESKTOP_AUTO_UPDATE_ENV（79 文件，+112/−4452），并补了升级指南；旧 .env.windows 里残留的键现在会让打包**响亮失败**而不是被静默忽略。
 - eat/first-slice 快进合并到 main（41 提交）。仓库第一次真正有默认分支内容；gh run list 的首条运行即由此产生。
 - 新增四个仓库级门禁并注册进
 un-gates（doc-sync 43 → 47）：erify-config-keys（87 行配置与其声明的 schema 键比对）、erify-bundle-overrides（6 处 bundle 覆盖必须重述全部键）、erify-disabled-package-imports（372 个包不得运行时依赖 8 个 shipped-but-off 包）、erify-seam-roles（33 条 seam 的 definition/consumer 不得 import provider）。
 - deepseekAccount seam 重构：线协议工具（platformClientHeaders/mergePlatformCookies/platformWireLocale/desktopClientHeaders）从定义包迁到唯一调用方 pps/desktop/src/platform-client-headers.ts，定义包只剩接口/类型（167 → 112 行，无运行时函数）；决策记录在 .agents/notes/implemented/architecture/2026-11-09-platform-client-identity.md。
-- 更新可信链（方案 B）：发布时为每个产物生成 Ed25519 detached 签名（覆盖 SHA-256 摘要，避免整包进内存），应用在 download() 内用固定公钥验签，失败即 error 且不进入可安装状态；私钥只在仓库 secret DSH_UPDATE_SIGNING_KEY，缺密钥时发布拒绝执行。
+- 更新可信链（方案 B）：发布时为每个产物生成 Ed25519 detached 签名（覆盖 SHA-256 摘要，避免整包进内存），应用在 download() 内用固定公钥验签，失败即 error 且不进入可安装状态；私钥只在仓库 secret AGENTRANS_UPDATE_SIGNING_KEY，缺密钥时发布拒绝执行。
 - 给产品自己的 feed：createAgentransInstallerBuilderConfig 现在内嵌 owner/repo/channel，安装器产出 lpha.yml（而不是 latest.yml）并把 channel: alpha 写进 pp-update.yml；Release tag 由 desktop-v<version> 改为 <version>，因为 electron-updater 会跳过 semver 解析失败的 tag。
 - 新增托管 runner 打包通道 .github/workflows/agentrans-unsigned-package.yml（windows-latest，未签名），用于在没有签名硬件的前提下把打包→发布→更新整条链跑通一次。
 - 验证：	ypecheck 6/6、doc-sync 47/47、pps/desktop/tests 1452 通过、签名相关 64 条。已知既有问题：lint 70 条（27 文件，均为本会话之前存在）；desktop 与 scripts 套件同进程混跑时偶发并行争用失败，单跑通过。
@@ -157,12 +157,12 @@ un-gates（doc-sync 43 → 47）：erify-config-keys（87 行配置与其声明
 ## 已完成只读审计：DeepSeek Harness 上游残留（2026-11-08，整改前快照）
 
 - 全文结论位于 `C:\agent制作\.dev-data\qa\2026-11-07-upstream-residue-audit\AUDIT.txt`，分组 19 项；另有 18 项品牌/资产引用链 JSON 与 OS 公开安装元数据 JSON。核对源码默认装配、发送器/开关、现有资产、纯生成器校验、PE/ASAR 版本及公开系统入口；本轮没有启动应用或安装器、联网请求、读取 dotenv/凭据/会话内容，也没有修改产品源码、图片或系统设置。
-- 首要上游行为残留：base 默认挂载且开启 `session-log-deepseek`，通过 DeepSeek 专用 adapter 向当前 baseURL 附 `dsh_session_log`，含 cwd 与原始事件 data，默认每请求 8 MiB；默认 `dsh_plugin_packages` 另带活跃包/preset 名称和版本。`DSH_TELEMETRY_DISABLED` 只禁用反馈 OTel，General 的日志开关只控制 API 日志贡献，不是统一分享开关。反馈 OTel 默认 FEEDBACK_ONLY，评价/删除评价等才捕获历史前缀并送上游 collector，不能说普通活动默认持续上报。请求 User-Agent/部分关联头仍为上游身份。以上是默认配置及触达条件，不证明本机此前实际发送过数据。
+- 首要上游行为残留：base 默认挂载且开启 `session-log-deepseek`，通过 DeepSeek 专用 adapter 向当前 baseURL 附 `dsh_session_log`，含 cwd 与原始事件 data，默认每请求 8 MiB；默认 `dsh_plugin_packages` 另带活跃包/preset 名称和版本。`AGENTRANS_TELEMETRY_DISABLED` 只禁用反馈 OTel，General 的日志开关只控制 API 日志贡献，不是统一分享开关。反馈 OTel 默认 FEEDBACK_ONLY，评价/删除评价等才捕获历史前缀并送上游 collector，不能说普通活动默认持续上报。请求 User-Agent/部分关联头仍为上游身份。以上是默认配置及触达条件，不证明本机此前实际发送过数据。
 - Desktop analytics row 和上游 collector 配置还在，但默认 consumer 严格依赖缺席的 deepseekAccount、Main 也回退 analyticsEnabled=false，不能宣称已启用发送。账号包、Feishu 联系表单等休眠代码保留，而原生 onboarding 仍显示不可用登录入口。正常 DeepSeek 推理/搜索/凭据门控模型发现是可保留 Provider 能力，与额外日志/反馈出口分开处理。
 - 用户可见残留：NSIS 欢迎/进度/卸载图、首次欢迎 SVG、Windows tray、PWA 全套图标、明暗 favicon、空聊天 Hero 仍为鲸鱼/旧字标；iOS meta 标题仍 DSH。旧 PWA 生成器依赖已不存在的 filter0/filter1 tile group，托盘生成器依赖已不存在的 tray-glyph group，已通过纯校验复现失败。主 PNG、简化 SVG、侧栏及派生图各有不同来源，需要先统一资产所有者和生成规则。默认 system 主题、白色 PWA 背景、部分欢迎 Harness 文案仍未对齐先前需求。
 - 产品模型上下文仍默认挂 `harness-dev-context`，描述 DeepSeek Harness 源码和 GUI；persona 仍为 coding agent。发行链保留上游 production 下载域名/命名、通用样例 appId、mac `.app` 后处理旧路径；专用 unsigned Agentrans wrapper 已覆盖 appId、protocols 和 metadata，不能把占位 test.example.com 或上游 feed 字符串当作当前活跃出口。更新排程缺 feed 时会本地拒绝，仍可能空转。文件名 0.1.0 的旧安装包实际 PE 版本为 0.2.2-alpha.2；CompanyName/Publisher 仍来自上游 author，需明确发行主体，不能靠删 LICENSE 处理。网站标题/编辑链接、贡献指南和部分可选 CI 仍是上游配置。
-- 本机旧入口：User/当前 Process 的 DSH_BASE 指向 npx 内 0.1.5-rc.2，当前源码无消费者；dsh:// 仍指 style-test/app 的 Agentrans；Desktop/Start Menu 两个 Agentrans 快捷方式仍指不存在的根级 exe。源码已修不代表 11/6 的旧负载被替换。独立 DeepSeek Harness 0.2.1-rc.2 负载和有效快捷方式、用户 `.dsh` 数据另列保留；未检出其卸载登记，不能推断完整安装状态，也不能据此删除。上一轮点名两项测试 GUID/链接复核均不存在，不扩称整机无历史残留。
-- 审计建议顺序：先明确 Agentrans 附加数据分享/身份策略，再收敛发行入口/版本/更新源，修品牌资产源与生成器并统一可见入口，然后有归属地修旧环境变量/协议/快捷方式，最后裁剪休眠包与维护工作流。包作用域、SDK/CLI/DSH_* 引擎接口、历史日志/fixtures、版权与字体授权不机械替换。之后再重建完整 Windows 候选做独立安装/GUI/CLI/Host/升级/卸载验收。本节是发现与建议，不表示已做这些整改；本次无生产改动，未重复构建/测试。记忆第 42 节已同步。
+- 本机旧入口：User/当前 Process 的 AGENTRANS_BASE 指向 npx 内 0.1.5-rc.2，当前源码无消费者；dsh:// 仍指 style-test/app 的 Agentrans；Desktop/Start Menu 两个 Agentrans 快捷方式仍指不存在的根级 exe。源码已修不代表 11/6 的旧负载被替换。独立 DeepSeek Harness 0.2.1-rc.2 负载和有效快捷方式、用户 `.dsh` 数据另列保留；未检出其卸载登记，不能推断完整安装状态，也不能据此删除。上一轮点名两项测试 GUID/链接复核均不存在，不扩称整机无历史残留。
+- 审计建议顺序：先明确 Agentrans 附加数据分享/身份策略，再收敛发行入口/版本/更新源，修品牌资产源与生成器并统一可见入口，然后有归属地修旧环境变量/协议/快捷方式，最后裁剪休眠包与维护工作流。包作用域、SDK/CLI/AGENTRANS_* 引擎接口、历史日志/fixtures、版权与字体授权不机械替换。之后再重建完整 Windows 候选做独立安装/GUI/CLI/Host/升级/卸载验收。本节是发现与建议，不表示已做这些整改；本次无生产改动，未重复构建/测试。记忆第 42 节已同步。
 
 ## 已完成切片：卸载归属保护与真实失败反馈
 
@@ -173,7 +173,7 @@ un-gates（doc-sync 43 → 47）：erify-config-keys（87 行配置与其声明
 - NSIS 捕获 native DWORD，失败 exit 2，停止后续注册/shortcut 清理并保留重试入口；通过既有报告 UI 提供部分影响、目标、Win32 错误和恢复说明，静默也保留独立 UTF-8 报告。真实重装复现旧延迟清理脚本删掉下一次安装的 root uninstaller，唯一临时脚本名无法阻止；现整段 cmd/ping/后台删除已移除，改为原生同步精确文件删除与父链 Pin。没有新增后台任务或清理账本。
 - 生产 NSIS 的 appExe 改为实际 app 子目录，快捷方式和完成页启动使用同一入口；卸载归属检查兼容旧同根 root-exe 入口，同时拒绝跨根、不同工作目录与额外参数。metadata 检查不提供跨进程原子事务。原生测试曾故意锁缓存显示“卸载未完成”，测试驱动查错 TaskDialog 控件导致弹窗短时留在用户桌面；已自动清理唯一 fixture 进程，改为原生按钮 ID 自动确认，无需用户操作。
 - 验证已完成：最终完整 build 11/11（43.59 s）；物理路径 20/20，注册/签名安装 17/17（含真实 Windows/COM 独立资源隔离），CLI 10/10（79.81 s，真实签名测试包安装/升级、junction、双根拒绝、文件锁 partial 与解锁重试），NSIS adapter/locale 定向 29/29。定向 type-aware lint、公开 JSDoc 与差异空白检查通过；doc quick 21/21，完整 doc-sync 42/43，仅既有 `project-doc-site.spec.ts:160` 的 Windows 文件 symlink `EPERM`。未修改权限或跳过此断言。
-- 原生验收：最终八语种每种 13 个卸载场景，共 104/104。含普通交互、静默、升级/替换保留数据、DSH_HOME 位于内侧、缓存/app 文件占用、目标/祖先 junction 拒绝、旧安装注册已指向新根、foreign shortcut 与 working directory，以及解除故障后的明确重试。首轮自动按钮未生效的问题用 WM_COMMAND/原生 ID 修正，中文沿用原产物单独 13/13 补过，没有修改产品语言或放宽业务断言。报告最后一行布局调整另以最新英语产物 13/13、真实 UIA 展开文本/截图验证，目视可见 Win32 32、目标、partial effects、Copy/Hide details 和报告位置；关闭后 exit 2，解除锁后恢复卸载成功。
+- 原生验收：最终八语种每种 13 个卸载场景，共 104/104。含普通交互、静默、升级/替换保留数据、AGENTRANS_HOME 位于内侧、缓存/app 文件占用、目标/祖先 junction 拒绝、旧安装注册已指向新根、foreign shortcut 与 working directory，以及解除故障后的明确重试。首轮自动按钮未生效的问题用 WM_COMMAND/原生 ID 修正，中文沿用原产物单独 13/13 补过，没有修改产品语言或放宽业务断言。报告最后一行布局调整另以最新英语产物 13/13、真实 UIA 展开文本/截图验证，目视可见 Win32 32、目标、partial effects、Copy/Hide details 和报告位置；关闭后 exit 2，解除锁后恢复卸载成功。
 - 完成页启动最后用精确 Button 的短验收通过：安装到唯一空根、快捷方式 target 与实际 app 子目录 exe 相同、点击 Finish 产生真实 native payload 的 launch marker，结束 stub 后通过标准 bootstrap 卸载清理。正常安装器 16-case 旧驱动另一次卡在 Browse 原生选择器，root 按精确 fixture executable/PID 121120 结束，仅关闭本轮测试；该整组未完成，不计通过。之后没有再次跑 Browse，只补本轮必要启动步骤；第一次短启动匹配到“Finishing installation…”的进度文本，修为精确按钮后通过，原失败日志保留。所有本轮运行范围无残留测试进程/窗口，旧固定 TEMP 清理脚本也不存在。
 - 本轮无 Session 类型/事件、Client UI 或包依赖修改，不重复无关全 GUI、SDK 与 lockfile；持久类型仍 68 roots/23 records。尚未重建、安装或发布完整 Agentrans 候选，旧 11/6 安装包不作为当前源码证据；104 个 native 场景和启动 marker 验证安装器/卸载器载体，不代表真实 Electron GUI/CLI/Host 的完整产品验收。
 - 记忆第 42 节已同步。证据在 `C:\agent制作\.dev-data\qa\2026-11-07-uninstall-boundaries`；未提交或修改用户真实安装。下一步使用绑定最新完整负载的独立空验收根，走真实安装、GUI/CLI/Host 同根启动、升级、失败恢复与卸载，再处理品牌/主题等收尾。所有历史“下一步”以本文件顶部为准。
@@ -306,7 +306,7 @@ un-gates（doc-sync 43 → 47）：erify-config-keys（87 行配置与其声明
 
 - 本轮修改尚未提交、打包或发布；下面的 0.1.0 Release 信息仍指此前发布物，不能当作已包含这些修复。
 - 新增轻量 `product-layout/launch-context`：显式区分 development、verification、user，由 code/resources/instance 三个根一次派生 DSH、Electron、缓存、日志、崩溃转储、导出和更新日志等路径。源码产品入口、Desktop、打包 CLI、Host 和验收启动使用同一契约。
-- 默认开发状态位于源码树外的 `<源码父目录>/.dev-data/agentrans/dev/<worktree标识>`；只允许 `AGENTRANS_DEV_ROOT` 显式覆盖。启动不再继承上游 `DSH_HOME`、`DSH_AGENTS_HOME` 或旧 Electron userData，普通启动不自动注册 `dsh` 协议。
+- 默认开发状态位于源码树外的 `<源码父目录>/.dev-data/agentrans/dev/<worktree标识>`；只允许 `AGENTRANS_DEV_ROOT` 显式覆盖。启动不再继承上游 `AGENTRANS_HOME`、`AGENTRANS_AGENTS_HOME` 或旧 Electron userData，普通启动不自动注册 `dsh` 协议。
 - 开发与验收实例首次使用必须为空，并写入用途标识；拒绝未标识非空目录、用途不匹配、安装负载、状态与代码重叠、路径中的 symlink/junction 和非目录。验收上下文必须绑定当前负载。已有用户安装不增加迁移流程。
 - Windows 打包 GUI/CLI 共用安装根。macOS 源码开发支持自定义根和 Finder 冷启动；macOS 普通用户包尚无单根布局适配，启动前明确拒绝，不能声称已支持。
 - 独立 Scene HTML 导出转义脚本内 JSON，并使用 DOM 文本节点显示模型标签；恶意标签不会变成脚本或图片。

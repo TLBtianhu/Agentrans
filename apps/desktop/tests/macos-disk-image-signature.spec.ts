@@ -11,9 +11,9 @@ afterEach(() => { vi.resetAllMocks() })
 const signingIdentity = 'Example Company (TEAMID1234)'
 const teamId = 'TEAMID1234'
 const environment = {
-  DSH_DESKTOP_APP_ID: 'com.example.desktop',  DOWNLOAD_PROD_ORIGIN: 'https://updates.example.com',
-  DSH_DESKTOP_MACOS_SIGNING_IDENTITY: signingIdentity, DSH_DESKTOP_MACOS_TEAM_ID: teamId,
-  DSH_DESKTOP_MACOS_SKIP_NOTARIZATION: '1',
+  AGENTRANS_DESKTOP_APP_ID: 'com.example.desktop',  DOWNLOAD_PROD_ORIGIN: 'https://updates.example.com',
+  AGENTRANS_DESKTOP_MACOS_SIGNING_IDENTITY: signingIdentity, AGENTRANS_DESKTOP_MACOS_TEAM_ID: teamId,
+  AGENTRANS_DESKTOP_MACOS_SKIP_NOTARIZATION: '1',
 }
 
 function toolResult(details = `Authority=Developer ID Application: ${signingIdentity}\nTeamIdentifier=${teamId}`) {

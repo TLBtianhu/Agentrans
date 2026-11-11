@@ -95,9 +95,9 @@ Var dshRecoveryStopped
 !macroend
 
 !macro dshStageApplication
-  !ifdef DSH_INSTALLER_LOG_DIR
+  !ifdef AGENTRANS_INSTALLER_LOG_DIR
     ; electron-builder defines the cache name after including our function bodies, before this section expands.
-    StrCpy $dshDirectoryLogDirectory "${DSH_INSTALLER_LOG_DIR}"
+    StrCpy $dshDirectoryLogDirectory "${AGENTRANS_INSTALLER_LOG_DIR}"
   !endif
   StrCpy $dshInstallRoot $INSTDIR
   StrCpy $dshFinalDirectory "$dshInstallRoot\app"
@@ -124,13 +124,13 @@ Var dshRecoveryStopped
     SetErrorLevel 2
     Quit
   ${EndIf}
-  File /oname=$PLUGINSDIR\dsh-7za.exe "${DSH_SEVENZIP_PATH}"
+  File /oname=$PLUGINSDIR\dsh-7za.exe "${AGENTRANS_SEVENZIP_PATH}"
   StrCpy $INSTDIR $dshNewDirectory
   SetOutPath $INSTDIR
   !insertmacro installApplicationFiles
-  !ifdef DSH_SEVENZIP_LICENSE_DIR
-    File /oname=7zip-installer-LICENSE.txt "${DSH_SEVENZIP_LICENSE_DIR}\LICENSE.txt"
-    File /oname=7zip-installer-COPYING.txt "${DSH_SEVENZIP_LICENSE_DIR}\COPYING"
+  !ifdef AGENTRANS_SEVENZIP_LICENSE_DIR
+    File /oname=7zip-installer-LICENSE.txt "${AGENTRANS_SEVENZIP_LICENSE_DIR}\LICENSE.txt"
+    File /oname=7zip-installer-COPYING.txt "${AGENTRANS_SEVENZIP_LICENSE_DIR}\COPYING"
   !endif
   !ifdef UNINSTALLER_ICON
     File /oname=uninstallerIcon.ico "${UNINSTALLER_ICON}"

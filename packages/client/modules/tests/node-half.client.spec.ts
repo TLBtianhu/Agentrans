@@ -26,7 +26,7 @@ vi.mock('node:fs', async (importOriginal) => {
     ...actual,
     readFileSync: ((path: Parameters<typeof actual.readFileSync>[0], ...rest: unknown[]) => {
       if (syncRefused.has(String(path))) {
-        throw Object.assign(new Error(`synchronous read refused for ${String(path)}`), { code: 'ERR_DSH_VFS_DEFERRED' })
+        throw Object.assign(new Error(`synchronous read refused for ${String(path)}`), { code: 'ERR_AGENTRANS_VFS_DEFERRED' })
       }
       return (actual.readFileSync as (...args: unknown[]) => unknown)(path, ...rest)
     }) as typeof actual.readFileSync,
@@ -115,7 +115,7 @@ it.each([false, true])('tracks the Web carrier lifetime when server-first is %s'
 it('publishes this package version and the build commit as the Host release in every composed graph', async () => {
   const { version } = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')) as { version: string }
   const mount = async (commit: string | undefined) => {
-    vi.stubEnv('DSH_CLIENT_COMMIT_HASH', commit)
+    vi.stubEnv('AGENTRANS_CLIENT_COMMIT_HASH', commit)
     const ctx = new Context()
     contexts.push({ ctx })
     ctx.provide('loader', { entries: () => [] })
@@ -125,7 +125,7 @@ it('publishes this package version and the build commit as the Host release in e
   }
   const graph = await mount('abc1234')
   expect(graph.release).toEqual({ version, commit: 'abc1234' })
-  expect(bootInjections(graph).at(-1)).toEqual({ kind: 'global', name: '__DSH_BOOT__', value: graph })
+  expect(bootInjections(graph).at(-1)).toEqual({ kind: 'global', name: '__AGENTRANS_BOOT__', value: graph })
   expect(modulesClient.parseBootManifest(graph).release).toEqual({ version, commit: 'abc1234' })
   expect((await mount(undefined)).release).toEqual({ version })
 })
@@ -261,7 +261,7 @@ describe('HTML bootstrap facade', () => {
       `<link rel="preload" as="script" href="${APPLICATION_URL.replaceAll('&', '&amp;')}">`,
     )
     const bootstrapAt = html.indexOf(`<script src="${BOOTSTRAP_URL.replaceAll('&', '&amp;')}"></script>`)
-    const graphAt = html.indexOf('globalThis["__DSH_BOOT__"] = ')
+    const graphAt = html.indexOf('globalThis["__AGENTRANS_BOOT__"] = ')
     const entryAt = html.indexOf('<script type="module" src="/index.js"></script>')
     expect([facadeAt, applicationAt, bootstrapAt, graphAt, entryAt]).toEqual([...new Set([
       facadeAt, applicationAt, bootstrapAt, graphAt, entryAt,

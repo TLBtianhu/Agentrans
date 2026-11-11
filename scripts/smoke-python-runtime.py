@@ -47,7 +47,7 @@ MCP_PROMPT = "Exercise the packaged MCP client with one external stdio server."
 MCP_TEXT = "MCP client smoke ok"
 PROFILE_PLUGIN_PROMPT = "Verify the Python-installed dsh profile plugin."
 PROFILE_PLUGIN_TEXT = "profile plugin smoke ok"
-PROFILE_PLUGIN_MARKER = "PYTHON_INSTALLED_DSH_PROFILE_PLUGIN"
+PROFILE_PLUGIN_MARKER = "PYTHON_INSTALLED_AGENTRANS_PROFILE_PLUGIN"
 PLUGIN_INSTALL_PROMPT = "Install SDK bundle: "
 AUTHORING_PROMPT = "Query the packaged Python environment for Office authoring."
 IS_WINDOWS = sys.platform == "win32"
@@ -902,7 +902,7 @@ def main() -> None:
             assert args.exe is not None
             with tempfile.TemporaryDirectory(prefix="dsh-sdk-plugin-cache-") as cache:
                 subprocess.run([str(args.exe.resolve())], check=True, capture_output=True, text=True,
-                               env={**os.environ, "DSH_RESOURCE_CACHE": cache, "DSH_RUNTIME_DOWNLOAD": "primary"})
+                               env={**os.environ, "AGENTRANS_RESOURCE_CACHE": cache, "AGENTRANS_RUNTIME_DOWNLOAD": "primary"})
                 smoke_sdk_plugin_manager(model.url, args.exe.resolve(), Path(cache))
         if args.scenario in {"all", "sdk-authoring"}:
             assert args.exe is not None
@@ -958,7 +958,7 @@ def smoke_sdk_authoring(base_url: str, executable: Path, update_snapshots: bool)
 def _smoke_sdk_authoring_cached(base_url: str, executable: Path, update_snapshots: bool, cache: Path) -> None:
     from deepseek_harness import DeepSeekHarness
 
-    cache_environment = {**os.environ, "DSH_RESOURCE_CACHE": str(cache), "DSH_RUNTIME_DOWNLOAD": "primary"}
+    cache_environment = {**os.environ, "AGENTRANS_RESOURCE_CACHE": str(cache), "AGENTRANS_RUNTIME_DOWNLOAD": "primary"}
     primary = Path(json.loads(subprocess.check_output([str(executable)], encoding="utf-8", env=cache_environment)))
     resources = primary.parent
     manifest = json.loads((primary / "runtime.json").read_text())
@@ -986,7 +986,7 @@ def _smoke_sdk_authoring_cached(base_url: str, executable: Path, update_snapshot
                 provider="deepseek-official", model="smoke-model", cwd=str(root),
                 dsh_bin=str(executable), dsh_home=str(home), patches=(str(patch),),
                 api_key="sk-keyless-smoke", base_url=base_url,
-                env={"DSH_PERMISSION_MODE": "danger-full-access", "DSH_TELEMETRY_DISABLED": "1", "DSH_RESOURCE_CACHE": str(cache)},
+                env={"AGENTRANS_PERMISSION_MODE": "danger-full-access", "AGENTRANS_TELEMETRY_DISABLED": "1", "AGENTRANS_RESOURCE_CACHE": str(cache)},
                 request_timeout_seconds=60,
             ) as harness:
                 result = harness.run(AUTHORING_PROMPT, session_id="authoring")
@@ -1056,8 +1056,8 @@ def smoke_sdk_plugin_manager(base_url: str, executable: Path, cache: Path) -> No
             "insert": [{"id": "sdk-managed-fixture", "name": "dsh-sdk-managed-fixture"}],
         }]))
         home = root / "home"
-        environment = {"PATH": "", "DSH_RESOURCE_CACHE": str(cache),
-                       "DSH_PERMISSION_MODE": "workspace-write", "DSH_TELEMETRY_DISABLED": "1"}
+        environment = {"PATH": "", "AGENTRANS_RESOURCE_CACHE": str(cache),
+                       "AGENTRANS_PERMISSION_MODE": "workspace-write", "AGENTRANS_TELEMETRY_DISABLED": "1"}
         config = dict(provider="deepseek-official", model="smoke-model", cwd=str(root),
                       dsh_bin=str(executable), dsh_home=str(home), env=environment,
                       api_key="sk-keyless-smoke", base_url=base_url, request_timeout_seconds=60)
@@ -1109,7 +1109,7 @@ def smoke_sdk_office(executable: Path) -> None:
 
     checks_path = Path(__file__).resolve().parent / "fixtures/office-render.py"
     checks = runpy.run_path(checks_path)
-    artifacts = os.environ.get("DSH_OFFICE_TEST_ARTIFACTS")
+    artifacts = os.environ.get("AGENTRANS_OFFICE_TEST_ARTIFACTS")
     with checks["workspace"](None if artifacts is None else Path(artifacts), prefix="dsh-sdk-office-") as root:
         relocated = root / executable.name
         stem = executable.name.removesuffix(".exe")
@@ -1120,8 +1120,8 @@ def smoke_sdk_office(executable: Path) -> None:
                 shutil.copytree(source, destination)
             else:
                 shutil.copy2(source, destination)
-        cache_environment = {**os.environ, "DSH_RESOURCE_CACHE": str(root / "cache")}
-        office = Path(json.loads(subprocess.check_output([str(relocated)], encoding="utf-8", env={**cache_environment, "DSH_RUNTIME_DOWNLOAD": "office"})))
+        cache_environment = {**os.environ, "AGENTRANS_RESOURCE_CACHE": str(root / "cache")}
+        office = Path(json.loads(subprocess.check_output([str(relocated)], encoding="utf-8", env={**cache_environment, "AGENTRANS_RUNTIME_DOWNLOAD": "office"})))
         assert not (office.parent / "primary").exists(), "Office download unexpectedly prepared the authoring environment"
         adapter = office / "node_modules/@deepseek-ai/libreoffice-kit/package.json"
         native = stem.removeprefix("deepseek-harness-sdk-runtime-").replace("win-", "win32-").replace("macos-", "darwin-")
@@ -1140,7 +1140,7 @@ def smoke_sdk_office(executable: Path) -> None:
         document = documents["docx"]
 
         environment = {key: value for key, value in os.environ.items()
-                       if not key.startswith("DSH_") and not any(part in key.upper() for part in ("KEY", "SECRET", "TOKEN", "PASSWORD"))}
+                       if not key.startswith("AGENTRANS_") and not any(part in key.upper() for part in ("KEY", "SECRET", "TOKEN", "PASSWORD"))}
         environment.update(PATH="")
         node = office / "node/bin" / ("node.exe" if native.startswith("win32-") else "node")
         cli = adapter.parent / "lib/cli.js"
@@ -1169,7 +1169,7 @@ def smoke_sdk_office(executable: Path) -> None:
             patches=(str(patch),),
             api_key="sk-keyless-smoke",
             base_url="http://127.0.0.1:9",
-            env={"DSH_PERMISSION_MODE": "danger-full-access", "DSH_TELEMETRY_DISABLED": "1", "DSH_RESOURCE_CACHE": str(root / "cache")},
+            env={"AGENTRANS_PERMISSION_MODE": "danger-full-access", "AGENTRANS_TELEMETRY_DISABLED": "1", "AGENTRANS_RESOURCE_CACHE": str(root / "cache")},
             # Startup performs three serial Office operations with 120-second engine deadlines.
             initialize_timeout_seconds=480,
             request_timeout_seconds=480,
@@ -1204,7 +1204,7 @@ recalculate(root / 'input.xlsx', root / 'calculated.xlsx')
 with zipfile.ZipFile(root / 'calculated.xlsx') as archive:
     sheet = ElementTree.fromstring(archive.read('xl/worksheets/sheet1.xml'))
     assert sheet.find('.//{*}c[@r="A1"]/{*}v').text == '3'
-""", str(root), expected_backend], env={name: value for name, value in cache_environment.items() if name != "DSH_OFFICE_SIDECAR"}, check=True, timeout=180)
+""", str(root), expected_backend], env={name: value for name, value in cache_environment.items() if name != "AGENTRANS_OFFICE_SIDECAR"}, check=True, timeout=180)
         assert not (office.parent / "primary").exists(), "Python Office API unexpectedly downloaded authoring resources"
         print(f"smoke-python-runtime: relocated Office {result['backend']} DOCX produced {len(pdf)} PDF bytes")
 
@@ -1215,8 +1215,8 @@ def assert_installed_wheel_environment() -> Path:
         raise AssertionError("installed-wheel smoke must run inside a virtual environment")
     if os.environ.get("PYTHONPATH"):
         raise AssertionError("installed-wheel smoke requires PYTHONPATH to be unset")
-    if os.environ.get("DSH_RUNTIME_MODE"):
-        raise AssertionError("installed-wheel smoke requires DSH_RUNTIME_MODE to be unset")
+    if os.environ.get("AGENTRANS_RUNTIME_MODE"):
+        raise AssertionError("installed-wheel smoke requires AGENTRANS_RUNTIME_MODE to be unset")
 
     repo_root = Path(__file__).resolve().parent.parent
     cwd = Path.cwd().resolve()
@@ -1290,8 +1290,8 @@ def smoke_sdk_live() -> None:
             cwd=str(root),
             dsh_home=str(dsh_home),
             env={
-                "DSH_PERMISSION_MODE": "danger-full-access",
-                "DSH_TELEMETRY_DISABLED": "1",
+                "AGENTRANS_PERMISSION_MODE": "danger-full-access",
+                "AGENTRANS_TELEMETRY_DISABLED": "1",
             },
             api_key=api_key,
             base_url=base_url,
@@ -1387,8 +1387,8 @@ def smoke_sdk_default(base_url: str) -> None:
             cwd=str(root),
             dsh_home=str(dsh_home),
             env={
-                "DSH_PERMISSION_MODE": "danger-full-access",
-                "DSH_TELEMETRY_DISABLED": "1",
+                "AGENTRANS_PERMISSION_MODE": "danger-full-access",
+                "AGENTRANS_TELEMETRY_DISABLED": "1",
             },
             api_key="sk-keyless-smoke",
             base_url=base_url,
@@ -1405,8 +1405,8 @@ def smoke_sdk_default(base_url: str) -> None:
         before = (dsh_home / "profiles/sdk/package.json").read_bytes()
         with DeepSeekHarness(
             provider="deepseek-official", model="smoke-model", cwd=str(root), dsh_home=str(dsh_home),
-            env={"DSH_PERMISSION_MODE": "danger-full-access", "DSH_TELEMETRY_DISABLED": "1", "PATH": "",
-                 "DSH_PRIMARY_RUNTIME": "", "DSH_RESOURCE_CACHE": str(root / "empty-resource-cache")},
+            env={"AGENTRANS_PERMISSION_MODE": "danger-full-access", "AGENTRANS_TELEMETRY_DISABLED": "1", "PATH": "",
+                 "AGENTRANS_PRIMARY_RUNTIME": "", "AGENTRANS_RESOURCE_CACHE": str(root / "empty-resource-cache")},
             api_key="sk-keyless-smoke", base_url=base_url, request_timeout_seconds=60,
         ) as harness:
             package_result = harness.run("check missing plugin package manager", session_id="missing-pnpm")
@@ -1435,8 +1435,8 @@ def smoke_sdk_custom(base_url: str, executable: Path) -> None:
                 dsh_home=str(dsh_home),
                 patches=(str(patch),),
                 env={
-                    "DSH_PERMISSION_MODE": "danger-full-access",
-                    "DSH_TELEMETRY_DISABLED": "1",
+                    "AGENTRANS_PERMISSION_MODE": "danger-full-access",
+                    "AGENTRANS_TELEMETRY_DISABLED": "1",
                 },
                 api_key="sk-keyless-smoke",
                 base_url=base_url,
@@ -1539,11 +1539,11 @@ def smoke_sdk_dynamic_tools(base_url: str, executable: Path, update_snapshots: b
             provider="deepseek-official", model="smoke-model", cwd=str(root),
             dsh_bin=str(executable), dsh_home=str(dsh_home), patches=(str(patch),),
             env={
-                "DSH_PERMISSION_MODE": "danger-full-access", "DSH_TELEMETRY_DISABLED": "1",
+                "AGENTRANS_PERMISSION_MODE": "danger-full-access", "AGENTRANS_TELEMETRY_DISABLED": "1",
                 "HOME": str(user_home), "USERPROFILE": str(user_home),
-                "DSH_AGENTS_HOME": str(user_home / ".agents"),
+                "AGENTRANS_AGENTS_HOME": str(user_home / ".agents"),
                 # Pin the tool baseline independently of optional resources in the host cache.
-                "DSH_PRIMARY_RUNTIME": "",
+                "AGENTRANS_PRIMARY_RUNTIME": "",
             },
             api_key="sk-keyless-smoke", base_url=base_url, request_timeout_seconds=60,
         ) as harness:
@@ -1581,8 +1581,8 @@ def smoke_sdk_fs_search(base_url: str, executable: Path) -> None:
             dsh_home=str(dsh_home),
             patches=(str(patch),),
             env={
-                "DSH_PERMISSION_MODE": "danger-full-access",
-                "DSH_TELEMETRY_DISABLED": "1",
+                "AGENTRANS_PERMISSION_MODE": "danger-full-access",
+                "AGENTRANS_TELEMETRY_DISABLED": "1",
             },
             api_key="sk-keyless-smoke",
             base_url=base_url,
@@ -1611,8 +1611,8 @@ def smoke_sdk_spawn_node(base_url: str, executable: Path) -> None:
             dsh_home=str(dsh_home),
             patches=(str(patch),),
             env={
-                "DSH_PERMISSION_MODE": "danger-full-access",
-                "DSH_TELEMETRY_DISABLED": "1",
+                "AGENTRANS_PERMISSION_MODE": "danger-full-access",
+                "AGENTRANS_TELEMETRY_DISABLED": "1",
             },
             api_key="sk-keyless-smoke",
             base_url=base_url,
@@ -1644,8 +1644,8 @@ def smoke_sdk_mcp(base_url: str, executable: Path | None) -> None:
             dsh_home=str(dsh_home),
             patches=(str(patch),),
             env={
-                "DSH_PERMISSION_MODE": "danger-full-access",
-                "DSH_TELEMETRY_DISABLED": "1",
+                "AGENTRANS_PERMISSION_MODE": "danger-full-access",
+                "AGENTRANS_TELEMETRY_DISABLED": "1",
             },
             api_key="sk-keyless-smoke",
             base_url=base_url,
@@ -1700,7 +1700,7 @@ def smoke_sdk_profile_plugin(base_url: str) -> None:
         }], indent=2))
 
         dsh = Path(sysconfig.get_path("scripts")) / ("dsh.exe" if IS_WINDOWS else "dsh")
-        environment = {**os.environ, "DSH_HOME": str(dsh_home)}
+        environment = {**os.environ, "AGENTRANS_HOME": str(dsh_home)}
         installed = subprocess.run(
             [str(dsh), "plugin", "--profile", "sdk", "add", f"file:{plugin}"],
             cwd=root,
@@ -1727,8 +1727,8 @@ def smoke_sdk_profile_plugin(base_url: str) -> None:
             cwd=str(root),
             dsh_home=str(dsh_home),
             env={
-                "DSH_PERMISSION_MODE": "danger-full-access",
-                "DSH_TELEMETRY_DISABLED": "1",
+                "AGENTRANS_PERMISSION_MODE": "danger-full-access",
+                "AGENTRANS_TELEMETRY_DISABLED": "1",
             },
             api_key="sk-keyless-smoke",
             base_url=base_url,
@@ -1796,8 +1796,8 @@ def smoke_sdk_snapshot_mode(
             dsh_home=str(dsh_home),
             patches=(str(patch), str(feedback_patch), str(creation_patch)),
             env={
-                "DSH_PERMISSION_MODE": "danger-full-access",
-                "DSH_TELEMETRY_DISABLED": "1",
+                "AGENTRANS_PERMISSION_MODE": "danger-full-access",
+                "AGENTRANS_TELEMETRY_DISABLED": "1",
             },
             api_key="sk-keyless-smoke",
             base_url=base_url,
@@ -1902,8 +1902,8 @@ def smoke_sdk_restart_snapshot(base_url: str, executable: Path, update_snapshots
                 dsh_home=str(dsh_home),
                 patches=(str(patch),),
                 env={
-                    "DSH_PERMISSION_MODE": "danger-full-access",
-                    "DSH_TELEMETRY_DISABLED": "1",
+                    "AGENTRANS_PERMISSION_MODE": "danger-full-access",
+                    "AGENTRANS_TELEMETRY_DISABLED": "1",
                 },
                 api_key="sk-keyless-smoke",
                 base_url=base_url,
@@ -2034,7 +2034,7 @@ def smoke_sdk_scheduler_recovery(base_url: str, executable: Path, update_snapsho
                 provider="deepseek-official", model="smoke-model", cwd=str(root),
                 dsh_bin=str(executable), dsh_home=str(dsh_home),
                 patches=(str(base_patch), str(patch)),
-                env={"DSH_PERMISSION_MODE": "danger-full-access", "DSH_TELEMETRY_DISABLED": "1"},
+                env={"AGENTRANS_PERMISSION_MODE": "danger-full-access", "AGENTRANS_TELEMETRY_DISABLED": "1"},
                 api_key="sk-keyless-smoke", base_url=base_url, request_timeout_seconds=60,
             )
 
@@ -2105,9 +2105,9 @@ def smoke_direct(base_url: str, executable: Path) -> None:
         patch = write_profile_patch(root, "direct.patch.yml", sessions, [])
         environment = {
             **os.environ,
-            "DSH_HOME": str(dsh_home),
-            "DSH_PERMISSION_MODE": "danger-full-access",
-            "DSH_TELEMETRY_DISABLED": "1",
+            "AGENTRANS_HOME": str(dsh_home),
+            "AGENTRANS_PERMISSION_MODE": "danger-full-access",
+            "AGENTRANS_TELEMETRY_DISABLED": "1",
             "DEEPSEEK_API_KEY": "sk-keyless-smoke",
             "DEEPSEEK_BASE_URL": base_url,
         }
@@ -2145,13 +2145,13 @@ def smoke_packaged_runner(executable: Path) -> None:
         target_script = (
             "import os,sys; "
             "ok = (os.getcwd() == os.environ['PACKAGED_RUNNER_EXPECTED_CWD'] "
-            "and os.environ.get('DSH_SUBPROCESS_RUNNER') == 'target-collision-restored'); "
+            "and os.environ.get('AGENTRANS_SUBPROCESS_RUNNER') == 'target-collision-restored'); "
             "sys.exit(7 if ok else 9)"
         )
         if not IS_WINDOWS:
             request_path = root / "launch-request.json"
             target_env = dict(os.environ)
-            target_env["DSH_SUBPROCESS_RUNNER"] = "target-collision-restored"
+            target_env["AGENTRANS_SUBPROCESS_RUNNER"] = "target-collision-restored"
             target_env["PACKAGED_RUNNER_EXPECTED_CWD"] = str(root)
             request_path.write_text(
                 json.dumps({"cwd": str(root), "env": target_env}),
@@ -2159,7 +2159,7 @@ def smoke_packaged_runner(executable: Path) -> None:
             )
             request_path.chmod(0o600)
             environment = dict(os.environ)
-            environment["DSH_SUBPROCESS_RUNNER"] = str(request_path)
+            environment["AGENTRANS_SUBPROCESS_RUNNER"] = str(request_path)
             result = subprocess.run(
                 [str(executable), "--", sys.executable, "-c", target_script],
                 cwd=root,
@@ -2185,7 +2185,7 @@ def smoke_packaged_runner(executable: Path) -> None:
 const [runtime, target, cwd, targetScript] = process.argv.slice(2)
 const child = spawn(runtime, ['--', target, '-c', targetScript], {
   cwd,
-  env: { ...process.env, DSH_SUBPROCESS_RUNNER: 'windows' },
+  env: { ...process.env, AGENTRANS_SUBPROCESS_RUNNER: 'windows' },
   stdio: ['ignore', 'ignore', 'ignore', 'ipc', 'pipe', 'pipe', 'pipe'],
 })
 const messages = []
@@ -2203,7 +2203,7 @@ const result = await new Promise((resolve, reject) => {
       cwd,
       env: {
         ...process.env,
-        DSH_SUBPROCESS_RUNNER: 'target-collision-restored',
+        AGENTRANS_SUBPROCESS_RUNNER: 'target-collision-restored',
         PACKAGED_RUNNER_EXPECTED_CWD: cwd,
       },
     }, error => { if (error) reject(error) })

@@ -3,7 +3,7 @@
 import { appendFileSync } from 'node:fs'
 import { Socket } from 'node:net'
 
-const auditFile = process.env.DSH_SNAPSHOT_NETWORK_AUDIT_FILE
+const auditFile = process.env.AGENTRANS_SNAPSHOT_NETWORK_AUDIT_FILE
 const loopbackHosts = new Set(['localhost', '127.0.0.1', '::1', '[::1]'])
 
 function audit(event) {

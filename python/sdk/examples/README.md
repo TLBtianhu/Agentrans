@@ -17,7 +17,7 @@ python python/sdk/examples/minimal.py \
   "Inspect the repository and fix the failing tests."
 ```
 
-Set `DEEPSEEK_BASE_URL` for a compatible proxy, `DSH_MODEL` for the script's default model, or `DSH_SYSTEM_PROMPT` for the deployment persona. `--model` is the single runtime model selection; no matching environment variable is required. `--profile` can select another SDK-serving profile. The selected home stores the generated `sdk-minimal` profile and uncompressed JSONL session logs under `sessions/`; the script never reads `~/.dsh` implicitly.
+Set `DEEPSEEK_BASE_URL` for a compatible proxy, `AGENTRANS_MODEL` for the script's default model, or `AGENTRANS_SYSTEM_PROMPT` for the deployment persona. `--model` is the single runtime model selection; no matching environment variable is required. `--profile` can select another SDK-serving profile. The selected home stores the generated `sdk-minimal` profile and uncompressed JSONL session logs under `sessions/`; the script never reads `~/.dsh` implicitly.
 
 The shipped [`@agentrans/sdk-minimal` bundle](../../../packages/bundle/sdk-minimal/README.md) is the complete explicit Cordis tree for this mode. It exposes exactly:
 
@@ -32,7 +32,7 @@ The persistent PTY can modify any path available to the runtime process, so use 
 <a id="compact-a-full-sdk-session"></a>
 ## Compact a full SDK Session
 
-The [compaction example](compact.py) uses the full `sdk` profile. It reads `README.md` from the selected workspace into a `Session.run()` prompt, executes `/compact` through the same method, then asks a follow-up using the retained context. It uses the same model credentials and `DSH_MODEL` default as the minimal example, and requires an explicit home:
+The [compaction example](compact.py) uses the full `sdk` profile. It reads `README.md` from the selected workspace into a `Session.run()` prompt, executes `/compact` through the same method, then asks a follow-up using the retained context. It uses the same model credentials and `AGENTRANS_MODEL` default as the minimal example, and requires an explicit home:
 
 ```sh
 python python/sdk/examples/compact.py \
@@ -104,7 +104,7 @@ The current process keeps its original plugins. After a `restart-required` resul
 Use the runtime wheel's `dsh` command against the same explicit home for persistent profile changes:
 
 ```sh
-export DSH_HOME=/absolute/path/to/example-dsh-home
+export AGENTRANS_HOME=/absolute/path/to/example-dsh-home
 dsh plugin --profile sdk-minimal add file:/absolute/path/to/my-plugin-bundle
 ```
 

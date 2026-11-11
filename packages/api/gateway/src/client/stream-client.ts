@@ -503,8 +503,8 @@ function remoteStreamUrl(): string {
   // The mux route is registered absolute; a page resolves its document-relative
   // form against its own document base. A shell-owned Host on another origin
   // supplies that base through the transport.
-  const globals = globalThis as { __DSH_TRANSPORT__?: { streamBaseUrl?: string } }
-  const url = new URL(REMOTE_STREAM_MUX_PATH.slice(1), globals.__DSH_TRANSPORT__?.streamBaseUrl ?? document.baseURI)
+  const globals = globalThis as { __AGENTRANS_TRANSPORT__?: { streamBaseUrl?: string } }
+  const url = new URL(REMOTE_STREAM_MUX_PATH.slice(1), globals.__AGENTRANS_TRANSPORT__?.streamBaseUrl ?? document.baseURI)
   url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:'
   return url.href
 }

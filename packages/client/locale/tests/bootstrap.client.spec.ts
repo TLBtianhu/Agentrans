@@ -12,7 +12,7 @@ describe('native locale initialization', () => {
   it('reports a failed native read instead of silently choosing a language', async () => {
     const ctx = new Context()
     const error = new Error('native settings unavailable')
-    vi.stubGlobal('__DSH_LOCALE__', { read: () => Promise.reject(error), onChange: vi.fn() })
+    vi.stubGlobal('__AGENTRANS_LOCALE__', { read: () => Promise.reject(error), onChange: vi.fn() })
     try {
       await expect(apply(ctx)).rejects.toBe(error)
       expect(ctx.get('locale')).toBeUndefined()

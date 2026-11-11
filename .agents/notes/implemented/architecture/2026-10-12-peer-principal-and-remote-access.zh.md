@@ -443,7 +443,7 @@ interface RemoteAccessGrant {
 }
 
 /** Window global carrying a page's opening baseline. */
-export const REMOTE_ACCESS_SNAPSHOT_KEY = '__DSH_REMOTE_ACCESS__'
+export const REMOTE_ACCESS_SNAPSHOT_KEY = '__AGENTRANS_REMOTE_ACCESS__'
 ```
 
 | 行为 | 说明 |

@@ -34,10 +34,10 @@ it.each(['sdk', 'sdk-minimal'])('the public SDK rejects an explicitly disabled p
     provider: 'deepseek-official', model: 'deepseek-flash', initializeTimeoutMs: 30_000,
     env: {
       ...environment, HOME: home, USERPROFILE: home, LOCALAPPDATA: local, APPDATA: roaming,
-      DSH_AGENTS_HOME: join(root, 'agents'),
+      AGENTRANS_AGENTS_HOME: join(root, 'agents'),
       DEEPSEEK_API_KEY: 'keyless-provider-admission-test', DEEPSEEK_BASE_URL: 'https://api.deepseek.com/anthropic',
       NODE_OPTIONS: `--disable-warning=ExperimentalWarning --import=${JSON.stringify(networkGuard.href)}`,
-      DSH_SNAPSHOT_NETWORK_AUDIT_FILE: auditFile,
+      AGENTRANS_SNAPSHOT_NETWORK_AUDIT_FILE: auditFile,
     },
   })
 

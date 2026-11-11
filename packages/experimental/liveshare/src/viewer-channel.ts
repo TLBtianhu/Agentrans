@@ -13,7 +13,7 @@
  * `@agentrans/experimental-liveshare-protocol`; it is restated here because a client bundle may
  * not import that package's values.
  */
-export const LIVESHARE_VIEWER_GLOBAL = '__DSH_LIVESHARE_VIEWER__'
+export const LIVESHARE_VIEWER_GLOBAL = '__AGENTRANS_LIVESHARE_VIEWER__'
 
 /** One unary Host RPC the viewer asks the owner to perform. */
 export interface ViewerCallRequest {

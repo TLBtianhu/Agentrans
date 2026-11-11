@@ -111,7 +111,7 @@ runtime resolution 列出它提供的包；Loader entries 组成活动插件列�
 
 ### 文件系统与运行时载体
 
-解析器不创建、更新或删除 fallback 软链接与代理包。runtime resolution 条目占据 `$DSH_HOME/profiles/node_modules` 上各自的包名位置；其余包名把该目录当作普通祖先。构造时记录目标同时位于共享 profiles 树和当前 profile 自身之外的目录链接，包括没有自身 manifest 的目标。installation 作用域包目录不参与 linked 拦截，即使更宽的 linked root 包含它们。符合条件的 linked importer 保留原生祖先顺序与逐位置的 peer 映射。优先级和范围见[查找顺序 Note](2026-09-19-profile-resolution-lookup-order.zh.md)。可写 profile 状态和包管理器事务不属于解析器。
+解析器不创建、更新或删除 fallback 软链接与代理包。runtime resolution 条目占据 `$AGENTRANS_HOME/profiles/node_modules` 上各自的包名位置；其余包名把该目录当作普通祖先。构造时记录目标同时位于共享 profiles 树和当前 profile 自身之外的目录链接，包括没有自身 manifest 的目标。installation 作用域包目录不参与 linked 拦截，即使更宽的 linked root 包含它们。符合条件的 linked importer 保留原生祖先顺序与逐位置的 peer 映射。优先级和范围见[查找顺序 Note](2026-09-19-profile-resolution-lookup-order.zh.md)。可写 profile 状态和包管理器事务不属于解析器。
 
 运行时解析要求受支持的 Node Internal loader 接口。Electron Host 通过设置 `ELECTRON_RUN_AS_NODE=1` 的 Electron 可执行文件运行；打包构建从 ASAR 读取 dsh 依赖树，并把 ASAR 中的可执行条目映射到 electron-builder 的 unpacked 目录。pkg 与 Electron 使用和普通 Node 启动相同的 runtime resolution 机制。
 

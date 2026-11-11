@@ -33,9 +33,9 @@ server.listen(0, '127.0.0.1')
 await once(server, 'listening')
 const address = server.address()
 if (address === null || typeof address === 'string') throw new Error('collector has no port')
-process.env.DSH_TELEMETRY_E2E_URL = `http://127.0.0.1:${address.port}/v1/logs`
-process.env.DSH_TELEMETRY_OTLP_URL = process.env.DSH_TELEMETRY_E2E_URL
-process.env.DSH_TELEMETRY_MODE = process.env.DSH_TELEMETRY_E2E_MODE ?? 'FEEDBACK_ONLY'
+process.env.AGENTRANS_TELEMETRY_E2E_URL = `http://127.0.0.1:${address.port}/v1/logs`
+process.env.AGENTRANS_TELEMETRY_OTLP_URL = process.env.AGENTRANS_TELEMETRY_E2E_URL
+process.env.AGENTRANS_TELEMETRY_MODE = process.env.AGENTRANS_TELEMETRY_E2E_MODE ?? 'FEEDBACK_ONLY'
 
 try {
   const ctx = await bootProductionProfile({
@@ -47,7 +47,7 @@ try {
     await runFixtureTurn(ctx, { task: 'prove telemetry with key sk-e2efixture1234567890' })
     const [agent] = ctx.get('agents')?.roots() ?? []
     if (agent === undefined) throw new Error('session-telemetry-otel driver requires one root agent')
-    if (process.env.DSH_TELEMETRY_E2E_FEEDBACK !== 'none') {
+    if (process.env.AGENTRANS_TELEMETRY_E2E_FEEDBACK !== 'none') {
       recordFeedback(agent.session, { text: 'fixture feedback' })
     }
     await runFixtureTurn(ctx, { task: 'post-feedback private suffix' })

@@ -41,7 +41,7 @@ x-client-bundled-dsh-version: 0.1.3-rc.2
 | Header | 含义与取值 |
 |---|---|
 | `x-client-platform` | `desktop-win` 或 `desktop-mac` |
-| `x-client-version` | 共享的客户端构建版本，在打包时内联为 `DSH_CLIENT_VERSION`；完整 SemVer，保留预发布标识，一期等于内置 dsh 版本 |
+| `x-client-version` | 共享的客户端构建版本，在打包时内联为 `AGENTRANS_CLIENT_VERSION`；完整 SemVer，保留预发布标识，一期等于内置 dsh 版本 |
 | `x-client-bundle-id` | Platform 用该字段标识 Chat 应用；该字段对 Harness 不适用，因此 Desktop 发送空值 |
 | `x-client-locale` | `zh_CN` 或 `en_US`，取自当前 UI 语言的主语言子标签；选择本地化内容，不代表区域 |
 | `x-client-timezone-offset` | 与 UTC 的整秒偏移，东为正，每次请求时从壳采样 |

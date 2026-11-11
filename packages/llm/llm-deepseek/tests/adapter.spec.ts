@@ -45,7 +45,7 @@ async function endpoint(...args: Parameters<typeof server>) {
 async function context() {
   const home = await mkdtemp(join(tmpdir(), 'dsh-messages-test-'))
   cleanup.push(() => rm(home, { recursive: true, force: true }))
-  vi.stubEnv('DSH_HOME', home)
+  vi.stubEnv('AGENTRANS_HOME', home)
   const ctx = new Context()
   cleanup.push(() => ctx.fiber.dispose())
   return { ctx, home }

@@ -57,7 +57,7 @@ function assertSharedPersistentStore(run: string | undefined): void {
 }
 
 const trustedPr = {
-  'vars.DSH_CI_FAILOVER_LINUX': 'selfhosted',
+  'vars.AGENTRANS_CI_FAILOVER_LINUX': 'selfhosted',
   'github.repository': repository,
   'github.actor': 'maintainer',
   'github.event_name': 'pull_request',
@@ -67,16 +67,16 @@ const trustedPr = {
   'github.event.pull_request.user.login': 'contributor',
 }
 const trustedPush = {
-  'vars.DSH_CI_FAILOVER_LINUX': 'selfhosted',
+  'vars.AGENTRANS_CI_FAILOVER_LINUX': 'selfhosted',
   'github.repository': repository,
   'github.actor': 'maintainer',
   'github.event_name': 'push',
   'github.ref': 'refs/heads/master',
 }
 const fallbackCases: Array<[string, Record<string, string | boolean>]> = [
-  ['unset switch', { ...trustedPr, 'vars.DSH_CI_FAILOVER_LINUX': '' }],
-  ['hosted switch', { ...trustedPr, 'vars.DSH_CI_FAILOVER_LINUX': 'hosted' }],
-  ['unknown switch', { ...trustedPr, 'vars.DSH_CI_FAILOVER_LINUX': 'true' }],
+  ['unset switch', { ...trustedPr, 'vars.AGENTRANS_CI_FAILOVER_LINUX': '' }],
+  ['hosted switch', { ...trustedPr, 'vars.AGENTRANS_CI_FAILOVER_LINUX': 'hosted' }],
+  ['unknown switch', { ...trustedPr, 'vars.AGENTRANS_CI_FAILOVER_LINUX': 'true' }],
   ['fork PR', { ...trustedPr, 'github.event.pull_request.head.repo.full_name': 'outsider/fork', 'github.event.pull_request.head.repo.fork': true }],
   ['different head repository', { ...trustedPr, 'github.event.pull_request.head.repo.full_name': 'outsider/repo' }],
   ['fork flag', { ...trustedPr, 'github.event.pull_request.head.repo.fork': true }],
@@ -108,7 +108,7 @@ for (const [file, jobIds] of [['release.yml', ['dependencies', 'pack']], ['relea
         it('routes trusted PRs and master pushes onto the existing Linux pool', () => {
           expect(evaluate(job['runs-on'], trustedPr)).toEqual(selfhosted)
           expect(evaluate(job['runs-on'], trustedPush)).toEqual(selfhosted)
-          expect(evaluate(job['runs-on'], { ...trustedPush, 'vars.DSH_CI_FAILOVER_LINUX': '' })).toBe(hosted)
+          expect(evaluate(job['runs-on'], { ...trustedPush, 'vars.AGENTRANS_CI_FAILOVER_LINUX': '' })).toBe(hosted)
         })
         it.each(fallbackCases)('keeps %s hosted', (_name, context) => {
           expect(evaluate(job['runs-on'], context)).toBe(hosted)

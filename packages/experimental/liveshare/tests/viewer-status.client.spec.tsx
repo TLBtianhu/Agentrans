@@ -81,7 +81,7 @@ afterEach(() => {
   cleanup()
   vi.unstubAllGlobals()
   document.getElementById(STATUS_ID)?.remove()
-  delete (globalThis as { __DSH_LIVESHARE_VIEWER__?: unknown }).__DSH_LIVESHARE_VIEWER__
+  delete (globalThis as { __AGENTRANS_LIVESHARE_VIEWER__?: unknown }).__AGENTRANS_LIVESHARE_VIEWER__
   viewerStatusFacts.set({})
   viewerStatus.set('connecting')
 })
@@ -170,7 +170,7 @@ describe('viewer status', () => {
       }
       return Promise.resolve(new Response('', { status: 404 }))
     }))
-    ;(globalThis as { __DSH_LIVESHARE_VIEWER__?: unknown }).__DSH_LIVESHARE_VIEWER__ = {
+    ;(globalThis as { __AGENTRANS_LIVESHARE_VIEWER__?: unknown }).__AGENTRANS_LIVESHARE_VIEWER__ = {
       shareId: 'share-1',
       sessionId: 'fx-shared',
       basePath: '',
@@ -229,7 +229,7 @@ describe('viewer status', () => {
       // A reader the Relay does not admit cannot read the share's own answer at all.
       return Promise.resolve(new Response('', { status: 403 }))
     }))
-    ;(globalThis as { __DSH_LIVESHARE_VIEWER__?: unknown }).__DSH_LIVESHARE_VIEWER__ = {
+    ;(globalThis as { __AGENTRANS_LIVESHARE_VIEWER__?: unknown }).__AGENTRANS_LIVESHARE_VIEWER__ = {
       shareId: 'share-1',
       sessionId: '',
       basePath: '',

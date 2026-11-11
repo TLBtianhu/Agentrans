@@ -3,14 +3,14 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/attachment/attachment-local/README.md
 /:
-  en: 5d8d225549347391
-  zh: 0fc0e5ee73acf917
+  en: 1dfdb3708194b6a4
+  zh: d334033ae5770c6a
 /agentrans-attachment-local:
   en: cef0c6afa97f9c63
   zh: 5437559159c36a53
 /agentrans-attachment-local/summary:
-  en: 2350024cee2e9954
-  zh: 73a4900b1e40013b
+  en: 436a08e4d0a51232
+  zh: 04a8e8d342251253
 /agentrans-attachment-local/table-of-contents:
   en: d152484eb41ac6b4
   zh: 09388d293f9be9cb
@@ -18,11 +18,11 @@
   en: 912a19be4b59ff8a
   zh: 9c14694cf2ebbaf2
 /agentrans-attachment-local/use-this-package/minimal-configuration:
-  en: 237d87e48bcbd002
-  zh: bd4bcb4549a0e5f1
+  en: 04b578a1f8960250
+  zh: 2e2cce9e7685aca1
 /agentrans-attachment-local/use-this-package/where-your-images-are-stored-and-how-long-they-last:
-  en: 4ee90b8f74baa38c
-  zh: 9c577709ec55eb82
+  en: 129ba78164805a87
+  zh: 2dc8d051adb5d489
 /agentrans-attachment-local/use-this-package/what-happens-when-you-attach-an-image:
   en: 75ba799b1e4edba4
   zh: 06c5f76200e8da8a
@@ -36,14 +36,14 @@
   en: dcd9857653645420
   zh: a27259a09f17465d
 /agentrans-attachment-local/understand-the-implementation/write-and-read-paths:
-  en: 4cbbe8a1466ed46f
-  zh: 49d2d118501867d3
+  en: b928bb4875c3a694
+  zh: 2ec02d3ac72ab321
 /agentrans-attachment-local/understand-the-implementation/source-map:
   en: 05af85aa85934d01
   zh: 1c89e80d496dc0a3
 /agentrans-attachment-local/further-exploration:
-  en: c6133b18af939d75
-  zh: 932964b94f8ff0fe
+  en: 1a52fa62116c1aea
+  zh: 71fd4a07e6a598a7
 /agentrans-attachment-local/model-experience:
   en: 2e18b3dfbc5af126
   zh: aaee1745632c561a
@@ -57,5 +57,5 @@
   en: d56846da29ad869c
   zh: 41e655e01351fd1d
 /agentrans-attachment-local/known-limitations-and-deferred-work/dev-note/future-retention-and-remote-storage:
-  en: d4bbda6aadc3c879
-  zh: 97a22323e77affb3
+  en: c6e05798731aa9a1
+  zh: a4aae7d055614c7b

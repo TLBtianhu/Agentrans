@@ -26,7 +26,7 @@ export interface Manifest {
 /** Depth limit of the fallback scan, counted in directories below the repository root. */
 const SCAN_DEPTH = 3
 const SKIPPED_DIRECTORIES = new Set(['node_modules', 'test', 'tests', 'fixtures', 'examples', 'example'])
-const DSH_PEER = /^@agentrans\/cli(?:-|$)/u
+const AGENTRANS_PEER = /^@agentrans\/cli(?:-|$)/u
 /** Ranges that installation reads as the running DSH version. */
 const CURRENT_DSH = new Set(['workspace:*', 'workspace:^', 'workspace:~'])
 
@@ -94,7 +94,7 @@ export function dshRange(manifest: Manifest): string | undefined | Error {
   const declared = isObject(manifest.engines) ? manifest.engines.dsh : undefined
   const ranges = typeof declared === 'string' ? [declared]
     : Object.entries(isObject(manifest.peerDependencies) ? manifest.peerDependencies : {})
-      .flatMap(([name, range]) => DSH_PEER.test(name) && typeof range === 'string' && !CURRENT_DSH.has(range) ? [range] : [])
+      .flatMap(([name, range]) => AGENTRANS_PEER.test(name) && typeof range === 'string' && !CURRENT_DSH.has(range) ? [range] : [])
   const used = [...new Set(ranges.map(range => range.trim()))].filter(range => range !== '*')
   if (used.length === 0) return undefined
   let combinations: string[][] = [[]]

@@ -21,11 +21,11 @@
   en: 608b24ca97ab5bca
   zh: 94bb28377c856b2e
 /agent-note-boot-the-preview-worker-from-the-shipped-profile-and-fetch-lazy-chunks-on-demand/decision/separate-archives-for-lazily-loaded-chunks:
-  en: 428699f74f19e998
-  zh: 2e8fcdbc9616f70b
+  en: 53a6ab6ece854770
+  zh: dfc936a8a4ef3fcb
 /agent-note-boot-the-preview-worker-from-the-shipped-profile-and-fetch-lazy-chunks-on-demand/decision/watching-and-client-plugin-delivery:
-  en: ba0d1ebe18af7b66
-  zh: aca2bc588beaed46
+  en: cda41596f6a5b826
+  zh: ad34e3ae0d0ff44d
 /agent-note-boot-the-preview-worker-from-the-shipped-profile-and-fetch-lazy-chunks-on-demand/alternatives-considered:
   en: 99ee505e82fa9c7c
   zh: 448bc0e160424cbf
@@ -33,5 +33,5 @@
   en: 38500ceea0e7ae3f
   zh: d9fa2c67442674c9
 /agent-note-boot-the-preview-worker-from-the-shipped-profile-and-fetch-lazy-chunks-on-demand/testing:
-  en: 532918df1acd147d
-  zh: e476c090d183d0a4
+  en: a45717798dfd48f5
+  zh: b6a0277854747b65

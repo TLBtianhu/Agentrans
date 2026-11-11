@@ -191,14 +191,14 @@ export function libraryBuildSteps(root: string, faces: 'host' | 'all', mode: Com
     typertStep(),
     ...scenes,
     compilerStep(root, 'host', mode, ['host-typert', ...scenes.map(step => step.id)]),
-    pnpmStep('host-bundle', 'Host bundle', ['exec', 'tsdown', '--config-loader', 'native', '--env.DSH_BUILD_FACE', 'host'], ['host-src']),
+    pnpmStep('host-bundle', 'Host bundle', ['exec', 'tsdown', '--config-loader', 'native', '--env.AGENTRANS_BUILD_FACE', 'host'], ['host-src']),
   ]
   if (faces === 'host') return host
   return [
     ...host,
     pnpmStep('desktop-bundle', 'Desktop bundle', ['--filter', '@agentrans/desktop', 'run', 'bundle'], ['host-bundle']),
     compilerStep(root, 'client', mode, ['desktop-bundle']),
-    pnpmStep('client-bundle', 'Client bundle', ['exec', 'tsdown', '--config-loader', 'native', '--env.DSH_BUILD_FACE', 'client'], ['client-src']),
+    pnpmStep('client-bundle', 'Client bundle', ['exec', 'tsdown', '--config-loader', 'native', '--env.AGENTRANS_BUILD_FACE', 'client'], ['client-src']),
   ]
 }
 

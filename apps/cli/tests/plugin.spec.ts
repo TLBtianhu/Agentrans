@@ -17,7 +17,7 @@ vi.mock('@agentrans/plugin-manager/operations', async importOriginal => ({
 
 function fixture() {
   const home = mkdtempSync(join(tmpdir(), 'cli-version-exemptions-'))
-  vi.stubEnv('DSH_HOME', home)
+  vi.stubEnv('AGENTRANS_HOME', home)
   const stdout = vi.spyOn(process.stdout, 'write').mockImplementation(() => true)
   const stderr = vi.spyOn(process.stderr, 'write').mockImplementation(() => true)
   onTestFinished(() => {

@@ -35,7 +35,8 @@ Arguments:
 
 Options:
   -V, --version                  output the version number
-  --profile <name>               the profile under $DSH_HOME/profiles to boot
+  --profile <name>               the profile under $AGENTRANS_HOME/profiles to
+                                 boot
   --from-default-profile <name>  replace a custom profile with a fresh copy of a
                                  shipped profile template
   --patch <path>                 extra patch-list overlay applied after the
@@ -188,8 +189,8 @@ Options:
   --port <port>                  listen port; pass 0 to let the OS pick a free
                                  one
   --public-url <url>             advertise this HTTP(S) root in the printed,
-                                 opened, runtime-context, and DSH_WEB_URL forms;
-                                 grants no trust
+                                 opened, runtime-context, and AGENTRANS_WEB_URL
+                                 forms; grants no trust
   --trusted-host <authority...>  extra authority the /api browser-trust fence
                                  accepts (host or host:port; repeatable)
   --tls-cert <file>              PEM server certificate chain; requires

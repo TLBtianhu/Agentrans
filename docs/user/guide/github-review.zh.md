@@ -7,30 +7,30 @@
 ## 前置条件
 
 - 一个可由 DSH 注册为 Web Workspace 的本地 checkout。
-- 一个可通过 `DSH_GITHUB_WEBHOOK_SECRET` 凭据引用访问的高熵 GitHub webhook 密钥。
+- 一个可通过 `AGENTRANS_GITHUB_WEBHOOK_SECRET` 凭据引用访问的高熵 GitHub webhook 密钥。
 - 一个可以把单个公共 URL 转发到 loopback 监听器的 TLS 反向代理或 tunnel。
 - GitHub webhook 订阅 Pull requests 事件，且 content type 为 `application/json`。
 
-overlay 默认使用启动目录作为 Workspace，并监听 `127.0.0.1:3081`。可通过 `DSH_GITHUB_REVIEW_WORKSPACE` 与 `DSH_GITHUB_WEBHOOK_PORT` 覆盖它们。
+overlay 默认使用启动目录作为 Workspace，并监听 `127.0.0.1:3081`。可通过 `AGENTRANS_GITHUB_REVIEW_WORKSPACE` 与 `AGENTRANS_GITHUB_WEBHOOK_PORT` 覆盖它们。
 
 ## 启动 DSH
 
 生成密钥，并在重启后继续使用同一值：
 
 ```sh
-export DSH_GITHUB_WEBHOOK_SECRET="$(openssl rand -hex 32)"
-printf '%s\n' "$DSH_GITHUB_WEBHOOK_SECRET"
+export AGENTRANS_GITHUB_WEBHOOK_SECRET="$(openssl rand -hex 32)"
+printf '%s\n' "$AGENTRANS_GITHUB_WEBHOOK_SECRET"
 ```
 
 先把两个实验包安装到 Web profile。Profile 不会自动安装 peer；GitHub 适配器需要显式安装 webhook 运行时：
 
 ```sh
 dsh plugin --profile web add @agentrans/webhook @agentrans/webhook-github
-export DSH_GITHUB_REVIEW_WORKSPACE=/path/to/deepseek-harness
-agentrans web --patch "${DSH_HOME:-$HOME/.dsh}/profiles/web/node_modules/@agentrans/webhook-github/examples/github-review/cordis.yml"
+export AGENTRANS_GITHUB_REVIEW_WORKSPACE=/path/to/deepseek-harness
+agentrans web --patch "${AGENTRANS_HOME:-$HOME/.dsh}/profiles/web/node_modules/@agentrans/webhook-github/examples/github-review/cordis.yml"
 ```
 
-示例随 GitHub 适配器发布，并从 profile 的安装目录加载，因此规则模块能解析该 profile 安装的 peer。不要把规则单独放到 profile 之外的任意目录运行。需要定制时，将示例的两个文件复制到 `$DSH_HOME/profiles/web/github-review/`，修改其配置并把 `--patch` 指向复制后的 `cordis.yml`；未设置 `DSH_HOME` 时使用 `~/.dsh`。
+示例随 GitHub 适配器发布，并从 profile 的安装目录加载，因此规则模块能解析该 profile 安装的 peer。不要把规则单独放到 profile 之外的任意目录运行。需要定制时，将示例的两个文件复制到 `$AGENTRANS_HOME/profiles/web/github-review/`，修改其配置并把 `--patch` 指向复制后的 `cordis.yml`；未设置 `AGENTRANS_HOME` 时使用 `~/.dsh`。
 
 仓库中的示例位于 `packages/experimental/webhook-github/examples/github-review/`。Webhook 包不随 CLI 安装，也不出现在官方插件列表中；安装包与提供 overlay 是两个独立步骤。
 
@@ -55,7 +55,7 @@ GitHub 配置如下：
 ```text
 Payload URL:  https://hooks.example.com/github
 Content type: application/json
-Secret:       DSH_GITHUB_WEBHOOK_SECRET value
+Secret:       AGENTRANS_GITHUB_WEBHOOK_SECRET value
 Events:       Pull requests
 Active:       yes
 ```

@@ -121,8 +121,8 @@ export interface ClientTransportHooks {
 
 /** Page global carrying {@link ClientTransportHooks}; absent in the served web app. */
 interface ClientTransportGlobal {
-  __DSH_TRANSPORT__?: ClientTransportHooks
-  __DSH_CONNECTION_RECOVERY__?: unknown
+  __AGENTRANS_TRANSPORT__?: ClientTransportHooks
+  __AGENTRANS_CONNECTION_RECOVERY__?: unknown
 }
 
 /** Browser location fields used to classify loopback authority. */
@@ -343,10 +343,10 @@ export function installConnection(ctx: Context, options: ConnectionInstallOption
 export function apply(ctx: Context): void {
   const globals = globalThis as ClientTransportGlobal
   const pageLocation = typeof location === 'undefined' ? undefined : location
-  const transport = globals.__DSH_TRANSPORT__
+  const transport = globals.__AGENTRANS_TRANSPORT__
   installConnection(ctx, {
     ...(transport === undefined ? {} : { transport }),
-    recovery: resolveConnectionConfig(globals.__DSH_CONNECTION_RECOVERY__),
+    recovery: resolveConnectionConfig(globals.__AGENTRANS_CONNECTION_RECOVERY__),
     ...(pageLocation === undefined ? {} : { location: pageLocation }),
   })
 }

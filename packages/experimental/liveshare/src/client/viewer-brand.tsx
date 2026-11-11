@@ -37,7 +37,7 @@ export const inject: readonly string[] = ['slots']
 
 /** Window global the shell installs for the share this page presents. */
 interface ViewerTargetWindow {
-  __DSH_LIVESHARE_VIEWER__?: {
+  __AGENTRANS_LIVESHARE_VIEWER__?: {
     readonly shareId: string
     readonly sessionId: string
     readonly basePath: string
@@ -69,7 +69,7 @@ export function ViewerBrandMark({ size }: SidebarBrandMarkOwnerProps): ReactNode
  * @returns the viewer's brand content.
  */
 export function ViewerBrandName({ t }: PropsLocale<typeof NS>): ReactNode {
-  const target = (globalThis as ViewerTargetWindow).__DSH_LIVESHARE_VIEWER__
+  const target = (globalThis as ViewerTargetWindow).__AGENTRANS_LIVESHARE_VIEWER__
   const basePath = target?.basePath ?? ''
   const facts = useViewerContextFacts()
   // The share's own identity data names its owner: a verified subject without a display name is

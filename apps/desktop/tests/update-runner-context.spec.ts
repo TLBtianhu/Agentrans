@@ -67,8 +67,8 @@ async function isolateEnvironment() {
   const oldHome = join(root, 'old-home')
   await mkdir(oldHome)
   await writeFile(join(oldHome, 'keep.txt'), 'unrelated user data')
-  vi.stubEnv('DSH_HOME', oldHome)
-  vi.stubEnv('DSH_AGENTS_HOME', oldHome)
+  vi.stubEnv('AGENTRANS_HOME', oldHome)
+  vi.stubEnv('AGENTRANS_AGENTS_HOME', oldHome)
   vi.stubEnv('AGENTRANS_LAUNCH_CONTEXT', '{"unrelated":true}')
   return { root, oldHome }
 }
@@ -81,8 +81,8 @@ function observeLaunch(codeRoot: (root: string) => string, resourcesRoot: string
     expect(context.codeRoot).toBe(codeRoot(options.cwd))
     expect(context.resourcesRoot).toBe(resourcesRoot)
     expect(relative(repo, context.instanceRoot)).toMatch(/^\.\.[\\/]/u)
-    expect(options.env.DSH_HOME).toBe(context.paths.dshHomeDir)
-    expect(options.env.DSH_AGENTS_HOME).toBe(context.paths.dshAgentsHomeDir)
+    expect(options.env.AGENTRANS_HOME).toBe(context.paths.dshHomeDir)
+    expect(options.env.AGENTRANS_AGENTS_HOME).toBe(context.paths.dshAgentsHomeDir)
     expect(JSON.parse(readFileSync(join(context.instanceRoot, '.agentrans-instance.json'), 'utf8')))
       .toMatchObject({ purpose: 'verification' })
     expect(existsSync(context.paths.electronUserDataDir)).toBe(true)

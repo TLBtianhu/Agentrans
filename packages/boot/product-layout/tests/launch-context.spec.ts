@@ -34,8 +34,8 @@ async function fixture() {
 describe('product launch context', () => {
   it('derives state from explicit roots without reading cwd or inherited Harness paths', async () => {
     const input = await fixture()
-    vi.stubEnv('DSH_HOME', join(input.root, 'upstream-home'))
-    vi.stubEnv('DSH_AGENTS_HOME', join(input.root, 'upstream-agents'))
+    vi.stubEnv('AGENTRANS_HOME', join(input.root, 'upstream-home'))
+    vi.stubEnv('AGENTRANS_AGENTS_HOME', join(input.root, 'upstream-agents'))
     const cwd = vi.spyOn(process, 'cwd').mockImplementation(() => { throw new Error('cwd must not select product state') })
     let context
     try { context = resolveProductLaunchContext({ ...input, purpose: 'development' }) }
@@ -136,10 +136,10 @@ describe('product process environment', () => {
   it('replaces all Windows aliases for owned variables without changing unrelated values or the input', async () => {
     const input = await fixture()
     const context = resolveProductLaunchContext({ ...input, purpose: 'verification' })
-    const inherited = { dsh_home: 'upstream', DSH_HOME: 'other', Dsh_Agents_Home: 'shared', agentrans_launch_context: 'foreign', PATH: 'tools', MODEL_KEY: 'fixture' }
+    const inherited = { dsh_home: 'upstream', AGENTRANS_HOME: 'other', Dsh_Agents_Home: 'shared', agentrans_launch_context: 'foreign', PATH: 'tools', MODEL_KEY: 'fixture' }
     const environment = productLaunchEnvironment(context, inherited, 'win32')
-    expect(environment).toEqual({ PATH: 'tools', MODEL_KEY: 'fixture', DSH_HOME: context.paths.dshHomeDir,
-      DSH_AGENTS_HOME: context.paths.dshAgentsHomeDir, [PRODUCT_LAUNCH_CONTEXT_ENV]: serializeProductLaunchContext(context) })
+    expect(environment).toEqual({ PATH: 'tools', MODEL_KEY: 'fixture', AGENTRANS_HOME: context.paths.dshHomeDir,
+      AGENTRANS_AGENTS_HOME: context.paths.dshAgentsHomeDir, [PRODUCT_LAUNCH_CONTEXT_ENV]: serializeProductLaunchContext(context) })
     expect(inherited.dsh_home).toBe('upstream')
     expect(inherited.agentrans_launch_context).toBe('foreign')
   })
@@ -147,7 +147,7 @@ describe('product process environment', () => {
   it('keeps case-sensitive unrelated POSIX names and round-trips only independent roots', async () => {
     const input = await fixture()
     const context = resolveProductLaunchContext({ ...input, purpose: 'development' })
-    expect(productLaunchEnvironment(context, { dsh_home: 'unrelated', DSH_HOME: 'upstream' }, 'linux').dsh_home).toBe('unrelated')
+    expect(productLaunchEnvironment(context, { dsh_home: 'unrelated', AGENTRANS_HOME: 'upstream' }, 'linux').dsh_home).toBe('unrelated')
     const encoded = serializeProductLaunchContext(context)
     expect(Object.keys(JSON.parse(encoded) as Record<string, unknown>).sort()).toEqual(['codeRoot', 'instanceRoot', 'purpose', 'resourcesRoot'])
     expect(parseProductLaunchContext(encoded)).toEqual(context)

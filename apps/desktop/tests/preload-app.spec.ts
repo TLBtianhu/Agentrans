@@ -109,7 +109,7 @@ it('exposes asynchronous boot only to the local application document', async () 
 it('exposes a directory picker only to the local application document', async () => {
   vi.stubGlobal('location', new URL('dsh-app://app/'))
   await import('../src/preload-app.ts')
-  const api = electron.contextBridge.exposeInMainWorld.mock.calls.find(([name]) => name === '__DSH_DIRECTORY_PICKER__')?.[1] as { pick(): Promise<string | null> }
+  const api = electron.contextBridge.exposeInMainWorld.mock.calls.find(([name]) => name === '__AGENTRANS_DIRECTORY_PICKER__')?.[1] as { pick(): Promise<string | null> }
   electron.ipcRenderer.invoke.mockResolvedValue('/workspace')
   await expect(api.pick()).resolves.toBe('/workspace')
   expect(electron.ipcRenderer.invoke).toHaveBeenCalledExactlyOnceWith(DESKTOP_IPC.directoryPick)
@@ -118,14 +118,14 @@ it('exposes a directory picker only to the local application document', async ()
     electron.contextBridge.exposeInMainWorld.mockClear()
     vi.stubGlobal('location', new URL(url))
     await import('../src/preload-app.ts')
-    expect(electron.contextBridge.exposeInMainWorld.mock.calls.some(([name]) => name === '__DSH_DIRECTORY_PICKER__')).toBe(false)
+    expect(electron.contextBridge.exposeInMainWorld.mock.calls.some(([name]) => name === '__AGENTRANS_DIRECTORY_PICKER__')).toBe(false)
   }
 })
 
 it('reports host paths of picked files only to the local application document', async () => {
   vi.stubGlobal('location', new URL('dsh-app://app/'))
   await import('../src/preload-app.ts')
-  const api = electron.contextBridge.exposeInMainWorld.mock.calls.find(([name]) => name === '__DSH_HOST_PATHS__')?.[1] as { pathFor(file: File): string }
+  const api = electron.contextBridge.exposeInMainWorld.mock.calls.find(([name]) => name === '__AGENTRANS_HOST_PATHS__')?.[1] as { pathFor(file: File): string }
   const picked = new File(['x'], 'notes.md')
   electron.webUtils.getPathForFile.mockReturnValue('/Users/me/notes.md')
   expect(api.pathFor(picked)).toBe('/Users/me/notes.md')
@@ -135,7 +135,7 @@ it('reports host paths of picked files only to the local application document', 
     electron.contextBridge.exposeInMainWorld.mockClear()
     vi.stubGlobal('location', new URL(url))
     await import('../src/preload-app.ts')
-    expect(electron.contextBridge.exposeInMainWorld.mock.calls.some(([name]) => name === '__DSH_HOST_PATHS__')).toBe(false)
+    expect(electron.contextBridge.exposeInMainWorld.mock.calls.some(([name]) => name === '__AGENTRANS_HOST_PATHS__')).toBe(false)
   }
 })
 

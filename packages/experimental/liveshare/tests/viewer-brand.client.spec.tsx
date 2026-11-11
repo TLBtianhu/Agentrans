@@ -10,7 +10,7 @@ import { viewerContextFacts, type ViewerContextFacts } from '../src/client/viewe
 import { en, NS, zh } from '../src/client/locales.ts'
 
 interface ViewerTargetWindow {
-  __DSH_LIVESHARE_VIEWER__?: { shareId: string; sessionId: string; basePath: string }
+  __AGENTRANS_LIVESHARE_VIEWER__?: { shareId: string; sessionId: string; basePath: string }
 }
 
 // The brand row reads its copy through the locale seat the served page's client tree provides.
@@ -22,7 +22,7 @@ const t = locale.bind(NS)
 afterEach(() => {
   cleanup()
   viewerContextFacts.set({})
-  delete (globalThis as ViewerTargetWindow).__DSH_LIVESHARE_VIEWER__
+  delete (globalThis as ViewerTargetWindow).__AGENTRANS_LIVESHARE_VIEWER__
 })
 
 /** Publish the facts the page's own read put in the store. */
@@ -32,7 +32,7 @@ function publish(facts: ViewerContextFacts): void {
 
 /** Point the page at one share under a public base path. */
 function target(basePath = '/team/liveshare'): void {
-  ;(globalThis as ViewerTargetWindow).__DSH_LIVESHARE_VIEWER__ = {
+  ;(globalThis as ViewerTargetWindow).__AGENTRANS_LIVESHARE_VIEWER__ = {
     shareId: 'e8HUU7dYsW7Y',
     sessionId: 'fx-alpha',
     basePath,

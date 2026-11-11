@@ -30,7 +30,7 @@ import { parsePublicUrl } from './public-url.ts'
 /** The Web GUI this process serves, provided by the `web-runtime` row. */
 export interface WebApp {
   /**
-   * The URL this GUI advertises, also used for `DSH_WEB_URL` and the startup URL line.
+   * The URL this GUI advertises, also used for `AGENTRANS_WEB_URL` and the startup URL line.
    * @returns the configured `publicUrl`, otherwise the listener origin.
    */
   getAdvertisedUrl(): string
@@ -58,13 +58,13 @@ export interface Config {
   /** Print the URL line on activation; a non-interactive layer can turn it off. */
   printUrl: boolean
   /**
-   * Register the `DSH_WEB_URL` bash variable naming this GUI. A one-shot
+   * Register the `AGENTRANS_WEB_URL` bash variable naming this GUI. A one-shot
    * non-interactive layer can turn it off when its user is not in the GUI.
    */
   surfaceContext: boolean
   /**
    * Canonical HTTP(S) root to advertise in the printed and opened URL,
-   * `DSH_WEB_URL`, and `webApp.getAdvertisedUrl()`, which supplies the Web GUI
+   * `AGENTRANS_WEB_URL`, and `webApp.getAdvertisedUrl()`, which supplies the Web GUI
    * URL in agent runtime context, e.g. `https://app.example/ui/`, normalized to end in `/`. Configures no routing
    * or authentication; see [public deployments](../README.md#public-deployments).
    * Absent or YAML `null` advertises the bind-address URL.
@@ -80,7 +80,7 @@ export const Config: z<Config> = z.object({
 })
 
 /** Environment variable naming the advertised URL of this Web GUI. */
-const DSH_WEB_URL = 'DSH_WEB_URL' as const
+const AGENTRANS_WEB_URL = 'AGENTRANS_WEB_URL' as const
 
 const BROWSER_OPENER_MODULE = import.meta.resolve('open')
 
@@ -209,9 +209,9 @@ export function apply(ctx: Context, config: Config): void {
       runtimeCtx.shellEnv.register({
         name: 'web-runtime',
         variables: {
-          [DSH_WEB_URL]: { description: 'Advertised URL of the Agentrans Web GUI serving this session.' },
+          [AGENTRANS_WEB_URL]: { description: 'Advertised URL of the Agentrans Web GUI serving this session.' },
         },
-        resolve: () => ({ [DSH_WEB_URL]: appRootUrl() }),
+        resolve: () => ({ [AGENTRANS_WEB_URL]: appRootUrl() }),
       })
     })
   }

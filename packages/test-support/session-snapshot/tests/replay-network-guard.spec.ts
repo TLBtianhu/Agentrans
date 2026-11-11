@@ -24,7 +24,7 @@ const boundaryProbe = `data:text/javascript,${encodeURIComponent(`
 async function runGuarded(source: string, auditFile: string): Promise<string> {
   const child = spawn(process.execPath, ['--input-type=module', '-e', source], {
     env: { SystemRoot: process.env.SystemRoot, PATH: process.env.PATH,
-      NODE_OPTIONS: `--import=${boundaryProbe} --import=${guard}`, DSH_SNAPSHOT_NETWORK_AUDIT_FILE: auditFile },
+      NODE_OPTIONS: `--import=${boundaryProbe} --import=${guard}`, AGENTRANS_SNAPSHOT_NETWORK_AUDIT_FILE: auditFile },
     stdio: ['ignore', 'pipe', 'pipe'],
   })
   let stdout = ''

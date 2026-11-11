@@ -61,10 +61,10 @@ it.each([
   }
   await writeFile(join(appDir, 'package.json'), JSON.stringify(manifest))
   const desktopConfig = createElectronBuilderConfig({
-    DSH_DESKTOP_APP_ID: 'com.example.shell-files',
-    DSH_DESKTOP_UNSIGNED: platform === 'win32' ? '1' : '0',
-    DSH_DESKTOP_MACOS_SIGNING_IDENTITY: 'Example Company (TEAMID1234)',
-    DSH_DESKTOP_MACOS_TEAM_ID: 'TEAMID1234',
+    AGENTRANS_DESKTOP_APP_ID: 'com.example.shell-files',
+    AGENTRANS_DESKTOP_UNSIGNED: platform === 'win32' ? '1' : '0',
+    AGENTRANS_DESKTOP_MACOS_SIGNING_IDENTITY: 'Example Company (TEAMID1234)',
+    AGENTRANS_DESKTOP_MACOS_TEAM_ID: 'TEAMID1234',
     APPLE_KEYCHAIN_PROFILE: 'shell-files-test',
   }, platform, arch)
   const config: Configuration = {

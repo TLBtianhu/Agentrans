@@ -63,15 +63,15 @@ jobs:
       run:
         shell: bash
     env:
-      DSH_DESKTOP_TARGET_PLATFORM: darwin
-      DSH_DESKTOP_TARGET_ARCH: arm64
+      AGENTRANS_DESKTOP_TARGET_PLATFORM: darwin
+      AGENTRANS_DESKTOP_TARGET_ARCH: arm64
       PACKAGE_MACOS_ZIP_COMPRESSION_LEVEL: ${{ inputs.compression_level }}
       PACKAGE_SKIP_NOTARIZATION: ${{ inputs.skip_notarization }}
       PACKAGE_SOURCE_REF: ${{ inputs.source_ref }}
       PACKAGE_VERSION_MODE: ${{ inputs.version_mode }}
-      DSH_DESKTOP_UPDATE_CHANNEL: ${{ inputs.update_channel }}
-      DSH_TELEMETRY_DISABLED: '1'
-      DSH_PACKAGING_PRESET: ${{ inputs.preset }}
+      AGENTRANS_DESKTOP_UPDATE_CHANNEL: ${{ inputs.update_channel }}
+      AGENTRANS_TELEMETRY_DISABLED: '1'
+      AGENTRANS_PACKAGING_PRESET: ${{ inputs.preset }}
       PACKAGE_TEST_RELEASE_ID: ${{ inputs.test_release_id }}
     steps:
       - uses: actions/checkout@v7.0.1
@@ -83,7 +83,7 @@ jobs:
       - name: Validate selected source and adapter support
         run: >-
           node -e "const fs=require('node:fs'); const ref=process.env.PACKAGE_SOURCE_REF;
-          const cp=require('node:child_process'); const preset=process.env.DSH_PACKAGING_PRESET;
+          const cp=require('node:child_process'); const preset=process.env.AGENTRANS_PACKAGING_PRESET;
           if(!['test','production'].includes(preset)) throw Error('Unknown packaging preset');
           const tag=/^dsh-v[0-9][0-9A-Za-z.-]*$/.test(ref);
           if(preset==='production' && ref!=='master' && !tag) throw Error('Production source must be master or dsh-v*');
@@ -106,10 +106,10 @@ jobs:
           node-version: '24'
       - name: Configure persistent package caches
         env:
-          DSH_DESKTOP_PACKAGE_CACHE_DIR: ${{ runner.tool_cache }}/dsh-desktop-package-cache
+          AGENTRANS_DESKTOP_PACKAGE_CACHE_DIR: ${{ runner.tool_cache }}/dsh-desktop-package-cache
         run: |
-          echo "DSH_DESKTOP_PACKAGE_CACHE_DIR=$DSH_DESKTOP_PACKAGE_CACHE_DIR" >> "$GITHUB_ENV"
-          echo "PNPM_CONFIG_STORE_DIR=$DSH_DESKTOP_PACKAGE_CACHE_DIR/workspace-pnpm-store" >> "$GITHUB_ENV"
+          echo "AGENTRANS_DESKTOP_PACKAGE_CACHE_DIR=$AGENTRANS_DESKTOP_PACKAGE_CACHE_DIR" >> "$GITHUB_ENV"
+          echo "PNPM_CONFIG_STORE_DIR=$AGENTRANS_DESKTOP_PACKAGE_CACHE_DIR/workspace-pnpm-store" >> "$GITHUB_ENV"
       - name: Install locked dependencies
         run: pnpm install --frozen-lockfile
       - name: Validate preset and resolve build version

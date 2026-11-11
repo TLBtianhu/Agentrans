@@ -55,7 +55,7 @@ describe('SDK dsh launch resolution', () => {
       patches: ['./first.yml', '../second.yml'],
       dshHome: './home',
       processCwd: './worker',
-      env: { PATH: '/bin', DSH_HOME: '/stale' },
+      env: { PATH: '/bin', AGENTRANS_HOME: '/stale' },
       initializeTimeoutMs: 123,
       requestTimeoutMs: 456,
       shutdownTimeoutMs: 789,
@@ -78,7 +78,7 @@ describe('SDK dsh launch resolution', () => {
       disposeEofGraceMs: 12,
       disposeGraceMs: 34,
     })
-    expect(launch.environment()).toEqual({ PATH: '/bin', DSH_HOME: join(caller, 'home') })
+    expect(launch.environment()).toEqual({ PATH: '/bin', AGENTRANS_HOME: join(caller, 'home') })
   })
 
   it.each([false, true])('selects source explicitly with a built bin present: %s', (builtPresent) => {
@@ -151,11 +151,11 @@ describe('SDK dsh launch resolution', () => {
     expect(explicitLaunch.environment().MARKER).toBe('after')
 
     const inheritedLaunch = resolveDshLaunch({ dshBin: '/bin/dsh' })
-    process.env.DSH_SDK_LATE_ENV_TEST = 'late'
+    process.env.AGENTRANS_SDK_LATE_ENV_TEST = 'late'
     try {
-      expect(inheritedLaunch.environment().DSH_SDK_LATE_ENV_TEST).toBe('late')
+      expect(inheritedLaunch.environment().AGENTRANS_SDK_LATE_ENV_TEST).toBe('late')
     } finally {
-      delete process.env.DSH_SDK_LATE_ENV_TEST
+      delete process.env.AGENTRANS_SDK_LATE_ENV_TEST
     }
   })
 

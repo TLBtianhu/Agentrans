@@ -1,5 +1,5 @@
-# Workspace-context snapshot patch: the harness exports DSH_HOME=<cwd>/.dsh and
-# DSH_AGENTS_HOME=<cwd>/.agents, so project-root and both user-global root
+# Workspace-context snapshot patch: the harness exports AGENTRANS_HOME=<cwd>/.dsh and
+# AGENTRANS_AGENTS_HOME=<cwd>/.agents, so project-root and both user-global root
 # discoveries stay inside the scenario's temporary cwd.
 - id: agent-default-model
   name: '@agentrans/agent-default-model'
@@ -11,7 +11,7 @@
   name: '@agentrans/session-persistence-jsonl'
   config:
     root: !!js dshHomePath('sessions')
-    compression: !!js 'process.env.DSH_SNAPSHOT === undefined ? ''zstd'' : ''none'''
+    compression: !!js 'process.env.AGENTRANS_SNAPSHOT === undefined ? ''zstd'' : ''none'''
 
 - id: agent-instructions
   name: '@agentrans/agent-instructions'

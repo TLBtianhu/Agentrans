@@ -9,7 +9,7 @@ English | [中文](guide.zh.md)
 
 ## Change
 
-`@agentrans/tools` keeps tool registration and executor selection, but rejects the removed `mode` and `maxParallelSubCalls` configuration fields at load time. Native and PTC execution require `@agentrans/tool-executor-native` or `@agentrans/tool-executor-ptc`. Shipped profiles mount an executor; custom compositions must add one. The existing `dsh-agent-tool-presentation` selector remains supported but is deprecated. Enabled `tool-executor-native` and `tool-executor-ptc` rows are required at startup; invalid executor configuration now stops startup. Web, headless, and SDK no longer read `DSH_TOOLS_MODE`; all inherit native execution from base.
+`@agentrans/tools` keeps tool registration and executor selection, but rejects the removed `mode` and `maxParallelSubCalls` configuration fields at load time. Native and PTC execution require `@agentrans/tool-executor-native` or `@agentrans/tool-executor-ptc`. Shipped profiles mount an executor; custom compositions must add one. The existing `dsh-agent-tool-presentation` selector remains supported but is deprecated. Enabled `tool-executor-native` and `tool-executor-ptc` rows are required at startup; invalid executor configuration now stops startup. Web, headless, and SDK no longer read `AGENTRANS_TOOLS_MODE`; all inherit native execution from base.
 
 ## Migration
 
@@ -20,7 +20,7 @@ English | [中文](guide.zh.md)
 5. Import `ToolExecutionPipeline` and `executeToolBatch` from `@agentrans/tools/pipeline`. Complete calls, including single calls, use batches; custom schedulers call `prepare`, `dispatch`, and `complete` directly. Add `@agentrans/tool-testkit` as a development dependency for tool fixtures and import them from that package. Neither is exported by the tool registry entry.
 6. Import shared dispatch events and the `ptc-mode` message-source declaration from `@agentrans/tool-executor-ptc/types`; Client code uses its `/client` re-export. Host policy extensions use `import type` from `@agentrans/tool-executor-ptc` for `PtcDispatchLog` and `tools/ptc-dispatch-log`.
 
-7. Remove `DSH_TOOLS_MODE` from launch environments. For PTC, save the following as `ptc.yml` and pass it with `--patch`; native execution needs no overlay. The same patch works with `--profile web` and `--profile sdk`; TypeScript and Python SDK clients pass its path through `patches`. Confirm that the model receives only `run_code` in PTC mode.
+7. Remove `AGENTRANS_TOOLS_MODE` from launch environments. For PTC, save the following as `ptc.yml` and pass it with `--patch`; native execution needs no overlay. The same patch works with `--profile web` and `--profile sdk`; TypeScript and Python SDK clients pass its path through `patches`. Confirm that the model receives only `run_code` in PTC mode.
 
 ```yaml
 - id: tool-executor-native

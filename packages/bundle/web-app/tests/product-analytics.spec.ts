@@ -20,8 +20,8 @@ it.each(['desktop', 'web', 'custom-opt-in'])('keeps collection off unless explic
   onTestFinished(async () => { const closed = once(server, 'close'); server.close(); server.closeAllConnections(); await closed })
   const address = server.address()
   if (address === null || typeof address === 'string') throw new Error('missing collector address')
-  vi.stubEnv('DSH_CLIENT_VERSION', 'test-version')
-  vi.stubEnv('DSH_PRODUCT_ANALYTICS_OTLP_URL', `http://127.0.0.1:${address.port}/logs`)
+  vi.stubEnv('AGENTRANS_CLIENT_VERSION', 'test-version')
+  vi.stubEnv('AGENTRANS_PRODUCT_ANALYTICS_OTLP_URL', `http://127.0.0.1:${address.port}/logs`)
   const ctx = new Context()
   onTestFinished(() => ctx.fiber.dispose())
   ctx.provide('profileContext', {

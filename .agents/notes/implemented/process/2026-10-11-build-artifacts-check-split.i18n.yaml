@@ -18,20 +18,20 @@
   en: c6c77bb1c7acf5e3
   zh: d53c2358bef42502
 /agent-note-split-build-artifacts-and-build-check-with-build-running-both-concurrently/decision/scheduling-failure-and-output:
-  en: 6a1b4ed0d9910133
-  zh: f32c6882208ded71
+  en: 30562cf6e01abe88
+  zh: 8e9c394be49e5f47
 /agent-note-split-build-artifacts-and-build-check-with-build-running-both-concurrently/decision/callers:
   en: 895968956b86a9d2
   zh: 5218d9ab8c60a53a
 /agent-note-split-build-artifacts-and-build-check-with-build-running-both-concurrently/decision/measurements:
-  en: b3a753ac2aab6073
-  zh: 19cbd0e32751896f
+  en: 1f25b188cc5aaefe
+  zh: 17c94e778d1af04a
 /agent-note-split-build-artifacts-and-build-check-with-build-running-both-concurrently/decision/completeness-and-lossless-evidence:
-  en: bed9a43f84716794
-  zh: 300ba712a7812a99
+  en: 63aa12aa6efbc1c3
+  zh: b57eb4e27d7a73c4
 /agent-note-split-build-artifacts-and-build-check-with-build-running-both-concurrently/decision/intentional-trade-offs-not-lossless:
-  en: 14370bc5b54e1278
-  zh: 7ac933092d3e9954
+  en: faf87fe5cd83fe1e
+  zh: 2a266b7ce9d3f9d2
 /agent-note-split-build-artifacts-and-build-check-with-build-running-both-concurrently/alternatives-considered:
   en: 54905b912d17c74e
   zh: 86a298004c8024e3

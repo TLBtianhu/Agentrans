@@ -153,7 +153,7 @@ export function fileUploadWorker(
 }
 
 interface ClientFileUploadGlobal {
-  __DSH_FILE_UPLOAD__?: ClientFileUploadHooks
+  __AGENTRANS_FILE_UPLOAD__?: ClientFileUploadHooks
 }
 
 interface FileUploadTransport {
@@ -167,7 +167,7 @@ export class FileUploadRuntime extends Service implements FileUploadService {
   /** @param ctx - providing Client context. */
   constructor(ctx: Context) {
     super(ctx, 'fileUpload')
-    const hook = (globalThis as ClientFileUploadGlobal).__DSH_FILE_UPLOAD__
+    const hook = (globalThis as ClientFileUploadGlobal).__AGENTRANS_FILE_UPLOAD__
     this.transport = hook === undefined ? workerTransport() : customTransport(hook.fetch)
   }
 

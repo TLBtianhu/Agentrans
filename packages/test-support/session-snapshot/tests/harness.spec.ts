@@ -137,9 +137,9 @@ describe('runScenario', () => {
       cwd: dir,
       configPath: AGENT.configPath,
       env: {
-        DSH_SNAPSHOT: 'replay',
-        DSH_SNAPSHOT_FILE: fixtureFile,
-        DSH_SNAPSHOT_SESSIONS_ROOT: sessionsRoot,
+        AGENTRANS_SNAPSHOT: 'replay',
+        AGENTRANS_SNAPSHOT_FILE: fixtureFile,
+        AGENTRANS_SNAPSHOT_SESSIONS_ROOT: sessionsRoot,
       },
     })
     await launched.client.initialize({ protocolVersion: PROTOCOL_VERSION, clientCapabilities: {} })
@@ -222,7 +222,7 @@ describe('runScenario', () => {
       agent: profileAgent,
       cwd: dir,
       configPath: selectedPatch,
-      env: { DSH_SNAPSHOT: 'record', DSH_SNAPSHOT_FILE: fixtureFile },
+      env: { AGENTRANS_SNAPSHOT: 'record', AGENTRANS_SNAPSHOT_FILE: fixtureFile },
     })
     await live.spawned
     await live.close()
@@ -241,7 +241,7 @@ describe('runScenario', () => {
       agent: profileAgent,
       cwd: dir,
       configPath: selectedPatch,
-      env: { DSH_SNAPSHOT: 'replay', DSH_SNAPSHOT_FILE: fixtureFile },
+      env: { AGENTRANS_SNAPSHOT: 'replay', AGENTRANS_SNAPSHOT_FILE: fixtureFile },
     })
     await replay.spawned
     await replay.close()
@@ -267,7 +267,7 @@ describe('runScenario', () => {
     expect(() => launchAcpTestAgent({
       agent: { ...profileAgent, configPath: conflictPatch },
       cwd: dir,
-      env: { DSH_SNAPSHOT: 'record', DSH_SNAPSHOT_FILE: fixtureFile },
+      env: { AGENTRANS_SNAPSHOT: 'record', AGENTRANS_SNAPSHOT_FILE: fixtureFile },
     })).toThrow('snapshot profile package conflict-package resolves to two directories')
 
     const invalidPatch = join(dir, 'invalid.cordis.yml')
@@ -275,7 +275,7 @@ describe('runScenario', () => {
     expect(() => launchAcpTestAgent({
       agent: { ...profileAgent, configPath: invalidPatch },
       cwd: dir,
-      env: { DSH_SNAPSHOT: 'record', DSH_SNAPSHOT_FILE: fixtureFile },
+      env: { AGENTRANS_SNAPSHOT: 'record', AGENTRANS_SNAPSHOT_FILE: fixtureFile },
     })).toThrow(`snapshot profile patch must be a top-level array: ${invalidPatch}`)
   })
 
@@ -284,7 +284,7 @@ describe('runScenario', () => {
     const launched = launchAcpTestAgent({
       agent: AGENT,
       cwd: dir,
-      env: { DSH_SNAPSHOT_FILE: fixtureFile },
+      env: { AGENTRANS_SNAPSHOT_FILE: fixtureFile },
     })
     await launched.client.initialize({ protocolVersion: PROTOCOL_VERSION, clientCapabilities: {} })
     await launched.client.newSession({ cwd: dir, mcpServers: [] })
@@ -463,7 +463,7 @@ describe('runScenario', () => {
     const launched = launchAcpTestAgent({
       agent: AGENT,
       cwd: dir,
-      env: { DSH_SNAPSHOT_FILE: fixtureFile },
+      env: { AGENTRANS_SNAPSHOT_FILE: fixtureFile },
       async requestPermission() {
         markPermissionStarted?.()
         await permissionReleased
@@ -498,7 +498,7 @@ describe('runScenario', () => {
 
   it('preserves launch-resolution errors when no child process exists', async () => {
     const { dir, fixtureFile } = await scenario({})
-    vi.stubEnv('DSH_EXAMPLE_MODE', 'lib')
+    vi.stubEnv('AGENTRANS_EXAMPLE_MODE', 'lib')
     try {
       await expect(runScenario(
         { steps: [] },

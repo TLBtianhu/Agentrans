@@ -38,7 +38,7 @@ Every package below exports a Cordis plugin that a bundle patch can name in a Lo
 
 | Package | Config | Description |
 |---|---|---|
-| `@agentrans/attachment-local` | yes | Private content-addressed DSH_HOME attachment storage |
+| `@agentrans/attachment-local` | yes | Private content-addressed AGENTRANS_HOME attachment storage |
 
 ## boot
 
@@ -72,7 +72,7 @@ Every package below exports a Cordis plugin that a bundle patch can name in a Lo
 | `@agentrans/client-file-upload` | no | Agent-scoped browser file upload, streaming intake, and staged receipt service |
 | `@agentrans/client-hmr` | yes | Web client graph synchronization and rebuilt-bundle reload transport |
 | `@agentrans/client-locale` | no | Locale plugin: Host-backed preference, extensible language catalog, browser fallback, and typed built-in dictionaries |
-| `@agentrans/client-modules` | no | Client module system, dual-face: node half composes the __DSH_BOOT__ entry graph (incremental dsh.client scan, bundle route, index tap, webPlugins service); browser half is the lazy-CJS module table the vendored cordis Loader consumes as its internal seam |
+| `@agentrans/client-modules` | no | Client module system, dual-face: node half composes the __AGENTRANS_BOOT__ entry graph (incremental dsh.client scan, bundle route, index tap, webPlugins service); browser half is the lazy-CJS module table the vendored cordis Loader consumes as its internal seam |
 | `@agentrans/client-product-analytics` | yes | Desktop product event collection and authenticated Host reporting |
 | `@agentrans/client-resources` | no | Unified client resource model: protocol-registered providers turn URL addresses into live values, consumed through the useResource global standard hook |
 | `@agentrans/client-shortcuts` | yes | Application keyboard command registry and physical-key routing |
@@ -179,7 +179,7 @@ Every package below exports a Cordis plugin that a bundle patch can name in a Lo
 | Package | Config | Description |
 |---|---|---|
 | `@agentrans/authorization` | no | Authorization seam (ctx.authorization): plugin-owned flows that obtain a credential through a conversation with the human |
-| `@agentrans/credentials-local` | yes | File-backed credentials provider ($DSH_HOME/.env under the live process environment) for the DeepSeek Harness |
+| `@agentrans/credentials-local` | yes | File-backed credentials provider ($AGENTRANS_HOME/.env under the live process environment) for the DeepSeek Harness |
 
 ## deliverables
 
@@ -427,7 +427,7 @@ Every package below exports a Cordis plugin that a bundle patch can name in a Lo
 | `@agentrans/bash-sandbox` | yes | Sandbox-consuming implementation of the DeepSeek Harness bash executor seam (confines every command via ctx.sandbox, reports denial/enforcement result facts) |
 | `@agentrans/pwsh-local` | yes | Local PowerShell implementation of the DeepSeek Harness bash executor seam |
 | `@agentrans/pwsh-sandbox` | yes | Sandbox-consuming implementation of the DeepSeek Harness PowerShell executor seam (confines every command via ctx.sandbox, reports denial/enforcement result facts) |
-| `@agentrans/shell-env` | yes | Tool-independent managed DSH_* shell environment registry |
+| `@agentrans/shell-env` | yes | Tool-independent managed AGENTRANS_* shell environment registry |
 | `@agentrans/tool-bash` | yes | Model-facing bash tool with optional generic background-job and sandbox-escalation support |
 | `@agentrans/tool-bash-persistent` | yes | Model-facing owner-scoped persistent Bash tool backed by the Harness PTY service |
 | `@agentrans/tool-pwsh` | yes | Model-facing pwsh tool over the bash executor seam |

@@ -115,7 +115,7 @@ function fixture() {
 function start(f: ReturnType<typeof fixture>, extra: string[] = [], nodeArgs: string[] = []) {
   const child = execa(process.execPath, [...nodeArgs, bin, '--profile', 'web', '--patch', f.watcher, ...extra, '--no-open', '--port', '0'], {
     cwd: f.root,
-    env: { ...process.env, DSH_HOME: f.home, DSH_AGENTS_HOME: join(f.root, '.agents'), DSH_TELEMETRY_DISABLED: '1', DEEPSEEK_API_KEY: 'keyless-matrix-no-call', NODE_NO_WARNINGS: '1' },
+    env: { ...process.env, AGENTRANS_HOME: f.home, AGENTRANS_AGENTS_HOME: join(f.root, '.agents'), AGENTRANS_TELEMETRY_DISABLED: '1', DEEPSEEK_API_KEY: 'keyless-matrix-no-call', NODE_NO_WARNINGS: '1' },
     input: '', reject: false, timeout: 110_000, killSignal: 'SIGKILL',
   })
   let stdout = ''
@@ -142,7 +142,7 @@ function start(f: ReturnType<typeof fixture>, extra: string[] = [], nodeArgs: st
     const response = await fetch(new URL('/', url), { headers: { cookie }, signal: AbortSignal.timeout(10_000) })
     expect(response.status).toBe(200)
     const html = await response.text()
-    expect(html).toContain('__DSH_BOOT__')
+    expect(html).toContain('__AGENTRANS_BOOT__')
     const bundlePath = /<script src="(plugins\/[^"]+)"/u.exec(html)?.[1]?.replaceAll('&amp;', '&')
     if (!bundlePath) throw new Error('Missing bootstrap bundle URL')
     const bundle = await fetch(new URL(bundlePath, url), { headers: { cookie }, signal: AbortSignal.timeout(10_000) })

@@ -441,7 +441,7 @@ describe('Conversation inject API', () => {
     await browser.runtime.dispose()
 
     const paths = new Map([['project', '/Users/me/my project'], ['notes.md', '/Users/me/notes.md'], ['shot.png', '/Users/me/shot.png']])
-    vi.stubGlobal('__DSH_HOST_PATHS__', { pathFor: (file: File) => paths.get(file.name) ?? '' })
+    vi.stubGlobal('__AGENTRANS_HOST_PATHS__', { pathFor: (file: File) => paths.get(file.name) ?? '' })
     try {
       const desktop = await bench()
       const composer = desktop.composerApi(ROOT)
@@ -466,7 +466,7 @@ describe('Conversation inject API', () => {
   })
 
   it('preserves selected text and file order and restores pasted directory chips from the draft', async () => {
-    vi.stubGlobal('__DSH_HOST_PATHS__', { pathFor: (file: File) => `/proj/${file.name}` })
+    vi.stubGlobal('__AGENTRANS_HOST_PATHS__', { pathFor: (file: File) => `/proj/${file.name}` })
     onTestFinished(() => { vi.unstubAllGlobals(); cleanup() })
     const b = await bench()
     onTestFinished(() => b.runtime.dispose())
@@ -502,7 +502,7 @@ describe('Conversation inject API', () => {
   })
 
   it('rejects the whole file batch before changing the draft when a later path is unrepresentable', async () => {
-    vi.stubGlobal('__DSH_HOST_PATHS__', { pathFor: (file: File) => `/proj/${file.name}` })
+    vi.stubGlobal('__AGENTRANS_HOST_PATHS__', { pathFor: (file: File) => `/proj/${file.name}` })
     onTestFinished(() => { vi.unstubAllGlobals() })
     const b = await bench()
     onTestFinished(() => b.runtime.dispose())

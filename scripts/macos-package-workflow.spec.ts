@@ -58,9 +58,9 @@ describe.each(['arm64', 'x64'])('macOS %s packaging', (arch) => {
     expect(JSON.stringify(env)).not.toContain('runner.')
     const steps = workflow.jobs.package!.steps
     const cache = steps.find(step => step.name === 'Configure persistent package caches')!
-    expect(cache.env?.DSH_DESKTOP_PACKAGE_CACHE_DIR).toBe('${{ runner.tool_cache }}/dsh-desktop-package-cache')
-    expect(cache.run).toContain('PNPM_CONFIG_STORE_DIR=$DSH_DESKTOP_PACKAGE_CACHE_DIR/workspace-pnpm-store')
-    expect(cache.run).toContain('DSH_DESKTOP_PACKAGE_CACHE_DIR=$DSH_DESKTOP_PACKAGE_CACHE_DIR')
+    expect(cache.env?.AGENTRANS_DESKTOP_PACKAGE_CACHE_DIR).toBe('${{ runner.tool_cache }}/dsh-desktop-package-cache')
+    expect(cache.run).toContain('PNPM_CONFIG_STORE_DIR=$AGENTRANS_DESKTOP_PACKAGE_CACHE_DIR/workspace-pnpm-store')
+    expect(cache.run).toContain('AGENTRANS_DESKTOP_PACKAGE_CACHE_DIR=$AGENTRANS_DESKTOP_PACKAGE_CACHE_DIR')
     expect(steps.indexOf(cache)).toBeLessThan(steps.findIndex(step => step.name === 'Install locked dependencies'))
   })
 
@@ -73,8 +73,8 @@ describe.each(['arm64', 'x64'])('macOS %s packaging', (arch) => {
 
   it('passes the same target to preparation, packaging and retention', () => {
     const job = workflow.jobs.package!
-    expect(job.env.DSH_DESKTOP_TARGET_PLATFORM).toBe('darwin')
-    expect(job.env.DSH_DESKTOP_TARGET_ARCH).toBe(arch)
+    expect(job.env.AGENTRANS_DESKTOP_TARGET_PLATFORM).toBe('darwin')
+    expect(job.env.AGENTRANS_DESKTOP_TARGET_ARCH).toBe(arch)
     const builds = job.steps.filter(step => step.run?.includes('pnpm run package:desktop:mac:'))
     expect(builds).toHaveLength(2)
     for (const step of builds) expect(step.run).toContain(`package:desktop:mac:${arch}`)

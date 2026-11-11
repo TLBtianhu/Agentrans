@@ -145,9 +145,9 @@ describe.skipIf(!builtArtifactsExist)('dsh Web profile best-effort startup', () 
       env: {
         ...process.env,
         DEEPSEEK_API_KEY: 'keyless-web-best-effort-no-call',
-        DSH_AGENTS_HOME: join(fixture.root, '.agents'),
-        DSH_HOME: fixture.home,
-        DSH_TELEMETRY_DISABLED: '1',
+        AGENTRANS_AGENTS_HOME: join(fixture.root, '.agents'),
+        AGENTRANS_HOME: fixture.home,
+        AGENTRANS_TELEMETRY_DISABLED: '1',
         NODE_NO_WARNINGS: '1',
       },
       input: '',
@@ -166,7 +166,7 @@ describe.skipIf(!builtArtifactsExist)('dsh Web profile best-effort startup', () 
       const page = await fetch(new URL('/', startup.url), { headers: { cookie } })
       const html = await page.text()
       expect(html).toContain('<div id="root"></div>')
-      expect(html).toContain('__DSH_BOOT__')
+      expect(html).toContain('__AGENTRANS_BOOT__')
       expect(readFileSync(fixture.events, 'utf8')).toBe('good apply\n')
       expect(startup.stderr).toContain('web-probe-import-failure')
       expect(startup.stderr).toContain('@agentrans/tool-todo')
@@ -224,9 +224,9 @@ describe.skipIf(!builtArtifactsExist)('dsh Web profile best-effort startup', () 
         env: {
           ...process.env,
           DEEPSEEK_API_KEY: 'keyless-web-required-no-call',
-          DSH_AGENTS_HOME: join(fixture.root, '.agents'),
-          DSH_HOME: fixture.home,
-          DSH_TELEMETRY_DISABLED: '1',
+          AGENTRANS_AGENTS_HOME: join(fixture.root, '.agents'),
+          AGENTRANS_HOME: fixture.home,
+          AGENTRANS_TELEMETRY_DISABLED: '1',
           NODE_NO_WARNINGS: '1',
         },
         input: '',
@@ -277,9 +277,9 @@ describe.skipIf(!builtArtifactsExist)('dsh Web profile best-effort startup', () 
         env: {
           ...process.env,
           DEEPSEEK_API_KEY: 'keyless-web-required-bind-no-call',
-          DSH_AGENTS_HOME: join(root, '.agents'),
-          DSH_HOME: home,
-          DSH_TELEMETRY_DISABLED: '1',
+          AGENTRANS_AGENTS_HOME: join(root, '.agents'),
+          AGENTRANS_HOME: home,
+          AGENTRANS_TELEMETRY_DISABLED: '1',
           NODE_NO_WARNINGS: '1',
         },
         input: '',
@@ -358,9 +358,9 @@ describe.skipIf(!builtArtifactsExist)('dsh Web profile best-effort startup', () 
         env: {
           ...process.env,
           DEEPSEEK_API_KEY: 'keyless-web-detached-no-call',
-          DSH_AGENTS_HOME: join(fixture.root, '.agents'),
-          DSH_HOME: fixture.home,
-          DSH_TELEMETRY_DISABLED: '1',
+          AGENTRANS_AGENTS_HOME: join(fixture.root, '.agents'),
+          AGENTRANS_HOME: fixture.home,
+          AGENTRANS_TELEMETRY_DISABLED: '1',
           NODE_NO_WARNINGS: '1',
         },
         input: '',

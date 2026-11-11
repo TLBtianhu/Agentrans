@@ -58,8 +58,8 @@ it('launches only the public query with no PIN, signing tool or inherited secret
   launch.mockClear()
   launch.mockResolvedValueOnce({ stdout: JSON.stringify({ status: 'public-keys', publicKeys: [blob.toString('base64')] }), stderr: '' })
   expect(await inspectWindowsTokenIdentity({ ...input, environment: {
-    PATH: 'fixture-path', DSH_DESKTOP_WINDOWS_TOKEN_PIN: 'must-not-pass', API_KEY: 'must-not-pass',
-    DSH_DESKTOP_WINDOWS_SIGNTOOL: 'must-not-run', NODE_OPTIONS: 'must-not-pass', NODE_PATH: 'must-not-pass',
+    PATH: 'fixture-path', AGENTRANS_DESKTOP_WINDOWS_TOKEN_PIN: 'must-not-pass', API_KEY: 'must-not-pass',
+    AGENTRANS_DESKTOP_WINDOWS_SIGNTOOL: 'must-not-run', NODE_OPTIONS: 'must-not-pass', NODE_PATH: 'must-not-pass',
   } })).toBe('matched')
   expect(launch).toHaveBeenCalledOnce()
   const [file, args, options] = launch.mock.calls[0]!
@@ -67,7 +67,7 @@ it('launches only the public query with no PIN, signing tool or inherited secret
   expect(args).toContain('-NonInteractive')
   expect(args.at(-1)).toMatch(/windows-token-public-key\.ps1$/u)
   expect(options.timeout).toBe(15_000)
-  expect(options.env).toEqual({ PATH: 'fixture-path', DSH_TOKEN_PUBLIC_CONTAINER: 'fixture-container' })
+  expect(options.env).toEqual({ PATH: 'fixture-path', AGENTRANS_TOKEN_PUBLIC_CONTAINER: 'fixture-container' })
 })
 
 it('reports a helper timeout or stderr as unknown without retry', async () => {

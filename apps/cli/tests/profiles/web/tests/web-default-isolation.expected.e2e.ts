@@ -17,7 +17,7 @@ it('boots default Web with the shipped Schedule rows, without experimental modul
     const page = await webGet(new URL('/', url), test.signal, { cookie: cookie! })
     expect(page.status).toBe(200)
     const html = page.text
-    const rawBoot = /globalThis\["__DSH_BOOT__"\] = ([\s\S]*?)<\/script>/u.exec(html)?.[1]
+    const rawBoot = /globalThis\["__AGENTRANS_BOOT__"\] = ([\s\S]*?)<\/script>/u.exec(html)?.[1]
     expect(rawBoot, html).toBeDefined()
     const delivered = JSON.parse(rawBoot!) as WebBootGraph
     const roster = await request('roster')

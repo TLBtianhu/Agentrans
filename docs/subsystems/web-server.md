@@ -190,7 +190,7 @@ The Web GUI this process serves, provided by the `web-runtime` row.
 
 ```ts cordis-catalog
 /**
- * The URL this GUI advertises, also used for `DSH_WEB_URL` and the startup URL line.
+ * The URL this GUI advertises, also used for `AGENTRANS_WEB_URL` and the startup URL line.
  * @returns the configured `publicUrl`, otherwise the listener origin.
  */
 getAdvertisedUrl(): string

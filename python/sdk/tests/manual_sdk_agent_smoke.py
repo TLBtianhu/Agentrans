@@ -74,9 +74,9 @@ def run_smoke(repo_root: Path, keep_sessions: bool) -> None:
                 "sdk",
             ),
             env={
-                "DSH_HOME": str(dsh_home),
-                "DSH_PERMISSION_MODE": "danger-full-access",
-                "DSH_TELEMETRY_DISABLED": "1",
+                "AGENTRANS_HOME": str(dsh_home),
+                "AGENTRANS_PERMISSION_MODE": "danger-full-access",
+                "AGENTRANS_TELEMETRY_DISABLED": "1",
                 "DEEPSEEK_BASE_URL": base_url,
                 "DEEPSEEK_API_KEY": "sdk-smoke-key",
             },

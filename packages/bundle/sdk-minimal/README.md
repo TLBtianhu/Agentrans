@@ -25,14 +25,14 @@ Use `agentrans --profile sdk-minimal` when an SDK client needs a small, explicit
 <a id="use-this-package"></a>
 ## Use this package
 
-Launch the profile directly or select it from the Python SDK. Supply an explicit `DSH_HOME`, use a disposable workspace, and provide the model credential through `DEEPSEEK_API_KEY`.
+Launch the profile directly or select it from the Python SDK. Supply an explicit `AGENTRANS_HOME`, use a disposable workspace, and provide the model credential through `DEEPSEEK_API_KEY`.
 
 ```sh
-export DSH_HOME=/absolute/path/to/example-dsh-home
+export AGENTRANS_HOME=/absolute/path/to/example-dsh-home
 agentrans --profile sdk-minimal
 ```
 
-`DSH_CONTEXT_WINDOW` sets the fallback capacity for a model absent from the adapter's advisory catalog. `DSH_SYSTEM_PROMPT` replaces the default persona. The SDK initialization request is the sole model selection and overrides environment defaults.
+`AGENTRANS_CONTEXT_WINDOW` sets the fallback capacity for a model absent from the adapter's advisory catalog. `AGENTRANS_SYSTEM_PROMPT` replaces the default persona. The SDK initialization request is the sole model selection and overrides environment defaults.
 
 The profile disables `session-log-deepseek` and `plugin-package-inventory-deepseek` by default. Normal model requests use the explicit DeepSeek adapter without contributing Session-log or plugin-inventory fields. To share either intentionally, enable its row with `disabled: false` in a profile or invocation patch and review that plugin's configuration; see [Session-log sharing](../../session/session-log-deepseek/README.md) and [plugin package inventory](../../llm/plugin-package-inventory-deepseek/README.md).
 
@@ -52,7 +52,7 @@ Like every shipped profile, it mounts [MCP resources](../../mcp/mcp-resources/RE
 <details>
 <summary>Implementation internals — click to expand</summary>
 
-The bundle's single insert is the complete application tree: SDK stdio startup and JSON-RPC serving, one environment-configured DeepSeek adapter, the explicit agent core, conditional MCP resource tools, local filesystem, image attachments, automatic context compaction, and subprocess services, Session working-directory state and its tool, a platform-selected persistent shell PTY, and uncompressed JSONL persistence under `$DSH_HOME/sessions`. It does not inherit another bundle, so every extra row is an explicit profile change.
+The bundle's single insert is the complete application tree: SDK stdio startup and JSON-RPC serving, one environment-configured DeepSeek adapter, the explicit agent core, conditional MCP resource tools, local filesystem, image attachments, automatic context compaction, and subprocess services, Session working-directory state and its tool, a platform-selected persistent shell PTY, and uncompressed JSONL persistence under `$AGENTRANS_HOME/sessions`. It does not inherit another bundle, so every extra row is an explicit profile change.
 
 ### Source map
 
@@ -82,7 +82,7 @@ The bundle's single insert is the complete application tree: SDK stdio startup a
 
 #### What the model sees
 
-The system prompt is `DSH_SYSTEM_PROMPT` or `You are a helpful software engineer assistant.`. With no MCP server configured, the advertised tools are `read_image`, `working_directory`, and owner-scoped persistent `bash` on Linux/macOS or `pwsh` on Windows. Required user context supplies the current directory. Optional runtime context, text file tools, workspace instructions, skills, jobs controls, and Harness identity are absent.
+The system prompt is `AGENTRANS_SYSTEM_PROMPT` or `You are a helpful software engineer assistant.`. With no MCP server configured, the advertised tools are `read_image`, `working_directory`, and owner-scoped persistent `bash` on Linux/macOS or `pwsh` on Windows. Required user context supplies the current directory. Optional runtime context, text file tools, workspace instructions, skills, jobs controls, and Harness identity are absent.
 
 #### Token effect
 
@@ -97,7 +97,7 @@ Stable for a fixed persona, platform, provider, model, and bundle patch stack. C
 <a id="known-limitations-and-deferred-work"></a>
 
 - **The composition intentionally omits shared product services** — select `agentrans --profile sdk` when settings, managed credentials, policy presets, telemetry, Web tools, or the full default tool roster are required.
-- **Image reading requires an image-capable model** — select a route whose adapter declares image input; text-only routes return a tool error. Images are stored under `$DSH_HOME/attachments/v1`.
+- **Image reading requires an image-capable model** — select a route whose adapter declares image input; text-only routes return a tool error. Images are stored under `$AGENTRANS_HOME/attachments/v1`.
 - **Compaction is automatic** — configure [compaction-basic](../../compaction/compaction-basic/README.md) through profile patches. SDK prompt text does not execute `/compact` or other slash commands.
 - **User patches can expand the tree and corrupt stdout** — profile customization is trusted application composition; a plugin that writes ordinary text to stdout can break JSON-RPC framing.
 

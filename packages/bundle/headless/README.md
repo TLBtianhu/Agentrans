@@ -53,11 +53,11 @@ The generated [configuration catalog](../../../docs/config-catalog.md#agentransh
 <a id="credentials"></a>
 ### Credentials
 
-The shipped headless profile disables the managed credential store and its authorization and DeepSeek account consumers. API-key routes use the launch environment, then `<invocation cwd>/.env`, then `$DSH_HOME/.env`. Keys and sign-ins saved by the GUI are ignored without changing their file. Providers that require a saved sign-in fail unless stored authentication is restored; external provider credential chains, such as AWS profiles, remain available.
+The shipped headless profile disables the managed credential store and its authorization and DeepSeek account consumers. API-key routes use the launch environment, then `<invocation cwd>/.env`, then `$AGENTRANS_HOME/.env`. Keys and sign-ins saved by the GUI are ignored without changing their file. Providers that require a saved sign-in fail unless stored authentication is restored; external provider credential chains, such as AWS profiles, remain available.
 
 Unset an empty launch variable to allow its `.env` fallback; an exported empty value shadows that fallback.
 
-To restore stored authentication, add these rows to `$DSH_HOME/profiles/headless/cordis.patch.yml` or a `--patch` overlay:
+To restore stored authentication, add these rows to `$AGENTRANS_HOME/profiles/headless/cordis.patch.yml` or a `--patch` overlay:
 
 ```yaml
 - id: credentials

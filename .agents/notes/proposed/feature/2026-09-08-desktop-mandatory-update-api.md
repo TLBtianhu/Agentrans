@@ -41,7 +41,7 @@ All listed headers are required on every Desktop request; a required header may 
 | Header | Meaning and allowed values |
 |---|---|
 | `x-client-platform` | `desktop-win` or `desktop-mac` |
-| `x-client-version` | Shared client build version, inlined as `DSH_CLIENT_VERSION` at packaging; full SemVer retaining prerelease identifiers, initially equal to the bundled dsh version |
+| `x-client-version` | Shared client build version, inlined as `AGENTRANS_CLIENT_VERSION` at packaging; full SemVer retaining prerelease identifiers, initially equal to the bundled dsh version |
 | `x-client-bundle-id` | Platform uses this field to identify the Chat application; the field does not apply to Harness, so Desktop sends it empty |
 | `x-client-locale` | `zh_CN` or `en_US`, taken from the active UI language's primary subtag; selects localized content, not region |
 | `x-client-timezone-offset` | Whole-second offset from UTC, positive east of Greenwich, sampled from the shell for every request |

@@ -397,7 +397,7 @@ describe('first snapshots', () => {
       type: 'baseline', owner: false, grants: [{ resource: GLOBAL, actions: ['notes/read', 'notes/rooms', 'notes/write'] }],
     })
     expect(access.snapshotFor(CREW)).toEqual({ type: 'baseline', owner: false, grants: [] })
-    expect(REMOTE_ACCESS_SNAPSHOT_KEY).toBe('__DSH_REMOTE_ACCESS__')
+    expect(REMOTE_ACCESS_SNAPSHOT_KEY).toBe('__AGENTRANS_REMOTE_ACCESS__')
   })
 
   it('injects the access snapshot of the Peer each index speaks for', async () => {
@@ -413,14 +413,14 @@ describe('first snapshots', () => {
     expect(render(OWNER)).toEqual([])
     ctx.provide('webServer', {} as Context['webServer'])
     await vi.waitFor(() => {
-      expect(render(OWNER)).toEqual([{ kind: 'global', name: '__DSH_REMOTE_ACCESS__', value: { type: 'baseline', owner: true } }])
+      expect(render(OWNER)).toEqual([{ kind: 'global', name: '__AGENTRANS_REMOTE_ACCESS__', value: { type: 'baseline', owner: true } }])
     })
-    expect(render(GUEST)).toEqual([{ kind: 'global', name: '__DSH_REMOTE_ACCESS__', value: {
+    expect(render(GUEST)).toEqual([{ kind: 'global', name: '__AGENTRANS_REMOTE_ACCESS__', value: {
       type: 'baseline', owner: false, grants: [{ resource: GLOBAL, actions: ['notes/read', 'notes/rooms', 'notes/write'] }],
     } }])
     // A grant change reaches the next render.
     policy.hold(GUEST)
-    expect(render(GUEST)).toEqual([{ kind: 'global', name: '__DSH_REMOTE_ACCESS__', value: { type: 'baseline', owner: false, grants: [] } }])
+    expect(render(GUEST)).toEqual([{ kind: 'global', name: '__AGENTRANS_REMOTE_ACCESS__', value: { type: 'baseline', owner: false, grants: [] } }])
   })
 
   it('lists per bound resource the endpoint actions decide() allows there without arguments, and no grant where none is allowed', async () => {

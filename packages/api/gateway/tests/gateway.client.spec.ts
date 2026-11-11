@@ -655,7 +655,7 @@ describe('Client Remote transport readiness', () => {
   it.each([false, true])('replaces a stalled carrier and restores events (socket opened: %s)', async (autoOpen) => {
     await withFakeWebSocket('https://harness.example', async () => {
       vi.useFakeTimers()
-      vi.stubGlobal('__DSH_CONNECTION_RECOVERY__', {
+      vi.stubGlobal('__AGENTRANS_CONNECTION_RECOVERY__', {
         backoffBaseMs: 10, backoffMaxMs: 10, generationReadyTimeoutMs: 100,
       })
       Object.assign(globalThis.location, { hostname: 'harness.example', search: '' })
@@ -2103,13 +2103,13 @@ describe('Client Typert API', () => {
 
   it('publishes injected Host facts after Remote events report ready', async () => {
     const locationDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'location')
-    const transportDescriptor = Object.getOwnPropertyDescriptor(globalThis, '__DSH_TRANSPORT__')
+    const transportDescriptor = Object.getOwnPropertyDescriptor(globalThis, '__AGENTRANS_TRANSPORT__')
     const mock = RemoteMock.create({ host: { home: '/home/mock' } })
     Object.defineProperty(globalThis, 'location', {
       configurable: true,
       value: { hostname: '127.0.0.1', search: '' },
     })
-    Object.defineProperty(globalThis, '__DSH_TRANSPORT__', {
+    Object.defineProperty(globalThis, '__AGENTRANS_TRANSPORT__', {
       configurable: true,
       value: { rpc: mock.rpc } satisfies ClientTransportHooks,
     })
@@ -2128,8 +2128,8 @@ describe('Client Typert API', () => {
       await ctx.fiber.dispose()
       if (locationDescriptor === undefined) Reflect.deleteProperty(globalThis, 'location')
       else Object.defineProperty(globalThis, 'location', locationDescriptor)
-      if (transportDescriptor === undefined) Reflect.deleteProperty(globalThis, '__DSH_TRANSPORT__')
-      else Object.defineProperty(globalThis, '__DSH_TRANSPORT__', transportDescriptor)
+      if (transportDescriptor === undefined) Reflect.deleteProperty(globalThis, '__AGENTRANS_TRANSPORT__')
+      else Object.defineProperty(globalThis, '__AGENTRANS_TRANSPORT__', transportDescriptor)
     }
   })
 
@@ -2985,7 +2985,7 @@ describe('Remote stream client carrier lifecycle', () => {
 
   it('connects to the shell-owned Host while the document uses a local asset origin', async () => {
     await withFakeWebSocket('dsh-app://app', async () => {
-      vi.stubGlobal('__DSH_TRANSPORT__', { streamBaseUrl: 'http://127.0.0.1:43210' })
+      vi.stubGlobal('__AGENTRANS_TRANSPORT__', { streamBaseUrl: 'http://127.0.0.1:43210' })
       const client = new RemoteStreamMuxClient()
       try {
         client.start()

@@ -89,9 +89,9 @@ export async function createPackedInstallation(temporaryPrefix: string, extraPac
     !/KEY|SECRET|TOKEN|PASSWORD/.test(key) && key !== 'NODE_OPTIONS' && key !== 'NODE_PATH'
   )))
   Object.assign(environment, {
-    DSH_HOME: home,
-    DSH_AGENTS_HOME: join(temporary, 'agents'),
-    DSH_TELEMETRY_DISABLED: '1',
+    AGENTRANS_HOME: home,
+    AGENTRANS_AGENTS_HOME: join(temporary, 'agents'),
+    AGENTRANS_TELEMETRY_DISABLED: '1',
     CI: 'true',
   })
   const [pnpm, ...prefix] = pnpmCommand()

@@ -29,7 +29,7 @@ export async function runDesktopCli(runtimeDir: string, supportDir: string): Pro
       args: ['--expose-internals', join(supportDir, 'primary-runtime', 'dependencies', 'pnpm', 'bin', 'pnpm.mjs')],
       env: {
         ELECTRON_RUN_AS_NODE: '1',
-        DSH_DESKTOP_NODE_EXECUTABLE: process.execPath,
+        AGENTRANS_DESKTOP_NODE_EXECUTABLE: process.execPath,
         PATH: `${join(supportDir, 'bin')}${delimiter}${process.env.PATH ?? ''}`,
       },
     },

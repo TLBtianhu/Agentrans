@@ -22,18 +22,18 @@
 - insert:
     - id: mock-llm
       name: '../../../packages/subagent/subagent-dsh-sdk/tests/fixtures/loader/mock-delegating-llm.ts'
-      disabled: !!js process.env.DSH_SNAPSHOT !== 'record'
+      disabled: !!js process.env.AGENTRANS_SNAPSHOT !== 'record'
 
     - id: subagent-dsh-sdk
       name: '@agentrans/subagent-dsh-sdk'
       config:
         profile: sdk
-        patches: !!js JSON.parse(process.env.DSH_TEST_CHILD_PATCHES ?? '[]')
-        dshHome: !!js process.env.DSH_TEST_CHILD_HOME
+        patches: !!js JSON.parse(process.env.AGENTRANS_TEST_CHILD_PATCHES ?? '[]')
+        dshHome: !!js process.env.AGENTRANS_TEST_CHILD_HOME
         provider: mock
         model: mock-routed
         env:
-          DSH_TELEMETRY_DISABLED: '1'
+          AGENTRANS_TELEMETRY_DISABLED: '1'
 
     - id: subagent-model-selection-settings
       name: '@agentrans/tool-subagent/model-selection-settings'
@@ -55,7 +55,7 @@
     - id: sdk-jsonrpc-server-dynamic-live
       name: '@agentrans/sdk-jsonrpc-server'
       inject: [sdkAppStartup, loader]
-      disabled: !!js process.env.DSH_SNAPSHOT !== 'record'
+      disabled: !!js process.env.AGENTRANS_SNAPSHOT !== 'record'
       config:
         maxTokensAsSuccess: true
 

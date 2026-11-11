@@ -17,7 +17,7 @@ import { DesktopUpdateHttpExecutor } from '../../lib/types/update-http-executor.
 import { DesktopUpdateOverlays } from '../../lib/types/update-overlay.js'
 import { qualifyUpdateDialogs } from './update-dialogs.mjs'
 
-const root = process.env.DSH_LOCAL_UPDATE_TEST_ROOT
+const root = process.env.AGENTRANS_LOCAL_UPDATE_TEST_ROOT
 assert.ok(root, 'The launcher must allocate a private test root')
 app.setPath('userData', join(root, 'electron'))
 // Sequential window scenarios share one Electron process; main() owns its final exit.

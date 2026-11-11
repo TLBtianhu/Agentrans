@@ -83,7 +83,7 @@ export async function apply(ctx: Context, config: HostPluginConfig): Promise<voi
       }))
       disposers.push(ctx.provide('inspector', createInspectorService(handle.source)))
       disposers.push(ctx.on('webserver/index-inject', (table: IndexInjection[]) => {
-        table.push({ kind: 'global', name: '__DSH_INSPECTOR__', value: handle.endpoint.client })
+        table.push({ kind: 'global', name: '__AGENTRANS_INSPECTOR__', value: handle.endpoint.client })
       }))
       const assets = serveStatic(fileURLToPath(new URL('./lib/devtools/',
         import.meta.resolve('@agentrans/experimental-inspector/package.json'))), {

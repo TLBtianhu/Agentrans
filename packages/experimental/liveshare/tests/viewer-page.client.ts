@@ -4,7 +4,7 @@
  * A served viewer page is the owner's own `apps/web` document with the carrier script placed first.
  * This helper reproduces that page in jsdom without a build: it installs the carrier through
  * {@link installViewerCarrier}, then a module-loader facade, a test-local roster
- * ({@link VIEWER_PAGE_ROSTER}) registered as module-table factories, a forged `__DSH_BOOT__` graph
+ * ({@link VIEWER_PAGE_ROSTER}) registered as module-table factories, a forged `__AGENTRANS_BOOT__` graph
  * naming exactly those rows, and runs {@link AppWebEntry}. The forged boot graph and roster are test
  * infrastructure only: production pages receive the owner's real boot graph from the owner's Host.
  *
@@ -120,7 +120,7 @@ export interface AssembledViewerPage {
 }
 
 interface ViewerPageWindow {
-  __DSH_BOOT__?: WebBootGraph
+  __AGENTRANS_BOOT__?: WebBootGraph
   __ModuleLoader__?: ClientModuleLoaderTarget
 }
 
@@ -169,7 +169,7 @@ export async function mountViewerPage(container: HTMLElement, target: ViewerPage
     facade.load({ id: row.id, factory: () => ({ ...row.exports }) })
   }
   const ids = rows.map(row => row.id)
-  page.__DSH_BOOT__ = {
+  page.__AGENTRANS_BOOT__ = {
     rev: 'viewer-page',
     entries: ids.map(id => ({ id, url: `viewer-page:${id}`, rev: 'viewer-page' })),
     batches: [{ phase: 'application', url: 'viewer-page', rev: 'viewer-page', entries: ids }],
@@ -184,7 +184,7 @@ export async function mountViewerPage(container: HTMLElement, target: ViewerPage
     async dispose() {
       await act(async () => { await entry.dispose() })
       probed = undefined
-      for (const key of ['__DSH_BOOT__', '__ModuleLoader__', '__DSH_LIVESHARE_VIEWER__', '__DSH_TRANSPORT__']) {
+      for (const key of ['__AGENTRANS_BOOT__', '__ModuleLoader__', '__AGENTRANS_LIVESHARE_VIEWER__', '__AGENTRANS_TRANSPORT__']) {
         Reflect.deleteProperty(globalThis, key)
       }
     },

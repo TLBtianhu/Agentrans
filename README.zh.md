@@ -51,7 +51,7 @@ pnpm run build
 pnpm exec vitest run --config vitest.web.config.ts apps/web/tests/artifact-interaction.e2e.ts apps/web/tests/branch-result.e2e.ts
 ```
 
-浏览器场景重放已记录的模型流，不需要模型供应商凭证。需要使用本机已安装浏览器时设置 `DSH_PLAYWRIGHT_EXECUTABLE_PATH`。Artifact 场景覆盖创建/更新、计数器交互和仅确认后准入操作；分支场景覆盖开岔、预览、取消、确认回流，以及不隐式启动父级轮次。
+浏览器场景重放已记录的模型流，不需要模型供应商凭证。需要使用本机已安装浏览器时设置 `AGENTRANS_PLAYWRIGHT_EXECUTABLE_PATH`。Artifact 场景覆盖创建/更新、计数器交互和仅确认后准入操作；分支场景覆盖开岔、预览、取消、确认回流，以及不隐式启动父级轮次。
 
 ## 上游与许可证
 

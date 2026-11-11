@@ -54,8 +54,8 @@ it.each(['headers', 'body', 'retry'] as const)('exits naturally while the collec
     tsconfigPath: resolve(import.meta.dirname, '../../../../tsconfig.base.json'),
     processTimeoutMs: 10_000,
     env: {
-      DSH_APP_VERSION: 'synthetic-release',
-      DSH_PRODUCT_TELEMETRY_TEST_ENDPOINT: `http://127.0.0.1:${address.port}/v1/logs`,
+      AGENTRANS_APP_VERSION: 'synthetic-release',
+      AGENTRANS_PRODUCT_TELEMETRY_TEST_ENDPOINT: `http://127.0.0.1:${address.port}/v1/logs`,
     },
   })
   expect(requests).toBe(1)

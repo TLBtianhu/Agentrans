@@ -26,7 +26,7 @@ it('embeds YAML cache settings in browser pages and withdraws them on disposal',
   await fiber.await()
   const rows: IndexInjection[] = []
   ctx.emit('webserver/index-inject', rows, PAGE_PEER)
-  expect(rows).toEqual([{ kind: 'global', name: '__DSH_DOCUMENT_PREVIEW_CONFIG__', value: config }])
+  expect(rows).toEqual([{ kind: 'global', name: '__AGENTRANS_DOCUMENT_PREVIEW_CONFIG__', value: config }])
   await fiber.dispose()
   const after: IndexInjection[] = []
   ctx.emit('webserver/index-inject', after, PAGE_PEER)

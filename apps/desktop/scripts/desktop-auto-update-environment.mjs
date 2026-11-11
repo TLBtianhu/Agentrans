@@ -9,7 +9,7 @@ import { assertUpstreamDesktopReleaseIdentity, DESKTOP_UPDATE_REPOSITORY } from 
  * @returns {'nightly' | 'latest'} Validated channel.
  */
 export function resolveDesktopUpdateChannel(env) {
-  const channel = env.DSH_DESKTOP_UPDATE_CHANNEL || 'nightly'
+  const channel = env.AGENTRANS_DESKTOP_UPDATE_CHANNEL || 'nightly'
   if (channel !== 'nightly' && channel !== 'latest') throw new Error('desktop auto-update: invalid update channel')
   return channel
 }
@@ -55,7 +55,7 @@ export function desktopUpdateMetadataFilename(version, platform, channel = 'nigh
   if (platform !== 'darwin' && platform !== 'win32') {
     throw new Error(`desktop auto-update: unsupported metadata platform ${platform}`)
   }
-  resolveDesktopUpdateChannel({ DSH_DESKTOP_UPDATE_CHANNEL: channel })
+  resolveDesktopUpdateChannel({ AGENTRANS_DESKTOP_UPDATE_CHANNEL: channel })
   return `${channel}${platform === 'darwin' ? '-mac' : ''}.yml`
 }
 
@@ -68,7 +68,7 @@ export function desktopUpdateMetadataFilename(version, platform, channel = 'nigh
  * @returns {{ provider: 'github', owner: string, repo: string, channel: 'nightly' | 'latest', releaseType: 'release' | 'prerelease' }} Feed coordinates embedded at build time.
  */
 export function resolveDesktopGitHubUpdateConfig(env) {
-  assertUpstreamDesktopReleaseIdentity(env.DSH_DESKTOP_APP_ID)
+  assertUpstreamDesktopReleaseIdentity(env.AGENTRANS_DESKTOP_APP_ID)
   const channel = resolveDesktopUpdateChannel(env)
   return {
     provider: 'github',

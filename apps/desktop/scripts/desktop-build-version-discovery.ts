@@ -87,7 +87,7 @@ async function localVersions(artifactsRoot: string): Promise<string[]> {
  */
 async function remoteVersions(options: DesktopBuildVersionSuggestionOptions): Promise<string[] | undefined> {
   // Only the GitHub transport publishes somewhere this build can enumerate.
-  if (options.environment.DSH_DESKTOP_UPDATE_PROVIDER !== 'github') return undefined
+  if (options.environment.AGENTRANS_DESKTOP_UPDATE_PROVIDER !== 'github') return undefined
   const deadline = Date.now() + LISTING_DEADLINE_MS
   const versions: string[] = []
   try {

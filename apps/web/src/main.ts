@@ -19,11 +19,11 @@ try {
   if (el === null) throw new Error('web app: missing #root')
   const entry = new AppWebEntry(el)
   if (desktop !== undefined) {
-    const gate = (globalThis as { __DSH_BOOT_READY__?: PromiseWithResolvers<void> }).__DSH_BOOT_READY__
+    const gate = (globalThis as { __AGENTRANS_BOOT_READY__?: PromiseWithResolvers<void> }).__AGENTRANS_BOOT_READY__
     if (gate === undefined) throw new Error('desktop web: boot readiness is missing')
     void desktop.ready().then(async ({ injections, streamBaseUrl }) => {
-      const transport = globalThis as { __DSH_TRANSPORT__?: { ownsHost: boolean; streamBaseUrl: string } }
-      transport.__DSH_TRANSPORT__ = { ownsHost: true, streamBaseUrl }
+      const transport = globalThis as { __AGENTRANS_TRANSPORT__?: { ownsHost: boolean; streamBaseUrl: string } }
+      transport.__AGENTRANS_TRANSPORT__ = { ownsHost: true, streamBaseUrl }
       await applyIndexInjections(injections, src => new Promise<void>((resolve, reject) => {
         const script = document.createElement('script')
         script.src = src

@@ -22,7 +22,7 @@ const CHILD = 'fx-child' as SessionId
 const OTHER = 'fx-other' as SessionId
 
 interface ViewerTargetWindow {
-  __DSH_LIVESHARE_VIEWER__?: { shareId: string; sessionId: string; basePath?: string }
+  __AGENTRANS_LIVESHARE_VIEWER__?: { shareId: string; sessionId: string; basePath?: string }
 }
 
 /** Blocks one Session's composer carries, keyed by the store the plugin wrote. */
@@ -71,7 +71,7 @@ async function bench(
   const access = provideViewerRemoteAccess(ctx, initial)
   const connection = provideViewerConnection(ctx)
   if (options.target !== false) {
-    (globalThis as ViewerTargetWindow).__DSH_LIVESHARE_VIEWER__ = {
+    (globalThis as ViewerTargetWindow).__AGENTRANS_LIVESHARE_VIEWER__ = {
       shareId: 'share-1',
       sessionId: SHARED,
       basePath: '',
@@ -143,7 +143,7 @@ function listRows(page: Awaited<ReturnType<typeof bench>>, options: { ownFork: b
 afterEach(() => {
   cleanup()
   vi.unstubAllGlobals()
-  delete (globalThis as ViewerTargetWindow).__DSH_LIVESHARE_VIEWER__
+  delete (globalThis as ViewerTargetWindow).__AGENTRANS_LIVESHARE_VIEWER__
   viewerCapabilities.set({ mode: 'view' })
   viewerStatusFacts.set({})
   viewerStatus.set('connecting')
@@ -568,7 +568,7 @@ describe('viewer session plugin', () => {
       expect(location.reload).toHaveBeenCalledOnce()
 
       // A served document that names no base path points the page at its own origin's root.
-      ;(globalThis as ViewerTargetWindow).__DSH_LIVESHARE_VIEWER__ = { shareId: 'share-1', sessionId: SHARED }
+      ;(globalThis as ViewerTargetWindow).__AGENTRANS_LIVESHARE_VIEWER__ = { shareId: 'share-1', sessionId: SHARED }
       viewerStatus.set('reauthenticate')
       await vi.waitFor(() => { expect(bannerAction('sign-in')).toBeDefined() })
       bannerAction('sign-in').click()

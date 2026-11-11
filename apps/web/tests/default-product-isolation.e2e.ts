@@ -50,7 +50,7 @@ function experimentalClientReferences(roster: Awaited<ReturnType<typeof readClie
 
 it('activates the actual default Client registry without experimental packages', async (test) => {
   await withDefaultWeb(test, async ({ url, request }) => {
-    const executablePath = process.env.DSH_PLAYWRIGHT_EXECUTABLE_PATH
+    const executablePath = process.env.AGENTRANS_PLAYWRIGHT_EXECUTABLE_PATH
     const browser = await chromium.launch({
       timeout: test.task.timeout,
       ...(executablePath === undefined ? {} : { executablePath }),

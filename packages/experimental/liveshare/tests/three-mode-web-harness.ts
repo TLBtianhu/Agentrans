@@ -423,9 +423,9 @@ export async function bootWebOwner(options: WebOwnerOptions = {}): Promise<WebOw
     tsconfigPath,
     sourceImport: 'tsx/esm',
     env: {
-      DSH_HOME: home,
-      DSH_AGENTS_HOME: join(cwd, '.agents'),
-      DSH_TELEMETRY_DISABLED: '1',
+      AGENTRANS_HOME: home,
+      AGENTRANS_AGENTS_HOME: join(cwd, '.agents'),
+      AGENTRANS_TELEMETRY_DISABLED: '1',
       DEEPSEEK_API_KEY: '',
       // Diagnostic only: the fixture appends one line per adapter call to this temp file.
       BASE_LLM_LOG: join(cwd, 'base-llm.log'),
@@ -447,9 +447,9 @@ export async function bootWebOwner(options: WebOwnerOptions = {}): Promise<WebOw
   child.stderr?.on('data', (chunk: Buffer) => { stderrText = (stderrText + chunk.toString()).slice(-8000) })
   // Real artifact evidence: `lib` mode spawns the built bin under plain Node, never tsx source.
   const launchBin = String(launch.args[0])
-  facts.push(`launch: mode=${process.env.DSH_EXAMPLE_MODE ?? 'src'} bin=${launchBin}`
+  facts.push(`launch: mode=${process.env.AGENTRANS_EXAMPLE_MODE ?? 'src'} bin=${launchBin}`
     + ` args=${JSON.stringify(launch.args.slice(1))} envKeys=${JSON.stringify(Object.keys(launch.env).sort())}`)
-  if (process.env.DSH_EXAMPLE_MODE === 'lib') {
+  if (process.env.AGENTRANS_EXAMPLE_MODE === 'lib') {
     expect(launchBin, 'built-lib launch').toContain('/lib/')
     expect(launch.args.some(argument => argument.includes('tsx')), 'no tsx loader in lib mode').toBe(false)
   }

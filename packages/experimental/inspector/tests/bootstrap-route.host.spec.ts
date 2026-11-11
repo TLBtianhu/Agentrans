@@ -80,7 +80,7 @@ describe('experimental Inspector Host bootstrap route', () => {
     const injected = () => {
       const rows: IndexInjection[] = []
       context!.emit('webserver/index-inject', rows, PAGE_PEER)
-      return rows.find(row => row.kind === 'global' && row.name === '__DSH_INSPECTOR__')
+      return rows.find(row => row.kind === 'global' && row.name === '__AGENTRANS_INSPECTOR__')
     }
     return { fiber, bootstrap, injected, register, registerUpgrade, messages, log }
   }
@@ -102,7 +102,7 @@ describe('experimental Inspector Host bootstrap route', () => {
     expect(response.status).toBe(200)
     expect(response.headers.get('cache-control')).toBe('no-store')
     const value = injected()
-    expect(value).toMatchObject({ kind: 'global', name: '__DSH_INSPECTOR__' })
+    expect(value).toMatchObject({ kind: 'global', name: '__AGENTRANS_INSPECTOR__' })
     expect(await response.json()).toEqual(value?.kind === 'global' ? value.value : undefined)
     expect(register).toHaveBeenCalledWith(expect.objectContaining({ path: '/inspector/devtools' }))
     expect(registerUpgrade).toHaveBeenCalledWith(expect.objectContaining({ path: '/inspector/devtools/cdp' }))

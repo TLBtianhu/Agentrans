@@ -23,7 +23,7 @@ it.skipIf(!built)('loads the packed GitHub example with its explicitly installed
 }, async () => {
   const { temporary, installation, home, profile, environment, tarballs, members, externalVersions, packageCommand }
     = await createPackedInstallation('dsh-webhook-packed-', [runtime, adapter])
-  Object.assign(environment, { DSH_GITHUB_WEBHOOK_SECRET: secret, DSH_GITHUB_WEBHOOK_PORT: '0' })
+  Object.assign(environment, { AGENTRANS_GITHUB_WEBHOOK_SECRET: secret, AGENTRANS_GITHUB_WEBHOOK_PORT: '0' })
   expect(existsSync(join(installation, 'node_modules', runtime))).toBe(false)
   expect(existsSync(join(installation, 'node_modules', adapter))).toBe(false)
   await writeFile(join(profile, 'package.json'), JSON.stringify({

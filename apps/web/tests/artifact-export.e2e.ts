@@ -44,7 +44,7 @@ describe.skipIf(webSnapshotMode() === 'record')('web e2e: fixed-source Artifact 
       replayProviders: [{ id: 'custom-provider', name: 'Custom Lab',
         models: [{ id: 'user-model', name: 'Custom Lab Model', contextWindow: 8192 }] }],
     })
-    const executablePath = process.env.DSH_PLAYWRIGHT_EXECUTABLE_PATH
+    const executablePath = process.env.AGENTRANS_PLAYWRIGHT_EXECUTABLE_PATH
     browser = await chromium.launch(executablePath === undefined ? {} : { executablePath })
     page = await browser.newPage({ viewport: { width: 1440, height: 960 }, locale: 'en-US' })
     tripwire = watchConsole(page)

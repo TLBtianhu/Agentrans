@@ -6,8 +6,8 @@
   en: 348d9ff129e5494a
   zh: ac88ae827ead8ec1
 /post-mortem-0003-web-agent-validated-a-replacement-server-instead-of-its-current-gui/executive-summary:
-  en: 75d1c77a786b4c54
-  zh: 36dfbed80b4b1227
+  en: 9b8693f560ffb6bf
+  zh: c43bfd4cdd83c2f5
 /post-mortem-0003-web-agent-validated-a-replacement-server-instead-of-its-current-gui/summary:
   en: 0674f37ca0a88d73
   zh: 64f1303f93aa163d
@@ -15,14 +15,14 @@
   en: 48899c487352c865
   zh: 7ba3a7ecb1fde2e7
 /post-mortem-0003-web-agent-validated-a-replacement-server-instead-of-its-current-gui/timeline:
-  en: b1bb796763c57ae1
-  zh: 8be14d4e36f25afb
+  en: aa7368082b6d86af
+  zh: f9fd23dc9347d92c
 /post-mortem-0003-web-agent-validated-a-replacement-server-instead-of-its-current-gui/root-cause:
-  en: 7d18f95cdf38e8ad
-  zh: 69488576b9eca212
+  en: 6b92a8e7634c0b64
+  zh: 50c5af39da030cc2
 /post-mortem-0003-web-agent-validated-a-replacement-server-instead-of-its-current-gui/guardrails-added:
-  en: 8b1a87b2b9d9437d
-  zh: 59d0cf5e753d9f67
+  en: e77cbd38072f5c82
+  zh: 08a29cc81cabf0bf
 /post-mortem-0003-web-agent-validated-a-replacement-server-instead-of-its-current-gui/lessons:
   en: f7830cb5a4fe0be4
   zh: 8422af4234ac9e40

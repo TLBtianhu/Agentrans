@@ -19,7 +19,7 @@ The headless bundle reads `--add-dir` through `headlessStartup` before activatin
    - id: sandbox-policy
      inject: []
      config:
-       mode: !!js process.env.DSH_PERMISSION_MODE ?? 'workspace-write'
+       mode: !!js process.env.AGENTRANS_PERMISSION_MODE ?? 'workspace-write'
        workspaceRoot: !!js process.cwd()
    ```
 

@@ -50,7 +50,7 @@ const autoIntegrationPath = fileURLToPath(new URL('../../../../../../packages/ex
 const headlessSessionExpected = join(goldensDir, 'headless-profile', 'session.expected.jsonl')
 const headlessReasoningExpected = join(goldensDir, 'headless-profile', 'reasoning.stderr.expected.txt')
 const headlessFailureExpected = join(goldensDir, 'headless-profile', 'stderr.expected.txt')
-const refreshing = process.env.DSH_SNAPSHOT === 'refresh'
+const refreshing = process.env.AGENTRANS_SNAPSHOT === 'refresh'
 /** The shipped base bundle's title output cap, which marks a title request's `max_tokens`. */
 const TITLE_MAX_TOKENS = 4096
 
@@ -309,7 +309,7 @@ describe('headless stream-json snapshots', () => {
       binScript: dshBinScript,
       configPath: autoShutdownOverlayPath,
       tsconfigPath,
-      env: { DSH_TELEMETRY_DISABLED: '1' },
+      env: { AGENTRANS_TELEMETRY_DISABLED: '1' },
     }
     const args = ['headless', '--patch', autoShutdownOverlayPath]
     let sessionId = ''
@@ -394,8 +394,8 @@ describe('headless stream-json snapshots', () => {
       binArgs: ['headless', '--patch', headlessOverlayPath, task],
       tsconfigPath,
       env: {
-        DSH_PERMISSION_MODE: 'danger-full-access',
-        DSH_TELEMETRY_DISABLED: '1',
+        AGENTRANS_PERMISSION_MODE: 'danger-full-access',
+        AGENTRANS_TELEMETRY_DISABLED: '1',
         NODE_OPTIONS: [process.env.NODE_OPTIONS, '--disable-warning=ExperimentalWarning'].filter(Boolean).join(' '),
       },
       inspect: async (cwd) => {
@@ -434,8 +434,8 @@ describe('headless stream-json snapshots', () => {
       ],
       tsconfigPath,
       env: {
-        DSH_PERMISSION_MODE: 'danger-full-access',
-        DSH_TELEMETRY_DISABLED: '1',
+        AGENTRANS_PERMISSION_MODE: 'danger-full-access',
+        AGENTRANS_TELEMETRY_DISABLED: '1',
         NODE_OPTIONS: [process.env.NODE_OPTIONS, '--disable-warning=ExperimentalWarning'].filter(Boolean).join(' '),
       },
       inspect: async (cwd) => {
@@ -473,7 +473,7 @@ describe('headless stream-json snapshots', () => {
       tsconfigPath,
       expectedExitCode: 1,
       env: {
-        DSH_TELEMETRY_DISABLED: '1',
+        AGENTRANS_TELEMETRY_DISABLED: '1',
         NODE_OPTIONS: [process.env.NODE_OPTIONS, '--disable-warning=ExperimentalWarning'].filter(Boolean).join(' '),
       },
     })
@@ -490,8 +490,8 @@ describe('headless stream-json snapshots', () => {
     const firstTask = 'Record the first wake of the resume proof.'
     const secondTask = 'Continue from the first wake of the resume proof.'
     const env = {
-      DSH_PERMISSION_MODE: 'danger-full-access',
-      DSH_TELEMETRY_DISABLED: '1',
+      AGENTRANS_PERMISSION_MODE: 'danger-full-access',
+      AGENTRANS_TELEMETRY_DISABLED: '1',
       NODE_OPTIONS: [process.env.NODE_OPTIONS, '--disable-warning=ExperimentalWarning'].filter(Boolean).join(' '),
     }
     const cwd = await mkdtemp(join(tmpdir(), 'headless-session-resume-'))
@@ -555,7 +555,7 @@ describe('headless stream-json snapshots', () => {
         '--permission-mode', 'auto', '--approval-policy', 'never', '--json', 'Run the CLI probe.',
       ],
       tsconfigPath,
-      env: { DSH_AUTO_REVIEW_TEST_MODE: mode, DSH_TELEMETRY_DISABLED: '1' },
+      env: { AGENTRANS_AUTO_REVIEW_TEST_MODE: mode, AGENTRANS_TELEMETRY_DISABLED: '1' },
       inspect: async (cwd) => {
         const logs = await persistedLogs(cwd, join(cwd, '.dsh', 'sessions'))
         expect(logs).toHaveLength(1)
@@ -590,7 +590,7 @@ describe('headless stream-json snapshots', () => {
       label: 'headless absent Auto integration', tempDirPrefix: 'headless-auto-absent-',
       binScript: dshBinScript, configPath: headlessOverlayPath,
       binArgs: ['--profile', 'headless', '--patch', headlessOverlayPath, '--permission-mode', 'auto', '--json', 'Do it.'],
-      tsconfigPath, expectedExitCode: 1, env: { DSH_TELEMETRY_DISABLED: '1' },
+      tsconfigPath, expectedExitCode: 1, env: { AGENTRANS_TELEMETRY_DISABLED: '1' },
     })
     const events = parseJsonl(result.stdout)
     expect(events).toHaveLength(1)
@@ -605,7 +605,7 @@ describe('headless stream-json snapshots', () => {
       const first = await runLoaderSmoke({
         label: 'headless Auto denied wake', cwd, binScript: dshBinScript, configPath: autoReviewOverlayPath,
         binArgs: [...args, '--permission-mode', 'auto', '--approval-policy', 'never', 'Run the CLI probe.'], tsconfigPath,
-        env: { DSH_AUTO_REVIEW_TEST_MODE: 'deny', DSH_TELEMETRY_DISABLED: '1' },
+        env: { AGENTRANS_AUTO_REVIEW_TEST_MODE: 'deny', AGENTRANS_TELEMETRY_DISABLED: '1' },
       })
       const sessionId = parseJsonl(first.stdout)[0]?.sessionId
       if (typeof sessionId !== 'string') throw new Error('missing Auto Session identity')
@@ -615,7 +615,7 @@ describe('headless stream-json snapshots', () => {
       const second = await runLoaderSmoke({
         label: 'headless Auto authorized wake', cwd, binScript: dshBinScript, configPath: autoReviewOverlayPath,
         binArgs: [...args, '--session-id', sessionId, 'I authorize the exact CLI probe. Retry it.'], tsconfigPath,
-        env: { DSH_AUTO_REVIEW_TEST_MODE: 'allow', DSH_TELEMETRY_DISABLED: '1' },
+        env: { AGENTRANS_AUTO_REVIEW_TEST_MODE: 'allow', AGENTRANS_TELEMETRY_DISABLED: '1' },
         inspect: async (directory) => {
           const logs = await persistedLogs(directory, join(directory, '.dsh', 'sessions'))
           expect(logs).toHaveLength(1)
@@ -645,8 +645,8 @@ describe('headless stream-json snapshots', () => {
       tsconfigPath,
       expectedExitCode: 1,
       env: {
-        DSH_CLI_MOCK_FAILURE: '1',
-        DSH_TELEMETRY_DISABLED: '1',
+        AGENTRANS_CLI_MOCK_FAILURE: '1',
+        AGENTRANS_TELEMETRY_DISABLED: '1',
         NODE_OPTIONS: [process.env.NODE_OPTIONS, '--disable-warning=ExperimentalWarning'].filter(Boolean).join(' '),
       },
     })
@@ -669,8 +669,8 @@ describe('headless stream-json snapshots', () => {
       ],
       tsconfigPath,
       env: {
-        DSH_PERMISSION_MODE: 'danger-full-access',
-        DSH_TELEMETRY_DISABLED: '1',
+        AGENTRANS_PERMISSION_MODE: 'danger-full-access',
+        AGENTRANS_TELEMETRY_DISABLED: '1',
         NODE_OPTIONS: [process.env.NODE_OPTIONS, '--disable-warning=ExperimentalWarning'].filter(Boolean).join(' '),
       },
     })
@@ -692,7 +692,7 @@ describe('headless stream-json snapshots', () => {
       binArgs: [retryConfigPath, prompt],
       tsconfigPath,
       env: {
-        DSH_SNAPSHOT: 'replay',
+        AGENTRANS_SNAPSHOT: 'replay',
         NODE_OPTIONS: [process.env.NODE_OPTIONS, '--disable-warning=ExperimentalWarning'].filter(Boolean).join(' '),
       },
       prepare: (cwd) => { runCwd = cwd },
@@ -854,7 +854,7 @@ describe('headless stream-json snapshots', () => {
           // Configuration carries only the reference; the key rides the
           // launching environment, which is the whole credential plane here.
           DEEPSEEK_API_KEY: 'snapshot-key',
-          DSH_SNAPSHOT_BASE_URL: server.url,
+          AGENTRANS_SNAPSHOT_BASE_URL: server.url,
           NODE_OPTIONS: [process.env.NODE_OPTIONS, '--disable-warning=ExperimentalWarning'].filter(Boolean).join(' '),
         },
       })
@@ -949,7 +949,7 @@ describe('headless stream-json snapshots', () => {
         tsconfigPath,
         env: {
           DEEPSEEK_API_KEY: 'snapshot-key',
-          DSH_SNAPSHOT_BASE_URL: server.url,
+          AGENTRANS_SNAPSHOT_BASE_URL: server.url,
           NODE_OPTIONS: [process.env.NODE_OPTIONS, '--disable-warning=ExperimentalWarning'].filter(Boolean).join(' '),
         },
       })
@@ -1003,7 +1003,7 @@ describe('headless stream-json snapshots', () => {
         prepare: cwd => writeFile(join(cwd, 'task.txt'), 'Call snapshot_ping once.\n'),
         env: {
           MOONSHOT_API_KEY: 'snapshot-key',
-          DSH_SNAPSHOT_BASE_URL: server.url,
+          AGENTRANS_SNAPSHOT_BASE_URL: server.url,
           NODE_OPTIONS: [process.env.NODE_OPTIONS, '--disable-warning=ExperimentalWarning'].filter(Boolean).join(' '),
         },
       })
@@ -1108,7 +1108,7 @@ describe('headless stream-json snapshots', () => {
       tsconfigPath,
       processTimeoutMs: 60_000,
       env: {
-        DSH_SNAPSHOT: 'team',
+        AGENTRANS_SNAPSHOT: 'team',
         NODE_OPTIONS: [process.env.NODE_OPTIONS, '--disable-warning=ExperimentalWarning'].filter(Boolean).join(' '),
       },
       inspect: async (cwd) => {
@@ -1279,9 +1279,9 @@ describe('headless stream-json snapshots', () => {
       binArgs: [goalConfigPath, prompt],
       tsconfigPath,
       env: {
-        DSH_SNAPSHOT: 'replay',
-        DSH_SNAPSHOT_FILE: join(goalScenarioDir, 'session.jsonl'),
-        DSH_SNAPSHOT_OVERRIDE: join(goalScenarioDir, 'replay.override.json'),
+        AGENTRANS_SNAPSHOT: 'replay',
+        AGENTRANS_SNAPSHOT_FILE: join(goalScenarioDir, 'session.jsonl'),
+        AGENTRANS_SNAPSHOT_OVERRIDE: join(goalScenarioDir, 'replay.override.json'),
         NODE_OPTIONS: [process.env.NODE_OPTIONS, '--disable-warning=ExperimentalWarning'].filter(Boolean).join(' '),
       },
       prepare: (cwd) => { runCwd = cwd },
@@ -1341,9 +1341,9 @@ describe('headless stream-json snapshots', () => {
       env: {
         // The override fully supplies the parent script; the child fixture
         // remains separate so replay binds it to the fresh child Session.
-        DSH_SNAPSHOT_FILE: parentReplay,
-        DSH_SNAPSHOT_OVERRIDE: parentOverride,
-        DSH_SNAPSHOT_CHILD_FILES: childReplay,
+        AGENTRANS_SNAPSHOT_FILE: parentReplay,
+        AGENTRANS_SNAPSHOT_OVERRIDE: parentOverride,
+        AGENTRANS_SNAPSHOT_CHILD_FILES: childReplay,
         NODE_OPTIONS: [process.env.NODE_OPTIONS, '--disable-warning=ExperimentalWarning'].filter(Boolean).join(' '),
       },
       prepare: (cwd) => { runCwd = cwd },

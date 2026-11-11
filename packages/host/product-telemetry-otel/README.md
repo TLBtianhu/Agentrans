@@ -25,7 +25,7 @@ Send selected product usage events to an OTLP/HTTP collector. Events carry a nam
 <a id="use-this-package"></a>
 ## Use this package
 
-Mount the plugin in a Cordis composition with the application identity; override the collector endpoint when needed. The shipped Agentrans Web/Desktop composition disables this exporter. A custom Desktop composition that enables [product analytics](../../client/product-analytics/README.md) must also mount its required services. The standalone example below reads `DSH_APP_VERSION`; Desktop supplies `DSH_CLIENT_VERSION` through its native launcher. Both must name the running release; the schema rejects an absent version.
+Mount the plugin in a Cordis composition with the application identity; override the collector endpoint when needed. The shipped Agentrans Web/Desktop composition disables this exporter. A custom Desktop composition that enables [product analytics](../../client/product-analytics/README.md) must also mount its required services. The standalone example below reads `AGENTRANS_APP_VERSION`; Desktop supplies `AGENTRANS_CLIENT_VERSION` through its native launcher. Both must name the running release; the schema rejects an absent version.
 
 ```yaml
 - name: '@agentrans/otel'
@@ -33,7 +33,7 @@ Mount the plugin in a Cordis composition with the application identity; override
   config:
     endpoint: https://dsh-otel-collector.deepseeksvc.com/v1/logs
     serviceName: deepseek-harness
-    serviceVersion: !!js process.env.DSH_APP_VERSION
+    serviceVersion: !!js process.env.AGENTRANS_APP_VERSION
     compression: gzip
     scheduledDelayMillis: 30000
 ```

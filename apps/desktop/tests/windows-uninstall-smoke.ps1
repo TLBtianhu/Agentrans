@@ -108,7 +108,7 @@ try {
         if (-not $isInteractive) { $arguments = '/S ' + $arguments }
         if ($mode -eq 'upgrade') { $arguments = '/S /KEEP_APP_DATA --updated /currentuser ' + $arguments }
         if ($mode -eq 'replaced') { $arguments = '/S /KEEP_APP_DATA /currentuser ' + $arguments }
-        if ($mode -eq 'home-inside') { $env:DSH_HOME = Join-Path $dataPath 'dsh\home' } else { Remove-Item Env:DSH_HOME -ErrorAction SilentlyContinue }
+        if ($mode -eq 'home-inside') { $env:AGENTRANS_HOME = Join-Path $dataPath 'dsh\home' } else { Remove-Item Env:AGENTRANS_HOME -ErrorAction SilentlyContinue }
         $process = Start-Process -FilePath $uninstaller -ArgumentList $arguments -PassThru -WindowStyle ($(if ($isInteractive) { 'Normal' } else { 'Hidden' }))
         if ($isInteractive) {
             $welcome = Wait-Text $copy.welcome
@@ -189,7 +189,7 @@ try {
     $env:TMP = $originalTmp
     if ($held) { $held.Dispose() }
     if ($linked) { [IO.Directory]::Delete($linked); Move-Item -LiteralPath $retained -Destination $linked }
-    Remove-Item Env:DSH_HOME -ErrorAction SilentlyContinue
+    Remove-Item Env:AGENTRANS_HOME -ErrorAction SilentlyContinue
     if ($process) { if (-not $process.HasExited) { $process.Kill(); $process.WaitForExit() }; $process.Dispose() }
     foreach ($pair in @(@($homePath, $OutputDirectory), @($externalPath, $OutputDirectory))) {
         $target = [IO.Path]::GetFullPath($pair[0])

@@ -47,7 +47,7 @@ function snapshotMode(value: string | undefined): SnapshotSuiteOptions['mode'] {
     case 'replay': return 'replay'
     case 'record': return 'record'
     case 'refresh': return 'refresh'
-    default: throw new Error(`unknown DSH_SNAPSHOT mode: ${value}`)
+    default: throw new Error(`unknown AGENTRANS_SNAPSHOT mode: ${value}`)
   }
 }
 
@@ -64,7 +64,7 @@ defineAcpSnapshotSuite({
   },
   snapshotsDir: join(dirname(fileURLToPath(import.meta.url)), 'snapshots'),
   scenarios: SCENARIOS, // exactly one entry per header class sets pinsHeader
-  mode: snapshotMode(process.env.DSH_SNAPSHOT),
+  mode: snapshotMode(process.env.AGENTRANS_SNAPSHOT),
 })
 ```
 
@@ -80,7 +80,7 @@ Headless/ACP and SDK adapters compare raw catalog child-creation times with harv
 
 ### Record, replay, and refresh
 
-`pnpm run test:snapshot:record` calls the live LLM and writes the harvested current generation under its canonical versioned filename. Record and refresh never rename or delete a completed generation, including generations of a child role absent from a later run; reviewed source-tree curation removes a predecessor only after the same role has a verified current replacement. Scenarios with an explicit `sessionFormat` remain read-only in record mode. `pnpm run test:snapshot:refresh` stays keyless, runs the selected highest replay input, and writes stdout, owned prompt and tool-schema sidecars, and a fresh current-generation comparable Session output; retained historical scenarios write the separate writer-output oracles instead of a canonical current-format replay generation. Headless and SDK scenarios may add a local `runtime.cordis.yml` patch for execution fixtures. Each composition owner keeps its replay patch beside its live patch; top-level `snapshots/` owns Session-driven scenarios, while other expected outputs stay beside their owning package. [`dsh-llm-replay`](../llm-replay/README.md) serves the recorded streams selected through `DSH_SNAPSHOT_*` environment values.
+`pnpm run test:snapshot:record` calls the live LLM and writes the harvested current generation under its canonical versioned filename. Record and refresh never rename or delete a completed generation, including generations of a child role absent from a later run; reviewed source-tree curation removes a predecessor only after the same role has a verified current replacement. Scenarios with an explicit `sessionFormat` remain read-only in record mode. `pnpm run test:snapshot:refresh` stays keyless, runs the selected highest replay input, and writes stdout, owned prompt and tool-schema sidecars, and a fresh current-generation comparable Session output; retained historical scenarios write the separate writer-output oracles instead of a canonical current-format replay generation. Headless and SDK scenarios may add a local `runtime.cordis.yml` patch for execution fixtures. Each composition owner keeps its replay patch beside its live patch; top-level `snapshots/` owns Session-driven scenarios, while other expected outputs stay beside their owning package. [`dsh-llm-replay`](../llm-replay/README.md) serves the recorded streams selected through `AGENTRANS_SNAPSHOT_*` environment values.
 
 SDK replay and refresh materialize cwd tokens at their JSON string-encoding depth, then parse and derive the replay script before starting the profile. Refresh tokenizes generated cwd spellings before stabilizing header identities, retaining nested JSON encoding and unrelated command text or external paths. Malformed input fails before runtime initialization. Their Node subprocesses use a test-owned backstop that rejects external HTTP and socket destinations while allowing loopback fixtures; replay does not inherit ambient Node preloads. An unexpected error outcome fails before waiting for later fixture events. Record mode retains its explicit live-provider behavior.
 
@@ -103,7 +103,7 @@ Headless, SDK, and ACP manifests declare `platform: posix` for recordings that r
 - **A durable wait times out** — `waitForTurnStart`, `waitForTurnEnd`, `waitForSubagentTurnEnd`, `waitForGoalPhase`, `waitForInboxMessage`, `waitForTitleAfterTurnEnd`, and `waitForEventAfterTurnEnd` identify the session or child and deadline even when the first log harvest exceeds that deadline. Child waits also name the requested turn. All retain the underlying failure as the error cause. `waitForTurnStart` rejects malformed turn records immediately.
 - **A fixture guard rejects the committed files** — orphan scenario dirs, missing files, multiple pins for one header class, duplicate sidecar content, unscrubbed prompt text or tool schemas, a `request/header` with no preceding `system/message`, and malformed pinning headers all fail the suite before comparisons run.
 - **The session harvest needs raw JSONL mode** — snapshot configs set the JSONL backend's `compression: 'none'`; compressed JSONL has no snapshot-harvest path.
-- **Built mode needs current artifacts** — run `pnpm run build` before selecting `DSH_EXAMPLE_MODE=lib`; source mode remains the zero-build path.
+- **Built mode needs current artifacts** — run `pnpm run build` before selecting `AGENTRANS_EXAMPLE_MODE=lib`; source mode remains the zero-build path.
 
 -----
 
@@ -171,7 +171,7 @@ None; this package neither assembles nor sends a provider request.
 These limits define when the kit needs special care. They are current package constraints, not a task backlog.
 
 - **Session harvest requires raw JSONL mode** — `runScenario` collects persisted `.jsonl` logs, so snapshot configs set the JSONL backend's `compression: 'none'`; compressed JSONL has no snapshot-harvest path.
-- **Built mode requires current artifacts** — run `pnpm run build` before selecting `DSH_EXAMPLE_MODE=lib`; source mode remains the zero-build path.
+- **Built mode requires current artifacts** — run `pnpm run build` before selecting `AGENTRANS_EXAMPLE_MODE=lib`; source mode remains the zero-build path.
 - **ACP remains for protocol behavior** — cancellation and permission round trips whose stimulus is the ACP client stay on that adapter; assembled one-shot and persistent-control behavior uses headless and SDK adapters.
 
 <a id="dev-note"></a>

@@ -6,29 +6,29 @@
   en: 7754ffbd03cff339
   zh: cbf34c74b346654a
 /agent-note-resolve-profile-modules-along-the-ancestor-chain-with-an-interception-layer/problem:
-  en: 51374538814c0796
-  zh: ebd74420bec9687a
+  en: a8388a3fb966e40b
+  zh: ad3b5fc0ff8e746b
 /agent-note-resolve-profile-modules-along-the-ancestor-chain-with-an-interception-layer/decision:
-  en: d69f81d4fc545e29
-  zh: 9fc532af8015cb28
+  en: 93cdff0aa2cb524e
+  zh: eb8f527120aebb72
 /agent-note-resolve-profile-modules-along-the-ancestor-chain-with-an-interception-layer/decision/part-1-resolution-rules:
   en: de6ea16534218e69
   zh: fd8e1d470a2cf056
 /agent-note-resolve-profile-modules-along-the-ancestor-chain-with-an-interception-layer/decision/part-1-resolution-rules/1-the-ancestor-chain-node-s-ancestor-node-modules-lookup:
-  en: 197a263bc0152b74
-  zh: ab05b5033f0a74e0
-/agent-note-resolve-profile-modules-along-the-ancestor-chain-with-an-interception-layer/decision/part-1-resolution-rules/2-the-interception-layer-the-runtime-resolution-occupies-dsh-home-profiles-node-modules-package:
-  en: 31834c0f0ecd6a68
-  zh: 54c20840d019d7cc
+  en: ededed4def832c52
+  zh: 1c4b39f9cf68ccaf
+/agent-note-resolve-profile-modules-along-the-ancestor-chain-with-an-interception-layer/decision/part-1-resolution-rules/2-the-interception-layer-the-runtime-resolution-occupies-agentrans-home-profiles-node-modules-package:
+  en: 95839c415794f3a3
+  zh: 668db78fa1042fde
 /agent-note-resolve-profile-modules-along-the-ancestor-chain-with-an-interception-layer/decision/part-1-resolution-rules/3-linked-directories-peer-interception-at-each-ancestor-position:
   en: 8b0ded021ddb87b4
   zh: 2f4d5c33dadf50e7
 /agent-note-resolve-profile-modules-along-the-ancestor-chain-with-an-interception-layer/decision/part-1-resolution-rules/4-what-the-interception-layer-holds-the-runtime-resolution-s-scan-contents:
-  en: 5581ddc9431c1e08
-  zh: 94218b20dc2d0fe5
+  en: 24a19edcbc9cabbd
+  zh: d1d7b60bab2479ae
 /agent-note-resolve-profile-modules-along-the-ancestor-chain-with-an-interception-layer/decision/part-1-resolution-rules/5-hook-coverage:
-  en: 644f6f9a6ff8d6c8
-  zh: 7a81f928551e9041
+  en: 836755a4f4a937a0
+  zh: 1ee027c99c58b9cf
 /agent-note-resolve-profile-modules-along-the-ancestor-chain-with-an-interception-layer/decision/part-1-resolution-rules/6-package-directories-and-module-files:
   en: c85f82cb1c60360e
   zh: c535f1c0ec58345e
@@ -39,8 +39,8 @@
   en: 30c29a5fd375f782
   zh: 93190a358ce68ba0
 /agent-note-resolve-profile-modules-along-the-ancestor-chain-with-an-interception-layer/decision/part-2-walkthroughs/table-2-interception-position-for-the-web-and-desktop-profiles:
-  en: e9dce1779952a066
-  zh: d51cf26a192f3f91
+  en: d790a50d40ce3842
+  zh: 47c6cb17dd93b3eb
 /agent-note-resolve-profile-modules-along-the-ancestor-chain-with-an-interception-layer/decision/part-2-walkthroughs/table-3-ancestor-chain-when-a-plugin-is-linked-outside-the-tree:
   en: 331e1de2aa269323
   zh: 73859795c737db46
@@ -48,14 +48,14 @@
   en: 35f27b53d995d59f
   zh: 58a47c7bfced79a0
 /agent-note-resolve-profile-modules-along-the-ancestor-chain-with-an-interception-layer/decision/part-3-developer-integration-guide/1-normal-installation:
-  en: d0bed60317e6e3a8
-  zh: 5714160678adc049
+  en: 89094f99cbbe4e9f
+  zh: c62784756d82b887
 /agent-note-resolve-profile-modules-along-the-ancestor-chain-with-an-interception-layer/decision/part-3-developer-integration-guide/2-development-mode-the-plugin-repository-is-outside-the-profile-tree:
   en: 577145eeb464c75e
   zh: 715c800495bb1f30
 /agent-note-resolve-profile-modules-along-the-ancestor-chain-with-an-interception-layer/alternatives-considered:
-  en: 5466618bb5e3d4d9
-  zh: 7d0b6d727e33d0d1
+  en: e0d8c45457923462
+  zh: 17877303dee50f32
 /agent-note-resolve-profile-modules-along-the-ancestor-chain-with-an-interception-layer/verification:
   en: 328fbaca95eac5ff
   zh: b41fbe45097d3ea9

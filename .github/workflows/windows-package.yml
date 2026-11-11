@@ -71,9 +71,9 @@ jobs:
     env:
       PACKAGE_SOURCE_REF: ${{ inputs.source_ref }}
       PACKAGE_VERSION_MODE: ${{ inputs.version_mode }}
-      DSH_DESKTOP_UPDATE_CHANNEL: ${{ inputs.update_channel }}
-      DSH_TELEMETRY_DISABLED: '1'
-      DSH_PACKAGING_PRESET: ${{ inputs.preset }}
+      AGENTRANS_DESKTOP_UPDATE_CHANNEL: ${{ inputs.update_channel }}
+      AGENTRANS_TELEMETRY_DISABLED: '1'
+      AGENTRANS_PACKAGING_PRESET: ${{ inputs.preset }}
       PACKAGE_TEST_RELEASE_ID: ${{ inputs.test_release_id }}
       PACKAGE_SIGNING: ${{ inputs.signing }}
       PACKAGE_CACHE_NAMESPACE: ${{ inputs.cache_namespace }}
@@ -113,7 +113,7 @@ jobs:
       - name: Validate selected source and adapter support
         run: >-
           node -e "const fs=require('node:fs'); const ref=process.env.PACKAGE_SOURCE_REF;
-          const cp=require('node:child_process'); const preset=process.env.DSH_PACKAGING_PRESET;
+          const cp=require('node:child_process'); const preset=process.env.AGENTRANS_PACKAGING_PRESET;
           if(!['test','production'].includes(preset)) throw Error('Unknown packaging preset');
           const tag=/^dsh-v[0-9][0-9A-Za-z.-]*$/.test(ref);
           if(preset==='production' && ref!=='master' && !tag) throw Error('Production source must be master or dsh-v*');
@@ -137,7 +137,7 @@ jobs:
       - name: Configure persistent pnpm store
         # PNPM_HOME belongs to this run; keep downloaded packages outside its temporary directory.
         env:
-          DSH_DESKTOP_PACKAGE_CACHE_DIR: ${{ runner.tool_cache }}/dsh-desktop-package-cache
+          AGENTRANS_DESKTOP_PACKAGE_CACHE_DIR: ${{ runner.tool_cache }}/dsh-desktop-package-cache
         run: |
           $storeRoot = Join-Path ([IO.Path]::GetPathRoot($env:GITHUB_WORKSPACE)) '.pnpm-store'
           $namespace = $env:PACKAGE_CACHE_NAMESPACE
@@ -145,9 +145,9 @@ jobs:
             if ($namespace -cnotmatch '^[a-z0-9][a-z0-9-]{0,63}\z') { throw 'Cache namespace must contain 1-64 lowercase letters, digits or hyphens' }
             if ($namespace -match '^(con|prn|aux|nul|com[1-9]|lpt[1-9])$') { throw 'Cache namespace cannot be a Windows device name' }
             $storeRoot = Join-Path $storeRoot $namespace
-            $env:DSH_DESKTOP_PACKAGE_CACHE_DIR = Join-Path $env:DSH_DESKTOP_PACKAGE_CACHE_DIR $namespace
+            $env:AGENTRANS_DESKTOP_PACKAGE_CACHE_DIR = Join-Path $env:AGENTRANS_DESKTOP_PACKAGE_CACHE_DIR $namespace
           }
-          "DSH_DESKTOP_PACKAGE_CACHE_DIR=$env:DSH_DESKTOP_PACKAGE_CACHE_DIR" >> $env:GITHUB_ENV
+          "AGENTRANS_DESKTOP_PACKAGE_CACHE_DIR=$env:AGENTRANS_DESKTOP_PACKAGE_CACHE_DIR" >> $env:GITHUB_ENV
           "PNPM_CONFIG_STORE_DIR=$storeRoot" >> $env:GITHUB_ENV
       - name: Install locked dependencies
         run: |

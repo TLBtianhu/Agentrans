@@ -54,7 +54,7 @@ export class AppWebEntry {
       // next microtask; an asynchronous bootstrap resolves it after its last
       // row, or rejects it into the failure rendering below. An absent global
       // means no bootstrap owns the document and there is nothing to wait for.
-      await (globalThis as { __DSH_BOOT_READY__?: { promise: Promise<void> } }).__DSH_BOOT_READY__?.promise
+      await (globalThis as { __AGENTRANS_BOOT_READY__?: { promise: Promise<void> } }).__AGENTRANS_BOOT_READY__?.promise
       const win = globalThis as DshWindow
       const moduleLoader = win.__ModuleLoader__
       if (moduleLoader === undefined) {
@@ -66,10 +66,10 @@ export class AppWebEntry {
       // this structural slice reads two optional members without adding a
       // package edge.
       const transport = (globalThis as {
-        __DSH_TRANSPORT__?: Pick<ClientModuleCreateOptions, 'loadBundle' | 'resolveAsset'>
-      }).__DSH_TRANSPORT__
+        __AGENTRANS_TRANSPORT__?: Pick<ClientModuleCreateOptions, 'loadBundle' | 'resolveAsset'>
+      }).__AGENTRANS_TRANSPORT__
       this.modules = moduleLoader.create({
-        boot: win.__DSH_BOOT__,
+        boot: win.__AGENTRANS_BOOT__,
         staticModules: getStaticModules(),
         ...transport?.loadBundle === undefined ? {} : { loadBundle: transport.loadBundle },
         ...transport?.resolveAsset === undefined ? {} : { resolveAsset: transport.resolveAsset },

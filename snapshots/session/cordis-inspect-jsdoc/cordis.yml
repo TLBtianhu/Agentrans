@@ -9,7 +9,7 @@
   name: '@agentrans/session-persistence-jsonl'
   config:
     root: !!js dshHomePath('sessions')
-    compression: !!js 'process.env.DSH_SNAPSHOT === undefined ? ''zstd'' : ''none'''
+    compression: !!js 'process.env.AGENTRANS_SNAPSHOT === undefined ? ''zstd'' : ''none'''
 
 - id: agent-instructions
   name: '@agentrans/agent-instructions'

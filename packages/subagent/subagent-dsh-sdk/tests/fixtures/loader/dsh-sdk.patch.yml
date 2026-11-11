@@ -48,16 +48,16 @@
       name: '@agentrans/subagent-dsh-sdk'
       config:
         profile: sdk
-        patches: !!js JSON.parse(process.env.DSH_TEST_CHILD_PATCHES ?? '[]')
-        dshHome: !!js process.env.DSH_TEST_CHILD_HOME
+        patches: !!js JSON.parse(process.env.AGENTRANS_TEST_CHILD_PATCHES ?? '[]')
+        dshHome: !!js process.env.AGENTRANS_TEST_CHILD_HOME
         provider: mock
         model: mock-routed
         env:
-          DSH_TELEMETRY_DISABLED: '1'
-          DSH_TEST_CHILD_FAILURE: !!js String(process.env.DSH_TEST_CHILD_FAILURE ?? '')
+          AGENTRANS_TELEMETRY_DISABLED: '1'
+          AGENTRANS_TEST_CHILD_FAILURE: !!js String(process.env.AGENTRANS_TEST_CHILD_FAILURE ?? '')
 
 - id: sandbox-policy
   inject: []
   config:
-    mode: !!js process.env.DSH_PERMISSION_MODE ?? 'workspace-write'
+    mode: !!js process.env.AGENTRANS_PERMISSION_MODE ?? 'workspace-write'
     workspaceRoot: !!js process.cwd()

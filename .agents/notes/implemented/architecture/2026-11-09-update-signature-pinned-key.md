@@ -15,7 +15,7 @@ A commercial code-signing identity would settle this for the operating system as
 Each published artifact carries a detached Ed25519 signature, and an installed build verifies the downloaded installer against a public key compiled into it before the update may install.
 
 - The signature covers the artifact's SHA-256 digest, not the file: Ed25519 hashes its message internally, so signing a digest is a second independent hash and a 150 MB installer streams through one pass instead of a buffer.
-- The public key is a constant in [update-signing-key.ts](../../../../apps/desktop/src/update-signing-key.ts). The private key exists only in the release environment as the `DSH_UPDATE_SIGNING_KEY` repository secret.
+- The public key is a constant in [update-signing-key.ts](../../../../apps/desktop/src/update-signing-key.ts). The private key exists only in the release environment as the `AGENTRANS_UPDATE_SIGNING_KEY` repository secret.
 - Publishing refuses to run without that key, because an unsigned release installs anywhere the key is trusted. A missing or mismatched signature ends the download with a visible failure; the alternative is installing bytes nobody vouched for.
 - The signature URL derives from the release tag the updater already resolved and the feed coordinates electron-builder embedded in `app-update.yml`, so the trust anchor and the download come from one release.
 

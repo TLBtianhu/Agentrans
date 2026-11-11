@@ -54,7 +54,7 @@ agentrans --profile web --no-open --port 8080
 |---|---|---|
 | `openBrowser` | `true` | 启动后用默认浏览器打开；SSH 启动会抑制它 |
 | `printUrl` | `true` | 启动时打印 `agentrans web:` URL 行 |
-| `surfaceContext` | `true` | 把 `DSH_WEB_URL` 暴露给 agent 的 shell 命令 |
+| `surfaceContext` | `true` | 把 `AGENTRANS_WEB_URL` 暴露给 agent 的 shell 命令 |
 | `publicUrl` | 未设置 | 对外公告的 HTTP(S) 应用根；否则公告绑定地址 URL |
 
 生成的[配置目录](../../../docs/config-catalog.zh.md#agentransweb-app)列出了本运行时插件接受的字段及其 JSDoc。随发行版交付的组合插入 `schedule` 服务行与 `ui-schedule` 任务页面行，时钟读数与四个提醒工具则属于 `standard`、`cordis` 与 `ptc` 三个 preset。这三个 preset 的 `tool-subagent` 与 `tool-subagent-fork` 两行都 deny 这四个工具，因此被委派子 agent 的作用域不会列出它们。
@@ -76,11 +76,11 @@ agentrans --profile web --no-open --host "$(hostname -i | awk '{print $1}')" --p
 
 未设置 `--public-url` 时，`::ffff:127.0.0.1` 这样的 mapped IPv6 回环绑定会公告其 IPv4 形式 `127.0.0.1`，让浏览器将其识别为本地可信来源。监听器仍使用配置的绑定地址。点分四段式的 IPv6 尾部表示该地址自身的低 32 位，与 `listen` 的读法完全一致：`::0.0.0.1` 属于 IPv6 回环并公告 `[::1]`，而 `::127.0.0.1` 是非回环地址，并非 IPv4 回环。
 
-`--public-url` 公告浏览器使用的 HTTP(S) 根——打印与打开的启动 URL、`DSH_WEB_URL`，以及 agent 运行时上下文中的 Web GUI URL。公告不授予任何信任：浏览器可见的 authority 还必须用 `--trusted-host` 点名。该 flag 不配置监听器、路由或 cookie 作用域，因为外部链路归代理所有：[在反向代理之后发布 Web UI](../../../docs/user/guide/public-deployments.zh.md)列出了这样的部署必须提供什么。
+`--public-url` 公告浏览器使用的 HTTP(S) 根——打印与打开的启动 URL、`AGENTRANS_WEB_URL`，以及 agent 运行时上下文中的 Web GUI URL。公告不授予任何信任：浏览器可见的 authority 还必须用 `--trusted-host` 点名。该 flag 不配置监听器、路由或 cookie 作用域，因为外部链路归代理所有：[在反向代理之后发布 Web UI](../../../docs/user/guide/public-deployments.zh.md)列出了这样的部署必须提供什么。
 
 无论是公告 URL 还是浏览器信任栅栏都不保护端口本身，因此请把端口限制在可信代理或网络内。
 
-打印的 URL 包含进程凭据，只应与预期用户分享。`printUrl: false` 无论是否配置 `--public-url` 都会抑制该行，凭据也绝不会出现在模型上下文或 `DSH_WEB_URL` 中。
+打印的 URL 包含进程凭据，只应与预期用户分享。`printUrl: false` 无论是否配置 `--public-url` 都会抑制该行，凭据也绝不会出现在模型上下文或 `AGENTRANS_WEB_URL` 中。
 
 ### 通过 SSH 运行
 
@@ -88,7 +88,7 @@ agentrans --profile web --no-open --host "$(hostname -i | awk '{print $1}')" --p
 
 ### 按会话的 agent 设置
 
-每个浏览器会话选择一个随发行版交付的 preset（默认 `standard`）。Agent 预设设置页可更改默认项并编辑预设的子插件；保存结果持久化到 `$DSH_HOME/profiles/web/cordis.patch.yml`。只有 Host 提供可编辑的 profile 时，标准模式和 Creator 才会启用插件管理工具。
+每个浏览器会话选择一个随发行版交付的 preset（默认 `standard`）。Agent 预设设置页可更改默认项并编辑预设的子插件；保存结果持久化到 `$AGENTRANS_HOME/profiles/web/cordis.patch.yml`。只有 Host 提供可编辑的 profile 时，标准模式和 Creator 才会启用插件管理工具。
 
 -----
 
@@ -106,7 +106,7 @@ patch 会替换目标行的整个 `config`，因此每个 Web 行都重述自己
 
 ### 公告应用 URL
 
-启动显示与浏览器交接接收附带启动 token 的公告根；agent 的运行时上下文与 `DSH_WEB_URL` 接收不含凭据的形式。根本身由[监听、信任与公开部署](#public-deployments)定义。
+启动显示与浏览器交接接收附带启动 token 的公告根；agent 的运行时上下文与 `AGENTRANS_WEB_URL` 接收不含凭据的形式。根本身由[监听、信任与公开部署](#public-deployments)定义。
 
 ### 就绪宣告
 
@@ -150,7 +150,7 @@ URL 行与浏览器交接都是就绪信号：监督方一观察到该行就发�
 
 #### 模型看到什么
 
-当 `surfaceContext` 为 true 时，`DSH_WEB_URL` 连同描述出现在受管 bash 环境中，每次调用时解析为上文「监听、信任与公开部署」定义的公告应用 URL。为 false 时不注册该变量。GUI 定位、实现 checkout 与当前 GUI URL 由本 bundle 挂载的 [`dsh-harness-dev-context`](../../context/harness-dev-context/README.zh.md) 行提供。
+当 `surfaceContext` 为 true 时，`AGENTRANS_WEB_URL` 连同描述出现在受管 bash 环境中，每次调用时解析为上文「监听、信任与公开部署」定义的公告应用 URL。为 false 时不注册该变量。GUI 定位、实现 checkout 与当前 GUI URL 由本 bundle 挂载的 [`dsh-harness-dev-context`](../../context/harness-dev-context/README.zh.md) 行提供。
 
 #### Token 影响
 

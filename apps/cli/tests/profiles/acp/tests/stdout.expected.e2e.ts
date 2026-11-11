@@ -78,7 +78,7 @@ it('keeps account model-listing diagnostics on stderr during API-key session cre
     launched = launchAcpTestAgent({
       agent,
       cwd,
-      env: { DEEPSEEK_API_KEY: 'acp-fixture-api-key', DEEPSEEK_BASE_URL: `${origin}/anthropic`, DSH_TELEMETRY_DISABLED: '1' },
+      env: { DEEPSEEK_API_KEY: 'acp-fixture-api-key', DEEPSEEK_BASE_URL: `${origin}/anthropic`, AGENTRANS_TELEMETRY_DISABLED: '1' },
     })
     await launched.client.initialize({ protocolVersion: PROTOCOL_VERSION, clientCapabilities: {} })
     const created = await launched.client.newSession({ cwd, mcpServers: [] })
@@ -131,7 +131,7 @@ it('keeps MCP resource-listing diagnostics off stdout for a tools-only client se
     launched = launchAcpTestAgent({
       agent: { binScript, configPath, profile: 'acp', tsconfigPath },
       cwd,
-      env: { DEEPSEEK_API_KEY: 'acp-fixture-api-key', DEEPSEEK_BASE_URL: llm.baseURL, DSH_TELEMETRY_DISABLED: '1' },
+      env: { DEEPSEEK_API_KEY: 'acp-fixture-api-key', DEEPSEEK_BASE_URL: llm.baseURL, AGENTRANS_TELEMETRY_DISABLED: '1' },
     })
     await launched.client.initialize({ protocolVersion: PROTOCOL_VERSION, clientCapabilities: {} })
     // The fixture server advertises only the tools capability.

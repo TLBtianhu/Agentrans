@@ -11,7 +11,7 @@ async function withPreset(run: (root: string) => Promise<void>) {
   try {
     await mkdir(join(root, 'presets'))
     await mkdir(join(root, 'secrets'))
-    await writeFile(join(root, 'presets/test.env'), 'DSH_DESKTOP_APP_ID=com.example.desktop\n')
+    await writeFile(join(root, 'presets/test.env'), 'AGENTRANS_DESKTOP_APP_ID=com.example.desktop\n')
     await run(root)
   } finally {
     await rm(root, { recursive: true, force: true })
@@ -21,42 +21,42 @@ async function withPreset(run: (root: string) => Promise<void>) {
 it('loads unsigned public settings without requiring the signing secret file or personal dotenv', async () => {
   await withPreset(async (root) => {
     const environment = loadDesktopPackageEnvironment('win32', {
-      DSH_PACKAGING_CONFIG_DIR: root, DSH_PACKAGING_PRESET: 'test', DSH_DESKTOP_WINDOWS_TOKEN_PIN: 'ambient-secret',
+      AGENTRANS_PACKAGING_CONFIG_DIR: root, AGENTRANS_PACKAGING_PRESET: 'test', AGENTRANS_DESKTOP_WINDOWS_TOKEN_PIN: 'ambient-secret',
     }, join(root, 'missing-checkout'), { unsigned: true })
-    expect(environment.DSH_DESKTOP_APP_ID).toBe('com.example.desktop')
-    expect(environment.DSH_DESKTOP_WINDOWS_TOKEN_PIN).toBeUndefined()
+    expect(environment.AGENTRANS_DESKTOP_APP_ID).toBe('com.example.desktop')
+    expect(environment.AGENTRANS_DESKTOP_WINDOWS_TOKEN_PIN).toBeUndefined()
     const prepared = loadDesktopPackageEnvironment('win32', {
-      DSH_PACKAGING_CONFIG_DIR: root, DSH_PACKAGING_PRESET: 'test',
+      AGENTRANS_PACKAGING_CONFIG_DIR: root, AGENTRANS_PACKAGING_PRESET: 'test',
     }, root, { prepareOnly: true })
-    expect(prepared.DSH_DESKTOP_WINDOWS_TOKEN_PIN).toBeUndefined()
-    expect(prepared.DSH_PACKAGING_PRESET).toBe('test')
-    expect(() => loadDesktopPackageEnvironment('win32', { DSH_PACKAGING_CONFIG_DIR: root, DSH_PACKAGING_PRESET: 'test' }))
+    expect(prepared.AGENTRANS_DESKTOP_WINDOWS_TOKEN_PIN).toBeUndefined()
+    expect(prepared.AGENTRANS_PACKAGING_PRESET).toBe('test')
+    expect(() => loadDesktopPackageEnvironment('win32', { AGENTRANS_PACKAGING_CONFIG_DIR: root, AGENTRANS_PACKAGING_PRESET: 'test' }))
       .toThrow(/cannot read/u)
   })
 })
 
 it('loads pack concurrency from the public preset and rejects an invalid worker count', async () => {
   await withPreset(async (root) => {
-    const env = { DSH_PACKAGING_CONFIG_DIR: root, DSH_PACKAGING_PRESET: 'test', DSH_DESKTOP_WINDOWS_PACK_CONCURRENCY: '8' }
+    const env = { AGENTRANS_PACKAGING_CONFIG_DIR: root, AGENTRANS_PACKAGING_PRESET: 'test', AGENTRANS_DESKTOP_WINDOWS_PACK_CONCURRENCY: '8' }
     const load = () => resolveWindowsPackageSettings(loadDesktopPackageEnvironment('win32', env, root, { unsigned: true }))
     expect(load().packConcurrency).toBe(4)
-    await writeFile(join(root, 'presets/test.env'), 'DSH_DESKTOP_WINDOWS_PACK_CONCURRENCY=2\n')
+    await writeFile(join(root, 'presets/test.env'), 'AGENTRANS_DESKTOP_WINDOWS_PACK_CONCURRENCY=2\n')
     expect(load().packConcurrency).toBe(2)
-    await writeFile(join(root, 'presets/test.env'), 'DSH_DESKTOP_WINDOWS_PACK_CONCURRENCY=0\n')
+    await writeFile(join(root, 'presets/test.env'), 'AGENTRANS_DESKTOP_WINDOWS_PACK_CONCURRENCY=0\n')
     expect(load).toThrow('PACK_CONCURRENCY')
   })
 })
 
 it('resolves signing file paths relative to the secret file and rejects public overrides there', async () => {
   await withPreset(async (root) => {
-    const env = { DSH_PACKAGING_CONFIG_DIR: root, DSH_PACKAGING_PRESET: 'test' }
+    const env = { AGENTRANS_PACKAGING_CONFIG_DIR: root, AGENTRANS_PACKAGING_PRESET: 'test' }
     const file = join(root, 'secrets/windows-signing.env')
-    await writeFile(file, 'DSH_DESKTOP_WINDOWS_CER_FILE=../certificates/ev.cer\nDSH_DESKTOP_WINDOWS_TOKEN_PIN="private-value"\n')
+    await writeFile(file, 'AGENTRANS_DESKTOP_WINDOWS_CER_FILE=../certificates/ev.cer\nAGENTRANS_DESKTOP_WINDOWS_TOKEN_PIN="private-value"\n')
     const result = loadDesktopPackageEnvironment('win32', env)
-    expect(result.DSH_DESKTOP_WINDOWS_CER_FILE).toBe(join(root, 'certificates/ev.cer'))
-    expect(result.DSH_DESKTOP_WINDOWS_TOKEN_PIN).toBe('private-value')
+    expect(result.AGENTRANS_DESKTOP_WINDOWS_CER_FILE).toBe(join(root, 'certificates/ev.cer'))
+    expect(result.AGENTRANS_DESKTOP_WINDOWS_TOKEN_PIN).toBe('private-value')
     await writeFile(file, '')
-    expect(loadDesktopPackageEnvironment('win32', env).DSH_DESKTOP_WINDOWS_CER_FILE).toBeUndefined()
+    expect(loadDesktopPackageEnvironment('win32', env).AGENTRANS_DESKTOP_WINDOWS_CER_FILE).toBeUndefined()
   })
 })
 
@@ -67,21 +67,21 @@ it('preserves the selected preset when Windows environment enumeration uses lowe
       get: (target, name) => typeof name === 'string' ? target[name.toLowerCase()] : undefined,
     })
     const selected = loadDesktopPackageEnvironment('win32', environment, root, { unsigned: true })
-    expect(selected.DSH_PACKAGING_PRESET).toBe('test')
+    expect(selected.AGENTRANS_PACKAGING_PRESET).toBe('test')
   })
 })
 
 it('rejects missing presets, traversal, deployment mismatches and secrets in public configuration', async () => {
   await withPreset(async (root) => {
-    const env = { DSH_PACKAGING_CONFIG_DIR: root, DSH_PACKAGING_PRESET: 'test' }
+    const env = { AGENTRANS_PACKAGING_CONFIG_DIR: root, AGENTRANS_PACKAGING_PRESET: 'test' }
     const load = (override = {}) => loadDesktopPackageEnvironment('win32', { ...env, ...override }, root, { unsigned: true })
-    expect(() => load({ DSH_PACKAGING_CONFIG_DIR: 'relative' })).toThrow(/absolute/u)
-    expect(() => load({ DSH_PACKAGING_CONFIG_DIR: undefined })).toThrow(/absolute/u)
-    expect(() => load({ DSH_PACKAGING_PRESET: '../secrets' })).toThrow(/preset must/u)
-    expect(() => load({ DSH_PACKAGING_PRESET: 'production' })).toThrow(/cannot read/u)
+    expect(() => load({ AGENTRANS_PACKAGING_CONFIG_DIR: 'relative' })).toThrow(/absolute/u)
+    expect(() => load({ AGENTRANS_PACKAGING_CONFIG_DIR: undefined })).toThrow(/absolute/u)
+    expect(() => load({ AGENTRANS_PACKAGING_PRESET: '../secrets' })).toThrow(/preset must/u)
+    expect(() => load({ AGENTRANS_PACKAGING_PRESET: 'production' })).toThrow(/cannot read/u)
     await writeFile(join(root, 'presets/test.env'), '')
-    await writeFile(join(root, 'presets/test.env'), 'DSH_DESKTOP_WINDOWS_TOKEN_PIN=private-value\n')
-    expect(() => load()).toThrow(/unsupported setting DSH_DESKTOP_WINDOWS_TOKEN_PIN/u)
+    await writeFile(join(root, 'presets/test.env'), 'AGENTRANS_DESKTOP_WINDOWS_TOKEN_PIN=private-value\n')
+    expect(() => load()).toThrow(/unsupported setting AGENTRANS_DESKTOP_WINDOWS_TOKEN_PIN/u)
     expect(() => load()).not.toThrow(/private-value/u)
   })
 })
@@ -89,10 +89,10 @@ it('rejects missing presets, traversal, deployment mismatches and secrets in pub
 it('cache maintenance reaches cache path validation without a signing file', async () => {
   await withPreset(async (root) => {
     await writeFile(join(root, 'presets/test.env'),
-      'DSH_DESKTOP_WINDOWS_SIGNATURE_CACHE_DIR=relative-cache\n')
+      'AGENTRANS_DESKTOP_WINDOWS_SIGNATURE_CACHE_DIR=relative-cache\n')
     const result = spawnSync(process.execPath,
       [join(import.meta.dirname, '../scripts/manage-windows-signature-cache.mjs'), '--usage'], {
-        env: { ...process.env, DSH_PACKAGING_CONFIG_DIR: root, DSH_PACKAGING_PRESET: 'test' },
+        env: { ...process.env, AGENTRANS_PACKAGING_CONFIG_DIR: root, AGENTRANS_PACKAGING_PRESET: 'test' },
         encoding: 'utf8', timeout: 10_000, windowsHide: true,
       })
     expect(result.error).toBeUndefined()

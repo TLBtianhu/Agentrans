@@ -142,8 +142,8 @@ export function apply(ctx: ClientContext): void {
    */
   const act = (action: ViewerStatusAction): void => {
     const target = (globalThis as {
-      __DSH_LIVESHARE_VIEWER__?: { readonly shareId?: string; readonly basePath?: string }
-    }).__DSH_LIVESHARE_VIEWER__
+      __AGENTRANS_LIVESHARE_VIEWER__?: { readonly shareId?: string; readonly basePath?: string }
+    }).__AGENTRANS_LIVESHARE_VIEWER__
     const base = target?.basePath ?? ''
     if (action === 'reload') {
       location.reload()
@@ -195,12 +195,12 @@ export function apply(ctx: ClientContext): void {
     return stop
   }, 'liveshare: state a lost Connection as offline')
   const target = (globalThis as {
-    __DSH_LIVESHARE_VIEWER__?: {
+    __AGENTRANS_LIVESHARE_VIEWER__?: {
       readonly shareId?: string
       readonly sessionId?: string
       readonly basePath?: string
     }
-  }).__DSH_LIVESHARE_VIEWER__
+  }).__AGENTRANS_LIVESHARE_VIEWER__
   // The share's own answer says who owns it and what it grants this page. It arrives when it arrives:
   // every surface re-reads it, so the Session opens as soon as the list carries it rather than waiting
   // for an answer that a stalled Relay may never send.

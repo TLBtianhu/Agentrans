@@ -7,9 +7,9 @@ import type { AccountClientMetadata } from '@agentrans/deepseek-account/types'
  * @throws Error when the build carries no client version, instead of reporting a guessed one.
  */
 export function desktopClientVersion(): string {
-  const version = process.env.DSH_CLIENT_VERSION
+  const version = process.env.AGENTRANS_CLIENT_VERSION
   if (version === undefined || version === '') {
-    throw new Error('desktop account: this application build carries no DSH_CLIENT_VERSION')
+    throw new Error('desktop account: this application build carries no AGENTRANS_CLIENT_VERSION')
   }
   return version
 }

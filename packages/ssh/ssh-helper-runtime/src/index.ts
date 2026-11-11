@@ -25,10 +25,10 @@ export async function runSshHelperRuntime(): Promise<void> {
     },
   })
 
-  const selection = process.env.DSH_SUBPROCESS_RUNNER
-  Reflect.deleteProperty(process.env, 'DSH_SUBPROCESS_RUNNER')
-  if (process.env.DSH_PTC_RUNTIME_NODE === '1') {
-    Reflect.deleteProperty(process.env, 'DSH_PTC_RUNTIME_NODE')
+  const selection = process.env.AGENTRANS_SUBPROCESS_RUNNER
+  Reflect.deleteProperty(process.env, 'AGENTRANS_SUBPROCESS_RUNNER')
+  if (process.env.AGENTRANS_PTC_RUNTIME_NODE === '1') {
+    Reflect.deleteProperty(process.env, 'AGENTRANS_PTC_RUNTIME_NODE')
     await import('@agentrans/ptc-runtime-node/process')
   } else if (selection !== undefined) {
     const { runSelectedSubprocessRunner } = await import('@agentrans/subprocess-local/runner')

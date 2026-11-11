@@ -15,7 +15,7 @@ Status: implemented
 每个发布的产物都附带一份分离式 Ed25519 签名，已安装的构建在允许安装前用编译进自身的公钥校验已下载的安装包。
 
 - 签名覆盖产物的 SHA-256 摘要而非文件本身：Ed25519 会对消息内部再做哈希，因此对摘要签名等于第二层独立哈希，150 MB 的安装包只需单次流式读取，无需整块载入内存。
-- 公钥是 [update-signing-key.ts](../../../../apps/desktop/src/update-signing-key.ts) 中的常量。私钥只存在于发布环境，即仓库 secret `DSH_UPDATE_SIGNING_KEY`。
+- 公钥是 [update-signing-key.ts](../../../../apps/desktop/src/update-signing-key.ts) 中的常量。私钥只存在于发布环境，即仓库 secret `AGENTRANS_UPDATE_SIGNING_KEY`。
 - 缺少该密钥时发布拒绝执行，因为未签名的版本会在任何信任该公钥的地方安装。签名缺失或不匹配会以可见失败结束下载；另一种选择是安装无人担保的字节。
 - 签名地址由更新器已解析出的 Release tag 与 electron-builder 写入 `app-update.yml` 的 feed 坐标推导，因此信任锚与下载来自同一个 Release。
 

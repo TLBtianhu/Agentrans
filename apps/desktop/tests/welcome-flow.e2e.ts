@@ -64,8 +64,8 @@ describe.skipIf(!existsSync(builtHost))('built Desktop welcome flow', () => {
         ...Object.fromEntries(['PATH', 'Path', 'SystemRoot', 'SYSTEMROOT', 'WINDIR', 'ComSpec', 'PATHEXT', 'TEMP', 'TMP']
           .flatMap(name => process.env[name] === undefined ? [] : [[name, process.env[name]]])),
         HOME: osHome, USERPROFILE: osHome, LOCALAPPDATA: local, APPDATA: roaming,
-        DSH_TELEMETRY_MODE: 'DISABLED',
-        DSH_CLIENT_VERSION: version(join(repository, 'apps/desktop/package.json')),
+        AGENTRANS_TELEMETRY_MODE: 'DISABLED',
+        AGENTRANS_CLIENT_VERSION: version(join(repository, 'apps/desktop/package.json')),
         NODE_OPTIONS: `--import=${JSON.stringify(networkGuard.href)}`,
       }
       const project = prepareDevelopmentProject({
@@ -104,7 +104,7 @@ describe.skipIf(!existsSync(builtHost))('built Desktop welcome flow', () => {
         await stop()
         activeAudit = join(root, `network-audit-${String(++launch)}.jsonl`)
         host = new DesktopHostProcess(process.execPath, project, paths.profile, undefined, {
-          ...environment, DSH_SNAPSHOT_NETWORK_AUDIT_FILE: activeAudit,
+          ...environment, AGENTRANS_SNAPSHOT_NETWORK_AUDIT_FILE: activeAudit,
           NODE_OPTIONS: `${environment.NODE_OPTIONS}${extraPreload === undefined ? '' : ` --import=${JSON.stringify(extraPreload)}`}`,
         })
         const { url } = await host.start()

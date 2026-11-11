@@ -19,7 +19,7 @@ const VIEWER_PLUGINS = [
 ]
 
 afterEach(() => {
-  Reflect.deleteProperty(globalThis, '__DSH_LIVESHARE_VIEWER__')
+  Reflect.deleteProperty(globalThis, '__AGENTRANS_LIVESHARE_VIEWER__')
 })
 
 /**
@@ -76,7 +76,7 @@ describe('liveshare client face', () => {
   })
 
   it('mounts the viewer surfaces and registers no Share action on a viewer page', async () => {
-    Reflect.set(globalThis, '__DSH_LIVESHARE_VIEWER__', { basePath: '', shareId: 'share-1', sessionId: 'fx-alpha' })
+    Reflect.set(globalThis, '__AGENTRANS_LIVESHARE_VIEWER__', { basePath: '', shareId: 'share-1', sessionId: 'fx-alpha' })
     const { ctx, fiber, registered, mounts } = await mountFace()
     // The viewer face contributes the seats whose only service is the slot registry; the owner's own
     // header action is not among them.
@@ -101,10 +101,10 @@ describe('Liveshare page constants', () => {
     const channel = await import('../src/viewer-channel.ts')
     expect(channel.LIVESHARE_VIEWER_GLOBAL).toBe(protocol.LIVESHARE_VIEWER_GLOBAL)
     protocol.installViewerCarrier({ basePath: '', shareId: 's', sessionId: 'a', readTimeoutMs: 1 })
-    const page = globalThis as { __DSH_LIVESHARE_VIEWER__?: unknown; __DSH_TRANSPORT__?: unknown }
+    const page = globalThis as { __AGENTRANS_LIVESHARE_VIEWER__?: unknown; __AGENTRANS_TRANSPORT__?: unknown }
     expect((globalThis as Record<string, unknown>)[channel.LIVESHARE_VIEWER_GLOBAL])
       .toEqual({ basePath: '', shareId: 's', sessionId: 'a' })
-    delete page.__DSH_LIVESHARE_VIEWER__
-    delete page.__DSH_TRANSPORT__
+    delete page.__AGENTRANS_LIVESHARE_VIEWER__
+    delete page.__AGENTRANS_TRANSPORT__
   })
 })

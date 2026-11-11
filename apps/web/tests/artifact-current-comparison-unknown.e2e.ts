@@ -33,7 +33,7 @@ describe.skipIf(webSnapshotMode() === 'record')('web e2e: unconfirmed current co
       replayProviders: [{ id: 'custom-provider', name: 'Custom Lab',
         models: [{ id: 'user-model', name: 'Custom Lab Model', contextWindow: 8192 }] }],
     })
-    const executablePath = process.env.DSH_PLAYWRIGHT_EXECUTABLE_PATH
+    const executablePath = process.env.AGENTRANS_PLAYWRIGHT_EXECUTABLE_PATH
     browser = await chromium.launch(executablePath === undefined ? {} : { executablePath })
     page = await browser.newPage({ viewport: { width: 1440, height: 960 }, locale: 'en-US' })
     tripwire = watchConsole(page)
@@ -126,7 +126,7 @@ describe.skipIf(webSnapshotMode() === 'record')('web e2e: unconfirmed current co
     expect(requests).toHaveLength(1)
     expect(actions()).toHaveLength(1)
     expect(agent.session.snapshotEvents().filter(event => event.type === 'turn/start')).toHaveLength(2)
-    const screenshotDirectory = process.env.DSH_INTERACTION_JOURNEY_SCREENSHOT_DIR
+    const screenshotDirectory = process.env.AGENTRANS_INTERACTION_JOURNEY_SCREENSHOT_DIR
     if (screenshotDirectory !== undefined) await page.screenshot({ path: join(screenshotDirectory, 'comparison-unknown.png'), fullPage: true })
 
     await unconfirmed.getByRole('button', { name: 'Retry original action', exact: true }).click()

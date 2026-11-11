@@ -1,4 +1,4 @@
-/** Local durable attachment backend rooted below `DSH_HOME`. @module @agentrans/attachment-local */
+/** Local durable attachment backend rooted below `AGENTRANS_HOME`. @module @agentrans/attachment-local */
 
 import { join } from 'node:path'
 import { Context } from '@agentrans/cordis'
@@ -63,7 +63,7 @@ export const MAX_IMAGE_COMPRESSION_CONCURRENCY = 8
 
 /** Local attachment backend configuration. */
 export interface Config {
-  /** Explicit harness home; omitted follows `DSH_HOME`, then `~/.dsh`. */
+  /** Explicit harness home; omitted follows `AGENTRANS_HOME`, then `~/.dsh`. */
   dshHome?: string
   /** Maximum encoded bytes accepted for one submitted image. Default: 50 MiB. */
   maxImageBytes?: number

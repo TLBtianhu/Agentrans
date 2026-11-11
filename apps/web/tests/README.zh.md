@@ -24,7 +24,7 @@ pnpm --filter @agentrans/web-frontend exec playwright install --with-deps chromi
 
 ## 真实 Artifact 验收
 
-[真实 Artifact 用例](artifact-live.e2e.ts)要求非空的 `DEEPSEEK_API_KEY`、`DSH_ARTIFACT_LIVE=1` 和 `DSH_SNAPSHOT=record`。将 `DSH_ARTIFACT_LIVE_OUTPUT_DIR` 设置为证据目录后，运行 `node node_modules/vitest/vitest.mjs run --config vitest.web.config.ts apps/web/tests/artifact-live.e2e.ts --maxWorkers=1 --retry=0 --reporter=verbose`。用例在临时工作区使用随附的 `deepseek-flash` 模型，不加载或写入回放 fixture。每次运行在新证据子目录保存 Session、截图和请求状态，不包含凭据及 HTTP 认证请求头。它检查模型创建粒子、不增加模型轮次的本地步进、随普通问题附上的 Host 重算状态，以及模型更新同一 Artifact 后改变的仿真行为。两轮及资源清理都必须正常完成。设置 `DSH_PLAYWRIGHT_EXECUTABLE_PATH` 可使用已有的 Chromium 兼容浏览器。
+[真实 Artifact 用例](artifact-live.e2e.ts)要求非空的 `DEEPSEEK_API_KEY`、`AGENTRANS_ARTIFACT_LIVE=1` 和 `AGENTRANS_SNAPSHOT=record`。将 `AGENTRANS_ARTIFACT_LIVE_OUTPUT_DIR` 设置为证据目录后，运行 `node node_modules/vitest/vitest.mjs run --config vitest.web.config.ts apps/web/tests/artifact-live.e2e.ts --maxWorkers=1 --retry=0 --reporter=verbose`。用例在临时工作区使用随附的 `deepseek-flash` 模型，不加载或写入回放 fixture。每次运行在新证据子目录保存 Session、截图和请求状态，不包含凭据及 HTTP 认证请求头。它检查模型创建粒子、不增加模型轮次的本地步进、随普通问题附上的 Host 重算状态，以及模型更新同一 Artifact 后改变的仿真行为。两轮及资源清理都必须正常完成。设置 `AGENTRANS_PLAYWRIGHT_EXECUTABLE_PATH` 可使用已有的 Chromium 兼容浏览器。
 
 ## 完成状态观察
 

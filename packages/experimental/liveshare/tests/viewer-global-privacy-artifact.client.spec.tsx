@@ -150,7 +150,7 @@ describe('Assembled viewer page global configuration privacy', () => {
     const context = input.context()
     expect(context.get('connection')?.isLoopback).toBe(authority === 'loopback')
     expect(context.get('remote')?.$host.isLoopback).toBe(authority === 'loopback')
-    const transport = Reflect.get(globalThis, '__DSH_TRANSPORT__') as { readonly ownsHost?: boolean }
+    const transport = Reflect.get(globalThis, '__AGENTRANS_TRANSPORT__') as { readonly ownsHost?: boolean }
     expect(transport.ownsHost).toBeUndefined()
     const forms = context.get('configForms')
     if (forms === undefined) throw new Error('assembled viewer page configuration forms did not activate')

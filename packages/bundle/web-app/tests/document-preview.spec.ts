@@ -97,7 +97,7 @@ it('loads the shipped Office rows with separately patched settings and authorize
   const injections: IndexInjection[] = []
   ctx.emit('webserver/index-inject', injections, PAGE_PEER)
   expect(injections).toEqual([
-    { kind: 'global', name: '__DSH_DOCUMENT_PREVIEW_CONFIG__', value: clientConfig },
+    { kind: 'global', name: '__AGENTRANS_DOCUMENT_PREVIEW_CONFIG__', value: clientConfig },
   ])
 
   const id = SessionId('office-loader')

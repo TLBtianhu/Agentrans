@@ -1,7 +1,7 @@
 /** Resolve public release identifiers supplied by the packaging environment. */
 
 /** Environment variable that supplies the Electron application identifier. */
-export const DESKTOP_APP_ID_ENV = 'DSH_DESKTOP_APP_ID'
+export const DESKTOP_APP_ID_ENV = 'AGENTRANS_DESKTOP_APP_ID'
 
 /** Fixed identity of the separately configured Agentrans Windows distribution. */
 export const AGENTRANS_DESKTOP_APP_ID = 'com.agentrans.app'
@@ -23,13 +23,13 @@ export function assertUpstreamDesktopReleaseIdentity(appId) {
 }
 
 /** Environment variable that supplies electron-builder's macOS certificate qualifier. */
-export const MACOS_SIGNING_IDENTITY_ENV = 'DSH_DESKTOP_MACOS_SIGNING_IDENTITY'
+export const MACOS_SIGNING_IDENTITY_ENV = 'AGENTRANS_DESKTOP_MACOS_SIGNING_IDENTITY'
 
 /** Environment variable that supplies the expected Apple Developer Team ID. */
-export const MACOS_TEAM_ID_ENV = 'DSH_DESKTOP_MACOS_TEAM_ID'
+export const MACOS_TEAM_ID_ENV = 'AGENTRANS_DESKTOP_MACOS_TEAM_ID'
 
 /** Environment variable that selects the npm registry used for the bundled runtime install. */
-export const NPM_REGISTRY_ENV = 'DSH_DESKTOP_NPM_REGISTRY'
+export const NPM_REGISTRY_ENV = 'AGENTRANS_DESKTOP_NPM_REGISTRY'
 
 const DEFAULT_NPM_REGISTRY = 'https://registry.npmjs.org/'
 

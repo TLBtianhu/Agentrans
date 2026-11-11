@@ -21,7 +21,7 @@ patchedDependencies:
   lexical@0.49.0: 54c4413db208cf234cb68c6a837f2523d3b319aa17911f1da385af08362e1356
   mdast-util-gfm-autolink-literal@2.0.1: 7fa6fc7927128a45c3f148d31faf388806895e2de39c14a144200edbc1e7aaa0
   micromark-extension-gfm-autolink-literal@2.1.0: 906ae7c0cd1f69e7ee308a41bc0542e0085276ac7517e56e96f0ccaf5a89327d
-  node-pty@1.2.0-beta.15: 9d30053266d0f39d3debe894c675867f6782da6bcadbc94a693b3cfb9eff8ed0
+  node-pty@1.2.0-beta.15: e8633e819d09e945938e44da1d5fb287ca2795fcfbd2300419ba83a4ffa26f13
 
 importers:
 
@@ -857,6 +857,9 @@ importers:
       '@agentrans/app-boot':
         specifier: workspace:*
         version: link:../../packages/boot/app-boot
+      '@agentrans/cli':
+        specifier: workspace:*
+        version: link:../cli
       '@agentrans/client-connection':
         specifier: workspace:*
         version: link:../../packages/client/connection
@@ -866,9 +869,6 @@ importers:
       '@agentrans/deepseek-account':
         specifier: workspace:*
         version: link:../../packages/credentials/deepseek-account
-      '@agentrans/cli':
-        specifier: workspace:*
-        version: link:../cli
       '@agentrans/home-paths':
         specifier: workspace:*
         version: link:../../packages/util/home-paths
@@ -17166,7 +17166,7 @@ importers:
         version: 3.1.1
       node-pty:
         specifier: 1.2.0-beta.15
-        version: 1.2.0-beta.15(patch_hash=9d30053266d0f39d3debe894c675867f6782da6bcadbc94a693b3cfb9eff8ed0)
+        version: 1.2.0-beta.15(patch_hash=e8633e819d09e945938e44da1d5fb287ca2795fcfbd2300419ba83a4ffa26f13)
     devDependencies:
       '@agentrans/cordis':
         specifier: workspace:~
@@ -18401,6 +18401,9 @@ importers:
       '@agentrans/brand':
         specifier: workspace:*
         version: link:../../packages/util/brand
+      '@agentrans/cli':
+        specifier: workspace:*
+        version: link:../../apps/cli
       '@agentrans/client-connection':
         specifier: workspace:*
         version: link:../../packages/client/connection
@@ -18467,9 +18470,6 @@ importers:
       '@agentrans/deepseek-llm-api-extensions':
         specifier: workspace:*
         version: link:../../packages/llm/deepseek-llm-api-extensions
-      '@agentrans/cli':
-        specifier: workspace:*
-        version: link:../../apps/cli
       '@agentrans/file-reference':
         specifier: workspace:*
         version: link:../../packages/context/file-reference
@@ -32377,7 +32377,7 @@ snapshots:
 
   node-int64@0.4.0: {}
 
-  node-pty@1.2.0-beta.15(patch_hash=9d30053266d0f39d3debe894c675867f6782da6bcadbc94a693b3cfb9eff8ed0):
+  node-pty@1.2.0-beta.15(patch_hash=e8633e819d09e945938e44da1d5fb287ca2795fcfbd2300419ba83a4ffa26f13):
     dependencies:
       node-addon-api: 7.1.1
 

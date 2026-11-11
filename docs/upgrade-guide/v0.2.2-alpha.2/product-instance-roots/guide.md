@@ -9,7 +9,7 @@ English | [中文](guide.zh.md)
 
 ## Change
 
-Repository `dsh`, `start:web`, `dev:web`, and Desktop development now establish a per-worktree instance outside the source tree. Inherited `DSH_HOME`, `DSH_AGENTS_HOME`, and `DSH_DESKTOP_USER_DATA_DIR` no longer select product state. `AGENTRANS_DEV_ROOT` is the explicit development override. Nonempty unmarked roots and roots owned by another purpose are rejected before state writes; existing data is not migrated.
+Repository `dsh`, `start:web`, `dev:web`, and Desktop development now establish a per-worktree instance outside the source tree. Inherited `AGENTRANS_HOME`, `AGENTRANS_AGENTS_HOME`, and `AGENTRANS_DESKTOP_USER_DATA_DIR` no longer select product state. `AGENTRANS_DEV_ROOT` is the explicit development override. Nonempty unmarked roots and roots owned by another purpose are rejected before state writes; existing data is not migrated.
 
 The Windows packaged GUI and bundled CLI derive state from the same installation anchor. Isolated verification requires an explicit context matching that payload and its own marked state root. Packaged user startup on another platform requires a platform-specific adapter rather than applying the Windows layout inside an application bundle. Ordinary startup no longer registers the upstream `dsh` protocol.
 

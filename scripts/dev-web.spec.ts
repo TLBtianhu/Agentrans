@@ -117,23 +117,23 @@ it('samples one local environment at startup without validating watcher outputs'
     await writeFile(join(root, 'apps/web/dist/index.html'), '<main></main>')
     await writeFile(join(root, 'packages/client/example/lib/client.js'), 'module.exports = {}\n')
     writeClientBuildRecord(root, {
-      DSH_CLIENT_BUILD_PROFILE: 'official',
-      DSH_CLIENT_COMMIT_HASH: 'fffffff',
-      DSH_CLIENT_TITLE: 'Agentrans',
-      DSH_CLIENT_VERSION: '1.2.2',
+      AGENTRANS_CLIENT_BUILD_PROFILE: 'official',
+      AGENTRANS_CLIENT_COMMIT_HASH: 'fffffff',
+      AGENTRANS_CLIENT_TITLE: 'Agentrans',
+      AGENTRANS_CLIENT_VERSION: '1.2.2',
     })
     await writeFile(join(root, 'packages/client/example/lib/client.js'), 'module.exports = { changed: true }\n')
 
     expect(devWebBuildEnvironment(root, {
       PATH: '/bin',
-      DSH_BUILD_CLIENT_PROFILE: 'official',
-      DSH_CLIENT_COMMIT_HASH: 'abc1234',
-      DSH_CLIENT_EXTRA: 'launch-value',
+      AGENTRANS_BUILD_CLIENT_PROFILE: 'official',
+      AGENTRANS_CLIENT_COMMIT_HASH: 'abc1234',
+      AGENTRANS_CLIENT_EXTRA: 'launch-value',
     })).toEqual({
       PATH: '/bin',
-      DSH_CLIENT_COMMIT_HASH: 'abc1234',
-      DSH_CLIENT_EXTRA: 'launch-value',
-      DSH_CLIENT_VERSION: '1.2.3',
+      AGENTRANS_CLIENT_COMMIT_HASH: 'abc1234',
+      AGENTRANS_CLIENT_EXTRA: 'launch-value',
+      AGENTRANS_CLIENT_VERSION: '1.2.3',
     })
   } finally {
     await rm(root, { recursive: true, force: true })

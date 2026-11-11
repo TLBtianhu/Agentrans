@@ -17,7 +17,7 @@ python python/sdk/examples/minimal.py \
   "Inspect the repository and fix the failing tests."
 ```
 
-如需使用兼容代理，请设置 `DEEPSEEK_BASE_URL`；可通过 `DSH_MODEL` 设置脚本的默认模型，通过 `DSH_SYSTEM_PROMPT` 指定部署角色设定。`--model` 是唯一运行时模型选择，不要求匹配的环境变量；`--profile` 可以选择另一个提供 SDK 服务的 profile。所选 home 保存生成的 `sdk-minimal` profile，并在 `sessions/` 下保存未压缩 JSONL 会话日志；脚本绝不会隐式读取 `~/.dsh`。
+如需使用兼容代理，请设置 `DEEPSEEK_BASE_URL`；可通过 `AGENTRANS_MODEL` 设置脚本的默认模型，通过 `AGENTRANS_SYSTEM_PROMPT` 指定部署角色设定。`--model` 是唯一运行时模型选择，不要求匹配的环境变量；`--profile` 可以选择另一个提供 SDK 服务的 profile。所选 home 保存生成的 `sdk-minimal` profile，并在 `sessions/` 下保存未压缩 JSONL 会话日志；脚本绝不会隐式读取 `~/.dsh`。
 
 随附的 [`@agentrans/sdk-minimal` 组合包](../../../packages/bundle/sdk-minimal/README.zh.md) 是该模式完整且显式的 Cordis 配置树。它只暴露：
 
@@ -32,7 +32,7 @@ python python/sdk/examples/minimal.py \
 <a id="compact-a-full-sdk-session"></a>
 ## 压缩完整 SDK Session
 
-[压缩示例](compact.py)使用完整 `sdk` profile。它将所选工作区的 `README.md` 读入 `Session.run()` 输入，通过同一方法执行 `/compact`，随后使用保留的上下文继续提问。模型凭据和 `DSH_MODEL` 默认值与极简示例一致，并且要求显式指定 home：
+[压缩示例](compact.py)使用完整 `sdk` profile。它将所选工作区的 `README.md` 读入 `Session.run()` 输入，通过同一方法执行 `/compact`，随后使用保留的上下文继续提问。模型凭据和 `AGENTRANS_MODEL` 默认值与极简示例一致，并且要求显式指定 home：
 
 ```sh
 python python/sdk/examples/compact.py \
@@ -104,7 +104,7 @@ python python/sdk/examples/manage_plugins.py \
 对同一个显式 home 使用运行时 wheel 包提供的 `dsh` 命令，以进行持久 profile 变更：
 
 ```sh
-export DSH_HOME=/absolute/path/to/example-dsh-home
+export AGENTRANS_HOME=/absolute/path/to/example-dsh-home
 dsh plugin --profile sdk-minimal add file:/absolute/path/to/my-plugin-bundle
 ```
 

@@ -18,7 +18,7 @@ const pluginName = 'profile-resolution-plugin'
 const sourceProbeName = 'source-probe'
 const externalName = 'profile-resolution-external'
 const externalLeafName = 'profile-resolution-external-leaf'
-const marker = 'DSH_PROFILE_RESOLUTION '
+const marker = 'AGENTRANS_PROFILE_RESOLUTION '
 
 interface ResolutionEvidence {
   execArgv: string[]
@@ -58,7 +58,7 @@ export function testProfileResolution(mode: ExampleMode): void {
   it.each(['installed', 'npm-link'] as const)(`resolves a %s profile dependency graph in ${mode} mode`, {
     timeout: processTimeoutMs + 15_000, retry: 0,
   }, async (layout) => {
-    // The child reports loaded module paths in the form DSH_HOME was given; hand it the native realpath so
+    // The child reports loaded module paths in the form AGENTRANS_HOME was given; hand it the native realpath so
     // Windows 8.3 tmpdir names and macOS /var symlinks match the expectations computed below.
     const root = realpathSync.native(await mkdtemp(join(tmpdir(), 'dsh-profile-resolution-')))
     const links: string[] = []
@@ -139,8 +139,8 @@ export function testProfileResolution(mode: ExampleMode): void {
       const staleTools = join(root, 'stale-tools')
       const staleToolsLink = join(sharedModules, '@agentrans', 'tools')
       await writePackage(staleTools, { name: '@agentrans/tools', version: '0.0.0', exports }, {
-        'index.mjs': "export default class Tools {}\nthrow new Error('STALE_DSH_TOOLS')",
-        'index.cjs': "throw new Error('STALE_DSH_TOOLS')",
+        'index.mjs': "export default class Tools {}\nthrow new Error('STALE_AGENTRANS_TOOLS')",
+        'index.cjs': "throw new Error('STALE_AGENTRANS_TOOLS')",
       })
       const sourceDir = join(sourcePackageDir, 'src')
       const toolsCjsExpression = mode === 'lib' ? "require.resolve('@agentrans/tools')" : 'null'
@@ -225,7 +225,7 @@ export function testProfileResolution(mode: ExampleMode): void {
         ].join('\n'),
         'cordis.patch.yml': JSON.stringify([
           { id: 'headless-startup', disabled: true },
-          { id: 'sandbox-policy', inject: [], config: { mode: process.env.DSH_PERMISSION_MODE ?? 'workspace-write' } },
+          { id: 'sandbox-policy', inject: [], config: { mode: process.env.AGENTRANS_PERMISSION_MODE ?? 'workspace-write' } },
           { id: 'headless-runner', disabled: true },
           { id: 'llm-deepseek', disabled: true },
           { insert: [
@@ -248,7 +248,7 @@ export function testProfileResolution(mode: ExampleMode): void {
         mode, sourceImport: 'tsx/esm', tsconfigPath: join(repoRoot, 'tsconfig.json'),
         configArgs: ['--profile', 'headless'],
         env: {
-          DSH_HOME: home, DSH_AGENTS_HOME: join(root, 'agents'), DSH_TELEMETRY_DISABLED: '1',
+          AGENTRANS_HOME: home, AGENTRANS_AGENTS_HOME: join(root, 'agents'), AGENTRANS_TELEMETRY_DISABLED: '1',
           NODE_OPTIONS: undefined, TSX_TSCONFIG_PATH: undefined,
         },
       })

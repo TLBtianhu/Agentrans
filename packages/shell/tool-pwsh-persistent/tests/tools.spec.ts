@@ -109,8 +109,8 @@ type StubMode =
   | 'exit-after-send'
   | 'prompt-collision'
 
-const START_PATTERN = /__DSH_PERSISTENT_PWSH_START_[^_]+(?:-[^_]+)*__/
-const END_PATTERN = /__DSH_PERSISTENT_PWSH_END_[^:]+:/
+const START_PATTERN = /__AGENTRANS_PERSISTENT_PWSH_START_[^_]+(?:-[^_]+)*__/
+const END_PATTERN = /__AGENTRANS_PERSISTENT_PWSH_END_[^:]+:/
 
 class StubTerminalSession implements TerminalBackendSession {
   readonly motd = 'stub> '
@@ -371,8 +371,8 @@ describe('tool-pwsh-persistent', () => {
     stub.sessions[0]!.mode = 'with-echo'
     const result = text(await call(ctx, owner, 'Write-Output hi'))
     expect(result).toBe('hello from stub')
-    expect(result).not.toContain('__DSH_PERSISTENT_PWSH_START_')
-    expect(result).not.toContain('__DSH_PERSISTENT_PWSH_END_')
+    expect(result).not.toContain('__AGENTRANS_PERSISTENT_PWSH_START_')
+    expect(result).not.toContain('__AGENTRANS_PERSISTENT_PWSH_END_')
     expect(result).not.toContain('Invoke-Expression')
   })
 
@@ -586,7 +586,7 @@ describe('tool-pwsh-persistent', () => {
     expect(result).toContain('pwsh: syntax error')
     // The backend owns the prompt text, so the fallback retains it verbatim.
     expect(result.endsWith('stub> ')).toBe(true)
-    expect(result).not.toContain('DSH_PERSISTENT_PWSH_START')
+    expect(result).not.toContain('AGENTRANS_PERSISTENT_PWSH_START')
   })
 
   it('does not attribute old scrollback truncation to a complete current command', async () => {

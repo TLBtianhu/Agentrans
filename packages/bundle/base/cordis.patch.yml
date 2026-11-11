@@ -115,7 +115,7 @@
       name: '@agentrans/settings'
       disabled: !!js "!ctx.get('profileContext')"
 
-    # Credential sources: managed `$DSH_HOME/.credentials.yaml`, then inherited
+    # Credential sources: managed `$AGENTRANS_HOME/.credentials.yaml`, then inherited
     # environment, project `.env`, and user `.env` fallbacks.
     # Adapters resolve references per request; the Models page writes only the
     # managed document, which is never materialized into the process environment.
@@ -204,10 +204,10 @@
 
     # Session sharing is opt-in. If enabled by a custom composition, OTel releases
     # a Session-log prefix only after explicit feedback, regardless of provider.
-    # DSH_TELEMETRY_OTLP_URL overrides the production endpoint. A non-empty
-    # DSH_TELEMETRY_DISABLED — any value, including '0'/'false' — opts the
+    # AGENTRANS_TELEMETRY_OTLP_URL overrides the production endpoint. A non-empty
+    # AGENTRANS_TELEMETRY_DISABLED — any value, including '0'/'false' — opts the
     # process out (the launchers patch the row disabled; config cannot disable
-    # a row). Exports carry the harness home's anonymous user id ($DSH_HOME/.anonymous-user-id,
+    # a row). Exports carry the harness home's anonymous user id ($AGENTRANS_HOME/.anonymous-user-id,
     # random UUID; delete the file to reset the identity) as the Resource's
     # user.id. Byte-bounded batching may turn an authorized prefix into
     # several HTTP requests. Requests run serially; each has its own 1s
@@ -219,11 +219,11 @@
       name: '@agentrans/session-telemetry-otel'
       disabled: true
       config:
-        mode: !!js process.env.DSH_TELEMETRY_MODE || 'FEEDBACK_ONLY'
+        mode: !!js process.env.AGENTRANS_TELEMETRY_MODE || 'FEEDBACK_ONLY'
         shutdownTimeoutMillis: 3000
         maxRequestBytes: 4000000
         exporter:
-          url: !!js process.env.DSH_TELEMETRY_OTLP_URL ?? 'https://dsh-otel-collector.deepseeksvc.com/v1/logs'
+          url: !!js process.env.AGENTRANS_TELEMETRY_OTLP_URL ?? 'https://dsh-otel-collector.deepseeksvc.com/v1/logs'
           compression: gzip
           timeoutMillis: 1000
         processor:
@@ -244,7 +244,7 @@
     - id: sandbox-policy
       name: '@agentrans/sandbox-policy'
       config:
-        mode: !!js process.env.DSH_PERMISSION_MODE ?? 'workspace-write'
+        mode: !!js process.env.AGENTRANS_PERMISSION_MODE ?? 'workspace-write'
         workspaceRoot: !!js process.cwd()
 
     - id: bash-sandbox
@@ -260,7 +260,7 @@
     - id: approval
       name: '@agentrans/user-approval'
       config:
-        policy: !!js "(process.env.DSH_PERMISSION_MODE ?? 'workspace-write') === 'danger-full-access' ? 'never' : 'ask'"
+        policy: !!js "(process.env.AGENTRANS_PERMISSION_MODE ?? 'workspace-write') === 'danger-full-access' ? 'never' : 'ask'"
 
     - id: permission
       name: '@agentrans/permission-presets'

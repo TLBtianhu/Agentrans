@@ -45,13 +45,13 @@ describe('ShellEnvRegistry', () => {
     const registry = new ShellEnvRegistry(ctx, { dshHome: './test-dsh-home' })
 
     expect(registry.collect(execution())).toEqual({
-      DSH_HOME: resolve('./test-dsh-home'),
-      DSH_SHELL: '1',
+      AGENTRANS_HOME: resolve('./test-dsh-home'),
+      AGENTRANS_SHELL: '1',
     })
     expect(registry.collect(execution('session-a'))).toEqual({
-      DSH_HOME: resolve('./test-dsh-home'),
-      DSH_SESSION_ID: 'session-a',
-      DSH_SHELL: '1',
+      AGENTRANS_HOME: resolve('./test-dsh-home'),
+      AGENTRANS_SESSION_ID: 'session-a',
+      AGENTRANS_SHELL: '1',
     })
   })
 
@@ -62,22 +62,22 @@ describe('ShellEnvRegistry', () => {
       cwd: '/work', home: '/home', startedBundles: [], overlays: [], telemetryDisabledEnv: undefined,
     })
     const registry = new ShellEnvRegistry(ctx, { dshHome: './test-dsh-home' })
-    expect(registry.collect(execution())).toMatchObject({ DSH_PROFILE: 'web', DSH_PROFILE_DIR: '/profiles/web' })
+    expect(registry.collect(execution())).toMatchObject({ AGENTRANS_PROFILE: 'web', AGENTRANS_PROFILE_DIR: '/profiles/web' })
     expect(() => registry.register({
       name: 'profile-claimer',
-      variables: { DSH_PROFILE: { description: 'Reserved key.' } },
+      variables: { AGENTRANS_PROFILE: { description: 'Reserved key.' } },
       resolve: () => ({}),
-    })).toThrow(/reserved key "DSH_PROFILE"/)
+    })).toThrow(/reserved key "AGENTRANS_PROFILE"/)
   })
 
-  it('resolves DSH_HOME from the ambient override or the user-home default', () => {
-    vi.stubEnv('DSH_HOME', './ambient-dsh-home')
+  it('resolves AGENTRANS_HOME from the ambient override or the user-home default', () => {
+    vi.stubEnv('AGENTRANS_HOME', './ambient-dsh-home')
     const fromEnvironment = new ShellEnvRegistry(new Context())
-    expect(fromEnvironment.collect(execution()).DSH_HOME).toBe(resolve('./ambient-dsh-home'))
+    expect(fromEnvironment.collect(execution()).AGENTRANS_HOME).toBe(resolve('./ambient-dsh-home'))
 
-    vi.stubEnv('DSH_HOME', undefined)
+    vi.stubEnv('AGENTRANS_HOME', undefined)
     const fromDefault = new ShellEnvRegistry(new Context())
-    expect(fromDefault.collect(execution()).DSH_HOME).toBe(join(homedir(), '.dsh'))
+    expect(fromDefault.collect(execution()).AGENTRANS_HOME).toBe(join(homedir(), '.dsh'))
   })
 
   it('collects declared contributor variables and omits unavailable values', () => {
@@ -86,31 +86,31 @@ describe('ShellEnvRegistry', () => {
     registry.register({
       name: 'optional-session-fact',
       variables: {
-        DSH_SESSION_OPTIONAL: { description: 'Optional session-scoped test fact.' },
+        AGENTRANS_SESSION_OPTIONAL: { description: 'Optional session-scoped test fact.' },
       },
-      resolve: exec => exec.agent === undefined ? {} : { DSH_SESSION_OPTIONAL: exec.agent.session.header.id },
+      resolve: exec => exec.agent === undefined ? {} : { AGENTRANS_SESSION_OPTIONAL: exec.agent.session.header.id },
     })
     registry.register({
       name: 'always-available-fact',
       variables: {
-        DSH_ALWAYS_AVAILABLE: { description: 'Always-available test fact.' },
+        AGENTRANS_ALWAYS_AVAILABLE: { description: 'Always-available test fact.' },
       },
-      resolve: () => ({ DSH_ALWAYS_AVAILABLE: 'yes' }),
+      resolve: () => ({ AGENTRANS_ALWAYS_AVAILABLE: 'yes' }),
     })
 
-    expect(registry.collect(execution())).not.toHaveProperty('DSH_SESSION_OPTIONAL')
-    expect(registry.collect(execution()).DSH_ALWAYS_AVAILABLE).toBe('yes')
-    expect(registry.collect(execution('session-b')).DSH_SESSION_OPTIONAL).toBe('session-b')
+    expect(registry.collect(execution())).not.toHaveProperty('AGENTRANS_SESSION_OPTIONAL')
+    expect(registry.collect(execution()).AGENTRANS_ALWAYS_AVAILABLE).toBe('yes')
+    expect(registry.collect(execution('session-b')).AGENTRANS_SESSION_OPTIONAL).toBe('session-b')
     expect(registry.list()).toEqual([
       {
         contributor: 'always-available-fact',
         description: 'Always-available test fact.',
-        key: 'DSH_ALWAYS_AVAILABLE',
+        key: 'AGENTRANS_ALWAYS_AVAILABLE',
       },
       {
         contributor: 'optional-session-fact',
         description: 'Optional session-scoped test fact.',
-        key: 'DSH_SESSION_OPTIONAL',
+        key: 'AGENTRANS_SESSION_OPTIONAL',
       },
     ])
   })
@@ -120,48 +120,48 @@ describe('ShellEnvRegistry', () => {
     const registry = new ShellEnvRegistry(ctx, { dshHome: './test-dsh-home' })
     registry.register({
       name: 'first',
-      variables: { DSH_SHARED: { description: 'First owner.' } },
-      resolve: () => ({ DSH_SHARED: 'first' }),
+      variables: { AGENTRANS_SHARED: { description: 'First owner.' } },
+      resolve: () => ({ AGENTRANS_SHARED: 'first' }),
     })
 
     expect(() => registry.register({
       name: 'second',
-      variables: { DSH_SHARED: { description: 'Second owner.' } },
-      resolve: () => ({ DSH_SHARED: 'second' }),
-    })).toThrow(/DSH_SHARED.*first.*second|DSH_SHARED.*second.*first/)
+      variables: { AGENTRANS_SHARED: { description: 'Second owner.' } },
+      resolve: () => ({ AGENTRANS_SHARED: 'second' }),
+    })).toThrow(/AGENTRANS_SHARED.*first.*second|AGENTRANS_SHARED.*second.*first/)
   })
 
   it('rejects duplicate contributor names and malformed declarations', () => {
     const registry = new ShellEnvRegistry(new Context(), { dshHome: './test-dsh-home' })
     registry.register({
       name: 'declared',
-      variables: { DSH_DECLARED: { description: 'Declared fact.' } },
+      variables: { AGENTRANS_DECLARED: { description: 'Declared fact.' } },
       resolve: () => ({}),
     })
 
     expect(() => registry.register({
       name: 'declared',
-      variables: { DSH_ANOTHER: { description: 'Another fact.' } },
+      variables: { AGENTRANS_ANOTHER: { description: 'Another fact.' } },
       resolve: () => ({}),
     })).toThrow(/already registered/)
     expect(() => registry.register({
       name: ' ',
-      variables: { DSH_BLANK_NAME: { description: 'Blank owner.' } },
+      variables: { AGENTRANS_BLANK_NAME: { description: 'Blank owner.' } },
       resolve: () => ({}),
     })).toThrow(/name must be non-empty/)
     expect(() => registry.register({
       name: 'invalid-key',
-      variables: { dsh_invalid: { description: 'Invalid key.' } } as unknown as Record<'DSH_INVALID', { description: string }>,
+      variables: { dsh_invalid: { description: 'Invalid key.' } } as unknown as Record<'AGENTRANS_INVALID', { description: string }>,
       resolve: () => ({}),
     })).toThrow(/invalid key/)
     expect(() => registry.register({
       name: 'reserved-key',
-      variables: { DSH_HOME: { description: 'Reserved key.' } },
+      variables: { AGENTRANS_HOME: { description: 'Reserved key.' } },
       resolve: () => ({}),
     })).toThrow(/reserved key/)
     expect(() => registry.register({
       name: 'blank-description',
-      variables: { DSH_BLANK_DESCRIPTION: { description: ' ' } },
+      variables: { AGENTRANS_BLANK_DESCRIPTION: { description: ' ' } },
       resolve: () => ({}),
     })).toThrow(/must describe/)
   })
@@ -171,22 +171,22 @@ describe('ShellEnvRegistry', () => {
     const registry = new ShellEnvRegistry(ctx, { dshHome: './test-dsh-home' })
     registry.register({
       name: 'drifted-provider',
-      variables: { DSH_DECLARED: { description: 'Declared fact.' } },
-      resolve: () => ({ DSH_UNDECLARED: 'bad' }),
+      variables: { AGENTRANS_DECLARED: { description: 'Declared fact.' } },
+      resolve: () => ({ AGENTRANS_UNDECLARED: 'bad' }),
     })
 
-    expect(() => registry.collect(execution())).toThrow(/drifted-provider.*DSH_UNDECLARED/)
+    expect(() => registry.collect(execution())).toThrow(/drifted-provider.*AGENTRANS_UNDECLARED/)
   })
 
   it('rejects non-string values returned by a contributor', () => {
     const registry = new ShellEnvRegistry(new Context(), { dshHome: './test-dsh-home' })
     registry.register({
       name: 'wrong-value-type',
-      variables: { DSH_STRING: { description: 'String fact.' } },
-      resolve: () => ({ DSH_STRING: 42 }) as unknown as Record<'DSH_STRING', string>,
+      variables: { AGENTRANS_STRING: { description: 'String fact.' } },
+      resolve: () => ({ AGENTRANS_STRING: 42 }) as unknown as Record<'AGENTRANS_STRING', string>,
     })
 
-    expect(() => registry.collect(execution())).toThrow(/wrong-value-type.*non-string.*DSH_STRING/)
+    expect(() => registry.collect(execution())).toThrow(/wrong-value-type.*non-string.*AGENTRANS_STRING/)
   })
 
   it('removes an effect-scoped contributor when its plugin is disposed', async () => {
@@ -197,28 +197,28 @@ describe('ShellEnvRegistry', () => {
       apply(inner: Context) {
         inner.shellEnv.register({
           name: 'temporary',
-          variables: { DSH_TEMPORARY: { description: 'Temporary fact.' } },
-          resolve: () => ({ DSH_TEMPORARY: 'present' }),
+          variables: { AGENTRANS_TEMPORARY: { description: 'Temporary fact.' } },
+          resolve: () => ({ AGENTRANS_TEMPORARY: 'present' }),
         })
       },
     })
 
-    expect(registry.collect(execution()).DSH_TEMPORARY).toBe('present')
+    expect(registry.collect(execution()).AGENTRANS_TEMPORARY).toBe('present')
     await fiber.dispose()
-    expect(registry.collect(execution())).not.toHaveProperty('DSH_TEMPORARY')
+    expect(registry.collect(execution())).not.toHaveProperty('AGENTRANS_TEMPORARY')
   })
 
   it('returns an explicit contributor disposer', () => {
     const registry = new ShellEnvRegistry(new Context(), { dshHome: './test-dsh-home' })
     const dispose = registry.register({
       name: 'explicit-disposal',
-      variables: { DSH_EXPLICIT_DISPOSAL: { description: 'Explicitly disposed fact.' } },
-      resolve: () => ({ DSH_EXPLICIT_DISPOSAL: 'present' }),
+      variables: { AGENTRANS_EXPLICIT_DISPOSAL: { description: 'Explicitly disposed fact.' } },
+      resolve: () => ({ AGENTRANS_EXPLICIT_DISPOSAL: 'present' }),
     })
 
-    expect(registry.collect(execution()).DSH_EXPLICIT_DISPOSAL).toBe('present')
+    expect(registry.collect(execution()).AGENTRANS_EXPLICIT_DISPOSAL).toBe('present')
     dispose()
-    expect(registry.collect(execution())).not.toHaveProperty('DSH_EXPLICIT_DISPOSAL')
+    expect(registry.collect(execution())).not.toHaveProperty('AGENTRANS_EXPLICIT_DISPOSAL')
   })
 
   it('the plugin registers the service with no contributors on load', async () => {

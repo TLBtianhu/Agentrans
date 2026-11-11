@@ -137,8 +137,8 @@ Function un.CleanData
   StrCpy $UnCleanModels 0
   StrCpy $UnCleanRuntimes 0
   StrCpy $UnCleanExports 0
-  ; Only a DSH_HOME published as a Windows environment variable is visible here.
-  ReadEnvStr $UnHome DSH_HOME
+  ; Only a AGENTRANS_HOME published as a Windows environment variable is visible here.
+  ReadEnvStr $UnHome AGENTRANS_HOME
   ClearErrors
   ${If} $UnCleanApp == 1
     StrCpy $UnTarget "$INSTDIR\data\cache"

@@ -29,7 +29,7 @@
       name: '@agentrans/llm-deepseek-api-key'
       config:
         apiKeyEnv: DEEPSEEK_API_KEY
-        defaultContextWindow: !!js Number(process.env.DSH_CONTEXT_WINDOW ?? 1000000)
+        defaultContextWindow: !!js Number(process.env.AGENTRANS_CONTEXT_WINDOW ?? 1000000)
         streamIdleTimeoutMs: 172800000
 
     - id: sandbox
@@ -117,7 +117,7 @@
       config:
         includeHarnessIdentity: false
         includeRuntimeContext: false
-        personaPrefix: !!js process.env.DSH_SYSTEM_PROMPT ?? 'You are a helpful software engineer assistant.'
+        personaPrefix: !!js process.env.AGENTRANS_SYSTEM_PROMPT ?? 'You are a helpful software engineer assistant.'
 
     - id: tools
       name: '@agentrans/tools'

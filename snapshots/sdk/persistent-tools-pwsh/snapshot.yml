@@ -5,7 +5,7 @@ composition: sdk-persistent-pwsh
 recording: authored
 platform: pwsh
 environment:
-  DSH_EXAMPLE_COUNT: ''
+  AGENTRANS_EXAMPLE_COUNT: ''
 header:
   class: sdk-persistent-pwsh
   pin: true

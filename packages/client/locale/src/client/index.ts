@@ -565,7 +565,7 @@ export const inject = ['slots', 'remote', 'configForms']
  * @returns resolves after native language initialization and plugin registration.
  */
 export async function apply(ctx: ClientContext): Promise<void> {
-  const bridge = (globalThis as { __DSH_LOCALE__?: LocaleBridge }).__DSH_LOCALE__
+  const bridge = (globalThis as { __AGENTRANS_LOCALE__?: LocaleBridge }).__AGENTRANS_LOCALE__
   let bootstrap: LocaleBootstrap | undefined
   if (bridge !== undefined) {
     let value: unknown
