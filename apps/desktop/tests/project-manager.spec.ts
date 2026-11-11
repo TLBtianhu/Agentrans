@@ -311,21 +311,21 @@ describe.each(['applyRelease', 'disableAllPlugins'] as const)('desktop profile l
 })
 
 describe('desktop link-backend projections', () => {
-  it('removes .dsh-module-fallback projections when preparing a launch', async () => {
+  it('removes .agentrans-module-fallback projections when preparing a launch', async () => {
     const { manager } = setup()
     await manager.applyRelease()
     const profile = manager.paths.profile
     const target = join(profile, 'node_modules', 'my-bundle', 'node_modules', 'bridge')
     mkdirSync(target, { recursive: true })
     writeFileSync(join(target, 'package.json'), JSON.stringify({ name: 'bridge', version: '1.0.0' }))
-    const owned = join(profile, '.dsh-module-fallback', 'node_modules', 'bridge')
+    const owned = join(profile, '.agentrans-module-fallback', 'node_modules', 'bridge')
     mkdirSync(dirname(owned), { recursive: true })
     symlinkSync(target, owned, process.platform === 'win32' ? 'junction' : 'dir')
     symlinkSync(owned, join(profile, 'node_modules', 'bridge'), process.platform === 'win32' ? 'junction' : 'dir')
 
     await manager.applyRelease()
 
-    expect(existsSync(join(profile, '.dsh-module-fallback'))).toBe(false)
+    expect(existsSync(join(profile, '.agentrans-module-fallback'))).toBe(false)
     expect(lstatSync(join(profile, 'node_modules', 'bridge'), { throwIfNoEntry: false })).toBeUndefined()
     expect(existsSync(join(target, 'package.json'))).toBe(true)
   })

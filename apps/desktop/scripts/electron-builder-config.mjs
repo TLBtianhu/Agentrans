@@ -129,7 +129,7 @@ function electronBuilderConfig(env, hostPlatform, hostArch, preparedRuntime, pre
   const packaged = resolveDesktopBuildCommit(env)
   return {
     appId,
-    protocols: [{ name: DESKTOP_PRODUCT_NAME, schemes: ['dsh'] }],
+    protocols: [{ name: DESKTOP_PRODUCT_NAME, schemes: ['agentrans'] }],
     extraMetadata: {
       dshDesktopAppId: appId,
       dshDesktopUpdateChannel: update?.channel ?? 'nightly',

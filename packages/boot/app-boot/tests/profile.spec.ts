@@ -765,11 +765,11 @@ describe('removeLinkProjections', () => {
     writeFileSync(join(dir, 'package.json'), JSON.stringify({ name, version }))
   }
 
-  it('removes only the symlinks that point into .dsh-module-fallback and the directory itself', () => {
+  it('removes only the symlinks that point into .agentrans-module-fallback and the directory itself', () => {
     const home = tmp()
     const profile = join(home, 'profiles', 'web')
     const modules = join(profile, 'node_modules')
-    const owned = join(profile, '.dsh-module-fallback', 'node_modules')
+    const owned = join(profile, '.agentrans-module-fallback', 'node_modules')
     packageAt(join(modules, 'my-bundle'), 'my-bundle', '1.0.0')
     packageAt(join(modules, 'my-bundle', 'node_modules', 'bridge'), 'bridge', '1.0.0')
     packageAt(join(modules, '@scope', 'helper'), '@scope/helper', '1.0.0')
@@ -784,7 +784,7 @@ describe('removeLinkProjections', () => {
 
     removeLinkProjections(profile)
 
-    expect(existsSync(join(profile, '.dsh-module-fallback'))).toBe(false)
+    expect(existsSync(join(profile, '.agentrans-module-fallback'))).toBe(false)
     expect(lstatSync(join(modules, 'bridge'), { throwIfNoEntry: false })).toBeUndefined()
     expect(lstatSync(join(modules, '@scope', 'tool'), { throwIfNoEntry: false })).toBeUndefined()
     expect(lstatSync(join(modules, 'my-bundle')).isDirectory()).toBe(true)
@@ -799,15 +799,15 @@ describe('removeLinkProjections', () => {
   it('removes the directory when the profile has no node_modules and keeps links whose target parent is gone', () => {
     const home = tmp()
     const profile = join(home, 'profiles', 'web')
-    mkdirSync(join(profile, '.dsh-module-fallback', 'node_modules'), { recursive: true })
+    mkdirSync(join(profile, '.agentrans-module-fallback', 'node_modules'), { recursive: true })
     removeLinkProjections(profile)
-    expect(existsSync(join(profile, '.dsh-module-fallback'))).toBe(false)
+    expect(existsSync(join(profile, '.agentrans-module-fallback'))).toBe(false)
 
     const other = join(home, 'profiles', 'other')
-    mkdirSync(join(other, '.dsh-module-fallback', 'node_modules'), { recursive: true })
+    mkdirSync(join(other, '.agentrans-module-fallback', 'node_modules'), { recursive: true })
     link(join(home, 'missing-parent', 'pkg'), join(other, 'node_modules', 'orphan'))
     removeLinkProjections(other)
-    expect(existsSync(join(other, '.dsh-module-fallback'))).toBe(false)
+    expect(existsSync(join(other, '.agentrans-module-fallback'))).toBe(false)
     expect(lstatSync(join(other, 'node_modules', 'orphan')).isSymbolicLink()).toBe(true)
   })
 

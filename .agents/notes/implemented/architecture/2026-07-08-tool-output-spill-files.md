@@ -22,7 +22,7 @@ A thin spill storage seam plus a default spill policy plugin, in a new `packages
 | `@agentrans/spill-local` | Local backend: private, session-scoped file storage on the host filesystem. |
 | `@agentrans/spill-policy` | Tool-result policy plugin: wraps final text results after dispatch and replaces oversized results with a retained preview plus a spill locator. |
 
-The tool-result Consumer is `dsh-spill-policy`, which consumes final tool results through the `tools/post-execute` waterfall. The model follows the backend-supplied retrieval hint for the returned locator. [Session-reference spill reuse](../../../../packages/context/session-reference/README.md) adds a direct storage consumer with separate preview, source-description, and failure semantics; it does not change the tool-result policy.
+The tool-result Consumer is `agentrans-spill-policy`, which consumes final tool results through the `tools/post-execute` waterfall. The model follows the backend-supplied retrieval hint for the returned locator. [Session-reference spill reuse](../../../../packages/context/session-reference/README.md) adds a direct storage consumer with separate preview, source-description, and failure semantics; it does not change the tool-result policy.
 
 ### Spill seam
 
@@ -62,11 +62,11 @@ interface SpillRef {
 
 `SpillLocator` is a [branded](../../../../packages/util/brand) model-facing handle returned by the backend. The local backend renders it as a filesystem path; a remote or database backend can render a URI, key, or command token. Consumers treat it as opaque and render it with `retrievalHint` instead of assuming `read` is always the right retrieval mechanism. `SpillOwner.sessionId` is the save-time storage namespace: forked sessions inherit existing spill locators from the seeded log without copying or re-owning them, and new spills after the fork use the child session id. A retention-period cleanup may expire old locators with other old session artifacts; the spill seam does not define a per-session cleanup policy.
 
-`dsh-spill-local` owns storage details: session-scoped directory selection, safe names, path-traversal protection, the write, local artifact lifetime, and returning `{ locator, bytes, retrievalHint }`. It does not own tool-result replacement, model-facing preview policy, search, file inspection, or a seam-wide/per-session retention policy. Files land at `<root>/session-<hash>/<random>-<safeName>`, where `root` is a configured path or a lazily-created private (0700) per-process temp dir, the session subdir is a short `sha256(sessionId)` prefix, and the leaf is a random hex prefix plus the caller's `suggestedName` sanitized to one path segment (mirrors the JSONL backend's `encodeSegment`). The write is `open(path, 'wx', 0o600)` — exclusive and owner-only, so a planted symlink cannot redirect it. The locator is the path, and the retrieval hint tells the model it can use `read` or `grep` on that path. Its one-shot startup cleanup applies the backend-specific artifact lifetime described in the [local spill cleanup note](../../archived/architecture/2026-07-17-local-spill-startup-cleanup.md).
+`agentrans-spill-local` owns storage details: session-scoped directory selection, safe names, path-traversal protection, the write, local artifact lifetime, and returning `{ locator, bytes, retrievalHint }`. It does not own tool-result replacement, model-facing preview policy, search, file inspection, or a seam-wide/per-session retention policy. Files land at `<root>/session-<hash>/<random>-<safeName>`, where `root` is a configured path or a lazily-created private (0700) per-process temp dir, the session subdir is a short `sha256(sessionId)` prefix, and the leaf is a random hex prefix plus the caller's `suggestedName` sanitized to one path segment (mirrors the JSONL backend's `encodeSegment`). The write is `open(path, 'wx', 0o600)` — exclusive and owner-only, so a planted symlink cannot redirect it. The locator is the path, and the retrieval hint tells the model it can use `read` or `grep` on that path. Its one-shot startup cleanup applies the backend-specific artifact lifetime described in the [local spill cleanup note](../../archived/architecture/2026-07-17-local-spill-startup-cleanup.md).
 
 ### Spill policy
 
-`dsh-spill-policy` retains ordered text/image ends under `maxInlineTokens` after post-execute policy accepts the result. `saveText()` stores the complete result with readable image paths; image bytes remain in attachment storage. The [multimodal retention reference](../../../../packages/spill/spill-policy/README.md) owns image projection order, atomic image omission, and route pricing. An omitted budget installs no listeners, recovery failures keep the original result, and model-facing `read` results skip retention to avoid a read/spill loop.
+`agentrans-spill-policy` retains ordered text/image ends under `maxInlineTokens` after post-execute policy accepts the result. `saveText()` stores the complete result with readable image paths; image bytes remain in attachment storage. The [multimodal retention reference](../../../../packages/spill/spill-policy/README.md) owns image projection order, atomic image omission, and route pricing. An omitted budget installs no listeners, recovery failures keep the original result, and model-facing `read` results skip retention to avoid a read/spill loop.
 
 ## Showcase: web_fetch
 
@@ -86,7 +86,7 @@ ctx.tools.register(defineTool({
 }))
 ```
 
-With `dsh-spill-policy` configured, a large formatted fetch result is automatically retained and spilled. A deployment demonstrates the behavior by setting the provider resource cap higher than the policy cap:
+With `agentrans-spill-policy` configured, a large formatted fetch result is automatically retained and spilled. A deployment demonstrates the behavior by setting the provider resource cap higher than the policy cap:
 
 ```yaml
 - id: web-fetch-http
@@ -142,8 +142,8 @@ Cleanup shipped for the local backend as a one-shot startup sweep, not tied to s
 ## Testing
 
 - `dsh-spill` unit tests pin the seam contract: registration as `ctx.spillStore`, one-implementation-per-context, and disposal release.
-- `dsh-spill-local` unit tests cover `saveText`, `encodeSegment` sanitization (separators/tilde/whole-segment dots/empty), the session-hash directory, owner-only permissions, distinct paths per save, the configured/private root, and a storage-failure rejection.
-- `dsh-spill-policy` unit tests drive real tools through `ctx.tools.execute`: disabled-mode no-op, oversized-text replacement, small/non-text passthrough, `read` skip, best-effort fallback (save failure / no backend / no owner), and downstream-composition (bounding a replaced result, preserving `additionalContexts`).
+- `agentrans-spill-local` unit tests cover `saveText`, `encodeSegment` sanitization (separators/tilde/whole-segment dots/empty), the session-hash directory, owner-only permissions, distinct paths per save, the configured/private root, and a storage-failure rejection.
+- `agentrans-spill-policy` unit tests drive real tools through `ctx.tools.execute`: disabled-mode no-op, oversized-text replacement, small/non-text passthrough, `read` skip, best-effort fallback (save failure / no backend / no owner), and downstream-composition (bounding a replaced result, preserving `additionalContexts`).
 - `dsh-tool-web` integration drives `web_fetch` through `ctx.tools.execute` with the real `spill-local` backend + policy, proving the model-facing text changes only by the deliberate spill notice while the spill file holds the full formatted result.
 - The `tui-agent` example loads `spill-local` + `spill-policy`, so its keyless Loader/PTY smoke exercises the real load path (the namespace-plugin export shape + `inject`).
 

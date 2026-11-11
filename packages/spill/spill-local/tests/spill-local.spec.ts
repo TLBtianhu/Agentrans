@@ -36,7 +36,7 @@ const DAY_MS = 24 * 60 * 60 * 1000
 let root: string
 
 beforeEach(() => {
-  root = mkdtempSync(join(tmpdir(), 'dsh-spill-test-'))
+  root = mkdtempSync(join(tmpdir(), 'agentrans-spill-test-'))
 })
 afterEach(() => {
   rmSync(root, { recursive: true, force: true })
@@ -359,7 +359,7 @@ describe('startup cleanup sweep', () => {
     // A discovered prior-default root (pruneWhenEmpty) whose only session dir is
     // emptied should have its outer directory removed too; the active root, even
     // when fully emptied, must survive (the live process still writes into it).
-    const prior = mkdtempSync(join(tmpdir(), 'dsh-spill-'))
+    const prior = mkdtempSync(join(tmpdir(), 'agentrans-spill-'))
     const priorDir = sessionDir(prior, 'old-sess'); mkdirSync(priorDir, { recursive: true })
     writeAged(join(priorDir, 'old.txt'), 'x', 40)
     const activeDir = sessionDir(root, 'sess-1'); mkdirSync(activeDir, { recursive: true })
@@ -392,7 +392,7 @@ describe('startup cleanup sweep', () => {
   })
 
   it('does NOT prune a discovered root that still holds a fresh file', async () => {
-    const prior = mkdtempSync(join(tmpdir(), 'dsh-spill-'))
+    const prior = mkdtempSync(join(tmpdir(), 'agentrans-spill-'))
     const priorDir = sessionDir(prior, 'sess'); mkdirSync(priorDir, { recursive: true })
     writeAged(join(priorDir, 'fresh.txt'), 'y', 1)
     try {
@@ -548,10 +548,10 @@ describe('startup cleanup sweep', () => {
 })
 
 describe('discoverDefaultRoots', () => {
-  it('returns only real dsh-spill-* directories, excluding symlinks and non-matches', async () => {
+  it('returns only real agentrans-spill-* directories, excluding symlinks and non-matches', async () => {
     const base = mkdtempSync(join(tmpdir(), 'dsh-disc-'))
     try {
-      // A real backend-shaped root (dsh-spill-<6>) via mkdtemp — the only match.
+      // A real backend-shaped root (agentrans-spill-<6>) via mkdtemp — the only match.
       const realRoot = mkdtempSync(join(base, DEFAULT_ROOT_PREFIX))
       mkdirSync(join(base, 'unrelated-dir'))
       // Names of the EXACT default shape that must still be excluded because they

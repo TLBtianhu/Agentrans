@@ -537,7 +537,7 @@ it.each(['native', 'runtime'] as const)('reads a disabled bundle and its indepen
     for (const path of [
       join(root, 'node_modules'), join(dir, 'node_modules', 'local-child'),
       join(profile.home, 'profiles', 'node_modules'), join(profile.home, 'node_modules'),
-      join(dir, '.dsh-module-fallback'),
+      join(dir, '.agentrans-module-fallback'),
     ]) expect(lstatSync(path, { throwIfNoEntry: false }), path).toBeUndefined()
   }
   const resolution: RuntimeResolution = {

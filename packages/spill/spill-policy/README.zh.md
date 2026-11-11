@@ -113,7 +113,7 @@ PTC 程序收到完整的规范值。含图片的子结果在转发给模型前�
 当包级约定不够用时阅读以下页面。
 
 - [spill 存储服务](../spill/README.zh.md)——策略替换背后的 `saveText` 约定。
-- [dsh-spill-local](../spill-local/README.zh.md)——保存 spill 文本的本地后端。
+- [agentrans-spill-local](../spill-local/README.zh.md)——保存 spill 文本的本地后端。
 - [Token meter](../../llm/token-meter/README.zh.md) — 共享文字估算和模型图片计量。
 - [工具输出 spill 决策](../../../.agents/notes/implemented/architecture/2026-07-08-tool-output-spill-files.zh.md)——能力边界与设计依据。
 

@@ -59,7 +59,7 @@ function metadataFixture(mode: 'native' | 'runtime') {
     expect(lstatSync(dir).isDirectory()).toBe(true)
     for (const path of [
       join(profileDir, 'node_modules'), join(profilesDir, 'node_modules'),
-      join(root, 'node_modules'), join(profileDir, '.dsh-module-fallback'),
+      join(root, 'node_modules'), join(profileDir, '.agentrans-module-fallback'),
     ]) expect(lstatSync(path, { throwIfNoEntry: false }), path).toBeUndefined()
   }
   return { dir, baseUrl, resolution, expectUnlinked }

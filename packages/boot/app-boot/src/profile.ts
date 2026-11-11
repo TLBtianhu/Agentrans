@@ -217,12 +217,12 @@ export function initProfile(
 }
 
 /** Directory where the link backend of the dsh 0.1.5 releases projected bundle-carried packages into a profile. */
-const LINK_PROJECTION_DIR = '.dsh-module-fallback'
+const LINK_PROJECTION_DIR = '.agentrans-module-fallback'
 
 /**
  * Remove the package projections a link-backend launch left in a profile.
  * Only symlinks under the profile's `node_modules` whose target lies inside
- * `<profile>/.dsh-module-fallback/node_modules` are unlinked, then that directory is removed;
+ * `<profile>/.agentrans-module-fallback/node_modules` are unlinked, then that directory is removed;
  * pnpm-installed packages and every other symlink stay. A profile without the directory is untouched.
  * @param dir - the profile directory.
  */

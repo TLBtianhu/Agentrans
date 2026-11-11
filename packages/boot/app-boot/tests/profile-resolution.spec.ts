@@ -1112,14 +1112,14 @@ describe('runtime resolution', { concurrent: false }, () => {
     expect(realpathSync(shared)).toBe(target)
   })
 
-  it('treats a profile symlink into .dsh-module-fallback as an ordinary local package', async () => {
+  it('treats a profile symlink into .agentrans-module-fallback as an ordinary local package', async () => {
     const f = fixture()
     file(join(f.profile.dir, 'package.json'), JSON.stringify({
       name: 'dsh-profile-web', private: true, dependencies: { '@agentrans/core': '*' },
     }))
     const target = join(f.root, 'old-dsh', 'node_modules', '@agentrans', 'core')
     pkg(target, '@agentrans/core', 9)
-    const owned = join(f.profile.dir, '.dsh-module-fallback', 'node_modules', '@agentrans/core')
+    const owned = join(f.profile.dir, '.agentrans-module-fallback', 'node_modules', '@agentrans/core')
     const projected = join(f.profile.dir, 'node_modules', '@agentrans/core')
     mkdirSync(dirname(owned), { recursive: true })
     mkdirSync(dirname(projected), { recursive: true })
@@ -1208,7 +1208,7 @@ describe('runtime resolution', { concurrent: false }, () => {
       pkg(join(modules, bundle, 'node_modules', plugin), plugin, marker)
     }
     // A link-backend launch projected bundle-a's plugin while bundle-a was selected.
-    const owned = join(profileDir, '.dsh-module-fallback', 'node_modules', plugin)
+    const owned = join(profileDir, '.agentrans-module-fallback', 'node_modules', plugin)
     mkdirSync(dirname(owned), { recursive: true })
     symlinkSync(join(modules, 'bundle-a', 'node_modules', plugin), owned, process.platform === 'win32' ? 'junction' : 'dir')
     symlinkSync(owned, join(modules, plugin), process.platform === 'win32' ? 'junction' : 'dir')
@@ -1220,7 +1220,7 @@ describe('runtime resolution', { concurrent: false }, () => {
 
     const profile = loadProfile('dsh', 'web', f.installAnchor, f.root)
     expect(profile.layers.map(layer => layer.packageName)).toEqual(['bundle-b'])
-    expect(existsSync(join(profileDir, '.dsh-module-fallback'))).toBe(false)
+    expect(existsSync(join(profileDir, '.agentrans-module-fallback'))).toBe(false)
     expect(existsSync(join(modules, plugin))).toBe(false)
     const resolution = await createRuntimeResolution({ installAnchor: f.installAnchor, profile, home: f.root })
     expect(resolution.entries.find(entry => entry.name === plugin)).toMatchObject({
@@ -1242,7 +1242,7 @@ describe('runtime resolution', { concurrent: false }, () => {
       patchPaths: [join(bundle, 'cordis.patch.yml')], patches: [],
     })
     const target = join(f.root, 'old-dsh', 'node_modules', 'bridge')
-    const owned = join(f.profile.dir, '.dsh-module-fallback', 'node_modules', 'bridge')
+    const owned = join(f.profile.dir, '.agentrans-module-fallback', 'node_modules', 'bridge')
     const projected = join(f.profile.dir, 'node_modules', 'bridge')
     pkg(target, 'bridge', 9)
     mkdirSync(dirname(owned), { recursive: true })

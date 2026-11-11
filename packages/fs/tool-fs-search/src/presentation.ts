@@ -20,7 +20,7 @@
  * kilobytes, and `meta` is persisted with the session log and re-sent on every
  * request. {@link capMetaBytes} drops trailing groups/paths until the serialized
  * `meta` fits `maxMetaBytes` and marks the result `truncated`; a deployment's
- * final output budget (`dsh-spill-policy`) only shrinks `content`, never `meta`,
+ * final output budget (`agentrans-spill-policy`) only shrinks `content`, never `meta`,
  * so this projection owns keeping `meta` bounded.
  *
  * @module @agentrans/tool-fs-search/presentation
