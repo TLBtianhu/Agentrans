@@ -10,6 +10,22 @@
 - 已知限制：同一个版本的两个 macOS 架构会各自产出 `alpha-mac.yml`，发布到同一 Release 时会互相覆盖；要同时发布两个架构需要一次同时构建两个架构（或改用 universal 包），尚未实现。
 - 托管验证：合并后的工作流用 `mac-x64` 与 `win-x64` 各实跑一次，均成功（run 42854365096 / 42858836181）。
 
+## 已完成：与上游身份彻底分离（2026-11-11）
+
+三项改名全部落地，每阶段都过了门禁并在托管 runner 上验证：
+
+- **npm scope**：`@deepseek-ai/dsh-*` → `@agentrans/*`，含 vendor 内的 Cordis 一层与门禁里硬编码的 scope 断言。
+- **命令**：`dsh` → `agentrans`（`@agentrans/cli` 包、bin、启动器、185 处调用与文档）。
+- **环境变量**：`DSH_*` → `AGENTRANS_*`（1260 文件、5414 处），默认 home `~/.dsh` → `~/.agentrans`。
+- 仍保留上游 scope 的只有被消费的依赖：`@deepseek-ai/libreoffice-kit*` 与 `@deepseek-ai/node-addon-system*`——它们是上游发布的包，不能改名。
+
+改名暴露的真实缺陷（都已修）：
+
+1. 统一 scope 后 `@agentrans/*` 不再能区分自家包与 vendored 框架，插件兼容性判定与发布版本校验各错一次；现在两处都显式排除框架包。
+2. 代码里"拆开拼包路径"的写法（`join(root,'node_modules','@deepseek-ai','dsh-desktop-host')`、正则里转义的 `@deepseek-ai\/`、lockfile 里的 JSON 键）批量替换看不见，逐一人工核对修复。
+3. Office 引擎的运行时探测一度用新 scope 拼路径，托管打包报"缺少 win32-x64 引擎"。
+
+证据：`typecheck` 6/6、`lint` 0/0、`doc-sync` 47/47；托管 runner 上 `win-x64`（run 42988002080）与 `mac-arm64`（run 42989877966）打包均成功并产出 artifact。
 ## 已完成：lint 基线归零（2026-11-10）
 
 - pnpm run lint：**0 warnings / 0 errors**（6772 个文件，90 条规则），起点是 70 条、27 个文件。
