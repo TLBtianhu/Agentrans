@@ -25,7 +25,7 @@ mkdir -p hello-plugin
 
 ```
 hello-plugin/
-├── package.json       # declares dsh.bundle
+├── package.json       # declares agentrans.bundle
 ├── cordis.patch.yml   # the layer applied when a profile lists this bundle
 └── index.js           # plugin modules the patch rows reference
 ```
@@ -34,7 +34,7 @@ Create `hello-plugin/package.json`:
 
 ```json
 {
-  "name": "dsh-hello-plugin",
+  "name": "agentrans-hello-plugin",
   "version": "0.1.0",
   "type": "module",
   "main": "index.js",
@@ -58,12 +58,12 @@ Create `hello-plugin/cordis.patch.yml`. The patch is a YAML array like the `--pa
 ```yaml
 - insert:
     - id: hello
-      name: dsh-hello-plugin
+      name: agentrans-hello-plugin
 ```
 
 `patch` also accepts an ordered list of files, for example `["./base.patch.yml", "./web.patch.yml"]`; the launcher applies them in that order as one layer, and each file's relative plugin paths resolve beside that file. A package without the `agentrans.bundle` declaration still installs, but only as a plain dependency: `agentrans plugin` prints a warning and activates no layer. Use that package format for a library that plugin packages import rather than a plugin users enable.
 
-Declare the DSH releases the bundle supports with an `engines.agentrans` SemVer range, for example `"engines": { "dsh": ">=0.2.0 <0.3.0" }`. Installation and profile startup refuse a bundle whose range the running DSH does not satisfy; without `engines.agentrans`, they check its `@agentrans/cli*` peer dependency ranges instead ([rule](../../../../packages/boot/app-boot/README.md#profiles)).
+Declare the Agentrans releases the bundle supports with an `engines.agentrans` SemVer range, for example `"engines": { "agentrans": ">=0.2.0 <0.3.0" }`. Installation and profile startup refuse a bundle whose range the running Agentrans does not satisfy; without `engines.agentrans`, they check its `@agentrans/cli*` peer dependency ranges instead ([rule](../../../../packages/boot/app-boot/README.md#profiles)).
 
 ### The profile manifest
 
@@ -89,20 +89,20 @@ The first use initializes the profile (with `@agentrans/base` as its first bundl
   "name": "dsh-profile-demo",
   "private": true,
   "dependencies": {
-    "dsh-hello-plugin": "link:/path/to/hello-plugin"
+    "agentrans-hello-plugin": "link:/path/to/hello-plugin"
   },
   "agentrans": {
     "profile": {
       "bundles": [
         "@agentrans/base",
-        "dsh-hello-plugin"
+        "agentrans-hello-plugin"
       ]
     }
   }
 }
 ```
 
-A linked checkout keeps its own `node_modules`. Declare Agentrans packages whose instances the plugin must share with the host under both `peerDependencies` and `devDependencies`, as the harness packages do. At that manifest's lookup position, peers present in the running dsh's runtime resolution use the installation's copy; the devDependency copy serves your type checker and standalone tests. Keep independently versioned third-party dependencies and stateless Agentrans utilities under `dependencies`.
+A linked checkout keeps its own `node_modules`. Declare Agentrans packages whose instances the plugin must share with the host under both `peerDependencies` and `devDependencies`, as the harness packages do. At that manifest's lookup position, peers present in the running Agentrans installation's runtime resolution use the installation's copy; the devDependency copy serves your type checker and standalone tests. Keep independently versioned third-party dependencies and stateless Agentrans utilities under `dependencies`.
 
 Ordinary linked imports follow Node's ancestor order and check each directory's current peer declarations. A nearer physical package wins before a higher peer declaration. A link target can lack `package.json`; ancestor peers still apply, even without a physical `node_modules` beside that manifest. Explicit `require.resolve(..., { paths })` is always native, including paths inside a profile. These rules are shared by npm, Desktop, and source launches; they do not invalidate loaded modules or validate peer version ranges. See the [resolution rules](../../../../.agents/notes/implemented/architecture/2026-09-19-profile-resolution-lookup-order.md) for scope and file-query behavior.
 
@@ -111,11 +111,11 @@ Linking a broad checkout does not apply peer interception to the running install
 Verify the layer without booting, then boot:
 
 ```sh
-agentrans --profile demo --dump-config   # shows a "# == dsh-hello-plugin" layer
+agentrans --profile demo --dump-config   # shows a "# == agentrans-hello-plugin" layer
 agentrans --profile demo
 ```
 
-`agentrans plugin --profile demo remove dsh-hello-plugin` removes both the dependency and the layer.
+`agentrans plugin --profile demo remove agentrans-hello-plugin` removes both the dependency and the layer.
 
 ## The loading order
 
@@ -141,7 +141,7 @@ A bundle that defines a runnable app mounts an ordinary provider plugin:
 
 ```yaml
 - id: hello-startup
-  name: 'dsh-hello-plugin/startup'
+  name: 'agentrans-hello-plugin/startup'
 ```
 
 The plugin exports `inject = ['cmdlineArgs']`, calls `parseCmdline` from [`@agentrans/cmdline`](../../../../packages/boot/cmdline/README.md) with its own commander program, and provides its app-owned service from the program's action. The launcher hands every plugin the same immutable arguments after launcher flags, so app-specific flags need no launcher change and multiple plugins may parse the snapshot. The Loader row needs no launcher marker or special kind.
@@ -173,7 +173,7 @@ But a git install fetches **sources, not built artifacts**: nothing runs your `b
 
   ```yaml
   allowBuilds:
-    dsh-hello-plugin: true
+    agentrans-hello-plugin: true
   ```
 
   and re-run the `add`.

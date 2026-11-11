@@ -25,7 +25,7 @@ mkdir -p hello-plugin
 
 ```
 hello-plugin/
-├── package.json       # declares dsh.bundle
+├── package.json       # declares agentrans.bundle
 ├── cordis.patch.yml   # the layer applied when a profile lists this bundle
 └── index.js           # plugin modules the patch rows reference
 ```
@@ -34,7 +34,7 @@ hello-plugin/
 
 ```json
 {
-  "name": "dsh-hello-plugin",
+  "name": "agentrans-hello-plugin",
   "version": "0.1.0",
   "type": "module",
   "main": "index.js",
@@ -58,12 +58,12 @@ export function apply() {
 ```yaml
 - insert:
     - id: hello
-      name: dsh-hello-plugin
+      name: agentrans-hello-plugin
 ```
 
 `patch` 也接受一个有序的文件列表，例如 `["./base.patch.yml", "./web.patch.yml"]`；launcher 按该顺序把它们作为同一层应用，每个文件中的相对插件路径相对于该文件解析。没有 `agentrans.bundle` 声明的包仍然可以安装，但只作为普通依赖：`agentrans plugin` 会打印警告，且不激活任何层。如果一个库供插件包 import，而不是供用户启用，就使用这种包格式。
 
-使用 `engines.agentrans` SemVer 范围声明组合包支持的 DSH 版本，例如 `"engines": { "dsh": ">=0.2.0 <0.3.0" }`。安装和 profile 启动会拒绝当前运行的 DSH 不满足该范围的组合包；没有 `engines.agentrans` 时，改为检查其 `@agentrans/cli*` peer 依赖范围（[规则](../../../../packages/boot/app-boot/README.zh.md#profiles)）。
+使用 `engines.agentrans` SemVer 范围声明组合包支持的 DSH 版本，例如 `"engines": { "agentrans": ">=0.2.0 <0.3.0" }`。安装和 profile 启动会拒绝当前运行的 DSH 不满足该范围的组合包；没有 `engines.agentrans` 时，改为检查其 `@agentrans/cli*` peer 依赖范围（[规则](../../../../packages/boot/app-boot/README.zh.md#profiles)）。
 
 ### profile manifest
 
@@ -89,13 +89,13 @@ agentrans plugin --profile demo add ./hello-plugin
   "name": "dsh-profile-demo",
   "private": true,
   "dependencies": {
-    "dsh-hello-plugin": "link:/path/to/hello-plugin"
+    "agentrans-hello-plugin": "link:/path/to/hello-plugin"
   },
   "agentrans": {
     "profile": {
       "bundles": [
         "@agentrans/base",
-        "dsh-hello-plugin"
+        "agentrans-hello-plugin"
       ]
     }
   }
@@ -111,11 +111,11 @@ agentrans plugin --profile demo add ./hello-plugin
 先不启动、只验证该层，再启动：
 
 ```sh
-agentrans --profile demo --dump-config   # shows a "# == dsh-hello-plugin" layer
+agentrans --profile demo --dump-config   # shows a "# == agentrans-hello-plugin" layer
 agentrans --profile demo
 ```
 
-`agentrans plugin --profile demo remove dsh-hello-plugin` 会同时移除依赖和对应的层。
+`agentrans plugin --profile demo remove agentrans-hello-plugin` 会同时移除依赖和对应的层。
 
 ## 加载顺序
 
@@ -141,7 +141,7 @@ agentrans --profile demo
 
 ```yaml
 - id: hello-startup
-  name: 'dsh-hello-plugin/startup'
+  name: 'agentrans-hello-plugin/startup'
 ```
 
 该插件导出 `inject = ['cmdlineArgs']`，使用自己的 commander program 调用 [`@agentrans/cmdline`](../../../../packages/boot/cmdline/README.zh.md) 中的 `parseCmdline`，再在 program 自己的 action 中把应用自有服务提供出去。启动器把自身 flag 之后的同一份不可变参数交给每个插件，因此添加应用专属 flag 无需修改启动器，多个插件也可以解析该快照。Loader 行不需要启动器标记或特殊类型。
@@ -173,7 +173,7 @@ agentrans plugin --profile demo add github:you/hello-plugin
 
   ```yaml
   allowBuilds:
-    dsh-hello-plugin: true
+    agentrans-hello-plugin: true
   ```
 
   然后重新执行 `add`。
