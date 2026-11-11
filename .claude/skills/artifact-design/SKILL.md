@@ -64,5 +64,5 @@ See [Visual review](references/visual-review.md) for the concrete checklist and 
 
 - Rebuild templates after editing their sources.
 - Run the design-template browser smoke for rendering, interaction, responsiveness, and network isolation.
-- Run the real DSH Artifact replay when a template is used by a model-driven Session.
+- Run the real Agentrans Artifact replay when a template is used by a model-driven Session.
 - Do not claim visual quality from DOM checks alone. Keep screenshots and record which views and interactions were inspected.
