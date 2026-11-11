@@ -22,7 +22,7 @@
 
 ## 市场记录
 
-[Plugin Market](../../packages/boot/plugin-market/README.zh.md) 读取第 1 版索引格式，校验由 [`dsh-plugin-market-index`](../../packages/util/plugin-market-index/README.zh.md) 完成。
+[Plugin Market](../../packages/boot/plugin-market/README.zh.md) 读取第 1 版索引格式，校验由 [`@agentrans/plugin-market-index`](../../packages/util/plugin-market-index/README.zh.md) 完成。
 
 `MarketIndexSummary` 携带一个已配置的索引 URL，以及最近一次成功读取得到的 `title` 和 `description`；最近一次读取失败时，还携带其 `error`。
 

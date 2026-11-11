@@ -3,8 +3,8 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write docs/subsystems/plan.md
 /plan-mode:
-  en: 234f6e4c49714997
-  zh: add95d36252b572d
+  en: 6731653366043433
+  zh: f6a5c97169f22576
 /plan-mode/logged-state-and-recovery:
   en: 4c83897d7a6d8a67
   zh: 22dcc171a439ed19

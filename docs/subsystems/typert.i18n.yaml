@@ -3,8 +3,8 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write docs/subsystems/typert.md
 /typert-remote-calls:
-  en: ccc2694e359c2333
-  zh: cd68bf5e74e2d685
+  en: b25beb7e64b8ee21
+  zh: faf9ac3bafa93e0d
 /typert-remote-calls/lookup-and-context-declarations:
   en: 8725fa62f36364d7
   zh: 0f2ff4bdf13ff55b
@@ -12,8 +12,8 @@
   en: 21e88d68154c2c92
   zh: 8c9e05c65ef0f34d
 /typert-remote-calls/remote-access-resources:
-  en: 2e27d0745a4e3eac
-  zh: eb4ad825852c595b
+  en: 0009c645f21fdcbb
+  zh: 1d212c45cc1b49d7
 /typert-remote-calls/typert-registry:
   en: d891e9390cf890da
   zh: f45a31cc2ce2021e

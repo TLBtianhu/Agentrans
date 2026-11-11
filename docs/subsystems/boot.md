@@ -22,7 +22,7 @@ The [boot package group](../../packages/boot/README.md) owns launcher-provided p
 
 ## Market records
 
-[Plugin Market](../../packages/boot/plugin-market/README.md) reads index format 1, validated by [`dsh-plugin-market-index`](../../packages/util/plugin-market-index/README.md).
+[Plugin Market](../../packages/boot/plugin-market/README.md) reads index format 1, validated by [`@agentrans/plugin-market-index`](../../packages/util/plugin-market-index/README.md).
 
 `MarketIndexSummary` carries one configured index URL with the `title` and `description` of its last successful read and, when the last read failed, its `error`.
 

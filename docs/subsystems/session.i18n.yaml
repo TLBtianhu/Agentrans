@@ -3,8 +3,8 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write docs/subsystems/session.md
 /sessions:
-  en: 28fb7eb8f758fdf0
-  zh: a36d6f03e331ad86
+  en: 8edd184c40b3d7a5
+  zh: 5d0fa35b1171e182
 /sessions/sessioneventmap-the-event-vocabulary:
   en: 1c15c2125c536f8a
   zh: beb8d1acdc8b57eb
@@ -27,8 +27,8 @@
   en: 8fcc967516a13692
   zh: d3978d3b8d02c566
 /sessions/surface-types/surfaceintent-the-parameter-to-session-append:
-  en: c65cc976acad9005
-  zh: 3efd10779881cba5
+  en: 5a8616438acfe011
+  zh: 4f9d9c05cf37e88d
 /sessions/surface-types/plugin-owned-message-projections:
   en: f1f73607d650620f
   zh: b3ef72f19fb5ee3d
@@ -45,8 +45,8 @@
   en: 45d1a9ee6d610ac5
   zh: 79c061252fde4ceb
 /sessions/live-session-fork-api:
-  en: 06189884c62a80a1
-  zh: 30121aed7a011c72
+  en: 2dd63836437e56bc
+  zh: d568cb2939657e7d
 /sessions/why-a-turn-ended-turnendreasonmap:
   en: 966cc60273fb3911
   zh: de5123ea9dbb0df2

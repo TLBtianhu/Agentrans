@@ -2,7 +2,7 @@
 
 [English](client-modules.md) | 中文
 
-Web 插件表：[dsh-client-modules](../../packages/client/modules) 中 client 模块系统的 Node 半，以 `ctx.clientModules`（`ClientModuleRegistry`）形式提供。它扫描宿主 Loader 的 entry，找出声明了 `dsh.client` 的包，组合出 `window.__AGENTRANS_BOOT__` entry 图，在 `/plugins` 下提供带版本的单资源或多资源 combo 脚本，并以启动协议行回应每次 index 注入收集——这是同一个服务的四个面。它是 Web GUI 栈的一项可选能力，不属于 agent loop（智能体循环）主干，并且是 [dsh-host-webserver](../../packages/host/webserver) 的消费方：[web-server.md](web-server.zh.md) 所述的载体提供本服务注册的前缀路由与其回应的 `webserver/index-inject` 事件。同一个包的浏览器半（`ctx.modules`，即拉取并物化这些 bundle 的 lazy CJS 模块表）属于内核机件，记录在[包 README](../../packages/client/modules/README.zh.md)中，不在本页。
+Web 插件表：[@agentrans/client-modules](../../packages/client/modules) 中 client 模块系统的 Node 半，以 `ctx.clientModules`（`ClientModuleRegistry`）形式提供。它扫描宿主 Loader 的 entry，找出声明了 `dsh.client` 的包，组合出 `window.__AGENTRANS_BOOT__` entry 图，在 `/plugins` 下提供带版本的单资源或多资源 combo 脚本，并以启动协议行回应每次 index 注入收集——这是同一个服务的四个面。它是 Web GUI 栈的一项可选能力，不属于 agent loop（智能体循环）主干，并且是 [@agentrans/host-webserver](../../packages/host/webserver) 的消费方：[web-server.md](web-server.zh.md) 所述的载体提供本服务注册的前缀路由与其回应的 `webserver/index-inject` 事件。同一个包的浏览器半（`ctx.modules`，即拉取并物化这些 bundle 的 lazy CJS 模块表）属于内核机件，记录在[包 README](../../packages/client/modules/README.zh.md)中，不在本页。
 
 源码：[`packages/client/modules/src/client/manifest.ts`](../../packages/client/modules/src/client/manifest.ts)
 
@@ -121,7 +121,7 @@ interface ClientArtifactBaseline {
 
 `ClientModuleRegistry`（`ctx.clientModules`，定义于 [`packages/client/modules/src/index.ts`](../../packages/client/modules/src/index.ts)）暴露读取面与重建面；签名见生成的[服务目录](#ctxclientmodules--clientmoduleregistry)。`graph()` 返回当前组合出的图（两次变更之间是同一个稳定对象），`clientPath(id)` 返回 bundle 的绝对路径，`artifactBaseline(id)` 返回读取当前快照前捕获的 bundle stat 值。`fetchBundle()` 返回与 HTTP 路由相同的响应：惰性的 bundle 响应，以及每次请求都读取的包资源。`rebuilt(id)` 发布没有伴随条目重启的 bundle 重建：它从文件系统元数据派生 revision，只有 revision 变化才会读取新字节、重新组合图并发出通知；条目重启则经对账发布。`onRebuilt` 按发生变化的 bundle 逐个触发并携带新 revision；`onGraphChanged` 在任何一次重新组合了图的 flush 之后触发（行的增删，或 rebuilt 带来的 revision 变化），并采用拉取模型——监听器自行重读 `graph()`。两条通知路径都会兜住监听器异常，因此一个抛错的订阅者既不能让后续订阅者被跳过，也不能杀死触发这次 flush 的一方。
 
-随包提供的 Web 组合通过 [`dsh-client-hmr`](../../packages/client/hmr/README.zh.md) 交付动态图快照。Host 立即转发现有图变化通知，重连会发送当前完整图。图描述浏览器的目标条目，不声明 Host 清理已经完成。产物轮询另外报告重建 revision。仅 source map 变化不会触发重载；新 combo-map URL 只会在 bundle revision 变化后出现，每份 map body 由其首次 `GET` 固定。Client Modules 校验快照，并将对账与重建串行协调；它持有启动创建的条目映射，负责单资源到达、异步移除、未使用模块与样式清理，以及页面本地重试状态。静态平台模块与 bootstrap 保持页面生命周期；Electron 安装属于独立流程。
+随包提供的 Web 组合通过 [`@agentrans/client-hmr`](../../packages/client/hmr/README.zh.md) 交付动态图快照。Host 立即转发现有图变化通知，重连会发送当前完整图。图描述浏览器的目标条目，不声明 Host 清理已经完成。产物轮询另外报告重建 revision。仅 source map 变化不会触发重载；新 combo-map URL 只会在 bundle revision 变化后出现，每份 map body 由其首次 `GET` 固定。Client Modules 校验快照，并将对账与重建串行协调；它持有启动创建的条目映射，负责单资源到达、异步移除、未使用模块与样式清理，以及页面本地重试状态。静态平台模块与 bootstrap 保持页面生命周期；Electron 安装属于独立流程。
 
 <!-- BEGIN GENERATED cordis-surface (gen-cordis-catalog.ts) — do not edit between markers -->
 
