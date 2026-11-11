@@ -26,7 +26,7 @@ Invocations: `agentrans --help`
 Usage: agentrans [--profile] <name> [options] [app-args...]
        agentrans plugin --profile <name> <pnpm-args...>
 
-agentrans: boot a Agentrans profile — an ordered stack of plugin-bundle patch
+agentrans: boot an Agentrans profile — an ordered stack of plugin-bundle patch
 layers under your own overrides.
 
 Arguments:

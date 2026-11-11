@@ -131,7 +131,7 @@ it.each([
   const args = arguments_.map(value => value === 'CURRENT' ? getDshRuntimeVersion() : value)
   expect(await runPlugin('desktop', args)).toBe(1)
   expect(stderr.mock.calls.map(call => call[0]).join('')).toMatchInlineSnapshot(`
-    "agentrans: Error: Open Agentrans Desktop once to initialize its profile, then fully quit it before running dsh plugin --profile desktop.
+    "agentrans: Error: Open Agentrans Desktop once to initialize its profile, then fully quit it before running agentrans plugin --profile desktop.
     "
   `)
   expect(existsSync(join(home, 'profiles', 'desktop'))).toBe(false)

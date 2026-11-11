@@ -1,7 +1,7 @@
-Usage: dsh [--profile] <name> [options] [app-args...]
-       dsh plugin --profile <name> <pnpm-args...>
+Usage: agentrans [--profile] <name> [options] [app-args...]
+       agentrans plugin --profile <name> <pnpm-args...>
 
-dsh: boot a DeepSeek Harness profile — an ordered stack of plugin-bundle patch
+agentrans: boot an Agentrans profile — an ordered stack of plugin-bundle patch
 layers under your own overrides.
 
 Arguments:
@@ -10,7 +10,8 @@ Arguments:
 
 Options:
   -V, --version                  output the version number
-  --profile <name>               the profile under $AGENTRANS_HOME/profiles to boot
+  --profile <name>               the profile under $AGENTRANS_HOME/profiles to
+                                 boot
   --from-default-profile <name>  replace a custom profile with a fresh copy of a
                                  shipped profile template
   --patch <path>                 extra patch-list overlay applied after the
@@ -22,11 +23,11 @@ Options:
                                  or --patch overlays and exit
 
 Examples:
-  agentrans web                                   boot the web profile (same as: dsh --profile web)
-  dsh rescue --from-default-profile web
+  agentrans web                                   boot the web profile (same as: agentrans --profile web)
+  agentrans rescue --from-default-profile web
                                             recreate rescue from the shipped web template, then boot it
-  dsh headless "run the tests"              answer one task, print the result, and exit
-  dsh tui --patch ./extra.yml               boot a custom profile with one extra overlay
-  dsh tui --resume <session>                arguments after the launcher flags reach the app
+  agentrans headless "run the tests"              answer one task, print the result, and exit
+  agentrans tui --patch ./extra.yml               boot a custom profile with one extra overlay
+  agentrans tui --resume <session>                arguments after the launcher flags reach the app
   agentrans web --help                            the web app's own flags and help
-  dsh plugin --profile tui add <package>    install a plugin into the tui profile
+  agentrans plugin --profile tui add <package>    install a plugin into the tui profile

@@ -1,6 +1,6 @@
 {
   "name": "@agentrans/cli",
-  "description": "dsh CLI: profile launch, plugin management, and configuration inspection",
+  "description": "Agentrans CLI: profile launch, plugin management, and configuration inspection",
   "version": "0.1.0",
   "publishConfig": {
     "access": "public"
