@@ -114,7 +114,7 @@ describe('PluginInventorySettingsTab', () => {
       ['@agentrans/client-tabs', 'tabs'],
       ['@agentrans/cordis-plugin-hmr', 'hmr'],
       ['cordis:timer', 'timer'],
-      ['@acme/dsh-sidebar/navigation', 'sidebar/navigation'],
+      ['@acme/host-sidebar/navigation', 'sidebar/navigation'],
       ['plain-plugin', 'plain-plugin'],
     ] as const
     const rows = names.flatMap(([moduleName], index) => [false, true].map(fromManifest => ({
@@ -152,7 +152,7 @@ describe('PluginInventorySettingsTab', () => {
   it('keeps authored locale titles verbatim when they resemble module names', async () => {
     const { locale, pageProps } = localizedProps(async () => ({
       entries: [{
-        entryId: 'include:navigation' as PluginEntryId, moduleName: '@acme/dsh-navigation', enabled: true, fiberPhase: null,
+        entryId: 'include:navigation' as PluginEntryId, moduleName: '@acme/host-navigation', enabled: true, fiberPhase: null,
         meta: { title: { en: 'dsh-Navigation', zh: 'dsh-导航' } },
       }],
     }))
@@ -240,7 +240,7 @@ describe('PluginInventorySettingsTab', () => {
   it.each(['global', 'preset'])('resolves each %s row field independently and hides empty English descriptions', async (scope) => {
     const rows: Snapshot['entries'] = [
       {
-        entryId: 'include:navigation' as PluginEntryId, moduleName: '@acme/dsh-sidebar/navigation', enabled: true, fiberPhase: null,
+        entryId: 'include:navigation' as PluginEntryId, moduleName: '@acme/host-sidebar/navigation', enabled: true, fiberPhase: null,
         meta: { description: { en: 'Navigation description.' } },
       },
       {
@@ -299,7 +299,7 @@ describe('PluginInventorySettingsTab', () => {
     const error = 'locale/zh.json: invalid title'
     await renderReady({
       entries: [{
-        entryId: 'include:legacy' as PluginEntryId, moduleName: '@acme/dsh-legacy', enabled: false, fiberPhase: null,
+        entryId: 'include:legacy' as PluginEntryId, moduleName: '@acme/host-legacy', enabled: false, fiberPhase: null,
         meta: { error },
       }],
     })
@@ -309,7 +309,7 @@ describe('PluginInventorySettingsTab', () => {
     expect(card).toHaveProperty('disabled', false)
     expect(card.closest('li')?.getAttribute('data-failed')).toBeNull()
     fireEvent.click(card)
-    expect(screen.getByText(en.moduleLabel).nextElementSibling?.textContent).toBe('@acme/dsh-legacy')
+    expect(screen.getByText(en.moduleLabel).nextElementSibling?.textContent).toBe('@acme/host-legacy')
   })
 
   it('shows the default preset first with its group open and the global plane folded', async () => {
