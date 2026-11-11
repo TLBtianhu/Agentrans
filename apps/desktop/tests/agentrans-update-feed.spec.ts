@@ -26,8 +26,8 @@ describe('Agentrans update feed', () => {
       DSH_DESKTOP_UPDATE_CHANNEL: 'nightly',
     }, 'win32', 'x64')
     expect(config.publish).toEqual([
-      // The metadata file follows the build version's prerelease id, which is what the updater asks for.
-      { provider: 'github', owner: 'TLBtianhu', repo: 'Agentrans', releaseType: 'prerelease', channel: 'alpha' },
+      // The metadata file follows the build version's prerelease id; a stable version names the stable file.
+      { provider: 'github', owner: 'TLBtianhu', repo: 'Agentrans', releaseType: 'prerelease', channel: 'latest' },
     ])
     expect(config.appId).toBe('com.agentrans.app')
   })
