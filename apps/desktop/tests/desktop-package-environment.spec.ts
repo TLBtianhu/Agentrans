@@ -165,7 +165,7 @@ describe('Desktop local packaging configuration', () => {
       const parent = {
         PATH: 'build-tools', AGENTRANS_DESKTOP_APP_ID: 'com.stale.desktop',
         AGENTRANS_DESKTOP_WINDOWS_TOKEN_PIN: 'stale-pin', APPLE_ID: 'stale-apple-id',
-        dsh_desktop_windows_key_container: 'case-insensitive-stale-container',
+        agentrans_desktop_windows_key_container: 'case-insensitive-stale-container',
       }
       expect(loadDesktopPackageEnvironment('win32', parent, directory)).toEqual({
         PATH: 'build-tools', AGENTRANS_DESKTOP_APP_ID: 'com.example.windows',
