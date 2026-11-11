@@ -29,7 +29,7 @@ This group maps the installable patch layers used by `agentrans --profile`. Each
 | [`sdk-app`](sdk-app/README.md) | SDK JSON-RPC stdio application over base | mounts the SDK server |
 | [`sdk-minimal`](sdk-minimal/README.md) | Standalone minimal SDK application without base or Web | — (complete patch tree) |
 
-In-box bundles resolve from the dsh installation; out-of-tree bundles install into a profile through `agentrans plugin --profile <name> add <package>`.
+In-box bundles resolve from the Agentrans installation; out-of-tree bundles install into a profile through `agentrans plugin --profile <name> add <package>`.
 
 <a id="related-documentation"></a>
 ## Related documentation

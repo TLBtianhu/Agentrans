@@ -43,7 +43,7 @@ The tree composes over an empty root:
 - then the profile's `cordis.patch.yml`, then the home-level `$AGENTRANS_HOME/cordis.patch.yml`
 - then `--patch` overlays
 
-Bundles named in `agentrans.profile.bundles` resolve from the dsh installation first (`@agentrans/base`, `@agentrans/web-app`, `@agentrans/headless`, `@agentrans/sdk-app`, `@agentrans/sdk-minimal`, `@agentrans/acp-app`), then from the profile's own `node_modules`, where pnpm installs out-of-tree plugins.
+Bundles named in `agentrans.profile.bundles` resolve from the Agentrans installation first (`@agentrans/base`, `@agentrans/web-app`, `@agentrans/headless`, `@agentrans/sdk-app`, `@agentrans/sdk-minimal`, `@agentrans/acp-app`), then from the profile's own `node_modules`, where pnpm installs out-of-tree plugins.
 
 Use `--dump-default-config` and `--dump-config` to inspect the composed tree without booting it. `--dump-config-schema` imports the composed tree's declared plugin schemas and prints JSON Schema for entries and patches instead of configuration values; read the [schema-dump safety and scope](reference/README.md#config-schema-dump) before inspecting untrusted plugins.
 

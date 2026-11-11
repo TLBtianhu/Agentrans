@@ -15,7 +15,7 @@ Read the applicable references below and inspect the proposed or existing plugin
 
 ## Enable a shipped plugin
 
-A shipped bundle can resolve a plugin row and leave it `disabled`. The row id and its reason are in the shipped patch, `packages/bundle/*/cordis.patch.yml` in a source checkout. Write a workspace bundle whose patch overrides that row with `disabled: false` and inserts the Host rows it depends on; a source checkout's `apps/cli/config/examples/<feature>/cordis.yml` lists them for opt-in features. Packages shipped with dsh resolve from the dsh installation, so the bundle declares no dependencies on them. Install it with `install_bundle`.
+A shipped bundle can resolve a plugin row and leave it `disabled`. The row id and its reason are in the shipped patch, `packages/bundle/*/cordis.patch.yml` in a source checkout. Write a workspace bundle whose patch overrides that row with `disabled: false` and inserts the Host rows it depends on; a source checkout's `apps/cli/config/examples/<feature>/cordis.yml` lists them for opt-in features. Packages shipped with dsh resolve from the Agentrans installation, so the bundle declares no dependencies on them. Install it with `install_bundle`.
 
 ## Deliver a working plugin first
 
@@ -28,7 +28,7 @@ A shipped bundle can resolve a plugin row and leave it `disabled`. The row id an
 ## Knowledge sources, in order
 
 1. Inspection: `cordis_inspect_query` answers exact Service methods and Event modes (`Service`, `Event`), a mounted plugin's Config JSON Schema (`Config.listConfigs`: filter the paged directory by `name`, then query the `entry` id), the Tools this Agent can call (`Tool`), and live Client Slots and theme tokens (`Slots`, `Theme`).
-2. Package documentation: `Config.listConfigs` with `name` set to the package finds its entries; querying one `entry` returns its `packageDir`, the resolved package directory. Read `<packageDir>/README.md`. Bundled packages resolve from the dsh installation and profile-installed bundles from the profile, so never guess the path from `$AGENTRANS_PROFILE_DIR`.
+2. Package documentation: `Config.listConfigs` with `name` set to the package finds its entries; querying one `entry` returns its `packageDir`, the resolved package directory. Read `<packageDir>/README.md`. Bundled packages resolve from the Agentrans installation and profile-installed bundles from the profile, so never guess the path from `$AGENTRANS_PROFILE_DIR`.
 3. Source: installed packages ship built `lib/index.js` and `lib/types/**/*.d.ts` with JSDoc under that same `packageDir`, not `src/`; a source checkout of DSH has `packages/<group>/<name>/src`. Read them when inspection and the README leave a question open, and start source-level diagnosis from a concrete installation or runtime failure.
 
 `AGENTRANS_PROFILE` (profile name) and `AGENTRANS_PROFILE_DIR` (its directory, whose `node_modules` holds only profile-installed bundles) are set in every shell call of a profile-launched Harness and absent when the Harness was booted without a profile. Bash reads them as `$AGENTRANS_PROFILE`; PowerShell, which the Windows preset uses, reads them as `$env:AGENTRANS_PROFILE`. With `agentrans` on the PATH, `agentrans --profile "$AGENTRANS_PROFILE" --dump-config` prints the composed profile.

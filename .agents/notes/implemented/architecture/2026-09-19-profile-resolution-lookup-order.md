@@ -6,7 +6,7 @@ English | [中文](2026-09-19-profile-resolution-lookup-order.zh.md)
 
 ## Problem
 
-A profile loads plugins from its own package project. The dsh installation packages and the dependencies embedded in bundles are not on the profile's dependency tree, so Node's default `node_modules` lookup starting from the profile cannot find them.
+A profile loads plugins from its own package project. The Agentrans installation packages and the dependencies embedded in bundles are not on the profile's dependency tree, so Node's default `node_modules` lookup starting from the profile cannot find them.
 
 A developer must be able to restate the resolution rule in one sentence: which part is ordinary Node behavior, which part is dsh's intervention, and where that intervention ends. The previous runtime implementation hid the whole `$AGENTRANS_HOME/profiles/node_modules` layer for every package name and kept dedicated recognition code for historical directory layouts, so the rule could not be stated in one sentence and nobody could judge whether a given resolution result was expected.
 
@@ -173,7 +173,7 @@ Two other layouts remain available: install `@agentrans/cli` in the plugin repos
 
 ## Consequences
 
-Gained: module resolution needs no disk projections; dsh installation packages selected at an interception layer come from the running installation, including peers declared by plugins linked outside the tree; other resolution retains Node's ancestor-chain and package-entry rules; the lookup path does not recognize historical projection directories.
+Gained: module resolution needs no disk projections; Agentrans installation packages selected at an interception layer come from the running installation, including peers declared by plugins linked outside the tree; other resolution retains Node's ancestor-chain and package-entry rules; the lookup path does not recognize historical projection directories.
 
 Paid: third-party libraries in the installation closure still occupy package directories at ③; a profile plugin without a nearer copy gets the installation's version. A linked request selects a runtime package only at a matching peer position, and a nearer physical copy still wins. Developers must place declarations and dependencies accordingly. Runtime resolution does not enforce peer version ranges.
 
