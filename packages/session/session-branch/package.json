@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-session-branch",
   "description": "Pure lineage and confirmed-result rules for ordinary manual Session branches",
-  "version": "0.2.2-alpha.2",
+  "version": "0.1.0",
   "publishConfig": {
     "access": "public"
   },

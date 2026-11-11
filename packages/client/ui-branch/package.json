@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-client-ui-branch",
   "description": "Inline confirmation for returning a manual-branch conclusion to its direct parent",
-  "version": "0.2.2-alpha.2",
+  "version": "0.1.0",
   "publishConfig": {
     "access": "public"
   },

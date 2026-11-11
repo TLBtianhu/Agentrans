@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-session-input",
   "description": "Shared identity admission for Session prompts and confirmed domain messages",
-  "version": "0.2.2-alpha.2",
+  "version": "0.1.0",
   "publishConfig": {
     "access": "public"
   },

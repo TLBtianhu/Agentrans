@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-shortcut-protocol",
   "description": "Physical-key and versioned shortcut preference protocol shared by the Client and the Desktop main process",
-  "version": "0.2.2-alpha.2",
+  "version": "0.1.0",
   "publishConfig": {
     "access": "public"
   },
