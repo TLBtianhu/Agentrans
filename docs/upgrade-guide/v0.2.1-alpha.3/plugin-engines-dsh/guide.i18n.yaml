@@ -3,14 +3,14 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write docs/upgrade-guide/v0.2.1-alpha.3/plugin-engines-dsh/guide.md
 /:
-  en: 8b4090927cfab760
-  zh: 47917ce765e1930a
-/plugin-compatibility-reads-engines-dsh-first:
-  en: 99c73d9da5c7552d
-  zh: 9b7165d489c1960e
-/plugin-compatibility-reads-engines-dsh-first/change:
-  en: 887e5574bdf5fbc9
-  zh: 683df72d256a799f
-/plugin-compatibility-reads-engines-dsh-first/migration:
-  en: 57676d075c62d8c9
-  zh: 460daff143c5d044
+  en: 01d6385c10bc5207
+  zh: 7339d57a7803f1a6
+/plugin-compatibility-reads-engines-agentrans-first:
+  en: be19c6ff85a52f04
+  zh: 2b308c9cbd337a45
+/plugin-compatibility-reads-engines-agentrans-first/change:
+  en: 2ce8a6ab182eea3b
+  zh: e483c3ff9839e4cf
+/plugin-compatibility-reads-engines-agentrans-first/migration:
+  en: ea432e145bfc3a3f
+  zh: ad6ac62960652430

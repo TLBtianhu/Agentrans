@@ -237,7 +237,7 @@ it.each([
 ] as const)('validates a named nested package independently: %s', (_label, fields, title, expected) => {
   manifest({ exports: { '.': './entry.js' }, files: ['examples'] })
   json('examples/nested/package.json', {
-    name: '@test/nested', type: 'module', dsh: { bundle: { patch: './cordis.patch.yml' } },
+    name: '@test/nested', type: 'module', agentrans: { bundle: { patch: './cordis.patch.yml' } },
     exports: { './locale/*.json': './locale/*.json', './icon': './icon.svg' },
     files: ['locale', 'icon.svg'], ...fields,
   })

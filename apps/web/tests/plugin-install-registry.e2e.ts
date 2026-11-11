@@ -41,7 +41,7 @@ it.each(['https://registry.npmjs.org/', MIRROR])('selects the fastest responding
           console.log(JSON.stringify({ error: { code: 'ERR_PNPM_META_FETCH_FAIL', message: 'GET https://registry.npmjs.org/mirrored-package: request timed out (ETIMEDOUT)' } }));
           process.exitCode = 1;
         } else {
-          console.log(JSON.stringify({ name: 'mirrored-package', version: '2.0.0', dsh: { bundle: { patch: './cordis.patch.yml' } } }));
+          console.log(JSON.stringify({ name: 'mirrored-package', version: '2.0.0', agentrans: { bundle: { patch: './cordis.patch.yml' } } }));
         }
       `)
       await writeFile(join(profile, 'add'), `
@@ -54,7 +54,7 @@ it.each(['https://registry.npmjs.org/', MIRROR])('selects the fastest responding
           return;
         }
         fs.mkdirSync('node_modules/mirrored-package', { recursive: true });
-        fs.writeFileSync('node_modules/mirrored-package/package.json', JSON.stringify({ name: 'mirrored-package', version: '2.0.0', dsh: { bundle: { patch: './cordis.patch.yml' } } }));
+        fs.writeFileSync('node_modules/mirrored-package/package.json', JSON.stringify({ name: 'mirrored-package', version: '2.0.0', agentrans: { bundle: { patch: './cordis.patch.yml' } } }));
         fs.writeFileSync('node_modules/mirrored-package/cordis.patch.yml', '[]\\n');
         fs.writeFileSync('package.json', JSON.stringify({ ...JSON.parse(fs.readFileSync('package.json', 'utf8')), dependencies: { 'mirrored-package': '2.0.0' } }));
         console.log('Installed from ' + (process.argv.find(arg => arg.startsWith('--registry=')) ?? 'the registry pnpm names'));

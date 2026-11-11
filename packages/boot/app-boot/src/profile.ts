@@ -4,12 +4,12 @@
  *
  * A profile is a directory under `$AGENTRANS_HOME/profiles/<name>` holding a
  * `package.json` (out-of-tree plugin dependencies plus the profile manifest
- * `dsh.profile` with its ordered `bundles` list) and a `cordis.patch.yml`
+ * `agentrans.profile` with its ordered `bundles` list) and a `cordis.patch.yml`
  * (the user's own patch layer, applied after every bundle layer). Bundles are
  * npm packages whose manifest declares
- * `"dsh": { "bundle": { "patch": "./cordis.patch.yml" } }` (one file, or an
+ * `"agentrans": { "bundle": { "patch": "./cordis.patch.yml" } }` (one file, or an
  * ordered list of files); the tree is composed by applying each bundle's patch
- * lists in `dsh.profile.bundles` order over an empty entry list, then the
+ * lists in `agentrans.profile.bundles` order over an empty entry list, then the
  * profile's own patches, then any launcher layers (`--patch` files and
  * flag-derived patches).
  *
@@ -28,6 +28,7 @@ import type { EntryOptions } from '@agentrans/cordis-plugin-loader'
 import { applyEntryPatches, type PatchOptions } from '@agentrans/cordis-plugin-include'
 import { resolveDshHome } from '@agentrans/home-paths'
 import type { DshBundleManifest, DshPackageManifest } from '@agentrans/package-manifest'
+import { normalizeRetiredKeys } from './retired-keys.ts'
 import { INSTALLATION_OWNED_PROFILE_TUPLES, PROFILE_TEMPLATES, RETIRED_BUNDLES } from '@agentrans/official-bundles'
 import { assertBundlePlatform } from './bundle-platform.ts'
 import { evaluatePluginCompatibility, pluginCompatibilityWarning } from './plugin-compatibility.ts'
@@ -47,7 +48,7 @@ export type ProfileManifest = Partial<DshPackageManifest>
 /**
  * The patch files a bundle declares, as written: one file for a string
  * `patch`, the listed files in order for an array.
- * @param bundle - the bundle's `dsh.bundle` declaration, as read from package.json.
+ * @param bundle - the bundle's `agentrans.bundle` declaration, as read from package.json.
  * @returns the package-relative patch file paths in application order.
  * @throws {Error} when `patch` is neither a string nor a list of strings.
  */
@@ -62,7 +63,7 @@ export function bundlePatchFiles(bundle: DshBundleManifest): string[] {
 /**
  * Resolve a bundle declaration to its ordered absolute patch files.
  * @param packageDir - absolute directory of the bundle package.
- * @param bundle - the bundle's `dsh.bundle` declaration, as read from package.json.
+ * @param bundle - the bundle's `agentrans.bundle` declaration, as read from package.json.
  * @returns the absolute patch file paths in application order.
  * @throws {Error} when `patch` is neither a string nor a list of strings.
  */
@@ -72,7 +73,7 @@ export function bundlePatchPaths(packageDir: string, bundle: DshBundleManifest):
 
 /** One resolved bundle layer of a profile. */
 export interface ProfileLayer {
-  /** The bundle's package name, as listed in `dsh.profile.bundles`. */
+  /** The bundle's package name, as listed in `agentrans.profile.bundles`. */
   packageName: string
   /** Absolute directory of the resolved bundle package. */
   packageDir: string
@@ -88,19 +89,19 @@ export interface Profile {
   name: string
   /** Absolute profile directory. */
   dir: string
-  /** Bundle layers in `dsh.profile.bundles` order. */
+  /** Bundle layers in `agentrans.profile.bundles` order. */
   layers: ProfileLayer[]
   /** Absolute path of the profile's own patch file. */
   patchPath: string
   /** The profile's own patches; empty when the file is absent. */
   patches: PatchOptions[]
-  /** Selected bundles that contributed no layer, in `dsh.profile.bundles` order, with why. */
+  /** Selected bundles that contributed no layer, in `agentrans.profile.bundles` order, with why. */
   skippedBundles: SkippedBundle[]
 }
 
 /** A selected bundle the profile could not load, or whose own DSH requirements the profile does not exempt. */
 export interface SkippedBundle {
-  /** The bundle's package name from `dsh.profile.bundles`. */
+  /** The bundle's package name from `agentrans.profile.bundles`. */
   packageName: string
   /** The resolution, manifest, compatibility, or patch-loading failure. */
   reason: string
@@ -193,7 +194,7 @@ autoInstallPeers: false
  * pnpm settings out-of-tree plugins need. Existing files are never touched,
  * so re-running is a no-op on an initialized profile.
  * @param dir - the profile directory from {@link resolveProfileDir}.
- * @param bundles - the initial `dsh.profile.bundles` layer list.
+ * @param bundles - the initial `agentrans.profile.bundles` layer list.
  */
 export function initProfile(
   dir: string,
@@ -206,7 +207,7 @@ export function initProfile(
       name: `dsh-profile-${basename(dir)}`,
       private: true,
       dependencies: {},
-      dsh: { profile: { bundles: [...bundles] } },
+      agentrans: { profile: { bundles: [...bundles] } },
     }
     writeFileSync(manifestPath, JSON.stringify(manifest, undefined, 2) + '\n')
   }
@@ -305,7 +306,7 @@ function pointsInto(link: string, root: string): boolean {
 
 /** Read one package manifest while traversing a dependency graph. */
 function readPackageManifest(anchor: string): ProfileManifest {
-  return JSON.parse(readFileSync(anchor, 'utf8')) as ProfileManifest
+  return normalizeRetiredKeys(JSON.parse(readFileSync(anchor, 'utf8')) as ProfileManifest, anchor)
 }
 
 /** Return dependency names that may be imported by a loader-visible plugin. */
@@ -558,7 +559,7 @@ export function readProfileManifest(binName: string, dir: string): ProfileManife
   if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
     throw new Error(`${binName}: profile manifest ${path} must hold a JSON object`)
   }
-  return parsed
+  return normalizeRetiredKeys(parsed, path)
 }
 
 /**
@@ -575,14 +576,14 @@ function sameBundles(left: readonly string[], right: readonly string[]): boolean
   return left.length === right.length && left.every((value, index) => value === right[index])
 }
 
-/** Return `manifest` with `dsh.profile.bundles` replaced, preserving all other fields. */
+/** Return `manifest` with `agentrans.profile.bundles` replaced, preserving all other fields. */
 function withBundles(manifest: ProfileManifest, bundles: readonly string[]): ProfileManifest {
   return {
     ...manifest,
-    dsh: {
-      ...manifest.dsh,
+    agentrans: {
+      ...manifest.agentrans,
       profile: {
-        ...manifest.dsh?.profile,
+        ...manifest.agentrans?.profile,
         bundles: [...bundles],
       },
     },
@@ -596,7 +597,7 @@ function withBundles(manifest: ProfileManifest, bundles: readonly string[]): Pro
 function normalizeShippedProfile(name: string, dir: string, manifest: ProfileManifest): ProfileManifest {
   const installationOwned = INSTALLATION_OWNED_PROFILE_TUPLES[name]
   const template = PROFILE_TEMPLATES[name]
-  const bundles = manifest.dsh?.profile?.bundles
+  const bundles = manifest.agentrans?.profile?.bundles
   if (template === undefined || bundles === undefined) return manifest
   const isRetiredTuple = installationOwned !== undefined && sameBundles(bundles, installationOwned)
   if (!isRetiredTuple) return manifest
@@ -610,7 +611,7 @@ function normalizeShippedProfile(name: string, dir: string, manifest: ProfileMan
  * manifest back only when it listed one.
  */
 function dropRetiredBundles(dir: string, manifest: ProfileManifest): ProfileManifest {
-  const bundles = manifest.dsh?.profile?.bundles ?? []
+  const bundles = manifest.agentrans?.profile?.bundles ?? []
   const kept = bundles.filter(bundle => !RETIRED_BUNDLES.has(bundle))
   if (kept.length === bundles.length) return manifest
   const normalized = withBundles(manifest, kept)
@@ -643,7 +644,7 @@ function packageDirFromAnchor(anchor: string, packageName: string): string | und
  * the same installation as the running dsh, never from a profile-local copy.
  * Resolution does not require the package to export `./package.json`.
  * @param binName - the diagnostic prefix on the thrown error.
- * @param packageName - the bundle's package name from `dsh.profile.bundles`.
+ * @param packageName - the bundle's package name from `agentrans.profile.bundles`.
  * @param installAnchor - absolute path of a file inside the dsh app package (its package.json).
  * @param profileDir - the profile directory (second anchor).
  * @returns the bundle package's absolute directory.
@@ -682,7 +683,7 @@ export function loadProfileDirectory(
   options: { userLayer?: boolean } = {},
 ): Profile {
   const manifest = dropRetiredBundles(dir, readProfileManifest(binName, dir))
-  const bundles = manifest.dsh?.profile?.bundles ?? []
+  const bundles = manifest.agentrans?.profile?.bundles ?? []
   const layers: ProfileLayer[] = []
   const skippedBundles: SkippedBundle[] = []
   const exemptions = bundles.length === 0 ? {} : readProfileVersionExemptions(dir)
@@ -690,7 +691,7 @@ export function loadProfileDirectory(
     try {
       const packageDir = resolveBundleDir(binName, packageName, installAnchor, dir)
       const bundleManifest = readProfileManifest(binName, packageDir)
-      const bundle = bundleManifest.dsh?.bundle
+      const bundle = bundleManifest.agentrans?.bundle
       if (bundle === undefined) {
         throw new Error(`${binName}: profile bundle ${JSON.stringify(packageName)} declares no dsh.bundle in its package.json`)
       }
@@ -713,7 +714,7 @@ export function loadProfileDirectory(
 }
 
 /**
- * Load a profile: resolve every `dsh.profile.bundles` entry to its patch
+ * Load a profile: resolve every `agentrans.profile.bundles` entry to its patch
  * layer and parse the profile's own patch file. Unreadable bundles, unsupported Host platforms,
  * and incompatible bundles are skipped and listed in `skippedBundles`; profile manifest and user patch errors still throw.
  * @param binName - the diagnostic prefix on thrown errors.

@@ -47,7 +47,7 @@
     "@agentrans/cordis-plugin-include": "workspace:~",
     "js-yaml": "^4.3.2"
   },
-  "dsh": {
+  "agentrans": {
     "bundle": {
       "patch": "./cordis.patch.yml"
     }

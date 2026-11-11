@@ -42,7 +42,7 @@
     "./package.json": "./package.json",
     "./locale/*.json": "./locale/*.json"
   },
-  "dsh": {
+  "agentrans": {
     "client": {
       "external": [
         "@agentrans/api-gateway/client"

@@ -10,11 +10,11 @@ import { ClientRoster, createClientTest, webApp } from '@agentrans/client-test-r
 
 const manifest = JSON.parse(readFileSync(resolve(import.meta.dirname, '../package.json'), 'utf8')) as {
   name: string
-  dsh: { client: { inject: string[] } }
+  agentrans: { client: { inject: string[] } }
 }
 // Auto mounts the native row dynamically; use that package's actual dependency declaration.
 const test = createClientTest({ roster: ClientRoster.of([...webApp.rows, {
-  name: manifest.name, inject: manifest.dsh.client.inject, immediately: false,
+  name: manifest.name, inject: manifest.agentrans.client.inject, immediately: false,
 }]) })
 afterEach(() => { cleanup(); vi.unstubAllGlobals() })
 

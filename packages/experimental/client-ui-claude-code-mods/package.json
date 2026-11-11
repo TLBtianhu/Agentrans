@@ -26,7 +26,7 @@
     "./locale/*.json": "./locale/*.json",
     "./package.json": "./package.json"
   },
-  "dsh": {
+  "agentrans": {
     "client": {
       "inject": [
         "@agentrans/api-remotes",

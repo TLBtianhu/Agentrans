@@ -59,7 +59,12 @@ export type MarketSource =
 
 /** Runtime requirements of one version. */
 export interface MarketEngines {
-  /** SemVer range of DSH versions the version runs on; absent means any DSH version. */
+  /** SemVer range of Agentrans versions the version runs on; absent means any Agentrans version. */
+  readonly agentrans?: string
+  /**
+   * Retired name of `agentrans`; a catalog published before the rename still carries it.
+   * @deprecated Rename the engine name to `agentrans`.
+   */
   readonly dsh?: string
 }
 

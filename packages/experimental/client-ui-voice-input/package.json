@@ -59,7 +59,7 @@
     "@agentrans/client-store": "workspace:*",
     "@agentrans/client-ui-plugin-manager": "workspace:*"
   },
-  "dsh": {
+  "agentrans": {
     "client": {
       "inject": [
         "@agentrans/api-remotes",

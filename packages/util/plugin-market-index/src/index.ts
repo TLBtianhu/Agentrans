@@ -213,6 +213,7 @@ function engines(value: unknown, path: string): MarketEngines {
     if (semver.validRange(range) === null) fail(at, 'must be a SemVer range')
     return range
   })
+  /* eslint-disable-next-line typescript/no-deprecated -- a catalog published before the rename still names the engine `dsh` */
   return dsh === undefined ? {} : { dsh }
 }
 

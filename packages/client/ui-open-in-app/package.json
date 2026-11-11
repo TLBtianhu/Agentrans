@@ -37,7 +37,7 @@
     "watch": "tsdown --watch"
   },
   "license": "MIT",
-  "dsh": {
+  "agentrans": {
     "client": {
       "inject": [
         "@agentrans/api-gateway",

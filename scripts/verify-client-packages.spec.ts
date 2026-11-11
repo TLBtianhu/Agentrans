@@ -378,12 +378,12 @@ describe('package assets', () => {
     roots.push(root)
     const files: Record<string, unknown> = {
       'packages/g/web/package.json': {
-        name: '@f/web', dsh: { client: { platform: 'web' } }, exports: { './assets/*': './lib/assets/*' },
+        name: '@f/web', agentrans: { client: { platform: 'web' } }, exports: { './assets/*': './lib/assets/*' },
       },
       'packages/g/conditional/package.json': {
         name: '@f/conditional', exports: { './assets/*': { default: './lib/assets/*' } },
       },
-      'packages/g/none/package.json': { name: '@f/none', dsh: { client: { platform: 1 } }, exports: './lib/index.js' },
+      'packages/g/none/package.json': { name: '@f/none', agentrans: { client: { platform: 1 } }, exports: './lib/index.js' },
     }
     for (const [path, value] of Object.entries(files)) {
       mkdirSync(dirname(join(root, path)), { recursive: true })
@@ -455,9 +455,9 @@ describe('manifest declarations', () => {
     roots.push(root)
     const files: Record<string, unknown> = {
       'packages/g/a/package.json': {
-        name: '@f/a', dsh: { client: { external: 'react', inject: ['@f/b', 1] } },
+        name: '@f/a', agentrans: { client: { external: 'react', inject: ['@f/b', 1] } },
       },
-      'packages/g/b/package.json': { name: '@f/b', dsh: { client: {} } },
+      'packages/g/b/package.json': { name: '@f/b', agentrans: { client: {} } },
     }
     for (const [path, value] of Object.entries(files)) {
       mkdirSync(dirname(join(root, path)), { recursive: true })
@@ -495,7 +495,7 @@ describe('manifest declarations', () => {
     const slots = declaration('ui-slots', { dynamic: false })
     const manifest = {
       name: subject.name,
-      dsh: { client: { external: subject.external, inject: subject.inject, platform: 'web' } },
+      agentrans: { client: { external: subject.external, inject: subject.inject, platform: 'web' } },
       dependencies: subject.dependencies,
       peerDependencies: subject.peerDependencies,
       devDependencies: subject.devDependencies,
@@ -511,12 +511,12 @@ describe('manifest declarations', () => {
     }))).toEqual([subject.manifest])
 
     const fixed = JSON.parse(readFileSync(join(root, subject.manifest), 'utf8')) as {
-      dsh: { client: { external: string[]; inject: string[] } }
+      agentrans: { client: { external: string[]; inject: string[] } }
       dependencies?: Record<string, string>
       peerDependencies: Record<string, string>
       devDependencies: Record<string, string>
     }
-    expect(fixed.dsh.client).toMatchObject({
+    expect(fixed.agentrans.client).toMatchObject({
       external: ['@agentrans/missing'],
       inject: ['@agentrans/agent'],
     })

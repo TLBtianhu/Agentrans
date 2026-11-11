@@ -36,7 +36,7 @@ interface AssembledBootOptions {
 interface ClientPackageManifest {
   name?: string
   exports?: Record<string, string | { default?: string }>
-  dsh?: {
+  agentrans?: {
     client?: {
       platform?: string
       inject?: string[]
@@ -93,7 +93,7 @@ const comboReference = (ids: readonly string[], rev: string): string =>
 /** Derive the assembled browser graph from the same bundle patches and package declarations as `agentrans web`. */
 function loadAssembledPlugins(): readonly AssembledPlugin[] {
   const entries = appBoot.composeEntries(BUNDLE_LAYERS.map((layer) => {
-    const declared = (JSON.parse(readFileSync(layer.manifest, 'utf8')) as { dsh: { bundle: { patch: string | string[] } } }).dsh.bundle
+    const declared = (JSON.parse(readFileSync(layer.manifest, 'utf8')) as { agentrans: { bundle: { patch: string | string[] } } }).agentrans.bundle
     return appBoot.bundlePatchPaths(layer.dir, declared).flatMap(patch => appBoot.loadOverlayPatches('assembled boot', patch))
   }))
   const plugins = new Map<string, AssembledPlugin>()
@@ -102,7 +102,7 @@ function loadAssembledPlugins(): readonly AssembledPlugin[] {
     const packagePath = resolvePackageManifest(entry.name)
     if (packagePath === undefined) continue
     const pkg = JSON.parse(readFileSync(packagePath, 'utf8')) as ClientPackageManifest
-    const declaration = pkg.dsh?.client
+    const declaration = pkg.agentrans?.client
     if (declaration?.platform !== 'web') continue
     if (pkg.name !== entry.name) {
       throw new Error(`assembled boot: ${entry.name} resolved package ${pkg.name ?? '<unnamed>'}`)

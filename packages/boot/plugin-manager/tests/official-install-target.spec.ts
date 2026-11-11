@@ -18,7 +18,7 @@ function fixture() {
   writeFileSync(anchor, JSON.stringify({ name: '@agentrans/cli', version, dependencies: { '@agentrans/app-boot': 'workspace:*' } }))
   const directory = join(root, 'packages', 'relocated', 'native-provider')
   mkdirSync(join(directory, 'lib'), { recursive: true })
-  writeFileSync(join(directory, 'package.json'), JSON.stringify({ name, version, main: 'lib/index.js', dsh: { bundle: { patch: './cordis.patch.yml' } } }))
+  writeFileSync(join(directory, 'package.json'), JSON.stringify({ name, version, main: 'lib/index.js', agentrans: { bundle: { patch: './cordis.patch.yml' } } }))
   writeFileSync(join(directory, 'lib', 'index.js'), 'export function apply() {}\n')
   writeFileSync(join(directory, 'cordis.patch.yml'), '[]\n')
   return { root, anchor, directory }
@@ -70,7 +70,7 @@ it.each(['missing', 'duplicate'])('refuses a %s workspace package without offeri
 })
 
 it.each([
-  { version: '0.1.0' }, { private: true }, { dsh: {} },
+  { version: '0.1.0' }, { private: true }, { agentrans: {} },
 ])('refuses a workspace package with invalid release or bundle metadata: %j', (changes) => {
   const { anchor, directory } = fixture()
   const file = join(directory, 'package.json')

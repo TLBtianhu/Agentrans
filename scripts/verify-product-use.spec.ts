@@ -45,7 +45,7 @@ function fixture(): string {
   write(root, 'apps/desktop/src/main.ts', 'export {}\n')
   write(root, 'apps/web/src/main.ts', 'export {}\n')
   write(root, 'apps/web/index.html', '<script type="module" src="/src/main.ts"></script>')
-  pkg(root, 'packages/bundle/base', base, { dsh: { bundle: { patch: './cordis.patch.yml' } } })
+  pkg(root, 'packages/bundle/base', base, { agentrans: { bundle: { patch: './cordis.patch.yml' } } })
   pkg(root, 'packages/core/core', core)
   write(root, patch, [{ insert: [{ id: 'core', name: core }] }])
   profiles(root)
@@ -130,7 +130,7 @@ describe('product package use', () => {
 
   it.each(['acp', 'headless', 'sdk', 'sdk-minimal'])('composes the %s profile independently', (name) => {
     const root = fixture()
-    pkg(root, candidateDir, candidate, { dsh: { bundle: { patch: './feature.patch.yml' } } })
+    pkg(root, candidateDir, candidate, { agentrans: { bundle: { patch: './feature.patch.yml' } } })
     write(root, `${candidateDir}/feature.patch.yml`, [{ insert: [{ name: candidate }] }])
     const source = readFileSync(join(root, profile), 'utf8')
     write(root, profile, source.replace(`"${name}":{"bundles":["${base}"]}`, `"${name}":{"bundles":["${base}","${candidate}"]}`))
@@ -197,7 +197,7 @@ describe('product package use', () => {
   it.each(['shipped', 'on-demand'])('keeps %s optional selection and its runtime closure separate from default use', (delivery) => {
     const root = fixture()
     const bundle = '@agentrans/experimental-feature'
-    pkg(root, 'packages/experimental/feature', bundle, { dsh: { bundle: { patch: './cordis.patch.yml' } } })
+    pkg(root, 'packages/experimental/feature', bundle, { agentrans: { bundle: { patch: './cordis.patch.yml' } } })
     pkg(root, candidateDir, candidate)
     pkg(root, 'packages/core/indirect', '@agentrans/indirect')
     write(root, `${candidateDir}/src/index.ts`, "import '@agentrans/indirect'")
@@ -212,7 +212,7 @@ describe('product package use', () => {
   it.each(['shipped', 'on-demand'])('does not count a %s optional patch whose target is absent', (delivery) => {
     const root = fixture()
     const bundle = '@agentrans/experimental-feature'
-    pkg(root, 'packages/experimental/feature', bundle, { dsh: { bundle: { patch: './cordis.patch.yml' } } })
+    pkg(root, 'packages/experimental/feature', bundle, { agentrans: { bundle: { patch: './cordis.patch.yml' } } })
     pkg(root, candidateDir, candidate)
     write(root, 'packages/experimental/feature/cordis.patch.yml', [{ id: 'absent', insert: [{ name: candidate }] }])
     profiles(root, delivery === 'shipped' ? [bundle] : [], delivery === 'on-demand' ? [bundle] : [])
@@ -261,7 +261,7 @@ describe('product package use', () => {
     const root = fixture()
     const picker = '@agentrans/host-directory-picker-auto'
     pkg(root, 'packages/host/directory-picker-auto', picker)
-    pkg(root, candidateDir, candidate, { dsh: { client: { platform: 'web' } } })
+    pkg(root, candidateDir, candidate, { agentrans: { client: { platform: 'web' } } })
     pkg(root, 'packages/client/indirect', '@agentrans/client-indirect')
     write(root, `${candidateDir}/src/client.ts`, "import '@agentrans/client-indirect'")
     write(root, 'packages/host/directory-picker-auto/src/index.ts',

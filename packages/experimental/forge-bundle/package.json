@@ -45,7 +45,7 @@
   "devDependencies": {
     "@agentrans/cordis": "workspace:~"
   },
-  "dsh": {
+  "agentrans": {
     "bundle": {
       "patch": "./cordis.patch.yml"
     }

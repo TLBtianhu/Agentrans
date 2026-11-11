@@ -73,7 +73,7 @@ async function runHeadlessPtySmoke(): Promise<string> {
       name: 'dsh-profile-headless',
       private: true,
       dependencies: {},
-      dsh: { profile: { bundles: ['@agentrans/base', '@agentrans/headless'] } },
+      agentrans: { profile: { bundles: ['@agentrans/base', '@agentrans/headless'] } },
     }, undefined, 2))
     await writeFile(join(profileDir, 'cordis.patch.yml'), [
       '- insert:',

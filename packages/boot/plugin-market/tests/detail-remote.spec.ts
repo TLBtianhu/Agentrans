@@ -45,22 +45,22 @@ const index = {
   format: 1, title: 'Market', plugins: [
     {
       name: 'from-git', repository: { url: 'https://github.com/o/mono', directory: 'other' },
-      versions: [{ version: '1.0.0', publishTimestamp: 1, source: { type: 'git', url: 'https://github.com/o/r', commit: COMMIT, path: 'pkg' }, engines: { dsh: '*' } }],
+      versions: [{ version: '1.0.0', publishTimestamp: 1, source: { type: 'git', url: 'https://github.com/o/r', commit: COMMIT, path: 'pkg' }, engines: { agentrans: '*' } }],
     },
     {
       name: 'from-git-root', repository: { url: 'https://example.com/only' },
-      versions: [{ version: '1.0.0', publishTimestamp: 1, source: { type: 'git', url: 'https://github.com/o/root', commit: COMMIT }, engines: { dsh: '*' } }],
+      versions: [{ version: '1.0.0', publishTimestamp: 1, source: { type: 'git', url: 'https://github.com/o/root', commit: COMMIT }, engines: { agentrans: '*' } }],
     },
     {
       name: 'from-git-self', repository: { url: 'https://github.com/o/self', directory: 'pkg' },
-      versions: [{ version: '1.0.0', publishTimestamp: 1, source: { type: 'git', url: 'https://github.com/o/self', commit: COMMIT, path: 'pkg' }, engines: { dsh: '*' } }],
+      versions: [{ version: '1.0.0', publishTimestamp: 1, source: { type: 'git', url: 'https://github.com/o/self', commit: COMMIT, path: 'pkg' }, engines: { agentrans: '*' } }],
     },
-    { name: 'bare', versions: [{ version: '1.0.0', publishTimestamp: 1, source: { type: 'npm' }, engines: { dsh: '*' } }] },
+    { name: 'bare', versions: [{ version: '1.0.0', publishTimestamp: 1, source: { type: 'npm' }, engines: { agentrans: '*' } }] },
     {
       name: 'from-npm', versions: [
-        { version: '2.0.0', publishTimestamp: 1, source: { type: 'npm' }, engines: { dsh: '*' } },
-        { version: '1.0.0', publishTimestamp: 1, source: { type: 'npm', registry: 'https://npm.corp.example/' }, engines: { dsh: '*' } },
-        { version: '0.9.0', publishTimestamp: 1, source: { type: 'npm', registry: 'https://registry.npmmirror.com/' }, engines: { dsh: '*' } },
+        { version: '2.0.0', publishTimestamp: 1, source: { type: 'npm' }, engines: { agentrans: '*' } },
+        { version: '1.0.0', publishTimestamp: 1, source: { type: 'npm', registry: 'https://npm.corp.example/' }, engines: { agentrans: '*' } },
+        { version: '0.9.0', publishTimestamp: 1, source: { type: 'npm', registry: 'https://registry.npmmirror.com/' }, engines: { agentrans: '*' } },
       ],
       repository: { url: 'https://github.com/o/npm' },
     },

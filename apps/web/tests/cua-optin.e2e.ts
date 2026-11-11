@@ -30,7 +30,7 @@ it.skipIf(process.platform !== 'darwin').each([
     const defaults = join(directory, 'script-defaults')
     if (script) {
       await mkdir(defaults)
-      await writeFile(join(defaults, 'package.json'), JSON.stringify({ name: 'cua-script-defaults', version: '1.0.0', dsh: { bundle: { patch: 'cordis.patch.yml' } } }))
+      await writeFile(join(defaults, 'package.json'), JSON.stringify({ name: 'cua-script-defaults', version: '1.0.0', agentrans: { bundle: { patch: 'cordis.patch.yml' } } }))
       await writeFile(join(defaults, 'cordis.patch.yml'), '- id: ptc-runtime\n  config:\n    executionMode: vm-script\n    scriptPersistence: false\n')
     }
     const harnessHome = join(directory, 'home')
@@ -84,7 +84,7 @@ it.skipIf(process.platform !== 'darwin').each([
     expect(originalRuntime.programFormat).toBe(script ? 'script' : 'function-body')
     expect(scaffold.ctx.get('computerUse')).toBeUndefined()
     const profileManifest = () => readProfileManifest('scaffold', join(scaffold.harnessHome, 'profiles/scaffold'))
-    const selected = () => profileManifest().dsh?.profile?.bundles
+    const selected = () => profileManifest().agentrans?.profile?.bundles
     const dependencies = profileManifest().dependencies
     expect(selected()).not.toContain('@agentrans/cua-bundle')
 

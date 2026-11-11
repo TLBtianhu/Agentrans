@@ -37,8 +37,8 @@ it('rejects unguarded hover and queries that also match devices without hover', 
 
 it('limits every client hover selector to hover-capable primary input', () => {
   const clientRoots = packageFiles(name => name === 'package.json').flatMap((file) => {
-    const manifest = JSON.parse(readFileSync(file, 'utf8')) as { dsh?: { client?: object } }
-    return manifest.dsh?.client === undefined ? [] : [file.slice(0, -'package.json'.length)]
+    const manifest = JSON.parse(readFileSync(file, 'utf8')) as { agentrans?: { client?: object } }
+    return manifest.agentrans?.client === undefined ? [] : [file.slice(0, -'package.json'.length)]
   })
   const files = packageStylesheets().filter(file => file.includes('/packages/client/') || clientRoots.some(root => file.startsWith(root)))
   expect(files.length).toBeGreaterThan(0)

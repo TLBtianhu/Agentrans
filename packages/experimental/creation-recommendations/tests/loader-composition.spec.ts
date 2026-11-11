@@ -37,7 +37,7 @@ it.each(['portable-bundle', 'foreign-nested-row'] as const)('validates and insta
   await mkdir(base)
   await writeFile(anchor, JSON.stringify({ name: 'installation', dependencies: {} }))
   await writeFile(join(base, 'package.json'), JSON.stringify({ name: 'fixture-base', version: '1.0.0',
-    dsh: { bundle: { patch: './cordis.patch.yml' } } }))
+    agentrans: { bundle: { patch: './cordis.patch.yml' } } }))
   await writeFile(join(base, 'cordis.patch.yml'), JSON.stringify([{ insert: [
     ['session', 'sessions'], ['projection', 'projections'], ['llm', 'llm'], ['prompt', 'prompt'], ['tools', 'tools'],
     ['executor', 'executor'], ['fs', 'fs'], ['working-directory', 'workingDirectory'], ['skills', 'skills'], ['tool-skill', 'toolSkill'],
@@ -113,7 +113,7 @@ it.each(['portable-bundle', 'foreign-nested-row'] as const)('validates and insta
     expect([...ctx.loader.entries()].find(entry => entry.options.id === 'access')).toBe(access)
     expect(access?.options.name).toBe('cordis:access')
     expect(access?.fiber).toBeDefined()
-    expect(readProfileManifest('test', dir).dsh?.profile?.bundles).toEqual(['fixture-base'])
+    expect(readProfileManifest('test', dir).agentrans?.profile?.bundles).toEqual(['fixture-base'])
     return
   }
   await vi.waitFor(() => { expect(receipt()?.phase).toBe('installed') }, { timeout: 20_000 })
@@ -127,14 +127,14 @@ it.each(['portable-bundle', 'foreign-nested-row'] as const)('validates and insta
   expect((await ctx.pluginManager.setBundleEnabled(name, true)).application).toBe('applied')
   const live = () => [...ctx.loader.entries()].find(entry => entry.options.id === name + ':counter')?.fiber
   expect(live()).toBeDefined()
-  expect(readProfileManifest('test', dir).dsh?.profile?.bundles).toContain(name)
+  expect(readProfileManifest('test', dir).agentrans?.profile?.bundles).toContain(name)
   await ctx.actionCards.act(agent, callId, 'keep')
   expect(receipt()?.phase).toBe('kept')
   expect(live()).toBeDefined()
   await ctx.actionCards.act(agent, callId, 'undo')
   expect(receipt()?.phase).toBe('removed')
   expect(live()).toBeUndefined()
-  expect(readProfileManifest('test', dir).dsh?.profile?.bundles).toEqual(['fixture-base'])
+  expect(readProfileManifest('test', dir).agentrans?.profile?.bundles).toEqual(['fixture-base'])
   expect((await ctx.pluginManager.listBundles()).find(bundle => bundle.name === name)?.installed).not.toBe(true)
   const feature = [...ctx.loader.entries()].find(entry => entry.options.id === 'recommendations')
   expect(feature?.fiber).toBeDefined()

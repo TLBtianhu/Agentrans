@@ -30,7 +30,7 @@ export interface IncompatiblePlugin {
   name: string
   version: string
   runtimeVersion: string
-  /** Only the requirements the running version does not satisfy, keyed `engines.dsh` or by DSH peer package name. */
+  /** Only the requirements the running version does not satisfy, keyed `engines.agentrans` or by DSH peer package name. */
   requirements: Record<string, string>
 }
 
@@ -271,9 +271,9 @@ export interface PluginVersion {
   readonly prerelease: boolean
   /** The registry's deprecation message, when the version is deprecated. */
   readonly deprecated?: string
-  /** Whether the version declares a `dsh.bundle`; a version that does not cannot replace a bundle. */
+  /** Whether the version declares a `agentrans.bundle`; a version that does not cannot replace a bundle. */
   readonly bundle: boolean
-  /** Present when the version's `engines.dsh` or DSH peers reject the running DSH version without an exemption for the exact pair. */
+  /** Present when the version's `engines.agentrans` or DSH peers reject the running DSH version without an exemption for the exact pair. */
   readonly incompatible?: IncompatiblePlugin
 }
 

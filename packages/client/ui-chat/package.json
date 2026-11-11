@@ -27,7 +27,7 @@
     "./package.json": "./package.json",
     "./locale/*.json": "./locale/*.json"
   },
-  "dsh": {
+  "agentrans": {
     "client": {
       "inject": [
         "@agentrans/api-session-controller",

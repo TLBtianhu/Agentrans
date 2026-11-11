@@ -35,7 +35,7 @@ kind: "package-bundle"
 {
   "name": "my-profile",
   "private": true,
-  "dsh": {
+  "agentrans": {
     "profile": {
       "bundles": ["@agentrans/base"]
     }

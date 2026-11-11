@@ -17,6 +17,6 @@ description: "Web 组合不再包含 Schedule 的三行；改由“自动化任�
 
 ## 迁移
 
-1. 打开插件管理页，在“官方”分组中找到“自动化任务”并开启。开关会把 `@agentrans/experimental-schedule-bundle` 追加到 `$AGENTRANS_HOME/profiles/<name>/package.json` 的 `dsh.profile.bundles`；手动维护的 profile 需自行添加该条目。
+1. 打开插件管理页，在“官方”分组中找到“自动化任务”并开启。开关会把 `@agentrans/experimental-schedule-bundle` 追加到 `$AGENTRANS_HOME/profiles/<name>/package.json` 的 `agentrans.profile.bundles`；手动维护的 profile 需自行添加该条目。
 2. 保留为 `schedule`、`time-context` 或 `ui-schedule` 设置其他字段的覆盖项，例如 `deliveryHistoryDays`；bundle 插入这些行后它们重新生效。只设置 `disabled: false` 的覆盖项已无作用，可以删除。
 3. 确认：重启 `agentrans web`，检查启动日志中这三个 id 不再出现 `patch: entry ... not found` 警告，且侧栏显示“自动化任务”并列出之前存储的提醒。

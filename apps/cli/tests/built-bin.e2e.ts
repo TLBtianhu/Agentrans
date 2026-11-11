@@ -74,7 +74,7 @@ interface ProfileLifecycleFixture {
 
 /**
  * A minimal custom profile: one lifecycle-marker plugin bundle listed in
- * dsh.profile.bundles, no dsh-base — proving out-of-box composition machinery without
+ * agentrans.profile.bundles, no dsh-base — proving out-of-box composition machinery without
  * booting the entire product tree.
  */
 function createProfileLifecycleFixture(): ProfileLifecycleFixture {
@@ -130,7 +130,7 @@ function createProfileLifecycleFixture(): ProfileLifecycleFixture {
     name: 'dsh-lifecycle-bundle',
     version: '0.0.0',
     type: 'module',
-    dsh: { bundle: { patch: './cordis.patch.yml' } },
+    agentrans: { bundle: { patch: './cordis.patch.yml' } },
   }, undefined, 2))
   const profileDir = join(home, 'profiles', 'lifecycle')
   mkdirSync(join(profileDir, 'node_modules'), { recursive: true })
@@ -138,7 +138,7 @@ function createProfileLifecycleFixture(): ProfileLifecycleFixture {
     name: 'dsh-profile-lifecycle',
     private: true,
     dependencies: {},
-    dsh: { profile: { bundles: ['dsh-lifecycle-bundle'] } },
+    agentrans: { profile: { bundles: ['dsh-lifecycle-bundle'] } },
   }, undefined, 2))
   // Hand-place the "installed" bundle where profile resolution finds it.
   writeFileSync(join(profileDir, 'cordis.patch.yml'), '[]\n')
@@ -212,7 +212,7 @@ function createEnvironmentProbeProfile(home: string, project: string): void {
     name: 'dsh-profile-environment-probe',
     private: true,
     dependencies: {},
-    dsh: { profile: { bundles: ['@agentrans/base'] } },
+    agentrans: { profile: { bundles: ['@agentrans/base'] } },
   }, undefined, 2))
   writeFileSync(join(profileDir, 'cordis.patch.yml'), [
     '- insert:',
@@ -308,13 +308,13 @@ function createStartupFixture(): StartupFixture {
     name: 'dsh-startup-bundle',
     version: '0.0.0',
     type: 'module',
-    dsh: { bundle: { patch: './cordis.patch.yml' } },
+    agentrans: { bundle: { patch: './cordis.patch.yml' } },
   }, undefined, 2))
   writeFileSync(join(profileDir, 'package.json'), JSON.stringify({
     name: 'dsh-profile-startup',
     private: true,
     dependencies: {},
-    dsh: { profile: { bundles: ['dsh-startup-bundle'] } },
+    agentrans: { profile: { bundles: ['dsh-startup-bundle'] } },
   }, undefined, 2))
   writeFileSync(join(profileDir, 'cordis.patch.yml'), '[]\n')
   return {
@@ -686,10 +686,10 @@ describe.skipIf(!existsSync(dshBin))('dsh BUILT bin (node lib/bin.js, no tsx)', 
       const dir = join(home, 'profiles', 'rescue')
       const manifest = JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8')) as {
         dependencies: Record<string, string>
-        dsh: { profile: { bundles: string[] } }
+        agentrans: { profile: { bundles: string[] } }
       }
       expect(manifest.dependencies).toEqual({})
-      expect(manifest.dsh.profile).toEqual({
+      expect(manifest.agentrans.profile).toEqual({
         bundles: ['@agentrans/base', '@agentrans/web-app'],
       })
       expect(readFileSync(join(dir, 'cordis.patch.yml'), 'utf8')).toContain('[]')
@@ -873,7 +873,7 @@ describe.skipIf(!existsSync(dshBin))('dsh BUILT bin (node lib/bin.js, no tsx)', 
     const unmounted = join(fixture.home, 'extra-unmounted')
     mkdirSync(bundleDir, { recursive: true })
     writeFileSync(join(bundleDir, 'package.json'), JSON.stringify({
-      name: 'extra-bundle', version: '1.0.0', dsh: { bundle: { patch: './cordis.patch.yml' } },
+      name: 'extra-bundle', version: '1.0.0', agentrans: { bundle: { patch: './cordis.patch.yml' } },
     }))
     writeFileSync(join(bundleDir, 'cordis.patch.yml'), '- insert:\n    - id: extra\n      name: ./plugin.mjs\n')
     writeFileSync(join(bundleDir, 'plugin.mjs'), `
@@ -887,14 +887,14 @@ describe.skipIf(!existsSync(dshBin))('dsh BUILT bin (node lib/bin.js, no tsx)', 
     try {
       await waitForFile(fixture.settled)
       await withFileLock(manifestPath, async () => {
-        const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as { dsh: { profile: { bundles: string[] } } }
-        manifest.dsh.profile.bundles.push('extra-bundle')
+        const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as { agentrans: { profile: { bundles: string[] } } }
+        manifest.agentrans.profile.bundles.push('extra-bundle')
         await writeFileAtomic(manifestPath, JSON.stringify(manifest), { mode: 0o600 })
       })
       await waitForFile(mounted)
       await withFileLock(manifestPath, async () => {
-        const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as { dsh: { profile: { bundles: string[] } } }
-        manifest.dsh.profile.bundles = manifest.dsh.profile.bundles.filter(name => name !== 'extra-bundle')
+        const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as { agentrans: { profile: { bundles: string[] } } }
+        manifest.agentrans.profile.bundles = manifest.agentrans.profile.bundles.filter(name => name !== 'extra-bundle')
         await writeFileAtomic(manifestPath, JSON.stringify(manifest), { mode: 0o600 })
       })
       await waitForFile(unmounted)
@@ -1070,7 +1070,7 @@ describe.skipIf(!existsSync(dshBin))('dsh BUILT bin (node lib/bin.js, no tsx)', 
       writeFileSync(join(checkout, 'package.json'), JSON.stringify({
         name: 'anchored-bundle',
         version: '1.0.0',
-        dsh: { bundle: { patch: './cordis.patch.yml' } },
+        agentrans: { bundle: { patch: './cordis.patch.yml' } },
       }))
       writeFileSync(join(checkout, 'cordis.patch.yml'), '[]\n')
       const result = await execa(process.execPath, [dshBin, 'plugin', '--profile', 'anchor', 'add', '.'], {
@@ -1084,10 +1084,10 @@ describe.skipIf(!existsSync(dshBin))('dsh BUILT bin (node lib/bin.js, no tsx)', 
       expect(result.exitCode).toBe(0)
       const manifest = JSON.parse(readFileSync(join(home, 'profiles', 'anchor', 'package.json'), 'utf8')) as {
         dependencies: Record<string, string>
-        dsh: { profile: { bundles: string[] } }
+        agentrans: { profile: { bundles: string[] } }
       }
       expect(Object.keys(manifest.dependencies)).toEqual(['anchored-bundle'])
-      expect(manifest.dsh.profile.bundles).toContain('anchored-bundle')
+      expect(manifest.agentrans.profile.bundles).toContain('anchored-bundle')
 
       const removed = await runBuiltBin(
         ['plugin', '--profile', 'anchor', 'remove', 'anchored-bundle'],
@@ -1099,10 +1099,10 @@ describe.skipIf(!existsSync(dshBin))('dsh BUILT bin (node lib/bin.js, no tsx)', 
         readFileSync(join(home, 'profiles', 'anchor', 'package.json'), 'utf8'),
       ) as {
         dependencies?: Record<string, string>
-        dsh: { profile: { bundles: string[] } }
+        agentrans: { profile: { bundles: string[] } }
       }
       expect(Object.keys(afterRemove.dependencies ?? {})).toEqual([])
-      expect(afterRemove.dsh.profile.bundles).not.toContain('anchored-bundle')
+      expect(afterRemove.agentrans.profile.bundles).not.toContain('anchored-bundle')
     } finally {
       rmSync(home, { recursive: true, force: true })
       rmSync(checkout, { recursive: true, force: true })
@@ -1117,7 +1117,7 @@ describe.skipIf(!existsSync(dshBin))('dsh BUILT bin (node lib/bin.js, no tsx)', 
       mkdirSync(bundle)
       mkdirSync(library)
       writeFileSync(join(bundle, 'package.json'), JSON.stringify({
-        name: 'original-bundle-name', version: '1.0.0', dsh: { bundle: { patch: './cordis.patch.yml' } },
+        name: 'original-bundle-name', version: '1.0.0', agentrans: { bundle: { patch: './cordis.patch.yml' } },
       }))
       writeFileSync(join(bundle, 'cordis.patch.yml'), '[]\n')
       writeFileSync(join(library, 'package.json'), JSON.stringify({ name: 'ordinary-library', version: '1.0.0' }))
@@ -1129,25 +1129,25 @@ describe.skipIf(!existsSync(dshBin))('dsh BUILT bin (node lib/bin.js, no tsx)', 
       const manifestPath = join(home, 'profiles', 'alias', 'package.json')
       const installed = JSON.parse(readFileSync(manifestPath, 'utf8')) as {
         dependencies: Record<string, string>
-        dsh: { profile: { bundles: string[] } }
+        agentrans: { profile: { bundles: string[] } }
       }
       expect(Object.keys(installed.dependencies).sort()).toEqual(['bundle-alias', 'ordinary-library'])
-      expect(installed.dsh.profile.bundles).toEqual(['@agentrans/base', 'bundle-alias'])
-      installed.dsh.profile.bundles = ['@agentrans/base']
+      expect(installed.agentrans.profile.bundles).toEqual(['@agentrans/base', 'bundle-alias'])
+      installed.agentrans.profile.bundles = ['@agentrans/base']
       writeFileSync(manifestPath, JSON.stringify(installed))
       const refreshed = await runBuiltBin(['plugin', '--profile', 'alias', 'root'], { AGENTRANS_HOME: home }, home)
       expect(refreshed.code).toBe(0)
       expect(refreshed.stderr).not.toContain('declares no dsh.bundle')
-      const active = JSON.parse(readFileSync(manifestPath, 'utf8')) as { dsh: { profile: { bundles: string[] } } }
-      expect(active.dsh.profile.bundles).toEqual(['@agentrans/base'])
+      const active = JSON.parse(readFileSync(manifestPath, 'utf8')) as { agentrans: { profile: { bundles: string[] } } }
+      expect(active.agentrans.profile.bundles).toEqual(['@agentrans/base'])
       const removed = await runBuiltBin(['plugin', '--profile', 'alias', 'remove', 'bundle-alias'], { AGENTRANS_HOME: home }, home)
       expect(removed.code).toBe(0)
       const remaining = JSON.parse(readFileSync(manifestPath, 'utf8')) as {
         dependencies: Record<string, string>
-        dsh: { profile: { bundles: string[] } }
+        agentrans: { profile: { bundles: string[] } }
       }
       expect(Object.keys(remaining.dependencies)).toEqual(['ordinary-library'])
-      expect(remaining.dsh.profile.bundles).toEqual(['@agentrans/base'])
+      expect(remaining.agentrans.profile.bundles).toEqual(['@agentrans/base'])
     } finally {
       rmSync(home, { recursive: true, force: true })
     }
@@ -1163,24 +1163,24 @@ describe.skipIf(!existsSync(dshBin))('dsh BUILT bin (node lib/bin.js, no tsx)', 
         name: 'dsh-profile-up',
         private: true,
         dependencies: { 'late-bundle': 'file:./late-bundle' },
-        dsh: { profile: { bundles: ['@agentrans/base'] } },
+        agentrans: { profile: { bundles: ['@agentrans/base'] } },
       }))
       writeFileSync(join(profileDir, 'cordis.patch.yml'), '[]\n')
       // v1: no dsh manifest — a plain dependency.
       writeFileSync(join(installed, 'package.json'), JSON.stringify({ name: 'late-bundle', version: '1.0.0' }))
       const first = await runBuiltBin(['plugin', '--profile', 'up', 'root'], { AGENTRANS_HOME: home })
       expect(first.code).toBe(0)
-      let manifest = JSON.parse(readFileSync(join(profileDir, 'package.json'), 'utf8')) as { dsh: { profile: { bundles: string[] } } }
-      expect(manifest.dsh.profile.bundles).toEqual(['@agentrans/base'])
+      let manifest = JSON.parse(readFileSync(join(profileDir, 'package.json'), 'utf8')) as { agentrans: { profile: { bundles: string[] } } }
+      expect(manifest.agentrans.profile.bundles).toEqual(['@agentrans/base'])
       // v2: the installed package now declares dsh.bundle (an update landed).
       writeFileSync(join(installed, 'package.json'), JSON.stringify({
-        name: 'late-bundle', version: '2.0.0', dsh: { bundle: { patch: './cordis.patch.yml' } },
+        name: 'late-bundle', version: '2.0.0', agentrans: { bundle: { patch: './cordis.patch.yml' } },
       }))
       writeFileSync(join(installed, 'cordis.patch.yml'), '[]\n')
       const second = await runBuiltBin(['plugin', '--profile', 'up', 'root'], { AGENTRANS_HOME: home })
       expect(second.code).toBe(0)
-      manifest = JSON.parse(readFileSync(join(profileDir, 'package.json'), 'utf8')) as { dsh: { profile: { bundles: string[] } } }
-      expect(manifest.dsh.profile.bundles).toEqual(['@agentrans/base'])
+      manifest = JSON.parse(readFileSync(join(profileDir, 'package.json'), 'utf8')) as { agentrans: { profile: { bundles: string[] } } }
+      expect(manifest.agentrans.profile.bundles).toEqual(['@agentrans/base'])
     } finally {
       rmSync(home, { recursive: true, force: true })
     }

@@ -54,10 +54,10 @@ const document = {
       metadata: { category: 'tools', labels: ['official'], sortKeys: { downloads: 5 } },
       versions: [
         { version: '1.0.0', publishTimestamp: 1790476800, source: { type: 'npm', registry: 'https://r.example/' } },
-        { version: '2.0.0', publishTimestamp: 1790476900, source: { type: 'npm' }, engines: { dsh: '0.0.1' } },
+        { version: '2.0.0', publishTimestamp: 1790476900, source: { type: 'npm' }, engines: { agentrans: '0.0.1' } },
       ],
     },
-    { name: 'dsh-b', versions: [{ version: '2.0.0', publishTimestamp: 0, source: { type: 'git', url: 'https://github.com/o/r', commit: 'a'.repeat(40) }, engines: { dsh: '0.0.1' } }] },
+    { name: 'dsh-b', versions: [{ version: '2.0.0', publishTimestamp: 0, source: { type: 'git', url: 'https://github.com/o/r', commit: 'a'.repeat(40) }, engines: { agentrans: '0.0.1' } }] },
     { name: 'dsh-c', description: 'x'.repeat(400), versions: [{ version: '3.0.0', publishTimestamp: 0, source: { type: 'npm' } }] },
   ],
 }
@@ -115,7 +115,7 @@ it('pages one plugin\'s versions with their compatibility and install targets', 
   const first = await call({ action: 'list_versions', target: URL_A, name: 'dsh-a', limit: 1 })
   expect(first.json).toMatchObject({
     name: 'dsh-a', defaultVersion: '1.0.0', total: 2, nextOffset: 1,
-    versions: [{ version: '2.0.0', compatibility: { compatible: false, requirements: { 'engines.dsh': '0.0.1' } }, install: { target: 'dsh-a@2.0.0' } }],
+    versions: [{ version: '2.0.0', compatibility: { compatible: false, requirements: { 'engines.agentrans': '0.0.1' } }, install: { target: 'dsh-a@2.0.0' } }],
   })
   const git = await call({ action: 'list_versions', target: URL_A, name: 'dsh-b' })
   expect(git.json).toMatchObject({ defaultVersion: null, nextOffset: null, versions: [{ install: { target: `git+https://github.com/o/r.git#${'a'.repeat(40)}` } }] })

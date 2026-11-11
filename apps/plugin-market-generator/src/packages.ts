@@ -20,7 +20,7 @@ export interface Manifest {
   readonly exports?: unknown
   readonly engines?: unknown
   readonly peerDependencies?: unknown
-  readonly dsh?: { readonly bundle?: unknown }
+  readonly agentrans?: { readonly bundle?: unknown }
 }
 
 /** Depth limit of the fallback scan, counted in directories below the repository root. */
@@ -56,10 +56,10 @@ export async function readManifest(files: PackageFiles, dir: string): Promise<Ma
 /**
  * Whether a manifest declares a DSH bundle.
  * @param manifest - parsed manifest, or undefined for a directory without one.
- * @returns true when `dsh.bundle` is an object whose `patch` is a string or an array of strings.
+ * @returns true when `agentrans.bundle` is an object whose `patch` is a string or an array of strings.
  */
 export function isBundle(manifest: Manifest | undefined): boolean {
-  const bundle = manifest?.dsh?.bundle
+  const bundle = manifest?.agentrans?.bundle
   if (!isObject(bundle)) return false
   return typeof bundle.patch === 'string' || (Array.isArray(bundle.patch) && bundle.patch.every(file => typeof file === 'string'))
 }
@@ -81,7 +81,7 @@ const invalidRange = (range: string): Error => new Error(`DSH range ${JSON.strin
 const MAX_RANGE_ALTERNATIVES = 256
 
 /**
- * The `engines.dsh` range an index lists for a manifest: its own `engines.dsh` string, otherwise the conjunction of
+ * The `engines.agentrans` range an index lists for a manifest: its own `engines.agentrans` string, otherwise the conjunction of
  * its `@agentrans/cli` and `@agentrans/*` peer ranges. A peer of exactly `workspace:*`, `workspace:^`, or
  * `workspace:~` means the running DSH version, and a `*` range admits every version; both impose nothing. A single
  * remaining range is listed as written. Several ranges are combined: the conjunction combines one `||` alternative of
@@ -91,7 +91,7 @@ const MAX_RANGE_ALTERNATIVES = 256
  *   with every DSH version: an empty, `workspace:`, or invalid range, or ranges that no version satisfies together.
  */
 export function dshRange(manifest: Manifest): string | undefined | Error {
-  const declared = isObject(manifest.engines) ? manifest.engines.dsh : undefined
+  const declared = isObject(manifest.engines) ? manifest.engines.agentrans : undefined
   const ranges = typeof declared === 'string' ? [declared]
     : Object.entries(isObject(manifest.peerDependencies) ? manifest.peerDependencies : {})
       .flatMap(([name, range]) => AGENTRANS_PEER.test(name) && typeof range === 'string' && !CURRENT_DSH.has(range) ? [range] : [])

@@ -107,16 +107,16 @@ it('ignores dependency-only manifest changes and reloads a changed bundle list',
   const manifestPath = join(f.dir, 'package.json')
   const manifest = readProfileManifest('test', f.dir)
   manifest.dependencies = { added: '1.0.0' }
-  delete manifest.dsh!.profile!.bundles
+  delete manifest.agentrans!.profile!.bundles
   writeFileSync(manifestPath, JSON.stringify(manifest))
   f.emit(2, manifestPath)
   await f.drain()
   expect(update).not.toHaveBeenCalled()
   const packageDir = join(f.dir, 'node_modules', 'added')
   mkdirSync(packageDir, { recursive: true })
-  writeFileSync(join(packageDir, 'package.json'), JSON.stringify({ name: 'added', dsh: { bundle: { patch: './cordis.patch.yml' } } }))
+  writeFileSync(join(packageDir, 'package.json'), JSON.stringify({ name: 'added', agentrans: { bundle: { patch: './cordis.patch.yml' } } }))
   writeFileSync(join(packageDir, 'cordis.patch.yml'), '- insert:\n    - id: bundled\n      name: cordis:probe\n      disabled: true\n')
-  manifest.dsh!.profile!.bundles = ['added']
+  manifest.agentrans!.profile!.bundles = ['added']
   writeFileSync(manifestPath, JSON.stringify(manifest))
   f.emit(2, manifestPath)
   await f.drain()

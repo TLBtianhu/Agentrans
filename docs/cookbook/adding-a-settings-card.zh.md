@@ -65,7 +65,7 @@ ctx.slots.inject('plugins.detail.badge', () => ctx.slots.register({
     ".": { "types": "./lib/types/index.d.ts", "default": "./lib/index.js" },
     "./client": { "types": "./lib/types/client/index.d.ts", "default": "./lib/client.js" }
   },
-  "dsh": { "client": { "platform": "web", "inject": ["@agentrans/client-ui-settings"] } }
+  "agentrans": { "client": { "platform": "web", "inject": ["@agentrans/client-ui-settings"] } }
 }
 ```
 

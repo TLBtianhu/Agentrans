@@ -1,4 +1,4 @@
-/** Plugin dsh requirement checks prefer engines.dsh, retain exact mismatches, and never inherit exemption entries. */
+/** Plugin dsh requirement checks prefer engines.agentrans, retain exact mismatches, and never inherit exemption entries. */
 
 import fs from 'node:fs'
 import { fileURLToPath } from 'node:url'
@@ -128,7 +128,7 @@ describe('plugin compatibility', () => {
   })
 })
 
-describe('engines.dsh', () => {
+describe('engines.agentrans', () => {
   const failingPeers = { '@agentrans/cli': '^0.2.0' }
   const passingPeers = { '@agentrans/cli': '*' }
   function engines(dsh: unknown, peerDependencies: object = {}) {
@@ -141,20 +141,20 @@ describe('engines.dsh', () => {
 
   it('decides alone when unsatisfied, ignoring passing peers', () => {
     expect(engines('^0.2.0', passingPeers)).toEqual({
-      ...identity, runtimeVersion: runtime, requirements: { 'engines.dsh': '^0.2.0' }, exempted: false,
+      ...identity, runtimeVersion: runtime, requirements: { 'engines.agentrans': '^0.2.0' }, exempted: false,
     })
   })
 
   it.each(['', ' ', 'broken', 'workspace:^', 'workspace:*', 'workspace:~'])('treats %j as an unmet range', (range) => {
-    expect(engines(range, passingPeers)?.requirements).toEqual({ 'engines.dsh': range })
+    expect(engines(range, passingPeers)?.requirements).toEqual({ 'engines.agentrans': range })
   })
 
   it.each([null, [], 'bad', 1, false, undefined])('rejects malformed engines: %j', (value) => {
     expect(() => evaluatePluginCompatibility({ ...identity, engines: value }, {}, runtime)).toThrow('Plugin manifest engines must be an object')
   })
 
-  it.each([null, [], {}, 1, false, undefined])('rejects a non-string engines.dsh: %j', (value) => {
-    expect(() => engines(value, passingPeers)).toThrow('Plugin manifest engines.dsh must be a string')
+  it.each([null, [], {}, 1, false, undefined])('rejects a non-string engines.agentrans: %j', (value) => {
+    expect(() => engines(value, passingPeers)).toThrow('Plugin manifest engines.agentrans must be a string')
   })
 
   it('falls back to peers when engines has no own dsh member', () => {
@@ -164,13 +164,13 @@ describe('engines.dsh', () => {
         .toEqual(failingPeers)
       expect(evaluatePluginCompatibility({ ...identity, engines: value, peerDependencies: passingPeers }, {}, runtime)).toBeUndefined()
     }
-    expect(evaluatePluginCompatibility(Object.create({ engines: { dsh: '^0.2.0' } }) as object, {}, runtime)).toBeUndefined()
+    expect(evaluatePluginCompatibility(Object.create({ engines: { agentrans: '^0.2.0' } }) as object, {}, runtime)).toBeUndefined()
   })
 
   it('applies exact-version exemptions to an engines mismatch', () => {
-    const manifest = { ...identity, engines: { dsh: '^0.2.0' } }
+    const manifest = { ...identity, engines: { agentrans: '^0.2.0' } }
     expect(evaluatePluginCompatibility(manifest, { '@example/plugin@2.0.0': [runtime] }, runtime)).toMatchObject({
-      requirements: { 'engines.dsh': '^0.2.0' }, exempted: true,
+      requirements: { 'engines.agentrans': '^0.2.0' }, exempted: true,
     })
   })
 })

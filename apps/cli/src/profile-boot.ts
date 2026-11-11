@@ -1,6 +1,6 @@
 /**
  * Shared profile boot for every `dsh` surface: resolve the profile, stack its
- * patch layers (bundle layers in `dsh.profile.bundles` order, the profile's
+ * patch layers (bundle layers in `agentrans.profile.bundles` order, the profile's
  * own `cordis.patch.yml`, `--patch` overlays, the telemetry switch), mount the
  * tree over the profile's empty root config, and wire fail-loud plus bounded shutdown.
  *
@@ -79,7 +79,7 @@ export const INSTALL_ANCHOR = fileURLToPath(new URL('../package.json', import.me
 
 /** The empty root entry list every profile tree patches over. */
 const PROFILE_ROOT_CONFIG = `# dsh profile root — an empty entry list. The tree is composed as patches:
-# each bundle in package.json's dsh.profile.bundles, then cordis.patch.yml, then any
+# each bundle in package.json's agentrans.profile.bundles, then cordis.patch.yml, then any
 # --patch overlays. Edit cordis.patch.yml, not this file.
 []
 `
@@ -210,7 +210,7 @@ interface ComposedProfile {
 
 /**
  * Load `name` and compose its effective patch stack: bundle layers in
- * `dsh.profile.bundles` order (a base-backed profile gets the base bundle's
+ * `agentrans.profile.bundles` order (a base-backed profile gets the base bundle's
  * platform-gated shell rows), the profile's user layer, the home-level user
  * layer (`$AGENTRANS_HOME/cordis.patch.yml` — machine-local preferences that apply
  * to every profile, so it outranks the per-profile layer), `--patch` overlays,

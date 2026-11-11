@@ -18,7 +18,7 @@ it('saves language and provider preferences without remounting and restores them
     const bundle = join(dir, 'node_modules', 'test-bundle')
     mkdirSync(bundle, { recursive: true })
     writeFileSync(join(home, 'package.json'), '{"name":"test-installation"}\n')
-    writeFileSync(join(bundle, 'package.json'), JSON.stringify({ name: 'test-bundle', version: '1.0.0', dsh: { bundle: { patch: 'cordis.patch.yml' } } }))
+    writeFileSync(join(bundle, 'package.json'), JSON.stringify({ name: 'test-bundle', version: '1.0.0', agentrans: { bundle: { patch: 'cordis.patch.yml' } } }))
     writeFileSync(join(bundle, 'cordis.patch.yml'), readFileSync(new URL('./fixtures/selection.patch.yml', import.meta.url)))
     writeFileSync(join(dir, 'cordis.yml'), '[]\n')
     const profile: ProfileContext = {

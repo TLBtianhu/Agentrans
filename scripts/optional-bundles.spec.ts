@@ -17,7 +17,7 @@ const root = resolve(import.meta.dirname, '..')
 
 interface Manifest {
   name: string
-  dsh?: { bundle?: DshBundleManifest }
+  agentrans?: { bundle?: DshBundleManifest }
 }
 
 const bundles = new Map(globSync('packages/*/*/package.json', { cwd: root }).map((path) => {
@@ -27,8 +27,8 @@ const bundles = new Map(globSync('packages/*/*/package.json', { cwd: root }).map
 
 function bundle(name: string): { dir: string; patches: ReturnType<typeof loadOverlayPatches> } {
   const entry = bundles.get(name)
-  if (entry?.manifest.dsh?.bundle === undefined) throw new Error(`${name} is not a workspace bundle`)
-  return { dir: entry.dir, patches: bundlePatchPaths(entry.dir, entry.manifest.dsh.bundle).flatMap(path => loadOverlayPatches('test', path)) }
+  if (entry?.manifest.agentrans?.bundle === undefined) throw new Error(`${name} is not a workspace bundle`)
+  return { dir: entry.dir, patches: bundlePatchPaths(entry.dir, entry.manifest.agentrans.bundle).flatMap(path => loadOverlayPatches('test', path)) }
 }
 
 const lightweight = [
@@ -54,7 +54,7 @@ function profileLayers(surface: 'web' | 'desktop'): ReturnType<typeof loadOverla
   onTestFinished(() => { rmSync(directory, { recursive: true, force: true }) })
   if (surface === 'desktop') createPluginProfile(directory)
   else initProfile(directory, PROFILE_TEMPLATES.web!.bundles)
-  const names = readProfileManifest('test', directory).dsh?.profile?.bundles
+  const names = readProfileManifest('test', directory).agentrans?.profile?.bundles
   if (names === undefined) throw new Error(`${surface} profile has no bundle list`)
   return names.map(name => bundle(name).patches)
 }
@@ -93,7 +93,7 @@ describe.each(['web', 'desktop'] as const)('%s optional bundle overrides', (surf
 
 describe('optional bundles', () => {
   it('admits Computer Use only on macOS Hosts', () => {
-    expect(bundles.get('@agentrans/cua-bundle')?.manifest.dsh?.bundle?.platforms).toEqual(['darwin'])
+    expect(bundles.get('@agentrans/cua-bundle')?.manifest.agentrans?.bundle?.platforms).toEqual(['darwin'])
   })
   const shipped = ['@agentrans/base', '@agentrans/web-app'].map(name => bundle(name).patches)
 

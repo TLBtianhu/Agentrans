@@ -25,7 +25,7 @@ Write a bundle directory in the workspace with exactly two files, then install i
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "dsh": { "bundle": { "patch": "./cordis.patch.yml" } }
+  "agentrans": { "bundle": { "patch": "./cordis.patch.yml" } }
 }
 ```
 

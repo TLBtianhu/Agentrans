@@ -509,7 +509,9 @@ function installationOf(name: string, version: string, bundles: readonly BundleI
 function compatibilityOf(
   name: string, version: MarketVersion, exemptions: Readonly<Record<string, readonly string[]>>, runtimeVersion: string,
 ): MarketCompatibility {
-  const manifest = { name, version: version.version, ...version.engines.dsh === undefined ? {} : { engines: { dsh: version.engines.dsh } } }
+  // A catalog published before the rename still names the range under `dsh`.
+  const declared = version.engines.agentrans ?? version.engines.agentrans
+  const manifest = { name, version: version.version, ...declared === undefined ? {} : { engines: { agentrans: declared } } }
   const issue = evaluatePluginCompatibility(manifest, exemptions, runtimeVersion)
   if (issue === undefined) return { compatible: true }
   return { compatible: false, runtimeVersion: issue.runtimeVersion, requirements: issue.requirements, exempted: issue.exempted }

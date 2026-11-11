@@ -42,7 +42,7 @@ Enable Agent Teams on the Web or Desktop Plugins page to activate both tools and
 dsh plugin --profile web add @agentrans/experimental-agent-team-profile
 ```
 
-In an existing profile’s `package.json`, keep `@agentrans/experimental-agent-team-profile` in `dsh.profile.bundles` and remove the separate `@agentrans/experimental-agent-team-web-profile` entry. User patches targeting `ui-agent-team` still apply.
+In an existing profile’s `package.json`, keep `@agentrans/experimental-agent-team-profile` in `agentrans.profile.bundles` and remove the separate `@agentrans/experimental-agent-team-web-profile` entry. User patches targeting `ui-agent-team` still apply.
 
 ### What you get
 

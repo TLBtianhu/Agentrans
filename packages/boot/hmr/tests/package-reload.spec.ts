@@ -49,7 +49,7 @@ export function apply(ctx, config = {}) {
 function addon(dir: string, version: string, source = plugin(version), mode?: string): void {
   const root = join(dir, 'node_modules', 'addon')
   file(join(root, 'package.json'), JSON.stringify({
-    name: 'addon', version, type: 'module', exports: './index.mjs', dsh: { bundle: { patch: './cordis.patch.yml' } },
+    name: 'addon', version, type: 'module', exports: './index.mjs', agentrans: { bundle: { patch: './cordis.patch.yml' } },
   }))
   file(join(root, 'index.mjs'), source)
   file(join(root, 'cordis.patch.yml'), `- insert:\n    - id: addon\n      name: addon\n${mode === undefined ? '' : `      config: { mode: ${mode} }\n`}`)
@@ -64,7 +64,7 @@ function shared(dir: string, value: number): void {
 function other(dir: string): void {
   const root = join(dir, 'node_modules', 'other')
   file(join(root, 'package.json'), JSON.stringify({
-    name: 'other', version: '1.0.0', type: 'module', exports: './index.mjs', dsh: { bundle: { patch: './cordis.patch.yml' } },
+    name: 'other', version: '1.0.0', type: 'module', exports: './index.mjs', agentrans: { bundle: { patch: './cordis.patch.yml' } },
   }))
   file(join(root, 'index.mjs'), `export function apply(ctx) {
   ctx.get('reloadTrace').push('start:other')
@@ -77,7 +77,7 @@ function other(dir: string): void {
 function commonjs(dir: string, value: number): void {
   const root = join(dir, 'node_modules', 'cjs-addon')
   file(join(root, 'package.json'), JSON.stringify({
-    name: 'cjs-addon', version: '1.0.0', main: './index.cjs', dsh: { bundle: { patch: './cordis.patch.yml' } },
+    name: 'cjs-addon', version: '1.0.0', main: './index.cjs', agentrans: { bundle: { patch: './cordis.patch.yml' } },
   }))
   file(join(root, 'index.cjs'), `const { value } = require('./helper.cjs')
 exports.apply = (ctx) => {
@@ -100,7 +100,7 @@ function age(dir: string): void {
 function linked(home: string, dir: string, value: number): string {
   const target = join(home, 'work', 'linked')
   file(join(target, 'package.json'), JSON.stringify({
-    name: '@local/linked', version: '1.0.0', type: 'module', exports: './index.mjs', dsh: { bundle: { patch: './cordis.patch.yml' } },
+    name: '@local/linked', version: '1.0.0', type: 'module', exports: './index.mjs', agentrans: { bundle: { patch: './cordis.patch.yml' } },
   }))
   file(join(target, 'index.mjs'), `export function apply(ctx) {
   ctx.get('reloadTrace').push('start:linked:${String(value)}')
@@ -151,7 +151,7 @@ async function fixture(bundles = ['addon', 'other'], before?: (home: string, dir
   const reconcile = () => ctx.hmr.runExclusive(() => ctx.hmr.reconcileProfile())
   const select = (bundles: string[]) => {
     const manifest = readProfileManifest('test', dir)
-    manifest.dsh = { profile: { bundles } }
+    manifest.agentrans = { profile: { bundles } }
     writeFileSync(join(dir, 'package.json'), JSON.stringify(manifest))
   }
   /** Deliver a change of the profile patch file to HMR's own watch and wait for its recomposition. */
@@ -1202,7 +1202,7 @@ it.each(['disabled', 'removed', 'incompatible', 'dynamic'] as const)('never eval
   if (kind === 'incompatible') {
     const path = join(f.dir, 'node_modules', 'addon', 'package.json')
     file(path, JSON.stringify({ name: 'addon', version: '2.0.0', type: 'module', exports: './index.mjs',
-      peerDependencies: { '@agentrans/cli': '<0.0.0' }, dsh: { bundle: { patch: './cordis.patch.yml' } } }))
+      peerDependencies: { '@agentrans/cli': '<0.0.0' }, agentrans: { bundle: { patch: './cordis.patch.yml' } } }))
   } else if (kind === 'removed') {
     f.select(['other'])
   } else {
@@ -1223,7 +1223,7 @@ it('restarts both CommonJS requirers of a changed shared child', async () => {
   const f = await fixture(['cjs-addon'], async (_home, dir) => {
     const root = join(dir, 'node_modules', 'other')
     file(join(root, 'package.json'), JSON.stringify({ name: 'other', version: '1.0.0', main: './index.cjs',
-      dsh: { bundle: { patch: './cordis.patch.yml' } } }))
+      agentrans: { bundle: { patch: './cordis.patch.yml' } } }))
     file(join(root, 'index.cjs'), `const helper = require('../cjs-addon/helper.cjs')
 exports.apply = ctx => {
   ctx.get('reloadTrace').push('start:second:' + helper.value)

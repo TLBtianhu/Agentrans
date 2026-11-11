@@ -41,7 +41,7 @@ export function installedBundle(name: string): BundleInfo {
 
 export async function writeBundle(directory: string, name: string): Promise<void> {
   await writeFile(join(directory, 'package.json'), JSON.stringify({ name, version: '1.0.0', type: 'module',
-    main: './index.js', exports: { '.': './index.js', './client': './index.js' }, dsh: { bundle: { patch: './cordis.patch.yml' } } }))
+    main: './index.js', exports: { '.': './index.js', './client': './index.js' }, agentrans: { bundle: { patch: './cordis.patch.yml' } } }))
   await writeFile(join(directory, 'cordis.patch.yml'), JSON.stringify([{ insert: [{ id: name + ':counter', name }] }]))
   await writeFile(join(directory, 'index.js'), 'export function apply(ctx) { ctx.provide("createdCounter", true) }\n')
 }

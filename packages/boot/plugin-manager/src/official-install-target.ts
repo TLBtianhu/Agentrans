@@ -42,14 +42,14 @@ export function officialBundleInstallTarget(name: string, installAnchor: string,
   }
   const { file, manifest } = selected
   const directory = realpathSync(dirname(file))
-  if (manifest.version !== version || manifest.private === true || manifest.dsh?.bundle === undefined) {
+  if (manifest.version !== version || manifest.private === true || manifest.agentrans?.bundle === undefined) {
     throw new Error(`Official bundle ${name}: ${file} must declare a public bundle at DSH version ${version}`)
   }
   const main = typeof manifest.main === 'string' ? resolve(directory, manifest.main) : undefined
   if (main === undefined || !existsSync(main) || !statSync(main).isFile()) {
     throw new Error(`Official bundle ${name}: built runtime is missing in ${directory}; run pnpm install and pnpm run build in ${root}`)
   }
-  for (const patch of bundlePatchPaths(directory, manifest.dsh.bundle)) {
+  for (const patch of bundlePatchPaths(directory, manifest.agentrans.bundle)) {
     if (!existsSync(patch) || !statSync(patch).isFile()) {
       throw new Error(`Official bundle ${name}: bundle patch ${patch} is missing; restore the checkout`)
     }

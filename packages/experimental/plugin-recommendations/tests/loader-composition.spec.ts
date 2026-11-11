@@ -47,7 +47,7 @@ it.each(['normal', 'consumer-unload'] as const)('enables through the real Loader
     await mkdir(path, { recursive: true })
     await writeFile(join(path, 'package.json'), JSON.stringify({
       name, version: '1.0.0', description: 'Find previous conversations',
-      dsh: { bundle: { patch: './cordis.patch.yml' } },
+      agentrans: { bundle: { patch: './cordis.patch.yml' } },
     }))
     await writeFile(join(path, 'cordis.patch.yml'), patch)
     return path
@@ -80,7 +80,7 @@ it.each(['normal', 'consumer-unload'] as const)('enables through the real Loader
   const agent = await ctx.agentLoop.create(SessionId('recommendation-live'), { provider: 'mock', model: 'test' })
   const callId = logProposal(ctx, agent, 'call-live', { title: 'Session search', brief: 'Search saved conversations', details: { name } })
   expect((await ctx.skills.list()).map(skill => skill.name)).toContain('official-plugins')
-  expect(readProfileManifest('test', dir).dsh?.profile?.bundles).not.toContain(name)
+  expect(readProfileManifest('test', dir).agentrans?.profile?.bundles).not.toContain(name)
   if (scenario === 'consumer-unload') {
     const entered = Promise.withResolvers<undefined>()
     const release = Promise.withResolvers<undefined>()
@@ -103,14 +103,14 @@ it.each(['normal', 'consumer-unload'] as const)('enables through the real Loader
     expect(ctx.get('pluginRecommendations')).toBeUndefined()
     expect(await ctx.skills.list()).toEqual([])
     await ctx.hmr.runExclusive(async () => {})
-    expect(readProfileManifest('test', dir).dsh?.profile?.bundles).toContain(name)
+    expect(readProfileManifest('test', dir).agentrans?.profile?.bundles).toContain(name)
     expect((await ctx.pluginManager.listBundles()).find(bundle => bundle.name === name)?.enabled).toBe(true)
     expect(model.requests).toHaveLength(0)
     return
   }
   const enabled = { callId, action: ACTION, phase: 'enabled' }
   expect(await ctx.actionCards.act(agent, callId, 'enable')).toEqual({ status: 'settled', decision: enabled })
-  expect(readProfileManifest('test', dir).dsh?.profile?.bundles).toContain(name)
+  expect(readProfileManifest('test', dir).agentrans?.profile?.bundles).toContain(name)
   expect([...ctx.loader.entries()].find(entry => entry.options.id === 'recommendation-probe')?.fiber).toBeDefined()
   expect((await ctx.pluginManager.listBundles()).find(bundle => bundle.name === name)?.enabled).toBe(true)
   // The outcome reaches the model with the next request; enabling starts no turn by itself.

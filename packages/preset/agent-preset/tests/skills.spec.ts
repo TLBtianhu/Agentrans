@@ -93,8 +93,8 @@ describe('the shipped creator skills', () => {
     const templates = join(skills, 'cordis-plugin-development', 'templates')
     for (const name of readdirSync(templates)) {
       const dir = join(templates, name)
-      const manifest = JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8')) as { dsh: { bundle: { patch: string } } }
-      const patch = yaml.load(readFileSync(join(dir, manifest.dsh.bundle.patch), 'utf8'), { schema: entryListSchema })
+      const manifest = JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8')) as { agentrans: { bundle: { patch: string } } }
+      const patch = yaml.load(readFileSync(join(dir, manifest.agentrans.bundle.patch), 'utf8'), { schema: entryListSchema })
       expect(Array.isArray(patch)).toBe(true)
       for (const file of readdirSync(dir).filter(entry => entry.endsWith('.js'))) {
         execFileSync(process.execPath, ['--check', join(dir, file)])
@@ -109,7 +109,7 @@ describe('the shipped creator skills', () => {
       const manifest = JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8')) as {
         exports: Record<string, string> & { './icon': string }
         files: string[]
-        dsh: { bundle: { patch: string } }
+        agentrans: { bundle: { patch: string } }
       }
       expect(manifest).not.toHaveProperty('icon')
       expect(manifest.exports['./locale/*.json']).toBe('./locale/*.json')
@@ -123,7 +123,7 @@ describe('the shipped creator skills', () => {
         expect(locale.meta.description).toMatch(/\S/u)
       }
       const resources = new Set([...Object.values(manifest.exports).filter(file => !file.includes('*')),
-        ...locales, manifest.dsh.bundle.patch])
+        ...locales, manifest.agentrans.bundle.patch])
       for (const resource of resources) {
         const file = resource.replace(/^\.\//u, '')
         expect(body('cordis-plugin-development'), file).toContain(`\`templates/${name}/${file.startsWith('locale/') ? 'locale' : file}\``)

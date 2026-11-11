@@ -37,7 +37,7 @@ kind: "package-reference"
   disabled: false
 ```
 
-插件开关只更新 profile 的 `cordis.patch.yml` 中最后一条匹配覆盖项的 `disabled`；没有匹配项时追加。匹配依据是条目 id，以及覆盖项声明的模块名称。如果组合包层和其余 profile patch 已使条目处于所请求的状态，仅含 `id` 与 `disabled` 的覆盖项会被移除，也不会追加覆盖项，因此 profile patch 只记录与组合包不同的设置。该比较不计入 home 和单次启动 patch；它们在 profile patch 之后应用，不决定 profile patch 记录什么。组合包开关修改 `package.json` 的有序 `dsh.profile.bundles` 列表。关闭保留依赖；开启追加到列表末尾，可能改变配置优先级。安装新组合包默认启用。home 和单次启动 patch 保留更高优先级。
+插件开关只更新 profile 的 `cordis.patch.yml` 中最后一条匹配覆盖项的 `disabled`；没有匹配项时追加。匹配依据是条目 id，以及覆盖项声明的模块名称。如果组合包层和其余 profile patch 已使条目处于所请求的状态，仅含 `id` 与 `disabled` 的覆盖项会被移除，也不会追加覆盖项，因此 profile patch 只记录与组合包不同的设置。该比较不计入 home 和单次启动 patch；它们在 profile patch 之后应用，不决定 profile patch 记录什么。组合包开关修改 `package.json` 的有序 `agentrans.profile.bundles` 列表。关闭保留依赖；开启追加到列表末尾，可能改变配置优先级。安装新组合包默认启用。home 和单次启动 patch 保留更高优先级。
 
 组合包的平台声明会在保存启用选择前检查。Host 不受支持时返回 `unsupported-platform`。组合包仍保留显示信息，并允许取消选择。包操作后的自动启用执行同一检查。给模型的下一步说明会提示用户在受支持的 Host 上运行该组合包。
 
@@ -53,9 +53,9 @@ kind: "package-reference"
 
 官方按需安装调用和其他组合包相同的 `installBundle` 操作。注册表目标使用 `saveExact: true`；开发目标保留普通 `link:` 依赖。显式更新先删除已安装的包，再以当前 `enabled` 选择状态安装目标；没有 HMR 时，自启动起运行的组合包无法删除，因此安装直接覆盖它并报告 `restart-required`。删除之后安装失败或被取消时，该包保持未安装，重新安装的组合包排在选择列表末尾。关闭仅取消选择配置层，移除使用原有移除检查。安装失败恢复 profile 清单和锁文件；安装成功后激活失败可能保留已保存的依赖和选择。原有 peer 兼容性检查继续生效，不增加仅针对官方条目的版本准入规则。
 
-`listVersions(name, options)` 读取 `listBundles` 标为 `updatable` 的已安装组合包的新版本：以自身包名、按注册表 spec 保存（不是 `npm:` 别名）的第三方 profile 依赖，清单声明 semver 版本，且不承载插件管理。一次 `pnpm view <name> versions time dist-tags` 按注册表计划询问，计划从 `options.registry` 开始，否则从本进程上次安装该包所用的注册表开始，否则从配置的注册表开始。随后从作答的注册表逐个读取比已安装版本新的最新 `versionListLimit` 个版本，每个版本一次 `pnpm view <name>@<version>`，同时最多 `versionLookupConcurrency` 个，因为 pnpm 对范围只打印最高的匹配版本。列表按从新到旧排列，带有各版本的 dist-tag、发布时间、预发布标记、弃用说明、是否声明组合包，以及在其 `engines.dsh` 或 DSH peer 拒绝当前运行版本且没有豁免时的 `incompatible` 记录；`omitted` 统计未列出的新版本数，`attempts` 列出问过的每个注册表及其失败原因。拒绝为 `not-updatable`、`not-found`、`network` 或 `unknown`；任一版本查询失败都会拒绝整个列表。官方组合包跟随 DSH 版本，不会列出。
+`listVersions(name, options)` 读取 `listBundles` 标为 `updatable` 的已安装组合包的新版本：以自身包名、按注册表 spec 保存（不是 `npm:` 别名）的第三方 profile 依赖，清单声明 semver 版本，且不承载插件管理。一次 `pnpm view <name> versions time dist-tags` 按注册表计划询问，计划从 `options.registry` 开始，否则从本进程上次安装该包所用的注册表开始，否则从配置的注册表开始。随后从作答的注册表逐个读取比已安装版本新的最新 `versionListLimit` 个版本，每个版本一次 `pnpm view <name>@<version>`，同时最多 `versionLookupConcurrency` 个，因为 pnpm 对范围只打印最高的匹配版本。列表按从新到旧排列，带有各版本的 dist-tag、发布时间、预发布标记、弃用说明、是否声明组合包，以及在其 `engines.agentrans` 或 DSH peer 拒绝当前运行版本且没有豁免时的 `incompatible` 记录；`omitted` 统计未列出的新版本数，`attempts` 列出问过的每个注册表及其失败原因。拒绝为 `not-updatable`、`not-found`、`network` 或 `unknown`；任一版本查询失败都会拒绝整个列表。官方组合包跟随 DSH 版本，不会列出。
 
-`updateBundle(name, version, options)` 把可更新的组合包替换为一个更新的确切版本；更旧的版本会被拒绝。目标版本先按与 `listVersions` 相同的计划查询，版本不存在、未声明组合包，或其 `engines.dsh` 或 DSH peer 拒绝当前 DSH 时，更新停在 `step: 'check'`，profile 保持不变。有 HMR 时，更新先移除已安装版本，使其插件停止，再以 `saveExact` 和当前的选中状态从作答的注册表安装 `name@version`。该安装失败、被取消，或已安装但无法启动时，先移除仍留下的目标版本，再从本进程安装被移除版本所用的注册表重新安装它，没有记录时按配置的计划安装，与移除的做法一致，结果以 `restore` 报告；重新安装也失败时，包处于未安装状态。移除或安装被拒绝（例如锁等待超时）时，报告为该步骤失败。没有 HMR 时，目标版本直接安装在运行中的版本之上，结果报告 `restart-required`。`plugin-manager/update-state` 以调用方的 `requestId` 通告 `checking`、`removing`、`installing` 与 `restoring`；目标版本的安装以同一 id 流式输出日志并接受 `cancelInstall`，重新安装不带 id，因此取消无法中止它。
+`updateBundle(name, version, options)` 把可更新的组合包替换为一个更新的确切版本；更旧的版本会被拒绝。目标版本先按与 `listVersions` 相同的计划查询，版本不存在、未声明组合包，或其 `engines.agentrans` 或 DSH peer 拒绝当前 DSH 时，更新停在 `step: 'check'`，profile 保持不变。有 HMR 时，更新先移除已安装版本，使其插件停止，再以 `saveExact` 和当前的选中状态从作答的注册表安装 `name@version`。该安装失败、被取消，或已安装但无法启动时，先移除仍留下的目标版本，再从本进程安装被移除版本所用的注册表重新安装它，没有记录时按配置的计划安装，与移除的做法一致，结果以 `restore` 报告；重新安装也失败时，包处于未安装状态。移除或安装被拒绝（例如锁等待超时）时，报告为该步骤失败。没有 HMR 时，目标版本直接安装在运行中的版本之上，结果报告 `restart-required`。`plugin-manager/update-state` 以调用方的 `requestId` 通告 `checking`、`removing`、`installing` 与 `restoring`；目标版本的安装以同一 id 流式输出日志并接受 `cancelInstall`，重新安装不带 id，因此取消无法中止它。
 
 `installBundle` 在启动 pnpm 前通过 `git ls-remote` 检查 GitHub 仓库，使用 profile 目录及安装器的 Git 与代理配置。`githubConnectionTimeoutMs` 默认为 5000 毫秒，只限制这次检查，不限制包下载或构建。检查禁用凭据助手和认证提示；只有网络失败与超时会停止安装，通过现有失败类型与诊断日志返回，并标记 `failedAt: 'spec-host'`。被停止的安装会以调用方的 `requestId` 把该失败转发为这次安装唯一的 `plugin-manager/install-log` 运行，其命令行是去掉 URL 用户信息的 `git ls-remote`；因超时结束的检查不报告退出码。应答中的 `packageResult` 仍是普通结果，不含该命令行。认证、仓库查找及其他失败继续交给 pnpm，包括其 HTTPS 到 SSH 的回退。取消安装或销毁管理器会停止检查及其子进程。注册表包、本地路径、压缩包和其他 Git 主机跳过此检查。仓库可达后，下载或组合包验证仍可能失败。
 
@@ -80,7 +80,7 @@ pnpm 11 拦下依赖脚本时，失败的安装在 `pendingBuilds` 里报告 pro
 
 授权在下一次组合时生效。在线 profile 会重新组合，被授权的插件会在当前会话中挂载，结果报告 `applied`；仅启动型 profile 在重启前保留当前条目并报告 `restart-required`。
 
-CLI 提供 `dsh plugin --profile <profile> version-exemptions`、`allow-version <package@version> --dsh-version <runtime> --accept-risk` 和 `revoke-version <package@version> --dsh-version <runtime>`。授权会在保存前打印风险警告。兼容性拒绝带有 `incompatible-version` 错误码，以及每个被拒绝软件包的 `name`、`version`、`runtimeVersion` 和未满足的 `requirements`（键为 `engines.dsh` 或 DSH peer 包名）；各界面自行呈现这份记录。Web 页面通过 locale 词典生成文案，CLI 拒绝时打印精确的 `allow-version` 命令。通过工具或 CLI 添加豁免后，重试原操作。
+CLI 提供 `dsh plugin --profile <profile> version-exemptions`、`allow-version <package@version> --dsh-version <runtime> --accept-risk` 和 `revoke-version <package@version> --dsh-version <runtime>`。授权会在保存前打印风险警告。兼容性拒绝带有 `incompatible-version` 错误码，以及每个被拒绝软件包的 `name`、`version`、`runtimeVersion` 和未满足的 `requirements`（键为 `engines.agentrans` 或 DSH peer 包名）；各界面自行呈现这份记录。Web 页面通过 locale 词典生成文案，CLI 拒绝时打印精确的 `allow-version` 命令。通过工具或 CLI 添加豁免后，重试原操作。
 
 ### 配置
 
@@ -192,7 +192,7 @@ service 运行若在 `idleTimeoutMs` 内没有任何捕获输出即被终止，�
 | 包操作成功后解析表发布失败 | 保留已完成的磁盘改动和上一张运行时表。报告 `application: 'failed'` 及发布诊断；pnpm 的零退出码不代表发布成功。 |
 | 卸载：任一步失败 | 停在失败步骤，保留已完成的改动和待重试删除的依赖，报告卸载失败。不重新启用组合包。 |
 
-pnpm 执行和组合包校验成功即完成安装，后续发布或启用失败不撤销安装。卸载依次执行：从 `dsh.profile.bundles` 移除组合包、卸载运行时贡献、执行 `pnpm remove`，然后发布 runtime resolution，除非没有 HMR 且已取消选入的启动组合包仍在运行。`pnpm remove` 使用本管理器在当前进程中最近一次安装该包时所用的注册表，因为 pnpm 按默认注册表校验锁文件中的 tarball URL；进程启动前安装的包使用安装时首先询问的注册表删除。任一步失败都不继续执行后续步骤；删除后的发布失败不会恢复已删除的包。 profile 依赖和安装都不持有的已选名称（例如已下线的组合包）同样可卸载；其卸载在取消选择后结束，不运行 pnpm。
+pnpm 执行和组合包校验成功即完成安装，后续发布或启用失败不撤销安装。卸载依次执行：从 `agentrans.profile.bundles` 移除组合包、卸载运行时贡献、执行 `pnpm remove`，然后发布 runtime resolution，除非没有 HMR 且已取消选入的启动组合包仍在运行。`pnpm remove` 使用本管理器在当前进程中最近一次安装该包时所用的注册表，因为 pnpm 按默认注册表校验锁文件中的 tarball URL；进程启动前安装的包使用安装时首先询问的注册表删除。任一步失败都不继续执行后续步骤；删除后的发布失败不会恢复已删除的包。 profile 依赖和安装都不持有的已选名称（例如已下线的组合包）同样可卸载；其卸载在取消选择后结束，不运行 pnpm。
 
 恢复只重写这两份快照文件；用户编写的 patch 配置、应用数据、诊断日志以及 pnpm 已下载的文件保持原样，没有 manifest 引用的包由下一次包操作清理。
 

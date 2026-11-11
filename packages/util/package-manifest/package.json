@@ -1,6 +1,6 @@
 {
   "name": "@agentrans/package-manifest",
-  "description": "Shared type declarations for package.json.dsh configuration fields",
+  "description": "Shared type declarations for package.json.agentrans configuration fields",
   "version": "0.1.0",
   "publishConfig": {
     "access": "public"

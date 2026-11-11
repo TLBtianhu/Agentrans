@@ -42,7 +42,7 @@ profile 必须已经包含 `@agentrans/base`，本层会使用其中的 Subagent
 dsh plugin --profile web add @agentrans/experimental-agent-team-profile
 ```
 
-已有 profile 的 `package.json` 中，`dsh.profile.bundles` 应只保留 `@agentrans/experimental-agent-team-profile`，删除独立的 `@agentrans/experimental-agent-team-web-profile` 条目。用户 patch 中的 `ui-agent-team` 配置仍然有效。
+已有 profile 的 `package.json` 中，`agentrans.profile.bundles` 应只保留 `@agentrans/experimental-agent-team-profile`，删除独立的 `@agentrans/experimental-agent-team-web-profile` 条目。用户 patch 中的 `ui-agent-team` 配置仍然有效。
 
 ### 获得的功能
 

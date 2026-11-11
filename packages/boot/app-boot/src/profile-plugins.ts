@@ -64,13 +64,13 @@ function bundleManifest(location: ProfilePluginLocation, name: string): ProfileM
  */
 export function readProfilePlugins(location: ProfilePluginLocation): ProfilePluginInventory {
   const manifest = readProfileManifest(location.binName, location.profileDir)
-  const bundles = manifest.dsh?.profile?.bundles ?? []
+  const bundles = manifest.agentrans?.profile?.bundles ?? []
   const dependencies = Object.entries(manifest.dependencies ?? {}).map(([name, spec]) => {
     const installed = optionalManifest(location.binName, join(location.profileDir, 'node_modules', name))
     return {
       name,
       version: typeof installed?.version === 'string' ? installed.version : spec,
-      bundle: bundleManifest(location, name)?.dsh?.bundle?.patch !== undefined,
+      bundle: bundleManifest(location, name)?.agentrans?.bundle?.patch !== undefined,
       enabled: bundles.includes(name),
     }
   })
@@ -87,7 +87,7 @@ export function readProfilePlugins(location: ProfilePluginLocation): ProfilePlug
 export function writeProfileBundles(
   profileDir: string, manifest: ProfileManifest, bundles: readonly string[],
 ): ProfileManifest {
-  const updated = { ...manifest, dsh: { ...manifest.dsh, profile: { ...manifest.dsh?.profile, bundles: [...bundles] } } }
+  const updated = { ...manifest, agentrans: { ...manifest.agentrans, profile: { ...manifest.agentrans?.profile, bundles: [...bundles] } } }
   writeProfileManifest(profileDir, updated)
   return updated
 }
@@ -112,11 +112,11 @@ export function reconcileProfilePlugins(options: ProfilePluginLocation & {
   const disabled = new Set(options.preserveDisabled
     ? options.before.dependencies.filter(dependency => dependency.bundle && !dependency.enabled).map(dependency => dependency.name)
     : [])
-  const previous = after.manifest.dsh?.profile?.bundles ?? []
+  const previous = after.manifest.agentrans?.profile?.bundles ?? []
   const bundles = previous.filter(name => !(beforeNames.has(name) || afterNames.has(name)) || bundleNames.has(name))
   for (const dependency of after.dependencies) {
     if (dependency.bundle && !disabled.has(dependency.name) && !bundles.includes(dependency.name)) {
-      assertBundlePlatform(bundleManifest(options, dependency.name)?.dsh?.bundle?.platforms, process.platform)
+      assertBundlePlatform(bundleManifest(options, dependency.name)?.agentrans?.bundle?.platforms, process.platform)
       bundles.push(dependency.name)
     }
   }

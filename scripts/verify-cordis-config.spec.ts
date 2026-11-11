@@ -69,7 +69,7 @@ describe('workspace Bundle discovery and product dependency closures', () => {
       mkdirSync(plainDir, { recursive: true })
       writeFileSync(join(bundleDir, 'package.json'), JSON.stringify({
         name: '@agentrans/subagent-example',
-        dsh: { bundle: { patch: './cordis.patch.yml' } },
+        agentrans: { bundle: { patch: './cordis.patch.yml' } },
       }))
       writeFileSync(join(plainDir, 'package.json'), JSON.stringify({
         name: '@agentrans/plain',

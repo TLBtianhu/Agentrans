@@ -64,7 +64,7 @@ function stageInstallation(
       type: 'module',
       main: './index.js',
       dependencies: spec.deps ?? {},
-      ...spec.patch === undefined ? {} : { dsh: { bundle: { patch: './cordis.patch.yml', ...spec.platforms === undefined ? {} : { platforms: spec.platforms } } } },
+      ...spec.patch === undefined ? {} : { agentrans: { bundle: { patch: './cordis.patch.yml', ...spec.platforms === undefined ? {} : { platforms: spec.platforms } } } },
     }))
     writeFileSync(join(dir, 'index.js'), `export const packageName = ${JSON.stringify(name)}\n`)
     if (spec.patch !== undefined) writeFileSync(join(dir, 'cordis.patch.yml'), spec.patch)
@@ -231,13 +231,13 @@ describe('initProfile', () => {
     const dir = resolveProfileDir('tui', home)
     initProfile(dir, ['@agentrans/base'])
     const manifest = readProfileManifest('t', dir)
-    expect(manifest.dsh?.profile?.bundles).toEqual(['@agentrans/base'])
+    expect(manifest.agentrans?.profile?.bundles).toEqual(['@agentrans/base'])
     expect(readFileSync(join(dir, PROFILE_PATCH_FILENAME), 'utf8')).toContain('[]')
     expect(readFileSync(join(dir, 'pnpm-workspace.yaml'), 'utf8')).toContain('nodeLinker: hoisted')
     // Re-init keeps user edits.
     writeFileSync(join(dir, PROFILE_PATCH_FILENAME), '- id: x\n  config: {}\n')
     initProfile(dir, ['other'])
-    expect(readProfileManifest('t', dir).dsh?.profile?.bundles).toEqual(['@agentrans/base'])
+    expect(readProfileManifest('t', dir).agentrans?.profile?.bundles).toEqual(['@agentrans/base'])
     expect(readFileSync(join(dir, PROFILE_PATCH_FILENAME), 'utf8')).toContain('- id: x')
   })
 })
@@ -245,8 +245,8 @@ describe('initProfile', () => {
 describe('manifest round-trip', () => {
   it('writes and reads back, and fails loud on a broken manifest', () => {
     const dir = tmp()
-    writeProfileManifest(dir, { name: 'p', dsh: { profile: { bundles: ['a'] } } })
-    expect(readProfileManifest('t', dir).dsh?.profile?.bundles).toEqual(['a'])
+    writeProfileManifest(dir, { name: 'p', agentrans: { profile: { bundles: ['a'] } } })
+    expect(readProfileManifest('t', dir).agentrans?.profile?.bundles).toEqual(['a'])
     writeFileSync(join(dir, 'package.json'), '[]')
     expect(() => readProfileManifest('t', dir)).toThrow('must hold a JSON object')
     expect(() => readProfileManifest('t', join(dir, 'nope'))).toThrow('failed to read profile manifest')
@@ -279,7 +279,7 @@ describe('resolveBundleDir', () => {
       name: 'sealed-bundle',
       version: '0.0.0',
       exports: { '.': './index.js' },
-      dsh: { bundle: { patch: './cordis.patch.yml' } },
+      agentrans: { bundle: { patch: './cordis.patch.yml' } },
     }))
     writeFileSync(join(dir, 'index.js'), '')
     writeFileSync(join(dir, 'cordis.patch.yml'), '[]\n')
@@ -298,7 +298,7 @@ describe('loadProfile', () => {
     expect(profile.layers.map(layer => layer.packageName)).toEqual(['bundle-a'])
   })
 
-  it('resolves each dsh.profile.bundles entry to its patch layer in order, plus the user layer', () => {
+  it('resolves each agentrans.profile.bundles entry to its patch layer in order, plus the user layer', () => {
     const anchor = stageInstallation({
       'bundle-a': { patch: '- insert:\n    - id: a\n      name: pkg-a\n' },
       'bundle-b': { patch: '- id: a\n  config:\n    v: 2\n' },
@@ -329,12 +329,12 @@ describe('loadProfile', () => {
     mkdirSync(join(bundleDir, 'layers'), { recursive: true })
     writeFileSync(join(bundleDir, 'package.json'), JSON.stringify({
       name: 'multi', version: '0.0.0', type: 'module', main: './index.js',
-      dsh: { bundle: { patch: ['./first.patch.yml', './layers/second.patch.yml'] } },
+      agentrans: { bundle: { patch: ['./first.patch.yml', './layers/second.patch.yml'] } },
     }))
     writeFileSync(join(bundleDir, 'first.patch.yml'), '- insert:\n    - id: a\n      name: ./local.js\n      config: { v: 1 }\n')
     writeFileSync(join(bundleDir, 'layers', 'second.patch.yml'), '- id: a\n  config: { v: 2 }\n- insert:\n    - id: b\n      name: ./local.js\n')
     const brokenManifest = join(anchor, '..', 'node_modules', 'broken', 'package.json')
-    writeFileSync(brokenManifest, JSON.stringify({ name: 'broken', version: '0.0.0', dsh: { bundle: { patch: [1] } } }))
+    writeFileSync(brokenManifest, JSON.stringify({ name: 'broken', version: '0.0.0', agentrans: { bundle: { patch: [1] } } }))
     const home = tmp()
     const dir = resolveProfileDir('demo', home)
     initProfile(dir, ['multi', 'broken'])
@@ -360,7 +360,7 @@ describe('loadProfile', () => {
     expect(() => loadProfile('t', 'custom', anchor, home))
       .toThrow('profile "custom" does not exist')
     loadProfile('t', 'web', anchor, home)
-    expect(readProfileManifest('t', resolveProfileDir('web', home)).dsh?.profile?.bundles)
+    expect(readProfileManifest('t', resolveProfileDir('web', home)).agentrans?.profile?.bundles)
       .toEqual([...PROFILE_TEMPLATES.web?.bundles ?? []])
   })
 
@@ -379,7 +379,7 @@ describe('loadProfile', () => {
     const retiredManifest = readProfileManifest('t', stock)
     writeProfileManifest(stock, retiredManifest)
     loadProfile('t', 'headless', anchor, home)
-    expect(readProfileManifest('t', stock).dsh?.profile).toEqual({
+    expect(readProfileManifest('t', stock).agentrans?.profile).toEqual({
       bundles: ['@agentrans/base', '@agentrans/headless'],
     })
 
@@ -389,7 +389,7 @@ describe('loadProfile', () => {
       '@agentrans/base', '@agentrans/web-app', '@agentrans/headless', 'custom-bundle',
     ])
     loadProfile('t', 'headless', anchor, customHome)
-    expect(readProfileManifest('t', custom).dsh?.profile?.bundles).toEqual([
+    expect(readProfileManifest('t', custom).agentrans?.profile?.bundles).toEqual([
       '@agentrans/base', '@agentrans/web-app', '@agentrans/headless', 'custom-bundle',
     ])
   })
@@ -407,7 +407,7 @@ describe('loadProfile', () => {
     expect(profile.layers.map(layer => layer.packageName)).toEqual(['@agentrans/base', 'custom-bundle'])
     expect(readProfileManifest('t', dir)).toMatchObject({
       dependencies: { 'custom-bundle': '^1.0.0' },
-      dsh: { profile: { bundles: ['@agentrans/base', 'custom-bundle'] } },
+      agentrans: { profile: { bundles: ['@agentrans/base', 'custom-bundle'] } },
     })
   })
 

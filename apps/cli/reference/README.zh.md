@@ -10,7 +10,7 @@
 
 ## Profile 启动
 
-`dsh <name>` 是 `agentrans --profile <name>` 的简写，启动位于 `$AGENTRANS_HOME/profiles/<name>` 的 profile。简写中的名称必须紧跟 `dsh`；`plugin` 仍为插件管理命令，因此启动同名 profile 时须使用 `agentrans --profile plugin`。生效配置树以空根节点为起点，依次叠加 profile manifest（元数据清单）的 `dsh.profile.bundles` 列表中指定的各组合包 patch、profile 自身的 `cordis.patch.yml`、home 级的 `$AGENTRANS_HOME/cordis.patch.yml`（这是各 profile 共享的机器本地偏好，因此优先于逐 profile 配置层），以及按 argv 顺序指定的各个 `--patch <path>` 覆盖层。对同一配置行，后应用的层优先。patch 会替换目标行的整个 `config` 值，而不是深度合并其中的键；patch 也可以插入新行。最终 YAML 组合决定是否由 `dsh-hmr` 监视配置；未启用 HMR 时，更改需要重启。配置解析、schema 校验、模块解析或插件启动失败时，系统会报告错误并以非零状态退出。收到 SIGINT 或 SIGTERM 时，挂载的根节点会先 dispose（资源释放）再退出。
+`dsh <name>` 是 `agentrans --profile <name>` 的简写，启动位于 `$AGENTRANS_HOME/profiles/<name>` 的 profile。简写中的名称必须紧跟 `dsh`；`plugin` 仍为插件管理命令，因此启动同名 profile 时须使用 `agentrans --profile plugin`。生效配置树以空根节点为起点，依次叠加 profile manifest（元数据清单）的 `agentrans.profile.bundles` 列表中指定的各组合包 patch、profile 自身的 `cordis.patch.yml`、home 级的 `$AGENTRANS_HOME/cordis.patch.yml`（这是各 profile 共享的机器本地偏好，因此优先于逐 profile 配置层），以及按 argv 顺序指定的各个 `--patch <path>` 覆盖层。对同一配置行，后应用的层优先。patch 会替换目标行的整个 `config` 值，而不是深度合并其中的键；patch 也可以插入新行。最终 YAML 组合决定是否由 `dsh-hmr` 监视配置；未启用 HMR 时，更改需要重启。配置解析、schema 校验、模块解析或插件启动失败时，系统会报告错误并以非零状态退出。收到 SIGINT 或 SIGTERM 时，挂载的根节点会先 dispose（资源释放）再退出。
 
 组合包名称先从 dsh 安装目录解析，再从 profile 目录解析。因此，内置组合包（`@agentrans/base`、`@agentrans/web-app`、`@agentrans/headless`、`@agentrans/sdk-app`、`@agentrans/sdk-minimal`、`@agentrans/acp-app`）始终来自当前运行的 `dsh` 所属的安装；树外组合包来自 profile 中由 pnpm 管理的 `node_modules`。挂载配置行前，launcher 会按此顺序遍历安装与所选 bundle，并将生成的不可变 runtime resolution 安装到 Node 的解析器中。启动不会创建共享或 profile 自有的 fallback 链接。profile 已安装包保留原生优先级；profile 初始化和包管理器写入与运行时解析相互独立。
 
@@ -82,7 +82,7 @@ agentrans --profile web --patch ./extra.yml --dump-config
 
 ## 插件管理
 
-`dsh plugin --profile <name> <args...>` 在 profile 缺失时先初始化它（有随附模板的用模板，其他名称只装 `@agentrans/base`），然后以 profile 目录为工作目录，把 `<args...>` 转发给 `pnpm`：`add`、`remove`、`why`、`update` 及其他所有 pnpm 子命令都照常可用；pnpm 必须在 PATH 上。相对路径 spec（`.`、`../plugin` 及其 `file:`/`link:` 形式）会先锚定到调用目录，因此在插件 checkout 中执行 `add .` 安装的是该 checkout，而不是 profile。每次成功运行后，系统都会根据当前安装状态更新 `dsh.profile.bundles`：如果某项依赖解析到的包在 manifest 中声明了 `"dsh": { "bundle": { "patch": "./cordis.patch.yml" } }`，该依赖就会加入配置层栈；如果某项依赖在 `update` 后获得该声明，也会随即激活。没有组合包声明的依赖仍作为普通依赖保留，并显示一次性警告；已移除的依赖则从配置层栈中删除。
+`dsh plugin --profile <name> <args...>` 在 profile 缺失时先初始化它（有随附模板的用模板，其他名称只装 `@agentrans/base`），然后以 profile 目录为工作目录，把 `<args...>` 转发给 `pnpm`：`add`、`remove`、`why`、`update` 及其他所有 pnpm 子命令都照常可用；pnpm 必须在 PATH 上。相对路径 spec（`.`、`../plugin` 及其 `file:`/`link:` 形式）会先锚定到调用目录，因此在插件 checkout 中执行 `add .` 安装的是该 checkout，而不是 profile。每次成功运行后，系统都会根据当前安装状态更新 `agentrans.profile.bundles`：如果某项依赖解析到的包在 manifest 中声明了 `"agentrans": { "bundle": { "patch": "./cordis.patch.yml" } }`，该依赖就会加入配置层栈；如果某项依赖在 `update` 后获得该声明，也会随即激活。没有组合包声明的依赖仍作为普通依赖保留，并显示一次性警告；已移除的依赖则从配置层栈中删除。
 
 `dsh plugin` 只在被转发的参数之前读取 `--profile`；被转发的参数从它无法识别的第一个 token 开始，因此 `--profile <name>` 必须写在最前面。被转发的参数以 pnpm 命令开头时，该命令之后的所有内容都会原样交给 pnpm，包括 `-h` 和 `--help`。被转发的参数以 `--filter <selector>` 或 `-r` 等 pnpm 选项开头时，后面的 `-h` 或 `--help` 仍会打印转发器的帮助而不是 pnpm 的帮助，因此要查看 pnpm 的帮助，需把 pnpm 命令写在它们之前。在任何被转发的参数之前出现的 `-h` 或 `--help` 会打印转发器自身的帮助并以 0 退出。
 

@@ -5,7 +5,7 @@ export interface DesktopElectronBuilderConfig {
   readonly appId: string
   readonly copyright: string
   readonly artifactName: string
-  readonly protocols: readonly [{ readonly name: string; readonly schemes: readonly ['dsh'] }]
+  readonly protocols: readonly [{ readonly name: string; readonly schemes: readonly ['agentrans'] }]
   readonly directories: {
     readonly output: string
   }

@@ -102,8 +102,8 @@ describe('the shipped shell composition (real bundle layers)', () => {
 
 describe('shipped agent presets gate both shell tools by platform', () => {
   const webBundle = fileURLToPath(new URL('../../../packages/bundle/web-app/', import.meta.url))
-  const webManifest = JSON.parse(readFileSync(join(webBundle, 'package.json'), 'utf8')) as { dsh: { bundle: { patch: string[] } } }
-  const presetRows = composeEntries([bundlePatchPaths(webBundle, webManifest.dsh.bundle).flatMap(file =>
+  const webManifest = JSON.parse(readFileSync(join(webBundle, 'package.json'), 'utf8')) as { agentrans: { bundle: { patch: string[] } } }
+  const presetRows = composeEntries([bundlePatchPaths(webBundle, webManifest.agentrans.bundle).flatMap(file =>
     yaml.load(readFileSync(file, 'utf8'), { schema: entryListSchema }) as import('@agentrans/cordis-plugin-include').PatchOptions[])])
 
   const definitions = presetRows.filter(row => row.name === '@agentrans/agent-preset').map(row => row.config as import('@agentrans/agent-preset-registry').PresetDefinition)

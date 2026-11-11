@@ -11,7 +11,7 @@ import { browserDependencyAnalysis } from '../apps/web/product-isolation.ts'
 interface Manifest {
   name: string
   private?: boolean
-  dsh?: { client?: unknown }
+  agentrans?: { client?: unknown }
   exports?: Record<string, unknown>
 }
 
@@ -87,7 +87,7 @@ async function collectClientBundles(
   seen: Set<string>,
 ): Promise<void> {
   for (const [manifestPath, manifest] of manifests) {
-    if (manifest.private === true || manifest.dsh?.client === undefined) continue
+    if (manifest.private === true || manifest.agentrans?.client === undefined) continue
     const dir = dirname(manifestPath)
     const loaded = await import(pathToFileURL(resolve(dir, 'tsdown.config.ts')).href) as { default: UserConfigExport }
     const factory = await loaded.default

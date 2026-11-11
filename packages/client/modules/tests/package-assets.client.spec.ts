@@ -67,7 +67,7 @@ function writeClientPackage(packageName: string, exports: Record<string, string 
   writeFile(join(pkgRoot, 'package.json'), JSON.stringify({
     name: packageName,
     exports: { '.': './lib/index.js', './client': './lib/client.js', './package.json': './package.json', ...exports },
-    dsh: { client: { platform: 'web' } },
+    agentrans: { client: { platform: 'web' } },
   }))
   writeFile(join(pkgRoot, 'lib', 'index.js'), 'export default {}\n')
   writeFile(join(pkgRoot, 'lib', 'client.js'), 'module.exports = {}\n')

@@ -1202,7 +1202,7 @@ describe('runtime resolution', { concurrent: false }, () => {
     const plugin = 'shared-plugin'
     for (const [bundle, marker] of [['bundle-a', 1], ['bundle-b', 2]] as const) {
       file(join(modules, bundle, 'package.json'), JSON.stringify({
-        name: bundle, version: '1.0.0', dependencies: { [plugin]: '*' }, dsh: { bundle: { patch: './cordis.patch.yml' } },
+        name: bundle, version: '1.0.0', dependencies: { [plugin]: '*' }, agentrans: { bundle: { patch: './cordis.patch.yml' } },
       }))
       file(join(modules, bundle, 'cordis.patch.yml'), '[]\n')
       pkg(join(modules, bundle, 'node_modules', plugin), plugin, marker)
@@ -1215,7 +1215,7 @@ describe('runtime resolution', { concurrent: false }, () => {
     file(join(profileDir, 'package.json'), JSON.stringify({
       name: 'dsh-profile-web', private: true,
       dependencies: { 'bundle-a': '*', 'bundle-b': '*' },
-      dsh: { profile: { bundles: ['bundle-b'] } },
+      agentrans: { profile: { bundles: ['bundle-b'] } },
     }))
 
     const profile = loadProfile('dsh', 'web', f.installAnchor, f.root)

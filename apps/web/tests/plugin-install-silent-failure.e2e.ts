@@ -22,7 +22,7 @@ it('reports a failed install whose pnpm printed nothing with its command line, o
       const profile = join(scaffold.harnessHome, 'profiles', 'scaffold')
       // Node stands in for pnpm: `view` answers the check, and `add` exits unsuccessfully without printing
       // anything, the way a silent or early-crashing package manager leaves a failed run with no terminal output.
-      await writeFile(join(profile, 'view'), 'console.log(JSON.stringify({ name: "silent-package", version: "1.0.0", dsh: { bundle: { patch: "./cordis.patch.yml" } } }))\n')
+      await writeFile(join(profile, 'view'), 'console.log(JSON.stringify({ name: "silent-package", version: "1.0.0", agentrans: { bundle: { patch: "./cordis.patch.yml" } } }))\n')
       await writeFile(join(profile, 'add'), 'process.exitCode = 1\n')
       const page = await browser.newPage({ viewport: { width: 1440, height: 1000 }, locale: ZH_BROWSER_LOCALE })
       const tripwire = watchConsole(page)

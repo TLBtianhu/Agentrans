@@ -84,7 +84,7 @@ it('checks explicit, default and legacy subpath entries and refuses source files
   onTestFinished(() => rm(directory, { recursive: true, force: true }))
   const name = '@dsh-local/view-entries'
   await writeBundle(directory, name)
-  const base = { name, version: '1.0.0', dsh: { bundle: { patch: './cordis.patch.yml' } } }
+  const base = { name, version: '1.0.0', agentrans: { bundle: { patch: './cordis.patch.yml' } } }
   for (const main of ['./index.js', undefined]) {
     await writeFile(join(directory, 'package.json'), JSON.stringify({ ...base, main }))
     await expect(validateGeneratedBundle(directory, name)).resolves.toBeUndefined()
@@ -104,7 +104,7 @@ it('requires a built ./client export when the package declares a client entry', 
   onTestFinished(() => rm(directory, { recursive: true, force: true }))
   const name = '@dsh-local/view-client'
   await writeBundle(directory, name)
-  const manifest = { name, version: '1.0.0', main: './index.js', dsh: { bundle: { patch: './cordis.patch.yml' }, client: { platform: 'web' } } }
+  const manifest = { name, version: '1.0.0', main: './index.js', agentrans: { bundle: { patch: './cordis.patch.yml' }, client: { platform: 'web' } } }
   await mkdir(join(directory, 'folder.js'))
   for (const exports of [undefined, { '.': './index.js' }, { '.': './index.js', './client': './client.ts' },
     { '.': './index.js', './client': './lib/client.js' }, { '.': './index.js', './client': './folder.js' }]) {
@@ -115,6 +115,6 @@ it('requires a built ./client export when the package declares a client entry', 
   await writeFile(join(directory, 'lib', 'client.js'), 'export function apply() {}\n')
   await writeFile(join(directory, 'package.json'), JSON.stringify({ ...manifest, exports: { '.': './index.js', './client': './lib/client.js' } }))
   await expect(validateGeneratedBundle(directory, name)).resolves.toBeUndefined()
-  await writeFile(join(directory, 'package.json'), JSON.stringify({ ...manifest, dsh: { ...manifest.dsh, client: 'web' } }))
+  await writeFile(join(directory, 'package.json'), JSON.stringify({ ...manifest, agentrans: { ...manifest.agentrans, client: 'web' } }))
   await expect(validateGeneratedBundle(directory, name)).rejects.toThrow()
 })

@@ -31,7 +31,7 @@ export const WEB_PROFILE_BUNDLES: readonly string[] = ['@agentrans/base', '@agen
 
 interface PackageManifest {
   name?: unknown
-  dsh?: { bundle?: { patch?: unknown }; client?: unknown }
+  agentrans?: { bundle?: { patch?: unknown }; client?: unknown }
 }
 
 /** One bundle: where its package.json is (plugin names resolve from there) and its parsed patch list. */
@@ -75,7 +75,7 @@ export function bundleRoster(
     if (manifest.name !== name) {
       throw new Error(`client-test-runtime: ${manifestPath} names ${JSON.stringify(manifest.name)}, expected ${name}`)
     }
-    const declaration = parseDshClient(name, manifest.dsh?.client)
+    const declaration = parseDshClient(name, manifest.agentrans?.client)
     if (declaration === undefined || declaration.platform !== 'web') continue
     if (disabled.some(value => value !== undefined && value !== null && typeof value !== 'boolean'
       && !(disabledContext !== undefined && isJsExpr(value)))) {
@@ -89,7 +89,7 @@ export function bundleRoster(
 function readLayer(bundle: string, anchor: string): BundleLayer {
   const manifestPath = locateManifest([anchor], bundle)
   if (manifestPath === undefined) throw new Error(`client-test-runtime: cannot resolve bundle ${bundle} from ${anchor}`)
-  const declared = readManifest(manifestPath).dsh?.bundle?.patch
+  const declared = readManifest(manifestPath).agentrans?.bundle?.patch
   const files = typeof declared === 'string' ? [declared] : declared
   if (!Array.isArray(files) || !files.every(file => typeof file === 'string')) {
     throw new Error(`client-test-runtime: bundle ${bundle} declares no dsh.bundle.patch file list in ${manifestPath}`)

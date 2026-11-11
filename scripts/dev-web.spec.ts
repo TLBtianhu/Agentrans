@@ -146,7 +146,7 @@ it('discovers dsh.client packages with sibling roles', async () => {
     const current = join(root, 'packages', 'client', 'current')
     await mkdir(current, { recursive: true })
     await writeFile(join(current, 'package.json'), JSON.stringify({
-      dsh: {
+      agentrans: {
         bundle: { patch: './cordis.patch.yml' },
         client: { platform: 'web' },
         profile: { bundles: [] },
@@ -172,7 +172,7 @@ it('discovers client-preset packages the shell links, excluding loader-delivered
     // Linked by the compile shell: client preset, no loader-delivered half.
     await write('packages/client/linked', {}, clientPreset)
     // Loader-delivered: discoverPluginDirs owns it, so it must not appear twice.
-    await write('packages/client/delivered', { dsh: { client: { platform: 'web' } } }, clientPreset)
+    await write('packages/client/delivered', { agentrans: { client: { platform: 'web' } } }, clientPreset)
     // Test infrastructure builds through the preset but never enters the shell graph.
     await write('packages/test-support/harness', {}, clientPreset)
     // Host package with its own config: not a client-face build at all.

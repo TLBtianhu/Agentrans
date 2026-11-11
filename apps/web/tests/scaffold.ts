@@ -230,7 +230,7 @@ export function recordedSessionFixturePath(path: string, version: number): strin
 /** The shipped composition under test: the dsh-base and dsh-web-app bundle patches over the empty profile root. */
 const BASE_PATCH_PATH = join(REPO_ROOT, 'packages/bundle/base/cordis.patch.yml')
 const WEB_BUNDLE_DIR = join(REPO_ROOT, 'packages/bundle/web-app')
-const WEB_BUNDLE_PATCH = (JSON.parse(readFileSync(join(WEB_BUNDLE_DIR, 'package.json'), 'utf8')) as { dsh: { bundle: { patch: string[] } } }).dsh.bundle
+const WEB_BUNDLE_PATCH = (JSON.parse(readFileSync(join(WEB_BUNDLE_DIR, 'package.json'), 'utf8')) as { agentrans: { bundle: { patch: string[] } } }).agentrans.bundle
 /** The installation anchor whose dependency surface the runtime resolution mirrors. */
 const INSTALL_ANCHOR = join(REPO_ROOT, 'apps/cli/package.json')
 
@@ -360,7 +360,7 @@ export interface LaunchOptions {
    * over the profile directory, whose manifest lists the shipped web bundles
    * and each package directory here as an installed dependency (`file:` in the
    * manifest, a symlink under the profile's `node_modules`); `enabled` also
-   * lists a bundle in `dsh.profile.bundles`. The plugin manager mounts on such
+   * lists a bundle in `agentrans.profile.bundles`. The plugin manager mounts on such
    * a profile, and the root Include is mounted from the profile's own layers.
    * The base bundle's `hmr` row turns on with the profile context, so
    * configuration changes apply live; `hmr: false` disables that row through
@@ -606,7 +606,7 @@ export async function launchWebScaffold(options: LaunchOptions = {}): Promise<We
   if (pinDeepSeekCredential) Object.assign(process.env, REPLAY_CREDENTIAL_ENV)
 
   // The include patch set — the same layer stack the profile boot composes
-  // (bundle patches in dsh.profile.bundles order), applied over the SAME empty root (a
+  // (bundle patches in agentrans.profile.bundles order), applied over the SAME empty root (a
   // patch id that stops matching a row fails the boot sweep loudly instead of
   // drifting).
   const basePatches = loadOverlayPatches('web e2e scaffold', BASE_PATCH_PATH)
@@ -820,7 +820,7 @@ export async function launchWebScaffold(options: LaunchOptions = {}): Promise<We
       // Fixture deployment defaults remain below editable profile values.
       const fixtureDir = join(profileDir, 'node_modules', SCAFFOLD_DEFAULTS_BUNDLE)
       await mkdir(fixtureDir, { recursive: true })
-      await writeFile(join(fixtureDir, 'package.json'), JSON.stringify({ name: SCAFFOLD_DEFAULTS_BUNDLE, version: '1.0.0', dsh: { bundle: { patch: 'cordis.patch.yml' } } }))
+      await writeFile(join(fixtureDir, 'package.json'), JSON.stringify({ name: SCAFFOLD_DEFAULTS_BUNDLE, version: '1.0.0', agentrans: { bundle: { patch: 'cordis.patch.yml' } } }))
       await writeFile(join(fixtureDir, 'cordis.patch.yml'), yaml.dump(formDefaults, { schema: entryListSchema }))
       bundles.push(SCAFFOLD_DEFAULTS_BUNDLE)
       dependencies[SCAFFOLD_DEFAULTS_BUNDLE] = `file:${fixtureDir}`

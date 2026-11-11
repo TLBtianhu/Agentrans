@@ -76,7 +76,7 @@ it('cancels installation, retries and highlights the enabled plugin at 40% alpha
       await writeFile(lockPath, 'original lockfile\n')
       // Node stands in for the pnpm executable: `view` answers the check that precedes the run,
       // and the same installer owns and stops the real `add` child.
-      await writeFile(join(profile, 'view'), 'console.log(JSON.stringify({ name: process.argv[2], version: "1.0.0", dsh: { bundle: { patch: "./cordis.patch.yml" } } }))\n')
+      await writeFile(join(profile, 'view'), 'console.log(JSON.stringify({ name: process.argv[2], version: "1.0.0", agentrans: { bundle: { patch: "./cordis.patch.yml" } } }))\n')
       await writeFile(join(profile, 'add'), `
         import('node:fs').then(fs => {
         fs.writeFileSync('package.json', JSON.stringify({ ...JSON.parse(fs.readFileSync('package.json', 'utf8')), dependencies: { partial: '1.0.0' } }));
@@ -201,7 +201,7 @@ it('cancels installation, retries and highlights the enabled plugin at 40% alpha
         import('node:fs').then(fs => {
         const name = process.argv[2];
         fs.mkdirSync('node_modules/' + name, { recursive: true });
-        fs.writeFileSync('node_modules/' + name + '/package.json', JSON.stringify({ name, version: '1.0.0', dsh: { bundle: { patch: './cordis.patch.yml' } } }));
+        fs.writeFileSync('node_modules/' + name + '/package.json', JSON.stringify({ name, version: '1.0.0', agentrans: { bundle: { patch: './cordis.patch.yml' } } }));
         fs.writeFileSync('node_modules/' + name + '/cordis.patch.yml', '[]\\n');
         fs.writeFileSync('package.json', JSON.stringify({ ...JSON.parse(fs.readFileSync('package.json', 'utf8')), dependencies: { ...JSON.parse(fs.readFileSync('package.json', 'utf8')).dependencies, [name]: '1.0.0' } }));
         console.log('Retry completed');

@@ -365,8 +365,8 @@ describe('Python SDK dsh profile keyless smoke', () => {
 
       const profile = JSON.parse(
         await readFile(join(root, '.dsh', 'profiles', 'sdk-minimal', 'package.json'), 'utf8'),
-      ) as { dsh?: { profile?: { bundles?: string[] } } }
-      expect(profile.dsh?.profile).toEqual({
+      ) as { agentrans?: { profile?: { bundles?: string[] } } }
+      expect(profile.agentrans?.profile).toEqual({
         bundles: ['@agentrans/sdk-minimal'],
       })
       expect(modelRequests[0]?.tools).toEqual(expect.any(Array))

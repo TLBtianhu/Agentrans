@@ -62,7 +62,7 @@
     "@agentrans/tool-executor-native": "workspace:*",
     "@agentrans/tools": "workspace:*"
   },
-  "dsh": {
+  "agentrans": {
     "bundle": {
       "patch": "./cordis.patch.yml"
     }

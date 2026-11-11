@@ -58,11 +58,11 @@ class Scratch {
   }
 
   bundle(name: string, patch: string): void {
-    this.pkg(name, { dsh: { bundle: { patch: './cordis.patch.yml' } } }, { 'cordis.patch.yml': patch })
+    this.pkg(name, { agentrans: { bundle: { patch: './cordis.patch.yml' } } }, { 'cordis.patch.yml': patch })
   }
 
   web(name: string, client: Record<string, unknown> = {}): void {
-    this.pkg(name, { dsh: { client: { platform: 'web', ...client } } })
+    this.pkg(name, { agentrans: { client: { platform: 'web', ...client } } })
   }
 
   roster(bundles: readonly string[]): readonly string[] {
@@ -80,7 +80,7 @@ describe('bundleRoster on a scratch installation', () => {
     const bundle = join(linked.root, 'workspace', 'bundle')
     mkdirSync(bundle, { recursive: true })
     writeFileSync(join(bundle, 'package.json'), JSON.stringify({
-      name: '@t/self', dsh: { bundle: { patch: './cordis.patch.yml' }, client: { platform: 'web' } },
+      name: '@t/self', agentrans: { bundle: { patch: './cordis.patch.yml' }, client: { platform: 'web' } },
     }))
     writeFileSync(join(bundle, 'cordis.patch.yml'), "- insert:\n    - name: '@t/self'\n")
     mkdirSync(join(linked.root, 'app', 'node_modules', '@t'), { recursive: true })
@@ -92,7 +92,7 @@ describe('bundleRoster on a scratch installation', () => {
     const anchored = new Scratch()
     onTestFinished(() => { rmSync(anchored.root, { recursive: true, force: true }) })
     writeFileSync(anchored.anchor, JSON.stringify({
-      name: '@t/self', dsh: { bundle: { patch: './cordis.patch.yml' }, client: { platform: 'web' } },
+      name: '@t/self', agentrans: { bundle: { patch: './cordis.patch.yml' }, client: { platform: 'web' } },
     }))
     writeFileSync(join(anchored.root, 'app', 'cordis.patch.yml'), "- insert:\n    - name: '@t/self'\n")
     anchored.bundle('@t/self', '- insert: []\n')
@@ -105,9 +105,9 @@ describe('bundleRoster on a scratch installation', () => {
     const bundle = join(linked.root, 'workspace', 'bundle')
     const dependency = join(bundle, 'node_modules', '@t', 'theme')
     mkdirSync(dependency, { recursive: true })
-    writeFileSync(join(bundle, 'package.json'), JSON.stringify({ name: '@t/linked', dsh: { bundle: { patch: './cordis.patch.yml' } } }))
+    writeFileSync(join(bundle, 'package.json'), JSON.stringify({ name: '@t/linked', agentrans: { bundle: { patch: './cordis.patch.yml' } } }))
     writeFileSync(join(bundle, 'cordis.patch.yml'), "- insert:\n    - id: theme\n      name: '@t/theme'\n")
-    writeFileSync(join(dependency, 'package.json'), JSON.stringify({ name: '@t/theme', dsh: { client: { platform: 'web' } } }))
+    writeFileSync(join(dependency, 'package.json'), JSON.stringify({ name: '@t/theme', agentrans: { client: { platform: 'web' } } }))
     linked.pkg('@t/theme', {})
     symlinkSync(bundle, join(linked.root, 'app', 'node_modules', '@t', 'linked'), 'junction')
     linked.bundle('@t/base', '- insert: []\n')
@@ -119,8 +119,8 @@ describe('bundleRoster on a scratch installation', () => {
     scratch.web('@t/b')
     scratch.web('@t/c')
     scratch.web('plain')
-    scratch.pkg('@t/host', { dsh: {} })
-    scratch.pkg('@t/node', { dsh: { client: { platform: 'node' } } })
+    scratch.pkg('@t/host', { agentrans: {} })
+    scratch.pkg('@t/node', { agentrans: { client: { platform: 'node' } } })
     scratch.bundle('@t/base', `
 - insert:
     - id: a
@@ -164,7 +164,7 @@ describe('bundleRoster on a scratch installation', () => {
 
   it('concatenates a dsh.bundle.patch list in order', () => {
     scratch.web('@t/listed')
-    scratch.pkg('@t/list', { dsh: { bundle: { patch: ['./first.yml', './second.yml'] } } }, {
+    scratch.pkg('@t/list', { agentrans: { bundle: { patch: ['./first.yml', './second.yml'] } } }, {
       'first.yml': '- insert:\n    - id: listed\n      name: \'@t/listed\'\n      disabled: true\n',
       'second.yml': '- id: listed\n  disabled: false\n',
     })
@@ -291,9 +291,9 @@ describe('bundleRoster on a scratch installation', () => {
 
   it('fails loud on a bundle that does not resolve, declares no patch, or whose patch is not a list', () => {
     expect(() => scratch.roster(['@t/missing'])).toThrow('cannot resolve bundle @t/missing from')
-    scratch.pkg('@t/no-patch', { dsh: {} })
+    scratch.pkg('@t/no-patch', { agentrans: {} })
     expect(() => scratch.roster(['@t/no-patch'])).toThrow('bundle @t/no-patch declares no dsh.bundle.patch file list in')
-    scratch.pkg('@t/bad-patch-list', { dsh: { bundle: { patch: [1] } } })
+    scratch.pkg('@t/bad-patch-list', { agentrans: { bundle: { patch: [1] } } })
     expect(() => scratch.roster(['@t/bad-patch-list'])).toThrow('bundle @t/bad-patch-list declares no dsh.bundle.patch file list in')
     scratch.bundle('@t/not-a-list', 'insert: []\n')
     expect(() => scratch.roster(['@t/not-a-list'])).toThrow('must be a top-level list of patches')
@@ -337,7 +337,7 @@ it('exhausts uneven linked-bundle search paths before reporting a missing plugin
   onTestFinished(() => { rmSync(scratch.root, { recursive: true, force: true }) })
   const bundle = join(scratch.root, 'workspace', 'nested', 'deeper', 'bundle')
   mkdirSync(bundle, { recursive: true })
-  writeFileSync(join(bundle, 'package.json'), JSON.stringify({ name: '@t/deep', dsh: { bundle: { patch: './cordis.patch.yml' } } }))
+  writeFileSync(join(bundle, 'package.json'), JSON.stringify({ name: '@t/deep', agentrans: { bundle: { patch: './cordis.patch.yml' } } }))
   writeFileSync(join(bundle, 'cordis.patch.yml'), "- insert:\n    - id: missing\n      name: '@t/absent'\n")
   scratch.bundle('@t/base', '- insert: []\n')
   symlinkSync(bundle, join(scratch.root, 'app', 'node_modules', '@t', 'deep'), 'junction')

@@ -30,14 +30,14 @@ export function generateOfficialBundleCatalog(root: string, names: readonly stri
       dependencies?: Record<string, string>
       optionalDependencies?: Record<string, string>
       peerDependencies?: Record<string, string>
-      dsh?: { bundle?: { patch?: unknown; platforms?: DshBundleManifest['platforms']; listedByDefault?: boolean } }
+      agentrans?: { bundle?: { patch?: unknown; platforms?: DshBundleManifest['platforms']; listedByDefault?: boolean } }
     }
     if (manifests.has(manifest.name)) throw new Error(`duplicate workspace package ${manifest.name}`)
-    const listedByDefault = manifest.dsh?.bundle?.listedByDefault
+    const listedByDefault = manifest.agentrans?.bundle?.listedByDefault
     if (listedByDefault !== undefined && typeof listedByDefault !== 'boolean') throw new Error(`${manifest.name}: dsh.bundle.listedByDefault must be a boolean`)
     const runtime = ['dependencies', 'optionalDependencies', 'peerDependencies'] as const
-    manifests.set(manifest.name, { path, private: manifest.private === true, bundle: manifest.dsh?.bundle?.patch !== undefined,
-      ...manifest.dsh?.bundle?.platforms === undefined ? {} : { platforms: manifest.dsh.bundle.platforms },
+    manifests.set(manifest.name, { path, private: manifest.private === true, bundle: manifest.agentrans?.bundle?.patch !== undefined,
+      ...manifest.agentrans?.bundle?.platforms === undefined ? {} : { platforms: manifest.agentrans.bundle.platforms },
       ...listedByDefault === undefined ? {} : { listedByDefault },
       runtime: runtime.flatMap(section => Object.keys(manifest[section] ?? {})) })
   }

@@ -44,7 +44,7 @@ async function fixture(config: Config = {}) {
       mkdirSync(join(path, file, '..'), { recursive: true })
       writeFileSync(join(path, file), contents)
     }
-    writeFileSync(join(path, 'package.json'), JSON.stringify({ name, version: '1.0.0', dsh: { bundle: { patch: './cordis.patch.yml' } } }))
+    writeFileSync(join(path, 'package.json'), JSON.stringify({ name, version: '1.0.0', agentrans: { bundle: { patch: './cordis.patch.yml' } } }))
   }
   bundle('core', { 'cordis.patch.yml': JSON.stringify([{ insert: [{ id: 'manager', name: 'cordis:manager', config }, { id: 'connection', name: 'cordis:connection' }] }]) })
   bundle('documented', {

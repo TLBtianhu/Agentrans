@@ -103,15 +103,15 @@ it('reads an index with installation status, compatibility, and install argument
   const runtime = getDshRuntimeVersion()
   const fetch = serve(json(index([
     entry('absent', { icon: 'a.svg', author: 'Jane' }),
-    entry('same', {}, [release('1.0.0', { engines: { dsh: runtime } })]),
+    entry('same', {}, [release('1.0.0', { engines: { agentrans: runtime } })]),
     entry('older', {}, [release('2.0.0')]),
     entry('newer'),
     entry('unknown'),
     entry('unparsed'),
     entry('shipped'),
     entry('catalog'),
-    entry('incompatible', {}, [release('1.0.0', { engines: { dsh: '0.0.1' } })]),
-    entry('exempted', {}, [release('1.0.0', { engines: { dsh: '0.0.1' }, source: { type: 'npm', registry: 'https://r.example/' } })]),
+    entry('incompatible', {}, [release('1.0.0', { engines: { agentrans: '0.0.1' } })]),
+    entry('exempted', {}, [release('1.0.0', { engines: { agentrans: '0.0.1' }, source: { type: 'npm', registry: 'https://r.example/' } })]),
   ])))
   const { market } = await mount({}, {
     bundles: [
@@ -139,16 +139,16 @@ it('reads an index with installation status, compatibility, and install argument
   expect(by.catalog?.installation).toEqual({ status: 'not-installed' })
   expect(by.incompatible?.defaultVersion).toBeUndefined()
   expect(by.incompatible?.installation).toEqual({ status: 'update-available', installedVersion: '0.9.0' })
-  expect(by.incompatible?.versions[0]?.compatibility).toEqual({ compatible: false, runtimeVersion: runtime, requirements: { 'engines.dsh': '0.0.1' }, exempted: false })
+  expect(by.incompatible?.versions[0]?.compatibility).toEqual({ compatible: false, runtimeVersion: runtime, requirements: { 'engines.agentrans': '0.0.1' }, exempted: false })
   expect(by.exempted?.versions[0]).toMatchObject({ install: { spec: 'exempted@1.0.0', registry: 'https://r.example/' }, compatibility: { compatible: false, exempted: true } })
   expect(market.listIndexes()).toEqual([{ url: URL_A, title: { en: 'Market', zh: '市场' }, description: 'Bundles' }])
 })
 
 it('defaults to the highest compatible stable version, or the highest compatible prerelease without a stable one', async () => {
   serve(json(index([
-    entry('mixed', {}, [release('2.0.0-rc.1'), release('1.0.0'), release('1.1.0', { engines: { dsh: '0.0.1' } })]),
-    entry('previews', {}, [release('1.0.0-beta.1'), release('1.0.0-rc.1', { engines: { dsh: '0.0.1' } })]),
-    entry('only-preview-stable', {}, [release('2.0.0-rc.1'), release('1.0.0', { engines: { dsh: '0.0.1' } })]),
+    entry('mixed', {}, [release('2.0.0-rc.1'), release('1.0.0'), release('1.1.0', { engines: { agentrans: '0.0.1' } })]),
+    entry('previews', {}, [release('1.0.0-beta.1'), release('1.0.0-rc.1', { engines: { agentrans: '0.0.1' } })]),
+    entry('only-preview-stable', {}, [release('2.0.0-rc.1'), release('1.0.0', { engines: { agentrans: '0.0.1' } })]),
   ])))
   const { market } = await mount({}, { bundles: [bundle('mixed', { version: '1.0.0' })] })
   const by = Object.fromEntries((await read(market, URL_A)).entries.map(item => [item.name, item]))

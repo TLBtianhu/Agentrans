@@ -25,7 +25,7 @@ kind: "package-bundle"
 <a id="use-this-package"></a>
 ## 使用此包
 
-在**插件 → 添加插件**中输入 `@agentrans/experimental-ralph-bundle`，选择**安装**，再选择**立即启用**。DSH 使用随包提供的版本，无需再次下载。也可在目标 [profile](../../boot/app-boot/README.zh.md#profiles) 的 `package.json` 中，将包名加入 `dsh.profile.bundles`。开启 HMR 时选择即时生效；否则需重启应用。启用后的组合包会出现在插件页；关闭时移除其配置层，并再次隐藏卡片。另行安装到 profile 的依赖在关闭后仍会列出。
+在**插件 → 添加插件**中输入 `@agentrans/experimental-ralph-bundle`，选择**安装**，再选择**立即启用**。DSH 使用随包提供的版本，无需再次下载。也可在目标 [profile](../../boot/app-boot/README.zh.md#profiles) 的 `package.json` 中，将包名加入 `agentrans.profile.bundles`。开启 HMR 时选择即时生效；否则需重启应用。启用后的组合包会出现在插件页；关闭时移除其配置层，并再次隐藏卡片。另行安装到 profile 的依赖在关闭后仍会列出。
 
 开启 HMR 时，启用或关闭组合包会在运行中的 Host 注册或移除其全局工具，因此所有预设（包括 minimal）中的每个智能体都会在下一次请求时看到变化。
 

@@ -231,7 +231,7 @@ export function fixClientPackageManifests(root: string, facts: ClientPackageFact
   const baseline = new Set([...facts.platformModules, ...facts.preloadedExternals])
   for (const declaration of facts.declarations.filter(entry => entry.dynamic)) {
     const target = document(declaration.manifest)
-    const dsh = isRecord(target.manifest.dsh) ? target.manifest.dsh : undefined
+    const dsh = isRecord(target.manifest.agentrans) ? target.manifest.agentrans : undefined
     const client = isRecord(dsh?.client) ? dsh.client : undefined
     if (client === undefined) continue
     target.changed = normalizeClientArray(client, 'inject', () => false) || target.changed
@@ -484,7 +484,7 @@ function collectAssetViolations(facts: ClientPackageFacts): string[] {
 
 interface Manifest {
   name?: unknown
-  dsh?: unknown
+  agentrans?: unknown
   exports?: unknown
   dependencies?: Record<string, string>
   peerDependencies?: Record<string, string>
@@ -498,7 +498,7 @@ function readDeclaration(
 ): ClientDeclaration | undefined {
   const manifest = JSON.parse(readFileSync(resolve(root, manifestPath), 'utf8')) as Manifest
   if (typeof manifest.name !== 'string') return undefined
-  const dsh = isRecord(manifest.dsh) ? manifest.dsh : undefined
+  const dsh = isRecord(manifest.agentrans) ? manifest.agentrans : undefined
   const rawClient = dsh?.client
   const assetExport = isRecord(manifest.exports) ? manifest.exports[PACKAGE_ASSET_EXPORT] : undefined
   const rowless = {

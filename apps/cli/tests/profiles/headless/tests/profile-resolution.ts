@@ -76,7 +76,7 @@ export function testProfileResolution(mode: ExampleMode): void {
       const exports = { import: './index.mjs', require: './index.cjs' }
       await writePackage(bundleDir, {
         name: bundleName, version: '1.0.0', dependencies: { [bridgeName]: '*' },
-        dsh: { bundle: { patch: './cordis.patch.yml' } },
+        agentrans: { bundle: { patch: './cordis.patch.yml' } },
       }, { 'cordis.patch.yml': '[]' })
       await writePackage(bridgeDir, {
         name: bridgeName, version: '1.0.0', exports, dependencies: { [leafName]: '*' },
@@ -178,7 +178,7 @@ export function testProfileResolution(mode: ExampleMode): void {
       // The probe imports from the profile, where the bundle's transitive dependencies need fallback.
       await writePackage(profileDir, {
         name: 'resolution-profile', private: true, dependencies: { [bundleName]: '*', [pluginName]: '*' },
-        dsh: { profile: { bundles: ['@agentrans/base', '@agentrans/headless', bundleName] } },
+        agentrans: { profile: { bundles: ['@agentrans/base', '@agentrans/headless', bundleName] } },
       }, {
         'probe.mjs': [
           "import { createRequire } from 'node:module'",

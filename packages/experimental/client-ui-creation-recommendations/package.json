@@ -27,7 +27,7 @@
     },
     "./locale/*.json": "./locale/*.json"
   },
-  "dsh": {
+  "agentrans": {
     "client": {
       "platform": "web",
       "inject": [

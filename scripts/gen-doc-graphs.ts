@@ -1185,10 +1185,10 @@ function bundleLayers(name: string): BundleLayer[] {
   for (const manifestPath of globSync('packages/*/*/package.json').map(path => path.replaceAll('\\', '/'))) {
     const manifest = JSON.parse(readFileSync(resolve(root, manifestPath), 'utf8')) as {
       name?: string
-      dsh?: { bundle?: { patch?: string | string[] } }
+      agentrans?: { bundle?: { patch?: string | string[] } }
     }
     if (manifest.name !== name) continue
-    const patch = manifest.dsh?.bundle?.patch
+    const patch = manifest.agentrans?.bundle?.patch
     if (patch === undefined) throw new Error(`${manifestPath}: ${name} must declare dsh.bundle.patch`)
     const directory = manifestPath.replace(/\/package\.json$/, '')
     return (Array.isArray(patch) ? patch : [patch]).map((entry) => {

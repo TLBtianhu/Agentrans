@@ -42,7 +42,7 @@ const { boot } = createRequire(import.meta.url)(join(REPO_ROOT, 'packages/boot/a
 /** The shipped Web surface: the dsh-base and dsh-web-app bundle patches over an empty profile. */
 const BASE_PATCH = join(REPO_ROOT, 'packages/bundle/base/cordis.patch.yml')
 const WEB_BUNDLE = join(REPO_ROOT, 'packages/bundle/web-app')
-const WEB_PATCHES = bundlePatchPaths(WEB_BUNDLE, (JSON.parse(readFileSync(join(WEB_BUNDLE, 'package.json'), 'utf8')) as { dsh: { bundle: { patch: string[] } } }).dsh.bundle)
+const WEB_PATCHES = bundlePatchPaths(WEB_BUNDLE, (JSON.parse(readFileSync(join(WEB_BUNDLE, 'package.json'), 'utf8')) as { agentrans: { bundle: { patch: string[] } } }).agentrans.bundle)
 const webPatches = (label: string): PatchOptions[] => WEB_PATCHES.flatMap(file => loadOverlayPatches(label, file))
 const CODEX_PACKAGE_DIR = join(REPO_ROOT, 'packages/subagent/subagent-codex')
 const CLAUDE_CODE_PACKAGE_DIR = join(REPO_ROOT, 'packages/subagent/subagent-claude-code')
@@ -198,7 +198,7 @@ async function bootWeb(
     await writeFile(join(profileDir, 'package.json'), JSON.stringify({
       private: true,
       dependencies: Object.fromEntries(profileBundles.map(name => [name, 'workspace:*'])),
-      dsh: { profile: { bundles: profileBundles } },
+      agentrans: { profile: { bundles: profileBundles } },
     }, null, 2) + '\n')
     profile = loadProfile('dsh-test', surface, INSTALL_ANCHOR, home, { userLayer: false })
     bundlePatches = profile.layers.flatMap(layer => layer.patches)
@@ -207,10 +207,10 @@ async function bootWeb(
   const fixtureName = 'dsh-web-presets-defaults'
   const fixtureDir = join(profileDir, 'node_modules', fixtureName)
   await mkdir(fixtureDir, { recursive: true })
-  await writeFile(join(fixtureDir, 'package.json'), JSON.stringify({ name: fixtureName, version: '1.0.0', dsh: { bundle: { patch: 'cordis.patch.yml' } } }))
+  await writeFile(join(fixtureDir, 'package.json'), JSON.stringify({ name: fixtureName, version: '1.0.0', agentrans: { bundle: { patch: 'cordis.patch.yml' } } }))
   await writeFile(join(fixtureDir, 'cordis.patch.yml'), JSON.stringify(overrides))
-  const manifest = JSON.parse(await readFile(join(profileDir, 'package.json'), 'utf8')) as { dsh: { profile: { bundles: string[] } } }
-  manifest.dsh.profile.bundles.push(fixtureName)
+  const manifest = JSON.parse(await readFile(join(profileDir, 'package.json'), 'utf8')) as { agentrans: { profile: { bundles: string[] } } }
+  manifest.agentrans.profile.bundles.push(fixtureName)
   await writeFile(join(profileDir, 'package.json'), JSON.stringify(manifest))
   const resolution = await createRuntimeResolution({ installAnchor: INSTALL_ANCHOR, home, profile })
   const rootConfig = join(profileDir, 'cordis.yml')

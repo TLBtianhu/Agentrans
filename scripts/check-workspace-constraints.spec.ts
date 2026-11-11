@@ -436,7 +436,7 @@ describe('package payload constraints', () => {
   it('includes a declared profile patch without a package-name allowlist', () => {
     expect(expectedDshPackageFiles({
       name: '@agentrans/private-profile',
-      dsh: { bundle: { patch: './cordis.patch.yml' } },
+      agentrans: { bundle: { patch: './cordis.patch.yml' } },
     })).toEqual([
       'lib/index.js',
       'cordis.patch.yml',
@@ -444,7 +444,7 @@ describe('package payload constraints', () => {
     ])
     expect(expectedDshPackageFiles({
       name: '@agentrans/private-profile',
-      dsh: { bundle: { patch: ['./cordis.patch.yml', './layers/web.patch.yml'] } },
+      agentrans: { bundle: { patch: ['./cordis.patch.yml', './layers/web.patch.yml'] } },
     })).toEqual([
       'lib/index.js',
       'cordis.patch.yml',

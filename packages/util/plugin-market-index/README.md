@@ -60,7 +60,7 @@ None of its own. The tool result that carries plugins owns its request's cache b
 
 <a id="known-limitations-and-deferred-work"></a>
 
-- **Generator obligations are unchecked** — the validator cannot verify that `name`, `version`, `publishTimestamp`, `engines.dsh`, or display fields match the package they describe, or that the package declares a bundle.
+- **Generator obligations are unchecked** — the validator cannot verify that `name`, `version`, `publishTimestamp`, `engines.agentrans`, or display fields match the package they describe, or that the package declares a bundle.
 - **No size bound** — the caller bounds the document before parsing it.
 
 <a id="dev-note"></a>

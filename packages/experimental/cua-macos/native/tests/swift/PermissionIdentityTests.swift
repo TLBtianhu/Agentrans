@@ -27,7 +27,7 @@ import Testing
 func liveBundleIdentitySurvivesAnUnavailableExecutablePath(error: Int32) throws {
     let identity = try NativePlatform.identity(getpid())
     let expectedPath = try #require(NativePlatform.executablePath(identity.pid))
-    let bundle: (Int32) -> (identifier: String?, url: URL?) = { _ in ("test.dsh.bundle", nil) }
+    let bundle: (Int32) -> (identifier: String?, url: URL?) = { _ in ("test.agentrans.bundle", nil) }
     let before = try ApplicationAuthorization.describe(identity, name: "Fixture", expectedExecutablePath: expectedPath, readBundle: bundle)
     var queries = 0
     let after = try ApplicationAuthorization.describe(identity, name: "Fixture", expectedExecutablePath: expectedPath,
@@ -60,7 +60,7 @@ func missingBundleAndPathReportsThePathFailureWithoutRetry(error: Int32) throws 
     let identity = try NativePlatform.identity(getpid())
     do {
         _ = try ApplicationAuthorization.describe(identity, name: "Fixture", expectedExecutablePath: "/another/executable",
-            readBundle: { _ in ("test.dsh.bundle", nil) })
+            readBundle: { _ in ("test.agentrans.bundle", nil) })
         Issue.record("A mismatched target path was accepted")
     } catch let failure as NativeFailure { #expect(failure.code == "STALE_APP") }
 }
@@ -79,7 +79,7 @@ func missingBundleAndPathReportsThePathFailureWithoutRetry(error: Int32) throws 
     let identity = try NativePlatform.identity(process.processIdentifier)
     do {
         _ = try ApplicationAuthorization.describe(identity, name: "Fixture", expectedExecutablePath: nil,
-            readBundle: { _ in ("test.dsh.bundle", nil) }, readPath: { _ in
+            readBundle: { _ in ("test.agentrans.bundle", nil) }, readPath: { _ in
                 process.terminate()
                 process.waitUntilExit()
                 return .failure(NativePlatform.executablePathFailure(ENOENT))

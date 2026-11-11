@@ -35,7 +35,7 @@ To build a profile on the shared core, create a profile with a `package.json` th
 {
   "name": "my-profile",
   "private": true,
-  "dsh": {
+  "agentrans": {
     "profile": {
       "bundles": ["@agentrans/base"]
     }

@@ -1,4 +1,4 @@
-/** Evaluate plugin dsh requirements (`engines.dsh`, else dsh peers) without importing plugin code. */
+/** Evaluate plugin dsh requirements (`engines.agentrans`, else dsh peers) without importing plugin code. */
 
 import fs from 'node:fs'
 import { fileURLToPath } from 'node:url'
@@ -9,7 +9,7 @@ export interface PluginCompatibility {
   name: string
   version: string
   runtimeVersion: string
-  /** Only requirements the running dsh version does not satisfy: `engines.dsh`, or dsh peer package names. */
+  /** Only requirements the running dsh version does not satisfy: `engines.agentrans`, or dsh peer package names. */
   requirements: Record<string, string>
   exempted: boolean
 }
@@ -67,10 +67,12 @@ function isHarnessPackage(name: string): boolean {
 }
 function unmetRequirements(fields: Record<string, unknown>, runtimeVersion: string): Record<string, string> {
   const engines = Object.hasOwn(fields, 'engines') ? objectOf(fields.engines, 'Plugin manifest engines') : {}
-  if (Object.hasOwn(engines, 'dsh')) {
-    const range = engines.dsh
-    if (typeof range !== 'string') throw new Error('Plugin manifest engines.dsh must be a string')
-    return satisfies(runtimeVersion, range) ? {} : { 'engines.dsh': range }
+  // A manifest written before the rename keeps naming its range under `dsh`; report the key it used.
+  const engineName = Object.hasOwn(engines, 'agentrans') ? 'agentrans' : Object.hasOwn(engines, 'dsh') ? 'dsh' : undefined
+  if (engineName !== undefined) {
+    const range = engines[engineName]
+    if (typeof range !== 'string') throw new Error('Plugin manifest engines.agentrans must be a string')
+    return satisfies(runtimeVersion, range) ? {} : { 'engines.agentrans': range }
   }
   if (!Object.hasOwn(fields, 'peerDependencies')) return {}
   const dependencies = objectOf(fields.peerDependencies, 'Plugin manifest peerDependencies')
@@ -87,10 +89,10 @@ function unmetRequirements(fields: Record<string, unknown>, runtimeVersion: stri
 }
 
 /**
- * Check the plugin's dsh requirements against the runtime. An own `engines.dsh` range decides alone and
+ * Check the plugin's dsh requirements against the runtime. An own `engines.agentrans` range decides alone and
  * peerDependencies are ignored; otherwise every @agentrans/cli or @agentrans/* peer must match.
  * Prereleases participate in ranges. For peers only, workspace:^, workspace:~, and workspace:* refer to
- * the current runtime; other empty or invalid ranges, including any workspace: `engines.dsh`, are unmet.
+ * the current runtime; other empty or invalid ranges, including any workspace: `engines.agentrans`, are unmet.
  * @param manifest - parsed plugin package.json; inherited fields are ignored.
  * @param exemptions - exact plugin name@version keys mapped to exact runtime versions.
  * @param runtimeVersion - running dsh version, defaulting to this app-boot package.

@@ -7367,7 +7367,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'MarketEngines',
-    declaration: 'export interface MarketEngines {\n    readonly dsh?: string;\n}',
+    declaration: 'export interface MarketEngines {\n    readonly agentrans?: string;\n    readonly dsh?: string;\n}',
   },
   {
     name: 'MarketIndexMetadata',

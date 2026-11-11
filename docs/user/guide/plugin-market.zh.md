@@ -97,7 +97,7 @@ https://gitlab.example.com/team/dsh-plugins
 pnpm --filter @agentrans/plugin-market-generator start --input plugins.txt --output site/index.json --title "Team plugins"
 ```
 
-对于 npm 包，索引列出所有未弃用、未设为私有且声明了 `dsh.bundle` 的版本。对于 Git 仓库，生成器在默认分支上查找 `package.json` 没有设置 `"private": true` 的组合包，列出它们在 `vX.Y.Z`、`X.Y.Z` 和 `<name>@X.Y.Z` 标签处的版本，以及每个包在默认分支上的版本。标题、描述、图标、作者和主页取自每个插件的最高版本。路径相对于你运行 pnpm 的目录。
+对于 npm 包，索引列出所有未弃用、未设为私有且声明了 `agentrans.bundle` 的版本。对于 Git 仓库，生成器在默认分支上查找 `package.json` 没有设置 `"private": true` 的组合包，列出它们在 `vX.Y.Z`、`X.Y.Z` 和 `<name>@X.Y.Z` 标签处的版本，以及每个包在默认分支上的版本。标题、描述、图标、作者和主页取自每个插件的最高版本。路径相对于你运行 pnpm 的目录。
 
 生成器只下载和读取文件，从不安装包或运行其代码。它在列表旁的 `.plugin-market-cache` 中保存缓存，因此再次运行时只下载新的版本和提交。按上文所述发布输出目录，即 `index.json` 及其 `icons/` 目录。
 
@@ -132,9 +132,9 @@ pnpm --filter @agentrans/plugin-market-generator start --input plugins.txt --out
 | `version` | 是 | 精确的 SemVer 版本，在插件内唯一。 |
 | `publishTimestamp` | 是 | 发布时间，Unix 秒。 |
 | `source` | 是 | `{ "type": "npm", "registry"?: url }`，或 `{ "type": "git", "url": https-url, "commit": 40 位十六进制 SHA, "path"?: 目录 }`。 |
-| `engines.dsh` | 否 | 该版本可运行的 DSH 版本的 SemVer 范围；缺省表示任意版本。 |
+| `engines.agentrans` | 否 | 该版本可运行的 DSH 版本的 SemVer 范围；缺省表示任意版本。 |
 
-DSH 将 npm 版本安装为 `name@version`，存在 `registry` 时先询问它；将 Git 版本安装为 `git+<url>.git#<commit>`，包位于子目录时追加 `&path:/<path>`。`engines.dsh` 应与包自身的 `engines.dsh` 一致，DSH 会在安装时再次检查；没有该字段的包改为按其 `@agentrans/cli*` peer 依赖检查。[格式说明](../../../.agents/notes/implemented/feature/2026-10-02-plugin-market-index-format.zh.md)定义了全部规则。
+DSH 将 npm 版本安装为 `name@version`，存在 `registry` 时先询问它；将 Git 版本安装为 `git+<url>.git#<commit>`，包位于子目录时追加 `&path:/<path>`。`engines.agentrans` 应与包自身的 `engines.agentrans` 一致，DSH 会在安装时再次检查；没有该字段的包改为按其 `@agentrans/cli*` peer 依赖检查。[格式说明](../../../.agents/notes/implemented/feature/2026-10-02-plugin-market-index-format.zh.md)定义了全部规则。
 
 <a id="further-exploration"></a>
 ## 延伸阅读

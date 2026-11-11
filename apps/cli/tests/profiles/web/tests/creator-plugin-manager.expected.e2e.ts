@@ -34,7 +34,7 @@ it('configures MCP on a live profile, restores it on restart, and removes its to
   const bundle = join(root, 'demo-mcp')
   await mkdir(bundle)
   await writeFile(join(bundle, 'package.json'), JSON.stringify({ name: '@test/creator-mcp', version: '1.0.0',
-    dsh: { bundle: { patch: './cordis.patch.yml' } } }))
+    agentrans: { bundle: { patch: './cordis.patch.yml' } } }))
   await writeFile(join(bundle, 'cordis.patch.yml'), JSON.stringify([{ insert: [{ id: 'demo',
     name: '@agentrans/mcp-client', config: { serverName: 'demo', transport: 'streamable-http',
       url: mcp.url, failOnStartupError: true },
@@ -88,7 +88,7 @@ it('configures MCP on a live profile, restores it on restart, and removes its to
   expect(initial.other).toContain('mcp__demo__ping')
   expect(JSON.stringify(initial.ping)).toContain('pong')
   const saved = readProfileManifest('dsh', join(root, 'home/profiles/web'))
-  expect(saved.dsh?.profile?.bundles).toContain('@test/creator-mcp')
+  expect(saved.agentrans?.profile?.bundles).toContain('@test/creator-mcp')
   expect(saved.dependencies).toHaveProperty('@test/creator-mcp')
   await first.stop()
   const second = await start()

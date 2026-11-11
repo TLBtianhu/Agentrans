@@ -396,7 +396,7 @@ export async function bootWebOwner(options: WebOwnerOptions = {}): Promise<WebOw
     name: 'dsh-profile-web',
     private: true,
     dependencies: Object.fromEntries(extraBundles.map(bundle => [bundle, 'workspace:^'])),
-    dsh: {
+    agentrans: {
       profile: { bundles: ['@agentrans/base', '@agentrans/web-app', ...extraBundles] },
     },
   }, undefined, 2) + '\n')

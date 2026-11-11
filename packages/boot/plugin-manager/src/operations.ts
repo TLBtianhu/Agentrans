@@ -75,7 +75,7 @@ export function anchorPathSpec(argument: string, cwd: string): string {
 export function bundleManifest(name: string, dir: string, anchor: string): ProfileManifest | undefined {
   const packageDir = resolveBundleDir('dsh', name, anchor, dir)
   const manifest = readProfileManifest('dsh', packageDir)
-  return manifest.dsh?.bundle?.patch === undefined ? undefined : manifest
+  return manifest.agentrans?.bundle?.patch === undefined ? undefined : manifest
 }
 
 /** Atomically save a profile manifest while retaining unrelated fields.
@@ -91,7 +91,7 @@ async function reconcile(before: ProfileManifest, dir: string, anchor: string, o
   const after = readProfileManifest('dsh', dir)
   const dependencies = Object.keys(after.dependencies ?? {})
   const beforeDeps = new Set(Object.keys(before.dependencies ?? {}))
-  const previous = after.dsh?.profile?.bundles ?? []
+  const previous = after.agentrans?.profile?.bundles ?? []
   const unsupported: string[] = []
   const bundles = previous.filter((name) => {
     if (!beforeDeps.has(name) && !dependencies.includes(name)) return true
@@ -100,23 +100,24 @@ async function reconcile(before: ProfileManifest, dir: string, anchor: string, o
   for (const name of dependencies) {
     if (beforeDeps.has(name)) continue
     const metadata = bundleManifest(name, dir, anchor)
-    if (metadata?.dsh?.bundle === undefined) {
+    const declared = metadata?.agentrans?.bundle
+    if (declared === undefined) {
       options.onOutput?.(`dsh: warning: ${name} declares no dsh.bundle — installed as a plain dependency, not a profile layer\n`, 'stderr')
       continue
     }
-    try { assertBundlePlatform(metadata.dsh.bundle.platforms, process.platform) } catch (error) {
+    try { assertBundlePlatform(declared.platforms, process.platform) } catch (error) {
       if (!(error instanceof UnsupportedBundlePlatformError)) throw error
       unsupported.push(`${name}: ${error.message}`)
       continue
     }
-    for (const file of bundlePatchPaths(resolveBundleDir('dsh', name, anchor, dir), metadata.dsh.bundle)) loadOverlayPatches('dsh', file)
+    for (const file of bundlePatchPaths(resolveBundleDir('dsh', name, anchor, dir), declared)) loadOverlayPatches('dsh', file)
     if (!bundles.includes(name)) {
       bundles.push(name)
     }
   }
   if (unsupported.length > 0) return unsupported
   if (JSON.stringify(previous) === JSON.stringify(bundles)) return []
-  after.dsh = { ...after.dsh, profile: { ...after.dsh?.profile, bundles } }
+  after.agentrans = { ...after.agentrans, profile: { ...after.agentrans?.profile, bundles } }
   await saveManifest(dir, after)
   return []
 }
@@ -256,7 +257,7 @@ function directDependencies(manifest: ProfileManifest): Record<string, string> {
 
 /** Inspect only plugin rows contributed by the changed bundle, not its dependency closure. */
 function bundleComponentManifests(manifest: ProfileManifest, dir: string, anchor: string): ProfileManifest[] {
-  const bundle = manifest.dsh?.bundle
+  const bundle = manifest.agentrans?.bundle
   if (bundle === undefined) return []
   const patches = bundlePatchPaths(dir, bundle).flatMap(file => loadOverlayPatches('dsh', file))
   const names = new Set<string>()

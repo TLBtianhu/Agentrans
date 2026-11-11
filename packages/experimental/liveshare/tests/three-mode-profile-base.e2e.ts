@@ -92,7 +92,7 @@ describe('three-mode acceptance: real-profile base', () => {
         name: 'dsh-profile-headless',
         private: true,
         dependencies: { '@agentrans/experimental-liveshare': 'workspace:^' },
-        dsh: { profile: { bundles: ['@agentrans/base', '@agentrans/headless'] } },
+        agentrans: { profile: { bundles: ['@agentrans/base', '@agentrans/headless'] } },
       }, undefined, 2) + '\n')
       await writeFile(join(profileDir, 'cordis.patch.yml'), [
         '- id: llm-deepseek',

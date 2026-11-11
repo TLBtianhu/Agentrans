@@ -60,7 +60,7 @@
     "@agentrans/agent-loop": "workspace:*"
   },
   "icon": "./icon.svg",
-  "dsh": {
+  "agentrans": {
     "bundle": {
       "patch": "./cordis.patch.yml"
     }

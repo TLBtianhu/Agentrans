@@ -10,8 +10,8 @@ To use a fresh source checkout instead, complete the [run-from-source section](.
 
 Installation is built on two concepts. Both are described by a `package.json`, but they carry different kinds of manifest under the `dsh` key, and they answer different questions:
 
-- A **bundle** is an npm package that ships a configuration layer. Its manifest declares `dsh.bundle`, answering "what does this package contribute?": a patch file that inserts or overrides plugin rows.
-- A **profile** is a directory under `$AGENTRANS_HOME/profiles/<name>` describing one runnable composition. Its manifest declares `dsh.profile`, answering "which bundles compose this setup, in what order?".
+- A **bundle** is an npm package that ships a configuration layer. Its manifest declares `agentrans.bundle`, answering "what does this package contribute?": a patch file that inserts or overrides plugin rows.
+- A **profile** is a directory under `$AGENTRANS_HOME/profiles/<name>` describing one runnable composition. Its manifest declares `agentrans.profile`, answering "which bundles compose this setup, in what order?".
 
 A bundle is what you author and distribute; a profile is what a user boots with `agentrans --profile <name>`. Nothing is both.
 
@@ -39,7 +39,7 @@ Create `hello-plugin/package.json`:
   "type": "module",
   "main": "index.js",
   "files": ["index.js", "cordis.patch.yml"],
-  "dsh": { "bundle": { "patch": "./cordis.patch.yml" } }
+  "agentrans": { "bundle": { "patch": "./cordis.patch.yml" } }
 }
 ```
 
@@ -61,15 +61,15 @@ Create `hello-plugin/cordis.patch.yml`. The patch is a YAML array like the `--pa
       name: dsh-hello-plugin
 ```
 
-`patch` also accepts an ordered list of files, for example `["./base.patch.yml", "./web.patch.yml"]`; the launcher applies them in that order as one layer, and each file's relative plugin paths resolve beside that file. A package without the `dsh.bundle` declaration still installs, but only as a plain dependency: `dsh plugin` prints a warning and activates no layer. Use that package format for a library that plugin packages import rather than a plugin users enable.
+`patch` also accepts an ordered list of files, for example `["./base.patch.yml", "./web.patch.yml"]`; the launcher applies them in that order as one layer, and each file's relative plugin paths resolve beside that file. A package without the `agentrans.bundle` declaration still installs, but only as a plain dependency: `dsh plugin` prints a warning and activates no layer. Use that package format for a library that plugin packages import rather than a plugin users enable.
 
-Declare the DSH releases the bundle supports with an `engines.dsh` SemVer range, for example `"engines": { "dsh": ">=0.2.0 <0.3.0" }`. Installation and profile startup refuse a bundle whose range the running DSH does not satisfy; without `engines.dsh`, they check its `@agentrans/cli*` peer dependency ranges instead ([rule](../../../../packages/boot/app-boot/README.md#profiles)).
+Declare the DSH releases the bundle supports with an `engines.agentrans` SemVer range, for example `"engines": { "dsh": ">=0.2.0 <0.3.0" }`. Installation and profile startup refuse a bundle whose range the running DSH does not satisfy; without `engines.agentrans`, they check its `@agentrans/cli*` peer dependency ranges instead ([rule](../../../../packages/boot/app-boot/README.md#profiles)).
 
 ### The profile manifest
 
 A profile directory holds two files:
 
-- `package.json` — the profile's out-of-tree plugin dependencies (managed by pnpm) plus the `dsh.profile` manifest with its ordered `bundles` list.
+- `package.json` — the profile's out-of-tree plugin dependencies (managed by pnpm) plus the `agentrans.profile` manifest with its ordered `bundles` list.
 - `cordis.patch.yml` — the user's own patch layer, applied after every bundle layer.
 
 You never write a profile manifest by hand: `agentrans --profile <name> --from-default-profile <template>` can create or reset one from a shipped application template, while `dsh plugin` creates a base-backed profile and maintains its installed bundle list. The [CLI behavior reference](../../../../apps/cli/reference/README.md#profile-boot) owns the creation rules; the next section shows the plugin path.
@@ -82,7 +82,7 @@ You never write a profile manifest by hand: `agentrans --profile <name> --from-d
 dsh plugin --profile demo add ./hello-plugin
 ```
 
-The first use initializes the profile (with `@agentrans/base` as its first bundle), pnpm links the checkout, and `dsh` appends the bundle to `dsh.profile.bundles` because the package declares `dsh.bundle`:
+The first use initializes the profile (with `@agentrans/base` as its first bundle), pnpm links the checkout, and `dsh` appends the bundle to `agentrans.profile.bundles` because the package declares `agentrans.bundle`:
 
 ```json
 {
@@ -91,7 +91,7 @@ The first use initializes the profile (with `@agentrans/base` as its first bundl
   "dependencies": {
     "dsh-hello-plugin": "link:/path/to/hello-plugin"
   },
-  "dsh": {
+  "agentrans": {
     "profile": {
       "bundles": [
         "@agentrans/base",
@@ -121,7 +121,7 @@ agentrans --profile demo
 
 The effective configuration composes over an empty root by applying, in order:
 
-1. Each bundle patch named in the profile's `dsh.profile.bundles` list, in list order — `@agentrans/base` first, then each installed bundle in the order it was added.
+1. Each bundle patch named in the profile's `agentrans.profile.bundles` list, in list order — `@agentrans/base` first, then each installed bundle in the order it was added.
 2. The profile's own `cordis.patch.yml`.
 3. The home-level `$AGENTRANS_HOME/cordis.patch.yml` — machine-local preferences shared by every profile.
 4. Each `--patch <path>` overlay, in argv order.

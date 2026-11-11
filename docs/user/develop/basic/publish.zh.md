@@ -10,8 +10,8 @@
 
 安装机制建立在两个概念之上。二者都由一份 `package.json` 描述，但它们在 `dsh` 键下携带的 manifest（元数据清单）种类不同，回答的问题也不同：
 
-- **组合包**是附带一个配置层的 npm 包。它的 manifest 声明 `dsh.bundle`，回答的是"这个包贡献什么？"：一个插入或覆盖插件行的 patch 文件。
-- **profile** 是位于 `$AGENTRANS_HOME/profiles/<name>` 下、描述一份可启动组合的目录。它的 manifest 声明 `dsh.profile`，回答的是"这套配置由哪些组合包按什么顺序组成？"。
+- **组合包**是附带一个配置层的 npm 包。它的 manifest 声明 `agentrans.bundle`，回答的是"这个包贡献什么？"：一个插入或覆盖插件行的 patch 文件。
+- **profile** 是位于 `$AGENTRANS_HOME/profiles/<name>` 下、描述一份可启动组合的目录。它的 manifest 声明 `agentrans.profile`，回答的是"这套配置由哪些组合包按什么顺序组成？"。
 
 组合包是你编写并分发的东西；profile 是用户用 `agentrans --profile <name>` 启动的东西。没有东西同时是两者。
 
@@ -39,7 +39,7 @@ hello-plugin/
   "type": "module",
   "main": "index.js",
   "files": ["index.js", "cordis.patch.yml"],
-  "dsh": { "bundle": { "patch": "./cordis.patch.yml" } }
+  "agentrans": { "bundle": { "patch": "./cordis.patch.yml" } }
 }
 ```
 
@@ -61,15 +61,15 @@ export function apply() {
       name: dsh-hello-plugin
 ```
 
-`patch` 也接受一个有序的文件列表，例如 `["./base.patch.yml", "./web.patch.yml"]`；launcher 按该顺序把它们作为同一层应用，每个文件中的相对插件路径相对于该文件解析。没有 `dsh.bundle` 声明的包仍然可以安装，但只作为普通依赖：`dsh plugin` 会打印警告，且不激活任何层。如果一个库供插件包 import，而不是供用户启用，就使用这种包格式。
+`patch` 也接受一个有序的文件列表，例如 `["./base.patch.yml", "./web.patch.yml"]`；launcher 按该顺序把它们作为同一层应用，每个文件中的相对插件路径相对于该文件解析。没有 `agentrans.bundle` 声明的包仍然可以安装，但只作为普通依赖：`dsh plugin` 会打印警告，且不激活任何层。如果一个库供插件包 import，而不是供用户启用，就使用这种包格式。
 
-使用 `engines.dsh` SemVer 范围声明组合包支持的 DSH 版本，例如 `"engines": { "dsh": ">=0.2.0 <0.3.0" }`。安装和 profile 启动会拒绝当前运行的 DSH 不满足该范围的组合包；没有 `engines.dsh` 时，改为检查其 `@agentrans/cli*` peer 依赖范围（[规则](../../../../packages/boot/app-boot/README.zh.md#profiles)）。
+使用 `engines.agentrans` SemVer 范围声明组合包支持的 DSH 版本，例如 `"engines": { "dsh": ">=0.2.0 <0.3.0" }`。安装和 profile 启动会拒绝当前运行的 DSH 不满足该范围的组合包；没有 `engines.agentrans` 时，改为检查其 `@agentrans/cli*` peer 依赖范围（[规则](../../../../packages/boot/app-boot/README.zh.md#profiles)）。
 
 ### profile manifest
 
 profile 目录包含两个文件：
 
-- `package.json` — profile 的树外插件依赖（由 pnpm 管理），加上 `dsh.profile` manifest 及其有序的 `bundles` 列表。
+- `package.json` — profile 的树外插件依赖（由 pnpm 管理），加上 `agentrans.profile` manifest 及其有序的 `bundles` 列表。
 - `cordis.patch.yml` — 用户自己的 patch 层，在每个组合包层之后应用。
 
 profile manifest 从不需要手写：`agentrans --profile <name> --from-default-profile <template>` 可以从随附应用模板创建或重置 profile，`dsh plugin` 则创建一个以 base 为基础的 profile，并维护其中已安装的 bundle 列表。创建规则以 [CLI（命令行界面）行为参考](../../../../apps/cli/reference/README.zh.md#profile-boot)为准；下一节展示插件路径。
@@ -82,7 +82,7 @@ profile manifest 从不需要手写：`agentrans --profile <name> --from-default
 dsh plugin --profile demo add ./hello-plugin
 ```
 
-首次使用会初始化 profile（`@agentrans/base` 作为它的第一个组合包），pnpm 链接该 checkout，而 `dsh` 因为这个包声明了 `dsh.bundle`，把它追加进 `dsh.profile.bundles`：
+首次使用会初始化 profile（`@agentrans/base` 作为它的第一个组合包），pnpm 链接该 checkout，而 `dsh` 因为这个包声明了 `agentrans.bundle`，把它追加进 `agentrans.profile.bundles`：
 
 ```json
 {
@@ -91,7 +91,7 @@ dsh plugin --profile demo add ./hello-plugin
   "dependencies": {
     "dsh-hello-plugin": "link:/path/to/hello-plugin"
   },
-  "dsh": {
+  "agentrans": {
     "profile": {
       "bundles": [
         "@agentrans/base",
@@ -121,7 +121,7 @@ agentrans --profile demo
 
 生效配置在空根之上按以下顺序逐层组合：
 
-1. profile 的 `dsh.profile.bundles` 列表所列的各个组合包 patch，按列表顺序——先是 `@agentrans/base`，然后是每个已安装组合包，按其加入顺序。
+1. profile 的 `agentrans.profile.bundles` 列表所列的各个组合包 patch，按列表顺序——先是 `@agentrans/base`，然后是每个已安装组合包，按其加入顺序。
 2. profile 自己的 `cordis.patch.yml`。
 3. home 级的 `$AGENTRANS_HOME/cordis.patch.yml`——各 profile 共享的机器本地偏好。
 4. 每个 `--patch <path>` overlay，按 argv 顺序。

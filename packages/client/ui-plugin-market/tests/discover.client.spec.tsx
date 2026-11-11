@@ -28,7 +28,7 @@ function release(name: string, version: string, fields: Partial<MarketListingVer
   }
 }
 
-const INCOMPATIBLE = { compatible: false, runtimeVersion: '0.2.0', requirements: { 'engines.dsh': '0.1.0' } } as const
+const INCOMPATIBLE = { compatible: false, runtimeVersion: '0.2.0', requirements: { 'engines.agentrans': '0.1.0' } } as const
 
 function entry(
   name: string, fields: Partial<MarketListingEntry> = {}, metadata: Partial<MarketListingEntry['metadata']> = {},

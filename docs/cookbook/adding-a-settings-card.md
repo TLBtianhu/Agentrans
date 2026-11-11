@@ -65,7 +65,7 @@ The built `./client` file must be in the client module system's lazy-CJS factory
     ".": { "types": "./lib/types/index.d.ts", "default": "./lib/index.js" },
     "./client": { "types": "./lib/types/client/index.d.ts", "default": "./lib/client.js" }
   },
-  "dsh": { "client": { "platform": "web", "inject": ["@agentrans/client-ui-settings"] } }
+  "agentrans": { "client": { "platform": "web", "inject": ["@agentrans/client-ui-settings"] } }
 }
 ```
 

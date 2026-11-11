@@ -22,7 +22,7 @@ Status: implemented
 
 **将内部元数据保留在公共声明中。** 仅限工作区的迁移目录和实验性镜像打包器，不会因为其元数据可被发现就提供公共插件行为。
 
-**将 DSH 兼容性放在 `dsh.engines` 下。** [VS Code](https://code.visualstudio.com/api/references/extension-manifest) 将宿主要求放在顶层 `engines.vscode`。顶层 `engines.dsh` 让作者在同一位置声明运行时要求；自定义键的检查仍由 DSH 负责。
+**将 DSH 兼容性放在 `dsh.engines` 下。** [VS Code](https://code.visualstudio.com/api/references/extension-manifest) 将宿主要求放在顶层 `engines.vscode`。顶层 `engines.agentrans` 让作者在同一位置声明运行时要求；自定义键的检查仍由 DSH 负责。
 
 **仅用 peer dependency 声明宿主要求。** Peer dependency 约束已安装的 npm 包，包括 CLI 包 `@agentrans/cli`。插件位于独立 profile 项目时，它们无法标识当前运行的 DSH 进程。
 

@@ -28,7 +28,7 @@
     "lib/types/**/*.d.ts"
   ],
   "license": "MIT",
-  "dsh": {
+  "agentrans": {
     "bundle": {
       "patch": "./cordis.patch.yml"
     }

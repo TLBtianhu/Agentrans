@@ -106,7 +106,7 @@ export interface PackageManifest {
   devDependencies?: Record<string, string>
   dependencies?: Record<string, string>
   optionalDependencies?: Record<string, string>
-  dsh?: {
+  agentrans?: {
     bundle?: DshBundleManifest
   }
 }
@@ -308,7 +308,7 @@ export function expectedDshPackageFiles(manifest: PackageManifest, detailFiles: 
     if (target?.startsWith('./') && target.endsWith('.json')) localeFiles.add(target.slice(2))
   }
   const browserClient = exportDefault(manifest, './client')
-  const bundle = manifest.dsh?.bundle
+  const bundle = manifest.agentrans?.bundle
   const bundleFiles = bundle === undefined ? [] : bundlePatchFiles(bundle).map(file => file.replace(/^\.\//, ''))
   const extras = [
     ...bundleFiles,

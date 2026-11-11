@@ -49,7 +49,7 @@
     "@agentrans/client-test-runtime": "workspace:*",
     "@agentrans/session": "workspace:*"
   },
-  "dsh": {
+  "agentrans": {
     "client": {
       "inject": [
         "@agentrans/api-session-controller",

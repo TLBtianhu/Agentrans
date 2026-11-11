@@ -12,7 +12,7 @@ function tree(contents: Record<string, string | Uint8Array>): PackageFiles {
   })))
 }
 
-const bundle = (name: string, extra: object = {}): string => JSON.stringify({ name, version: '1.0.0', dsh: { bundle: { patch: './cordis.patch.yml' } }, ...extra })
+const bundle = (name: string, extra: object = {}): string => JSON.stringify({ name, version: '1.0.0', agentrans: { bundle: { patch: './cordis.patch.yml' } }, ...extra })
 
 async function readDisplay(files: PackageFiles, manifest: Manifest, inlineBytes = 100) {
   const warnings: string[] = []
@@ -50,7 +50,7 @@ describe('isBundle and dshRange', () => {
   it('accepts only a bundle whose patch is a string or a list of strings', () => {
     expect([
       { patch: 'a.yml' }, { patch: ['a.yml', 'b.yml'] }, { patch: [] }, { patch: [1] }, {}, [], null, 'a.yml',
-    ].map(value => isBundle({ dsh: { bundle: value } }))).toEqual([true, true, true, false, false, false, false, false])
+    ].map(value => isBundle({ agentrans: { bundle: value } }))).toEqual([true, true, true, false, false, false, false, false])
     expect(isBundle(undefined)).toBe(false)
   })
 
@@ -59,16 +59,16 @@ describe('isBundle and dshRange', () => {
     expect(isPrivate(undefined)).toBe(false)
   })
 
-  it('copies engines.dsh, else joins DSH peer ranges, and refuses ranges installation rejects', () => {
-    expect(dshRange({ engines: { dsh: '>=0.2.0' }, peerDependencies: { '@agentrans/cli': '1' } })).toBe('>=0.2.0')
+  it('copies engines.agentrans, else joins DSH peer ranges, and refuses ranges installation rejects', () => {
+    expect(dshRange({ engines: { agentrans: '>=0.2.0' }, peerDependencies: { '@agentrans/cli': '1' } })).toBe('>=0.2.0')
     expect(dshRange({ peerDependencies: { react: '18', '@agentrans/agent': 'workspace:*', '@agentrans/cli': '*' } })).toBeUndefined()
-    // Installation refuses an empty range, any `workspace:` engines.dsh, and a padded workspace peer on every DSH version.
+    // Installation refuses an empty range, any `workspace:` engines.agentrans, and a padded workspace peer on every DSH version.
     for (const manifest of [
-      { peerDependencies: { '@agentrans/cli': ' ' } }, { engines: { dsh: '' } }, { engines: { dsh: 'workspace:*' } },
+      { peerDependencies: { '@agentrans/cli': ' ' } }, { engines: { agentrans: '' } }, { engines: { agentrans: 'workspace:*' } },
       { peerDependencies: { '@agentrans/cli': ' workspace:*' } },
     ]) expect(dshRange(manifest)).toBeInstanceOf(Error)
-    expect(dshRange({ engines: { dsh: '>1 <1' } })).toEqual(new Error('no DSH version satisfies the DSH range: >1 <1'))
-    expect(dshRange({ engines: { dsh: ' * ' } })).toBeUndefined()
+    expect(dshRange({ engines: { agentrans: '>1 <1' } })).toEqual(new Error('no DSH version satisfies the DSH range: >1 <1'))
+    expect(dshRange({ engines: { agentrans: ' * ' } })).toBeUndefined()
     expect(dshRange({ engines: { node: '22' }, peerDependencies: [] })).toBeUndefined()
     expect(dshRange({
       peerDependencies: { '@agentrans/a': '^0.2.0 || ^0.3.0', '@agentrans/b': '>=0.2.1', '@agentrans/c': '>=0.2.1', '@agentrans/d': '<1 ||' },
@@ -86,7 +86,7 @@ describe('isBundle and dshRange', () => {
     const wide = Object.fromEntries(Array.from({ length: 3 }, (_, peer) => [`@agentrans/${peer}`, Array.from({ length: 10 }, (_, minor) => `>=0.${minor}.${peer}`).join(' || ')]))
     expect(dshRange({ peerDependencies: wide })).toEqual(new Error('DSH peer ranges combine into more than 256 alternatives'))
     expect(dshRange({ peerDependencies: { '@agentrans/a': 'workspace:>=1' } })).toEqual(new Error('DSH range "workspace:>=1" is not a valid SemVer range'))
-    expect(dshRange({ engines: { dsh: 'not a range' } })).toBeInstanceOf(Error)
+    expect(dshRange({ engines: { agentrans: 'not a range' } })).toBeInstanceOf(Error)
     expect(dshRange({ peerDependencies: { '@agentrans/cli': '>=0.2.0', '@agentrans/x': 'not a range' } })).toEqual(new Error('DSH range "not a range" is not a valid SemVer range'))
   })
 })

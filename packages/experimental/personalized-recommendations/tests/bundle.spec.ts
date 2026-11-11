@@ -30,9 +30,9 @@ const manifest = JSON.parse(readFileSync(new URL('../package.json', import.meta.
   name: string
   publishConfig: { access: string }
   dependencies: Record<string, string>
-  dsh: { bundle: { patch: string } }
+  agentrans: { bundle: { patch: string } }
 }
-const patch = yaml.load(readFileSync(new URL(`../${manifest.dsh.bundle.patch}`, import.meta.url), 'utf8'), {
+const patch = yaml.load(readFileSync(new URL(`../${manifest.agentrans.bundle.patch}`, import.meta.url), 'utf8'), {
   schema: entryListSchema,
 }) as { insert: Row[] }[]
 const rows = patch[0]?.insert ?? []
@@ -54,7 +54,7 @@ const MODULES: Readonly<Record<string, object>> = {
 
 it('publishes one layer inserting the card service, the card display and both features with their card bodies', () => {
   expect(manifest.publishConfig.access).toBe('public')
-  expect(manifest.dsh.bundle.patch).toBe('./cordis.patch.yml')
+  expect(manifest.agentrans.bundle.patch).toBe('./cordis.patch.yml')
   expect(patch).toEqual([{ insert: [
     { id: 'action-cards', name: '@agentrans/action-cards' },
     { id: 'client-ui-action-cards', name: '@agentrans/client-ui-action-cards' },
@@ -78,7 +78,7 @@ it('addresses every row through its own id and switches the shared card service 
     const path = join(root, 'node_modules', name)
     await mkdir(path, { recursive: true })
     await writeFile(join(path, 'package.json'), JSON.stringify({
-      name, version: '1.0.0', dsh: { bundle: { patch: './cordis.patch.yml' } },
+      name, version: '1.0.0', agentrans: { bundle: { patch: './cordis.patch.yml' } },
     }))
     await writeFile(join(path, 'cordis.patch.yml'), JSON.stringify([{ insert: inserted }]))
   }

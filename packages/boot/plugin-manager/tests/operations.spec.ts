@@ -165,7 +165,7 @@ function heldPipeChild(output: string) {
 function install(dir: string, name: string) {
   const path = join(dir, 'node_modules', name)
   mkdirSync(path, { recursive: true })
-  writeFileSync(join(path, 'package.json'), JSON.stringify({ name, version: '1', dsh: { bundle: { patch: './cordis.patch.yml' } } }))
+  writeFileSync(join(path, 'package.json'), JSON.stringify({ name, version: '1', agentrans: { bundle: { patch: './cordis.patch.yml' } } }))
   writeFileSync(join(path, 'cordis.patch.yml'), '[]\n')
   const manifest = readProfileManifest('test', dir)
   manifest.dependencies = { ...manifest.dependencies, [name]: '1' }
@@ -178,7 +178,7 @@ it.each(['service', 'cli'] as const)('reports unsupported activation through %s 
     install(target, 'supported')
     install(target, 'restricted')
     writeFileSync(join(target, 'node_modules/restricted/package.json'), JSON.stringify({ name: 'restricted', version: '1',
-      dsh: { bundle: { patch: './cordis.patch.yml', platforms: [process.platform === 'darwin' ? 'win32' : 'darwin'] } } }))
+      agentrans: { bundle: { patch: './cordis.patch.yml', platforms: [process.platform === 'darwin' ? 'win32' : 'darwin'] } } }))
   }
   const messages: string[] = []
   const result = await runPluginCommand(context, ['add', 'restricted'], {
@@ -191,7 +191,7 @@ it.each(['service', 'cli'] as const)('reports unsupported activation through %s 
   expect(readFileSync(result.logPath, 'utf8')).toContain(result.output)
   expect(messages.join('')).toContain(result.output)
   expect(readProfileManifest('test', dir).dependencies).toMatchObject({ supported: '1', restricted: '1' })
-  expect(readProfileManifest('test', dir).dsh?.profile?.bundles).toEqual([])
+  expect(readProfileManifest('test', dir).agentrans?.profile?.bundles).toEqual([])
 })
 
 it('preserves malformed platform metadata errors without selecting the installed bundle', async () => {
@@ -199,17 +199,17 @@ it('preserves malformed platform metadata errors without selecting the installed
   pnpm.mutate = (target) => {
     install(target, 'malformed')
     writeFileSync(join(target, 'node_modules/malformed/package.json'), JSON.stringify({ name: 'malformed', version: '1',
-      dsh: { bundle: { patch: './cordis.patch.yml', platforms: ['macos'] } } }))
+      agentrans: { bundle: { patch: './cordis.patch.yml', platforms: ['macos'] } } }))
   }
   await expect(runProfilePnpm(context, ['add', 'malformed'], { execution: 'service', outputBytes: 8192 }))
     .rejects.toThrow('dsh.bundle.platforms must be a nonempty list of Node platform names')
-  expect(readProfileManifest('test', dir).dsh?.profile?.bundles).toEqual([])
+  expect(readProfileManifest('test', dir).agentrans?.profile?.bundles).toEqual([])
 })
 
 function installGuarded(dir: string, dependency: string, name = dependency, version = '1.0.0', peer = '>=999.0.0') {
   install(dir, dependency)
   writeFileSync(join(dir, 'node_modules', dependency, 'package.json'), JSON.stringify({
-    name, version, peerDependencies: { '@agentrans/app-boot': peer }, dsh: { bundle: { patch: './cordis.patch.yml' } },
+    name, version, peerDependencies: { '@agentrans/app-boot': peer }, agentrans: { bundle: { patch: './cordis.patch.yml' } },
   }))
 }
 
@@ -272,15 +272,15 @@ it.each(['plugin@1.0.0', '@scope/plugin@1.0.0'])('rejects the registry spec %s t
   expect(readFileSync(join(dir, 'package.json'), 'utf8')).toBe(manifestBefore)
 })
 
-it('rejects a registry spec whose engines.dsh the pre-install lookup denies, ignoring its peers', async () => {
+it('rejects a registry spec whose engines.agentrans the pre-install lookup denies, ignoring its peers', async () => {
   const { context, pnpm } = fixture()
   pnpm.view = () => ({
     exitCode: 0,
-    stdout: JSON.stringify({ name: 'plugin', version: '1.0.0', engines: { dsh: '999.0.0' }, peerDependencies: { '@agentrans/cli': '*' } }),
+    stdout: JSON.stringify({ name: 'plugin', version: '1.0.0', engines: { agentrans: '999.0.0' }, peerDependencies: { '@agentrans/cli': '*' } }),
   })
   const outcome = await runProfilePnpm(context, ['add', 'plugin@1.0.0'], { execution: 'service', outputBytes: 8192 })
   expect(outcome).toMatchObject({ exitCode: 1 })
-  expect(outcome.incompatible).toMatchObject([{ name: 'plugin', version: '1.0.0', requirements: { 'engines.dsh': '999.0.0' } }])
+  expect(outcome.incompatible).toMatchObject([{ name: 'plugin', version: '1.0.0', requirements: { 'engines.agentrans': '999.0.0' } }])
   expect(command.run.mock.calls[0]?.[1] as readonly string[]).toEqual(expect.arrayContaining(['view', 'engines', 'peerDependencies']))
   expect(command.run).toHaveBeenCalledTimes(1)
 })
@@ -320,14 +320,14 @@ it('installs an incompatible path spec the profile exempts', async () => {
     install(target, 'plugin')
     writeFileSync(join(target, 'node_modules', 'plugin', 'package.json'), JSON.stringify({
       name: 'plugin', version: '1.0.0', peerDependencies: { '@agentrans/cli': '999.0.0' },
-      dsh: { bundle: { patch: './cordis.patch.yml' } },
+      agentrans: { bundle: { patch: './cordis.patch.yml' } },
     }))
   }
   expect(await runProfilePnpm(context, ['add', './plugin'], { execution: 'service', outputBytes: 8192 }))
     .toMatchObject({ exitCode: 0 })
   // A path spec never needs a registry lookup, and the exemption covers the installed manifest too.
   expect(pnpm.views).toEqual([])
-  expect(readProfileManifest('test', dir).dsh?.profile?.bundles).toEqual(['plugin'])
+  expect(readProfileManifest('test', dir).agentrans?.profile?.bundles).toEqual(['plugin'])
 })
 
 it('installs a compatible path spec', async () => {
@@ -338,7 +338,7 @@ it('installs a compatible path spec', async () => {
     .toMatchObject({ exitCode: 0 })
   expect(pnpm.views).toEqual([])
   expect(command.run).toHaveBeenCalledTimes(1)
-  expect(readProfileManifest('test', dir).dsh?.profile?.bundles).toEqual(['plugin'])
+  expect(readProfileManifest('test', dir).agentrans?.profile?.bundles).toEqual(['plugin'])
 })
 
 it('runs the install with the caller\'s flags and its path specs anchored', async () => {
@@ -363,7 +363,7 @@ it.each([
   expect(pnpm.views).toEqual(['plugin'])
   expect(command.run).toHaveBeenCalledTimes(2)
   expect(command.run.mock.lastCall?.[1]).toEqual(['add', 'plugin'])
-  expect(readProfileManifest('test', dir).dsh?.profile?.bundles).toEqual(['plugin'])
+  expect(readProfileManifest('test', dir).agentrans?.profile?.bundles).toEqual(['plugin'])
 })
 
 it.each(['github:owner/repo', 'https://example.com/plugin.tgz'])(
@@ -446,7 +446,7 @@ it('detects a version update that keeps the dependency spec and removes a lockfi
   pnpm.mutate = (target) => {
     writeFileSync(join(target, 'node_modules', 'updated', 'package.json'), JSON.stringify({
       name: 'updated', version: '2.0.0', peerDependencies: { '@agentrans/app-boot': '>=999.0.0' },
-      dsh: { bundle: { patch: './cordis.patch.yml' } },
+      agentrans: { bundle: { patch: './cordis.patch.yml' } },
     }))
     writeFileSync(join(target, 'pnpm-lock.yaml'), 'changed-lock\n')
   }
@@ -466,7 +466,7 @@ it('does not fail an unrelated installation on an untouched incompatible depende
   expect(await runProfilePnpm(context, ['add', 'unrelated'], {
     execution: 'service', outputBytes: 8192, onOutput: (text) => { messages.push(text) },
   })).toMatchObject({ exitCode: 0 })
-  expect(readProfileManifest('test', dir).dsh?.profile?.bundles).toEqual(['unrelated'])
+  expect(readProfileManifest('test', dir).agentrans?.profile?.bundles).toEqual(['unrelated'])
   expect(messages.join('')).toContain('startup denies it')
 })
 
@@ -476,12 +476,12 @@ it('installs a dependency whose installed manifest declares compatible peers', a
     install(target, 'plugin')
     writeFileSync(join(target, 'node_modules', 'plugin', 'package.json'), JSON.stringify({
       name: 'plugin', version: '1.0.0', peerDependencies: { '@agentrans/cli': '*' },
-      dsh: { bundle: { patch: './cordis.patch.yml' } },
+      agentrans: { bundle: { patch: './cordis.patch.yml' } },
     }))
   }
   expect(await runProfilePnpm(context, ['add', 'plugin'], { execution: 'service', outputBytes: 8192 }))
     .toMatchObject({ exitCode: 0 })
-  expect(readProfileManifest('test', dir).dsh?.profile?.bundles).toEqual(['plugin'])
+  expect(readProfileManifest('test', dir).agentrans?.profile?.bundles).toEqual(['plugin'])
 })
 
 it.each([
@@ -494,7 +494,7 @@ it.each([
   writeFileSync(join(dir, 'compatibility.json'), JSON.stringify({ [key]: [runtime === 'current' ? getDshRuntimeVersion() : runtime] }) + '\n')
   pnpm.mutate = (target) => { installGuarded(target, 'alias', 'actual') }
   expect(await runProfilePnpm(context, ['add', 'alias@npm:actual@1.0.0'], { execution: 'service', outputBytes: 8192 })).toMatchObject({ exitCode })
-  expect(readProfileManifest('test', dir).dsh?.profile?.bundles).toEqual(exitCode === 0 ? ['alias'] : [])
+  expect(readProfileManifest('test', dir).agentrans?.profile?.bundles).toEqual(exitCode === 0 ? ['alias'] : [])
 })
 
 it.each(['list', 'remove'])('allows %s with preexisting incompatible packages', async (operation) => {
@@ -591,10 +591,10 @@ it('activates newly installed bundles and leaves retained disabled dependencies 
   install(dir, 'disabled')
   pnpm.mutate = (target) => { install(target, 'new-bundle') }
   expect(await runPluginCommand(context, ['add', 'new-bundle'], { execution: 'service', outputBytes: 100 })).toMatchObject({ exitCode: 0 })
-  expect(readProfileManifest('test', dir).dsh?.profile?.bundles).toEqual(['new-bundle'])
+  expect(readProfileManifest('test', dir).agentrans?.profile?.bundles).toEqual(['new-bundle'])
   pnpm.mutate = () => {}
   await runPluginCommand(context, ['update'], { execution: 'service', outputBytes: 100 })
-  expect(readProfileManifest('test', dir).dsh?.profile?.bundles).toEqual(['new-bundle'])
+  expect(readProfileManifest('test', dir).agentrans?.profile?.bundles).toEqual(['new-bundle'])
 })
 
 it('can install without activation and bounds output while retaining the complete log', async () => {
@@ -604,7 +604,7 @@ it('can install without activation and bounds output while retaining the complet
   const outcome = await runProfilePnpm(context, ['add', './extra'], { execution: 'service', outputBytes: 4, activateNewBundles: false })
   expect(outcome).toMatchObject({ exitCode: 0, output: '6789', truncated: true })
   expect(readFileSync(outcome.logPath, 'utf8')).toBe('0123456789')
-  expect(readProfileManifest('test', dir).dsh?.profile?.bundles).toEqual([])
+  expect(readProfileManifest('test', dir).agentrans?.profile?.bundles).toEqual([])
   expect(command.run.mock.calls[0]?.[1]).toEqual(['add', join(context.cwd, 'extra')])
 })
 
@@ -616,9 +616,9 @@ it.each([runPluginCommand, runProfilePnpm])('installs into the supplied applicat
   const outcome = await run({ ...context, dir }, ['add', 'extra'], { execution: 'service', outputBytes: 100 })
   expect(outcome.exitCode).toBe(0)
   expect(command.run).toHaveBeenCalledWith(expect.anything(), ['add', 'extra'], expect.objectContaining({ cwd: dir }))
-  expect(readProfileManifest('test', dir).dsh?.profile?.bundles).toEqual(['extra'])
+  expect(readProfileManifest('test', dir).agentrans?.profile?.bundles).toEqual(['extra'])
   expect(readProfileManifest('test', namedDir).dependencies).not.toHaveProperty('extra')
-  expect(readProfileManifest('test', namedDir).dsh?.profile?.bundles).toEqual([])
+  expect(readProfileManifest('test', namedDir).agentrans?.profile?.bundles).toEqual([])
 })
 
 it('retains partial package-manager changes after a failed install without activating them', async () => {
@@ -627,7 +627,7 @@ it('retains partial package-manager changes after a failed install without activ
   pnpm.exitCode = 1
   expect(await runProfilePnpm(context, ['add', 'partial'], { execution: 'service', outputBytes: 100 })).toMatchObject({ exitCode: 1 })
   expect(readProfileManifest('test', dir).dependencies).toEqual({ partial: '1' })
-  expect(readProfileManifest('test', dir).dsh?.profile?.bundles).toEqual([])
+  expect(readProfileManifest('test', dir).agentrans?.profile?.bundles).toEqual([])
 })
 
 
@@ -638,7 +638,7 @@ it('initializes missing profiles under the same lock and reports initialization'
     await runPluginCommand({ ...context, profile }, ['root'], {
       execution: 'service', outputBytes: 100, lockWaitMs: 1000, onOutput: (text) => { messages.push(text) },
     })
-    expect(readProfileManifest('test', join(home, 'profiles', profile)).dsh?.profile?.bundles).toContain('@agentrans/base')
+    expect(readProfileManifest('test', join(home, 'profiles', profile)).agentrans?.profile?.bundles).toContain('@agentrans/base')
   }
   expect(messages.filter(text => text.includes('initialized profile'))).toHaveLength(2)
 })
@@ -840,7 +840,7 @@ it('retains built-in layers, removes deleted dependencies and warns about plain 
   const { context, dir, pnpm } = fixture()
   install(dir, 'removed')
   const manifest = readProfileManifest('test', dir)
-  manifest.dsh = { profile: { bundles: ['builtin', 'removed'] } }
+  manifest.agentrans = { profile: { bundles: ['builtin', 'removed'] } }
   writeFileSync(join(dir, 'package.json'), JSON.stringify(manifest))
   const messages: string[] = []
   pnpm.mutate = (target) => {
@@ -851,7 +851,7 @@ it('retains built-in layers, removes deleted dependencies and warns about plain 
     writeFileSync(join(target, 'package.json'), JSON.stringify(after))
   }
   await runPluginCommand(context, ['remove', 'removed'], { execution: 'service', outputBytes: 100, onOutput: (text) => { messages.push(text) } })
-  expect(readProfileManifest('test', dir).dsh?.profile?.bundles).toEqual(['builtin'])
+  expect(readProfileManifest('test', dir).agentrans?.profile?.bundles).toEqual(['builtin'])
   expect(messages.join('')).toContain('plain dependency')
 })
 
@@ -861,11 +861,11 @@ it('preserves a package-manager selected new bundle without adding it twice', as
   pnpm.mutate = (target) => {
     install(target, 'new')
     const manifest = readProfileManifest('test', target)
-    manifest.dsh = { profile: { bundles: ['new'] } }
+    manifest.agentrans = { profile: { bundles: ['new'] } }
     writeFileSync(join(target, 'package.json'), JSON.stringify(manifest))
   }
   await runProfilePnpm(context, ['add', 'new'], { execution: 'service', outputBytes: 100 })
-  expect(readProfileManifest('test', dir).dsh?.profile?.bundles).toEqual(['new'])
+  expect(readProfileManifest('test', dir).agentrans?.profile?.bundles).toEqual(['new'])
 })
 
 it.each([

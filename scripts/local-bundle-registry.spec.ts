@@ -72,7 +72,7 @@ function packFixture(options: {
     version: options.version,
     main: 'lib/index.js',
     ...options.dependencies === undefined ? {} : { dependencies: options.dependencies },
-    ...options.patch === undefined ? {} : { dsh: { bundle: { patch: options.patch } } },
+    ...options.patch === undefined ? {} : { agentrans: { bundle: { patch: options.patch } } },
   }
   mkdirSync(join(staging, 'package', 'lib'), { recursive: true })
   writeFileSync(join(staging, 'package', 'package.json'), JSON.stringify(manifest))
@@ -226,7 +226,7 @@ describe('packed archives', () => {
     const staging = join(destination, 'staging')
     mkdirSync(join(staging, 'package'), { recursive: true })
     writeFileSync(join(staging, 'package', 'package.json'), JSON.stringify({
-      name: '@scope/pkg', version: '1.0.0', main: 'lib/index.js', dsh: { bundle: { patch: 'cordis.patch.yml' } },
+      name: '@scope/pkg', version: '1.0.0', main: 'lib/index.js', agentrans: { bundle: { patch: 'cordis.patch.yml' } },
     }))
     capture('tar', ['-czf', join(destination, 'scope-pkg-1.0.0.tgz'), '-C', staging, 'package'])
     const member = workspacePackage('@scope/pkg', { version: '1.0.0' })
@@ -246,7 +246,7 @@ describe('packed archives', () => {
     const stripped = join(destination, 'stripped')
     mkdirSync(join(stripped, 'package'), { recursive: true })
     writeFileSync(join(stripped, 'package', 'package.json'), JSON.stringify({
-      name: '@scope/bundle', version: '1.0.0', main: 'lib/index.js', dsh: { bundle: { patch: 'cordis.patch.yml' } },
+      name: '@scope/bundle', version: '1.0.0', main: 'lib/index.js', agentrans: { bundle: { patch: 'cordis.patch.yml' } },
     }))
     mkdirSync(join(stripped, 'package', 'lib'), { recursive: true })
     writeFileSync(join(stripped, 'package', 'lib', 'index.js'), 'export default 1\n')

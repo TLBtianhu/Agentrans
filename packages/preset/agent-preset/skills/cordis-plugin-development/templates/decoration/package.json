@@ -10,7 +10,7 @@
     "./icon": "./icon.svg"
   },
   "files": ["index.js", "client.js", "cordis.patch.yml", "locale/*.json", "icon.svg"],
-  "dsh": {
+  "agentrans": {
     "bundle": { "patch": "./cordis.patch.yml" },
     "client": {
       "platform": "web",

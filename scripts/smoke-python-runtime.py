@@ -1043,7 +1043,7 @@ def smoke_sdk_plugin_manager(base_url: str, executable: Path, cache: Path) -> No
         plugin.mkdir()
         (plugin / "package.json").write_text(json.dumps({
             "name": "dsh-sdk-managed-fixture", "version": "1.0.0", "type": "module",
-            "exports": "./index.js", "dsh": {"bundle": {"patch": "./cordis.patch.yml"}},
+            "exports": "./index.js", "agentrans": {"bundle": {"patch": "./cordis.patch.yml"}},
         }))
         (plugin / "index.js").write_text(
             "export const name = 'sdk-managed-fixture'\n"
@@ -1680,7 +1680,7 @@ def smoke_sdk_profile_plugin(base_url: str) -> None:
             "type": "module",
             "exports": "./index.js",
             "peerDependencies": {"@agentrans/cordis": "*"},
-            "dsh": {"bundle": {"patch": "./cordis.patch.yml"}},
+            "agentrans": {"bundle": {"patch": "./cordis.patch.yml"}},
         }, indent=2))
         (plugin / "index.js").write_text(
             "import { Context } from '@agentrans/cordis'\n"

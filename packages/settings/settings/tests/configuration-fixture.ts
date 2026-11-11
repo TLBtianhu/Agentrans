@@ -20,7 +20,7 @@ export async function configurationFixture(options: { schema?: z; apply?: (ctx: 
   const bundle = join(dir, 'node_modules', 'test-bundle')
   mkdirSync(bundle, { recursive: true })
   writeFileSync(join(home, 'package.json'), '{"name":"test-installation"}\n')
-  writeFileSync(join(bundle, 'package.json'), JSON.stringify({ name: 'test-bundle', version: '1.0.0', dsh: { bundle: { patch: 'cordis.patch.yml' } } }))
+  writeFileSync(join(bundle, 'package.json'), JSON.stringify({ name: 'test-bundle', version: '1.0.0', agentrans: { bundle: { patch: 'cordis.patch.yml' } } }))
   writeFileSync(join(bundle, 'cordis.patch.yml'), JSON.stringify([{ insert: [
     { id: 'config-editor', name: 'cordis:editor' },
     { id: 'settings', name: 'cordis:settings' },

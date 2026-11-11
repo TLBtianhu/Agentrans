@@ -384,7 +384,7 @@ interface PackageManifest {
   readonly optionalDependencies?: Record<string, string>
   /** Package exports; the browser face emits assets only while `./assets/*` publishes `lib/assets`. */
   readonly exports?: Readonly<Record<string, unknown>>
-  readonly dsh?: { readonly client?: { readonly external?: unknown } }
+  readonly agentrans?: { readonly client?: { readonly external?: unknown } }
 }
 
 /**
@@ -454,7 +454,7 @@ function clientExternals(manifest: PackageManifest): ReadonlySet<string> {
   return new Set([
     ...PLATFORM_MODULES,
     ...PRELOADED_CLIENT_EXTERNALS,
-    ...requestedExternals(manifest.name, manifest.dsh?.client ?? {}),
+    ...requestedExternals(manifest.name, manifest.agentrans?.client ?? {}),
   ])
 }
 

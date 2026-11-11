@@ -133,7 +133,7 @@ it('publishes this package version and the build commit as the Host release in e
 /** Create a resolvable package whose client export points at the returned path. */
 function writePackage(
   packageName: string,
-  metadata: Record<string, unknown> = { dsh: { client: { platform: 'web' } } },
+  metadata: Record<string, unknown> = { agentrans: { client: { platform: 'web' } } },
 ): string {
   root ??= realpathSync(mkdtempSync(join(tmpdir(), 'dsh-client-modules-')))
   const pkgRoot = join(root, 'node_modules', ...packageName.split('/'))
@@ -152,7 +152,7 @@ function writePackage(
 
 /** Create a built package with the supplied client declaration. */
 function writeBuiltPackage(packageName: string, client: Record<string, unknown>): void {
-  const clientPath = writePackage(packageName, { dsh: { client: { platform: 'web', ...client } } })
+  const clientPath = writePackage(packageName, { agentrans: { client: { platform: 'web', ...client } } })
   mkdirSync(dirname(clientPath), { recursive: true })
   writeFileSync(clientPath, 'module.exports = {}\n')
 }
@@ -641,7 +641,7 @@ describe('client bundle activation', () => {
   it('allows sibling dsh roles', () => {
     const currentName = '@fixture/current-client-field'
     const clientPath = writePackage(currentName, {
-      dsh: {
+      agentrans: {
         bundle: { patch: './cordis.patch.yml' },
         client: { platform: 'web' },
         profile: { bundles: [] },
@@ -1151,7 +1151,7 @@ describe('client bundle activation', () => {
   it('loads a renamed browser export at the logical URL without exposing Node bundles as chunks', async () => {
     const packageName = '@fixture/dual-client'
     const legacyPath = writePackage(packageName, {
-      dsh: { client: { platform: 'web' } },
+      agentrans: { client: { platform: 'web' } },
       exports: {
         './client': {
           types: './lib/types/client/index.d.ts',
@@ -1397,7 +1397,7 @@ describe('package manifest refresh', () => {
   }
   const clientManifest = (client: Record<string, unknown>, clientExport = './lib/client.js'): Record<string, unknown> => ({
     exports: { './client': clientExport, './package.json': './package.json' },
-    dsh: { client: { platform: 'web', ...client } },
+    agentrans: { client: { platform: 'web', ...client } },
   })
 
   it('publishes a reinstalled declaration when its Loader entry restarts, and nothing for an unchanged restart', async () => {

@@ -139,7 +139,7 @@
     "@agentrans/client-ui-approval": "workspace:*",
     "@agentrans/client-ui-conversation": "workspace:*"
   },
-  "dsh": {
+  "agentrans": {
     "client": {
       "inject": [
         "@agentrans/api-remotes",

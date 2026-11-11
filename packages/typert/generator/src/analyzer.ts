@@ -2937,7 +2937,8 @@ function hasPackageSurface(model: PackageModel): boolean {
 }
 
 function isDualFacePackage(manifest: Record<string, unknown>): boolean {
-  const dsh = manifest.dsh
+  // A manifest written before the rename still carries dsh; the new key wins when both exist.
+  const dsh = manifest.agentrans ?? manifest.agentrans
   const client = dsh !== null && typeof dsh === 'object'
     ? (dsh as Record<string, unknown>).client
     : undefined

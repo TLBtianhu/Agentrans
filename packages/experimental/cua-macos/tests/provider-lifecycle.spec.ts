@@ -667,7 +667,7 @@ async function permissionProfile(allowedApps: Array<{ id: string; name: string; 
   await mkdir(bundle, { recursive: true })
   await writeFile(join(home, 'package.json'), '{"name":"test-installation"}\n')
   await writeFile(join(bundle, 'package.json'), JSON.stringify({ name: 'permission-fixture-bundle', version: '1.0.0',
-    dsh: { bundle: { patch: 'cordis.patch.yml' } } }))
+    agentrans: { bundle: { patch: 'cordis.patch.yml' } } }))
   await writeFile(join(bundle, 'cordis.patch.yml'), JSON.stringify([{ insert: [{ id: 'cua', name: 'cordis:cua', config: { ...config, allowedApps } }] }]))
   await writeFile(join(dir, 'cordis.yml'), '[]\n')
   const profile: ProfileContext = { name: 'test', startedBundles: ['permission-fixture-bundle'], dir,

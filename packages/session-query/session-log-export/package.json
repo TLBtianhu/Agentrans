@@ -71,7 +71,7 @@
     "@agentrans/session-title": "workspace:*",
     "react": "^18.2.0"
   },
-  "dsh": {
+  "agentrans": {
     "client": {
       "inject": [
         "@agentrans/client-locale",

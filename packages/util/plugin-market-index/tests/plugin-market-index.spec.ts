@@ -61,7 +61,7 @@ describe('parseMarketIndex', () => {
           unknown: 'ignored',
           versions: [
             npmVersion({ version: '1.2.3-rc.1', publishTimestamp: 1 }),
-            npmVersion({ source: { type: 'npm', registry: 'https://registry.example/', note: 'x' }, engines: { dsh: '>=0.2.0', node: '>=22' } }),
+            npmVersion({ source: { type: 'npm', registry: 'https://registry.example/', note: 'x' }, engines: { agentrans: '>=0.2.0', node: '>=22' } }),
             npmVersion({ version: '1.10.0', publishTimestamp: 2, engines: {} }),
           ],
         }),
@@ -96,7 +96,7 @@ describe('parseMarketIndex', () => {
           metadata: { category: 'productivity', keywords: ['review'], labels: ['official', 'ui'], sortKeys: { downloads: 12 } },
           versions: [
             { version: '1.10.0', publishTimestamp: 2, source: { type: 'npm' }, engines: {} },
-            { version: '1.2.3', publishTimestamp: 1790476800, source: { type: 'npm', registry: 'https://registry.example/' }, engines: { dsh: '>=0.2.0' } },
+            { version: '1.2.3', publishTimestamp: 1790476800, source: { type: 'npm', registry: 'https://registry.example/' }, engines: { agentrans: '>=0.2.0' } },
             { version: '1.2.3-rc.1', publishTimestamp: 1, source: { type: 'npm' }, engines: {} },
           ],
         },
@@ -197,10 +197,10 @@ describe('parseMarketIndex', () => {
       expect(versionRejection({ publishTimestamp })).toBe('$.plugins[0].versions[0].publishTimestamp must be an integer number of Unix seconds in [0, 10^11)')
     }
     expect(versionRejection({ engines: '>=1' })).toBe('$.plugins[0].versions[0].engines must be an object')
-    expect(versionRejection({ engines: { dsh: '' } })).toBe('$.plugins[0].versions[0].engines.dsh must be a string with a non-whitespace character')
-    expect(versionRejection({ engines: { dsh: 1 } })).toBe('$.plugins[0].versions[0].engines.dsh must be a string with a non-whitespace character')
-    expect(versionRejection({ engines: { dsh: 'workspace:*' } })).toBe('$.plugins[0].versions[0].engines.dsh must not be a workspace: range')
-    expect(versionRejection({ engines: { dsh: 'broken' } })).toBe('$.plugins[0].versions[0].engines.dsh must be a SemVer range')
+    expect(versionRejection({ engines: { agentrans: '' } })).toBe('$.plugins[0].versions[0].engines.agentrans must be a string with a non-whitespace character')
+    expect(versionRejection({ engines: { agentrans: 1 } })).toBe('$.plugins[0].versions[0].engines.agentrans must be a string with a non-whitespace character')
+    expect(versionRejection({ engines: { agentrans: 'workspace:*' } })).toBe('$.plugins[0].versions[0].engines.agentrans must not be a workspace: range')
+    expect(versionRejection({ engines: { agentrans: 'broken' } })).toBe('$.plugins[0].versions[0].engines.agentrans must be a SemVer range')
   })
 
   it('rejects malformed sources', () => {

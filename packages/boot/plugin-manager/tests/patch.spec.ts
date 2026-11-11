@@ -19,7 +19,7 @@ async function fixture(text?: string, rows: object[] = []): Promise<ProfileConte
   initProfile(dir, ['bundle'])
   const bundle = join(dir, 'node_modules', 'bundle')
   await mkdir(bundle, { recursive: true })
-  await writeFile(join(bundle, 'package.json'), JSON.stringify({ name: 'bundle', version: '1.0.0', dsh: { bundle: { patch: './cordis.patch.yml' } } }))
+  await writeFile(join(bundle, 'package.json'), JSON.stringify({ name: 'bundle', version: '1.0.0', agentrans: { bundle: { patch: './cordis.patch.yml' } } }))
   await writeFile(join(bundle, 'cordis.patch.yml'), JSON.stringify([{ insert: rows }]))
   const patchPath = join(dir, 'cordis.patch.yml')
   await (text === undefined ? rm(patchPath) : writeFile(patchPath, text))

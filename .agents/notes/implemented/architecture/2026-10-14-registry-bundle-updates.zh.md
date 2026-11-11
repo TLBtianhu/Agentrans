@@ -12,7 +12,7 @@ Status: implemented
 
 **版本通过在 profile 目录中运行 `pnpm view` 读取。** `listVersions` 按与 `inspect` 相同的注册表计划运行 `pnpm view <name> versions time dist-tags`，因此安装所用的 `.npmrc` 链、代理与认证同样决定列表显示什么，连不上的注册表会使查询转向下一个。pnpm 对范围查询只打印最高的匹配版本，因此每个列出的版本在作答的注册表上单独运行一次 `pnpm view <name>@<version> name version engines peerDependencies deprecated dsh`。`versionListLimit` 限制读取的新版本个数，`versionLookupConcurrency` 限制同时运行的子进程个数。兼容性复用 `evaluatePluginCompatibility` 与 profile 的豁免，因此列表与安装以同样方式判断 peer。
 
-**更新及其恢复由 Host 负责。** `updateBundle` 先查询目标版本，在任何改动之前拒绝不存在的版本、未声明组合包的版本，以及 `engines.dsh` 或 DSH peer 拒绝当前运行版本的版本。有 HMR 时，它随后调用 `removeBundle` 与 `installBundle(name@version, { saveExact, registry, enabled })`；该安装失败、被取消，或已安装但无法启动时，先移除仍留下的目标版本，再从被移除版本原来的注册表重新安装它，没有记录时按配置的计划安装。重新安装不带请求 id，因此取消更新无法中止它。没有 HMR 时，它直接安装在运行中的版本之上，`installBundle` 在这种情况下允许这样做并报告 `restart-required`。`plugin-manager/update-state` 通告每一步，供对话框的进度列表使用。
+**更新及其恢复由 Host 负责。** `updateBundle` 先查询目标版本，在任何改动之前拒绝不存在的版本、未声明组合包的版本，以及 `engines.agentrans` 或 DSH peer 拒绝当前运行版本的版本。有 HMR 时，它随后调用 `removeBundle` 与 `installBundle(name@version, { saveExact, registry, enabled })`；该安装失败、被取消，或已安装但无法启动时，先移除仍留下的目标版本，再从被移除版本原来的注册表重新安装它，没有记录时按配置的计划安装。重新安装不带请求 id，因此取消更新无法中止它。没有 HMR 时，它直接安装在运行中的版本之上，`installBundle` 在这种情况下允许这样做并报告 `restart-required`。`plugin-manager/update-state` 通告每一步，供对话框的进度列表使用。
 
 **更新资格是列出的事实。** `BundleInfo.updatable` 标记以自身包名、按注册表 spec 保存（不是 `npm:` 别名）、带 semver 版本且不承载插件管理的第三方 profile 依赖；页面只为这些组合包显示版本区块，两个方法都拒绝其他组合包。没有更新操作的 `plugin_manager` 工具省略该字段。
 

@@ -50,7 +50,7 @@ async function createFixture(modules: Record<string, string>, patches: string): 
     type: 'module',
     exports: Object.fromEntries(Object.keys(modules).map(name => [`./${name}`, `./${name}.mjs`])),
     peerDependencies: { '@agentrans/schemastery': '*' },
-    dsh: { bundle: { patch: './cordis.patch.yml' } },
+    agentrans: { bundle: { patch: './cordis.patch.yml' } },
   }))
   for (const [name, source] of Object.entries(modules)) {
     await writeFile(join(moduleDir, `${name}.mjs`), `${source}\n`)
@@ -60,7 +60,7 @@ async function createFixture(modules: Record<string, string>, patches: string): 
     name: 'dsh-profile-schema-acceptance',
     private: true,
     dependencies: { [packageName]: '1.0.0' },
-    dsh: { profile: { bundles: [packageName] } },
+    agentrans: { profile: { bundles: [packageName] } },
   }))
   await writeFile(join(profile, 'cordis.patch.yml'), '[]\n')
   return { root, home, profile }
@@ -321,7 +321,7 @@ describe.skipIf(!builtArtifactsExist)('dsh --dump-config-schema assembled output
     await writeFile(join(fixture.profile, 'package.json'), JSON.stringify({
       private: true,
       dependencies: { [packageName]: '1.0.0' },
-      dsh: { profile: { bundles: [packageName, missingBundle] } },
+      agentrans: { profile: { bundles: [packageName, missingBundle] } },
     }))
     const result = await dump(fixture)
     expect(result.exitCode, result.stderr).toBe(1)

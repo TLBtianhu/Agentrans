@@ -37,7 +37,7 @@ function repository() {
   return { dir, git, write, commit }
 }
 
-const bundle = (name: string, version: string, extra: object = {}) => JSON.stringify({ name, version, dsh: { bundle: { patch: './cordis.patch.yml' } }, ...extra })
+const bundle = (name: string, version: string, extra: object = {}) => JSON.stringify({ name, version, agentrans: { bundle: { patch: './cordis.patch.yml' } }, ...extra })
 
 /**
  * Configure Git for the generator through a private home directory: the https REPOSITORY is routed to the fixture, protocol
@@ -149,7 +149,7 @@ it('reads a root package, reports repositories without a public one, and refuses
   repo.commit(1790000000)
   expect(await run(true)).toEqual([[], [expect.stringContaining("transport 'file' not allowed") as string]])
   expect(await run()).toEqual([[], []])
-  repo.write({ 'package.json': JSON.stringify({ version: '1.0.0', dsh: { bundle: { patch: 'p.yml' } } }) })
+  repo.write({ 'package.json': JSON.stringify({ version: '1.0.0', agentrans: { bundle: { patch: 'p.yml' } } }) })
   repo.commit(1790000100)
   expect(await run()).toEqual([[], []])
   // A private package is not listed, and a release tag on a private manifest lists no version.

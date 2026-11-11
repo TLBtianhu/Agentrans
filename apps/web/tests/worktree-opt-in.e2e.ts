@@ -57,9 +57,9 @@ it('persists the Git Worktrees switch and removes its capability while retaining
     .filter(entry => ['worktree', 'tool-worktree'].includes(entry.options.id) && entry.fiber?.state === FiberState.ACTIVE)
   const selectedBundles = async (): Promise<string[]> => {
     const manifest = JSON.parse(await readFile(join(scaffold.harnessHome, 'profiles/scaffold/package.json'), 'utf8')) as {
-      dsh: { profile: { bundles: string[] } }
+      agentrans: { profile: { bundles: string[] } }
     }
-    return manifest.dsh.profile.bundles
+    return manifest.agentrans.profile.bundles
   }
   const openPlugins = async () => {
     await page.getByRole('navigation', { name: 'Global panels' }).getByRole('button', { name: 'Plugins', exact: true }).click()

@@ -27,7 +27,7 @@
     "./brand-font.css": "./lib/styles/brand-font.css",
     "./locale/*.json": "./locale/*.json"
   },
-  "dsh": {
+  "agentrans": {
     "client": {
       "inject": [
         "@agentrans/client-connection",

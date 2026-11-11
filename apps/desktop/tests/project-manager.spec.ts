@@ -17,14 +17,14 @@ function seedPlugin(manager: DesktopProjectManager): void {
   const path = join(manager.paths.profile, 'package.json')
   const manifest = JSON.parse(readFileSync(path, 'utf8')) as {
     dependencies: Record<string, string>
-    dsh: { profile: { bundles: string[] } }
+    agentrans: { profile: { bundles: string[] } }
   }
   manifest.dependencies.plugin = '1.0.0'
-  manifest.dsh.profile.bundles.push('plugin')
+  manifest.agentrans.profile.bundles.push('plugin')
   writeFileSync(path, JSON.stringify(manifest))
   const directory = join(manager.paths.profile, 'node_modules/plugin')
   mkdirSync(directory, { recursive: true })
-  writeFileSync(join(directory, 'package.json'), JSON.stringify({ name: 'plugin', version: '1.0.0', dsh: { bundle: { patch: 'bundle.yml' } } }))
+  writeFileSync(join(directory, 'package.json'), JSON.stringify({ name: 'plugin', version: '1.0.0', agentrans: { bundle: { patch: 'bundle.yml' } } }))
   writeFileSync(join(directory, 'bundle.yml'), '[]\n')
 }
 function plugins(manager: DesktopProjectManager) {
@@ -95,8 +95,8 @@ describe('desktop external plugin profile', () => {
     unlinkSync(patch)
     await manager.disableAllPlugins()
     expect((JSON.parse(readFileSync(join(manager.paths.profile, 'package.json'), 'utf8')) as {
-      dsh: { profile: { bundles: string[] } }
-    }).dsh.profile.bundles).not.toContain('plugin')
+      agentrans: { profile: { bundles: string[] } }
+    }).agentrans.profile.bundles).not.toContain('plugin')
     expect(existsSync(join(manager.paths.profile, 'node_modules/plugin/package.json'))).toBe(true)
     await expect(manager.applyRelease()).resolves.toBeUndefined()
   })
@@ -117,11 +117,11 @@ describe('desktop external plugin profile', () => {
     expect(existsSync(join(manager.paths.profile, 'node_modules/plugin/package.json'))).toBe(true)
     const manifest = JSON.parse(readFileSync(join(manager.paths.profile, 'package.json'), 'utf8')) as {
       dependencies: Record<string, string>
-      dsh: { profile: { bundles: string[] } }
+      agentrans: { profile: { bundles: string[] } }
     }
     expect(manifest.dependencies.plugin).toBe('1.0.0')
-    expect(manifest.dsh.profile.bundles).not.toContain('plugin')
-    expect(manifest.dsh.profile.bundles).toContain('@agentrans/web-app')
+    expect(manifest.agentrans.profile.bundles).not.toContain('plugin')
+    expect(manifest.agentrans.profile.bundles).toContain('@agentrans/web-app')
     await manager.applyRelease()
     expect(readFileSync(patch, 'utf8')).toContain('[]')
   })

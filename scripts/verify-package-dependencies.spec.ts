@@ -117,7 +117,7 @@ function generatedHostFixture(mode: 'schema' | 'object'): { root: string; manife
   const manifest = {
     name: '@fixture/generated',
     type: 'module',
-    dsh: { client: {} },
+    agentrans: { client: {} },
     exports: {
       '.': { types: './lib/types/index.d.ts', default: './lib/index.js' },
       './typert': { types: './lib/typert.host.d.ts', default: './lib/typert.host.js' },
@@ -260,11 +260,11 @@ describe('package dependency scope', () => {
   it('discovers the Client directory, dsh.client declarations, and configured Host packages', () => {
     const packages = [
       pkg('@f/static', 'packages/client/static/package.json'),
-      pkg('@f/dynamic-client', 'packages/client/dynamic/package.json', { dsh: { client: {} } }),
-      pkg('@f/dual', 'packages/api/dual/package.json', { dsh: { client: {} } }),
+      pkg('@f/dynamic-client', 'packages/client/dynamic/package.json', { agentrans: { client: {} } }),
+      pkg('@f/dual', 'packages/api/dual/package.json', { agentrans: { client: {} } }),
       pkg('@f/export-only', 'packages/api/export-only/package.json', { exports: { './client': './lib/client.js' } }),
       pkg('@f/forced-client', 'packages/api/forced/package.json'),
-      pkg('@f/excluded', 'packages/api/excluded/package.json', { dsh: { client: {} } }),
+      pkg('@f/excluded', 'packages/api/excluded/package.json', { agentrans: { client: {} } }),
       pkg('@f/host', 'packages/core/host/package.json'),
     ]
 
@@ -287,7 +287,7 @@ describe('package dependency scope', () => {
   it('rejects stale, redundant, overlapping, and unknown configuration', () => {
     const packages = [
       pkg('@f/client', 'packages/client/client/package.json'),
-      pkg('@f/dual', 'packages/api/dual/package.json', { dsh: { client: {} } }),
+      pkg('@f/dual', 'packages/api/dual/package.json', { agentrans: { client: {} } }),
       pkg('@f/host', 'packages/core/host/package.json'),
     ]
     const found = discoverPackageDependencyScope(packages, policy({
@@ -371,7 +371,7 @@ describe('experimental packages and Host build entries', () => {
       'packages/client/ui-probe/package.json': { name: '@agentrans/client-ui-probe', ...CORDIS_PEER },
       'packages/experimental/client-ui-probe/package.json': {
         name: '@agentrans/experimental-client-ui-probe',
-        dsh: { client: {} },
+        agentrans: { client: {} },
         peerDependencies: { [CORDIS]: 'workspace:~', '@agentrans/client-ui-probe': 'workspace:*' },
         devDependencies: { [CORDIS]: 'workspace:~', '@agentrans/client-ui-probe': 'workspace:*' },
       },
@@ -410,7 +410,7 @@ describe('experimental packages and Host build entries', () => {
     const root = writeWorkspace({
       'packages/g/inspect/package.json': {
         name: '@agentrans/inspect-probe',
-        dsh: { client: {} },
+        agentrans: { client: {} },
         dependencies: { ws: '^8.0.0' },
         ...CORDIS_PEER,
       },
@@ -720,7 +720,7 @@ describe('face-aware source classification', () => {
       const root = writeWorkspace({
         'packages/client/ui-probe/package.json': {
           name: '@agentrans/client-ui-probe',
-          dsh: { client: { platform: 'web' } },
+          agentrans: { client: { platform: 'web' } },
           exports: {
             '.': { types: './lib/types/index.d.ts', default: './lib/index.js' },
             './client': { types: './lib/types/client/index.d.ts', default: './lib/client.js' },
@@ -758,7 +758,7 @@ describe('face-aware source classification', () => {
     const root = mkdtempSync(join(tmpdir(), 'dsh-package-faces-'))
     roots.push(root)
     const subject = pkg('@f/dual', 'packages/g/dual/package.json', {
-      dsh: { client: { inject: ['@f/injected'] } },
+      agentrans: { client: { inject: ['@f/injected'] } },
     })
     const files = {
       'packages/g/dual/src/index.ts': [

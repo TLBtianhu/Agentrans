@@ -27,7 +27,7 @@ function fixture(edges: Array<[number, number]>): string {
     catalogDependencies[name] = 'workspace:^'
     writeFileSync(join(dir, 'package.json'), JSON.stringify({
       name,
-      dsh: { sessionFormatMigration: {
+      agentrans: { sessionFormatMigration: {
         from, to, export: '.',
         migration: `sessionFormatV${from}ToV${to}`,
         sourceCodec: `releasedV${from}SessionFormatCodec`,
@@ -57,7 +57,7 @@ function edgeManifest(root: string, from: number, to: number): {
   path: string
   value: Record<string, unknown> & {
     dependencies: Record<string, string>
-    dsh: { sessionFormatMigration: Record<string, unknown> }
+    agentrans: { sessionFormatMigration: Record<string, unknown> }
   }
 } {
   const path = join(root, `packages/session/session-format-v${from}-to-v${to}/package.json`)
@@ -65,7 +65,7 @@ function edgeManifest(root: string, from: number, to: number): {
     path,
     value: JSON.parse(readFileSync(path, 'utf8')) as Record<string, unknown> & {
       dependencies: Record<string, string>
-      dsh: { sessionFormatMigration: Record<string, unknown> }
+      agentrans: { sessionFormatMigration: Record<string, unknown> }
     },
   }
 }
@@ -122,7 +122,7 @@ describe('session format catalog generator', () => {
   it('refuses a later edge whose declared source codec does not continue the prior target', () => {
     const root = fixture([[0, 1], [1, 2]])
     const manifest = edgeManifest(root, 1, 2)
-    manifest.value.dsh.sessionFormatMigration['sourceCodec'] = 'UnrelatedV1Codec'
+    manifest.value.agentrans.sessionFormatMigration['sourceCodec'] = 'UnrelatedV1Codec'
     writeFileSync(manifest.path, JSON.stringify(manifest.value))
 
     expect(() => collectSessionFormatMigrations(root, 2))

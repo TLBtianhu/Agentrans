@@ -55,7 +55,7 @@ function library(root: string, name: string, source = 'export const value = 1'):
 
 function dynamicPlugin(root: string, source: string): void {
   write(root, 'packages/client/dynamic/package.json', JSON.stringify({
-    name: '@fixture/dynamic', dsh: { client: { platform: 'web' } },
+    name: '@fixture/dynamic', agentrans: { client: { platform: 'web' } },
   }))
   write(root, 'packages/client/dynamic/tsdown.config.ts', [
     'export default {',

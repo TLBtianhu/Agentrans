@@ -55,7 +55,7 @@
     "lib/client.js",
     "lib/types/**/*.d.ts"
   ],
-  "dsh": {
+  "agentrans": {
     "client": {
       "inject": [
         "@agentrans/api-job-controller",

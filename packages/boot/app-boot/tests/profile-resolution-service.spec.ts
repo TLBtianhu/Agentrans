@@ -63,7 +63,7 @@ describe('profile package metadata service', () => {
     const bundleDir = join(profileDir, 'node_modules', 'extra')
     const privateDir = join(bundleDir, 'node_modules', 'metadata-lib')
     file(join(bundleDir, 'package.json'), JSON.stringify({
-      name: 'extra', version: '1.0.0', dependencies: { 'metadata-lib': '1.0.0' }, dsh: { bundle: { patch: './cordis.patch.yml' } },
+      name: 'extra', version: '1.0.0', dependencies: { 'metadata-lib': '1.0.0' }, agentrans: { bundle: { patch: './cordis.patch.yml' } },
     }))
     file(join(bundleDir, 'cordis.patch.yml'), '[]\n')
     const parentURL = pathToFileURL(join(profileDir, 'caller.mjs')).href
@@ -344,7 +344,7 @@ it.each(['installation', 'bundle'] as const)('exposes installed optional depende
   const profileDir = join(root, 'profiles', 'test')
   initProfile(profileDir, ['optional-bundle'])
   const bundleDir = join(profileDir, 'node_modules', 'optional-bundle')
-  const bundleManifest = { name: 'optional-bundle', version: '1.0.0', dsh: { bundle: { patch: './cordis.patch.yml' } } }
+  const bundleManifest = { name: 'optional-bundle', version: '1.0.0', agentrans: { bundle: { patch: './cordis.patch.yml' } } }
   file(join(bundleDir, 'package.json'), JSON.stringify(bundleManifest))
   file(join(bundleDir, 'cordis.patch.yml'), '[]\n')
   const anchor = scope === 'installation' ? installAnchor : join(bundleDir, 'package.json')

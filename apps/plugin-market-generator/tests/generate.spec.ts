@@ -74,7 +74,7 @@ async function registry(packages: Packages) {
   return { url: `${base}/`, tarballs }
 }
 
-const BUNDLE = { dsh: { bundle: { patch: './cordis.patch.yml' } } }
+const BUNDLE = { agentrans: { bundle: { patch: './cordis.patch.yml' } } }
 
 const bundleManifest = (name: string, version: string, extra: object = {}) => JSON.stringify({ name, version, ...BUNDLE, ...extra })
 
@@ -91,7 +91,7 @@ it('lists every bundle version from the registry document that is neither deprec
   const packages: Packages = {
     'dsh-a': {
       '0.9.0': { time: '2026-01-01T00:00:00.000Z' },
-      '1.0.0': { time: '2026-02-01T00:00:00.000Z', manifest: { ...BUNDLE, keywords: ['old'], engines: { dsh: '>=0.2.0' }, peerDependencies: { '@agentrans/cli': '9' } } },
+      '1.0.0': { time: '2026-02-01T00:00:00.000Z', manifest: { ...BUNDLE, keywords: ['old'], engines: { agentrans: '>=0.2.0' }, peerDependencies: { '@agentrans/cli': '9' } } },
       '1.1.0': { time: '2026-03-01T00:00:00.000Z', manifest: { ...BUNDLE, deprecated: 'broken' } },
       '1.1.5': { time: '2026-03-15T00:00:00.000Z', manifest: { ...BUNDLE, private: true } },
       '1.2.0': {
@@ -142,8 +142,8 @@ it('lists every bundle version from the registry document that is neither deprec
       metadata: { keywords: ['alpha', '', 'alpha'] },
       versions: [
         { version: '2.0.0-rc.1', publishTimestamp: 1780272000, source: npm },
-        { version: '1.2.0', publishTimestamp: 1775001600, source: npm, engines: { dsh: '>=0.2.0 <0.3.0-0 || >=0.2.0 >=0.3.0 <0.4.0-0' } },
-        { version: '1.0.0', publishTimestamp: 1769904000, source: npm, engines: { dsh: '>=0.2.0' } },
+        { version: '1.2.0', publishTimestamp: 1775001600, source: npm, engines: { agentrans: '>=0.2.0 <0.3.0-0 || >=0.2.0 >=0.3.0 <0.4.0-0' } },
+        { version: '1.0.0', publishTimestamp: 1769904000, source: npm, engines: { agentrans: '>=0.2.0' } },
       ],
     },
     { name: 'dsh-b', title: 'dsh-b', versions: [{ version: '1.0.0', publishTimestamp: 1780358400, source: npm }] },

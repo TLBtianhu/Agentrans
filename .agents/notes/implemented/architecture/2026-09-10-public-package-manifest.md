@@ -22,7 +22,7 @@ Each consumer owns JSON parsing, field validation, default resolution, and adapt
 
 **Keep internal metadata in the public declaration.** A workspace-only migration catalog and an experimental image packer cannot offer public plugin behavior merely because their metadata is discoverable.
 
-**Put DSH compatibility under `dsh.engines`.** [VS Code](https://code.visualstudio.com/api/references/extension-manifest) places its host requirement in top-level `engines.vscode`. Top-level `engines.dsh` gives authors one location for runtime requirements; DSH still owns enforcement of its custom key.
+**Put DSH compatibility under `dsh.engines`.** [VS Code](https://code.visualstudio.com/api/references/extension-manifest) places its host requirement in top-level `engines.vscode`. Top-level `engines.agentrans` gives authors one location for runtime requirements; DSH still owns enforcement of its custom key.
 
 **Use peer dependencies as the sole host requirement.** Peer dependencies constrain installed npm packages, including the CLI package `@agentrans/cli`. They do not identify the currently running DSH process when plugins live in a separate profile project.
 

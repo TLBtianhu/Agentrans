@@ -52,7 +52,7 @@ async function fixture(reload: 'live' | 'startup' = 'live', overlay = false, pre
   const bundle = (name: string, rows: unknown[], packageRoot = dir) => {
     const path = join(packageRoot, 'node_modules', name)
     mkdirSync(path, { recursive: true })
-    writeFileSync(join(path, 'package.json'), JSON.stringify({ name, version: '1.0.0', dsh: { bundle: { patch: './cordis.patch.yml' } } }))
+    writeFileSync(join(path, 'package.json'), JSON.stringify({ name, version: '1.0.0', agentrans: { bundle: { patch: './cordis.patch.yml' } } }))
     writeFileSync(join(path, 'cordis.patch.yml'), JSON.stringify([{ insert: rows }]))
     writeFileSync(join(path, 'plugin.mjs'), 'export function apply(ctx, config) { if (config?.fail) throw new Error("test activation failed"); ctx.provide(config?.service ?? "managedProbe", true) }\n')
   }
@@ -96,9 +96,9 @@ it.each(['live', 'startup'] as const)('refuses an unsupported bundle before savi
   const { manager, dir, ctx } = await fixture(reload, false, undefined, {}, undefined, (dir) => {
     const path = join(dir, 'node_modules/extra/package.json')
     writeFileSync(path, JSON.stringify({ name: 'extra', version: '1.0.0', description: 'Platform-limited bundle',
-      dsh: { bundle: { patch: './cordis.patch.yml', platforms: [process.platform === 'darwin' ? 'win32' : 'darwin'] } } }))
+      agentrans: { bundle: { patch: './cordis.patch.yml', platforms: [process.platform === 'darwin' ? 'win32' : 'darwin'] } } }))
     const manifest = readProfileManifest('test', dir)
-    manifest.dsh = { profile: { bundles: ['core'] } }
+    manifest.agentrans = { profile: { bundles: ['core'] } }
     writeFileSync(join(dir, 'package.json'), JSON.stringify(manifest))
   })
   const before = readFileSync(join(dir, 'package.json'), 'utf8')
@@ -117,11 +117,11 @@ it('allows supported bundle activation and permits deselecting an unsupported sa
   const { manager, dir } = await fixture()
   const path = join(dir, 'node_modules/extra/package.json')
   const metadata = readProfileManifest('test', join(dir, 'node_modules/extra'))
-  metadata.dsh = { bundle: { patch: './cordis.patch.yml', platforms: [process.platform] } }
+  metadata.agentrans = { bundle: { patch: './cordis.patch.yml', platforms: [process.platform] } }
   writeFileSync(path, JSON.stringify(metadata))
   expect(await manager.setBundleEnabled('extra', false)).toMatchObject({ changed: true, application: 'applied' })
   expect(await manager.setBundleEnabled('extra', true)).toMatchObject({ changed: true, application: 'applied' })
-  metadata.dsh.bundle!.platforms = [process.platform === 'darwin' ? 'win32' : 'darwin']
+  metadata.agentrans.bundle!.platforms = [process.platform === 'darwin' ? 'win32' : 'darwin']
   writeFileSync(path, JSON.stringify(metadata))
   expect(await manager.setBundleEnabled('extra', false)).toMatchObject({ changed: true, application: 'applied' })
 })
@@ -264,7 +264,7 @@ it('waits for the GitHub check before installing and activating the bundle', asy
   expect(pnpm).not.toHaveBeenCalled()
   release.resolve(undefined)
   expect(await installing).toMatchObject({ application: 'applied', changed: true, bundle: 'addon' })
-  expect(readProfileManifest('test', dir).dsh?.profile?.bundles).toContain('addon')
+  expect(readProfileManifest('test', dir).agentrans?.profile?.bundles).toContain('addon')
 })
 
 it('disposal waits for an active GitHub check to stop', async () => {
@@ -305,7 +305,7 @@ it.each(['github:acme/connected', 'https://github.com/acme/connected.git', 'git+
     const git = (args: string[]) => execa('git', args, { cwd: repository, env })
     await git(['init', '--initial-branch=main'])
     const name = '@test/github-connected'
-    writeFileSync(join(repository, 'package.json'), JSON.stringify({ name, version: '1.0.0', dsh: { bundle: { patch: './cordis.patch.yml' } } }))
+    writeFileSync(join(repository, 'package.json'), JSON.stringify({ name, version: '1.0.0', agentrans: { bundle: { patch: './cordis.patch.yml' } } }))
     writeFileSync(join(repository, 'cordis.patch.yml'), '[]\n')
     await git(['add', '.'])
     await git(['-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false', 'commit', '-m', 'fixture bundle'])
@@ -362,7 +362,7 @@ it.each(['missing package', 'invalid manifest', 'not a bundle', 'missing patch',
       enabled: true, source: 'extra@1.0.0', error: { code: failure === 'not a bundle' ? 'not-bundle' : 'operation-error' }, rows: [],
     })
     expect(await manager.setBundleEnabled('extra', false)).toMatchObject({ changed: true, application: 'applied' })
-    expect(readProfileManifest('test', dir).dsh?.profile?.bundles).toEqual(['core'])
+    expect(readProfileManifest('test', dir).agentrans?.profile?.bundles).toEqual(['core'])
     expect(await manager.setBundleEnabled('extra', true)).toMatchObject({ changed: false, application: 'failed' })
   },
 )
@@ -385,7 +385,7 @@ it.each(['live', 'startup'] as const)('removes a bundle skipped at startup in a 
   })
   const remove = vi.spyOn(operations, 'runProfilePnpm').mockImplementation(async () => {
     const manifest = readProfileManifest('test', dir)
-    expect(manifest.dsh?.profile?.bundles).toEqual(['core'])
+    expect(manifest.agentrans?.profile?.bundles).toEqual(['core'])
     delete manifest.dependencies?.extra
     writeFileSync(join(dir, 'package.json'), JSON.stringify(manifest))
     return { exitCode: 0, output: 'removed', truncated: false, logPath: join(dir, 'pnpm.log') }
@@ -430,7 +430,7 @@ it('describes a bundle by its manifest and patch: one-liner, rows without a live
   const { manager, dir, bundle } = await fixture()
   bundle('described', [{ id: 'described-row', name: './plugin.mjs' }])
   writeFileSync(join(dir, 'node_modules', 'described', 'package.json'), JSON.stringify({
-    name: 'described', version: '2.0.0', description: 'Describes itself.', dsh: { bundle: { patch: './cordis.patch.yml' } },
+    name: 'described', version: '2.0.0', description: 'Describes itself.', agentrans: { bundle: { patch: './cordis.patch.yml' } },
   }))
   // An anonymous row is not addressable and is left out of the rows.
   writeFileSync(join(dir, 'node_modules', 'described', 'cordis.patch.yml'), JSON.stringify([
@@ -457,17 +457,17 @@ it('describes a bundle by its manifest and patch: one-liner, rows without a live
 it('projects each bundle\'s default GUI listing without changing its selection, and reports invalid declarations', async () => {
   const { manager, dir } = await fixture()
   const path = join(dir, 'node_modules', 'extra', 'package.json')
-  const manifest = JSON.parse(readFileSync(path, 'utf8')) as { dsh: { bundle: { patch: string; listedByDefault?: boolean | string } } }
+  const manifest = JSON.parse(readFileSync(path, 'utf8')) as { agentrans: { bundle: { patch: string; listedByDefault?: boolean | string } } }
   for (const listedByDefault of [false, true, undefined]) {
-    if (listedByDefault === undefined) delete manifest.dsh.bundle.listedByDefault
-    else manifest.dsh.bundle.listedByDefault = listedByDefault
+    if (listedByDefault === undefined) delete manifest.agentrans.bundle.listedByDefault
+    else manifest.agentrans.bundle.listedByDefault = listedByDefault
     writeFileSync(path, JSON.stringify(manifest))
     const entry = (await manager.listBundles()).find(row => row.name === 'extra')
     expect(entry?.listedByDefault).toBe(listedByDefault)
     expect(entry?.enabled).toBe(true)
     expect(entry?.error).toBeUndefined()
   }
-  manifest.dsh.bundle.listedByDefault = 'hidden'
+  manifest.agentrans.bundle.listedByDefault = 'hidden'
   writeFileSync(path, JSON.stringify(manifest))
   expect((await manager.listBundles()).find(row => row.name === 'extra')).toMatchObject({ enabled: true,
     error: { diagnostic: 'dsh.bundle.listedByDefault must be a boolean' } })
@@ -486,7 +486,7 @@ it('names where each installed bundle comes from as a spec pnpm installs', async
   }
   for (const name of Object.keys(recorded)) bundle(name, [])
   // Installed under a name other than its own, the package keeps that name only when the spec carries it.
-  writeFileSync(join(dir, 'node_modules', 'aliasLocal', 'package.json'), JSON.stringify({ name: 'original', version: '1.0.0', dsh: { bundle: { patch: './cordis.patch.yml' } } }))
+  writeFileSync(join(dir, 'node_modules', 'aliasLocal', 'package.json'), JSON.stringify({ name: 'original', version: '1.0.0', agentrans: { bundle: { patch: './cordis.patch.yml' } } }))
   const manifest = readProfileManifest('test', dir)
   manifest.dependencies = recorded
   writeFileSync(join(dir, 'package.json'), JSON.stringify(manifest))
@@ -515,7 +515,7 @@ it.each(['native', 'runtime'] as const)('reads a disabled bundle and its indepen
   mkdirSync(join(child, 'first-locale'), { recursive: true })
   mkdirSync(join(child, 'second-locale'), { recursive: true })
   writeFileSync(join(root, 'package.json'), JSON.stringify({ name: 'localized',
-    exports: { './locale/*.json': './locale/*.json' }, dsh: {
+    exports: { './locale/*.json': './locale/*.json' }, agentrans: {
       bundle: { patch: './cordis.patch.yml' },
     } }))
   writeFileSync(join(root, 'locale', 'en.json'), '{"meta":{"title":"Local bundle"}}')
@@ -576,7 +576,7 @@ it.each([
   const root = join(dir, 'node_modules', 'unnamed')
   mkdirSync(join(root, 'locale'))
   writeFileSync(join(root, 'package.json'), JSON.stringify({
-    version: '1.0.0', exports, dsh: { bundle: { patch: './cordis.patch.yml' } },
+    version: '1.0.0', exports, agentrans: { bundle: { patch: './cordis.patch.yml' } },
   }))
   writeFileSync(join(root, 'locale', 'en.json'), '{"meta":{"title":"Nameless bundle"}}')
   const manifest = readProfileManifest('test', dir)
@@ -594,7 +594,7 @@ it('correlates diagnostic operation starts with persisted toggle results', async
   const facts: PluginOperation[] = []
   ctx.on('plugin-manager/operation', (event) => { facts.push(event) })
   await manager.setBundleEnabled('extra', false)
-  expect(readProfileManifest('test', dir).dsh?.profile?.bundles).not.toContain('extra')
+  expect(readProfileManifest('test', dir).agentrans?.profile?.bundles).not.toContain('extra')
   expect(facts).toHaveLength(2)
   expect(facts[0]).toMatchObject({ phase: 'started', reason: 'bundle', target: 'extra', enabled: false, version: '1.0.0' })
   expect(facts[1]).toMatchObject({ id: facts[0]!.id, phase: 'settled', changed: true, application: 'restart-required', version: '1.0.0' })
@@ -602,7 +602,7 @@ it('correlates diagnostic operation starts with persisted toggle results', async
   expect(facts[2]!.id).not.toBe(facts[0]!.id)
 })
 
-it.each(['{', ...[null, 12, {}, 'x'.repeat(129)].map(version => JSON.stringify({ version, dsh: { bundle: { patch: './cordis.patch.yml' } } }))])('retains an observed version for a refused removal and leaves damaged metadata unknown: %s', async (manifest) => {
+it.each(['{', ...[null, 12, {}, 'x'.repeat(129)].map(version => JSON.stringify({ version, agentrans: { bundle: { patch: './cordis.patch.yml' } } }))])('retains an observed version for a refused removal and leaves damaged metadata unknown: %s', async (manifest) => {
   const { manager, ctx, dir } = await fixture('startup')
   const facts: PluginOperation[] = []
   ctx.on('plugin-manager/operation', (event) => { facts.push(event) })
@@ -690,7 +690,7 @@ it.each(['throw', 'reject'])('delivers diagnostics to later subscribers when an 
   const facts: PluginOperation[] = []
   ctx.on('plugin-manager/operation', (event) => { facts.push(event) })
   expect(await manager.setBundleEnabled('extra', false)).toMatchObject({ changed: true, application: 'restart-required' })
-  expect(readProfileManifest('test', dir).dsh?.profile?.bundles).not.toContain('extra')
+  expect(readProfileManifest('test', dir).agentrans?.profile?.bundles).not.toContain('extra')
   expect(facts.map(event => event.phase)).toEqual(['started', 'settled'])
   await vi.waitFor(() => { expect(errors).toHaveBeenCalledWith('dsh plugin-manager: operation diagnostic delivery failed') })
 })
@@ -716,7 +716,7 @@ it('retains installed dependencies when toggling a bundle and appends it when re
   expect(readProfileManifest('test', dir).dependencies).toEqual({ extra: '1.0.0' })
   expect((await manager.listPlugins()).some(row => row.patchId === 'managed')).toBe(false)
   await manager.setBundleEnabled('extra', true)
-  expect(readProfileManifest('test', dir).dsh?.profile?.bundles).toEqual(['core', 'third', 'extra'])
+  expect(readProfileManifest('test', dir).agentrans?.profile?.bundles).toEqual(['core', 'third', 'extra'])
 })
 
 it('reports an overlay overriding a saved plugin toggle', async () => {
@@ -755,7 +755,7 @@ it('installs only valid bundle declarations and honors installation without acti
     const name = String(args[1])
     bundle(name, [{ id: name, name: './plugin.mjs', config: { service: name } }])
     if (name === 'another-bundle') {
-      writeFileSync(join(dir, 'node_modules', name, 'package.json'), JSON.stringify({ name, dsh: { bundle: { patch: './cordis.patch.yml' } } }))
+      writeFileSync(join(dir, 'node_modules', name, 'package.json'), JSON.stringify({ name, agentrans: { bundle: { patch: './cordis.patch.yml' } } }))
     }
     const manifest = readProfileManifest('test', dir)
     manifest.dependencies = { ...manifest.dependencies, [name]: '1.0.0' }
@@ -803,7 +803,7 @@ it('reports blocked scripts after a failed installation and retries only after e
   expect(await manager.installBundle('addon', { approvedBuilds: ['native'], enabled: false })).toMatchObject({
     application: 'applied', changed: true, approvedBuilds: ['native'],
   })
-  expect(readProfileManifest('test', dir).dsh?.profile?.bundles).not.toContain('addon')
+  expect(readProfileManifest('test', dir).agentrans?.profile?.bundles).not.toContain('addon')
 })
 
 it('retains approved policy and reports it as changed when the registry fails before adding a dependency', async () => {
@@ -822,7 +822,7 @@ it('runs a real pnpm dependency script only after approval and retry', async () 
   const addon = join(profile.cwd, 'addon')
   mkdirSync(addon)
   writeFileSync(join(addon, 'package.json'), JSON.stringify({ name: 'approval-fixture-addon', version: '1.0.0',
-    scripts: { install: 'node build.cjs' }, dsh: { bundle: { patch: './cordis.patch.yml' } } }))
+    scripts: { install: 'node build.cjs' }, agentrans: { bundle: { patch: './cordis.patch.yml' } } }))
   writeFileSync(join(addon, 'build.cjs'), 'require("node:fs").writeFileSync("built.txt", "built")\n')
   writeFileSync(join(addon, 'cordis.patch.yml'), '[]\n')
   writeFileSync(join(dir, 'package.json'), '{"name":"approval-fixture","private":true}\n')
@@ -853,7 +853,7 @@ it('offers approval for a real git-hosted package pnpm refused to prepare', asyn
   const git = (args: string[]) => execa('git', args, { cwd: repository, env })
   await git(['init', '--initial-branch=main'])
   writeFileSync(join(repository, 'package.json'), JSON.stringify({ name: '@test/git-prepared', version: '1.0.0',
-    scripts: { prepare: 'node build.cjs' }, dsh: { bundle: { patch: './cordis.patch.yml' } } }))
+    scripts: { prepare: 'node build.cjs' }, agentrans: { bundle: { patch: './cordis.patch.yml' } } }))
   writeFileSync(join(repository, 'build.cjs'), 'require("node:fs").writeFileSync("built.txt", "built")\n')
   writeFileSync(join(repository, 'cordis.patch.yml'), '[]\n')
   await git(['add', '.'])
@@ -1063,7 +1063,7 @@ it('restores the manifest when the package pnpm added declares no bundle', async
   })
   // The manifest is put back rather than cleaned through another pnpm run.
   expect(install).toHaveBeenCalledOnce()
-  expect(readProfileManifest('test', dir)).toMatchObject({ dependencies: { extra: '1.0.0' }, dsh: { profile: { bundles: ['core', 'extra'] } } })
+  expect(readProfileManifest('test', dir)).toMatchObject({ dependencies: { extra: '1.0.0' }, agentrans: { profile: { bundles: ['core', 'extra'] } } })
   expect((await manager.listBundles()).some(row => row.name === 'plain')).toBe(false)
 })
 
@@ -1294,17 +1294,17 @@ it('reads what a spec names before installing it', async () => {
   const view = vi.spyOn(operations, 'viewProfilePackage')
   onTestFinished(() => { view.mockRestore() })
   const answers = (stdout: string) => view.mockResolvedValueOnce({ exitCode: 0, stdout, stderr: '', timedOut: false })
-  answers(JSON.stringify({ name: 'dsh-x', version: '1.4.2', description: 'A sidebar.', dsh: { bundle: { patch: './cordis.patch.yml' } } }))
+  answers(JSON.stringify({ name: 'dsh-x', version: '1.4.2', description: 'A sidebar.', agentrans: { bundle: { patch: './cordis.patch.yml' } } }))
   expect(await manager.inspect('dsh-x')).toEqual({
     status: 'accepted', kind: 'registry', name: 'dsh-x', version: '1.4.2', description: 'A sidebar.', bundle: true, registry: null,
   })
   expect(view).toHaveBeenCalledWith(dir, 'dsh-x', { command: 'pnpm-test', fields: ['name', 'version', 'description', 'dsh'], timeoutMs: 1000, registry: null })
   const signal = AbortSignal.abort()
-  answers(JSON.stringify([{ name: 'dsh-lib', version: '1.0.0', dsh: { bundle: {} } }, { name: 'dsh-lib', version: '1.1.0', dsh: null }]))
+  answers(JSON.stringify([{ name: 'dsh-lib', version: '1.0.0', agentrans: { bundle: {} } }, { name: 'dsh-lib', version: '1.1.0', dsh: null }]))
   expect(await manager.inspect('dsh-lib@^1', undefined, signal)).toEqual({ status: 'refused', problem: 'not-a-bundle', reason: 'dsh-lib declares no dsh.bundle', registries: [null] })
   expect(view).toHaveBeenLastCalledWith(dir, 'dsh-lib@^1', { command: 'pnpm-test', fields: ['name', 'version', 'description', 'dsh'], timeoutMs: 1000, signal, registry: null })
   // An answer that names no package keeps the name the spec gave; colour escapes around the JSON are dropped.
-  answers('\x1b[36m' + JSON.stringify({ version: '0.0.1', description: '', dsh: { bundle: { patch: './p.yml' } } }) + '\x1b[39m\n')
+  answers('\x1b[36m' + JSON.stringify({ version: '0.0.1', description: '', agentrans: { bundle: { patch: './p.yml' } } }) + '\x1b[39m\n')
   expect(await manager.inspect('dsh-bare')).toEqual({ status: 'accepted', kind: 'registry', name: 'dsh-bare', version: '0.0.1', bundle: true, registry: null })
   const failure = (stderr: string, exitCode: number | null = 1, more: Partial<operations.PackageViewResult> = {}) =>
     view.mockResolvedValueOnce({ exitCode, stdout: '', stderr, timedOut: false, ...more })
@@ -1347,9 +1347,9 @@ it('reads what a spec names before installing it', async () => {
   expect(await manager.inspect(local)).toEqual({ status: 'refused', problem: 'not-a-package', reason: 'the package.json names no package' })
   writeFileSync(join(local, 'package.json'), JSON.stringify({ name: 'dsh-local', version: '0.1.0', description: 'Local.' }))
   expect(await manager.inspect(local)).toEqual({ status: 'refused', problem: 'not-a-bundle', reason: 'dsh-local declares no dsh.bundle' })
-  writeFileSync(join(local, 'package.json'), JSON.stringify({ name: 'dsh-local', version: '0.1.0', description: 'Local.', dsh: { bundle: { patch: './p.yml' } } }))
+  writeFileSync(join(local, 'package.json'), JSON.stringify({ name: 'dsh-local', version: '0.1.0', description: 'Local.', agentrans: { bundle: { patch: './p.yml' } } }))
   expect(await manager.inspect(`file:${local}`)).toEqual({ status: 'accepted', kind: 'path', name: 'dsh-local', version: '0.1.0', description: 'Local.', bundle: true, registry: null })
-  writeFileSync(join(local, 'package.json'), JSON.stringify({ name: 'core', dsh: { bundle: { patch: './p.yml' } } }))
+  writeFileSync(join(local, 'package.json'), JSON.stringify({ name: 'core', agentrans: { bundle: { patch: './p.yml' } } }))
   expect(await manager.inspect(local)).toEqual({ status: 'refused', problem: 'already-installed', reason: 'core is already installed' })
   // A profile and an installation that list nothing know nothing.
   writeFileSync(join(dir, 'package.json'), '{}')
@@ -1412,7 +1412,7 @@ it.each(OPTIONAL_BUNDLES)('offers %s switched off and never removable', async (o
   const supplied = join(profile.home, 'node_modules', offered)
   mkdirSync(supplied, { recursive: true })
   writeFileSync(join(supplied, 'package.json'), JSON.stringify({
-    name: offered, version: '3.0.0', description: 'Package one-liner.', dsh: { bundle: { patch: './cordis.patch.yml' } },
+    name: offered, version: '3.0.0', description: 'Package one-liner.', agentrans: { bundle: { patch: './cordis.patch.yml' } },
   }))
   writeFileSync(join(supplied, 'cordis.patch.yml'), JSON.stringify([{ insert: [{ id: 'offered-row', name: './plugin.mjs', config: { service: 'offeredProbe' } }] }]))
   writeFileSync(join(supplied, 'plugin.mjs'), 'export function apply(ctx, config) { ctx.provide(config?.service ?? "offeredProbe", true) }\n')
@@ -1432,7 +1432,7 @@ it('removes a selected bundle no dependency holds by deselecting it without pnpm
   const { manager, dir } = await fixture()
   const manifest = readProfileManifest('test', dir)
   writeFileSync(join(dir, 'package.json'), JSON.stringify({
-    ...manifest, dsh: { profile: { bundles: [...manifest.dsh?.profile?.bundles ?? [], 'retired'] } },
+    ...manifest, agentrans: { profile: { bundles: [...manifest.agentrans?.profile?.bundles ?? [], 'retired'] } },
   }))
   expect((await manager.listBundles()).find(row => row.name === 'retired')).toMatchObject({
     enabled: true, installed: false, official: false, availability: 'missing', optional: false, removable: true, error: { code: 'operation-error' },
@@ -1441,7 +1441,7 @@ it('removes a selected bundle no dependency holds by deselecting it without pnpm
   onTestFinished(() => { pnpm.mockRestore() })
   expect(await manager.removeBundle('retired')).toMatchObject({ changed: true, application: 'applied' })
   expect(pnpm).not.toHaveBeenCalled()
-  expect(readProfileManifest('test', dir).dsh?.profile?.bundles).not.toContain('retired')
+  expect(readProfileManifest('test', dir).agentrans?.profile?.bundles).not.toContain('retired')
   expect((await manager.listBundles()).some(row => row.name === 'retired')).toBe(false)
 })
 
@@ -1487,7 +1487,7 @@ it('applies watched configuration while pnpm installation is still running', asy
   expect(pnpm).toHaveBeenCalledOnce()
   release.resolve(undefined)
   expect(await installing).toMatchObject({ application: 'applied', changed: true })
-  expect(readProfileManifest('test', dir).dsh?.profile?.bundles).toEqual(['core', 'extra', 'new-bundle'])
+  expect(readProfileManifest('test', dir).agentrans?.profile?.bundles).toEqual(['core', 'extra', 'new-bundle'])
   expect(ctx.get('managedProbe')).toBeUndefined()
 })
 
@@ -1499,7 +1499,7 @@ it('installs and removes with the bundled pnpm when PATH contains no pnpm', asyn
   const target = join(dir, 'local-bundle')
   mkdirSync(target)
   writeFileSync(join(target, 'package.json'), JSON.stringify({ name: '@test/desktop-manager', version: '1.0.0',
-    dsh: { bundle: { patch: './cordis.patch.yml' } } }))
+    agentrans: { bundle: { patch: './cordis.patch.yml' } } }))
   writeFileSync(join(target, 'cordis.patch.yml'), '[]\n')
   // Fixture-only packages need no registry resolution during this local install.
   const manifest = readProfileManifest('test', dir)
@@ -1531,7 +1531,7 @@ it('asks the registries in turn while one is unreachable or stale, and names the
   const failure = (stderr: string, exitCode = 1) => view.mockResolvedValueOnce({ exitCode, stdout: '', stderr, timedOut: false })
   const answers = (stdout: string) => view.mockResolvedValueOnce({ exitCode: 0, stdout, stderr: '', timedOut: false })
   const asked = (from: number) => view.mock.calls.slice(from).map(call => call[2].registry)
-  const manifest = JSON.stringify({ name: 'dsh-x', version: '1.0.0', dsh: { bundle: { patch: './cordis.patch.yml' } } })
+  const manifest = JSON.stringify({ name: 'dsh-x', version: '1.0.0', agentrans: { bundle: { patch: './cordis.patch.yml' } } })
   // pnpm's own registry is unreachable; the mirror answers and the install is told to start there.
   failure('ERR_PNPM_META_FETCH_FAIL  GET https://registry.npmjs.org/dsh-x: ETIMEDOUT\n')
   answers(manifest)
@@ -1743,7 +1743,7 @@ it.each(['live', 'startup'] as const)('requires exact risk acknowledgement and p
   expect(manager.listVersionExemptions()).toEqual({ exemptions: { 'extra@1.0.0': [runtime] }, warnings: [] })
   // The grant is persisted only in the profile's compatibility file, never in its package manifest.
   expect(JSON.parse(readFileSync(join(dir, 'compatibility.json'), 'utf8'))).toEqual({ 'extra@1.0.0': [runtime] })
-  expect(readProfileManifest('test', dir).dsh?.profile?.bundles).toEqual(['core', 'extra'])
+  expect(readProfileManifest('test', dir).agentrans?.profile?.bundles).toEqual(['core', 'extra'])
   // `setVersionExemption` reconciles the profile itself, so a live tree re-admits the bundle here;
   // no manifest watch or Loader instrumentation participates. A startup-only profile keeps it out until restart.
   if (mode === 'live') expect(managed()?.fiber?.state).toBe(2)
@@ -1797,7 +1797,7 @@ it.each([false, true])('rechecks installed bundle peers before accepting a disab
     expect(result.error).toMatchObject({ code: 'incompatible-version', incompatible: [{ name: 'incompatible', version: '1.0.0' }] })
     expect(readFileSync(join(dir, 'package.json'), 'utf8')).toBe(before)
   }
-  expect(readProfileManifest('test', dir).dsh?.profile?.bundles).toEqual(['core', 'extra'])
+  expect(readProfileManifest('test', dir).agentrans?.profile?.bundles).toEqual(['core', 'extra'])
 })
 
 it('lists absent Official entries offline without resolving their packages or consulting registries', async () => {
@@ -1832,7 +1832,7 @@ it.each([false, true])('applies offline platform admission to an uninstalled Off
   const { manager, dir } = await fixture('startup')
   if (selected) {
     const manifest = readProfileManifest('test', dir)
-    manifest.dsh!.profile!.bundles!.push(entry.packageName)
+    manifest.agentrans!.profile!.bundles!.push(entry.packageName)
     writeFileSync(join(dir, 'package.json'), JSON.stringify(manifest))
   }
   expect((await manager.listBundles()).find(bundle => bundle.name === entry.packageName)).toMatchObject({
@@ -1841,7 +1841,7 @@ it.each([false, true])('applies offline platform admission to an uninstalled Off
   })
   if (selected) {
     expect(await manager.setBundleEnabled(entry.packageName, false)).toMatchObject({ changed: true, enabled: false })
-    expect(readProfileManifest('test', dir).dsh?.profile?.bundles).not.toContain(entry.packageName)
+    expect(readProfileManifest('test', dir).agentrans?.profile?.bundles).not.toContain(entry.packageName)
   }
 })
 
@@ -1896,7 +1896,7 @@ it('restores dependency and selection after an exact version is unavailable', as
   bundle(name, [], profile.home)
   const manifest = readProfileManifest('test', dir)
   manifest.dependencies = { ...manifest.dependencies, [name]: '1.0.0' }
-  manifest.dsh!.profile!.bundles!.push(name)
+  manifest.agentrans!.profile!.bundles!.push(name)
   writeFileSync(join(dir, 'package.json'), JSON.stringify(manifest))
   const before = readFileSync(join(dir, 'package.json'), 'utf8')
   const pnpm = vi.spyOn(operations, 'runProfilePnpm').mockImplementation(async () => {
@@ -1920,7 +1920,7 @@ it('retains a successful installation and saved selection when Official activati
   })
   onTestFinished(() => { pnpm.mockRestore() })
   expect(await manager.installBundle(`${name}@${getDshRuntimeVersion()}`, { saveExact: true })).toMatchObject({ application: 'failed', stage: 'enable' })
-  expect(readProfileManifest('test', dir).dsh?.profile?.bundles).toContain(name)
+  expect(readProfileManifest('test', dir).agentrans?.profile?.bundles).toContain(name)
   expect(readProfileManifest('test', dir).dependencies?.[name]).toBe(getDshRuntimeVersion())
 })
 
@@ -1928,7 +1928,7 @@ it('reports and removes a saved Official selection whose dependency is absent', 
   const { manager, dir } = await fixture()
   const name = OFFICIAL_ON_DEMAND_CATALOG[0]!.packageName
   const manifest = readProfileManifest('test', dir)
-  manifest.dsh!.profile!.bundles!.push(name)
+  manifest.agentrans!.profile!.bundles!.push(name)
   writeFileSync(join(dir, 'package.json'), JSON.stringify(manifest))
   expect((await manager.listBundles()).find(bundle => bundle.name === name)).toMatchObject({
     official: true, installed: false, availability: 'missing', enabled: true, removable: true, error: { code: 'not-bundle' },
@@ -1961,7 +1961,7 @@ it('offers checkout links beside stale registry and other-checkout dependencies 
   const version = getDshRuntimeVersion()
   const source = join(profile.home, 'packages', 'native', 'provider')
   mkdirSync(join(source, 'lib'), { recursive: true })
-  writeFileSync(join(source, 'package.json'), JSON.stringify({ name, version, main: './lib/index.js', dsh: { bundle: { patch: './cordis.patch.yml' } } }))
+  writeFileSync(join(source, 'package.json'), JSON.stringify({ name, version, main: './lib/index.js', agentrans: { bundle: { patch: './cordis.patch.yml' } } }))
   writeFileSync(join(source, 'lib', 'index.js'), 'export function apply() {}\n')
   writeFileSync(join(source, 'cordis.patch.yml'), '[]\n')
   bundle(name, [], profile.home)
@@ -2026,9 +2026,9 @@ function extraRegistry(spec: string, fields: readonly string[]): object {
   if (version === '2.0.0') return { name: 'extra', version, peerDependencies: { '@agentrans/cli': '>=999.0.0' }, dsh: BUNDLE }
   if (version === '1.1.0') return { name: 'extra', version, deprecated: 'use 1.2.0', dsh: BUNDLE }
   if (version === '1.2.0-beta.1') return { name: 'extra', version }
-  // An own `engines.dsh` decides compatibility alone, so its unmet peer range does not make this version incompatible.
+  // An own `engines.agentrans` decides compatibility alone, so its unmet peer range does not make this version incompatible.
   if (version === '1.2.0') {
-    return { name: 'extra', version, engines: { dsh: '>=0.0.0-0' }, peerDependencies: { '@agentrans/cli': '>=999.0.0' }, dsh: BUNDLE }
+    return { name: 'extra', version, engines: { agentrans: '>=0.0.0-0' }, peerDependencies: { '@agentrans/cli': '>=999.0.0' }, dsh: BUNDLE }
   }
   return { name: 'extra', version, dsh: BUNDLE }
 }

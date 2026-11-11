@@ -73,7 +73,7 @@ describe('initializeProfileFromDefault', () => {
           name: 'dsh-profile-custom',
           private: true,
           dependencies: {},
-          dsh: { profile: { bundles: [...template.bundles] } },
+          agentrans: { profile: { bundles: [...template.bundles] } },
         })
         expect(readFileSync(join(dir, PROFILE_PATCH_FILENAME), 'utf8')).toContain('[]')
         expect(readFileSync(join(dir, 'pnpm-workspace.yaml'), 'utf8')).toContain('nodeLinker: hoisted')
@@ -95,7 +95,7 @@ describe('initializeProfileFromDefault', () => {
       const targetDir = resolveProfileDir('rescue', home)
       const target = readProfileManifest('test', targetDir)
       expect(target.dependencies).toEqual({})
-      expect(target.dsh?.profile).toEqual({
+      expect(target.agentrans?.profile).toEqual({
         bundles: [...PROFILE_TEMPLATES.web!.bundles],
       })
       expect(readFileSync(join(targetDir, PROFILE_PATCH_FILENAME), 'utf8')).not.toContain('local-only')
@@ -118,7 +118,7 @@ describe('initializeProfileFromDefault', () => {
         name: 'dsh-profile-rescue',
         private: true,
         dependencies: {},
-        dsh: { profile: { bundles: [...PROFILE_TEMPLATES.web!.bundles] } },
+        agentrans: { profile: { bundles: [...PROFILE_TEMPLATES.web!.bundles] } },
       })
       expect(readFileSync(join(dir, PROFILE_PATCH_FILENAME), 'utf8')).not.toContain('existing')
       expect(existsSync(join(dir, 'node_modules'))).toBe(false)
@@ -135,7 +135,7 @@ describe('initializeProfileFromDefault', () => {
       initializeProfileFromDefault('rescue', 'web', home)
 
       expect(existsSync(join(dir, 'residual'))).toBe(false)
-      expect(readProfileManifest('test', dir).dsh?.profile).toEqual(PROFILE_TEMPLATES.web)
+      expect(readProfileManifest('test', dir).agentrans?.profile).toEqual(PROFILE_TEMPLATES.web)
     })
   })
 
@@ -197,7 +197,7 @@ describe('initializeProfileFromDefault', () => {
       expect(() => {
         initializeProfileFromDefault('rescue', 'web', home)
       }).toThrow('profile "rescue" was recreated concurrently')
-      expect(readProfileManifest('test', dir).dsh?.profile).toEqual({ bundles: ['concurrent-bundle'] })
+      expect(readProfileManifest('test', dir).agentrans?.profile).toEqual({ bundles: ['concurrent-bundle'] })
       expect(readdirSync(dirname(dir))).toEqual(['rescue'])
     })
   })
@@ -253,7 +253,7 @@ describe('initializeProfileFromDefault', () => {
         expect(result.stderr).toContain('was recreated concurrently')
       }
       const dir = resolveProfileDir('rescue', home)
-      expect(readProfileManifest('test', dir).dsh?.profile).toEqual(PROFILE_TEMPLATES.web)
+      expect(readProfileManifest('test', dir).agentrans?.profile).toEqual(PROFILE_TEMPLATES.web)
       expect(readdirSync(dirname(dir))).toEqual(['rescue'])
     } finally {
       for (const child of children) child.kill('SIGKILL')

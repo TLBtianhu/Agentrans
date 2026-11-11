@@ -55,13 +55,13 @@ export interface MarketInstallation {
   readonly installedVersion?: string
 }
 
-/** Whether the running DSH version satisfies a version's `engines.dsh`, as DSH's installation check evaluates it. */
+/** Whether the running DSH version satisfies a version's `engines.agentrans`, as DSH's installation check evaluates it. */
 export type MarketCompatibility =
   | { readonly compatible: true }
   | {
     readonly compatible: false
     readonly runtimeVersion: string
-    /** The unmet requirement, keyed `engines.dsh`. */
+    /** The unmet requirement, keyed `engines.agentrans`. */
     readonly requirements: Readonly<Record<string, string>>
     /** Whether the profile holds a version exemption for this exact package and runtime version. */
     readonly exempted: boolean

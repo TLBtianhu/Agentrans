@@ -76,9 +76,9 @@ export function bundlePatchLayers(): Map<string, string[]> {
   for (const manifestPath of globSync('packages/*/*/package.json', { cwd: root }).map(path => path.split('\\').join('/'))) {
     const manifest = JSON.parse(readFileSync(resolve(root, manifestPath), 'utf8')) as {
       name?: string
-      dsh?: { bundle?: { patch?: string | string[] } }
+      agentrans?: { bundle?: { patch?: string | string[] } }
     }
-    const patch = manifest.dsh?.bundle?.patch
+    const patch = manifest.agentrans?.bundle?.patch
     if (manifest.name === undefined || patch === undefined) continue
     const directory = manifestPath.replace(/\/package\.json$/u, '')
     layers.set(manifest.name, (Array.isArray(patch) ? patch : [patch])

@@ -764,8 +764,8 @@ describe('web e2e: plugin manager', () => {
       }), MODE)
     await toggle.click()
     await expect.poll(async () => (JSON.parse(await homeFile('profiles', 'scaffold', 'package.json')) as {
-      dsh: { profile: { bundles: string[] } }
-    }).dsh.profile.bundles, { timeout: 10_000 }).toEqual(SCAFFOLD_BUNDLES)
+      agentrans: { profile: { bundles: string[] } }
+    }).agentrans.profile.bundles, { timeout: 10_000 }).toEqual(SCAFFOLD_BUNDLES)
     await expect.poll(() => panel.getByText(/cannot resolve profile bundle/).count(), { timeout: 10_000 }).toBe(0)
     expect((await scaffold.ctx.pluginManager.listBundles()).some(row => row.name === '@fixture/missing-bundle')).toBe(false)
     expect(tripwire.pageErrors).toEqual([])
@@ -1172,9 +1172,9 @@ describe('web e2e: plugin manager', () => {
         await teamPanel.getByText('暂无共享任务，可以通过对话创建').waitFor()
         await teamPanel.getByText('lead', { exact: true }).waitFor()
         const manifest = JSON.parse(await homeFile('profiles', 'scaffold', 'package.json')) as {
-          dsh: { profile: { bundles: string[] } }
+          agentrans: { profile: { bundles: string[] } }
         }
-        expect(manifest.dsh.profile.bundles).toEqual([...SCAFFOLD_BUNDLES, '@agentrans/experimental-agent-team-profile'])
+        expect(manifest.agentrans.profile.bundles).toEqual([...SCAFFOLD_BUNDLES, '@agentrans/experimental-agent-team-profile'])
         await panel.getByRole('button', { name: '查看 智能体团队', exact: true }).click()
         for (const id of ['agent-team', 'tool-agent-team', 'ui-agent-team']) {
           await panel.locator('[data-plugin-row]', { hasText: id }).first().waitFor()
@@ -1414,8 +1414,8 @@ describe('web e2e: plugin manager', () => {
     await toggle.click()
 
     const bundles = async () => (JSON.parse(await homeFile('profiles', 'scaffold', 'package.json')) as {
-      dsh: { profile: { bundles: string[] } }
-    }).dsh.profile.bundles
+      agentrans: { profile: { bundles: string[] } }
+    }).agentrans.profile.bundles
     await expect.poll(bundles, { timeout: PLUGIN_TOGGLE_SETTLE_MS }).toEqual([...SCAFFOLD_BUNDLES, '@fixture/bundle'])
     // A live profile: the row mounts once the whole tree recomposed, the switch is on, and nothing waits for a restart.
     await expect.poll(() => mounted()?.fiber?.state, { timeout: 20_000 }).toBe(2)
@@ -1544,7 +1544,7 @@ describe('web e2e: startup-applied plugin management', () => {
       const mounted = () => [...scaffold.ctx.loader.entries()].find(entry => entry.options.id === 'fixture-row')
       const bundles = async () => {
         const text = await readFile(join(scaffold.harnessHome, 'profiles', 'scaffold', 'package.json'), 'utf8')
-        return (JSON.parse(text) as { dsh: { profile: { bundles: string[] } } }).dsh.profile.bundles
+        return (JSON.parse(text) as { agentrans: { profile: { bundles: string[] } } }).agentrans.profile.bundles
       }
       expect(mounted()?.fiber?.state).toBeUndefined()
       await toggle.click()

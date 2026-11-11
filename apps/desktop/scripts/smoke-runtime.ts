@@ -59,7 +59,7 @@ export async function smokeDesktopRuntime(
     const installedPlugin = join(home, installedName)
     mkdirSync(installedPlugin)
     writeFileSync(join(installedPlugin, 'package.json'), JSON.stringify({
-      name: installedName, version: '1.0.0', type: 'module', exports: './index.js', dsh: { bundle: { patch: './bundle.yml' } },
+      name: installedName, version: '1.0.0', type: 'module', exports: './index.js', agentrans: { bundle: { patch: './bundle.yml' } },
     }))
     writeFileSync(join(installedPlugin, 'index.js'), `
 export function apply(ctx) {
@@ -92,7 +92,7 @@ export function apply(ctx) {
     if (cordis === undefined) throw new Error('desktop runtime: missing shared Cordis package')
     writeFileSync(join(plugin, 'package.json'), JSON.stringify({
       name: pluginName, version: '1.0.0', type: 'module', exports: './index.js',
-      peerDependencies: { '@agentrans/cordis': cordis.version }, dsh: { bundle: { patch: './bundle.yml' } },
+      peerDependencies: { '@agentrans/cordis': cordis.version }, agentrans: { bundle: { patch: './bundle.yml' } },
     }))
     writeFileSync(join(plugin, 'index.js'), `
 import { Context } from '@agentrans/cordis'
@@ -150,10 +150,10 @@ export function apply(ctx) {
     cpSync(plugin, join(profile, 'node_modules', pluginName), { recursive: true })
     const manifest = JSON.parse(readFileSync(join(profile, 'package.json'), 'utf8')) as {
       dependencies?: Record<string, string>
-      dsh: { profile: { bundles: string[] } }
+      agentrans: { profile: { bundles: string[] } }
     }
     manifest.dependencies = { ...manifest.dependencies, [pluginName]: `file:${plugin}` }
-    manifest.dsh.profile.bundles.push(pluginName)
+    manifest.agentrans.profile.bundles.push(pluginName)
     writeFileSync(join(profile, 'package.json'), JSON.stringify(manifest))
     writeFileSync(join(profile, 'cordis.patch.yml'), '- id: webserver\n  config:\n    host: 127.0.0.1\n    port: 0\n')
     const ready = await Promise.race([host.start(), new Promise<never>((_, reject) => {

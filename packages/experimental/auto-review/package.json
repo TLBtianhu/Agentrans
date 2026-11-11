@@ -81,7 +81,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "dsh": {
+  "agentrans": {
     "bundle": {
       "patch": "./cordis.patch.yml"
     }

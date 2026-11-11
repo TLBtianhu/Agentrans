@@ -771,11 +771,11 @@ export interface RemainingSchema {
     const root = copyFixture()
     const manifestPath = join(root, 'packages/remote/package.json')
     const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as {
-      dsh?: { client?: object }
+      agentrans?: { client?: object }
       exports: Record<string, unknown>
       files: string[]
     }
-    manifest.dsh = { client: {} }
+    manifest.agentrans = { client: {} }
     manifest.exports['./client'] = './src/client.ts'
     manifest.exports['./client/typert'] = {
       types: './lib/typert.client.d.ts',

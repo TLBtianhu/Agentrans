@@ -34,7 +34,7 @@
     },
     "./locale/*.json": "./locale/*.json"
   },
-  "dsh": {
+  "agentrans": {
     "client": {
       "inject": [
         "@agentrans/api-remotes",

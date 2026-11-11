@@ -137,7 +137,7 @@ Category, label, and sort-key ids are non-empty strings. Readers look ids up as 
 | `publishTimestamp` | yes | Integer Unix timestamp in seconds, in `[0, 10^11)`. |
 | `source` | yes | Where `version` is installed from; see below. |
 | `engines` | yes | Object containing `dsh`. |
-| `engines.dsh` | yes | Non-blank valid npm SemVer range declared in the source manifest; copied unchanged. `*` explicitly declares support for any DSH version. |
+| `engines.agentrans` | yes | Non-blank valid npm SemVer range declared in the source manifest; copied unchanged. `*` explicitly declares support for any DSH version. |
 
 A relative `icon` reference resolves against the index URL, as an HTML image reference resolves against its page. For an index at `https://market.example/dsh/index.json`, `"icon": "icons/foo.svg"` names `https://market.example/dsh/icons/foo.svg`. A generator can therefore publish the index and its icon files as one directory on any static host without knowing the final URL. Absolute icon URLs on other origins must use `https:`; the same-origin allowance lets an `http:` index on a loopback or intranet host serve its own icons. Readers resolve the reference when they read the index, so clients receive absolute URLs.
 
@@ -155,7 +155,7 @@ A client installs one version with exactly these pnpm arguments:
 
 ### DSH compatibility
 
-Every market-listed version must declare valid `engines.dsh`. The reader and market-origin installation evaluate that range against the running DSH version with npm's `node-semver` and `includePrerelease: true`. There is no peer fallback or range synthesis. npm package peer resolution remains outside market host compatibility.
+Every market-listed version must declare valid `engines.agentrans`. The reader and market-origin installation evaluate that range against the running DSH version with npm's `node-semver` and `includePrerelease: true`. There is no peer fallback or range synthesis. npm package peer resolution remains outside market host compatibility.
 
 Installation rechecks the source manifest before accepting a market-origin package. An exact local `name@version` exemption may permit a valid range that rejects the runtime; it cannot make a missing or invalid declaration eligible. Exemptions are not published in the index.
 
@@ -165,9 +165,9 @@ A reader cannot verify these rules; a generator that violates them publishes a m
 
 - `name` and each `version` equal the package manifest of the installed source.
 - `publishTimestamp` is the registry publish time of `version` for npm sources and the committer time of `commit` for Git sources.
-- `engines.dsh` copies the manifest's declared range unchanged. A version with a missing, blank, or invalid range is omitted with a diagnostic. A plugin with no eligible version is omitted.
+- `engines.agentrans` copies the manifest's declared range unchanged. A version with a missing, blank, or invalid range is omitted with a diagnostic. A plugin with no eligible version is omitted.
 - `dist-tags` snapshots npm's [distribution tags](https://docs.npmjs.com/cli/v11/commands/npm-dist-tag/), retaining only targets present among the eligible listed versions. For Git sources, the publisher or market supplies the same exact tag-to-version mapping.
-- Each listed version declares `dsh.bundle`. Installation independently refuses a package without a bundle patch.
+- Each listed version declares `agentrans.bundle`. Installation independently refuses a package without a bundle patch.
 - `title`, `description`, and `icon` come from the highest listed version's locale metadata, manifest fields, and icon under the installed-plugin display rules. Use npm's `node-semver.rsort()` order, retaining input order for ties. This metadata choice does not select the installation version. `homepage` copies that version's manifest `homepage` and is absent without one. `repository` comes from that version's manifest `repository`: a shorthand or Git URL becomes the repository's web URL, `directory` is copied when it meets the `directory` rule and otherwise dropped while `url` stays, and the field is absent when the manifest has none or names no web-addressable repository.
 - `author` comes from the same highest listed version's npm author declaration. Copy an object's `name`; parse shorthand strings with a maintained npm person normalizer. Omit an absent or whitespace-only name and contact fields. Normalize a fresh projection, leaving the source manifest untouched.
 
@@ -181,7 +181,7 @@ Tag names must parse as registry tag specs under npm's maintained `npm-package-a
 
 Categories, labels, and sort keys are opaque: a reader filters and sorts by them, displays their `title`, and never interprets an id. Readers display declarations in the order of their localized `title`. When sorting plugins, a plugin without a value for the selected sort key follows all plugins with a value in either direction, and equal values keep the index order. Sorting by publish time uses a plugin's greatest `publishTimestamp`.
 
-A reader evaluates the required `engines.dsh` range under DSH compatibility. Versions use npm's `node-semver.rsort()` order, retaining index order for ties. Exact tag targets, not this display order, select installation versions.
+A reader evaluates the required `engines.agentrans` range under DSH compatibility. Versions use npm's `node-semver.rsort()` order, retaining index order for ties. Exact tag targets, not this display order, select installation versions.
 
 The initial channel is `latest`. Its exact target is the publisher- or market-selected version. Clients install that recorded version or commit, never `name@latest`. Missing or incompatible `latest` requires explicit version or channel selection; clients do not switch automatically. Installation confirmation identifies the version, selected channel if any, prerelease status, index URL, and source.
 
@@ -201,7 +201,7 @@ The initial channel is `latest`. Its exact target is the publisher- or market-se
 
 **Inline icons only.** A list without extra requests needs inline icons, but the 256 KiB installed-plugin icon limit is about 341 KiB as base64, so a 100-plugin index could reach about 35 MB. URL icons trade extra requests, and disclosure of the user's IP address to the image host, for a small index. The 32 KiB inline limit is about 43 KiB as base64, so 1,000 plugins with inline icons add at most about 43 MB; larger icons use URL references.
 
-**Inferring host compatibility from peer dependencies.** The market defines a new standard requiring an author-declared `engines.dsh`. Existing packages must add that declaration before listing; no fallback, workspace mapping, or range intersection is needed.
+**Inferring host compatibility from peer dependencies.** The market defines a new standard requiring an author-declared `engines.agentrans`. Existing packages must add that declaration before listing; no fallback, workspace mapping, or range intersection is needed.
 
 **Copying the complete npm person object into the display field.** The list needs a name. The generator supports npm's original declaration while omitting unused contact fields.
 
@@ -222,14 +222,14 @@ The initial channel is `latest`. Its exact target is the publisher- or market-se
 - A validator accepts the example above and rejects one violation of each rule in Root fields, Plugin fields, Version fields, and the `source` forms, with a diagnostic naming the JSON path.
 - Install arguments built from every example version are accepted by DSH's install-spec parser and by pnpm.
 - A validator ignores unknown members at every level.
-- Generator and validator refuse missing, blank, and invalid `engines.dsh`; omitted versions leave no dangling tag target. Index and market-origin installation agree on valid ranges, including hyphen ranges, prereleases, and valid ranges that reject the runtime. Exemptions never bypass the declaration requirement.
+- Generator and validator refuse missing, blank, and invalid `engines.agentrans`; omitted versions leave no dangling tag target. Index and market-origin installation agree on valid ranges, including hyphen ranges, prereleases, and valid ranges that reject the runtime. Exemptions never bypass the declaration requirement.
 - Exact tag targets select the same source after equally ranked Git build versions are reordered. Missing targets are rejected; absent or incompatible `latest` causes no automatic switch.
 - npm author objects and shorthand strings produce the declared name without contact fields or mutation of source identity.
 
 ## Risks
 
 - An index is unsigned. Titles, authors, labels, and scores are market claims; an `official` label is not DSH verification. Clients must show the index URL and each version's `source`.
-- A Git version's `name`, `version`, and `engines.dsh` are claims about the repository. A repository can claim any name, including an `@agentrans/` name, and the installed manifest decides what is actually installed.
+- A Git version's `name`, `version`, and `engines.agentrans` are claims about the repository. A repository can claim any name, including an `@agentrans/` name, and the installed manifest decides what is actually installed.
 - An npm version's `source.registry` is equally a claim: it directs the install of any `name`, including an `@agentrans/` name, to a registry the market chooses, and that registry decides what is installed.
 - URL icons disclose the user's IP address to image hosts.
 - Pinned versions and distribution tags stay stale until the index is regenerated.

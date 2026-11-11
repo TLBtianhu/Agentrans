@@ -22,7 +22,7 @@ it('offers approval for blocked install scripts and installs once they are allow
       const policyPath = join(profile, 'pnpm-workspace.yaml')
       // Node stands in for pnpm: `view` answers the check, and `add` first leaves the script undecided in the
       // profile policy the way pnpm 11 does and fails; once the policy allows it, the same `add` installs the package.
-      await writeFile(join(profile, 'view'), 'console.log(JSON.stringify({ name: "native-package", version: "1.0.0", dsh: { bundle: { patch: "./cordis.patch.yml" } } }))\n')
+      await writeFile(join(profile, 'view'), 'console.log(JSON.stringify({ name: "native-package", version: "1.0.0", agentrans: { bundle: { patch: "./cordis.patch.yml" } } }))\n')
       await writeFile(join(profile, 'add'), `
         import('node:fs').then(fs => {
         const policy = fs.readFileSync('pnpm-workspace.yaml', 'utf8');
@@ -36,7 +36,7 @@ it('offers approval for blocked install scripts and installs once they are allow
           return;
         }
         fs.mkdirSync('node_modules/native-package', { recursive: true });
-        fs.writeFileSync('node_modules/native-package/package.json', JSON.stringify({ name: 'native-package', version: '1.0.0', dsh: { bundle: { patch: './cordis.patch.yml' } } }));
+        fs.writeFileSync('node_modules/native-package/package.json', JSON.stringify({ name: 'native-package', version: '1.0.0', agentrans: { bundle: { patch: './cordis.patch.yml' } } }));
         fs.writeFileSync('node_modules/native-package/cordis.patch.yml', '[]\\n');
         fs.writeFileSync('package.json', JSON.stringify({ ...JSON.parse(fs.readFileSync('package.json', 'utf8')), dependencies: { 'native-package': '1.0.0' } }));
         console.log('Built native-package');

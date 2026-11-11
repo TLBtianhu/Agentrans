@@ -60,7 +60,7 @@ import { MarketIndexError, marketInstallTarget, parseMarketIndex } from '@agentr
 
 <a id="known-limitations-and-deferred-work"></a>
 
-- **不检查生成器义务**——校验器无法验证 `name`、`version`、`publishTimestamp`、`engines.dsh` 或展示字段是否与其描述的包一致，也无法验证该包是否声明了组合包。
+- **不检查生成器义务**——校验器无法验证 `name`、`version`、`publishTimestamp`、`engines.agentrans` 或展示字段是否与其描述的包一致，也无法验证该包是否声明了组合包。
 - **没有大小上限**——调用方在解析前限制文档大小。
 
 <a id="dev-note"></a>

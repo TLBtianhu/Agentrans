@@ -25,7 +25,7 @@ it('saves index sources without remounting, announces them, and restores them at
     const bundle = join(dir, 'node_modules', 'test-bundle')
     mkdirSync(bundle, { recursive: true })
     writeFileSync(join(home, 'package.json'), '{"name":"test-installation"}\n')
-    writeFileSync(join(bundle, 'package.json'), JSON.stringify({ name: 'test-bundle', version: '1.0.0', dsh: { bundle: { patch: 'cordis.patch.yml' } } }))
+    writeFileSync(join(bundle, 'package.json'), JSON.stringify({ name: 'test-bundle', version: '1.0.0', agentrans: { bundle: { patch: 'cordis.patch.yml' } } }))
     writeFileSync(join(bundle, 'cordis.patch.yml'), readFileSync(new URL('./fixtures/market.patch.yml', import.meta.url)))
     writeFileSync(join(dir, 'cordis.yml'), '[]\n')
     const profile: ProfileContext = {
@@ -75,7 +75,7 @@ it('reads a market entry detail document and serves its images through the compo
   const raw = `https://raw.githubusercontent.com/o/r/${commit}/pkg`
   const files: Record<string, string> = {
     'https://first.example/index.json': JSON.stringify({ format: 1, title: 'Market', plugins: [{
-      name: 'from-git', versions: [{ version: '1.0.0', publishTimestamp: 1, source: { type: 'git', url: 'https://github.com/o/r', commit, path: 'pkg' }, engines: { dsh: '*' } }],
+      name: 'from-git', versions: [{ version: '1.0.0', publishTimestamp: 1, source: { type: 'git', url: 'https://github.com/o/r', commit, path: 'pkg' }, engines: { agentrans: '*' } }],
     }] }),
     [`${raw}/locale/en.json`]: JSON.stringify({ meta: { detail: 'guide/DETAIL.md' } }),
     [`${raw}/locale/zh.json`]: JSON.stringify({ meta: { detail: 'guide/DETAIL.zh.md' } }),
@@ -93,7 +93,7 @@ it('reads a market entry detail document and serves its images through the compo
     const bundle = join(dir, 'node_modules', 'test-bundle')
     mkdirSync(bundle, { recursive: true })
     writeFileSync(join(home, 'package.json'), '{"name":"test-installation"}\n')
-    writeFileSync(join(bundle, 'package.json'), JSON.stringify({ name: 'test-bundle', version: '1.0.0', dsh: { bundle: { patch: 'cordis.patch.yml' } } }))
+    writeFileSync(join(bundle, 'package.json'), JSON.stringify({ name: 'test-bundle', version: '1.0.0', agentrans: { bundle: { patch: 'cordis.patch.yml' } } }))
     writeFileSync(join(bundle, 'cordis.patch.yml'), readFileSync(new URL('./fixtures/market.patch.yml', import.meta.url)))
     writeFileSync(join(dir, 'cordis.yml'), '- name: cordis:connection\n')
     const profile: ProfileContext = {

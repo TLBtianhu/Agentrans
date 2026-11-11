@@ -28,7 +28,7 @@ it.skipIf(!built)('loads the packed GitHub example with its explicitly installed
   expect(existsSync(join(installation, 'node_modules', adapter))).toBe(false)
   await writeFile(join(profile, 'package.json'), JSON.stringify({
     name: 'packed-webhook-profile', private: true, dependencies: {},
-    dsh: { profile: { bundles: ['@agentrans/base', '@agentrans/web-app'] } },
+    agentrans: { profile: { bundles: ['@agentrans/base', '@agentrans/web-app'] } },
   }))
   const profileDependencies = new Set([runtime, adapter])
   for (const name of profileDependencies) {

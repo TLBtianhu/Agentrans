@@ -53,7 +53,7 @@ The following metadata fields are optional. Omitting them leaves the format vers
 |---|---|
 | `dsh.manifestVersion` | Manifest format identifier; the declared format is `1`, independent of the npm package version and Session format version. |
 | `dsh.bundle.platforms` | Optional nonempty list of Node Host platform names, such as `["darwin"]`; omission allows every operating system. The launcher and plugin manager enforce it before composing or selecting the bundle. |
-| `engines.dsh` | Author-declared compatible DSH versions as a SemVer range, including exact prerelease versions. This field sits beside `engines.node` and `engines.npm`; an engines object may omit `dsh`. |
+| `engines.agentrans` | Author-declared compatible DSH versions as a SemVer range, including exact prerelease versions. This field sits beside `engines.node` and `engines.npm`; an engines object may omit `dsh`. |
 
 `LocalizedText` carries literal text or a language map with a required English fallback. `PluginLocalizedMeta` carries optional display title, description, an image data URL resolved from a package root's `package.json.icon` or an exported `<specifier>/icon`, and metadata diagnostics for installed plugins. [App boot](../../boot/app-boot/README.md) reads these values; this package only supplies their types.
 
@@ -93,7 +93,7 @@ Type declarations add no model input, so provider cache reuse is unaffected.
 <a id="known-limitations-and-deferred-work"></a>
 
 - **Static typing only.** Consumers read and validate the JSON fields they use, then adapt the shared declarations to their runtime data. The package supplies no parser, getter helpers, file checks, or defaults.
-- **Compatibility is declarative.** Current installers and loaders do not enforce `dsh.manifestVersion` or `engines.dsh`; declaring a range does not reject incompatible hosts or validate SemVer syntax.
+- **Compatibility is declarative.** Current installers and loaders do not enforce `dsh.manifestVersion` or `engines.agentrans`; declaring a range does not reject incompatible hosts or validate SemVer syntax.
 
 <a id="dev-note"></a>
 ### Dev Note

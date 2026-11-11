@@ -18,7 +18,7 @@ export async function profileComposition(ctx: Context, home: string, baseFile: s
   const bundle = join(dir, 'node_modules', 'test-profile-bundle')
   await mkdir(bundle, { recursive: true })
   await writeFile(join(home, 'package.json'), '{"name":"test-installation"}\n')
-  await writeFile(join(bundle, 'package.json'), JSON.stringify({ name: 'test-profile-bundle', version: '1.0.0', dsh: { bundle: { patch: 'cordis.patch.yml' } } }))
+  await writeFile(join(bundle, 'package.json'), JSON.stringify({ name: 'test-profile-bundle', version: '1.0.0', agentrans: { bundle: { patch: 'cordis.patch.yml' } } }))
   const rows = yaml.load(await readFile(baseFile, 'utf8'), { schema: entryListSchema }) as EntryOptions[]
   for (const row of rows) row.id ??= row.name.replace('@agentrans/', '')
   await writeFile(join(bundle, 'cordis.patch.yml'), yaml.dump([{ insert: rows }], { schema: entryListSchema }))

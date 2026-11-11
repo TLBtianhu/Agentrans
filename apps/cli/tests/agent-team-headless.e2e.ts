@@ -30,7 +30,7 @@ describe('agentrans run with Agent Teams enabled', () => {
         dependencies: {
           '@agentrans/experimental-agent-team-profile': 'workspace:^',
         },
-        dsh: {
+        agentrans: {
           profile: {
             bundles: [
               '@agentrans/base',

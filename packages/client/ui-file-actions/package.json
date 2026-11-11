@@ -29,7 +29,7 @@
       "types": "./lib/types/types.d.ts"
     }
   },
-  "dsh": {
+  "agentrans": {
     "client": {
       "inject": [
         "@agentrans/client-locale",

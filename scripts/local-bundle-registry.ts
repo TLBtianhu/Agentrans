@@ -238,7 +238,7 @@ export function verifyBuiltBundles(options: {
     if (!existsSync(entry) || !statSync(entry).isFile()) {
       throw new Error(`${name}: built runtime is missing at ${entry}; run pnpm run build:official first`)
     }
-    const dsh = member.manifest.dsh
+    const dsh = member.manifest.agentrans
     if (!isRecord(dsh) || !isRecord(dsh.bundle)) throw new Error(`${name} declares no dsh.bundle`)
     const patches = declaredBundlePatches(member.manifest)
     if (patches.length === 0) throw new Error(`${name}: dsh.bundle.patch must be a file path or a list of file paths`)
@@ -739,7 +739,7 @@ function payloadPath(file: string): string {
  * @returns Package-relative patch paths, or nothing when the package is not a bundle.
  */
 function declaredBundlePatches(manifest: Record<string, unknown>): string[] {
-  const dsh = manifest.dsh
+  const dsh = manifest.agentrans
   if (!isRecord(dsh) || !isRecord(dsh.bundle)) return []
   const declared = dsh.bundle.patch
   if (typeof declared === 'string') return [declared]

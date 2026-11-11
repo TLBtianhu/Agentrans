@@ -219,7 +219,7 @@ describe.skipIf(!builtArtifactsExist)('agentrans web browser-open assembled snap
 
     const diagnostic = result.stderr.split(/\r?\n/u)
       .find(line => line.startsWith('Error: dsh: '))
-      ?.replace(/^Error: dsh: .*[/\\]\.env/u, 'dsh: {{root}}/.env')
+      ?.replace(/^Error: dsh: .*[/\\]\.env/u, 'agentrans: {{root}}/.env')
 
     expect({
       diagnostic,
@@ -229,7 +229,7 @@ describe.skipIf(!builtArtifactsExist)('agentrans web browser-open assembled snap
       ready: result.stdout.includes('agentrans web: '),
     }).toMatchInlineSnapshot(`
       {
-        "diagnostic": "dsh: {{root}}/.env sets "BROWSER", which only the launching environment may set (it decides how this process starts, where its code and instructions load from, or how it reaches the network); export BROWSER instead of putting it in a .env file",
+        "diagnostic": "agentrans: {{root}}/.env sets "BROWSER", which only the launching environment may set (it decides how this process starts, where its code and instructions load from, or how it reaches the network); export BROWSER instead of putting it in a .env file",
         "exitCode": 1,
         "opened": false,
         "opening": false,

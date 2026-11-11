@@ -33,7 +33,7 @@ function fixture(): string {
   write(root, 'python/sdk-runtime/package.json', { name: '@agentrans/python-runtime' })
   write(root, 'packages/core/core/package.json', { name: core })
   write(root, 'packages/core/core/src/index.ts', 'export {}\n')
-  write(root, 'packages/bundle/base/package.json', { name: base, dsh: { bundle: { patch: './cordis.patch.yml' } } })
+  write(root, 'packages/bundle/base/package.json', { name: base, agentrans: { bundle: { patch: './cordis.patch.yml' } } })
   write(root, patch, [{ insert: [{ name: core }] }])
   write(root, preset, [{ insert: [{ name: '@agentrans/agent-preset', config: { id: 'standard', plugins: [{ name: core }] } }] }])
   write(root, 'packages/preset/agent-preset/package.json', { name: '@agentrans/agent-preset' })
@@ -119,7 +119,7 @@ describe('default product isolation', () => {
     write(root, 'packages/experimental/layer/package.json', {
       name: layer, ...legacy ? { icon: './icon.svg' } : {},
       exports: { ...legacy ? {} : { './icon': './icon.svg' }, './locale/*.json': './locale/*.json' },
-      dependencies: { [experimental]: 'workspace:^' }, dsh: { bundle: { patch: './cordis.patch.yml' } },
+      dependencies: { [experimental]: 'workspace:^' }, agentrans: { bundle: { patch: './cordis.patch.yml' } },
     })
     write(root, 'packages/experimental/layer/cordis.patch.yml', [{ insert: [{ name: experimental }] }])
     manifest(root, 'apps/cli/package.json', { dependencies: { [core]: 'workspace:^', [layer]: 'workspace:^' } })
@@ -144,7 +144,7 @@ describe('default product isolation', () => {
       const layer = '@agentrans/optional-layer'
       write(root, 'packages/bundle/optional-layer/package.json', {
         name: layer, icon: './icon.svg', exports: { './locale/*.json': './locale/*.json' },
-        dsh: { bundle: { patch: './cordis.patch.yml' } },
+        agentrans: { bundle: { patch: './cordis.patch.yml' } },
       })
       write(root, 'packages/bundle/optional-layer/src/index.ts', 'export {}')
       write(root, 'packages/bundle/optional-layer/cordis.patch.yml', [])
@@ -371,7 +371,7 @@ describe('default product isolation', () => {
     const root = fixture()
     write(root, profile, `export const PROFILE_TEMPLATES = { web: { bundles: ['${experimental}'] } }\n`
       + `export const DEFAULT_PROFILE_BUNDLES = ['${base}']\n`)
-    manifest(root, 'apps/cli/package.json', { dsh: { configTrees: [{ path: './config' }] } })
+    manifest(root, 'apps/cli/package.json', { agentrans: { configTrees: [{ path: './config' }] } })
     write(root, 'apps/cli/config/extra.cordis.yml', [{ name: experimental }])
     const failures = verifyDefaultProductIsolation(root).failures.join('\n')
     expect(failures).toContain(`${profile} -> ${experimental}`)
@@ -380,7 +380,7 @@ describe('default product isolation', () => {
 
   it.each([false, true])('rejects a declared config tree without composition files when its directory exists: %s', (existing) => {
     const root = fixture()
-    manifest(root, 'apps/cli/package.json', { dsh: { configTrees: [{ path: './config' }] } })
+    manifest(root, 'apps/cli/package.json', { agentrans: { configTrees: [{ path: './config' }] } })
     if (existing) write(root, 'apps/cli/config/README.i18n.yaml', 'en: test\n')
 
     expect(verifyDefaultProductIsolation(root).failures.join('\n')).toContain('apps/cli/config')
@@ -406,7 +406,7 @@ describe('default product isolation', () => {
   it('checks group contents after an id-only patch changes the composed Web tree', () => {
     const root = fixture()
     const web = '@agentrans/web-app'
-    write(root, 'packages/bundle/web-app/package.json', { name: web, dsh: { bundle: { patch: './cordis.patch.yml' } } })
+    write(root, 'packages/bundle/web-app/package.json', { name: web, agentrans: { bundle: { patch: './cordis.patch.yml' } } })
     write(root, patch, [{ insert: [{ id: 'feature-group', group: true, config: [{ name: core }] }] }])
     write(root, 'packages/bundle/web-app/cordis.patch.yml', [
       { id: 'feature-group', config: [{ name: experimental }] },

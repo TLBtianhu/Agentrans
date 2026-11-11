@@ -22,13 +22,18 @@ export interface DshPackageManifest {
   optionalDependencies?: Record<string, string>
   /** Compatible versions of packages supplied by the consuming project. */
   peerDependencies?: Record<string, string>
-  /** Runtime requirements; DSH compatibility is declarative until a reader enforces it. */
+  /** Runtime requirements; Agentrans compatibility is declarative until a reader enforces it. */
   engines?: DshEnginesManifest
-  /** DSH-specific author declarations. */
+  /** Agentrans author declarations. */
+  agentrans?: DshManifest
+  /**
+   * Retired name of {@link agentrans}; accepted for one release with a deprecation warning.
+   * @deprecated Rename the manifest key to `agentrans`.
+   */
   dsh?: DshManifest
 }
 
-/** Public author fields under `package.json.dsh`; a package may declare several roles. */
+/** Public author fields under `package.json.agentrans`; a package may declare several roles. */
 export interface DshManifest {
   /** Manifest format version, independent of the npm package and Session format versions. */
   manifestVersion?: 1
@@ -57,7 +62,12 @@ export interface PluginLocalizedMeta {
 
 /** Runtime version requirements under `package.json.engines`. */
 export interface DshEnginesManifest {
-  /** Compatible DSH versions as a SemVer range, including an exact version. */
+  /** Compatible Agentrans versions as a SemVer range, including an exact version. */
+  agentrans?: string
+  /**
+   * Retired name of {@link agentrans}; accepted for one release with a deprecation warning.
+   * @deprecated Rename the engine name to `agentrans`.
+   */
   dsh?: string
   /** Compatible Node.js versions. */
   node?: string

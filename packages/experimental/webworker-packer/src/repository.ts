@@ -154,8 +154,8 @@ function shippedTemplate(profile: string): { readonly bundles: readonly string[]
 function bundlePatches(repoRoot: string, bundle: string): PatchOptions[] {
   const directory = resolveBundleDir(BIN_NAME, bundle, installationManifest(repoRoot).manifest, join(repoRoot, CLI_PACKAGE))
   const declaration = (JSON.parse(readFileSync(join(directory, 'package.json'), 'utf8')) as {
-    dsh?: { bundle?: Parameters<typeof bundlePatchPaths>[1] }
-  }).dsh?.bundle
+    agentrans?: { bundle?: Parameters<typeof bundlePatchPaths>[1] }
+  }).agentrans?.bundle
   if (declaration === undefined) throw new Error(`vfs image: bundle ${bundle} declares no dsh.bundle`)
   return bundlePatchPaths(directory, declaration).flatMap(file => loadOverlayPatches(BIN_NAME, file))
 }
@@ -204,9 +204,9 @@ export function packRepositoryImage(repoRoot: string, profile: string, root?: st
 export function configTrees(repoRoot: string): ConfigTree[] {
   const packageDir = join(repoRoot, CLI_PACKAGE)
   const manifest = JSON.parse(readFileSync(join(packageDir, 'package.json'), 'utf8')) as {
-    dsh?: { configTrees?: unknown }
+    agentrans?: { configTrees?: unknown }
   }
-  const declared = manifest.dsh?.configTrees
+  const declared = manifest.agentrans?.configTrees
   if (declared === undefined) return []
   if (!Array.isArray(declared)) {
     throw new Error(`vfs image: ${CLI_PACKAGE} dsh.configTrees must be an array`)

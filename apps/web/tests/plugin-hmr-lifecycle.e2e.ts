@@ -42,7 +42,7 @@ describe('web e2e: plugin lifecycle with HMR', () => {
     await mkdir(dir, { recursive: true })
     await writeFile(join(dir, 'package.json'), JSON.stringify({
       name: NAME, version: `${label.replace(/\D/gu, '') || '0'}.0.0`, type: 'module', main: './index.mjs',
-      dsh: { bundle: { patch: './cordis.patch.yml' } },
+      agentrans: { bundle: { patch: './cordis.patch.yml' } },
     }))
     await writeFile(join(dir, 'cordis.patch.yml'), `- insert:\n    - id: ${NAME}\n      name: ${NAME}\n`)
     await writeFile(join(dir, 'index.mjs'), `${body}
@@ -227,7 +227,7 @@ describe('web e2e: plugin installation without HMR', () => {
       const dir = join(scratch, 'addon')
       await mkdir(dir)
       await writeFile(join(dir, 'package.json'), JSON.stringify({
-        name: NAME, version: '1.0.0', type: 'module', main: './index.mjs', dsh: { bundle: { patch: './cordis.patch.yml' } },
+        name: NAME, version: '1.0.0', type: 'module', main: './index.mjs', agentrans: { bundle: { patch: './cordis.patch.yml' } },
       }))
       await writeFile(join(dir, 'cordis.patch.yml'), `- insert:\n    - id: ${NAME}\n      name: ${NAME}\n`)
       await writeFile(join(dir, 'index.mjs'), `export const name = '${NAME}'\nexport function apply() {}\n`)

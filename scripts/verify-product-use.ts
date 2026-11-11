@@ -78,15 +78,15 @@ export function verifyProductUse(
     const manifest = JSON.parse(readFileSync(resolve(root, path), 'utf8')) as {
       name: string
       exports?: Record<string, unknown>
-      dsh?: { bundle?: DshBundleManifest; client?: unknown }
+      agentrans?: { bundle?: DshBundleManifest; client?: unknown }
     }
     if (typeof manifest.name !== 'string' || manifest.name === '') throw new Error(`${path}: missing package name`)
     if (packages.has(manifest.name)) throw new Error(`${path}: duplicate package name ${manifest.name}`)
     const remote = manifest.exports?.['./remote']
-    const pkg: Package = { directory: dirname(path), name: manifest.name, client: manifest.dsh?.client !== undefined,
+    const pkg: Package = { directory: dirname(path), name: manifest.name, client: manifest.agentrans?.client !== undefined,
       generatedRemote: isRecord(remote) && remote.default === './lib/typert.remote-client.js'
         && remote.types === './lib/typert.remote-client.d.ts',
-      ...(manifest.dsh?.bundle === undefined ? {} : { bundle: manifest.dsh.bundle }) }
+      ...(manifest.agentrans?.bundle === undefined ? {} : { bundle: manifest.agentrans.bundle }) }
     packages.set(pkg.name, pkg)
     directories.set(resolve(root, pkg.directory), pkg)
   }

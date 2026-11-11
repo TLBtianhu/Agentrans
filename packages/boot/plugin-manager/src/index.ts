@@ -143,7 +143,9 @@ interface InstallationManifest {
 
 /** What a package manifest says about the package: identity, one-liner, and whether it is a bundle. */
 function inspectionOf(kind: 'registry' | 'path', manifest: object, registry: Registry): Extract<PluginSpecInspection, { status: 'accepted' }> {
-  const dsh = (manifest as { dsh?: unknown }).dsh
+  // A manifest written before the rename still declares its bundle under `dsh`.
+  const author = manifest as { agentrans?: unknown; dsh?: unknown }
+  const dsh = author.agentrans ?? author.dsh
   const declared = typeof dsh === 'object' && dsh !== null ? dsh as { bundle?: unknown } : undefined
   const bundle = declared !== undefined && typeof declared.bundle === 'object' && declared.bundle !== null
   const name = stringField(manifest, 'name')
@@ -238,7 +240,7 @@ type Reload = Pick<ChangeResult, 'warnings' | 'restartReason'>
 
 /** The bundles a profile manifest selects. */
 function bundleSelection(manifest: ProfileManifest): readonly string[] {
-  return manifest.dsh?.profile?.bundles ?? []
+  return manifest.agentrans?.profile?.bundles ?? []
 }
 
 /**
@@ -547,7 +549,7 @@ export class PluginManager extends TypertRemoteService {
           continue
         }
         version = info.version
-        const listedByDefault = info.dsh?.bundle?.listedByDefault
+        const listedByDefault = info.agentrans?.bundle?.listedByDefault
         if (listedByDefault !== undefined) {
           if (typeof listedByDefault !== 'boolean') throw new Error('dsh.bundle.listedByDefault must be a boolean')
           listing = { listedByDefault }
@@ -557,7 +559,7 @@ export class PluginManager extends TypertRemoteService {
         const dir = resolveBundleDir('dsh', name, this.profile.installAnchor, this.profile.dir)
         const meta = offered?.meta ?? readPluginMeta(info.name ?? name, pathToFileURL(join(dir, 'package.json')).href)
         let platformError: ManagementError | undefined
-        try { assertBundlePlatform(info.dsh?.bundle?.platforms, process.platform) }
+        try { assertBundlePlatform(info.agentrans?.bundle?.platforms, process.platform) }
         catch (error) { platformError = managementError(error) }
         if (platformError?.code === 'unsupported-platform') listing = { listedByDefault: false }
         const error = platformError ?? targetError
@@ -981,10 +983,12 @@ export class PluginManager extends TypertRemoteService {
         name = target
         const dir = resolveBundleDir('dsh', name, this.profile.installAnchor, this.profile.dir)
         const manifest = bundleManifest(name, this.profile.dir, this.profile.installAnchor)
-        if (manifest?.dsh?.bundle === undefined) throw new ManagementFailure('not-bundle')
+        if (manifest === undefined) throw new ManagementFailure('not-bundle')
+        const bundle = manifest.agentrans?.bundle
+        if (bundle === undefined) throw new ManagementFailure('not-bundle')
         const compatibility = evaluatePluginCompatibility(manifest, readProfileVersionExemptions(this.profile.dir))
         if (compatibility !== undefined && !compatibility.exempted) throw new ManagementFailure('incompatible-version', [incompatiblePlugin(compatibility)])
-        for (const file of bundlePatchPaths(dir, manifest.dsh.bundle)) loadOverlayPatches('dsh', file)
+        for (const file of bundlePatchPaths(dir, bundle)) loadOverlayPatches('dsh', file)
         version = manifest.version
         this.installedFrom.set(name, used)
       } catch (error) {
@@ -1080,7 +1084,7 @@ export class PluginManager extends TypertRemoteService {
 
   /** The rows a bundle's patch inserts and the existing rows it changes; an unreadable patch throws. */
   private declaredRows(name: string, info: ProfileManifest): Pick<BundleInfo, 'rows' | 'overrides'> {
-    const bundle = info.dsh?.bundle
+    const bundle = info.agentrans?.bundle
     /* v8 ignore next -- bundleManifest answers only manifests that declare a patch */
     if (bundle === undefined) return { rows: [], overrides: [] }
     const dir = resolveBundleDir('dsh', name, this.profile.installAnchor, this.profile.dir)
@@ -1173,7 +1177,7 @@ export class PluginManager extends TypertRemoteService {
       const metadata = bundleManifest(name, this.profile.dir, this.profile.installAnchor)
       if (metadata === undefined) throw new ManagementFailure('not-bundle')
       if (enabled) {
-        assertBundlePlatform(metadata.dsh?.bundle?.platforms, process.platform)
+        assertBundlePlatform(metadata.agentrans?.bundle?.platforms, process.platform)
         const compatibility = evaluatePluginCompatibility(metadata, readProfileVersionExemptions(this.profile.dir))
         if (compatibility !== undefined && !compatibility.exempted) throw new ManagementFailure('incompatible-version', [incompatiblePlugin(compatibility)])
         this.bundleRows(name)
@@ -1184,16 +1188,17 @@ export class PluginManager extends TypertRemoteService {
     }
     const bundles = enabled ? [...previous, ...previous.includes(name) ? [] : [name]] : previous.filter(item => item !== name)
     if (JSON.stringify(previous) === JSON.stringify(bundles)) return
-    manifest.dsh = { ...manifest.dsh, profile: { ...manifest.dsh?.profile, bundles } }
+    manifest.agentrans = { ...manifest.agentrans, profile: { ...manifest.agentrans?.profile, bundles } }
     await saveManifest(this.profile.dir, manifest)
     if (enabled) this.protectsManager(name)
   }
 
   private bundleRows(name: string): EntryOptions[] {
     const info = bundleManifest(name, this.profile.dir, this.profile.installAnchor)
-    if (info?.dsh?.bundle === undefined) return []
+    const bundle = info?.agentrans?.bundle
+    if (bundle === undefined) return []
     const dir = resolveBundleDir('dsh', name, this.profile.installAnchor, this.profile.dir)
-    return flatten(composeEntries([bundlePatchPaths(dir, info.dsh.bundle).flatMap(file => loadOverlayPatches('dsh', file))]))
+    return flatten(composeEntries([bundlePatchPaths(dir, bundle).flatMap(file => loadOverlayPatches('dsh', file))]))
   }
 
   private protectsManager(name: string): boolean {

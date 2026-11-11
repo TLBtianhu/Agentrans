@@ -35,7 +35,7 @@ interface Manifest {
   optionalDependencies?: Record<string, string>
   peerDependencies?: Record<string, string>
   devDependencies?: Record<string, string>
-  dsh?: { bundle?: DshBundleManifest; configTrees?: Array<{ path: string }> }
+  agentrans?: { bundle?: DshBundleManifest; configTrees?: Array<{ path: string }> }
 }
 
 interface Package {
@@ -91,7 +91,7 @@ export function verifyDefaultProductIsolation(root: string): ProductIsolationRes
       failures.push(`${PROFILE_SOURCE}: optional bundle ${name} must be a runtime dependency of apps/cli`)
     }
     const manifest = packages.get(name)?.manifest
-    if (manifest?.dsh?.bundle?.patch === undefined) {
+    if (manifest?.agentrans?.bundle?.patch === undefined) {
       failures.push(`${PROFILE_SOURCE}: optional bundle ${name} must declare dsh.bundle.patch`)
     }
     if (typeof manifest?.icon !== 'string' && manifest?.exports?.['./icon'] == null) {
@@ -243,14 +243,14 @@ export function verifyDefaultProductIsolation(root: string): ProductIsolationRes
   if (selection !== undefined) {
     for (const name of selection.packages) {
       reference(name, PROFILE_SOURCE)
-      if (packages.get(name)?.manifest.dsh?.bundle?.patch === undefined) {
+      if (packages.get(name)?.manifest.agentrans?.bundle?.patch === undefined) {
         failures.push(`${PROFILE_SOURCE}: default bundle ${name} must declare dsh.bundle.patch`)
       }
       if (optionalBundles.has(name)) failures.push(`${PROFILE_SOURCE}: optional bundle ${name} must not be a default bundle`)
     }
     const webLayers = selection.webBundles.flatMap((name) => {
       const pkg = packages.get(name)
-      const bundle = pkg?.manifest.dsh?.bundle
+      const bundle = pkg?.manifest.agentrans?.bundle
       if (pkg === undefined || bundle === undefined) return []
       return [bundlePatchPaths(pkg.directory, bundle).flatMap(file => loadOverlayPatches('verify-default-product-isolation', file))]
     })
@@ -298,8 +298,9 @@ export function verifyDefaultProductIsolation(root: string): ProductIsolationRes
         dependency(name, range, pkg, `${manifest.name} ${section}`)
       }
     }
-    for (const file of manifest.dsh?.bundle === undefined ? [] : bundlePatchPaths(pkg.directory, manifest.dsh.bundle)) scanConfig(file)
-    for (const tree of manifest.dsh?.configTrees ?? []) {
+    const declaredPatches = manifest.agentrans?.bundle
+    if (declaredPatches !== undefined) for (const file of bundlePatchPaths(pkg.directory, declaredPatches)) scanConfig(file)
+    for (const tree of manifest.agentrans?.configTrees ?? []) {
       const treePath = resolve(pkg.directory, tree.path)
       const files = existsSync(treePath) && statSync(treePath).isDirectory()
         ? globSync('**/*.{yml,yaml}', { cwd: treePath, exclude: ['**/*.i18n.yaml', '**/preset.yml'] }) : []
