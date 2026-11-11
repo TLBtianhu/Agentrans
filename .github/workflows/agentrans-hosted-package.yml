@@ -23,9 +23,9 @@ on:
         default: nightly
         required: true
       target:
-        description: '打包目标'
+        description: '打包目标（mac 同时构建两种 macOS 架构并合并更新元数据）'
         type: choice
-        options: [win-x64, mac-arm64, mac-x64]
+        options: [win-x64, mac-arm64, mac-x64, mac]
         default: win-x64
         required: true
 
@@ -71,19 +71,35 @@ jobs:
       # The preparation starts the packaged application once to prove it runs. An Intel build on an
       # arm64 runner needs Rosetta before that check can pass.
       - name: Install Rosetta for the Intel build
-        if: inputs.target == 'mac-x64'
+        if: inputs.target == 'mac-x64' || inputs.target == 'mac'
         run: sudo softwareupdate --install-rosetta --agree-to-license
 
       # The installer entry packages a prepared tree; this prepares it without producing an
       # installer of its own, which is the step the signed lanes get from their full package run.
+      # The installer entry packages a prepared tree; this prepares it without producing an
+      # installer of its own, which is the step the signed lanes get from their full package run.
       - name: Prepare the packaged runtime
+        if: inputs.target != 'mac'
         shell: pwsh
         run: |
           $script = if ($env:TARGET -eq 'win-x64') { 'package:desktop:win:x64' } else { 'package:desktop:mac:' + ($env:TARGET -replace '^mac-', '') }
           pnpm run $script --unsigned --prepare-only --build-version ${{ inputs.version }}
 
       - name: Build the unsigned application
+        if: inputs.target != 'mac'
         run: node apps/desktop/scripts/package-agentrans-installer.mjs artifacts/agentrans-installer ${{ inputs.target }}
+
+      # One release needs one metadata file per platform, and each macOS architecture produces its
+      # own, so both architectures are built here and assembled into a single upload directory.
+      - name: Package both macOS architectures
+        if: inputs.target == 'mac'
+        shell: pwsh
+        run: |
+          pnpm run package:desktop:mac:arm64 --unsigned --prepare-only --build-version ${{ inputs.version }}
+          node apps/desktop/scripts/package-agentrans-installer.mjs artifacts/mac-arm64 mac-arm64
+          pnpm run package:desktop:mac:x64 --unsigned --prepare-only --build-version ${{ inputs.version }}
+          node apps/desktop/scripts/package-agentrans-installer.mjs artifacts/mac-x64 mac-x64
+          node apps/desktop/scripts/merge-mac-metadata.mjs apps/desktop/artifacts/mac-arm64 apps/desktop/artifacts/mac-x64 apps/desktop/artifacts/agentrans-installer
 
       - name: List the packaged files
         shell: pwsh

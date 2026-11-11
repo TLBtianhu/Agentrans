@@ -1,14 +1,16 @@
 /** Build the Agentrans installer for one target with the shared unsigned production configuration. */
 import { build, Platform, Arch } from 'electron-builder'
 import { mkdir } from 'node:fs/promises'
-import { join } from 'node:path'
+import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { agentransInstallerEnvironment, createAgentransInstallerConfig } from './agentrans-installer-config.mjs'
 
 const appRoot = fileURLToPath(new URL('..', import.meta.url))
 const repositoryRoot = fileURLToPath(new URL('../../..', import.meta.url))
 const target = process.argv[3] ?? 'win-x64'
-const output = process.argv[2] ?? join(repositoryRoot, 'artifacts', 'agentrans-installer')
+// electron-builder resolves its output directory against the Electron project, so the same
+// absolute path is created here and packaged there; a relative path used to split the two.
+const output = resolve(appRoot, process.argv[2] ?? join(repositoryRoot, 'artifacts', 'agentrans-installer'))
 
 const environment = agentransInstallerEnvironment(process.env, target)
 const config = createAgentransInstallerConfig({ environment, output, repositoryRoot, target })
