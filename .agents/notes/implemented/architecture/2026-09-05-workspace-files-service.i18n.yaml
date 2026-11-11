@@ -6,20 +6,20 @@
   en: 4f48d3f949d8e3eb
   zh: 4060f4e66c36439e
 /agent-note-workspace-file-service/problem:
-  en: 55d969715a48c9b3
-  zh: 755dab7523cd01c2
+  en: 40cc03e2da535f53
+  zh: 7c192e7a31eba737
 /agent-note-workspace-file-service/decision:
-  en: bcf7d51cb7c7fc27
-  zh: 4bdbd8733d672476
+  en: 7a4f977d3d9708c5
+  zh: e8105667987b0523
 /agent-note-workspace-file-service/decision/package-topology:
-  en: 5a8d81c95c031663
-  zh: 5bdeebe3b5e759c9
+  en: 3d6636ab0ff2fbc0
+  zh: ce14713f30a95f16
 /agent-note-workspace-file-service/decision/the-workspacefiles-file-operations:
   en: 434a2f6b3fab4756
   zh: ea83124d00c6a79c
 /agent-note-workspace-file-service/decision/paths-on-the-wire:
-  en: 7b5a96adc08177bc
-  zh: ae4692e5e62e7de0
+  en: f3fe216b14f7b4ab
+  zh: e0d3408b79c1d141
 /agent-note-workspace-file-service/decision/file-checks-and-workspace-containment:
   en: 1b588f346590a0fd
   zh: 1cdac02b967b157f
@@ -29,9 +29,9 @@
 /agent-note-workspace-file-service/decision/configuration:
   en: 796ee295af0895bd
   zh: 4dfa113ed19f5f9a
-/agent-note-workspace-file-service/decision/the-readbyterange-seam-in-dsh-fs:
-  en: 24d84843c56a012a
-  zh: 058f959527589302
+/agent-note-workspace-file-service/decision/the-readbyterange-seam-in-agentrans-fs:
+  en: a334aa0c9c84e187
+  zh: 02c339b5d8ea9ccb
 /agent-note-workspace-file-service/decision/the-client-file-provider:
   en: 0d42d4716dde706f
   zh: 4e95b8af2df232b6
@@ -45,8 +45,8 @@
   en: 246bb7aed62f6c9b
   zh: debf6d4129ee477b
 /agent-note-workspace-file-service/testing:
-  en: 776c380b6150065e
-  zh: df3f0f1050966ff7
+  en: b496afd6c043fb15
+  zh: 75dffc29af460d0d
 /agent-note-workspace-file-service/deferred:
   en: b033218338ca0122
   zh: aa48fa67f9eb36c3

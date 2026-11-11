@@ -12,7 +12,7 @@ host 侧，cordis 插件装载站在 Node 的模块机制之上——require cac
 
 浏览器客户端跑同一套 cordis 插件机制，因此底下需要同样的基座——而浏览器没有 Node 模块系统。
 
-常规前端工程在构建期消化全部依赖：单一 bundle，external 由打包器解决，运行时无物可管。在此之上再做运行时模块管理，正是这里的特殊需求。client 因此拆成两层：上层是经同一份 vendored Loader 的 cordis 插件装载，下层是模块粒度的依赖管理——`dsh-client-modules`。
+常规前端工程在构建期消化全部依赖：单一 bundle，external 由打包器解决，运行时无物可管。在此之上再做运行时模块管理，正是这里的特殊需求。client 因此拆成两层：上层是经同一份 vendored Loader 的 cordis 插件装载，下层是模块粒度的依赖管理——`@agentrans/client-modules`。
 
 下层供给四项能力：external（平台清单）、远程到达（同源外部 classic script 加惰性工厂登记）、不可变的版本化交付、热更新（invalidate/prefetch）。
 
@@ -32,7 +32,7 @@ Web 内核保持不依赖框架，也不 import 任何动态包实体。Modules 
 
 ### 一套模块系统，一个插件治理器
 
-浏览器复刻 host 侧的分工。`dsh-client-modules`（`ClientModuleSystem`）坐上 host 侧由 Node 内部 ESM loader 占据的模块系统席位；同一份 vendored `@cordisjs/plugin-loader` 在两侧都坐治理席。二者的分界线一句话说尽：**模块系统拥有模块身份与字节——代码怎么到达、怎么登记、怎么变成导出内容；Loader 拥有插件生命周期——插件何时挂载、等待什么、如何拆除。**
+浏览器复刻 host 侧的分工。`@agentrans/client-modules`（`ClientModuleSystem`）坐上 host 侧由 Node 内部 ESM loader 占据的模块系统席位；同一份 vendored `@cordisjs/plugin-loader` 在两侧都坐治理席。二者的分界线一句话说尽：**模块系统拥有模块身份与字节——代码怎么到达、怎么登记、怎么变成导出内容；Loader 拥有插件生命周期——插件何时挂载、等待什么、如何拆除。**
 
 `ClientModuleSystem` 是一张 lazy CJS 表。执行 bundle 只**登记**其 factory——入口调用 `window.__ModuleLoader__.load({ id, factory })`，chunk 还会提供其生成文件名——此外什么都不发生。模块体的一切副作用（包括 CSS 注入）都住在 factory 闭包里，在物化时运行：物化即该 id 的首次 `require`/import，此后记忆化。Import 和 prefetch 会先递归登记已声明的动态请求，再登记消费者；随后 factory 会同步物化任何已登记但尚未物化的请求。可调用的 `require` 解析同步模块表请求；其 `require.async` 操作返回 Promise，负责加载、登记并物化一个包内 chunk。共享 tsdown 预设把源码中针对包内 chunk 的 `import()` 表达式编译到这个独立操作。受支持的产物必须自包含：入口或 chunk 不能同步 require 另一个相对 `client*.js` 产物。模块表按固定分支顺序解析：seed word → 记忆化记录 → graph row classic-script 登记 → 已登记 factory 物化 → 大声抛错。Modules factory 是自举例外：HTML facade 先物化它，构造过程再把同一 exports 直接写入记忆化表。最后这一抛是构建期纯度门禁在运行时的镜像。系统还保管逐模块簿记——名下 `<style data-plugin>` 标签 id、观测到的 require 边——并暴露 HMR（热模块替换）需要的两个动词：`prefetch(id)`（登记所请求的动态 factory 和本 row 自身的 factory；并发到达共享一个任务）与 `invalidate(id)`（推进 owner 代次并丢弃非 bootstrap 包的入口和 chunk factory 及记录，让下次到达重新加载它们）。在旧代次捕获的 chunk 请求不能填充新代次。
 
@@ -55,7 +55,7 @@ Host 会快照每个已构建插件入口 bundle，并把每个调度阶段的�
 **host 侧——组合这张图。**
 
 1. 负责组合的 app（`apps/cli`）把名册作为普通行放进它的 `cordis.yml` 配置树——client 插件包与每个 host 插件一样是 entry 行，包括无条件挂载的 `client-hmr` 行。`auditStartupEntries` 报告 import 失败、带原始 stack 的激活错误，以及待满足的依赖；optional entry 输出 warning，required entry 则使启动失败（[启动策略](2026-09-09-consumer-owned-startup-strictness.zh.md)）。
-2. `dsh-client-modules` 的 node 半（该包是双面的：浏览器半就是模块表）使用 Host face import 时相同的 `name` 与所属 tree `baseUrl` 解析每个 live Loader entry，再读取最近归属 package.json 的 `dsh.client` 声明并组合出 `window.__AGENTRANS_BOOT__`：`{ rev, entries: [{ id, url, rev, inject?, immediately?, external? }], batches: [{ phase, url, rev, entries }] }`。即使 overlay 指向相对的 source 或 built entry 文件，manifest 包名仍是浏览器模块身份。若不同的 active Loader source 解析到同一包名，组合会失败；一个来源卸载后，仍存活的来源无需重启 fiber 即可提供该 row。Row 的三个可选字段都来自 manifest，永不人肉抄写。组合会把被请求的动态图 row 排到消费者之前、拒绝同步请求环，并把每个 row 恰好分配给一个初始批次。它会拒绝没有已构建 `./client` bundle 的已声明插件，并把它们的 package/path 行归到一条源码构建要求下；畸形声明字段同样会让激活失败，Host 检查会从 FAILED fiber 报告这两类错误。
+2. `@agentrans/client-modules` 的 node 半（该包是双面的：浏览器半就是模块表）使用 Host face import 时相同的 `name` 与所属 tree `baseUrl` 解析每个 live Loader entry，再读取最近归属 package.json 的 `dsh.client` 声明并组合出 `window.__AGENTRANS_BOOT__`：`{ rev, entries: [{ id, url, rev, inject?, immediately?, external? }], batches: [{ phase, url, rev, entries }] }`。即使 overlay 指向相对的 source 或 built entry 文件，manifest 包名仍是浏览器模块身份。若不同的 active Loader source 解析到同一包名，组合会失败；一个来源卸载后，仍存活的来源无需重启 fiber 即可提供该 row。Row 的三个可选字段都来自 manifest，永不人肉抄写。组合会把被请求的动态图 row 排到消费者之前、拒绝同步请求环，并把每个 row 恰好分配给一个初始批次。它会拒绝没有已构建 `./client` bundle 的已声明插件，并把它们的 package/path 行归到一条源码构建要求下；畸形声明字段同样会让激活失败，Host 检查会从 FAILED fiber 报告这两类错误。
 3. 扫描是单包增量——不存在全量重扫代码路径。每次 cordis `internal/plugin` 发射把该 fiber 的 entry 名标脏（无 entry 的 fiber O(1) 丢弃）；微任务 flush 把每个脏名对账 live loader entries，每次对账都重新读取包 manifest 与 bundle 元数据，因此条目重启会发布变化后的声明或 bundle，未变化时不发布；没有伴随条目重启的 bundle 重建经 `rebuilt(id)` 发布（[包资源决策](2026-10-19-client-plugin-package-assets.zh.md)）。激活趟从当前 entries 灌同一脏集合并同步 flush，初扫与稳态共享一条实现。初始 row 对读取前的文件系统元数据求哈希；启动 combo revision 对有序 row 的身份与 revision 求哈希，row 与批次描述再共同哈希进 `graph.rev`。图类型单源在 modules 包的 `./client` 出口——webserver 对图一无所知；modules 会注册 combo 路由并贡献结构化 index 注入行。
 
 为什么名册是 yml 行而不是扫描？因为哪些插件组合进一次部署是组合决策，不是包属性——一个在仓库中声明了 dsh.client 的包，不代表这次部署要挂载它，扫描发现无从替人做这个决定；node 半只扫描配置树实际挂载了的东西。
@@ -65,7 +65,7 @@ Host 会快照每个已构建插件入口 bundle，并把每个调度阶段的�
 **第二阶段——插件面。**
 
 1. 内核挂载 vendored Loader，在任何 entry 存在之前就把模块系统注入为 `internal`。顺序有讲究：`tree.import` 的裸 import 兜底分支在浏览器里绝不能跑到。
-2. 它统一创建每个 graph row。Import modules row 会返回记忆化的 bootstrap exports，其 `apply()` 读取该树的 `Loader.internal`，把同一个实例提供为 `ctx.modules`；需要该 service 的 row 会保持 PENDING 直至此时，因此 modules row 无需特殊创建位置。渲染组装是由 `dsh-client-ui-renderer` 提供的普通 host graph row；内核不追加组装伪 entry。
+2. 它统一创建每个 graph row。Import modules row 会返回记忆化的 bootstrap exports，其 `apply()` 读取该树的 `Loader.internal`，把同一个实例提供为 `ctx.modules`；需要该 service 的 row 会保持 PENDING 直至此时，因此 modules row 无需特殊创建位置。渲染组装是由 `@agentrans/client-ui-renderer` 提供的普通 host graph row；内核不追加组装伪 entry。
 3. Graph 顺序治理同步 factory 可用性；Cordis 激活与之独立，仍经服务等待推进。
 4. `settled` = 每个 entry 已创建 + `loader.await()` 完全停稳 + 一次全 ACTIVE 扫描。扫描列出每个 import 失败、FAILED 或 PENDING 的 fiber 及其缺失的服务。它存在的理由：cordis 的 inject 等待没有超时——这次扫描就是大声失败的兜底线。
 5. 不依赖框架的 loading 页经 `internal/status` 投影真实 fiber 状态。检查完成后，内核调用 `ctx.uiRenderer.mount(container)`，一次切换到真实 UI。
@@ -106,7 +106,7 @@ Wire 两侧运行同一份治理实现；浏览器特有层只包含一套模块
 
 接受的代价：vendored Loader 在浏览器里背着闲置机件（EntryTree 持久化是 no-op，分组／隔离未用）；开发期每次修改插件都要付一次 bundle 重建加 fiber 重挂；graph `inject` row 指导 factory 到达，但服务可用性仍是激活权威，因此不匹配会在 settled 扫描时浮出；静态 UI 库保留直接实体导出；每个 bundle 多出一份 sourcemap 产物，外部 script 失败也只能给出粗粒度 URL 诊断，不能像显式 fetch 那样报告 HTTP 状态。Host 为当前图及上一代启动图保留 bundle 快照与惰性响应计划。脚本和 map body 在首次 `GET` 后缓存，因此内存随 bundle 快照和已请求的响应 body 增长。每份已物化响应在其 URL 下保持固定；若上一代 map 在重建后才首次被请求，则会读取当前 map 文件。
 
-名册位于 web 组合包的配置树（`packages/bundle/web-app/cordis.patch.yml`）；`mountWebPlugins` 与 `CLIENT_PACKAGES` 常量已消失，重组一次部署等于替换 yml/overlay。Graph 组合器位于 `dsh-client-modules` node 半，由 parser 预载的 Client face 则自举浏览器模块表。Webserver 继续作为朴素路由注册插件；`/api/*` 绑定、浏览器认证、RPC envelope 与精确 Fetch 路由属于 Connection node 半，Remote 分发属于 API Gateway，开发期 bundle 监视与 SSE 通道属于 HMR node 半。
+名册位于 web 组合包的配置树（`packages/bundle/web-app/cordis.patch.yml`）；`mountWebPlugins` 与 `CLIENT_PACKAGES` 常量已消失，重组一次部署等于替换 yml/overlay。Graph 组合器位于 `@agentrans/client-modules` node 半，由 parser 预载的 Client face 则自举浏览器模块表。Webserver 继续作为朴素路由注册插件；`/api/*` 绑定、浏览器认证、RPC envelope 与精确 Fetch 路由属于 Connection node 半，Remote 分发属于 API Gateway，开发期 bundle 监视与 SSE 通道属于 HMR node 半。
 
 ## Alternatives considered
 

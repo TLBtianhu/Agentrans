@@ -9,8 +9,8 @@
   en: 4b312be894531bee
   zh: d655648ea5843ef5
 /agent-note-ptc-mode-the-model-writes-typescript-against-the-tool-registry/decision:
-  en: 7fc8228c4a610ffe
-  zh: 47d04300874415bd
+  en: 78841ca4f90895d3
+  zh: 531d9823890e69ac
 /agent-note-ptc-mode-the-model-writes-typescript-against-the-tool-registry/decision/per-program-execution-controls:
   en: da694641e1d009de
   zh: 9d7492d39039af66
@@ -24,8 +24,8 @@
   en: b8e4cf9433c7ee18
   zh: e5f4e8d7d03d3a7b
 /agent-note-ptc-mode-the-model-writes-typescript-against-the-tool-registry/decision/the-ptc-runtime-seam:
-  en: 4c423f4e9cef6055
-  zh: 5c23a3637eb420c0
+  en: 6c71189b9f8ad36e
+  zh: 359e3455ef260af5
 /agent-note-ptc-mode-the-model-writes-typescript-against-the-tool-registry/decision/the-node-process-runtime:
   en: 0b846ed33977e383
   zh: e45158758d657f9a
@@ -45,5 +45,5 @@
   en: e78530994a88d14f
   zh: 49f64c7f1421f507
 /agent-note-ptc-mode-the-model-writes-typescript-against-the-tool-registry/risks:
-  en: d58925bdb912de23
-  zh: d3a70237d656e5a4
+  en: 2b3b71107530ebdd
+  zh: 608a4bfdae7d5239

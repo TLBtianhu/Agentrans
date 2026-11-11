@@ -32,7 +32,7 @@ Terminology reminder: pkg's `/snapshot` VFS has nothing to do with this repo's t
 The deterministic serving surface is a plugin selected by the packaged `agentrans` application:
 
 - [`packages/sdk/server`](../../../../packages/sdk/server/README.md) (`@agentrans/sdk-jsonrpc-server`): the pure protocol plugin; on apply it mounts `HarnessSdkJsonRpcServer` plus a line-delimited JSON-RPC transport on the process stdio, with disposal through `ctx.effect()`. Whether to serve is decided by `cordis.yml`; a yml that does not mount it is a legitimate process that does not serve. Protocol-level exit belongs to the plugin (after answering and flushing the `shutdown` response it disposes the root runtime so persistence drains, then `exit(0)`; an HMR-style unload only stops the service without exiting the process).
-- [`apps/cli`](../../../../apps/cli/README.md) (`@agentrans/cli`): the packaged application entry; its `sdk` profile mounts `dsh-sdk-jsonrpc-server`, and the CLI owns environment layering, profile composition, stdin/signal shutdown, and process exit.
+- [`apps/cli`](../../../../apps/cli/README.md) (`@agentrans/cli`): the packaged application entry; its `sdk` profile mounts `@agentrans/sdk-jsonrpc-server`, and the CLI owns environment layering, profile composition, stdin/signal shutdown, and process exit.
 
 The Python client supplies an explicit Harness home and selects the `sdk` profile plus ordered patch files. A missing home, profile, bundle, or server row fails loudly; there is no external complete-config fallback. [docs/architecture.md](../../../../docs/architecture.md) owns this application surface.
 
@@ -66,7 +66,7 @@ The Python client launches the packaged `agentrans` command with the selected pr
 
 ## Packaged workflow and code execution
 
-`dsh-workflow-ptc` sends its self-contained guest program through `dsh-ptc-runtime-node`. The shared provider starts a managed child through the executable's private Node bootstrap dispatch, with a dedicated control channel; no separate workflow worker asset is required. The [sandboxed Node decision](2026-09-11-sandboxed-node-ptc-runtime.md) owns process and policy lifetime, and [workflow sandbox reuse](2026-09-13-workflow-ptc-sandbox-reuse.md) owns the workflow adapter.
+`@agentrans/workflow-ptc` sends its self-contained guest program through `@agentrans/ptc-runtime-node`. The shared provider starts a managed child through the executable's private Node bootstrap dispatch, with a dedicated control channel; no separate workflow worker asset is required. The [sandboxed Node decision](2026-09-11-sandboxed-node-ptc-runtime.md) owns process and policy lifetime, and [workflow sandbox reuse](2026-09-13-workflow-ptc-sandbox-reuse.md) owns the workflow adapter.
 
 ## Testing
 

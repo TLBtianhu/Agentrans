@@ -8,7 +8,7 @@ English | [中文](2026-09-19-remote-duplex-stream.zh.md)
 
 ### Current state
 
-`dsh-api-gateway` multiplexes Typert Remote streams over one WebSocket at `/api/remote.mux`. A Host method declares both directions with `@Remote({ mode: 'stream' })` and `RemoteStream<Out, In>`; the generated Client method returns `RemoteStreamHandle<Out, In>`. Existing `Iterable` and `AsyncIterable` return types declare downlink-only methods. The optional final `signal: AbortSignal` is supplied by the Gateway and does not enter the wire arguments.
+`@agentrans/api-gateway` multiplexes Typert Remote streams over one WebSocket at `/api/remote.mux`. A Host method declares both directions with `@Remote({ mode: 'stream' })` and `RemoteStream<Out, In>`; the generated Client method returns `RemoteStreamHandle<Out, In>`. Existing `Iterable` and `AsyncIterable` return types declare downlink-only methods. The optional final `signal: AbortSignal` is supplied by the Gateway and does not enter the wire arguments.
 
 Both directions share one `streamId`:
 
@@ -452,13 +452,13 @@ cancel : missing → ignore; otherwise control.abort(new Error('Remote stream ca
 
 | Package | Carries |
 | --- | --- |
-| `dsh-typert-protocol` (`types.ts`, `index.ts`) | `RemoteStream`, `RemoteStreamHandle`, `PeerId`, `PeerScope`, `RemoteInvocation`, the `ctx.invocation` declaration merge, `InvocationDescriptor.uplink`; the decorator recognizes only `mode: 'stream'`; `TypertRemoteService` registers the `invocation` accessor when constructed |
-| `dsh-typert-registry` | Load-time validation that `uplink.codec` is a valid strict codec |
-| `dsh-typert-generator` (`model.ts`, `analyzer.ts`, `emitter.ts`) | `remoteResultType` recognizes `RemoteStream<Out, In>` and generates the `uplink` boundary; the descriptor emits `uplink: { codec }`; the generated Client signature returns `RemoteStreamHandle<Out, In>`; the parameter loop accepts only business parameters and a final `signal` |
-| `dsh-client-connection` (`peer.ts`, `rpc.ts`, `rpc-host.ts`, `index.ts`) | The `Peer` class; `connection.browserPeer` and `admit`; the `/api` and upgrade routes obtain the Peer through `admit`; the optional `uplink` of `rpc.open` |
-| `dsh-api-gateway` Host (`stream-protocol.ts`, `stream-server.ts`, `types.ts`, `index.ts`) | `item` / `end` frames; `UplinkInbox`; `Config.streamInboxBytes` and `Config.websocketCompression`; `GatewayInvocation` and `extend({ invocation })`; `UplinkDecoder`; `handleUpgrade(req, socket, head, peer)` |
-| `dsh-api-gateway` Client (`client/index.ts`, `client/stream-client.ts`) | `invokeStream` returns the handle; the uplink pump is driven by the handle's queue |
-| `dsh-webworker-runtime`, `dsh-remote-mock` | The worker tunnel's two uplink frames and the `serveStream` assembly; `StreamHandle.uplink`; the direct proxy returns the real handle |
+| `@agentrans/typert-protocol` (`types.ts`, `index.ts`) | `RemoteStream`, `RemoteStreamHandle`, `PeerId`, `PeerScope`, `RemoteInvocation`, the `ctx.invocation` declaration merge, `InvocationDescriptor.uplink`; the decorator recognizes only `mode: 'stream'`; `TypertRemoteService` registers the `invocation` accessor when constructed |
+| `@agentrans/typert-registry` | Load-time validation that `uplink.codec` is a valid strict codec |
+| `@agentrans/typert-generator` (`model.ts`, `analyzer.ts`, `emitter.ts`) | `remoteResultType` recognizes `RemoteStream<Out, In>` and generates the `uplink` boundary; the descriptor emits `uplink: { codec }`; the generated Client signature returns `RemoteStreamHandle<Out, In>`; the parameter loop accepts only business parameters and a final `signal` |
+| `@agentrans/client-connection` (`peer.ts`, `rpc.ts`, `rpc-host.ts`, `index.ts`) | The `Peer` class; `connection.browserPeer` and `admit`; the `/api` and upgrade routes obtain the Peer through `admit`; the optional `uplink` of `rpc.open` |
+| `@agentrans/api-gateway` Host (`stream-protocol.ts`, `stream-server.ts`, `types.ts`, `index.ts`) | `item` / `end` frames; `UplinkInbox`; `Config.streamInboxBytes` and `Config.websocketCompression`; `GatewayInvocation` and `extend({ invocation })`; `UplinkDecoder`; `handleUpgrade(req, socket, head, peer)` |
+| `@agentrans/api-gateway` Client (`client/index.ts`, `client/stream-client.ts`) | `invokeStream` returns the handle; the uplink pump is driven by the handle's queue |
+| `dsh-webworker-runtime`, `@agentrans/remote-mock` | The worker tunnel's two uplink frames and the `serveStream` assembly; `StreamHandle.uplink`; the direct proxy returns the real handle |
 | Documentation | The READMEs of gateway, the api group, connection, protocol, and generator; `docs/api-gateway`; the type-equiv blocks of `docs/subsystems/typert`; the config and Cordis catalogs |
 
 ## Key sequences

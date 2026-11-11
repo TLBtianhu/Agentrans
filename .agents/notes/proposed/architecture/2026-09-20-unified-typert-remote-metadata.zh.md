@@ -32,7 +32,7 @@ CLI 帮助、参数解析和 MCP 工具发现需要在连接受控 Host 前取�
 
 Registry 查询返回基础描述符。纯叶入口或协议根入口的 `isTypertRemoteMethod(descriptor)` 以 `object`/`unknown` 类型收窄直接调用能力；精确端点类型来自 `TYPERT_REMOTE.methods`，而非动态查询。一元 `mode` 省略；流式 `mode` 为 `'stream'`。`invoke(remote, input, signal?)` 在调用时解析已挂载的命名空间方法，保留其 `this`、可选位置参数空位和 signal。它不使用 async 包装，直接转发同一个完整 `Promise<RemoteResult<DecodedOutput>>` 或 `RemoteStreamHandle<Output, Uplink>`；流迭代、`send`、`end` 和 `dispose` 均保留。`TypertRemoteMethod` 的第五个泛型参数独立于结果解析器的原始输出，保留载体解码后的一元字节类型。
 
-文档和 JSON Schema 可选。每个不受支持的输入变体或结果投影记录各自的 `jsonSchemaError`，同时保留解析器及独立文档；只捕获专用投影错误。显式选择工具的消费方要求工具说明和受支持的输入 JSON Schema。即使缺少可选输出 JSON Schema，输出解析仍然必需。原生 `dsh-tools` 注册额外要求 `output.schema`：仅有解析器并不满足要求。这些消费方要求不得阻止本来有效的 Remote 方法生成。
+文档和 JSON Schema 可选。每个不受支持的输入变体或结果投影记录各自的 `jsonSchemaError`，同时保留解析器及独立文档；只捕获专用投影错误。显式选择工具的消费方要求工具说明和受支持的输入 JSON Schema。即使缺少可选输出 JSON Schema，输出解析仍然必需。原生 `@agentrans/tools` 注册额外要求 `output.schema`：仅有解析器并不满足要求。这些消费方要求不得阻止本来有效的 Remote 方法生成。
 
 ## Proposal
 

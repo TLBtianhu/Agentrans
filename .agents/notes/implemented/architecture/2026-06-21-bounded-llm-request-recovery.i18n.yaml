@@ -6,17 +6,17 @@
   en: fb8e336ecd4bf571
   zh: 23e40e4cb224163f
 /agent-note-bounded-recovery-for-transient-llm-request-failures/problem:
-  en: ac1641f64d0e0a25
-  zh: 2ddb6a3fd290ea31
+  en: 3cdb4422b75b026c
+  zh: 46ed69c6a9b39868
 /agent-note-bounded-recovery-for-transient-llm-request-failures/decision:
   en: a15c7c13f167e5ac
   zh: 63bcc2ef60c2f344
 /agent-note-bounded-recovery-for-transient-llm-request-failures/decision/preserve-failure-facts-without-embedding-policy:
-  en: bbc621c07f10a7b2
-  zh: 5cb30c4bd38aa7f3
+  en: 8fcbd42426aaff1d
+  zh: dea063ed8f3f4c0a
 /agent-note-bounded-recovery-for-transient-llm-request-failures/decision/put-retry-policy-on-the-existing-failed-step-extension-point:
-  en: b0092c0d71dacf7a
-  zh: acdc2c56799947f4
+  en: b6a45eef551a0687
+  zh: 89824d9101540492
 /agent-note-bounded-recovery-for-transient-llm-request-failures/decision/make-one-layer-own-visible-attempts:
   en: 57dbdd385f48bb3e
   zh: 5e15463fae4be582
@@ -30,11 +30,11 @@
   en: 985720529b56cda2
   zh: 8a649bfa9cd8d93f
 /agent-note-bounded-recovery-for-transient-llm-request-failures/alternatives-considered:
-  en: a6d0306740d470ee
-  zh: 700bd4b0aa58f3e8
+  en: b9b6a5a5a4c0c613
+  zh: 3c48af8164cc40f3
 /agent-note-bounded-recovery-for-transient-llm-request-failures/verification:
-  en: 7412edfd162c4a28
-  zh: 64108a11e6194e35
+  en: b01c64c8d4fa52e7
+  zh: df058fb7d30054c0
 /agent-note-bounded-recovery-for-transient-llm-request-failures/consequences:
   en: 08659e8606455ada
   zh: 862080f8df5f28ec

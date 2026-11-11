@@ -25,11 +25,11 @@ So the real proposal is: **replace the compile-time merge-extensible-map pattern
 
 A migration of the event/vocabulary API to runtime schemas touches, at minimum:
 
-- **Six merge-extensible maps** (~370 LOC of core types): `ContentBlockMap`, `MessageSourceMap`, `FinishReasonMap` (in `dsh-llm`); `TurnTriggerMap`, `TurnEndReasonMap`, `SessionEventMap` (in `dsh-session`).
-- **~10 `declare module` augmentation sites** across `dsh-agent`, `dsh-agent-loop`, `dsh-shell`, `dsh-llm`, `dsh-session`, `dsh-session-persistence`, `dsh-system-prompt`, `dsh-tools` — each would move from declaration merging to a runtime `register()` call.
+- **Six merge-extensible maps** (~370 LOC of core types): `ContentBlockMap`, `MessageSourceMap`, `FinishReasonMap` (in `@agentrans/llm`); `TurnTriggerMap`, `TurnEndReasonMap`, `SessionEventMap` (in `@agentrans/session`).
+- **~10 `declare module` augmentation sites** across `@agentrans/agent`, `@agentrans/agent-loop`, `@agentrans/shell`, `@agentrans/llm`, `@agentrans/session`, `@agentrans/session-persistence`, `@agentrans/system-prompt`, `@agentrans/tools` — each would move from declaration merging to a runtime `register()` call.
 - **The event producers** — 16 `session.append(...)` call sites in the loop — unchanged in shape but now validated at the boundary.
-- **~7 switch-consumers** that branch on these unions: `deriveMessages` and the package-owned invariant companion (`dsh-session`), `BlockAssembler` (`dsh-llm`), both LLM adapters (`dsh-llm-deepseek`, `dsh-llm-pi-ai`), and the tool schema layer (`dsh-tools`). The `assertNever`-on-closed-unions vs fall-through-on-extensible-unions convention (a documented lint rule) would need rethinking — runtime variants are not statically exhaustive.
-- **The `defineTool` `InferArgs` DSL** (`dsh-tools`), which derives zero-cast `execute` arg types from a compile-time schema spec — the showcase of the current approach.
+- **~7 switch-consumers** that branch on these unions: `deriveMessages` and the package-owned invariant companion (`@agentrans/session`), `BlockAssembler` (`@agentrans/llm`), both LLM adapters (`@agentrans/llm-deepseek`, `@agentrans/llm-pi-ai`), and the tool schema layer (`@agentrans/tools`). The `assertNever`-on-closed-unions vs fall-through-on-extensible-unions convention (a documented lint rule) would need rethinking — runtime variants are not statically exhaustive.
+- **The `defineTool` `InferArgs` DSL** (`@agentrans/tools`), which derives zero-cast `execute` arg types from a compile-time schema spec — the showcase of the current approach.
 - **Docs**: architecture.md (the pattern is described as foundational), [dev-mode invariants](../../implemented/architecture/2026-06-11-dev-invariants-over-deep-readonly.md), and any Agent Note that references the pattern.
 
 This is a repository-wide vocabulary redesign, not a persistence implementation detail.

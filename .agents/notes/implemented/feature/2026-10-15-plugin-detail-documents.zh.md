@@ -12,7 +12,7 @@ DSH 自身各包的 README 是面向维护者的参考，而不是面向用户�
 
 ## 决策
 
-详细介绍文档按固定顺序读取。对每个包，顺序首先是其 `locale/<language>.json` 中 `meta.detail` 为显示语言指定的 Markdown 文件，该语言没有时依次回退到更短的语言前缀，最后回退到英文；然后是包的 README。市场条目页面在此之后继续读取条目或其包所声明仓库目录中的 README，读取默认分支上的文件。[文档顺序](../../../../packages/util/plugin-detail/README.zh.md#document-order)属于无状态库 [`dsh-plugin-detail`](../../../../packages/util/plugin-detail/README.zh.md)，是包内各步骤的唯一定义；[`plugin-manager`](../../../../packages/boot/plugin-manager/README.zh.md#bundle-detail-documents) 和 [`plugin-market`](../../../../packages/boot/plugin-market/README.zh.md#plugin-detail-documents) 说明它们如何应用该顺序。
+详细介绍文档按固定顺序读取。对每个包，顺序首先是其 `locale/<language>.json` 中 `meta.detail` 为显示语言指定的 Markdown 文件，该语言没有时依次回退到更短的语言前缀，最后回退到英文；然后是包的 README。市场条目页面在此之后继续读取条目或其包所声明仓库目录中的 README，读取默认分支上的文件。[文档顺序](../../../../packages/util/plugin-detail/README.zh.md#document-order)属于无状态库 [`@agentrans/plugin-detail`](../../../../packages/util/plugin-detail/README.zh.md)，是包内各步骤的唯一定义；[`plugin-manager`](../../../../packages/boot/plugin-manager/README.zh.md#bundle-detail-documents) 和 [`plugin-market`](../../../../packages/boot/plugin-market/README.zh.md#plugin-detail-documents) 说明它们如何应用该顺序。
 
 `meta.detail` 位于[插件展示元信息](../../../../docs/cookbook/adding-a-package.zh.md#plugin-display-metadata)已经使用的 `locale/<language>.json` 文件中，没有包字段回退，并且只在读取详细介绍文档时读取，因此格式错误的值只让详细介绍的读取失败，插件的标题、描述和图标不受影响。包的 README 代替 npm 显示的 README，因为 npm 显示的就是已发布版本中的 README 文件。存在但读取失败的来源会带着原因终止读取，而不是继续尝试下一个来源，因此缺失的 `meta.detail` 文件或过大的仓库会被报告，而不是被另一份文档替代。
 

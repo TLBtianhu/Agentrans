@@ -10,7 +10,7 @@ Status: implemented
 
 ## 决策
 
-`apply_patch` 接收一份 Codex 风格补丁，支持新增、更新、删除和移动，以及多个文件和 hunk。[dsh-fs-patch 纯库](../../../../packages/fs/fs-patch/README.zh.md)遵循 Codex `rust-v0.158.0` 的解析、顺序匹配、空白容忍和 `NormalizeToLf` 重建。匹配器只接收 LF 文本，因此不实现 Codex `PreserveLineEndings`。
+`apply_patch` 接收一份 Codex 风格补丁，支持新增、更新、删除和移动，以及多个文件和 hunk。[@agentrans/fs-patch 纯库](../../../../packages/fs/fs-patch/README.zh.md)遵循 Codex `rust-v0.158.0` 的解析、顺序匹配、空白容忍和 `NormalizeToLf` 重建。匹配器只接收 LF 文本，因此不实现 Codex `PreserveLineEndings`。
 
 [文件系统服务](../../../../packages/fs/fs/README.zh.md)提供 `patchText`、`deleteFile` 和 `moveFile`；本地、沙箱和 SSH 提供方均实现它们。`fs/delete-intent` 与 `fs/edit-intent` 要求相同的存在观察，移动目标使用 `fs/write-intent`。版本防护和沙箱约束仍由提供方负责。移动先发布目标，再删除源；`sourceDeleted` 区分已完成的移动与目标已发布但源未能删除的情况。
 
@@ -20,7 +20,7 @@ Status: implemented
 
 [Review 采集](../../../../packages/deliverables/workspace-changes/README.zh.md)使用文件系统 intent 监听器，不解析参数。`tools/pre-execute` 将执行关联到轮次记录器；前置的 write、edit 和 delete 监听器先等待策略决策，再等待捕获完成，然后提供方才修改文件。移动捕获两端。每轮保留首次基线，比较实际最终字节，因此重复编辑形成一份净 diff，还原的变化不再显示。现有大小、数量、时间、位置和 Session 生命周期限制保持适用。
 
-`tool-fs.applyPatch` 默认为 `false`，因此所有随发行版交付的组合保持该工具出现之前的模型请求；启用 `edit` 的 `tool-fs` 行（`dsh-base` 以及 Web 的 `standard`、`ptc`、`cordis` preset）显式写出 `applyPatch: false`，部署只需改这一行即可开启，或在没有 preset 拥有该行时通过针对 `tool-fs` id 的 profile patch 开启。该工具像 `write` 和 `edit` 一样咨询 `fs/*` intent waterfall，因此已挂载的观察策略对每个补丁操作要求先读并拒绝过期版本。schema 沿用 Codex 的参数名 `input`：在 2,226 条 DS-Bench 与 DeepSWE 录制轨迹中，14% 的 `apply_patch` 调用带着这个键发出，而参数名为 `patch` 时它们都被拒绝。工具通过插件 effect 注册 schema、指导文本、native/PTC 执行与调用展示；不修改 agent loop（智能体循环）。
+`tool-fs.applyPatch` 默认为 `false`，因此所有随发行版交付的组合保持该工具出现之前的模型请求；启用 `edit` 的 `tool-fs` 行（`@agentrans/base` 以及 Web 的 `standard`、`ptc`、`cordis` preset）显式写出 `applyPatch: false`，部署只需改这一行即可开启，或在没有 preset 拥有该行时通过针对 `tool-fs` id 的 profile patch 开启。该工具像 `write` 和 `edit` 一样咨询 `fs/*` intent waterfall，因此已挂载的观察策略对每个补丁操作要求先读并拒绝过期版本。schema 沿用 Codex 的参数名 `input`：在 2,226 条 DS-Bench 与 DeepSWE 录制轨迹中，14% 的 `apply_patch` 调用带着这个键发出，而参数名为 `patch` 时它们都被拒绝。工具通过插件 effect 注册 schema、指导文本、native/PTC 执行与调用展示；不修改 agent loop（智能体循环）。
 
 ## 考虑过的替代方案
 

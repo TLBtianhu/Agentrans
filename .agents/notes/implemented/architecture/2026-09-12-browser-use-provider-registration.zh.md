@@ -10,7 +10,7 @@ Status: implemented
 
 ## 决策
 
-[`dsh-browser-use`](../../../../packages/browser-use/browser-use/README.zh.md) 拥有 `ctx.browserUse`，注册一个提供方拥有的名称并返回其 effect 清理器。第二次注册无论名称为何都会失败。服务不包含浏览器对象、共享操作类型、分派方法、资源生命周期或运行时选择器。[计算机操作注册决策](2026-09-12-computer-use-provider-registration.zh.md)仍独立拥有桌面提供方注册与共享桌面协调规则。
+[`@agentrans/browser-use`](../../../../packages/browser-use/browser-use/README.zh.md) 拥有 `ctx.browserUse`，注册一个提供方拥有的名称并返回其 effect 清理器。第二次注册无论名称为何都会失败。服务不包含浏览器对象、共享操作类型、分派方法、资源生命周期或运行时选择器。[计算机操作注册决策](2026-09-12-computer-use-provider-registration.zh.md)仍独立拥有桌面提供方注册与共享桌面协调规则。
 
 [Playwright MCP](../../../../packages/experimental/browser-use-playwright-mcp/README.zh.md)、[Chrome DevTools MCP](../../../../packages/experimental/browser-use-chrome-devtools-mcp/README.zh.md) 与[原生 Stagehand](../../../../packages/experimental/browser-use-stagehand-native/README.zh.md) 拥有自己的浏览器工具，并通过常规 DSH 工具管线集成。它们是公共实验性可选功能。DSH 拥有任务规划与任务循环；Stagehand 提供单项 AI（人工智能）辅助操作。Profile 或 preset 配置为每次提供方激活选择启动或附加模式。
 

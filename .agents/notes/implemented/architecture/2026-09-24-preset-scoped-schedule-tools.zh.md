@@ -12,7 +12,7 @@ Status: implemented
 
 `@agentrans/tool-schedule`（`packages/schedule/tool-schedule`）以 preset 级 Consumer 的身份贡献 `schedule_create`、`schedule_list`、`schedule_view` 和 `schedule_edit`。它声明 `inject = ['tools', 'systemPrompt']`，并在 `ctx.inject(['schedule'], …)` 内注册这些定义和共用授权指令，因此挂载作用域拥有它们，注册会等待同一作用域中的宿主 Schedule 服务。发布版 Web profile 在其 `standard`、`cordis` 和 `ptc` preset 中挂载该行，`minimal` 不挂载。Cordis 的 effect 所有权随挂载卸载而释放这些定义，而始终未解析出 `schedule` 的组合不会注册其中任何一个。[Web bundle](../../../../packages/bundle/web-app/README.zh.md)负责随发行版交付的组合挂载的 `schedule` 与 `ui-schedule` 两行；本记录负责提醒工具的 preset 归属。
 
-`@agentrans/schedule` 保留 `schedule` 存储域，现写入 v2 并读取 v1，同时保留宿主定时器与串行队列、宿主投递、自动化任务页面的读取来源，以及 `ctx.schedule` 接口。`dsh-tool-schedule` 是该接口面向模型的消费者：它将 RRULE 与目标输入映射为服务请求，从 `exec.agent` 读取操作者与 `this_session` 目的地，并把未声明的失败映射为 `internal_error`，使存储细节不会到达模型。管理按 id 寻址宿主全部任务；仅目标选择接收 Session。
+`@agentrans/schedule` 保留 `schedule` 存储域，现写入 v2 并读取 v1，同时保留宿主定时器与串行队列、宿主投递、自动化任务页面的读取来源，以及 `ctx.schedule` 接口。`@agentrans/tool-schedule` 是该接口面向模型的消费者：它将 RRULE 与目标输入映射为服务请求，从 `exec.agent` 读取操作者与 `this_session` 目的地，并把未声明的失败映射为 `internal_error`，使存储细节不会到达模型。管理按 id 寻址宿主全部任务；仅目标选择接收 Session。
 
 ## Alternatives considered
 
@@ -24,9 +24,9 @@ Status: implemented
 
 - `minimal` 的请求头与工具列表不含任何提醒工具 schema。
 - 挂载该行的每个 preset 承担四个 schema 的固定 token 成本，工具可用性取自组合，而不是由宿主服务是否存在推断。
-- 部署可以只为存储与投递挂载 `dsh-schedule`，而不授予其 Agent 由模型驱动的提醒管理能力。
-- `dsh-schedule` 不注入 `ctx.tools`，也不注册任何面向模型的工具。
-- 被委派的子 agent 继承 preset 的四个提醒 schema。调用方委派深度大于零时，`dsh-tool-schedule` 中的 `runForCaller` 从每个工具返回 `{ code: 'subagent_session', message: 'A delegated subagent cannot use scheduled tasks.' }`。[preset 组装决策](../simplification/2026-10-09-preset-owned-subagent-composition.zh.md)移除了重复的子级过滤；可见性不授予执行权限。
+- 部署可以只为存储与投递挂载 `@agentrans/schedule`，而不授予其 Agent 由模型驱动的提醒管理能力。
+- `@agentrans/schedule` 不注入 `ctx.tools`，也不注册任何面向模型的工具。
+- 被委派的子 agent 继承 preset 的四个提醒 schema。调用方委派深度大于零时，`@agentrans/tool-schedule` 中的 `runForCaller` 从每个工具返回 `{ code: 'subagent_session', message: 'A delegated subagent cannot use scheduled tasks.' }`。[preset 组装决策](../simplification/2026-10-09-preset-owned-subagent-composition.zh.md)移除了重复的子级过滤；可见性不授予执行权限。
 - 被委派子 agent 拥有的 Session 永远收不到投递的提醒，因此 `ScheduleService.create` 以及通过 `ScheduleService.edit` 改变目标或启用任务时会以 `subagent_session` 拒绝它。该拒绝读取委派深度——委派封顶本身执行的记账，由持久化 session header 承载并跨冷恢复保留。这条规则在服务层，因此其它消费方（包括自动化任务页面）也会命中。
 
 ## Testing

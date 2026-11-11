@@ -9,29 +9,29 @@
   en: 22a80335f54b17e9
   zh: 6c0d695a4dba7f0d
 /agent-note-domain-kv-storage-capability-seam-and-the-workspace-entity/proposal:
-  en: a651acb7cf44dd8c
-  zh: f4abf9dbe231108d
-/agent-note-domain-kv-storage-capability-seam-and-the-workspace-entity/proposal/dsh-storage-the-storage-hub:
-  en: 5eb0b18c2adf5111
-  zh: 856ee7b1464b8bfc
-/agent-note-domain-kv-storage-capability-seam-and-the-workspace-entity/proposal/dsh-storage-json:
-  en: a18ec1e534a5488b
-  zh: 2f5beb445e30554b
-/agent-note-domain-kv-storage-capability-seam-and-the-workspace-entity/proposal/dsh-storage-sqlite:
-  en: 1a4bebbbf52db7a2
-  zh: 425c32b0dc17b49e
+  en: 73aaa7f246f1a015
+  zh: f20dae0355e7ad46
+/agent-note-domain-kv-storage-capability-seam-and-the-workspace-entity/proposal/agentrans-storage-the-storage-hub:
+  en: a177427e93fe826e
+  zh: bd1d38afcb0493e4
+/agent-note-domain-kv-storage-capability-seam-and-the-workspace-entity/proposal/agentrans-storage-json:
+  en: f313c0f447010e9b
+  zh: 7e1919a4a5fd9682
+/agent-note-domain-kv-storage-capability-seam-and-the-workspace-entity/proposal/agentrans-storage-sqlite:
+  en: e12cda9fdc2c4b2b
+  zh: b52b57fb0167a752
 /agent-note-domain-kv-storage-capability-seam-and-the-workspace-entity/proposal/dsh-domain-the-domain-data-form:
   en: b99e07359dc78dc8
   zh: 4af881d0b6d5b628
 /agent-note-domain-kv-storage-capability-seam-and-the-workspace-entity/proposal/future-work-session-side-deletion-design-settled-not-implemented-this-phase:
   en: a3824326587b6539
   zh: 9736e3060bd57651
-/agent-note-domain-kv-storage-capability-seam-and-the-workspace-entity/proposal/dsh-workspace:
-  en: 13e68c6072cbfc98
-  zh: 5f111dd13038b535
+/agent-note-domain-kv-storage-capability-seam-and-the-workspace-entity/proposal/agentrans-workspace:
+  en: 118b85c4585306eb
+  zh: c51d1f1b8eda6e3d
 /agent-note-domain-kv-storage-capability-seam-and-the-workspace-entity/proposal/reuse-and-the-session-backend-migration-outlook:
-  en: e586acdb16085b91
-  zh: 4fae53c5b9e4fd5b
+  en: c11583896c01be6b
+  zh: 476fc64314eb3e96
 /agent-note-domain-kv-storage-capability-seam-and-the-workspace-entity/proposal/test-matrix:
   en: 4f8560110ec03322
   zh: 574d611d6e086e96

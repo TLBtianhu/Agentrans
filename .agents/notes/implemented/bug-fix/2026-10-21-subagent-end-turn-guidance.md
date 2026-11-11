@@ -19,7 +19,7 @@ The per-model difference is `0/150` vs `6/150` for flash (p=0.030) and `0/150` v
 
 ## Decision
 
-The delegation paragraph keeps the end-turn sentence, byte-identical to the text introduced for #6057. Ending the turn does not lose the result: a settled child delivers a user-role notice to its parent, and a notice that reaches an idle parent starts one independent model request ([`dsh-subagent`](../../../../packages/subagent/subagent/README.md)). Hosts that keep children progressing alternate `agent.whenIdle()` and `waitForChildren(agent)` ([ACP `session.ts`](../../../../packages/acp/acp/src/session.ts)), and `dsh-goal-round-driver` waits for running descendants before starting the next goal round.
+The delegation paragraph keeps the end-turn sentence, byte-identical to the text introduced for #6057. Ending the turn does not lose the result: a settled child delivers a user-role notice to its parent, and a notice that reaches an idle parent starts one independent model request ([`@agentrans/subagent`](../../../../packages/subagent/subagent/README.md)). Hosts that keep children progressing alternate `agent.whenIdle()` and `waitForChildren(agent)` ([ACP `session.ts`](../../../../packages/acp/acp/src/session.ts)), and `@agentrans/goal-round-driver` waits for running descendants before starting the next goal round.
 
 The sentence stays one literal line. Rewording `the next result starts a new turn` to `each result starts a new turn` would re-render 83 prompt sidecars without a measured behavior change.
 

@@ -6,14 +6,14 @@
   en: 07f6420c67ea2700
   zh: b9b53250e050cf6e
 /agent-note-incremental-tool-argument-scanning-and-argument-order-during-preparation/problem:
-  en: c97b3edd4ef1d063
-  zh: 5c8b6065e662f326
+  en: 9dcd4320e759a5b9
+  zh: e6d819c99b2d3c8a
 /agent-note-incremental-tool-argument-scanning-and-argument-order-during-preparation/decision:
   en: a15c7c13f167e5ac
   zh: 63bcc2ef60c2f344
-/agent-note-incremental-tool-argument-scanning-and-argument-order-during-preparation/decision/a-lazily-computed-argument-view-lives-in-dsh-util-values:
-  en: eb004194b0c08464
-  zh: d09c6353ed7138de
+/agent-note-incremental-tool-argument-scanning-and-argument-order-during-preparation/decision/a-lazily-computed-argument-view-lives-in-agentrans-util-values:
+  en: fbb70a99b2c17bd5
+  zh: c2ad51e1ad15b697
 /agent-note-incremental-tool-argument-scanning-and-argument-order-during-preparation/decision/parsing-happens-in-the-tool-definition-not-in-react:
   en: 518206f94d82993d
   zh: c6cab3b2f71dd18b

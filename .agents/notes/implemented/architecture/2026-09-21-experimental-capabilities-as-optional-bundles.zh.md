@@ -24,7 +24,7 @@ Computer Use 是 experimental 包组内随安装提供的可选组合包。组�
 
 **把所有提供方都做成可选 bundle。** 组合与展示都正确，但会为多数安装从不启用的能力把提供方运行时塞进每次安装；语音输入的 `sherpa-onnx-node` 是唯一被接受的先例。
 
-**在 `dsh-base` 中挂载仅负责注册的 `computer-use` 与 `browser-use` 服务。** 共享组合将携带只有可选提供方 bundle 才需要的行；提供方 bundle 可以从自己的 patch 和依赖插入服务行。
+**在 `@agentrans/base` 中挂载仅负责注册的 `computer-use` 与 `browser-use` 服务。** 共享组合将携带只有可选提供方 bundle 才需要的行；提供方 bundle 可以从自己的 patch 和依赖插入服务行。
 
 **在运行时注册预设扩展。** 独立注册路径需要自己的排序、模块解析、代际更新与检查行为。Profile patch 为启动、配置导出、校验和用户覆盖保留同一个有效组合。
 

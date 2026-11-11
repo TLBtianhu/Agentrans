@@ -6,29 +6,29 @@
   en: e57698907c40f783
   zh: 47004d8f68af1d7d
 /agent-note-provider-routed-llm-adapters-and-a-generic-pi-ai-backend/problem:
-  en: 2e51f5fa703b0677
-  zh: 385937219b88c447
+  en: 06d4baa7d266b249
+  zh: ba7a28b0a543bf57
 /agent-note-provider-routed-llm-adapters-and-a-generic-pi-ai-backend/decision:
   en: a15c7c13f167e5ac
   zh: 63bcc2ef60c2f344
 /agent-note-provider-routed-llm-adapters-and-a-generic-pi-ai-backend/decision/provider-is-the-adapter-registration-key:
-  en: 4921a060c657b790
-  zh: 2f9632469c6f0b60
+  en: 36450602b884693f
+  zh: a8e536d69245a1bc
 /agent-note-provider-routed-llm-adapters-and-a-generic-pi-ai-backend/decision/explicit-pi-ai-provider-profiles:
-  en: 1346315312eb35e2
-  zh: 3555f91c3afb49f8
+  en: d1d3dca45cac7226
+  zh: e1422bf6023a388d
 /agent-note-provider-routed-llm-adapters-and-a-generic-pi-ai-backend/decision/recorded-assistant-route-and-replay-state:
   en: ed60d078eacc67df
   zh: a22631faf93deee2
 /agent-note-provider-routed-llm-adapters-and-a-generic-pi-ai-backend/decision/propagate-the-target-through-every-request-producer:
-  en: ba1908bc1517ed23
-  zh: 1c9353a422cf74e1
+  en: 608f552cd7327241
+  zh: 7866b16808fdc01d
 /agent-note-provider-routed-llm-adapters-and-a-generic-pi-ai-backend/alternatives-considered:
-  en: ad0d610ea92aa9b8
-  zh: fe09d62762e73f01
+  en: d5aeb455c1ca644a
+  zh: 3b6ae5efb1050d20
 /agent-note-provider-routed-llm-adapters-and-a-generic-pi-ai-backend/consequences:
-  en: a0c98bced8a5e6fb
-  zh: 23caf082a08ba507
+  en: df5116fefafd34c2
+  zh: 00733ff132eda4c5
 /agent-note-provider-routed-llm-adapters-and-a-generic-pi-ai-backend/testing:
   en: 5a36121f12701d08
   zh: 90f0f8ed44f7234f

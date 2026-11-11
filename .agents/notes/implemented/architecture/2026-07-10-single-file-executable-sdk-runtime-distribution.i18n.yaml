@@ -15,8 +15,8 @@
   en: 11828cf81a6365da
   zh: 8304607881926301
 /agent-note-single-file-executable-sdk-runtime-distribution-single-exe/decision/the-serving-interface-is-a-plugin-inside-the-dsh-application:
-  en: 83bd1ce8e898e3f0
-  zh: 7694151cdb6fd207
+  en: b607620f5a594eb1
+  zh: 1c32f423735c3f02
 /agent-note-single-file-executable-sdk-runtime-distribution-single-exe/decision/plugin-resolution-the-vfs-holds-a-real-package-tree-the-closure-manifest-is-the-deploy-root:
   en: 5d496f5110aa03fd
   zh: 4af8b8f8361a991d
@@ -30,8 +30,8 @@
   en: 31a5aecb8bf828bb
   zh: 2dffb6fd2e0f8194
 /agent-note-single-file-executable-sdk-runtime-distribution-single-exe/packaged-workflow-and-code-execution:
-  en: 0426f598f3f44e64
-  zh: fc66728e17f3bcfb
+  en: f1c97a4d1cdbf8f1
+  zh: 33f34bfebf365c51
 /agent-note-single-file-executable-sdk-runtime-distribution-single-exe/testing:
   en: 8e7f46bbb595afa9
   zh: 4641894ed285d717

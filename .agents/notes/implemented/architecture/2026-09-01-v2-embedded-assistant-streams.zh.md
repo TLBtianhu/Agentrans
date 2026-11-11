@@ -35,7 +35,7 @@ Client event source 原样传递持久 settlement。Chat 与 Trajectory 在 atte
 
 ### 已发布 v1 到 v2 迁移
 
-相邻迁移会校验完整的冻结 v1 产物，按 turn、step、terminal boundary 与精确 message chunk reference 对 chunk 分组，再为每个 attempt 替换一个 settlement。成功分组的 chunk 移入其 message。未被认领的分组会在最后一个被消费 chunk 的位置变成 `assistant/attempt`。无关的交错事件保持相对顺序，存活事件获得密集 v2 序号。该迁移边通过 `dsh-llm` 运行时的 `AssistantStreamAccumulator` 压缩嵌入 stream，而不持有冻结副本，因为该包拥有 v2 stream 编码。隔离的 publication verifier 通过 `expandAssistantStream()` 与 `BlockAssembler` 展开并重组写入后的 stream，并在发布前检查每个迁移后的 `assistant/message` 是否与其一致。日后若某个格式改变 stream 编码，必须把这些 helper 的冻结副本纳入本迁移边。
+相邻迁移会校验完整的冻结 v1 产物，按 turn、step、terminal boundary 与精确 message chunk reference 对 chunk 分组，再为每个 attempt 替换一个 settlement。成功分组的 chunk 移入其 message。未被认领的分组会在最后一个被消费 chunk 的位置变成 `assistant/attempt`。无关的交错事件保持相对顺序，存活事件获得密集 v2 序号。该迁移边通过 `@agentrans/llm` 运行时的 `AssistantStreamAccumulator` 压缩嵌入 stream，而不持有冻结副本，因为该包拥有 v2 stream 编码。隔离的 publication verifier 通过 `expandAssistantStream()` 与 `BlockAssembler` 展开并重组写入后的 stream，并在发布前检查每个迁移后的 `assistant/message` 是否与其一致。日后若某个格式改变 stream 编码，必须把这些 helper 的冻结副本纳入本迁移边。
 
 该迁移边会重映射有限的已声明引用清单：信封 source-event reference、surface replacement 端点、command source event、compaction range 与 shadowed list，以及 title message list。经过校验的 `session/title-llm-request` 模型可见文本会在源序号命名空间中保持逐字节不变，而它的 `messageSeqs` 字段会迁移到 v2 命名空间；因此目标校验不会根据重映射后的序号重建该文本。指向被消费 chunk 的引用会使迁移失败；它绝不会被重定向到含义不同的 settlement。该迁移边也会拒绝切开 attempt 的继承切点。
 

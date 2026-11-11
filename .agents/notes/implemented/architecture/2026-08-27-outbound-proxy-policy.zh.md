@@ -20,7 +20,7 @@ Node 内置的 `fetch` 会忽略 `HTTP_PROXY` 与 `HTTPS_PROXY`。开发者运�
 
 **放在 `util/` 的库，而非插件。** 传输策略每个进程只有一个答案：没有可替换的实现，也没有比进程更窄的作用域可赋予。因此本包只导出函数、不挂载任何东西——`boot`、`web`、`subprocess` 与 `workflow` 都消费它，而 `util/` 正是其他所有组都可以依赖的那一组。
 
-早先的修订把它放进新建的 `net/` 包组，理由是依赖 `undici` 使它不符合“零依赖”组。那个理解是错的：[优先使用依赖而非手写](../process/2026-07-26-dependencies-over-hand-rolling.zh.md) 记录了该章程约束的是 *harness* 依赖——util 不依赖它们，任何组才都能依赖 util——并不禁止外部包。真正需要去掉的是对 `dsh-launch-environment` 的依赖：解析只用到它的一个方法，于是改为声明结构化的 `EnvLookup`，启动器原样传入自己的快照即可。
+早先的修订把它放进新建的 `net/` 包组，理由是依赖 `undici` 使它不符合“零依赖”组。那个理解是错的：[优先使用依赖而非手写](../process/2026-07-26-dependencies-over-hand-rolling.zh.md) 记录了该章程约束的是 *harness* 依赖——util 不依赖它们，任何组才都能依赖 util——并不禁止外部包。真正需要去掉的是对 `@agentrans/launch-environment` 的依赖：解析只用到它的一个方法，于是改为声明结构化的 `EnvLookup`，启动器原样传入自己的快照即可。
 
 那次修订一并引入的插件也随之删除。它让某个组合可以把策略写进 `cordis.yml`，但没有任何随附 bundle 挂载它，因此启动器那条路径是唯一可达的——而它的 `Config` 是那条配置分支唯一的供给方，别处无从到达。
 

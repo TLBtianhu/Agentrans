@@ -16,7 +16,7 @@ Each new external-process or network tool re-derived the same four things — cl
 
 ## Decision
 
-`@agentrans/timeout` lives under `packages/util/` (peer to `dsh-brand`) and owns the *timing and classification* half of timeout; the *termination* half — the hard kill — stays in each capability's implementation. It is a library of pure functions, **not** a cordis service or plugin: it takes no `ctx`, registers nothing, holds no cross-call state, and emits no events. There is deliberately no central "timeout service" that would have to know how to stop every capability's work — that knowledge is exactly what a microkernel keeps out of shared layers, and what Codex's exec-only `ExecExpiration` scope demonstrates.
+`@agentrans/timeout` lives under `packages/util/` (peer to `@agentrans/brand`) and owns the *timing and classification* half of timeout; the *termination* half — the hard kill — stays in each capability's implementation. It is a library of pure functions, **not** a cordis service or plugin: it takes no `ctx`, registers nothing, holds no cross-call state, and emits no events. There is deliberately no central "timeout service" that would have to know how to stop every capability's work — that knowledge is exactly what a microkernel keeps out of shared layers, and what Codex's exec-only `ExecExpiration` scope demonstrates.
 
 ### The library API
 
@@ -78,11 +78,11 @@ export function timeoutOf(x: AbortSignal | { reason?: unknown }, code?: string):
 
 | Concern | Owner |
 |---|---|
-| Validate request hint and clamp default/max | `dsh-timeout` (`clampTimeout`) — pure arithmetic plus the shared positive-finite request contract |
-| Arm one-shot timer, abort on deadline, carry reason, fuse with upstream cancel | `dsh-timeout` (`deadline`) |
-| Arm and rearm only around outstanding iterator demand, including out-of-band activity | `dsh-timeout` (`idleWatchdog`) |
-| Clear the timer | `dsh-timeout` (`[Symbol.dispose]` on either primitive) |
-| Classify the first abort reason after abort | `dsh-timeout` (`timeoutOf`) |
+| Validate request hint and clamp default/max | `@agentrans/timeout` (`clampTimeout`) — pure arithmetic plus the shared positive-finite request contract |
+| Arm one-shot timer, abort on deadline, carry reason, fuse with upstream cancel | `@agentrans/timeout` (`deadline`) |
+| Arm and rearm only around outstanding iterator demand, including out-of-band activity | `@agentrans/timeout` (`idleWatchdog`) |
+| Clear the timer | `@agentrans/timeout` (`[Symbol.dispose]` on either primitive) |
+| Classify the first abort reason after abort | `@agentrans/timeout` (`timeoutOf`) |
 | **Actually terminate the work** | the capability's implementation |
 | The default/max *values* | the capability's config |
 | The timeout `code` string | the capability (`WEB_FETCH_TIMEOUT` ≠ `BASH_TIMEOUT`) |
@@ -97,13 +97,13 @@ The signal only *notifies*; termination is always the listener's job, and the li
 
 ## Consequences
 
-- `runBash`'s outcome no longer independently latches `timedOut` and `aborted`; a timeout and a user abort racing before process close now report a single first-abort cause instead of both being true. Timeout classification does not alter provider-owned termination: local POSIX ranges use TERM→grace→KILL, while Windows ordinary ranges terminate immediately. The Service Definition type `ShellRunResult` keeps both booleans (now mutually exclusive), so `dsh-tool-bash`'s result rendering is untouched.
+- `runBash`'s outcome no longer independently latches `timedOut` and `aborted`; a timeout and a user abort racing before process close now report a single first-abort cause instead of both being true. Timeout classification does not alter provider-owned termination: local POSIX ranges use TERM→grace→KILL, while Windows ordinary ranges terminate immediately. The Service Definition type `ShellRunResult` keeps both booleans (now mutually exclusive), so `@agentrans/tool-bash`'s result rendering is untouched.
 - `SpawnSpec.timeoutMs` and `SpawnOutcome.timedOut`/`aborted` were removed rather than kept as always-zero/always-false vestiges: with `runBash` owning no timer and the executor owning classification, they were read nowhere. An always-0 field read by nothing is dead weight under the per-file coverage gate.
 - web_fetch shed its bespoke controller/timer/listener/reason-recovery; the classifier now keys off the deadline signal (`timeoutOf` + `aborted`) rather than the thrown error's shape, which is robust across both the request-phase reject-with-reason and the read-phase bare-`AbortError`.
 - `AbortSignal.any` and `using`/`Symbol.dispose` enter the repo for the first time here (Node ≥ 24 baseline, already met).
 - Model streams now share one rearmable timer contract without turning a sliding idle interval into a total-call deadline or charging consumer think time. Adapters that can observe out-of-band transport activity may pulse an outstanding demand; suppressed activity remains invisible to the watchdog. The one-shot `deadline()` still only notifies; adapter tests prove their transports observe the rearmable watchdog's stable signal and terminate. The watchdog additionally settles the one demand it drives when its idle interval elapses, because a transport that drops the error of an aborted in-flight read would otherwise hold the caller past that interval.
 
-Out of scope, named to mark the boundary: `web_search` can gain an optional model-facing `timeout_ms` once its tool-schema/snapshot coverage is planned; the ripgrep-backed fs discovery tools ([packaged ripgrep search](../../archived/architecture/2026-08-01-packaged-ripgrep-search.md)) consume the same provider-owned deadline shape through `dsh-tool-call-timeout-policy` and `exec.signal`; a `tools/execute` waterfall middleware could arm a default deadline for every tool call by driving `exec.signal` — that would be a plugin that *consumes* this library and still only notifies, the hard kill remaining each capability's job.
+Out of scope, named to mark the boundary: `web_search` can gain an optional model-facing `timeout_ms` once its tool-schema/snapshot coverage is planned; the ripgrep-backed fs discovery tools ([packaged ripgrep search](../../archived/architecture/2026-08-01-packaged-ripgrep-search.md)) consume the same provider-owned deadline shape through `@agentrans/tool-call-timeout-policy` and `exec.signal`; a `tools/execute` waterfall middleware could arm a default deadline for every tool call by driving `exec.signal` — that would be a plugin that *consumes* this library and still only notifies, the hard kill remaining each capability's job.
 
 ## Alternatives considered
 

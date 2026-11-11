@@ -10,7 +10,7 @@ Status: implemented
 
 ## Decision
 
-实验性的 forge 能力 seam 由三个角色组成。[`dsh-experimental-forge`](../../../../packages/experimental/forge/README.zh.md) 定义提供方无关的仓库与变更请求引用、提供方注册表与共享轮询：同一变更请求的监听方共享一个循环，每个 forge 同时只有一次批量读取，轮询节奏随检查、可合并性与生命周期状态变化。[`dsh-experimental-forge-github`](../../../../packages/experimental/forge-github/README.zh.md) 是第一个提供方；它通过宿主上的 GitHub CLI 读取 GitHub，因此凭据保留在该工具自己的存储中，从不进入 Session 的执行环境。[`dsh-experimental-forge-session`](../../../../packages/experimental/forge-session/README.zh.md) 把变更请求绑定到 Session。
+实验性的 forge 能力 seam 由三个角色组成。[`@agentrans/experimental-forge`](../../../../packages/experimental/forge/README.zh.md) 定义提供方无关的仓库与变更请求引用、提供方注册表与共享轮询：同一变更请求的监听方共享一个循环，每个 forge 同时只有一次批量读取，轮询节奏随检查、可合并性与生命周期状态变化。[`@agentrans/experimental-forge-github`](../../../../packages/experimental/forge-github/README.zh.md) 是第一个提供方；它通过宿主上的 GitHub CLI 读取 GitHub，因此凭据保留在该工具自己的存储中，从不进入 Session 的执行环境。[`@agentrans/experimental-forge-session`](../../../../packages/experimental/forge-session/README.zh.md) 把变更请求绑定到 Session。
 
 绑定从 Session 日志派生，而不是存放在单独的存储中。一个 Session 投影读取 `bash` 与 `pwsh` 调用：`gh pr create` 的结果绑定其输出的 URL，`gh pr view`、`gh pr edit` 与 `gh pr checkout` 调用绑定它们所操作的变更请求，`git push` 的结果记录其更新的分支。这三个命令只操作一个变更请求，因此只计入作为第一个参数给出的 URL 和输出为该变更请求打印的 URL；描述正文里的链接指向的是其他变更请求。调用方操作与发现结果是 `plugin:forge-session/binding` 插件记录。由于所有输入都是日志事件，fork 与恢复无需新的持久化即可带上绑定，投影也能从任意检查点重建它们。证据是输出中的 URL 或 ref 行，而不是退出状态：失败的 `gh pr create` 报告的已有 pull request 仍会绑定，部分被拒绝的推送仍会记录它已更新的分支。
 

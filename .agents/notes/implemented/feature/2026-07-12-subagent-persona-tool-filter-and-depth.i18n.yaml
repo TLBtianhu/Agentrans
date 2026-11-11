@@ -9,8 +9,8 @@
   en: 311bc04b9c36ab53
   zh: 0c52e6493e9350a5
 /agent-note-configure-subagent-persona-tool-visibility-and-depth/decision:
-  en: 45111f900708aaf9
-  zh: e75bed4951516963
+  en: 0b473ca805cfbf52
+  zh: 6892c6bc651795d5
 /agent-note-configure-subagent-persona-tool-visibility-and-depth/decision/persona-is-a-scoped-shadow:
   en: f9ee31a1fdcdd38f
   zh: c9d05721cef80659
@@ -18,8 +18,8 @@
   en: a9fe46283ea28722
   zh: 7b7d1be7c070b893
 /agent-note-configure-subagent-persona-tool-visibility-and-depth/decision/depth-is-an-absolute-tree-cap:
-  en: c1d92ec60342c8b7
-  zh: 063c9eaba331312b
+  en: 932caef9dac03324
+  zh: b7e26e3bfe42de1f
 /agent-note-configure-subagent-persona-tool-visibility-and-depth/decision/capability-gating-keeps-providers-honest:
   en: 1669c3372b728fc8
   zh: 349ee461c9307811

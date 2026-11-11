@@ -6,7 +6,7 @@ English | [中文](2026-08-22-single-dsh-application-launcher.zh.md)
 
 ## Problem
 
-DeepSeek Harness application processes need one owner for composition, plugin resolution, environment discovery, shutdown, and user customization. A dedicated app bin with a complete `cordis.yml` creates a second lifecycle beside profile launch: plugins installed into a profile do not reach it, behavior drifts from `dsh-base`, and SDK callers learn arbitrary process argv instead of the product's composition model.
+DeepSeek Harness application processes need one owner for composition, plugin resolution, environment discovery, shutdown, and user customization. A dedicated app bin with a complete `cordis.yml` creates a second lifecycle beside profile launch: plugins installed into a profile do not reach it, behavior drifts from `@agentrans/base`, and SDK callers learn arbitrary process argv instead of the product's composition model.
 
 The Python SDK distributes a native executable through four platform wheels. Its packaged process uses the same profile launcher while preserving the closed VFS dependency tree, native sidecars, and installed-wheel evidence.
 
@@ -20,7 +20,7 @@ Vendor CLIs, build-only and test-only executables, direct in-process plugin moun
 
 ### Profile applications
 
-`@agentrans/sdk-app` and `@agentrans/acp-app` compose the full protocol applications over `@agentrans/base`. The SDK bundle adds the JSON-RPC server plus app-owned help and stdio lifetime; the ACP bundle adds the automation-only ACP server plus the same application responsibilities. Both adopt the base model, tools, persistence, settings, credentials, policy, and environment behavior. The [standalone sdk-minimal profile](../../archived/architecture/2026-08-24-standalone-sdk-minimal-profile.md) reuses SDK startup and JSON-RPC serving but deliberately owns a complete explicit tree without `dsh-base`.
+`@agentrans/sdk-app` and `@agentrans/acp-app` compose the full protocol applications over `@agentrans/base`. The SDK bundle adds the JSON-RPC server plus app-owned help and stdio lifetime; the ACP bundle adds the automation-only ACP server plus the same application responsibilities. Both adopt the base model, tools, persistence, settings, credentials, policy, and environment behavior. The [standalone sdk-minimal profile](../../archived/architecture/2026-08-24-standalone-sdk-minimal-profile.md) reuses SDK startup and JSON-RPC serving but deliberately owns a complete explicit tree without `@agentrans/base`.
 
 Profile manifests own patch reload:
 
@@ -32,9 +32,9 @@ Profile manifests own patch reload:
 | `sdk-minimal` | `startup` |
 | `acp` | `startup` |
 
-Custom profiles default to `live`. A startup profile still applies its bundle, profile, home-level, and invocation `--patch` layers, but it does not watch them after boot. `dsh-base` inserts the module-HMR row disabled; a profile with a tested source-module reload lifecycle must enable it explicitly. None of the shipped profiles enable server module HMR: `patchReload: live` uses the launcher's config-only watcher while the startup profiles install no watcher. SDK and ACP cannot safely replace their server, agents, persistence, or tool registry inside one owned stdio connection.
+Custom profiles default to `live`. A startup profile still applies its bundle, profile, home-level, and invocation `--patch` layers, but it does not watch them after boot. `@agentrans/base` inserts the module-HMR row disabled; a profile with a tested source-module reload lifecycle must enable it explicitly. None of the shipped profiles enable server module HMR: `patchReload: live` uses the launcher's config-only watcher while the startup profiles install no watcher. SDK and ACP cannot safely replace their server, agents, persistence, or tool registry inside one owned stdio connection.
 
-The shipped protocol profiles reserve stdout for protocol frames, expose help without starting transport, and route stdin EOF and signals through bounded root disposal. ACP remains automation-only. The SDK JSON-RPC methods, notification fields, and `initialize.serverInfo.name` remain stable. Full-profile model-visible tool and persistence defaults come from `dsh-base`, including its [default editor selection](../../../../packages/bundle/base/README.md); `sdk-minimal` owns its explicit defaults. Runnable snapshots own the assembled application outputs.
+The shipped protocol profiles reserve stdout for protocol frames, expose help without starting transport, and route stdin EOF and signals through bounded root disposal. ACP remains automation-only. The SDK JSON-RPC methods, notification fields, and `initialize.serverInfo.name` remain stable. Full-profile model-visible tool and persistence defaults come from `@agentrans/base`, including its [default editor selection](../../../../packages/bundle/base/README.md); `sdk-minimal` owns its explicit defaults. Runnable snapshots own the assembled application outputs.
 
 ### TypeScript SDK customization
 
@@ -68,13 +68,13 @@ The [ACP automation-only protocol](../simplification/2026-07-23-acp-automation-o
 
 **Keep forwarding compatibility bins.** Rejected: a forwarding executable remains another public launch name and compatibility promise. The pre-release repository can move callers directly to profiles.
 
-**Put caller-supplied complete Cordis trees behind profile wrappers.** Rejected: that centralizes argv without centralizing application composition. Full profiles use `dsh-base` plus thin app bundles so shared policy has one owner. A repository-owned, versioned standalone bundle is allowed only when an explicit roster is the product behavior, as [sdk-minimal](../../archived/architecture/2026-08-24-standalone-sdk-minimal-profile.md) records.
+**Put caller-supplied complete Cordis trees behind profile wrappers.** Rejected: that centralizes argv without centralizing application composition. Full profiles use `@agentrans/base` plus thin app bundles so shared policy has one owner. A repository-owned, versioned standalone bundle is allowed only when an explicit roster is the product behavior, as [sdk-minimal](../../archived/architecture/2026-08-24-standalone-sdk-minimal-profile.md) records.
 
 **Accept inline plugins or a complete `cordis.yml` in the TypeScript constructor.** Rejected: the SDK would become another package installer and application composer. Named profiles and patch files already provide persistent and per-launch customization through one resolution model.
 
 **Resolve `agentrans` only from `PATH`.** Rejected: ordinary Node processes do not reliably inherit a project-local `.bin` path. A same-version package dependency provides a deterministic runtime.
 
-**Enable module HMR in `dsh-base` and make unsafe profiles disable it.** Rejected: the shared base also underlies custom profiles, so an enabled default makes every new application remember to opt out of source-module replacement. A disabled base makes module HMR an explicit profile capability while leaving `patchReload: live` config watching available.
+**Enable module HMR in `@agentrans/base` and make unsafe profiles disable it.** Rejected: the shared base also underlies custom profiles, so an enabled default makes every new application remember to opt out of source-module replacement. A disabled base makes module HMR an explicit profile capability while leaving `patchReload: live` config watching available.
 
 **Hot-reload protocol profiles.** Rejected: replacing a protocol server or its dependencies can invalidate pending frames and SDK-owned agents. Process restart is the adoption boundary for SDK and ACP configuration changes.
 
@@ -83,7 +83,7 @@ The [ACP automation-only protocol](../simplification/2026-07-23-acp-automation-o
 ## Verification
 
 - Source and built CLI acceptance cover `sdk`, `sdk-minimal`, and `acp` help, transport startup, stdout purity, EOF, signals, and root disposal.
-- Bundle configuration tests pin module HMR disabled in `dsh-base` and absent from shipped mode overrides; the custom live-profile e2e pins config reload through the launcher's watch-only fallback.
+- Bundle configuration tests pin module HMR disabled in `@agentrans/base` and absent from shipped mode overrides; the custom live-profile e2e pins config reload through the launcher's watch-only fallback.
 - Focused unit suites cover profile launch resolution, initialization bounds, SDK retries, server readiness, and nested isolated homes with 100% coverage on the changed runtime sources.
 - Keyless ACP and SDK snapshots boot real `agentrans` profiles and pin protocol output plus persisted logs; the nested SDK composition boots a second real profile runtime.
 - The real-API workflow caps file parallelism at four because one profile e2e file can own several complete `agentrans` subprocess trees; workflow tests pin that resource bound.

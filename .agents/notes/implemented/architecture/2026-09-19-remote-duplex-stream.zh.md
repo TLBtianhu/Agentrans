@@ -8,7 +8,7 @@ Status: implemented
 
 ### 现状
 
-`dsh-api-gateway` 在 `/api/remote.mux` 的一条 WebSocket 上复用 Typert Remote 流。Host 方法通过 `@Remote({ mode: 'stream' })` 和 `RemoteStream<Out, In>` 声明两个方向；生成的 Client 方法返回 `RemoteStreamHandle<Out, In>`。既有的 `Iterable` 和 `AsyncIterable` 返回类型声明仅下行的方法。可选的末位 `signal: AbortSignal` 由 Gateway 提供，不进入线路参数。
+`@agentrans/api-gateway` 在 `/api/remote.mux` 的一条 WebSocket 上复用 Typert Remote 流。Host 方法通过 `@Remote({ mode: 'stream' })` 和 `RemoteStream<Out, In>` 声明两个方向；生成的 Client 方法返回 `RemoteStreamHandle<Out, In>`。既有的 `Iterable` 和 `AsyncIterable` 返回类型声明仅下行的方法。可选的末位 `signal: AbortSignal` 由 Gateway 提供，不进入线路参数。
 
 两个方向共用一个 `streamId`：
 
@@ -452,13 +452,13 @@ cancel : missing → ignore; otherwise control.abort(new Error('Remote stream ca
 
 | 包 | 承载 |
 | --- | --- |
-| `dsh-typert-protocol`（`types.ts`、`index.ts`） | `RemoteStream`、`RemoteStreamHandle`、`PeerId`、`PeerScope`、`RemoteInvocation`、`ctx.invocation` 声明合并、`InvocationDescriptor.uplink`；修饰器只认 `mode: 'stream'`；`TypertRemoteService` 构造时注册 `invocation` accessor |
-| `dsh-typert-registry` | 加载校验 `uplink.codec` 为有效的严格 codec |
-| `dsh-typert-generator`（`model.ts`、`analyzer.ts`、`emitter.ts`） | `remoteResultType` 识别 `RemoteStream<Out, In>` 并生成 `uplink` boundary；描述符输出 `uplink: { codec }`；生成的 Client 签名返回 `RemoteStreamHandle<Out, In>`；参数循环只认业务参数与末位 `signal` |
-| `dsh-client-connection`（`peer.ts`、`rpc.ts`、`rpc-host.ts`、`index.ts`） | `Peer` 类；`connection.browserPeer` 与 `admit`；`/api` 与升级路由经 `admit` 取 Peer；`rpc.open` 的可选 `uplink` |
-| `dsh-api-gateway` Host（`stream-protocol.ts`、`stream-server.ts`、`types.ts`、`index.ts`） | `item` / `end` 帧；`UplinkInbox`；`Config.streamInboxBytes` 与 `Config.websocketCompression`；`GatewayInvocation` 与 `extend({ invocation })`；`UplinkDecoder`；`handleUpgrade(req, socket, head, peer)` |
-| `dsh-api-gateway` Client（`client/index.ts`、`client/stream-client.ts`） | `invokeStream` 返回句柄；上行泵由句柄的队列驱动 |
-| `dsh-webworker-runtime`、`dsh-remote-mock` | worker 隧道的两种上行帧与 `serveStream` 组装；`StreamHandle.uplink`；直接代理返回真句柄 |
+| `@agentrans/typert-protocol`（`types.ts`、`index.ts`） | `RemoteStream`、`RemoteStreamHandle`、`PeerId`、`PeerScope`、`RemoteInvocation`、`ctx.invocation` 声明合并、`InvocationDescriptor.uplink`；修饰器只认 `mode: 'stream'`；`TypertRemoteService` 构造时注册 `invocation` accessor |
+| `@agentrans/typert-registry` | 加载校验 `uplink.codec` 为有效的严格 codec |
+| `@agentrans/typert-generator`（`model.ts`、`analyzer.ts`、`emitter.ts`） | `remoteResultType` 识别 `RemoteStream<Out, In>` 并生成 `uplink` boundary；描述符输出 `uplink: { codec }`；生成的 Client 签名返回 `RemoteStreamHandle<Out, In>`；参数循环只认业务参数与末位 `signal` |
+| `@agentrans/client-connection`（`peer.ts`、`rpc.ts`、`rpc-host.ts`、`index.ts`） | `Peer` 类；`connection.browserPeer` 与 `admit`；`/api` 与升级路由经 `admit` 取 Peer；`rpc.open` 的可选 `uplink` |
+| `@agentrans/api-gateway` Host（`stream-protocol.ts`、`stream-server.ts`、`types.ts`、`index.ts`） | `item` / `end` 帧；`UplinkInbox`；`Config.streamInboxBytes` 与 `Config.websocketCompression`；`GatewayInvocation` 与 `extend({ invocation })`；`UplinkDecoder`；`handleUpgrade(req, socket, head, peer)` |
+| `@agentrans/api-gateway` Client（`client/index.ts`、`client/stream-client.ts`） | `invokeStream` 返回句柄；上行泵由句柄的队列驱动 |
+| `dsh-webworker-runtime`、`@agentrans/remote-mock` | worker 隧道的两种上行帧与 `serveStream` 组装；`StreamHandle.uplink`；直接代理返回真句柄 |
 | 文档 | gateway、api 组、connection、protocol、generator 的 README；`docs/api-gateway`；`docs/subsystems/typert` 的 type-equiv 块；config 与 Cordis 目录 |
 
 ## 关键流程时序

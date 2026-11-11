@@ -131,7 +131,7 @@ export function principalOf(invocation: RemoteInvocation | undefined): Principal
 
 ### 方法级访问控制
 
-资源类型与 `@Remote` 的 `resources` 读取函数在 `@agentrans/typert-protocol`；资源种类在 typert 中与 lookups、Contexts 并列：`TypertResourceMap` 声明种类，`typert.resources` 保存每个种类的默认 wire 字段或 resolver，lookup 与 Host Context adapter 声明其 wire 身份所属的资源种类。Gateway 把一次调用或一个转发事件解析为它访问的资源。判定、列表过滤与访问快照在新包 `@agentrans/api-remote-access`（`packages/api/remote-access`），该包不读取任何参数字段。Gateway 与领域包对 remote-access 只做 type-only 依赖并 inject `remoteAccess`，值依赖只有 `dsh-typert-protocol`，不为 remote-access 新增 `package-dependency-policy` 条目。role、binding 与 policy 由业务包定义和注册，liveshare 为首个使用方。除内置的 `global` 外，remote-access 与 Gateway 中不出现任何资源种类名，符合 [`packages/api` 只承载通用编排](../../../../docs/defensive-patterns/remote-and-api.zh.md) 的评审规则。
+资源类型与 `@Remote` 的 `resources` 读取函数在 `@agentrans/typert-protocol`；资源种类在 typert 中与 lookups、Contexts 并列：`TypertResourceMap` 声明种类，`typert.resources` 保存每个种类的默认 wire 字段或 resolver，lookup 与 Host Context adapter 声明其 wire 身份所属的资源种类。Gateway 把一次调用或一个转发事件解析为它访问的资源。判定、列表过滤与访问快照在新包 `@agentrans/api-remote-access`（`packages/api/remote-access`），该包不读取任何参数字段。Gateway 与领域包对 remote-access 只做 type-only 依赖并 inject `remoteAccess`，值依赖只有 `@agentrans/typert-protocol`，不为 remote-access 新增 `package-dependency-policy` 条目。role、binding 与 policy 由业务包定义和注册，liveshare 为首个使用方。除内置的 `global` 外，remote-access 与 Gateway 中不出现任何资源种类名，符合 [`packages/api` 只承载通用编排](../../../../docs/defensive-patterns/remote-and-api.zh.md) 的评审规则。
 
 #### 与 RBAC 的对应
 

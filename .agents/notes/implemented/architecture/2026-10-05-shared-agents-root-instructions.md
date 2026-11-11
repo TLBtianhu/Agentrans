@@ -6,11 +6,11 @@ English | [中文](2026-10-05-shared-agents-root-instructions.zh.md)
 
 ## Problem
 
-DSH loads one user-global instruction file, `$AGENTRANS_HOME/AGENTS.md`. People who run several agent tools keep the instructions they share across those tools in the shared agent configuration root (`~/.agents/AGENTS.md`, or `$AGENTRANS_AGENTS_HOME`) that `dsh-skill-filesystem` already scans for skills. Those instructions reached DSH only when the person copied or symlinked them into the harness home, which duplicates one source of truth into DSH-owned data and leaves no way to tell which copy a session loaded.
+DSH loads one user-global instruction file, `$AGENTRANS_HOME/AGENTS.md`. People who run several agent tools keep the instructions they share across those tools in the shared agent configuration root (`~/.agents/AGENTS.md`, or `$AGENTRANS_AGENTS_HOME`) that `@agentrans/skill-filesystem` already scans for skills. Those instructions reached DSH only when the person copied or symlinked them into the harness home, which duplicates one source of truth into DSH-owned data and leaves no way to tell which copy a session loaded.
 
 ## Decision
 
-The user-global instruction scope has two ordered roots: `$AGENTRANS_HOME/AGENTS.md` first, then `<agentsHome>/AGENTS.md`. The instruction loader resolves the harness home from `$AGENTRANS_HOME` or `~/.dsh`, and `agentsHome` from `$AGENTRANS_AGENTS_HOME` or `~/.agents`. `resolveAgentsHome` and `agentsHomeDisplay` in `dsh-home-paths` own that resolution for both `dsh-agent-instructions` and `dsh-skill-filesystem`, so the shared root has one resolver whose tilde expansion and blank-environment handling match the harness home.
+The user-global instruction scope has two ordered roots: `$AGENTRANS_HOME/AGENTS.md` first, then `<agentsHome>/AGENTS.md`. The instruction loader resolves the harness home from `$AGENTRANS_HOME` or `~/.dsh`, and `agentsHome` from `$AGENTRANS_AGENTS_HOME` or `~/.agents`. `resolveAgentsHome` and `agentsHomeDisplay` in `@agentrans/home-paths` own that resolution for both `@agentrans/agent-instructions` and `@agentrans/skill-filesystem`, so the shared root has one resolver whose tilde expansion and blank-environment handling match the harness home.
 
 The two files are candidates of one candidate group. They deduplicate by trimmed content, so identical copies render once from the harness home, and an unobservable candidate preserves the group's last-good state. A duplicate of budget-retained content keeps being reconciled, so deleting or changing the retained candidate promotes it; a byte-budget omission leaves that candidate and its content duplicates unprobed. The harness-home file keeps the `user-global` scope key that earlier sessions recorded; the shared file carries `agents-global`, and reconciliation probes both roots on resume, so an external edit, a removal, or a newly created file appears as a change notice instead of a new baseline.
 
@@ -32,6 +32,6 @@ A user-global scope directory is an internal reconciliation key, so it stays out
 
 - Shared instructions load without a copy or symlink, and the symlinked layout still renders once, from the harness home.
 - A session that started before this change receives one transition when the shared file exists with content that differs from the harness-home file.
-- `dsh-agent-instructions` exposes no `dshHome` or `agentsHome` config field; its two roots are process policy. `dsh-skill-filesystem` retains its explicit home fields, which select that provider's own skill roots.
+- `@agentrans/agent-instructions` exposes no `dshHome` or `agentsHome` config field; its two roots are process policy. `@agentrans/skill-filesystem` retains its explicit home fields, which select that provider's own skill roots.
 - The two user-global files share one fate on probe failure: the group preserves its last-good state together, because one digest decides which member renders.
 - `packages/context/agent-instructions/tests/agent-instructions.spec.ts` pins the two-root order, content deduplication, duplicate promotion after the retained candidate changes or disappears, the global delta wording, the `replace` and `remove` transitions, `$AGENTRANS_AGENTS_HOME` resolution, the `~/.agents` display label, and the escaped project directory name.

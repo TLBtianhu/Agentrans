@@ -10,11 +10,11 @@ Status: implemented
 
 ## Decision
 
-DSH 能力称为 **computer use（计算机操作）**。[`dsh-computer-use`](../../../../packages/computer-use/computer-use/README.zh.md) 拥有 `ctx.computerUse`，注册一个提供方自定的名称并返回其 effect 清理函数。第二次注册无论名称为何都会失败。服务不包含提供方对象、共享操作类型、分派方法、Session 锁或运行时选择器。
+DSH 能力称为 **computer use（计算机操作）**。[`@agentrans/computer-use`](../../../../packages/computer-use/computer-use/README.zh.md) 拥有 `ctx.computerUse`，注册一个提供方自定的名称并返回其 effect 清理函数。第二次注册无论名称为何都会失败。服务不包含提供方对象、共享操作类型、分派方法、Session 锁或运行时选择器。
 
 **Cua Driver** 是上游实现的名称。[MCP 提供方](../../../../packages/experimental/computer-use-cua-driver-mcp/README.zh.md)连接已安装的可执行文件。[原生提供方](../../../../packages/experimental/computer-use-cua-driver-native/README.zh.md)安装上游原生 npm 依赖。两者均保持实验性并加入显式公开发布允许列表；均不默认启用。
 
-各集成暴露上游工具目录。MCP 结果转换保留在 `dsh-mcp-client` 中，其基于回调的工具适配函数也转换原生 Cua Driver 结果。计算机操作服务不依赖该适配函数或任一提供方。
+各集成暴露上游工具目录。MCP 结果转换保留在 `@agentrans/mcp-client` 中，其基于回调的工具适配函数也转换原生 Cua Driver 结果。计算机操作服务不依赖该适配函数或任一提供方。
 
 提供方卸载时保留注册，直到停止接收工具调用且自有工作和资源关闭。分组 Cordis effect 为此清理排序；独立 effect 可能并发清理。原生提供方通过 `tools/execute` 在原生调用和截图准入之间共享取消信号，同时保留执行标识。并发 Session 由调用方协调，因为提供方注册不拥有观察、操作和验证流程。
 

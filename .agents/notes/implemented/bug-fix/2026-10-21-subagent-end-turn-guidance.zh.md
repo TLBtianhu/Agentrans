@@ -19,7 +19,7 @@ Status: implemented
 
 ## 决策
 
-委派段保留结束本轮这句，文本与 #6057 引入的版本逐字一致。结束本轮不会丢失结果：子代理结束后会向父级投递 user-role 通知，通知到达空闲父级会起一次独立的模型请求（[`dsh-subagent`](../../../../packages/subagent/subagent/README.zh.md)）。在子代理继续推进期间，宿主交替等待 `agent.whenIdle()` 与 `waitForChildren(agent)`（[ACP `session.ts`](../../../../packages/acp/acp/src/session.ts)），`dsh-goal-round-driver` 也会等运行中的后代结束再开下一轮 goal。
+委派段保留结束本轮这句，文本与 #6057 引入的版本逐字一致。结束本轮不会丢失结果：子代理结束后会向父级投递 user-role 通知，通知到达空闲父级会起一次独立的模型请求（[`@agentrans/subagent`](../../../../packages/subagent/subagent/README.zh.md)）。在子代理继续推进期间，宿主交替等待 `agent.whenIdle()` 与 `waitForChildren(agent)`（[ACP `session.ts`](../../../../packages/acp/acp/src/session.ts)），`@agentrans/goal-round-driver` 也会等运行中的后代结束再开下一轮 goal。
 
 这句保持为一行字面文本。把 `the next result starts a new turn` 改成 `each result starts a new turn` 会重录 83 个提示词 sidecar，而测不到行为变化。
 

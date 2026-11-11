@@ -10,7 +10,7 @@ Host 任务已经使用带版本的 `schedule` 域。第二个域、导入器和
 
 ## 决策
 
-使用 `schedule` 版本 2 和 `compatibleVersions: [1]`，保留后端路由、封套和整单元布局。将现有接受版本策略扩展到权威 JSON 和 SQLite 单元；读取保持存储不变，下一次写入将当前版本戳与数据一同提交。在现有六种记录类型旁添加 `rrule`，所有类型均正常求值。移除独立存储的导入器、导入标记、占位 RRULE 和并行的 Session 绑定管理 API。将可复用的 Cron、RRULE 解析及有界时间计算移至 `dsh-util-time`；Schedule 负责记录、目标、投递准入、历史和领域错误。
+使用 `schedule` 版本 2 和 `compatibleVersions: [1]`，保留后端路由、封套和整单元布局。将现有接受版本策略扩展到权威 JSON 和 SQLite 单元；读取保持存储不变，下一次写入将当前版本戳与数据一同提交。在现有六种记录类型旁添加 `rrule`，所有类型均正常求值。移除独立存储的导入器、导入标记、占位 RRULE 和并行的 Session 绑定管理 API。将可复用的 Cron、RRULE 解析及有界时间计算移至 `@agentrans/util-time`；Schedule 负责记录、目标、投递准入、历史和领域错误。
 
 显式目标优先。缺少目标时，将已有 `sessionId` 读取为 Session 目标；否则保留稳定的 `new_once` 目标。新增可选元数据使用读取默认值，不重写存储。每次成功编辑都写入不含 `sessionId` 的当前行格式。自定义时间同时接受 RRULE 和带显式时区的五字段 Cron 表达式；界面标签不提示任何语法名称。模型指引继续推荐 RRULE。
 

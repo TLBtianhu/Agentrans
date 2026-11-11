@@ -24,7 +24,7 @@ Computer Use is a shipped optional bundle in the experimental group. Its bundle 
 
 **Ship every provider as an optional bundle.** Composes and displays correctly, but grows every install by provider runtimes for a capability most installations never switch on; voice input's `sherpa-onnx-node` is the one accepted precedent.
 
-**Mount the registration-only `computer-use` and `browser-use` services in `dsh-base`.** The shared composition would carry rows that only an optional provider bundle needs; a provider bundle can insert the service row from its own patch and dependencies.
+**Mount the registration-only `computer-use` and `browser-use` services in `@agentrans/base`.** The shared composition would carry rows that only an optional provider bundle needs; a provider bundle can insert the service row from its own patch and dependencies.
 
 **Register preset extensions at runtime.** A separate registration path would need its own ordering, module resolution, generation updates, and inspection behavior. Profile patches keep one effective composition for boot, dumps, validation, and user overrides.
 

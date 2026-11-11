@@ -6,7 +6,7 @@ Status: implemented
 
 ## Problem
 
-DeepSeek Harness 应用进程需要由同一个机制负责组合、插件解析、环境发现、关闭和用户自定义。带完整 `cordis.yml` 的专用应用 bin 会在 profile 启动之外形成第二套生命周期：安装到 profile 的插件无法到达它，行为会与 `dsh-base` 偏离，SDK 调用方还需要学习任意进程 argv，而不是产品的组合模型。
+DeepSeek Harness 应用进程需要由同一个机制负责组合、插件解析、环境发现、关闭和用户自定义。带完整 `cordis.yml` 的专用应用 bin 会在 profile 启动之外形成第二套生命周期：安装到 profile 的插件无法到达它，行为会与 `@agentrans/base` 偏离，SDK 调用方还需要学习任意进程 argv，而不是产品的组合模型。
 
 Python SDK 通过四个平台 wheel 包分发原生可执行文件。其打包进程使用同一 profile 启动器，同时保留封闭的 VFS 依赖树、原生伴随文件与 installed-wheel 证据。
 
@@ -20,7 +20,7 @@ Vendor CLI、仅用于构建和测试的可执行文件、进程内直接挂载�
 
 ### Profile 应用
 
-`@agentrans/sdk-app` 与 `@agentrans/acp-app` 在 `@agentrans/base` 之上组合完整协议应用。SDK 组合包增加 JSON-RPC 服务器、应用自有帮助和 stdio 生命周期；ACP 组合包增加仅用于自动化的 ACP 服务器与相同的应用职责。两者都采用 base 层的模型、工具、持久化、settings、credentials、策略和环境行为。[独立 sdk-minimal profile](../../archived/architecture/2026-08-24-standalone-sdk-minimal-profile.md)复用 SDK 启动与 JSON-RPC 服务，但刻意拥有不含 `dsh-base` 的完整显式配置树。
+`@agentrans/sdk-app` 与 `@agentrans/acp-app` 在 `@agentrans/base` 之上组合完整协议应用。SDK 组合包增加 JSON-RPC 服务器、应用自有帮助和 stdio 生命周期；ACP 组合包增加仅用于自动化的 ACP 服务器与相同的应用职责。两者都采用 base 层的模型、工具、持久化、settings、credentials、策略和环境行为。[独立 sdk-minimal profile](../../archived/architecture/2026-08-24-standalone-sdk-minimal-profile.md)复用 SDK 启动与 JSON-RPC 服务，但刻意拥有不含 `@agentrans/base` 的完整显式配置树。
 
 Profile manifest 负责 patch 重载：
 
@@ -32,9 +32,9 @@ Profile manifest 负责 patch 重载：
 | `sdk-minimal` | `startup` |
 | `acp` | `startup` |
 
-自定义 profile 默认为 `live`。`startup` profile 仍会应用组合包、profile、home 级与调用时 `--patch` 各层，但启动后不会监视这些文件。`dsh-base` 插入的模块 HMR（热模块替换）配置项默认禁用；具有经过验证的源码模块重载生命周期的 profile 必须显式启用它。随附 profile 均不启用服务器模块 HMR：`patchReload: live` 使用启动器的仅配置 watcher，`startup` profile 则不安装 watcher。SDK 与 ACP 无法在一个自有 stdio 连接内安全替换其服务器、agent、持久化或工具注册表。
+自定义 profile 默认为 `live`。`startup` profile 仍会应用组合包、profile、home 级与调用时 `--patch` 各层，但启动后不会监视这些文件。`@agentrans/base` 插入的模块 HMR（热模块替换）配置项默认禁用；具有经过验证的源码模块重载生命周期的 profile 必须显式启用它。随附 profile 均不启用服务器模块 HMR：`patchReload: live` 使用启动器的仅配置 watcher，`startup` profile 则不安装 watcher。SDK 与 ACP 无法在一个自有 stdio 连接内安全替换其服务器、agent、持久化或工具注册表。
 
-随附协议 profile 将 stdout 保留给协议帧，显示帮助时不启动 transport，并通过有界根节点 dispose（资源释放）处理 stdin EOF 与信号。ACP 继续仅用于自动化。SDK JSON-RPC 方法、通知字段与 `initialize.serverInfo.name` 保持稳定。完整 profile 的模型可见工具与持久化默认值来自 `dsh-base`，包括其[默认编辑器选择](../../../../packages/bundle/base/README.zh.md)；`sdk-minimal` 拥有自己的显式默认值。可运行快照负责固定已组装的应用输出。
+随附协议 profile 将 stdout 保留给协议帧，显示帮助时不启动 transport，并通过有界根节点 dispose（资源释放）处理 stdin EOF 与信号。ACP 继续仅用于自动化。SDK JSON-RPC 方法、通知字段与 `initialize.serverInfo.name` 保持稳定。完整 profile 的模型可见工具与持久化默认值来自 `@agentrans/base`，包括其[默认编辑器选择](../../../../packages/bundle/base/README.zh.md)；`sdk-minimal` 拥有自己的显式默认值。可运行快照负责固定已组装的应用输出。
 
 ### TypeScript SDK 自定义
 
@@ -68,13 +68,13 @@ Python 运行时 wheel 将 [`python/sdk-runtime/runtime-bootstrap.mjs`](../../..
 
 **保留转发兼容 bin。** 拒绝：转发可执行文件仍然形成另一个公开启动名称与兼容承诺。预发布仓库可以让调用方直接迁移到 profile。
 
-**把调用方提供的完整 Cordis 树放到 profile wrapper 后面。** 拒绝：这只集中 argv，没有集中应用组合。完整 profile 使用 `dsh-base` 加轻量应用组合包，使共享策略只有一个归属。只有当显式清单本身属于产品行为时，才允许仓库自有且有版本的独立组合包，具体见 [sdk-minimal](../../archived/architecture/2026-08-24-standalone-sdk-minimal-profile.md)。
+**把调用方提供的完整 Cordis 树放到 profile wrapper 后面。** 拒绝：这只集中 argv，没有集中应用组合。完整 profile 使用 `@agentrans/base` 加轻量应用组合包，使共享策略只有一个归属。只有当显式清单本身属于产品行为时，才允许仓库自有且有版本的独立组合包，具体见 [sdk-minimal](../../archived/architecture/2026-08-24-standalone-sdk-minimal-profile.md)。
 
 **在 TypeScript 构造函数中接受内联插件或完整 `cordis.yml`。** 拒绝：SDK 会因此成为另一个包安装器和应用组合器。具名 profile 与 patch 文件已通过统一解析模型提供持久与逐次启动自定义。
 
 **只从 `PATH` 解析 `agentrans`。** 拒绝：普通 Node 进程不一定继承项目本地 `.bin` 路径。同版本包依赖可以提供确定的运行时。
 
-**在 `dsh-base` 中启用模块 HMR，再由不安全的 profile 逐一禁用。** 拒绝：共享 base 同样承载自定义 profile；默认启用会要求每个新应用都记得退出源码模块替换。base 默认禁用会让模块 HMR 成为显式的 profile 能力，同时保留 `patchReload: live` 配置监视。
+**在 `@agentrans/base` 中启用模块 HMR，再由不安全的 profile 逐一禁用。** 拒绝：共享 base 同样承载自定义 profile；默认启用会要求每个新应用都记得退出源码模块替换。base 默认禁用会让模块 HMR 成为显式的 profile 能力，同时保留 `patchReload: live` 配置监视。
 
 **热重载协议 profile。** 拒绝：替换协议服务器或其依赖可能破坏待处理协议帧与 SDK 自有 agent。进程重启是 SDK 与 ACP 配置变更的采用边界。
 
@@ -83,7 +83,7 @@ Python 运行时 wheel 将 [`python/sdk-runtime/runtime-bootstrap.mjs`](../../..
 ## 验证
 
 - 源码与构建后 CLI 验收覆盖 `sdk`、`sdk-minimal` 和 `acp` 的帮助、transport 启动、stdout 纯净性、EOF、信号与根节点 dispose。
-- 组合包配置测试钉住 `dsh-base` 默认禁用模块 HMR，随附模式覆盖层不含该策略；自定义 live profile 的 e2e 钉住启动器仅监视 fallback 提供的配置重载。
+- 组合包配置测试钉住 `@agentrans/base` 默认禁用模块 HMR，随附模式覆盖层不含该策略；自定义 live profile 的 e2e 钉住启动器仅监视 fallback 提供的配置重载。
 - 聚焦单元套件覆盖 profile 启动解析、初始化时限、SDK 重试、服务器就绪和嵌套隔离 home，并对变更后的运行时源码实现 100% 覆盖率。
 - 免密钥 ACP 与 SDK 快照启动真实 `agentrans` profile，并钉住协议输出与持久化日志；嵌套 SDK 组合会启动第二个真实 profile 运行时。
 - 真实 API 工作流把文件并行度限制为 4，因为一个 profile e2e 文件可能拥有多个完整 `agentrans` 子进程树；工作流测试会钉住该资源上限。

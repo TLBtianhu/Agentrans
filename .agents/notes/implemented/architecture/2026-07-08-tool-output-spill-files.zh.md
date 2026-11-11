@@ -8,7 +8,7 @@ Status: implemented
 
 工具输出需要有界的模型可见预览，但部分超大结果仍可能在之后有用。抓取的页面正文或冗长的工具响应不应完整占用下一次模型请求，但模型应能使用现有文件读取工具，在之后查看经过格式化的完整结果。
 
-这项改动之前的行为并不一致。`dsh-bash-local` 已经会在内存尾部溢出时，把完整 stdout／stderr 流写入私有的临时 spill 文件；普通文本工具结果则仍以内联形式返回，除非工具自行实现上限。[工具结果保留库](../../archived/architecture/2026-07-06-tool-result-retention-library.md)负责预览机制，但不负责存储，也不负责把这些机制应用于最终工具结果的执行流水线策略。
+这项改动之前的行为并不一致。`@agentrans/bash-local` 已经会在内存尾部溢出时，把完整 stdout／stderr 流写入私有的临时 spill 文件；普通文本工具结果则仍以内联形式返回，除非工具自行实现上限。[工具结果保留库](../../archived/architecture/2026-07-06-tool-result-retention-library.md)负责预览机制，但不负责存储，也不负责把这些机制应用于最终工具结果的执行流水线策略。
 
 其形态与超时策略设计一致：工具作者声明规范值与 Native renderer（原生渲染器），由策略插件在渲染后的内容上执行部署默认的上下文预算。工具仍可在提供方采集上限处提前 spill；由工具负责的展示 spill 可以保留已完整采集的规范值，而只替换展示内容。[规范工具输出约定](../../../../packages/core/tools/README.zh.md)规定了这项区分。
 
@@ -141,10 +141,10 @@ ctx.tools.register(defineTool({
 
 ## 测试
 
-- `dsh-spill` 单元测试锁定 seam 约定：注册为 `ctx.spillStore`、每个上下文只允许一种实现，并在 dispose（资源释放）时释放。
+- `@agentrans/spill` 单元测试锁定 seam 约定：注册为 `ctx.spillStore`、每个上下文只允许一种实现，并在 dispose（资源释放）时释放。
 - `agentrans-spill-local` 单元测试覆盖 `saveText`、`encodeSegment` 清理（分隔符／波浪号／完整路径段的点／空值）、会话哈希目录、仅所有者权限、每次保存生成不同路径、配置根目录／私有根目录，以及存储失败时的拒绝。
 - `agentrans-spill-policy` 单元测试通过 `ctx.tools.execute` 驱动真实工具：禁用模式下无操作、替换超大文本、小结果／非文本结果保持不变、跳过 `read`、尽力回退（保存失败／无后端／无所有者），以及下游组合（限制已替换结果、保留 `additionalContexts`）。
-- `dsh-tool-web` 集成测试驱动 `web_fetch`，其实际执行路径经过 `ctx.tools.execute`，并使用真实的 `spill-local` 后端与策略；测试证明只有刻意加入的 spill 提示会改变模型可见文本，而 spill 文件保存完整的格式化结果。
+- `@agentrans/tool-web` 集成测试驱动 `web_fetch`，其实际执行路径经过 `ctx.tools.execute`，并使用真实的 `spill-local` 后端与策略；测试证明只有刻意加入的 spill 提示会改变模型可见文本，而 spill 文件保存完整的格式化结果。
 - `tui-agent` 示例加载 `spill-local` 与 `spill-policy`，因此其无密钥 Loader／PTY 冒烟测试会执行真实加载路径（namespace-plugin 导出形态与 `inject`）。
 
 ## 影响
@@ -155,7 +155,7 @@ ctx.tools.register(defineTool({
 
 本地后端的价值取决于现有 `read`／`grep` 工具能否检查返回的本地路径，即使 spill 目录位于会话 cwd 之外。这一条件成立，因为文件系统策略会记录观察结果并设置写保护，但不会把读取限制在工作区内。未来的工作区限制策略必须显式允许本地 spill 路径，或改用检索提示指向受支持读取器的非文件 spill 后端。
 
-**快照缺口。** 目前没有 ACP 快照场景覆盖 transcript（文本记录）可见的 `web_fetch` spill 提示。ACP 快照 harness 在无密钥环境中回放，无法访问实时 web，而 `web_fetch` spill 需要一个真实的超上限 HTTP 正文；确定性场景需要一个预置的 loopback fetch 目标，但当前回放树尚未接线（示例根本没有加载 `tool-web`）。该行为改由 `dsh-tool-web` 针对 loopback server 的集成测试覆盖。弥补该缺口属于后续工作：把 `tool-web` 和预置 fetch 目标接入 ACP 示例，然后录制 `web-fetch-spill` 场景。
+**快照缺口。** 目前没有 ACP 快照场景覆盖 transcript（文本记录）可见的 `web_fetch` spill 提示。ACP 快照 harness 在无密钥环境中回放，无法访问实时 web，而 `web_fetch` spill 需要一个真实的超上限 HTTP 正文；确定性场景需要一个预置的 loopback fetch 目标，但当前回放树尚未接线（示例根本没有加载 `tool-web`）。该行为改由 `@agentrans/tool-web` 针对 loopback server 的集成测试覆盖。弥补该缺口属于后续工作：把 `tool-web` 和预置 fetch 目标接入 ACP 示例，然后录制 `web-fetch-spill` 场景。
 
 如果策略开始负责工具专用语义，就会膨胀得过大。它处理已接受的图文序列，不解释工具专用的文字语义。由工具负责的提前 spill 仍留作未来工作。
 

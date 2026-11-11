@@ -10,11 +10,11 @@ Desktop providers expose different operations, observation formats, and platform
 
 ## Decision
 
-The DSH capability is named **computer use**. [`dsh-computer-use`](../../../../packages/computer-use/computer-use/README.md) owns `ctx.computerUse`, which registers one provider-owned name and returns its effect disposer. A second registration fails regardless of its name. The service contains no provider object, shared operation type, dispatch method, Session lock, or runtime selector.
+The DSH capability is named **computer use**. [`@agentrans/computer-use`](../../../../packages/computer-use/computer-use/README.md) owns `ctx.computerUse`, which registers one provider-owned name and returns its effect disposer. A second registration fails regardless of its name. The service contains no provider object, shared operation type, dispatch method, Session lock, or runtime selector.
 
 **Cua Driver** names the upstream implementation. The [MCP provider](../../../../packages/experimental/computer-use-cua-driver-mcp/README.md) connects an installed executable. The [native provider](../../../../packages/experimental/computer-use-cua-driver-native/README.md) installs the upstream native npm dependency. Both remain experimental and join the explicit public-release allowlist; neither is enabled by default.
 
-Each integration exposes the upstream tool catalog. MCP result conversion stays in `dsh-mcp-client`, whose callback-based tool adapter also converts native Cua Driver results. The computer-use service has no dependency on that adapter or either provider.
+Each integration exposes the upstream tool catalog. MCP result conversion stays in `@agentrans/mcp-client`, whose callback-based tool adapter also converts native Cua Driver results. The computer-use service has no dependency on that adapter or either provider.
 
 Provider teardown retains the registration until tool admission stops and owned work and resources close. A grouped Cordis effect orders that cleanup; separate effects may dispose concurrently. The native provider uses `tools/execute` to share cancellation across native calls and screenshot admission while preserving execution identity. Concurrent Sessions remain caller-coordinated because a provider registration does not own an observe, act, and verify workflow.
 

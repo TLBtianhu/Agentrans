@@ -25,11 +25,11 @@ harness 将其核心词汇——内容块、消息来源、结束原因、轮次
 
 将事件/词汇接口迁移到运行时 schema，至少涉及：
 
-- **六个 merge-extensible map**（约 370 行核心类型）：`ContentBlockMap`、`MessageSourceMap`、`FinishReasonMap`（位于 `dsh-llm`）；`TurnTriggerMap`、`TurnEndReasonMap`、`SessionEventMap`（位于 `dsh-session`）。
-- **约 10 处 `declare module` 声明增补位置**，分布在 `dsh-agent`、`dsh-agent-loop`、`dsh-shell`、`dsh-llm`、`dsh-session`、`dsh-session-persistence`、`dsh-system-prompt`、`dsh-tools` 各包中——每处都将从声明合并改为运行时 `register()` 调用。
+- **六个 merge-extensible map**（约 370 行核心类型）：`ContentBlockMap`、`MessageSourceMap`、`FinishReasonMap`（位于 `@agentrans/llm`）；`TurnTriggerMap`、`TurnEndReasonMap`、`SessionEventMap`（位于 `@agentrans/session`）。
+- **约 10 处 `declare module` 声明增补位置**，分布在 `@agentrans/agent`、`@agentrans/agent-loop`、`@agentrans/shell`、`@agentrans/llm`、`@agentrans/session`、`@agentrans/session-persistence`、`@agentrans/system-prompt`、`@agentrans/tools` 各包中——每处都将从声明合并改为运行时 `register()` 调用。
 - **事件生产者**——agent loop（智能体循环）中 16 处 `session.append(...)` 调用——形状不变，但现在在边界处被校验。
-- **约 7 个 switch 消费方**，对这些联合类型进行分支：`deriveMessages` 与包自有的不变式 companion（`dsh-session`）、`BlockAssembler`（`dsh-llm`）、两个 LLM（大语言模型）适配器（`dsh-llm-deepseek`、`dsh-llm-pi-ai`）以及工具 schema 层（`dsh-tools`）。`assertNever` 对封闭联合类型的穷举 vs 对可扩展联合类型的 fall-through 约定（一条已记录的 lint 规则）需要重新考量——运行时变体在静态层面不可穷举。
-- **`defineTool` 的 `InferArgs` DSL**（`dsh-tools`），它从编译期 schema 规范派生出零类型转换的 `execute` 参数类型——这是当前方案的标杆用例。
+- **约 7 个 switch 消费方**，对这些联合类型进行分支：`deriveMessages` 与包自有的不变式 companion（`@agentrans/session`）、`BlockAssembler`（`@agentrans/llm`）、两个 LLM（大语言模型）适配器（`@agentrans/llm-deepseek`、`@agentrans/llm-pi-ai`）以及工具 schema 层（`@agentrans/tools`）。`assertNever` 对封闭联合类型的穷举 vs 对可扩展联合类型的 fall-through 约定（一条已记录的 lint 规则）需要重新考量——运行时变体在静态层面不可穷举。
+- **`defineTool` 的 `InferArgs` DSL**（`@agentrans/tools`），它从编译期 schema 规范派生出零类型转换的 `execute` 参数类型——这是当前方案的标杆用例。
 - **文档**：architecture.md（该模式被描述为基础性的）、[开发模式不变式](../../implemented/architecture/2026-06-11-dev-invariants-over-deep-readonly.zh.md)，以及所有引用该模式的 Agent Note。
 
 这是一次仓库级别的词汇重新设计，而非持久化的实现细节。

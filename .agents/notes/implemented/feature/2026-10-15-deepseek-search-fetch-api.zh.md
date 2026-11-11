@@ -24,7 +24,7 @@ Status: implemented
 
 直接 Search 发送 `query`、`count`、`need_content: false` 和 `ori_question`。`count` 为 1 至 50 的配置值，默认采用服务的 10；请求的结果上限更小时以后者为准，工具总会发送其上限，默认为 8。`ori_question` 是发起会话中最近一条用户提示的文本，空白折叠后截取至 API 的 128 个字符上限。API 拒绝空白或更长的值，因此没有此类提示的搜索不发送该字段，`sendOriginalQuestion: false` 可将其关闭。2026-10-16 的探测中，不同取值未改变结果顺序、评分或摘要。查询原样传递，包括文档中的站点、语言、日期、排除和精确短语操作符。服务端执行查询长度为 1–128 个 Unicode 字符的约束。空 `results` 表示成功。
 
-提供方保留服务端顺序，将 URL、标题、`snippet`、`summary` 和可为 null 的 `date` 映射为共享来源。按照指南，工具把每个来源的 `summary` 提供给模型，短的 `snippet` 留给搜索卡片及其回放元数据。指南中的典型摘要长度不是最大值：2026-10-16 实测返回的摘要为 1,000–2,300 个字符。因此 `dsh-tool-web` 合并摘要中的空白，并将每条摘要限制在 `searchSummaryMaxChars` 以内，默认 800 个字符，即指南典型范围的上限；一次调用的摘要总长不超过来源上限乘以该上限。摘要随工具输出值和渲染文本一起进入 Session 记录。提供方不使用完整 `content`、`site_name`、`site_icon`、`rerank_score` 或 `authority`，也不发送 `localization`。这些是当前接入的限制，并非 API 缺少这些能力。
+提供方保留服务端顺序，将 URL、标题、`snippet`、`summary` 和可为 null 的 `date` 映射为共享来源。按照指南，工具把每个来源的 `summary` 提供给模型，短的 `snippet` 留给搜索卡片及其回放元数据。指南中的典型摘要长度不是最大值：2026-10-16 实测返回的摘要为 1,000–2,300 个字符。因此 `@agentrans/tool-web` 合并摘要中的空白，并将每条摘要限制在 `searchSummaryMaxChars` 以内，默认 800 个字符，即指南典型范围的上限；一次调用的摘要总长不超过来源上限乘以该上限。摘要随工具输出值和渲染文本一起进入 Session 记录。提供方不使用完整 `content`、`site_name`、`site_icon`、`rerank_score` 或 `authority`，也不发送 `localization`。这些是当前接入的限制，并非 API 缺少这些能力。
 
 直接检索不产生辅助模型请求事件，因为 Harness 没有发起该请求。普通工具调用与工具结果事件继续保留查询及模型可见的结果。这不代表搜索服务内部不使用模型。返回文本仍是外部不受信任的数据。
 
