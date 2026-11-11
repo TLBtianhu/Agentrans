@@ -24,7 +24,7 @@ export const ACP_APP_STARTUP_SERVICE = 'acpAppStartup'
  */
 function acpCommand(): Command {
   return new Command()
-    .name('dsh --profile acp')
+    .name('agentrans --profile acp')
     .description('Serve automation clients over Agent Client Protocol stdio.')
     .helpOption('-h, --help', 'show this help')
     .addHelpText('after', `

@@ -58,7 +58,7 @@ interface WebOptions {
  */
 function webCommand(): Command {
   return new Command()
-    .name('dsh --profile web')
+    .name('agentrans --profile web')
     .description('Serve the Agentrans browser UI.')
     .helpOption('-h, --help', 'show this help')
     .option('--host <host>', 'bind address: one concrete IPv4 or IPv6 literal of a local interface; wildcard addresses are rejected')
