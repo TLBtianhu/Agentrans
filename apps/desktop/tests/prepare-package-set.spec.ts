@@ -44,9 +44,9 @@ describe('desktop package-set selection', () => {
       ['@agentrans/unused', packed('@agentrans/unused')],
     ])
     expect(selectDesktopPackageClosure(available, { platform: 'win32', arch: 'x64' }).map(entry => entry.manifest.name)).toEqual([
-      '@agentrans/cordis',
-      '@agentrans/cli',
       '@agentrans/base',
+      '@agentrans/cli',
+      '@agentrans/cordis',
       '@agentrans/desktop-host',
       '@agentrans/platform-package',
     ])
@@ -157,8 +157,8 @@ it('copies no macOS tarball into the Windows package set', () => {
   }
   const output = join(root, 'output')
   prepareDesktopPackageSet([inputs], output, { platform: 'win32', arch: 'x64' })
-  expect(readdirSync(join(output, DESKTOP_PACKAGES_DIR))).not.toContain('dsh-experimental-cua-macos.tgz')
+  expect(readdirSync(join(output, DESKTOP_PACKAGES_DIR))).not.toContain('experimental-cua-macos.tgz')
   prepareDesktopPackageSet([inputs], output, { platform: 'darwin', arch: 'arm64' })
-  expect(readFileSync(join(output, DESKTOP_PACKAGES_DIR, 'dsh-experimental-cua-macos.tgz')))
-    .toEqual(readFileSync(join(inputs, 'dsh-experimental-cua-macos.tgz')))
+  expect(readFileSync(join(output, DESKTOP_PACKAGES_DIR, 'experimental-cua-macos.tgz')))
+    .toEqual(readFileSync(join(inputs, 'experimental-cua-macos.tgz')))
 })
