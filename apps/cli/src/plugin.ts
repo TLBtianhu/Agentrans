@@ -10,7 +10,7 @@ import { join } from 'node:path'
 
 function requireDesktopProfile(dir: string): void {
   if (!existsSync(join(dir, 'package.json'))) {
-    throw new Error('Open Agentrans Desktop once to initialize its profile, then fully quit it before running dsh plugin --profile desktop.')
+    throw new Error('Open Agentrans Desktop once to initialize its profile, then fully quit it before running agentrans plugin --profile desktop.')
   }
 }
 
@@ -30,11 +30,11 @@ async function versionCommand(profile: string, args: readonly string[]): Promise
       else if (!argument.startsWith('-') && packageVersion === undefined) packageVersion = argument
       else throw new Error(`unexpected argument ${JSON.stringify(argument)}`)
     }
-    if (command === 'version-exemptions' && rest.length > 0) throw new Error('usage: dsh plugin version-exemptions')
+    if (command === 'version-exemptions' && rest.length > 0) throw new Error('usage: agentrans plugin version-exemptions')
     let request: { packageVersion: string; runtimeVersion: string } | undefined
     if (command !== 'version-exemptions') {
       if (packageVersion === undefined || runtimeVersion === undefined) {
-        throw new Error(`usage: dsh plugin ${command} <package@version> --dsh-version <exact>${command === 'allow-version' ? ' --accept-risk' : ''}`)
+        throw new Error(`usage: agentrans plugin ${command} <package@version> --dsh-version <exact>${command === 'allow-version' ? ' --accept-risk' : ''}`)
       }
       request = { packageVersion, runtimeVersion }
     }

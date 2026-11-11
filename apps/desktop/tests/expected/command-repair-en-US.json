@@ -8,6 +8,13 @@
     ]
   },
   {
+    "message": "Continue with the Desktop command?",
+    "buttons": [
+      "Continue",
+      "Cancel"
+    ]
+  },
+  {
     "message": "The Desktop command is installed.",
     "buttons": [
       "Close"

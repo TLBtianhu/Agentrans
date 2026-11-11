@@ -58,7 +58,7 @@ function Invoke-DshCommandPath {
             }
         }
         if ($Request.operation -eq 'install') {
-            if (-not (Test-Path -LiteralPath (Join-Path $directory 'dsh.cmd') -PathType Leaf)) { Fail 'ENOENT' 'The installed launcher is unavailable.' }
+            if (-not (Test-Path -LiteralPath (Join-Path $directory 'agentrans.cmd') -PathType Leaf)) { Fail 'ENOENT' 'The installed launcher is unavailable.' }
             $next = (@($directory) + $kept) -join ';'
             $environment = [Microsoft.Win32.Registry]::CurrentUser.CreateSubKey($EnvironmentKey)
             $owner = [Microsoft.Win32.Registry]::CurrentUser.CreateSubKey($OwnerKey)
@@ -96,7 +96,7 @@ function Invoke-DshCommandPath {
             $extensions = if ($env:PATHEXT) { @($env:PATHEXT.Split(';')) } else { @('.com','.exe','.bat','.cmd') }
             foreach ($extension in (@('.ps1') + $extensions)) {
                 try {
-                    $candidate = Join-Path $path ('dsh' + $extension)
+                    $candidate = Join-Path $path ('agentrans' + $extension)
                     if (Test-Path -LiteralPath $candidate -PathType Leaf) { $active = $candidate; break }
                 } catch {
                     # Invalid or unavailable PATH candidates do not prevent checking later entries.

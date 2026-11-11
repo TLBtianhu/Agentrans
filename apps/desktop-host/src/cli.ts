@@ -1,4 +1,4 @@
-/** Public dsh commands using the immutable runtime carried by the Desktop installation. */
+/** Public Agentrans commands using the immutable runtime carried by the Desktop installation. */
 
 import { delimiter, dirname, join, resolve } from 'node:path'
 import {

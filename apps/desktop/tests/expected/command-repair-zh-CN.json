@@ -8,6 +8,13 @@
     ]
   },
   {
+    "message": "继续使用 Desktop 命令？",
+    "buttons": [
+      "继续",
+      "取消"
+    ]
+  },
+  {
     "message": "Desktop 命令已安装。",
     "buttons": [
       "关闭"

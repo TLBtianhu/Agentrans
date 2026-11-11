@@ -5,7 +5,7 @@ import { en, zh } from '../src/locale.ts'
 import { presentCommandManagement } from '../src/command-management.ts'
 
 it.each([en, zh])('shows installation, repair/removal and shadowed command locations', (messages) => {
-  const destination = '/usr/local/bin/dsh'
+  const destination = '/usr/local/bin/agentrans'
   const missing = presentCommandManagement({ managed: false, available: false, destination }, messages, 'darwin')
   expect(missing.buttons).toEqual([messages.cliCommandInstall, messages.cancel])
   expect(missing.cancelId).toBe(1)
@@ -24,7 +24,7 @@ it.each([
   ['darwin', 'en-US', en], ['darwin', 'zh-CN', zh],
   ['win32', 'en-US', en], ['win32', 'zh-CN', zh],
 ] as const)('records command status on %s in %s', async (platform, language, messages) => {
-  const destination = platform === 'darwin' ? '/usr/local/bin/dsh' : 'C:\\Users\\user\\AppData\\Local\\Programs\\Agentrans\\resources\\runtime\\cli\\bin\\dsh.cmd'
+  const destination = platform === 'darwin' ? '/usr/local/bin/agentrans' : 'C:\\Users\\user\\AppData\\Local\\Programs\\Agentrans\\resources\\runtime\\cli\\bin\\dsh.cmd'
   const other = platform === 'darwin' ? '/opt/homebrew/bin/dsh' : 'C:\\Program Files\\nodejs\\dsh.cmd'
   const states = [
     { managed: false, available: false, destination },
