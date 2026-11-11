@@ -16,15 +16,15 @@ import { mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
-import { SESSION_FORMAT_VERSION, SessionId, SessionSeq } from '@deepseek-ai/dsh-session'
-import type { SessionHeader } from '@deepseek-ai/dsh-session'
+import { Context } from '@agentrans/cordis'
+import { SESSION_FORMAT_VERSION, SessionId, SessionSeq } from '@agentrans/session'
+import type { SessionHeader } from '@agentrans/session'
 import {
   SessionAlreadyExistsError,
   SessionAlreadyOwnedError,
   SessionPersistenceNotFoundError,
-} from '@deepseek-ai/dsh-session-persistence'
-import type { SessionPersistence } from '@deepseek-ai/dsh-session-persistence'
+} from '@agentrans/session-persistence'
+import type { SessionPersistence } from '@agentrans/session-persistence'
 import * as JsonlSessionPersistence from '../src/index.ts'
 import { LEASE_FILENAME, SessionWriteLease } from '../src/lease.ts'
 import type { JsonlSessionHandle } from '../src/storage.ts'

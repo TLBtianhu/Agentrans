@@ -1,6 +1,6 @@
 /** Actual canvas draw results; calculation availability alone is not renderer readiness. */
-import type { RuntimeReport } from '@deepseek-ai/dsh-artifact-runtime/types'
-import { resolveScenePalette, type ScenePalette } from '@deepseek-ai/dsh-artifact/scene-renderers'
+import type { RuntimeReport } from '@agentrans/artifact-runtime/types'
+import { resolveScenePalette, type ScenePalette } from '@agentrans/artifact/scene-renderers'
 
 /**
  * Resolve the drawing roles for one mounted canvas from the theme it inherits.

@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-host-frontend-static",
+  "name": "@agentrans/host-frontend-static",
   "description": "SPA dist server for the Web shell: owns the webserver fallback seat, serving explicit index entries and static assets with traversal rejection and 404 misses",
   "version": "0.1.0",
   "publishConfig": {
@@ -29,18 +29,18 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@deepseek-ai/dsh-host-webserver": "workspace:*",
-    "@deepseek-ai/dsh-client-connection": "workspace:*",
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/host-webserver": "workspace:*",
+    "@agentrans/client-connection": "workspace:*",
+    "@agentrans/cordis": "workspace:~"
   },
   "dependencies": {
-    "@deepseek-ai/schemastery": "workspace:~"
+    "@agentrans/schemastery": "workspace:~"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis-plugin-loader": "workspace:~",
-    "@deepseek-ai/dsh-client-connection": "workspace:*",
-    "@deepseek-ai/dsh-credentials-local": "workspace:*",
-    "@deepseek-ai/dsh-host-webserver": "workspace:*",
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/cordis-plugin-loader": "workspace:~",
+    "@agentrans/client-connection": "workspace:*",
+    "@agentrans/credentials-local": "workspace:*",
+    "@agentrans/host-webserver": "workspace:*",
+    "@agentrans/cordis": "workspace:~"
   }
 }

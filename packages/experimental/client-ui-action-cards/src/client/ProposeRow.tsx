@@ -1,8 +1,8 @@
 /** One-line process row for a `propose_action` call: the card title and whether the card was shown. */
 import { useState } from 'react'
-import { DisclosureRow, IconAppsAddOutlineRegular } from '@deepseek-ai/dsh-client-ui-primitives'
-import type { ToolCallViewProps } from '@deepseek-ai/dsh-client-ui-tool/client'
-import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
+import { DisclosureRow, IconAppsAddOutlineRegular } from '@agentrans/client-ui-primitives'
+import type { ToolCallViewProps } from '@agentrans/client-ui-tool/client'
+import type { PropsLocale } from '@agentrans/client-ui-slots'
 import css from './ProposeRow.module.css'
 
 type ProposeRowProps = ToolCallViewProps & PropsLocale<'actionCards'>

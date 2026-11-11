@@ -5,54 +5,54 @@
 /:
   en: 21c1b63e74134d34
   zh: 78c69828d5930a86
-/deepseek-ai-dsh-base:
-  en: 501b1b61d4739d2a
-  zh: 5faba14f2480be3b
-/deepseek-ai-dsh-base/summary:
+/agentrans-base:
+  en: c6e118f50fb74930
+  zh: 55c28084c473e567
+/agentrans-base/summary:
   en: 5c15f68a65aadc7d
   zh: 7ac9ace622e161ae
-/deepseek-ai-dsh-base/table-of-contents:
+/agentrans-base/table-of-contents:
   en: d152484eb41ac6b4
   zh: 09388d293f9be9cb
-/deepseek-ai-dsh-base/use-this-package:
+/agentrans-base/use-this-package:
   en: 4c0d7045f95ff79c
   zh: 456bb24bd1d35db1
-/deepseek-ai-dsh-base/use-this-package/a-minimal-custom-profile:
-  en: d9127fda3efeee5b
-  zh: 55ae0683c20aa9cb
-/deepseek-ai-dsh-base/use-this-package/what-you-get:
+/agentrans-base/use-this-package/a-minimal-custom-profile:
+  en: ff6a4cc0edb3d7ea
+  zh: c6d1c9494b9df35f
+/agentrans-base/use-this-package/what-you-get:
   en: f86010c2bc7a7143
   zh: 5f872ecfde1eb92d
-/deepseek-ai-dsh-base/use-this-package/shell-tools-per-platform:
+/agentrans-base/use-this-package/shell-tools-per-platform:
   en: 2dce12f82d6ee955
   zh: d4599eb899a3cd88
-/deepseek-ai-dsh-base/use-this-package/changing-the-defaults:
+/agentrans-base/use-this-package/changing-the-defaults:
   en: 96a55abd5f7007dd
   zh: d94f020708c38a17
-/deepseek-ai-dsh-base/understand-the-implementation:
+/agentrans-base/understand-the-implementation:
   en: 094cfca8e26a0042
   zh: de435e3e38420c01
-/deepseek-ai-dsh-base/understand-the-implementation/composition-mechanics:
+/agentrans-base/understand-the-implementation/composition-mechanics:
   en: fd37bc66e39ac5e7
   zh: 1a039afb8bf2d517
-/deepseek-ai-dsh-base/understand-the-implementation/platform-gating:
-  en: 8c2444fa7b237783
-  zh: 82002a8b9ddf5942
-/deepseek-ai-dsh-base/understand-the-implementation/source-map:
+/agentrans-base/understand-the-implementation/platform-gating:
+  en: 7050e67ee7860bba
+  zh: 5755c91a1cfefbc7
+/agentrans-base/understand-the-implementation/source-map:
   en: a8efda71d444155e
   zh: c8221593709fbb99
-/deepseek-ai-dsh-base/further-exploration:
+/agentrans-base/further-exploration:
   en: 39701b25b209fb67
   zh: 2b7ce98365f1ecfc
-/deepseek-ai-dsh-base/model-experience:
+/agentrans-base/model-experience:
   en: f6c4d2609b5f4bb6
   zh: 869a9565a133fb01
-/deepseek-ai-dsh-base/model-experience/kv-cache-effect:
+/agentrans-base/model-experience/kv-cache-effect:
   en: e6e907c99df7cd0a
   zh: f19f2f84a5f95177
-/deepseek-ai-dsh-base/known-limitations-and-deferred-work:
-  en: ce8558ab18184bf2
-  zh: 3b3fb98cf1bd4652
-/deepseek-ai-dsh-base/known-limitations-and-deferred-work/dev-note:
+/agentrans-base/known-limitations-and-deferred-work:
+  en: 002bec012141a5d3
+  zh: d2dfb0a22a81da3e
+/agentrans-base/known-limitations-and-deferred-work/dev-note:
   en: ca037cb236aa841a
   zh: e06f3899be43b572

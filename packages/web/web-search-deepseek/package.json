@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-web-search-deepseek",
+  "name": "@agentrans/web-search-deepseek",
   "description": "DeepSeek-backed search provider (native web_search via the Anthropic-compatible API) for the DeepSeek Harness web capability seam (ctx.web)",
   "version": "0.1.0",
   "publishConfig": {
@@ -29,32 +29,32 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@deepseek-ai/dsh-agent": "workspace:*",
-    "@deepseek-ai/dsh-credentials": "workspace:*",
-    "@deepseek-ai/dsh-deepseek-account": "workspace:*",
-    "@deepseek-ai/dsh-deepseek-issuer": "workspace:*",
-    "@deepseek-ai/dsh-launch-environment": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-web": "workspace:*",
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/agent": "workspace:*",
+    "@agentrans/credentials": "workspace:*",
+    "@agentrans/deepseek-account": "workspace:*",
+    "@agentrans/deepseek-issuer": "workspace:*",
+    "@agentrans/launch-environment": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/web": "workspace:*",
+    "@agentrans/cordis": "workspace:~"
   },
   "dependencies": {
-    "@deepseek-ai/schemastery": "workspace:~"
+    "@agentrans/schemastery": "workspace:~"
   },
   "devDependencies": {
-    "@deepseek-ai/dsh-agent": "workspace:*",
-    "@deepseek-ai/dsh-credentials": "workspace:*",
-    "@deepseek-ai/dsh-credentials-local": "workspace:*",
-    "@deepseek-ai/dsh-deepseek-account": "workspace:*",
-    "@deepseek-ai/dsh-deepseek-issuer": "workspace:*",
-    "@deepseek-ai/dsh-launch-environment": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-web": "workspace:*",
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-http-proxy": "workspace:*"
+    "@agentrans/agent": "workspace:*",
+    "@agentrans/credentials": "workspace:*",
+    "@agentrans/credentials-local": "workspace:*",
+    "@agentrans/deepseek-account": "workspace:*",
+    "@agentrans/deepseek-issuer": "workspace:*",
+    "@agentrans/launch-environment": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/web": "workspace:*",
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/http-proxy": "workspace:*"
   },
   "peerDependenciesMeta": {
-    "@deepseek-ai/dsh-deepseek-account": {
+    "@agentrans/deepseek-account": {
       "optional": true
     }
   }

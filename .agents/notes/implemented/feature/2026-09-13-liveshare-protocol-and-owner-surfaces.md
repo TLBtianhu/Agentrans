@@ -10,7 +10,7 @@ A DSH session runs on your own computer. A colleague sometimes needs to watch on
 
 So a share needs three things at once. A **page the colleague opens in a browser** that shows the session running on your machine, without connecting them to it. A **limit on what that page can do**, starting with "read without writing" — anything the page offers beyond what you agreed is a security hole, not a convenience. And an **answer to "who shared this?"**, because a page that cannot say who its owner is cannot be trusted by whoever opens it.
 
-This note covers the half that runs inside the owner's DSH — the share dialog, the owner-side service behind it, the package's browser face, and the page a reader opens — plus the protocol package both sides speak. The Liveshare server, the shared service in the middle, is its own package (`@deepseek-ai/dsh-experimental-liveshare-relay`) and is reviewed and deployed separately.
+This note covers the half that runs inside the owner's DSH — the share dialog, the owner-side service behind it, the package's browser face, and the page a reader opens — plus the protocol package both sides speak. The Liveshare server, the shared service in the middle, is its own package (`@agentrans/experimental-liveshare-relay`) and is reviewed and deployed separately.
 
 ## Decision
 
@@ -55,7 +55,7 @@ The Host's bundle `enabled` flag states whether the profile selected the bundle,
 
 The package declares the hiding intent in its own bundle manifest as `dsh.bundle.listedByDefault: false`; the manager keeps one generic visibility rule rather than a client-side name set. A bundle whose manifest does not declare `listedByDefault: false` is listed; one that declares it is listed only when the profile enables it, the installation carries it selected, or one of the rows its bundle patch declares is running (`pkg.rows.some(row => row.enabled)`). The filter applies before both lists are derived, so the name is absent from the main Experimental plugins group, the More page, Built-in plugin settings, and the Installed plugins group until one of those holds. The Host's `listBundles` contract, the profile format, and the installed package set are unchanged. `BundleInfo.rows` already joins each declared row with the Loader entry currently carrying it, and the client's `PackageView` carries whether that entry runs, so row state is the effective answer for both enable routes: removing the rows, disabling them, or deselecting the bundle stops them and the card leaves both lists again.
 
-A default-hidden bundle is not addressable by ID while its card is hidden: `openPkg` resolves only the listed inventory, so `pluginNavigation.openBundle('@deepseek-ai/dsh-experimental-liveshare')` renders no details until the same enablement conditions list it.
+A default-hidden bundle is not addressable by ID while its card is hidden: `openPkg` resolves only the listed inventory, so `pluginNavigation.openBundle('@agentrans/experimental-liveshare')` renders no details until the same enablement conditions list it.
 
 ### How shared work stays inside its grant
 

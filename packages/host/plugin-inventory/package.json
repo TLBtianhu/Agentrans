@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-host-plugin-inventory",
+  "name": "@agentrans/host-plugin-inventory",
   "description": "Read-only Remote projection of current Cordis Loader plugin state",
   "version": "0.1.0",
   "publishConfig": {
@@ -49,24 +49,24 @@
     "zod": "4.4.3"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis-plugin-loader": "workspace:~",
-    "@deepseek-ai/dsh-agent-preset-registry": "workspace:*",
-    "@deepseek-ai/dsh-brand": "workspace:*",
-    "@deepseek-ai/dsh-typert-protocol": "workspace:*",
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/cordis-plugin-loader": "workspace:~",
+    "@agentrans/agent-preset-registry": "workspace:*",
+    "@agentrans/brand": "workspace:*",
+    "@agentrans/typert-protocol": "workspace:*",
+    "@agentrans/cordis": "workspace:~"
   },
   "peerDependenciesMeta": {
-    "@deepseek-ai/dsh-agent-preset-registry": {
+    "@agentrans/agent-preset-registry": {
       "optional": true
     }
   },
   "devDependencies": {
-    "@deepseek-ai/dsh-app-boot": "workspace:*",
-    "@deepseek-ai/dsh-package-manifest": "workspace:*",
-    "@deepseek-ai/cordis-plugin-loader": "workspace:~",
-    "@deepseek-ai/dsh-agent-preset-registry": "workspace:*",
-    "@deepseek-ai/dsh-brand": "workspace:*",
-    "@deepseek-ai/dsh-typert-protocol": "workspace:*",
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/app-boot": "workspace:*",
+    "@agentrans/package-manifest": "workspace:*",
+    "@agentrans/cordis-plugin-loader": "workspace:~",
+    "@agentrans/agent-preset-registry": "workspace:*",
+    "@agentrans/brand": "workspace:*",
+    "@agentrans/typert-protocol": "workspace:*",
+    "@agentrans/cordis": "workspace:~"
   }
 }

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import type { FunctionPlotSpec } from '@deepseek-ai/dsh-artifact/scene'
-import { resolveScenePalette } from '@deepseek-ai/dsh-artifact/scene-renderers'
+import type { FunctionPlotSpec } from '@agentrans/artifact/scene'
+import { resolveScenePalette } from '@agentrans/artifact/scene-renderers'
 import { renderFunctionPlot } from '../src/client/renderers/function-plot.ts'
 
 afterEach(() => { vi.restoreAllMocks() })

@@ -3,7 +3,7 @@ description: "Web \"Open In...\" 控件：会话头部在记住的应用中打�
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-client-ui-open-in-app
+# @agentrans/client-ui-open-in-app
 
 [English](README.md) | 中文
 
@@ -55,7 +55,7 @@ kind: "package-reference"
 <details>
 <summary>实现内幕——点击展开</summary>
 
-两个目录插槽均通过显式的 `absolutePath` 使用 `OpenInAppAction`。`conversation.session.header.utilities` 的注册函数读取会话 cwd，`sidebar.right.tab.files.actions` 则接收所属组件传入的显示目录。插件以一个 effect 注册 `open-in-app` 词典。一个页面生命周期的 controller（[`src/client/controller.ts`](src/client/controller.ts)）拥有每页一次的可用性读取、持久化选择的 snapshot store 与启动 POST；组件经 inject 的 `hooks` 隔间接收共享源，因此所有会话头部共享同一份事实。文档相对的路由形式与 wire 载荷类型来自主机包的浏览器安全子路径 `@deepseek-ai/dsh-host-open-in-app/shared`。controller 守卫执行中的启动，并发布所捕获的目录与等待状态。适配器将原生操作和传输失败解析为具名结果；被忽略或取消的请求返回跳过结果，不作播报。
+两个目录插槽均通过显式的 `absolutePath` 使用 `OpenInAppAction`。`conversation.session.header.utilities` 的注册函数读取会话 cwd，`sidebar.right.tab.files.actions` 则接收所属组件传入的显示目录。插件以一个 effect 注册 `open-in-app` 词典。一个页面生命周期的 controller（[`src/client/controller.ts`](src/client/controller.ts)）拥有每页一次的可用性读取、持久化选择的 snapshot store 与启动 POST；组件经 inject 的 `hooks` 隔间接收共享源，因此所有会话头部共享同一份事实。文档相对的路由形式与 wire 载荷类型来自主机包的浏览器安全子路径 `@agentrans/host-open-in-app/shared`。controller 守卫执行中的启动，并发布所捕获的目录与等待状态。适配器将原生操作和传输失败解析为具名结果；被忽略或取消的请求返回跳过结果，不作播报。
 
 目录和文件适配器把应用信息与操作交给 [`OpenTargetButton`](src/client/OpenTargetButton.tsx)，由它统一管理菜单顺序、默认标记、图标和尺寸。注入的回调将结果交给本功能在 `shell.overlay` 中持有的唯一 toast，因此切换会话或关闭发起操作的预览不会丢失结果。文件标题栏和空态共用 `FileOpenTarget`，`OpenPathInjected.applications` 通过 [`open-path.ts`](src/client/open-path.ts) 查询 `session.workspacePathApplications`。打开操作使用 `session.openWorkspacePath`，Host 在启动前重新验证指定的关联应用。`FileRouteAction` 通过 `deliverables.file.actions` 和 `deliverables.review.file.actions` 为交付卡片和变更对比页提供同一控件，其认证路由保留会话文件校验。目录适配器继续使用已有的应用列表路由，文件查询失败或不可用时无需增加平台专用的界面实现。
 

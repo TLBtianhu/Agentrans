@@ -1,28 +1,28 @@
-import * as NativeToolExecutor from '@deepseek-ai/dsh-tool-executor-native'
+import * as NativeToolExecutor from '@agentrans/tool-executor-native'
 import { describe, expect, it, vi } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
-import LlmRuntime, { createUserMessage, ToolCallId  } from '@deepseek-ai/dsh-llm'
-import type { ContextFormed } from '@deepseek-ai/dsh-llm'
+import { Context } from '@agentrans/cordis'
+import LlmRuntime, { createUserMessage, ToolCallId  } from '@agentrans/llm'
+import type { ContextFormed } from '@agentrans/llm'
 import SessionStore, {
   SessionId,
   type SessionEvent,
   type TurnEndReason,
   type UserMessage,
-} from '@deepseek-ai/dsh-session'
-import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
-import ToolRuntime, { type PostToolDecision, type PreToolDecision } from '@deepseek-ai/dsh-tools'
-import { defineContentToolFixture } from '@deepseek-ai/dsh-tool-testkit'
+} from '@agentrans/session'
+import SystemPrompt from '@agentrans/system-prompt'
+import ToolRuntime, { type PostToolDecision, type PreToolDecision } from '@agentrans/tools'
+import { defineContentToolFixture } from '@agentrans/tool-testkit'
 import AgentRegistry, {
   type Agent,
   type PreStepDecision,
   type SessionStartSource,
-} from '@deepseek-ai/dsh-agent'
+} from '@agentrans/agent'
 
-import AgentLoop from '@deepseek-ai/dsh-agent-loop'
-import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
+import AgentLoop from '@agentrans/agent-loop'
+import SessionProjectionRegistry from '@agentrans/session-projection'
 import { MockAdapter, textResponse, toolCallResponse } from './mock-adapter.ts'
 
-declare module '@deepseek-ai/dsh-llm' {
+declare module '@agentrans/llm' {
   interface MessageSourceMap {
     'a': { kind: 'a' } & ContextFormed
     'accepted source': { kind: 'accepted source' } & ContextFormed

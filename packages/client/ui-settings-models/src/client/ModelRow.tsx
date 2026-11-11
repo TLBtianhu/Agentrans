@@ -4,7 +4,7 @@ import type { DragEvent, ReactNode } from 'react'
 import {
   IconChevronDownOutlineRegular, IconChevronRightOutlineRegular, IconDragHandleOutlineRegular,
   IconTrashOutlineRegular, Tooltip, useRowDragPreview,
-} from '@deepseek-ai/dsh-client-ui-primitives'
+} from '@agentrans/client-ui-primitives'
 import type { DeepSeekModelDraft } from './DeepSeekModelsEditor.tsx'
 import type { ModelsKey } from './locales.ts'
 import { ModelInputTypes } from './ModelInputTypes.tsx'

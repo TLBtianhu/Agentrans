@@ -1,4 +1,4 @@
-/** Single-root Agentrans distribution layout and lifecycle primitives. @module @deepseek-ai/dsh-product-layout */
+/** Single-root Agentrans distribution layout and lifecycle primitives. @module @agentrans/product-layout */
 export {
   PRODUCT_LAYOUT_VERSION,
   ProductLayout,

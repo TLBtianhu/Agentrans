@@ -5,39 +5,39 @@
 /:
   en: dd1d437b386e4216
   zh: 4b59a2d565d99a0c
-/deepseek-ai-dsh-client-ui-goal:
-  en: fde8c9d75ef5c79b
-  zh: 177db802d4dac57a
-/deepseek-ai-dsh-client-ui-goal/summary:
+/agentrans-client-ui-goal:
+  en: a9cb5b4ee9080863
+  zh: 5e7204ef64e43978
+/agentrans-client-ui-goal/summary:
   en: 615de8980e1b06c3
   zh: 7fc3284c2bb00f20
-/deepseek-ai-dsh-client-ui-goal/table-of-contents:
+/agentrans-client-ui-goal/table-of-contents:
   en: d152484eb41ac6b4
   zh: 09388d293f9be9cb
-/deepseek-ai-dsh-client-ui-goal/use-this-package:
+/agentrans-client-ui-goal/use-this-package:
   en: 7f6620a84a087d07
   zh: 80071126cc64b3e5
-/deepseek-ai-dsh-client-ui-goal/use-this-package/the-command-input-bubble:
+/agentrans-client-ui-goal/use-this-package/the-command-input-bubble:
   en: 05f0360b6c6dd3e9
   zh: d14c3f15dc4cea5b
-/deepseek-ai-dsh-client-ui-goal/use-this-package/failures:
+/agentrans-client-ui-goal/use-this-package/failures:
   en: 097bbdd748dc17e5
   zh: 867d341d046ba609
-/deepseek-ai-dsh-client-ui-goal/understand-the-implementation:
+/agentrans-client-ui-goal/understand-the-implementation:
   en: ab510274586c2d1d
   zh: 4f65fc3b8e367e1e
-/deepseek-ai-dsh-client-ui-goal/further-exploration:
+/agentrans-client-ui-goal/further-exploration:
   en: 591a317a4f0af7d9
   zh: b1665ca4f6fb811e
-/deepseek-ai-dsh-client-ui-goal/model-experience:
+/agentrans-client-ui-goal/model-experience:
   en: 53ca3b1f16b1ef44
   zh: 39254d4076e3723d
-/deepseek-ai-dsh-client-ui-goal/model-experience/kv-cache-effect:
+/agentrans-client-ui-goal/model-experience/kv-cache-effect:
   en: 68c9a2a057acb6cf
   zh: baba87876e432666
-/deepseek-ai-dsh-client-ui-goal/known-limitations-and-deferred-work:
+/agentrans-client-ui-goal/known-limitations-and-deferred-work:
   en: 7b69fe29ac31722e
   zh: eef4e78fa12b4ff3
-/deepseek-ai-dsh-client-ui-goal/known-limitations-and-deferred-work/dev-note:
+/agentrans-client-ui-goal/known-limitations-and-deferred-work/dev-note:
   en: e67f633dc6fe7773
   zh: 3bb0c20c93f16f98

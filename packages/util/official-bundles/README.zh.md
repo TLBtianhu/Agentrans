@@ -3,13 +3,13 @@ description: "由安装方持有的官方 dsh 组合包列表（随附 profile �
 kind: "package-library"
 ---
 
-# @deepseek-ai/dsh-official-bundles
+# @agentrans/official-bundles
 
 [English](README.md) | 中文
 
 ## 概述
 
-`@deepseek-ai/dsh-official-bundles` 保存由 dsh 安装决定的组合包名称：每个随附 profile 以哪些组合包启动、随附但默认关闭哪些组合包、哪些官方组合包按请求安装，哪些组合包曾由早期版本随附、现在要从 profile 中移除，以及插件管理器保护、隐藏、排序或标记为实验性的包。[`dsh-app-boot`](../../boot/app-boot/README.zh.md) 在加载 profile 时应用这些列表；插件管理器、CLI、Desktop、镜像打包器和仓库检查直接读取它们。本包只含数据，因此修改列表不会改动 app-boot 和插件管理器。请把它作为直接的库依赖使用，而不是通过 `cordis.yml` 使用。
+`@agentrans/official-bundles` 保存由 dsh 安装决定的组合包名称：每个随附 profile 以哪些组合包启动、随附但默认关闭哪些组合包、哪些官方组合包按请求安装，哪些组合包曾由早期版本随附、现在要从 profile 中移除，以及插件管理器保护、隐藏、排序或标记为实验性的包。[`dsh-app-boot`](../../boot/app-boot/README.zh.md) 在加载 profile 时应用这些列表；插件管理器、CLI、Desktop、镜像打包器和仓库检查直接读取它们。本包只含数据，因此修改列表不会改动 app-boot 和插件管理器。请把它作为直接的库依赖使用，而不是通过 `cordis.yml` 使用。
 
 ## 目录
 

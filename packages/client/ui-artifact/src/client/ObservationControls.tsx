@@ -1,10 +1,10 @@
 /** Named particle observations supplied by the Session projection. */
 import { useEffect, useRef, useState } from 'react'
-import { Button, Input } from '@deepseek-ai/dsh-client-ui-primitives'
-import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
-import type { ArtifactId, ArtifactObservationId, ArtifactObservations, SavedParticleObservation } from '@deepseek-ai/dsh-artifact/types'
-import type { ParticleCheckpoint } from '@deepseek-ai/dsh-artifact/particle-runtime'
-import { randomUUID } from '@deepseek-ai/dsh-util-crypto'
+import { Button, Input } from '@agentrans/client-ui-primitives'
+import type { PropsLocale } from '@agentrans/client-ui-slots'
+import type { ArtifactId, ArtifactObservationId, ArtifactObservations, SavedParticleObservation } from '@agentrans/artifact/types'
+import type { ParticleCheckpoint } from '@agentrans/artifact/particle-runtime'
+import { randomUUID } from '@agentrans/util-crypto'
 import {
   ArtifactObservationSaveError, type ObservationSaveFailure, type SaveArtifactObservation, type SendArtifactObservation,
 } from './protocol.ts'

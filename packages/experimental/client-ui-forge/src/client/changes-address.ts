@@ -6,9 +6,9 @@
  * percent-encoded; the source names the tab.
  */
 
-import type { SidebarRightTabDefinition } from '@deepseek-ai/dsh-client-ui-sidebar-right/client'
-import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
+import type { SidebarRightTabDefinition } from '@agentrans/client-ui-sidebar-right/client'
+import type { TranslateNS } from '@agentrans/client-ui-slots'
+import type { SessionId } from '@agentrans/session/types'
 import type { NS } from './locales.ts'
 import { numberOf } from './status.ts'
 
@@ -16,7 +16,7 @@ import { numberOf } from './status.ts'
 export const CHANGES_KIND = 'forge-changes'
 
 /** Registry id of the changes tab type, also the key its body and title register under. */
-export const CHANGES_ID = '@deepseek-ai/dsh-experimental-client-ui-forge/changes'
+export const CHANGES_ID = '@agentrans/experimental-client-ui-forge/changes'
 
 const PREFIX = 'dsh-resource://forge-changes/'
 
@@ -41,7 +41,7 @@ export interface ChangesParams {
   readonly path?: string
 }
 
-declare module '@deepseek-ai/dsh-client-ui-sidebar-right/client' {
+declare module '@agentrans/client-ui-sidebar-right/client' {
   interface SidebarRightResourceParamsMap {
     /** The file a changes tab scrolls to. */
     'forge-changes': ChangesParams

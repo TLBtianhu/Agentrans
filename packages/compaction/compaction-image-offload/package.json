@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-compaction-image-offload",
+  "name": "@agentrans/compaction-image-offload",
   "description": "Durable image offload for image-capable routes: replace over-budget request images with placeholders and retry",
   "version": "0.1.0",
   "publishConfig": {
@@ -33,27 +33,27 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-agent": "workspace:*",
-    "@deepseek-ai/dsh-compaction": "workspace:*",
-    "@deepseek-ai/dsh-llm": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/agent": "workspace:*",
+    "@agentrans/compaction": "workspace:*",
+    "@agentrans/llm": "workspace:*",
+    "@agentrans/session": "workspace:*"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-agent": "workspace:*",
-    "@deepseek-ai/dsh-agent-loop": "workspace:*",
-    "@deepseek-ai/dsh-agent-loop-testkit": "workspace:*",
-    "@deepseek-ai/dsh-attachment": "workspace:*",
-    "@deepseek-ai/dsh-compaction": "workspace:*",
-    "@deepseek-ai/dsh-compaction-basic": "workspace:*",
-    "@deepseek-ai/dsh-llm": "workspace:*",
-    "@deepseek-ai/dsh-llm-deepseek": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-session-projection": "workspace:*",
-    "@deepseek-ai/dsh-token-meter": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/agent": "workspace:*",
+    "@agentrans/agent-loop": "workspace:*",
+    "@agentrans/agent-loop-testkit": "workspace:*",
+    "@agentrans/attachment": "workspace:*",
+    "@agentrans/compaction": "workspace:*",
+    "@agentrans/compaction-basic": "workspace:*",
+    "@agentrans/llm": "workspace:*",
+    "@agentrans/llm-deepseek": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/session-projection": "workspace:*",
+    "@agentrans/token-meter": "workspace:*"
   },
   "dependencies": {
-    "@deepseek-ai/dsh-util-values": "workspace:*"
+    "@agentrans/util-values": "workspace:*"
   }
 }

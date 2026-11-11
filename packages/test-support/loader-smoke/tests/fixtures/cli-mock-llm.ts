@@ -1,4 +1,4 @@
-import type { Context } from '@deepseek-ai/cordis'
+import type { Context } from '@agentrans/cordis'
 import {
   ToolCallId,
   LlmAdapter,
@@ -6,8 +6,8 @@ import {
   type GenerateOptions,
   type LlmResolvedModelInfo,
   type StreamChunk,
-} from '@deepseek-ai/dsh-llm'
-import type {} from '@deepseek-ai/dsh-tools'
+} from '@agentrans/llm'
+import type {} from '@agentrans/tools'
 
 const HIGH = ReasoningEffortId('high')
 const OFF = ReasoningEffortId('off')

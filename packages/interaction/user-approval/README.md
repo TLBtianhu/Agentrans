@@ -3,7 +3,7 @@ description: "Channel-neutral one-shot approval seam for users and maintainers c
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-user-approval
+# @agentrans/user-approval
 
 English | [中文](README.zh.md)
 
@@ -36,8 +36,8 @@ Answerers are `approval/request` waterfall listeners: return an outcome to answe
 The effective policy is the one set for the session, falling back to the configured default. `ask` (the default) delegates to the composed answerers; `never` rejects every request deterministically before interactive dispatch — the strict headless stance for CI and unattended runs.
 
 ```yaml
-- name: '@deepseek-ai/dsh-session-projection'
-- name: '@deepseek-ai/dsh-user-approval'
+- name: '@agentrans/session-projection'
+- name: '@agentrans/user-approval'
   config:
     policy: ask
 ```
@@ -46,7 +46,7 @@ The effective policy is the one set for the session, falling back to the configu
 |---|---|---|
 | `policy` | `ask` | Default for sessions without an `approval/policy` override |
 
-The generated [configuration catalog](../../../docs/config-catalog.md#deepseek-aidsh-user-approval) is the exhaustive source for every accepted field and its JSDoc. `setPolicy(agent, policy)` switches a live agent and queues the switch notice described under Model Experience for its next model step; `setApprovalPolicy(session, policy)` is the direct durable write path used by session initialization.
+The generated [configuration catalog](../../../docs/config-catalog.md#agentransuser-approval) is the exhaustive source for every accepted field and its JSDoc. `setPolicy(agent, policy)` switches a live agent and queues the switch notice described under Model Experience for its next model step; `setApprovalPolicy(session, policy)` is the direct durable write path used by session initialization.
 
 ### Requesting a decision
 

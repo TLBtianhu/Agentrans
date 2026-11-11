@@ -8,29 +8,29 @@
  * Feature-owned rows and sections stay with their features.
  * Export discipline: packages/client/AGENTS.md.
  */
-import type { Context as ClientContext } from '@deepseek-ai/cordis'
+import type { Context as ClientContext } from '@agentrans/cordis'
 // Type-only: pulls the remoteAccess service merge (ctx.remoteAccess).
-import type {} from '@deepseek-ai/dsh-api-remote-access/client'
+import type {} from '@agentrans/api-remote-access/client'
 // Type-only: pulls the ctx.remote merge and its fixed Host facts.
-import type {} from '@deepseek-ai/dsh-api-remotes/client'
-import type { ConnectionHandle } from '@deepseek-ai/dsh-client-connection/client'
+import type {} from '@agentrans/api-remotes/client'
+import type { ConnectionHandle } from '@agentrans/client-connection/client'
 // Type-only: pulls the ctx.modules merge.
-import type {} from '@deepseek-ai/dsh-client-modules/client'
-import { resolveSlotLabel } from '@deepseek-ai/dsh-client-ui-slots'
-import { closeTopModal } from '@deepseek-ai/dsh-client-ui-primitives'
+import type {} from '@agentrans/client-modules/client'
+import { resolveSlotLabel } from '@agentrans/client-ui-slots'
+import { closeTopModal } from '@agentrans/client-ui-primitives'
 // Type-only: the settings slot declarations plus the ctx.configForms Context
 // merge. Cross-plugin collaboration goes through the service, never a value
 // import (client bundle purity gate).
-import type {} from '@deepseek-ai/dsh-client-ui-settings/client'
+import type {} from '@agentrans/client-ui-settings/client'
 // Type-only: pulls ctx.locale into this program.
-import type {} from '@deepseek-ai/dsh-client-locale/client'
-import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
-import type {} from '@deepseek-ai/dsh-client-ui-session/client'
-import type {} from '@deepseek-ai/dsh-client-product-analytics/client'
+import type {} from '@agentrans/client-locale/client'
+import type {} from '@agentrans/client-ui-renderer/client'
+import type {} from '@agentrans/client-ui-session/client'
+import type {} from '@agentrans/client-product-analytics/client'
 import type {
   SettingsOnboardingStep, SettingsRootInjected, SettingsSectionRow,
 } from './shell-contract.ts'
-import type { ShortcutCommandId } from '@deepseek-ai/dsh-client-shortcuts/client'
+import type { ShortcutCommandId } from '@agentrans/client-shortcuts/client'
 import { createSettingsShellStore } from './shell-store.ts'
 import { SettingsRoot } from './SettingsRoot.tsx'
 import { DesktopUpdateBadge } from './DesktopUpdateIndicator.tsx'
@@ -57,7 +57,7 @@ export type { SettingsDocumentState } from './settings-document-store.ts'
 export { SettingsDocumentStore } from './settings-document-store.ts'
 export type { SettingsKey } from './locales.ts'
 
-declare module '@deepseek-ai/dsh-client-ui-slots' {
+declare module '@agentrans/client-ui-slots' {
   interface LocaleNamespaceMap {
     /** Shell chrome + shell-owned General section copy. */
     settings: SettingsKey

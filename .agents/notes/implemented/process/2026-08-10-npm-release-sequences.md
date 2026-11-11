@@ -8,7 +8,7 @@ English | [中文](2026-08-10-npm-release-sequences.zh.md)
 
 This repository held three unrelated groups of publishable packages and no channel that sent any of them to a registry.
 
-`packages/*/*` and `apps/*` form the runtime surface of `@deepseek-ai/dsh`; `vendor/*` holds nine rescoped Cordis framework packages, each carrying its upstream version; `native/system/packages/*` holds Linux platform packages with their own workflow. The three differ in version baseline, change rate, and build requirements: dsh moves with the product, vendor moves only when upstream is re-synced or a local modification changes, and native needs a musl toolchain and one build per architecture. Forcing them through one pipeline means every product release republishes the framework and the native binaries.
+`packages/*/*` and `apps/*` form the runtime surface of `@agentrans/dsh`; `vendor/*` holds nine rescoped Cordis framework packages, each carrying its upstream version; `native/system/packages/*` holds Linux platform packages with their own workflow. The three differ in version baseline, change rate, and build requirements: dsh moves with the product, vendor moves only when upstream is re-synced or a local modification changes, and native needs a musl toolchain and one build per architecture. Forcing them through one pipeline means every product release republishes the framework and the native binaries.
 
 Two hard blockers sat in the way. All 217 workspace manifests set `private: true`, which npm refuses to publish. The subtler one was 933 hand-written `peerDependencies: "^0.0.1"` entries between sibling dsh packages: `pnpm pack` substitutes the `workspace:` protocol but leaves semver ranges alone, and `^0.0.1` means `>=0.0.1 <0.0.2` — it excludes `0.0.2`, and semver excludes prereleases from a range without a prerelease of its own, so it excluded `0.0.1-rc.1` too. Those entries never failed only because the version never left `0.0.1`.
 
@@ -42,15 +42,15 @@ The vendored packages are decoupled from upstream by their scope but keep their 
 
 | Package | Upstream version | First published version |
 |---|---|---|
-| `@deepseek-ai/cordis` | 4.0.0-rc.7 | 4.0.1 |
-| `@deepseek-ai/cordis-plugin-loader` | 1.0.0-rc.5 | 1.0.1 |
-| `@deepseek-ai/cosmokit` | 1.8.1 | 1.8.2 |
-| `@deepseek-ai/schemastery` | 3.18.0 | 3.18.1 |
-| `@deepseek-ai/cordis-plugin-hmr` | 1.0.15 | 1.0.16 |
-| `@deepseek-ai/cordis-plugin-include` | 1.0.4 | 1.0.5 |
-| `@deepseek-ai/cordis-plugin-timer` | 1.1.2 | 1.1.3 |
-| `@deepseek-ai/cordis-plugin-group` | 1.0.0 | 1.0.1 |
-| `@deepseek-ai/cordis-plugin-logger-console` | 1.0.0 | 1.0.1 |
+| `@agentrans/cordis` | 4.0.0-rc.7 | 4.0.1 |
+| `@agentrans/cordis-plugin-loader` | 1.0.0-rc.5 | 1.0.1 |
+| `@agentrans/cosmokit` | 1.8.1 | 1.8.2 |
+| `@agentrans/schemastery` | 3.18.0 | 3.18.1 |
+| `@agentrans/cordis-plugin-hmr` | 1.0.15 | 1.0.16 |
+| `@agentrans/cordis-plugin-include` | 1.0.4 | 1.0.5 |
+| `@agentrans/cordis-plugin-timer` | 1.1.2 | 1.1.3 |
+| `@agentrans/cordis-plugin-group` | 1.0.0 | 1.0.1 |
+| `@agentrans/cordis-plugin-logger-console` | 1.0.0 | 1.0.1 |
 
 Taking the latest tagged version as the baseline prevents reuse after a re-sync: upstream restoring `4.0.0-rc.8` after this repository tagged `4.0.1` would otherwise compute `4.0.1` again. `release:vendor --prerelease rc.1` or `--prerelease alpha.1` selects a prerelease, whose default npm dist-tag is `next`. Later prereleases and the stable release reuse its release numbers: `4.0.1` follows `4.0.1-rc.1`. The script compares SemVer precedence rather than using `git tag --sort=v:refname`, which places a prerelease above its release.
 
@@ -158,7 +158,7 @@ The installed-consumer probe captures npm's HTTP diagnostics and includes them w
 
 **Verifying only the packed install, with no local registry.** The reference flow unpacks tarballs into a tree and drives it with plain Node, which bypasses version-range resolution. Running a local registry in CI to cover that layer was rejected: artifact correctness is covered by existing tests, the publication path is exercised by the master rehearsal, and a pull request only needs to prove the release set packs. Installing from `file:` specifiers still exercises range resolution for every internal dependency.
 
-**Selecting a subset by entry closure.** Crawling `dependencies` from `@deepseek-ai/dsh` and `@deepseek-ai/dsh-web-frontend` yields 156 packages, 61 fewer than the whole set. But this repository's plugins are mounted by name from `cordis.yml` rather than imported: `vendor/cordis-plugin-group` and `vendor/cordis-plugin-logger-console` fall outside the dependency closure while being required at runtime. Selecting by code dependency fails as "the consumer installs it and it will not start", and it would need a standing proof that no mounted package was missed. Under a private scope the extra packages are invisible outside the organization. `python/`, `docs/`, and `website/` are not release-family members.
+**Selecting a subset by entry closure.** Crawling `dependencies` from `@agentrans/dsh` and `@agentrans/web-frontend` yields 156 packages, 61 fewer than the whole set. But this repository's plugins are mounted by name from `cordis.yml` rather than imported: `vendor/cordis-plugin-group` and `vendor/cordis-plugin-logger-console` fall outside the dependency closure while being required at runtime. Selecting by code dependency fails as "the consumer installs it and it will not start", and it would need a standing proof that no mounted package was missed. Under a private scope the extra packages are invisible outside the organization. `python/`, `docs/`, and `website/` are not release-family members.
 
 **Extending `scripts/publish-npm-baseline.ts`.** It is a local publication script that packs and publishes in one process, the opposite of separating credential-free packing from protected publication. Its verified parts — payload validation and installed-artifact probes — are reused so `pnpm run duplication` does not report clones.
 

@@ -5,36 +5,36 @@
 /:
   en: d7dbdeee1744fac0
   zh: 35dc07a9e797f855
-/deepseek-ai-dsh-client-ui-sidebar-files:
-  en: ae5625c23b3a864f
-  zh: 20cf48a229e806bf
-/deepseek-ai-dsh-client-ui-sidebar-files/summary:
+/agentrans-client-ui-sidebar-files:
+  en: 839d302d5cd25dff
+  zh: cc2ff5ad46dc2e18
+/agentrans-client-ui-sidebar-files/summary:
   en: 27a736e484be8693
   zh: 4778c310014c2c16
-/deepseek-ai-dsh-client-ui-sidebar-files/table-of-contents:
+/agentrans-client-ui-sidebar-files/table-of-contents:
   en: 94e520881bd8666e
   zh: 869ed79bd370c8b3
-/deepseek-ai-dsh-client-ui-sidebar-files/what-it-registers:
-  en: 2b620997cf39cac8
-  zh: ddfaa2da1c1bcd55
-/deepseek-ai-dsh-client-ui-sidebar-files/the-navigator:
+/agentrans-client-ui-sidebar-files/what-it-registers:
+  en: 73ecd41a5ebbc9b7
+  zh: 4c07f81dc54478fd
+/agentrans-client-ui-sidebar-files/the-navigator:
   en: 803d10142360264b
   zh: 042568a8ba293037
-/deepseek-ai-dsh-client-ui-sidebar-files/the-tree:
-  en: c6d5d2d068bdec7b
-  zh: dd41bcfa3e9080ad
-/deepseek-ai-dsh-client-ui-sidebar-files/reusable-tree-factory:
-  en: 0a3e9645426b4203
-  zh: 0478669e4157f15c
-/deepseek-ai-dsh-client-ui-sidebar-files/model-experience:
+/agentrans-client-ui-sidebar-files/the-tree:
+  en: ef1bb0abbaa3c0a6
+  zh: 16ce12fe5fc32e3b
+/agentrans-client-ui-sidebar-files/reusable-tree-factory:
+  en: e74168705a09a404
+  zh: 8d36ac38e29a7885
+/agentrans-client-ui-sidebar-files/model-experience:
   en: a18a43f6842f1371
   zh: 69f2a2b35f06dfc7
-/deepseek-ai-dsh-client-ui-sidebar-files/model-experience/kv-cache-effect:
+/agentrans-client-ui-sidebar-files/model-experience/kv-cache-effect:
   en: 5a6febb45089991a
   zh: b17ed755fd098b83
-/deepseek-ai-dsh-client-ui-sidebar-files/known-limitations-and-deferred-work:
+/agentrans-client-ui-sidebar-files/known-limitations-and-deferred-work:
   en: dd317b62980a9269
   zh: 0be3b9924f6b6c67
-/deepseek-ai-dsh-client-ui-sidebar-files/known-limitations-and-deferred-work/dev-note:
+/agentrans-client-ui-sidebar-files/known-limitations-and-deferred-work/dev-note:
   en: 1ec99e9fb6b4c948
   zh: c4f7883934307c3c

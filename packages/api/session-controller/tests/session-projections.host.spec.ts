@@ -11,26 +11,26 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { mkdtemp, readFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { Context } from '@deepseek-ai/cordis'
+import { Context } from '@agentrans/cordis'
 import { z } from 'zod'
-import AgentRegistry from '@deepseek-ai/dsh-agent'
-import { AttachmentStore } from '@deepseek-ai/dsh-attachment'
-import { agentPresetProjectionDefinition } from '@deepseek-ai/dsh-agent-preset-registry'
-import { createUserMessage } from '@deepseek-ai/dsh-llm'
-import SessionStore, { SESSION_FORMAT_VERSION, SessionId, SessionLogOffset, SessionSeq } from '@deepseek-ai/dsh-session'
-import type { Session, SessionEvent, SessionHeader, UserMessage } from '@deepseek-ai/dsh-session'
-import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
-import type { ProjectionDefinition } from '@deepseek-ai/dsh-session-projection'
-import SessionProjectionCache, { projectionCacheDomainSpec } from '@deepseek-ai/dsh-session-projection-cache'
-import { titleProjectionDefinition } from '@deepseek-ai/dsh-session-title'
-import Storage from '@deepseek-ai/dsh-storage'
-import * as StorageDomain from '@deepseek-ai/dsh-storage-domain'
-import * as StorageJson from '@deepseek-ai/dsh-storage-json'
-import type { SessionControlFrame, SessionFollowFrame } from '@deepseek-ai/dsh-api-session-controller/types'
+import AgentRegistry from '@agentrans/agent'
+import { AttachmentStore } from '@agentrans/attachment'
+import { agentPresetProjectionDefinition } from '@agentrans/agent-preset-registry'
+import { createUserMessage } from '@agentrans/llm'
+import SessionStore, { SESSION_FORMAT_VERSION, SessionId, SessionLogOffset, SessionSeq } from '@agentrans/session'
+import type { Session, SessionEvent, SessionHeader, UserMessage } from '@agentrans/session'
+import SessionProjectionRegistry from '@agentrans/session-projection'
+import type { ProjectionDefinition } from '@agentrans/session-projection'
+import SessionProjectionCache, { projectionCacheDomainSpec } from '@agentrans/session-projection-cache'
+import { titleProjectionDefinition } from '@agentrans/session-title'
+import Storage from '@agentrans/storage'
+import * as StorageDomain from '@agentrans/storage-domain'
+import * as StorageJson from '@agentrans/storage-json'
+import type { SessionControlFrame, SessionFollowFrame } from '@agentrans/api-session-controller/types'
 import {
   mountAgentLoopTestDependencies,
   mountAgentLoopTestHarness,
-} from '@deepseek-ai/dsh-agent-loop-testkit'
+} from '@agentrans/agent-loop-testkit'
 import { createSessionTestRemote, testSessionPersistence, type TestSessionRemote } from './test-remote.ts'
 
 const ownedContexts = new Set<Context>()
@@ -40,7 +40,7 @@ afterEach(async () => {
 })
 let nextHarnessSession = 1
 
-declare module '@deepseek-ai/dsh-session-projection/types' {
+declare module '@agentrans/session-projection/types' {
   interface SessionProjectionMap {
     'test/last-user': { text: string } | null
   }

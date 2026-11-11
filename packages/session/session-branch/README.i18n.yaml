@@ -5,39 +5,39 @@
 /:
   en: 5a616ab27703e3f9
   zh: 70ed7244b997cf25
-/deepseek-ai-dsh-session-branch:
-  en: e51e2e4962d6322c
-  zh: 574e4864d3c23b73
-/deepseek-ai-dsh-session-branch/summary:
+/agentrans-session-branch:
+  en: 4c685d407bca15bc
+  zh: abe5a452d2845e03
+/agentrans-session-branch/summary:
   en: 4cacaebd01a4a929
   zh: 23dd82475a4d8f35
-/deepseek-ai-dsh-session-branch/table-of-contents:
+/agentrans-session-branch/table-of-contents:
   en: ebe0529e07753162
   zh: 0215c7836038f504
-/deepseek-ai-dsh-session-branch/api:
+/agentrans-session-branch/api:
   en: d4d235e2ecb89f59
   zh: 34ae83a3243fb98a
-/deepseek-ai-dsh-session-branch/model-experience:
+/agentrans-session-branch/model-experience:
   en: 215e7ba838619b7b
   zh: a311da3843709f90
-/deepseek-ai-dsh-session-branch/model-experience/branch-result-history:
+/agentrans-session-branch/model-experience/branch-result-history:
   en: da02e70a5d1fe6cf
   zh: 1ccebcd378e28039
-/deepseek-ai-dsh-session-branch/model-experience/branch-result-history/what-the-model-sees:
+/agentrans-session-branch/model-experience/branch-result-history/what-the-model-sees:
   en: 726e3258395655fd
   zh: d054a610aa59c7c0
-/deepseek-ai-dsh-session-branch/model-experience/branch-result-history/token-effect:
+/agentrans-session-branch/model-experience/branch-result-history/token-effect:
   en: 0b83df973eac104d
   zh: ab01152579b34017
-/deepseek-ai-dsh-session-branch/model-experience/branch-result-history/kv-cache-effect:
+/agentrans-session-branch/model-experience/branch-result-history/kv-cache-effect:
   en: e5ea84eb57fb6f56
   zh: c52c1bb4a59b11ad
-/deepseek-ai-dsh-session-branch/model-experience/branch-result-history/kv-cache-effect/selection-boundary:
+/agentrans-session-branch/model-experience/branch-result-history/kv-cache-effect/selection-boundary:
   en: e23c2f6db367307e
   zh: ac182349aa66b4b0
-/deepseek-ai-dsh-session-branch/known-limitations-and-deferred-work:
+/agentrans-session-branch/known-limitations-and-deferred-work:
   en: ee3f8cb7955c9ae9
   zh: 995b3efda511f888
-/deepseek-ai-dsh-session-branch/known-limitations-and-deferred-work/dev-note:
+/agentrans-session-branch/known-limitations-and-deferred-work/dev-note:
   en: c48499e167363df2
   zh: 7b02cf7c6a94f427

@@ -4,7 +4,7 @@
 import type { Browser, Locator, Page } from 'playwright'
 import { chromium } from 'playwright'
 import { expect, it } from 'vitest'
-import type {} from '@deepseek-ai/dsh-schedule'
+import type {} from '@agentrans/schedule'
 import { launchWebScaffold, watchConsole } from './scaffold.ts'
 import { revealNavigationDrawer } from './support.ts'
 

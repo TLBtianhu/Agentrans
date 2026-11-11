@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-experimental-badge-skill-bundle",
+  "name": "@agentrans/experimental-badge-skill-bundle",
   "description": "Let agents add a “powered by dsh” badge to documents, pull requests, and other outputs.",
   "version": "0.1.0",
   "icon": "./icon.svg",
@@ -39,12 +39,12 @@
     }
   },
   "dependencies": {
-    "@deepseek-ai/dsh-skill-badge": "workspace:*"
+    "@agentrans/skill-badge": "workspace:*"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/cordis": "workspace:~"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/cordis": "workspace:~"
   }
 }

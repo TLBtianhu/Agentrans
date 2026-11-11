@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { parseExpression } from '@deepseek-ai/dsh-util-values'
+import { parseExpression } from '@agentrans/util-values'
 import { analyzeFunction, evaluateFunction, integrateFunction } from '../src/client/renderers/function-analysis.ts'
 
 describe('function analysis', () => {

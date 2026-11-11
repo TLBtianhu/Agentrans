@@ -9,9 +9,9 @@
  * @module
  */
 
-import type { Context } from '@deepseek-ai/cordis'
-import { errorChain } from '@deepseek-ai/dsh-llm'
-import type { Session, SessionEvent, SessionHeader, SessionId, SessionLogOffset } from '@deepseek-ai/dsh-session'
+import type { Context } from '@agentrans/cordis'
+import { errorChain } from '@agentrans/llm'
+import type { Session, SessionEvent, SessionHeader, SessionId, SessionLogOffset } from '@agentrans/session'
 import {
   assertContiguous,
   SessionAlreadyExistsError,
@@ -21,7 +21,7 @@ import {
   SessionPersistenceNotFoundError,
   SessionPersistenceRevision,
   SessionReadOnlyError,
-} from '@deepseek-ai/dsh-session-persistence'
+} from '@agentrans/session-persistence'
 import type {
   SessionAccess,
   SessionHandle,
@@ -29,7 +29,7 @@ import type {
   SessionHandleFlushOptions,
   SessionHandleReadOptions,
   SessionHandleReadResult,
-} from '@deepseek-ai/dsh-session-persistence'
+} from '@agentrans/session-persistence'
 import type { SessionWriteLease } from './lease.ts'
 
 /** Maximum intentional wait before a routed live session batch starts writing. */

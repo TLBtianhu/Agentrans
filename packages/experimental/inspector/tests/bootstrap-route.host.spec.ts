@@ -1,10 +1,10 @@
 /** Host bootstrap route availability while the Inspector Worker is still starting. */
 
-import { Context, FiberState } from '@deepseek-ai/cordis'
-import type { Message } from '@deepseek-ai/cordis'
-import type { IndexInjection, WebServer } from '@deepseek-ai/dsh-host-webserver'
-import { HostConnectionService } from '@deepseek-ai/dsh-client-connection'
-import type { BrowserAuth } from '@deepseek-ai/dsh-client-connection/src/browser-auth.ts'
+import { Context, FiberState } from '@agentrans/cordis'
+import type { Message } from '@agentrans/cordis'
+import type { IndexInjection, WebServer } from '@agentrans/host-webserver'
+import { HostConnectionService } from '@agentrans/client-connection'
+import type { BrowserAuth } from '@agentrans/client-connection/src/browser-auth.ts'
 import { setFlagsFromString } from 'node:v8'
 import { runInNewContext } from 'node:vm'
 import open from 'open'

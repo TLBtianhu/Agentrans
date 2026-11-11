@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-llm",
+  "name": "@agentrans/llm",
   "description": "Provider-neutral LLM service interface for the DeepSeek Harness",
   "version": "0.1.0",
   "publishConfig": {
@@ -58,20 +58,20 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/cordis": "workspace:~"
   },
   "dependencies": {
-    "@deepseek-ai/dsh-util-crypto": "workspace:*",
-    "@deepseek-ai/schemastery": "workspace:~",
+    "@agentrans/util-crypto": "workspace:*",
+    "@agentrans/schemastery": "workspace:~",
     "zod": "4.4.3",
-    "@deepseek-ai/dsh-timeout": "workspace:*",
-    "@deepseek-ai/dsh-brand": "workspace:*",
-    "@deepseek-ai/dsh-util-values": "workspace:*",
-    "@deepseek-ai/dsh-typert-protocol": "workspace:*"
+    "@agentrans/timeout": "workspace:*",
+    "@agentrans/brand": "workspace:*",
+    "@agentrans/util-values": "workspace:*",
+    "@agentrans/typert-protocol": "workspace:*"
   },
   "devDependencies": {
-    "@deepseek-ai/dsh-attachment": "workspace:*",
-    "@deepseek-ai/dsh-package-manifest": "workspace:*",
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/attachment": "workspace:*",
+    "@agentrans/package-manifest": "workspace:*",
+    "@agentrans/cordis": "workspace:~"
   }
 }

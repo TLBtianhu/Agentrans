@@ -13,10 +13,10 @@
  * as trusted as the host process that accepted its definition.
  */
 
-import { Context } from '@deepseek-ai/cordis'
-import type { DynamicCordisPackage } from '@deepseek-ai/dsh-api-remotes/client'
-import type { SlotRegistry } from '@deepseek-ai/dsh-client-ui-renderer/client'
-import type { ThemeRuntime } from '@deepseek-ai/dsh-client-ui-theme/client'
+import { Context } from '@agentrans/cordis'
+import type { DynamicCordisPackage } from '@agentrans/api-remotes/client'
+import type { SlotRegistry } from '@agentrans/client-ui-renderer/client'
+import type { ThemeRuntime } from '@agentrans/client-ui-theme/client'
 
 /** Facade verbs beyond declared services (host CTX_VERBS twin). */
 const CTX_VERBS = new Set([

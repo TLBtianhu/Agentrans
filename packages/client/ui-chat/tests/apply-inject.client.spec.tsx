@@ -1,27 +1,27 @@
 import type { AssistantNodeInjected } from '../src/client/chat/AssistantNodeView.tsx'
-import { MessageId } from '@deepseek-ai/dsh-llm/brand'
-import { apply as applyMenus, inject as injectMenus } from '@deepseek-ai/dsh-client-ui-context-menu/client'
+import { MessageId } from '@agentrans/llm/brand'
+import { apply as applyMenus, inject as injectMenus } from '@agentrans/client-ui-context-menu/client'
 // @vitest-environment jsdom
 /** Chat inject factories exercised over independently mounted Conversation and Chat plugins. */
-import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
+import { createSnapshotStore } from '@agentrans/client-store'
 import { describe, expect, it, vi } from 'vitest'
-import { AttachmentId } from '@deepseek-ai/dsh-attachment'
-import type { ISession, SessionReference } from '@deepseek-ai/dsh-api-session-controller/client'
-import { LocaleRuntime } from '@deepseek-ai/dsh-client-locale/client'
+import { AttachmentId } from '@agentrans/attachment'
+import type { ISession, SessionReference } from '@agentrans/api-session-controller/client'
+import { LocaleRuntime } from '@agentrans/client-locale/client'
 import {
   SlotTestRuntime, stubConfigForm, usePinnedBrowserLanguages,
-} from '@deepseek-ai/dsh-client-test-runtime'
-import type { SessionBehaviorOverrides } from '@deepseek-ai/dsh-client-test-runtime'
-import type { ClientRemote } from '@deepseek-ai/dsh-api-remotes/client'
+} from '@agentrans/client-test-runtime'
+import type { SessionBehaviorOverrides } from '@agentrans/client-test-runtime'
+import type { ClientRemote } from '@agentrans/api-remotes/client'
 import {
   apply as applyConversation, inject as injectConversation,
   type GroupKey,
-} from '@deepseek-ai/dsh-client-ui-conversation/client'
+} from '@agentrans/client-ui-conversation/client'
 import {
   apply as applyChat, inject as injectChat, type ChatFlowDataInjected, type ChatViewInjected,
-} from '@deepseek-ai/dsh-client-ui-chat/client'
-import { SessionSeq, type SessionId } from '@deepseek-ai/dsh-session/types'
-import type { WorkspaceId } from '@deepseek-ai/dsh-workspace/types'
+} from '@agentrans/client-ui-chat/client'
+import { SessionSeq, type SessionId } from '@agentrans/session/types'
+import type { WorkspaceId } from '@agentrans/workspace/types'
 import { createChatStore } from '../src/client/stores.ts'
 import { CHAT_SETTINGS_NAMESPACE, type ChatSettings } from '../src/chat-settings.ts'
 import type { LinkOpeningRowInjected } from '../src/client/settings/LinkOpeningRow.tsx'

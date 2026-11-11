@@ -1,11 +1,11 @@
-/** Shared, source-independent ownership of Session input receipts and in-flight admission. @module @deepseek-ai/dsh-session-input */
-import { Context, Service } from '@deepseek-ai/cordis'
-import type { Agent } from '@deepseek-ai/dsh-agent'
-import type {} from '@deepseek-ai/dsh-agent'
-import type { UserMessage } from '@deepseek-ai/dsh-llm'
-import type { SessionId } from '@deepseek-ai/dsh-session'
-import type { ProjectionHandle } from '@deepseek-ai/dsh-session-projection'
-import { deepEqualJson, deepFreeze, snapshotJsonValue } from '@deepseek-ai/dsh-util-values'
+/** Shared, source-independent ownership of Session input receipts and in-flight admission. @module @agentrans/session-input */
+import { Context, Service } from '@agentrans/cordis'
+import type { Agent } from '@agentrans/agent'
+import type {} from '@agentrans/agent'
+import type { UserMessage } from '@agentrans/llm'
+import type { SessionId } from '@agentrans/session'
+import type { ProjectionHandle } from '@agentrans/session-projection'
+import { deepEqualJson, deepFreeze, snapshotJsonValue } from '@agentrans/util-values'
 import { acceptedMessageDigest, inputMessageDigest, inputReceiptProjection, type InputReceiptState } from './receipts.ts'
 import type {
   SessionInputAdmissionFailure, SessionInputIdentity, SessionInputMode, SessionInputReceipt, SessionInputRequestId,
@@ -13,7 +13,7 @@ import type {
 
 export type * from './types.ts'
 
-declare module '@deepseek-ai/cordis' {
+declare module '@agentrans/cordis' {
   interface Context {
     /** Shared accepted-input identities; callers retain their own source validation and delivery policy. */
     sessionInputs: SessionInputAdmission

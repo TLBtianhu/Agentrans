@@ -106,14 +106,14 @@ The example composition remains opt-in and safe by default:
 
 ```yaml
 plugins:
-  '@deepseek-ai/dsh-sandbox-local':
-  '@deepseek-ai/dsh-sandbox-policy':
+  '@agentrans/sandbox-local':
+  '@agentrans/sandbox-policy':
     config:
       mode: workspace-write
       workspaceRoot: .
-  '@deepseek-ai/dsh-terminal':
-  '@deepseek-ai/dsh-subprocess-local':
-  '@deepseek-ai/dsh-terminal-bash':
+  '@agentrans/terminal':
+  '@agentrans/subprocess-local':
+  '@agentrans/terminal-bash':
     config:
       scrollbackLines: 10000
       scrollbackMaxBytes: 4194304
@@ -124,7 +124,7 @@ plugins:
       handoffGraceMs: 500
       timeoutMs: 30000
       disposeGraceMs: 3000
-  '@deepseek-ai/dsh-tool-terminal':
+  '@agentrans/tool-terminal':
     config:
       enableRunInBackground: true
       maxResultBytes: 262144

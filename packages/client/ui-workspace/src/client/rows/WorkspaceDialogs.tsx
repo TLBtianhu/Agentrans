@@ -1,7 +1,7 @@
 /** Workspace rename and removal dialogs, keyed by their captured request. */
 import { useEffect, useRef, useState } from 'react'
-import { Button, Modal } from '@deepseek-ai/dsh-client-ui-primitives'
-import type { WorkspaceId, WorkspaceView } from '@deepseek-ai/dsh-api-workspace-controller/client'
+import { Button, Modal } from '@agentrans/client-ui-primitives'
+import type { WorkspaceId, WorkspaceView } from '@agentrans/api-workspace-controller/client'
 import type { WorkspaceActionRequest, WorkspaceBrowserProps } from '../contract/slots.ts'
 import css from './WorkspaceBrowser.module.css'
 

@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-tool-skill",
+  "name": "@agentrans/tool-skill",
   "description": "Model-facing skill loading tool for the DeepSeek Harness",
   "version": "0.1.0",
   "publishConfig": {
@@ -29,28 +29,28 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@deepseek-ai/dsh-agent": "workspace:*",
-    "@deepseek-ai/dsh-llm": "workspace:*",
-    "@deepseek-ai/dsh-skill": "workspace:*",
-    "@deepseek-ai/dsh-tools": "workspace:*",
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-working-directory": "workspace:*"
+    "@agentrans/agent": "workspace:*",
+    "@agentrans/llm": "workspace:*",
+    "@agentrans/skill": "workspace:*",
+    "@agentrans/tools": "workspace:*",
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/working-directory": "workspace:*"
   },
   "dependencies": {
-    "@deepseek-ai/schemastery": "workspace:~"
+    "@agentrans/schemastery": "workspace:~"
   },
   "devDependencies": {
-    "@deepseek-ai/dsh-agent": "workspace:*",
-    "@deepseek-ai/dsh-agent-loop-testkit": "workspace:*",
-    "@deepseek-ai/dsh-llm": "workspace:*",
-    "@deepseek-ai/dsh-scope": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-skill": "workspace:*",
-    "@deepseek-ai/dsh-skill-filesystem": "workspace:*",
-    "@deepseek-ai/dsh-tool-executor-native": "workspace:*",
-    "@deepseek-ai/dsh-tool-testkit": "workspace:*",
-    "@deepseek-ai/dsh-tools": "workspace:*",
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-working-directory": "workspace:*"
+    "@agentrans/agent": "workspace:*",
+    "@agentrans/agent-loop-testkit": "workspace:*",
+    "@agentrans/llm": "workspace:*",
+    "@agentrans/scope": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/skill": "workspace:*",
+    "@agentrans/skill-filesystem": "workspace:*",
+    "@agentrans/tool-executor-native": "workspace:*",
+    "@agentrans/tool-testkit": "workspace:*",
+    "@agentrans/tools": "workspace:*",
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/working-directory": "workspace:*"
   }
 }

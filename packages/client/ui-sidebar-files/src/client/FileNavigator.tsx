@@ -10,10 +10,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import clsx from 'clsx'
-import type { UseSidebarRightTabInfo } from '@deepseek-ai/dsh-client-ui-sidebar-right/client'
+import type { UseSidebarRightTabInfo } from '@agentrans/client-ui-sidebar-right/client'
 import type { TreeEntry } from './FileTree.tsx'
-import type { FactoryComponentPropsOf } from '@deepseek-ai/dsh-client-ui-slots'
-import { fileAddressFor } from '@deepseek-ai/dsh-util-workspace-path'
+import type { FactoryComponentPropsOf } from '@agentrans/client-ui-slots'
+import { fileAddressFor } from '@agentrans/util-workspace-path'
 import type { FilesInjected } from './face.ts'
 import { DEFAULT_NAVIGATOR_WIDTH, PUSH_FROM, locateFile, navigatorGeometry, relativeFileOf, type createFilesStore } from './store.ts'
 import { parentOf, treeRootOf, workspaceDirectories, workspaceEntries } from './workspace-tree.ts'
@@ -30,7 +30,7 @@ export interface FileNavigatorInput {
   readonly onOpen: (address: string) => void
 }
 
-declare module '@deepseek-ai/dsh-client-ui-slots' {
+declare module '@agentrans/client-ui-slots' {
   interface SlotFactoryMap {
     /** One pane's workspace tree with its width and show/hide state. */
     'sidebar.files.navigator': {

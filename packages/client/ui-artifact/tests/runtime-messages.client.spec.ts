@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import type { ArtifactRuntimeId, ArtifactRuntimeIdentity } from '@deepseek-ai/dsh-artifact-runtime/types'
-import type { ArtifactId } from '@deepseek-ai/dsh-artifact/types'
+import type { ArtifactRuntimeId, ArtifactRuntimeIdentity } from '@agentrans/artifact-runtime/types'
+import type { ArtifactId } from '@agentrans/artifact/types'
 import { ARTIFACT_ACTION_MAX_BYTES } from '../src/client/messages.ts'
 import { ARTIFACT_RUNTIME_FAILURE_MAX_BYTES, parseArtifactRuntimeMessage } from '../src/client/runtime-messages.ts'
 

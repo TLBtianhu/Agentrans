@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
-import { assertNever, type JsonValue } from '@deepseek-ai/dsh-util-values'
+import { assertNever, type JsonValue } from '@agentrans/util-values'
 import type { WatchToolResult } from './watch-tool-result.ts'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import {
@@ -23,13 +23,13 @@ import {
   StateDot,
   Tooltip,
   writeClipboard,
-} from '@deepseek-ai/dsh-client-ui-primitives'
-import type { JsonTreeLabels, JsonTreeProps, MarkdownLabels } from '@deepseek-ai/dsh-client-ui-primitives'
-import type { PropsRenderSlots } from '@deepseek-ai/dsh-client-ui-slots'
+} from '@agentrans/client-ui-primitives'
+import type { JsonTreeLabels, JsonTreeProps, MarkdownLabels } from '@agentrans/client-ui-primitives'
+import type { PropsRenderSlots } from '@agentrans/client-ui-slots'
 import { structuredPatch } from 'diff'
 import type {
   AssistantRequestConfig, ConversationPromptSnapshot, MessageImageLoader,
-} from '@deepseek-ai/dsh-client-ui-conversation/client'
+} from '@agentrans/client-ui-conversation/client'
 import type {
   AssistantMetricDetail, TrajectoryCellKind, TrajectoryCellProps, TrajectorySourceBlock,
 } from './trajectory-record.ts'

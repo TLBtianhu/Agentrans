@@ -3,7 +3,7 @@ description: "重试已确认的 Session 输入，不替换已接受消息，也
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-session-input
+# @agentrans/session-input
 
 [English](README.md) | 中文
 
@@ -28,7 +28,7 @@ kind: "package-reference"
 在 Session Projection 旁挂载此服务，再接入 Session Controller 等消费者。Web bundle 已包含它。无界面源码创建和旧 Artifact 记录不要求激活它；稳定 Artifact 提交在服务缺席时明确拒绝。
 
 ```yaml
-- name: '@deepseek-ai/dsh-session-input'
+- name: '@agentrans/session-input'
 ```
 
 普通问题在异步准备 Agent 前预约 RPC 身份，在解析上下文或附件前读取接受记录。已经构造完整不可变用户消息的领域，则使用稳定消息 id。首次准入检查只在没有匹配收据时执行，因此已接受重试不依赖当前源码修订。

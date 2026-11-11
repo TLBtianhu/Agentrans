@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
+import { makeTranslate } from '@agentrans/client-test-runtime'
 import { FunctionPlotView } from '../src/client/FunctionPlotView.tsx'
 import { en } from '../src/client/locales.ts'
-import type { FunctionPlotSpec } from '@deepseek-ai/dsh-artifact/scene'
+import type { FunctionPlotSpec } from '@agentrans/artifact/scene'
 import type { ArtifactId, RecordArtifactAction } from '../src/client/protocol.ts'
 
 const t = makeTranslate(en)

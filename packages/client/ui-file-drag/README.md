@@ -3,7 +3,7 @@ description: "Application-scoped file transfers and localized drag failure feedb
 kind: package-reference
 ---
 
-# @deepseek-ai/dsh-client-ui-file-drag
+# @agentrans/client-ui-file-drag
 
 English | [中文](README.zh.md)
 

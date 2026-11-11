@@ -1,5 +1,5 @@
 /**
- * @deepseek-ai/dsh-host-frontend-static — SPA dist server over the webserver
+ * @agentrans/host-frontend-static — SPA dist server over the webserver
  * fallback seat: a webserver resource serving the built frontend directory
  * with explicit index entry points. A readable index renders at the dist root
  * and configured index path; missing paths return 404, traversal outside the
@@ -13,16 +13,16 @@
  * while the index carries no cache headers. The dist location is workspace
  * knowledge of the composing application, so `distIndex` is typically
  * supplied through a `!!js` expression, never hardcoded by a deployment.
- * @module @deepseek-ai/dsh-host-frontend-static
+ * @module @agentrans/host-frontend-static
  */
 
 import { createHash } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
 import { dirname, extname, join, normalize, resolve, sep } from 'node:path'
-import type { Context } from '@deepseek-ai/cordis'
-import z from '@deepseek-ai/schemastery'
-import type {} from '@deepseek-ai/dsh-client-connection'
-import type {} from '@deepseek-ai/dsh-host-webserver'
+import type { Context } from '@agentrans/cordis'
+import z from '@agentrans/schemastery'
+import type {} from '@agentrans/client-connection'
+import type {} from '@agentrans/host-webserver'
 
 /** Stable Cordis plugin name. */
 export const name = 'frontend-static'

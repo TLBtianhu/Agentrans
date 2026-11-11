@@ -9,9 +9,9 @@ import { verifyProductUse } from './verify-product-use.ts'
 import { writeFixtureFile as write } from './fixture-file.ts'
 
 const roots: string[] = []
-const base = '@deepseek-ai/dsh-base'
-const core = '@deepseek-ai/dsh-core'
-const candidate = '@deepseek-ai/dsh-candidate'
+const base = '@agentrans/base'
+const core = '@agentrans/core'
+const candidate = '@agentrans/candidate'
 const candidateDir = 'packages/core/candidate'
 const profile = 'packages/util/official-bundles/src/bundles.ts'
 const patch = 'packages/bundle/base/cordis.patch.yml'
@@ -38,7 +38,7 @@ function fixture(): string {
   const root = mkdtempSync(join(tmpdir(), 'dsh-product-use-'))
   roots.push(root)
   write(root, 'tsconfig.base.json', { compilerOptions: { moduleResolution: 'bundler', paths: {} } })
-  pkg(root, 'apps/cli', '@deepseek-ai/dsh')
+  pkg(root, 'apps/cli', '@agentrans/dsh')
   pkg(root, 'apps/desktop', '@fixture/desktop')
   pkg(root, 'apps/web', '@fixture/web')
   write(root, 'apps/cli/src/bin.ts', 'export {}\n')
@@ -72,7 +72,7 @@ describe('product package use', () => {
   it('rejects an orphan even when an app manifest installs it', () => {
     const root = fixture()
     pkg(root, candidateDir, candidate)
-    write(root, 'apps/cli/package.json', { name: '@deepseek-ai/dsh', dependencies: { [candidate]: '*' } })
+    write(root, 'apps/cli/package.json', { name: '@agentrans/dsh', dependencies: { [candidate]: '*' } })
     expect(failures(root)).toContain(`${candidateDir} (${candidate}): no product runtime use`)
     expect(failures(root, declarations())).toBe('')
   })
@@ -184,8 +184,8 @@ describe('product package use', () => {
   it('visits nested preset entries only while the preset is enabled', () => {
     const root = fixture()
     pkg(root, candidateDir, candidate)
-    pkg(root, 'packages/preset/agent-preset', '@deepseek-ai/dsh-agent-preset')
-    const entry = { id: 'preset', name: '@deepseek-ai/dsh-agent-preset', config: {
+    pkg(root, 'packages/preset/agent-preset', '@agentrans/agent-preset')
+    const entry = { id: 'preset', name: '@agentrans/agent-preset', config: {
       id: 'standard', plugins: [{ group: true, config: [{ name: candidate }] }],
     } }
     write(root, patch, [{ insert: [{ name: core }, entry] }])
@@ -196,11 +196,11 @@ describe('product package use', () => {
 
   it.each(['shipped', 'on-demand'])('keeps %s optional selection and its runtime closure separate from default use', (delivery) => {
     const root = fixture()
-    const bundle = '@deepseek-ai/dsh-experimental-feature'
+    const bundle = '@agentrans/experimental-feature'
     pkg(root, 'packages/experimental/feature', bundle, { dsh: { bundle: { patch: './cordis.patch.yml' } } })
     pkg(root, candidateDir, candidate)
-    pkg(root, 'packages/core/indirect', '@deepseek-ai/dsh-indirect')
-    write(root, `${candidateDir}/src/index.ts`, "import '@deepseek-ai/dsh-indirect'")
+    pkg(root, 'packages/core/indirect', '@agentrans/indirect')
+    write(root, `${candidateDir}/src/index.ts`, "import '@agentrans/indirect'")
     write(root, 'packages/experimental/feature/cordis.patch.yml', [{ insert: [{ name: candidate }] }])
     profiles(root, delivery === 'shipped' ? [bundle] : [], delivery === 'on-demand' ? [bundle] : [])
     const result = verifyProductUse(root, declarations())
@@ -211,7 +211,7 @@ describe('product package use', () => {
 
   it.each(['shipped', 'on-demand'])('does not count a %s optional patch whose target is absent', (delivery) => {
     const root = fixture()
-    const bundle = '@deepseek-ai/dsh-experimental-feature'
+    const bundle = '@agentrans/experimental-feature'
     pkg(root, 'packages/experimental/feature', bundle, { dsh: { bundle: { patch: './cordis.patch.yml' } } })
     pkg(root, candidateDir, candidate)
     write(root, 'packages/experimental/feature/cordis.patch.yml', [{ id: 'absent', insert: [{ name: candidate }] }])
@@ -224,14 +224,14 @@ describe('product package use', () => {
     pkg(root, candidateDir, candidate, { exports: { './remote': {
       types: './lib/typert.remote-client.d.ts', default: './lib/typert.remote-client.js',
     } } })
-    pkg(root, 'packages/core/host-only', '@deepseek-ai/dsh-host-only')
-    write(root, `${candidateDir}/src/index.ts`, "import '@deepseek-ai/dsh-host-only'")
+    pkg(root, 'packages/core/host-only', '@agentrans/host-only')
+    write(root, `${candidateDir}/src/index.ts`, "import '@agentrans/host-only'")
     write(root, 'apps/web/src/main.ts', `import '${candidate}/remote'`)
     const result = verifyProductUse(root, {})
     expect(result.defaultPackages).toContain(candidateDir)
     expect(result.defaultPackages).not.toContain('packages/core/host-only')
     expect(result.failures).toEqual([
-      'packages/core/host-only (@deepseek-ai/dsh-host-only): no product runtime use; mount it, declare its maintained role, or move it to experimental',
+      'packages/core/host-only (@agentrans/host-only): no product runtime use; mount it, declare its maintained role, or move it to experimental',
     ])
   })
 
@@ -259,11 +259,11 @@ describe('product package use', () => {
 
   it('follows explicit directory-picker dynamic mounts and their client face', () => {
     const root = fixture()
-    const picker = '@deepseek-ai/dsh-host-directory-picker-auto'
+    const picker = '@agentrans/host-directory-picker-auto'
     pkg(root, 'packages/host/directory-picker-auto', picker)
     pkg(root, candidateDir, candidate, { dsh: { client: { platform: 'web' } } })
-    pkg(root, 'packages/client/indirect', '@deepseek-ai/dsh-client-indirect')
-    write(root, `${candidateDir}/src/client.ts`, "import '@deepseek-ai/dsh-client-indirect'")
+    pkg(root, 'packages/client/indirect', '@agentrans/client-indirect')
+    write(root, `${candidateDir}/src/client.ts`, "import '@agentrans/client-indirect'")
     write(root, 'packages/host/directory-picker-auto/src/index.ts',
       `export const BACKEND_PACKAGES = { native: '${candidate}' }\nexport const SURFACE_PACKAGES = { native: '${candidate}' }\n`)
     write(root, patch, [{ insert: [{ name: core }, { name: picker }] }])
@@ -273,8 +273,8 @@ describe('product package use', () => {
   it('accepts declaration-only infrastructure and rejects missing or miscategorized policy entries', () => {
     const root = fixture()
     const directory = 'packages/util/package-manifest'
-    pkg(root, directory, '@deepseek-ai/dsh-package-manifest')
-    expect(failures(root)).toContain(`${directory} (@deepseek-ai/dsh-package-manifest): no product runtime use`)
+    pkg(root, directory, '@agentrans/package-manifest')
+    expect(failures(root)).toContain(`${directory} (@agentrans/package-manifest): no product runtime use`)
     expect(failures(root, { [directory]: { category: 'declarations', reason: 'Shared public metadata types.' } })).toBe('')
     pkg(root, candidateDir, candidate)
     expect(failures(root, declarations('declarations'))).toContain('invalid policy category declarations')
@@ -284,17 +284,17 @@ describe('product package use', () => {
   it('accepts a shipped-but-off package and rejects that role for test infrastructure', () => {
     const root = fixture()
     const directory = 'packages/llm/llm-disabled'
-    pkg(root, directory, '@deepseek-ai/dsh-llm-disabled')
+    pkg(root, directory, '@agentrans/llm-disabled')
     expect(failures(root, { [directory]: { category: 'disabled', reason: 'Shipped row no profile mounts.' } })).toBe('')
     const testDirectory = 'packages/test-support/probe'
-    pkg(root, testDirectory, '@deepseek-ai/dsh-test-probe')
+    pkg(root, testDirectory, '@agentrans/test-probe')
     expect(failures(root, { [testDirectory]: { category: 'disabled', reason: 'Shipped row no profile mounts.' } })).toContain('invalid policy category disabled')
   })
 
   it('requires a declared Web distribution package to remain source-reachable', () => {
     const root = fixture()
     const directory = 'packages/client/web'
-    const name = '@deepseek-ai/dsh-client-web'
+    const name = '@agentrans/client-web'
     pkg(root, directory, name)
     const policy = { [directory]: { category: 'web-distribution', reason: 'Browser boot kernel.' } } as const
     expect(failures(root, policy)).toContain('stale web-distribution policy')

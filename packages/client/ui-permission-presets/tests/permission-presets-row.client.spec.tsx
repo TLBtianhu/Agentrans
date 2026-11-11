@@ -1,14 +1,14 @@
 // @vitest-environment jsdom
-import { contextMenuHook } from '@deepseek-ai/dsh-client-test-runtime'
-import type { GlobalStandardProps } from '@deepseek-ai/dsh-client-ui-slots'
-import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
+import { contextMenuHook } from '@agentrans/client-test-runtime'
+import type { GlobalStandardProps } from '@agentrans/client-ui-slots'
+import { createSnapshotStore } from '@agentrans/client-store'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { allowAllAccess, bindSnapshotSelector, RemoteError } from '@deepseek-ai/dsh-client-test-runtime'
-import type { SettingsNamespaceView } from '@deepseek-ai/dsh-api-remotes/client'
+import { allowAllAccess, bindSnapshotSelector, RemoteError } from '@agentrans/client-test-runtime'
+import type { SettingsNamespaceView } from '@agentrans/api-remotes/client'
 import { PermissionRow, type PermissionRowProps } from '../src/client/PermissionRow.tsx'
 import { zh } from '../src/client/locales.ts'
-import { SettingsDescribeMirror } from '@deepseek-ai/dsh-client-ui-settings/src/client/settings-mirror.ts'
+import { SettingsDescribeMirror } from '@agentrans/client-ui-settings/src/client/settings-mirror.ts'
 import { PermissionPresetSettingsController } from '../src/client/settings-store.ts'
 
 // Every fixture carries the resource hook the resources plugin merges into GlobalStandardProps.

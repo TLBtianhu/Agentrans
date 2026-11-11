@@ -13,9 +13,9 @@
  * @module
  */
 
-import { createSnapshotStore, type SnapshotStore } from '@deepseek-ai/dsh-client-store'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import { writeClipboard } from '@deepseek-ai/dsh-client-ui-primitives'
+import { createSnapshotStore, type SnapshotStore } from '@agentrans/client-store'
+import type { SessionId } from '@agentrans/session/types'
+import { writeClipboard } from '@agentrans/client-ui-primitives'
 import { SESSION_MARKDOWN_EXPORT_ROUTE } from '../routes.ts'
 
 /** Whether the latest copy attempt succeeded, prepared no transcript, or could not write. */

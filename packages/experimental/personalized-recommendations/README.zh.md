@@ -3,7 +3,7 @@ description: "用一个实验性 Bundle 在回答下方启用个性化页面提�
 kind: "package-bundle"
 ---
 
-# @deepseek-ai/dsh-personalized-recommendations
+# @agentrans/personalized-recommendations
 
 [English](README.md) | 中文
 

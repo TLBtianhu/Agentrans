@@ -3,7 +3,7 @@ description: "实验性会话视图：按轮次与步骤展示上下文大小、
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-experimental-client-ui-stats
+# @agentrans/experimental-client-ui-stats
 
 [English](README.md) | 中文
 
@@ -29,13 +29,13 @@ kind: "package-reference"
 
 ### 何时选择它
 
-需要按提示词长度、缓存复用情况和总时间去向比较轮次或步骤时选它。需要完整事件清单、请求头和工具正文时选 `@deepseek-ai/dsh-client-ui-trajectory`；两个页签读同一份会话，可以同时启用。
+需要按提示词长度、缓存复用情况和总时间去向比较轮次或步骤时选它。需要完整事件清单、请求头和工具正文时选 `@agentrans/client-ui-trajectory`；两个页签读同一份会话，可以同时启用。
 
 ### 最小配置
 
 ```yaml
 - id: ui-stats
-  name: '@deepseek-ai/dsh-experimental-client-ui-stats'
+  name: '@agentrans/experimental-client-ui-stats'
 ```
 
 -----
@@ -79,8 +79,8 @@ kind: "package-reference"
 <a id="further-exploration"></a>
 ## 进一步探索
 
-- [`@deepseek-ai/dsh-client-ui-trajectory`](../../client/ui-trajectory/README.zh.md) —— 本页签的表格约定参考它。
-- [`@deepseek-ai/dsh-session-stats`](../../session/session-stats/README.zh.md) —— 列名口径与会话统计一致。
+- [`@agentrans/client-ui-trajectory`](../../client/ui-trajectory/README.zh.md) —— 本页签的表格约定参考它。
+- [`@agentrans/session-stats`](../../session/session-stats/README.zh.md) —— 列名口径与会话统计一致。
 - [`docs/subsystems/conversation.md`](../../../docs/subsystems/conversation.zh.md) —— 视图目标与 Definition 的装配方式。
 
 -----
@@ -98,7 +98,7 @@ kind: "package-reference"
 
 <a id="known-limitations-and-deferred-work"></a>
 
-- **默认产品不挂载。** Web 包按规则拒绝引用 experimental 包；可选的「开发者工具」组合包（`@deepseek-ai/dsh-experimental-inspector-profile`）会挂载本视图，也可以由 profile 显式添加。
+- **默认产品不挂载。** Web 包按规则拒绝引用 experimental 包；可选的「开发者工具」组合包（`@agentrans/experimental-inspector-profile`）会挂载本视图，也可以由 profile 显式添加。
 - **窗口被截断时没有起始时刻。** 已加载窗口从半步中间开始时，首 token、模型用时和总用时都推导不出来；行上标「起止未知」，不估算。
 - **Code-Mode 内层调用按根调用上下文并回步骤。** 内层调用不带 turn/step，因此每个根调用各自开一个以 root call id 为键的上下文，由 builder 把它的派发并回持有 runner 的那一步。窗口里丢了派发起点时仍会合并调用，但无法给出它们各自的实测耗时。
 - **更早历史的加载结果显式区分重试。** 页面请求只返回 `grew`、`exhausted` 或 `retry`；如果 Chat 或轨迹视图正在加载同一个 Session 的页，统计视图会保留加载按钮，而不是误报历史已耗尽或抛出错误。
@@ -114,7 +114,7 @@ kind: "package-reference"
 <details>
 <summary>维护者的工作上下文——点击展开</summary>
 
-本页签从一份独立的客户端插件移植而来。列名口径参照 `@deepseek-ai/dsh-session-stats`（模型用时、工具用时、首 token、输出速度），版式参照轨迹表格，让两个页签读起来一致。
+本页签从一份独立的客户端插件移植而来。列名口径参照 `@agentrans/session-stats`（模型用时、工具用时、首 token、输出速度），版式参照轨迹表格，让两个页签读起来一致。
 
 </details>
 

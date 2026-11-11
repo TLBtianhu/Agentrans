@@ -4,7 +4,7 @@
  * A share's ACL, tier, and expiry belong to the Relay once it states them, so this module holds the
  * last state frame it reported, fences each read against the generation of the share it was for, and
  * decides whether a viewer still holds the admission a frame describes.
- * @module @deepseek-ai/dsh-experimental-liveshare/src/host/relay-authority
+ * @module @agentrans/experimental-liveshare/src/host/relay-authority
  */
 
 import type {
@@ -12,8 +12,8 @@ import type {
   IdentityTriple,
   ShareAccessStateFrame,
   ShareRpcActor,
-} from '@deepseek-ai/dsh-experimental-liveshare-protocol'
-import { identityFromKey, identityKeyOf, parseShareAccessState } from '@deepseek-ai/dsh-experimental-liveshare-protocol'
+} from '@agentrans/experimental-liveshare-protocol'
+import { identityFromKey, identityKeyOf, parseShareAccessState } from '@agentrans/experimental-liveshare-protocol'
 import type { ForkRegistry } from './fork-registry.ts'
 import { isExpired, type ViewerSessionMode } from './fork-policy.ts'
 import type { ShareAccessSelection } from '../share-api-types.ts'

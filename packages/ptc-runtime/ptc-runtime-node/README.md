@@ -3,7 +3,7 @@ description: "Run TypeScript programs in Node processes with optional retained m
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-ptc-runtime-node
+# @agentrans/ptc-runtime-node
 
 English | [中文](README.zh.md)
 
@@ -32,7 +32,7 @@ Mount this provider in a composition that supplies `fs`, `subprocess`, `sandbox`
 Configure the provider row after its required services are available:
 
 ```yaml
-- name: '@deepseek-ai/dsh-ptc-runtime-node'
+- name: '@agentrans/ptc-runtime-node'
   config:
     executionMode: per-call
     timeoutMs: 120000
@@ -57,9 +57,9 @@ Configure the provider row after its required services are available:
 | `graceMs` | `3,000` | Managed termination and output-drain grace |
 | `launch` | Local carrier | Explicit `{ kind: "node-script", executable, bootstrapPath? }` or `{ kind: "embedded", executable }` in the subprocess world |
 
-The [configuration catalog](../../../docs/config-catalog.md#deepseek-aidsh-ptc-runtime-node) defines accepted config fields. `resolve(request)` defaults cwd to the sandbox policy workspace root and supplies the numeric or null deadline choice and execution policy; `run(spec)` accepts those resolved inputs and does not fill missing values.
+The [configuration catalog](../../../docs/config-catalog.md#agentransptc-runtime-node) defines accepted config fields. `resolve(request)` defaults cwd to the sandbox policy workspace root and supplies the numeric or null deadline choice and execution policy; `run(spec)` accepts those resolved inputs and does not fill missing values.
 
-Profile editors can import `resolvePersistentExecution` from `@deepseek-ai/dsh-ptc-runtime-node/configuration` to select retained execution from the effective program format. Merge both returned settings atomically: Script keeps its syntax, while function bodies switch to the REPL.
+Profile editors can import `resolvePersistentExecution` from `@agentrans/ptc-runtime-node/configuration` to select retained execution from the effective program format. Merge both returned settings atomically: Script keeps its syntax, while function bodies switch to the REPL.
 
 ### Execution and results
 
@@ -81,7 +81,7 @@ Set `executionMode: vm-script` to evaluate erasable TypeScript through `node:vm`
 <a id="persistent-repl"></a>
 ### In-memory modes
 
-The `persistent-in-memory` mode and Script mode with `scriptPersistence: true` retain state per owner. To select the REPL evaluator, set `executionMode: persistent-in-memory` on the existing `@deepseek-ai/dsh-ptc-runtime-node` plugin. All modes require `fs`, `subprocess`, `sandbox` and `sandboxPolicy` and apply the selected file sandbox policy. Enable it deliberately with a profile patch:
+The `persistent-in-memory` mode and Script mode with `scriptPersistence: true` retain state per owner. To select the REPL evaluator, set `executionMode: persistent-in-memory` on the existing `@agentrans/ptc-runtime-node` plugin. All modes require `fs`, `subprocess`, `sandbox` and `sandboxPolicy` and apply the selected file sandbox policy. Enable it deliberately with a profile patch:
 
 ```yaml
 - id: ptc-runtime

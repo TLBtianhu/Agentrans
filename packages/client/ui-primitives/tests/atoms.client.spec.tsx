@@ -2,7 +2,7 @@
 import { createRef, useState } from 'react'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from 'vitest'
-import { Button, ConnectionIndicator, Input, Menu, MenuItemButton, Modal, Pill } from '@deepseek-ai/dsh-client-ui-primitives'
+import { Button, ConnectionIndicator, Input, Menu, MenuItemButton, Modal, Pill } from '@agentrans/client-ui-primitives'
 import { POINTER_GRACE_MS } from '../src/pointer-grace.ts'
 import { focusWithoutRing } from '../src/focus.ts'
 import buttonCss from '../src/Button.module.css'
@@ -45,7 +45,7 @@ describe('isMobileDevice', () => {
     expect(first.isMobileDevice()).toBe(mobile)
 
     ua.mockReturnValue(mobile ? desktopUA : mobileUA)
-    const other = await import('@deepseek-ai/dsh-client-ui-primitives/src/focus.ts')
+    const other = await import('@agentrans/client-ui-primitives/src/focus.ts')
     expect(other.isMobileDevice()).toBe(mobile)
     expect(ua).toHaveBeenCalledTimes(1)
 

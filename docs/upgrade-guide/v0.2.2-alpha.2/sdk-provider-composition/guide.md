@@ -15,6 +15,6 @@ The shipped `sdk` and `sdk-minimal` profiles already register the official adapt
 
 ## Migration
 
-1. In the custom profile's `cordis.patch.yml`, enable its existing official adapter row or insert `@deepseek-ai/dsh-llm-deepseek-api-key` when absent. For another provider, compose that provider's adapter instead. See [SDK server wiring](../../../../packages/sdk/server/README.md).
+1. In the custom profile's `cordis.patch.yml`, enable its existing official adapter row or insert `@agentrans/llm-deepseek-api-key` when absent. For another provider, compose that provider's adapter instead. See [SDK server wiring](../../../../packages/sdk/server/README.md).
 2. Match `initialize.provider` and `initialize.model` to the composed adapter. The selected adapter still validates the model, reasoning effort, and output limit before the handshake succeeds. Do not use the handshake to install a provider.
 3. Verify that the intended profile initializes and completes a prompt. Disable its adapter and confirm initialization reports the missing route without registering a replacement. Custom and replay profiles must remain on their own adapters. No Session-data or wire-format migration is required.

@@ -1,9 +1,9 @@
 /** Pure vocabulary for manually confirmed branch-result return. */
 
-import type { MessageId, TextBlock, UserMessage } from '@deepseek-ai/dsh-llm'
+import type { MessageId, TextBlock, UserMessage } from '@agentrans/llm'
 import type {
   SessionEvent, SessionHeader, SessionId, SessionLogOffset, SessionSeq,
-} from '@deepseek-ai/dsh-session/types'
+} from '@agentrans/session/types'
 
 /** Durable source reference carried by a confirmed branch-result user message. */
 export interface BranchResultSource {
@@ -14,7 +14,7 @@ export interface BranchResultSource {
   readonly form: 'notice'
 }
 
-declare module '@deepseek-ai/dsh-llm' {
+declare module '@agentrans/llm' {
   interface MessageSourceMap {
     /**
      * User-confirmed conclusion reread from an ordinary manual branch. Readers

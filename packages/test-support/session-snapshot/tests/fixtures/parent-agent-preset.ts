@@ -1,8 +1,8 @@
 /** Compose a blank headless Session through the scenario's preset selections. */
 
-import type { Context } from '@deepseek-ai/cordis'
-import type {} from '@deepseek-ai/dsh-agent'
-import type {} from '@deepseek-ai/dsh-agent-preset-registry'
+import type { Context } from '@agentrans/cordis'
+import type {} from '@agentrans/agent'
+import type {} from '@agentrans/agent-preset-registry'
 
 export const name = 'parent-agent-preset'
 export const inject = ['agentPresets']

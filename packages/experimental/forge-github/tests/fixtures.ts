@@ -1,4 +1,4 @@
-import type { ChangeRequestRef, ForgeRepository } from '@deepseek-ai/dsh-experimental-forge'
+import type { ChangeRequestRef, ForgeRepository } from '@agentrans/experimental-forge'
 
 /** Repository on github.com used across the provider tests. */
 export const demo: ForgeRepository = { forge: 'github', host: 'github.com', owner: 'octo', name: 'demo' }

@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-client-ui-file-actions",
+  "name": "@agentrans/client-ui-file-actions",
   "description": "Original-file saving and image clipboard actions for Web and Desktop",
   "version": "0.1.0",
   "publishConfig": {
@@ -32,10 +32,10 @@
   "dsh": {
     "client": {
       "inject": [
-        "@deepseek-ai/dsh-client-locale",
-        "@deepseek-ai/dsh-client-ui-context-menu",
-        "@deepseek-ai/dsh-api-workspace-files",
-        "@deepseek-ai/dsh-api-session-controller"
+        "@agentrans/client-locale",
+        "@agentrans/client-ui-context-menu",
+        "@agentrans/api-workspace-files",
+        "@agentrans/api-session-controller"
       ],
       "platform": "web"
     }
@@ -46,23 +46,23 @@
   },
   "license": "MIT",
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/cordis": "workspace:~"
   },
   "devDependencies": {
     "react": "^18.2.0",
-    "@deepseek-ai/dsh-client-ui-primitives": "workspace:*",
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-client-ui-slots": "workspace:*",
-    "@deepseek-ai/dsh-api-session-controller": "workspace:*",
-    "@deepseek-ai/dsh-client-test-runtime": "workspace:*",
-    "@deepseek-ai/dsh-util-file-drag": "workspace:*",
-    "@deepseek-ai/dsh-client-locale": "workspace:*",
-    "@deepseek-ai/dsh-client-ui-context-menu": "workspace:*",
-    "@deepseek-ai/dsh-api-workspace-files": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-util-workspace-path": "workspace:*",
+    "@agentrans/client-ui-primitives": "workspace:*",
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/client-ui-slots": "workspace:*",
+    "@agentrans/api-session-controller": "workspace:*",
+    "@agentrans/client-test-runtime": "workspace:*",
+    "@agentrans/util-file-drag": "workspace:*",
+    "@agentrans/client-locale": "workspace:*",
+    "@agentrans/client-ui-context-menu": "workspace:*",
+    "@agentrans/api-workspace-files": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/util-workspace-path": "workspace:*",
     "mime": "^4.1.0",
-    "@deepseek-ai/dsh-client-ui-renderer": "workspace:*"
+    "@agentrans/client-ui-renderer": "workspace:*"
   },
   "files": [
     "locale/*.json",

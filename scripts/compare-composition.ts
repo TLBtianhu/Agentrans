@@ -11,7 +11,7 @@
  */
 
 import { relative, resolve } from 'node:path'
-import { applyEntryPatches } from '@deepseek-ai/cordis-plugin-include'
+import { applyEntryPatches } from '@agentrans/cordis-plugin-include'
 import { loadOverlayPatches } from '../packages/boot/app-boot/src/index.ts'
 
 interface Row {

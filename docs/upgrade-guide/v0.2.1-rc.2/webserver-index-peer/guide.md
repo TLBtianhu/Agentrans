@@ -8,7 +8,7 @@ English | [中文](guide.zh.md)
 
 ## Change
 
-`renderIndex(html)` and `collectIndexInjections()` on `ctx.webServer` from `@deepseek-ai/dsh-host-webserver` took no Peer, and every index carried the owner's access snapshot. They are now `renderIndex(html, peer)` and `collectIndexInjections(peer)`, and the `webserver/index-inject` event passes the same Peer as its second argument, so the remote-access snapshot in the index belongs to that Peer. Code that calls either method breaks at compile time; listeners that read only the table keep working.
+`renderIndex(html)` and `collectIndexInjections()` on `ctx.webServer` from `@agentrans/host-webserver` took no Peer, and every index carried the owner's access snapshot. They are now `renderIndex(html, peer)` and `collectIndexInjections(peer)`, and the `webserver/index-inject` event passes the same Peer as its second argument, so the remote-access snapshot in the index belongs to that Peer. Code that calls either method breaks at compile time; listeners that read only the table keep working.
 
 ## Migration
 

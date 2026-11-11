@@ -1,8 +1,8 @@
 /** Change request patches kept for later reads: versions, recency, and the size bound. */
 
 import { describe, expect, it } from 'vitest'
-import { changeRequestKey } from '@deepseek-ai/dsh-experimental-forge'
-import type { ChangeRequestKey } from '@deepseek-ai/dsh-experimental-forge'
+import { changeRequestKey } from '@agentrans/experimental-forge'
+import type { ChangeRequestKey } from '@agentrans/experimental-forge'
 import { PatchCache } from '../src/patch-cache.ts'
 
 function key(number: number): ChangeRequestKey {

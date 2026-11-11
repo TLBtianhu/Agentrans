@@ -1,7 +1,7 @@
 /** Visible composer choice for the next ordinary question. */
-import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
-import type { ObservableSnapshot } from '@deepseek-ai/dsh-client-store'
-import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
+import type { InjectFace, PropsLocale, PropsRuntime } from '@agentrans/client-ui-slots'
+import type { ObservableSnapshot } from '@agentrans/client-store'
+import { Button } from '@agentrans/client-ui-primitives'
 import type { ArtifactPromptBinding } from './particle-runtime-owner.ts'
 import { artifactHostRouteAvailable } from './artifact-route.ts'
 import css from './ArtifactNodeView.module.css'

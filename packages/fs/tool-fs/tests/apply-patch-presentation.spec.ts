@@ -1,6 +1,6 @@
 /** Exact Host projections and stopped output without invented file effects. */
 import { expect, it, vi } from 'vitest'
-import * as Patch from '@deepseek-ai/dsh-fs-patch'
+import * as Patch from '@agentrans/fs-patch'
 import { presentPatchCall, presentPatchResult } from '../src/apply-patch-presentation.ts'
 import { renderPatch, patchPresentationMeta, type PatchToolValue } from '../src/apply-patch-output.ts'
 import { stoppedFromMeta } from '../src/diff.ts'

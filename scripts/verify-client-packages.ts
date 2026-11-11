@@ -30,7 +30,7 @@ const CONFIG_GLOB = 'packages/*/*/tsdown.config.ts'
 const PLATFORM_SOURCE = 'packages/client/web/src/platform.ts'
 const PARSER_PRELOAD_SOURCE = 'packages/client/modules/src/index.ts'
 const STATIC_PRESET_SOURCE = 'packages/client/tsdown.client.ts'
-const CORDIS = '@deepseek-ai/cordis'
+const CORDIS = '@agentrans/cordis'
 /** Stylesheet requests the dynamic build preset compiles: CSS Modules, global sheets, and `?inline` text. */
 const STYLESHEET_REQUEST = /\.css(?:\?inline)?$/u
 const INLINE_STYLESHEET_QUERY = /\?inline$/u

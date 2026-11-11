@@ -1,4 +1,4 @@
-import type {} from '@deepseek-ai/dsh-client-ui-context-menu/client'
+import type {} from '@agentrans/client-ui-context-menu/client'
 /** Browser Conversation assemble core, React adapter, shell, input, and text projection plugin. */
 export type {} from './user-text/session-reference-rule.ts'
 
@@ -106,7 +106,7 @@ export type {
 export type { ArbitrateKey, ArbitrateOutcome, DraftInput, DraftQuote, DraftReference, DraftSnapshot, ReferenceInsert, TokenSpan } from './contract/draft-editor.ts'
 export type { ComposerBlock, ComposerBlocks } from './contract/composer-blocks.ts'
 
-declare module '@deepseek-ai/cordis' {
+declare module '@agentrans/cordis' {
   interface Context {
     /** Scope-addressed Conversation actions and per-Session input registry. */
     conversation: import('./service.ts').IConversation

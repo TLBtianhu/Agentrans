@@ -7,13 +7,13 @@
  * plugin bundles. The resource read receives the reader's own Peer, so the index renders that reader's
  * opening access snapshot and the page offers only what it may call from its first render.
  *
- * @module @deepseek-ai/dsh-experimental-liveshare/src/host/viewer-assets
+ * @module @agentrans/experimental-liveshare/src/host/viewer-assets
  */
 
-import type { Context } from '@deepseek-ai/cordis'
-import type {} from '@deepseek-ai/dsh-client-modules'
-import type {} from '@deepseek-ai/dsh-host-webserver'
-import type { PeerScope } from '@deepseek-ai/dsh-typert-protocol'
+import type { Context } from '@agentrans/cordis'
+import type {} from '@agentrans/client-modules'
+import type {} from '@agentrans/host-webserver'
+import type { PeerScope } from '@agentrans/typert-protocol'
 import type { ViewerAnswer, ViewerAssetBody } from '../viewer-channel.ts'
 
 /** Placeholder origin the page-relative path is resolved against; only the path and query are read. */

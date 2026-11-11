@@ -15,19 +15,19 @@
  * absent `ctx.shell`, or a failed query is a no-op, never an error: an executor
  * rejection is contained and logged as a warning so the turn continues.
  *
- * @module @deepseek-ai/dsh-tmux-context
+ * @module @agentrans/tmux-context
  */
 
-import type { Context, LoggerService } from '@deepseek-ai/cordis'
-import z from '@deepseek-ai/schemastery'
+import type { Context, LoggerService } from '@agentrans/cordis'
+import z from '@agentrans/schemastery'
 import { z as zod } from 'zod'
-import type { PreStepDecision } from '@deepseek-ai/dsh-agent'
-import type {} from '@deepseek-ai/dsh-session-projection'
-import type { ShellExecutor, ShellRunResult } from '@deepseek-ai/dsh-shell'
-import { createUserMessage } from '@deepseek-ai/dsh-llm'
-import type { ContextFormed } from '@deepseek-ai/dsh-llm'
+import type { PreStepDecision } from '@agentrans/agent'
+import type {} from '@agentrans/session-projection'
+import type { ShellExecutor, ShellRunResult } from '@agentrans/shell'
+import { createUserMessage } from '@agentrans/llm'
+import type { ContextFormed } from '@agentrans/llm'
 
-declare module '@deepseek-ai/dsh-llm' {
+declare module '@agentrans/llm' {
   interface MessageSourceMap {
     /** Location attribution; readers preserve the content without this producer.
      * Its projection uses the kind to avoid repeated injection.

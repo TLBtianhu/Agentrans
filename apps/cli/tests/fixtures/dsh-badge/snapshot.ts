@@ -1,12 +1,12 @@
-import { executeToolFixture } from '@deepseek-ai/dsh-tool-testkit'
+import { executeToolFixture } from '@agentrans/tool-testkit'
 import { fileURLToPath } from 'node:url'
-import { agentEvents, type Agent } from '@deepseek-ai/dsh-agent'
-import { ToolCallId } from '@deepseek-ai/dsh-llm'
-import { boot, loadOverlayPatches } from '@deepseek-ai/dsh-app-boot'
-import { SessionId } from '@deepseek-ai/dsh-session'
-import type {} from '@deepseek-ai/dsh-skill'
-import type {} from '@deepseek-ai/dsh-tools'
-import { unsupportedModel, unsupportedInbox } from '@deepseek-ai/dsh-agent-loop-testkit'
+import { agentEvents, type Agent } from '@agentrans/agent'
+import { ToolCallId } from '@agentrans/llm'
+import { boot, loadOverlayPatches } from '@agentrans/app-boot'
+import { SessionId } from '@agentrans/session'
+import type {} from '@agentrans/skill'
+import type {} from '@agentrans/tools'
+import { unsupportedModel, unsupportedInbox } from '@agentrans/agent-loop-testkit'
 
 const overlayPath = process.argv[2]
 if (overlayPath === undefined) throw new Error('dsh-badge snapshot requires an overlay path')
@@ -15,8 +15,8 @@ const basePatchPath = fileURLToPath(new URL('../../../../../packages/bundle/base
 // The fixture owns the optional provider; the base bundle has no dependency on it.
 const overlays = loadOverlayPatches('dsh-badge-snapshot', overlayPath).map(patch => patch.insert === undefined ? patch : {
   ...patch,
-  insert: patch.insert.map(row => row.name === '@deepseek-ai/dsh-skill-badge'
-    ? { ...row, name: import.meta.resolve('@deepseek-ai/dsh-skill-badge') }
+  insert: patch.insert.map(row => row.name === '@agentrans/skill-badge'
+    ? { ...row, name: import.meta.resolve('@agentrans/skill-badge') }
     : row),
 })
 const ctx = await boot('dsh-badge-snapshot', rootConfigPath, [

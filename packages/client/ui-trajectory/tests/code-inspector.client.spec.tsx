@@ -2,8 +2,8 @@
 /** PTC source, output, and independent wrapping through the trajectory inspector. */
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, waitFor, within } from '@testing-library/react'
-import { PartialArguments } from '@deepseek-ai/dsh-util-values'
-import type { ToolResultNode } from '@deepseek-ai/dsh-client-ui-conversation/client'
+import { PartialArguments } from '@agentrans/util-values'
+import type { ToolResultNode } from '@agentrans/client-ui-conversation/client'
 import { TrajectoryTable } from '../src/client/TrajectoryTable.tsx'
 import { deriveTrajectoryLayout } from '../src/client/layout.ts'
 import type { TrajectoryCellProps } from '../src/client/trajectory-record.ts'

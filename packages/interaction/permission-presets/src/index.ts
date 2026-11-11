@@ -11,38 +11,38 @@
  *
  * @module dsh-permission-presets
  */
-import type {} from '@deepseek-ai/dsh-settings'
-import type {} from '@deepseek-ai/dsh-agent'
+import type {} from '@agentrans/settings'
+import type {} from '@agentrans/agent'
 
-import type { Volatile } from '@deepseek-ai/cordis'
+import type { Volatile } from '@agentrans/cordis'
 
-import { Context, Service } from '@deepseek-ai/cordis'
-import { CommandDefinitionId } from '@deepseek-ai/dsh-commands/brand'
-import z from '@deepseek-ai/schemastery'
+import { Context, Service } from '@agentrans/cordis'
+import { CommandDefinitionId } from '@agentrans/commands/brand'
+import z from '@agentrans/schemastery'
 import { z as zod } from 'zod'
-import { Remote, TypertRemoteService } from '@deepseek-ai/dsh-typert-protocol'
-import type { Session, SessionEvent } from '@deepseek-ai/dsh-session'
-import type { SandboxMode } from '@deepseek-ai/dsh-sandbox'
-import { SANDBOX_MODES, setSandboxMode } from '@deepseek-ai/dsh-sandbox-policy'
+import { Remote, TypertRemoteService } from '@agentrans/typert-protocol'
+import type { Session, SessionEvent } from '@agentrans/session'
+import type { SandboxMode } from '@agentrans/sandbox'
+import { SANDBOX_MODES, setSandboxMode } from '@agentrans/sandbox-policy'
 // Side-effect type import: declaration-merges `ctx.shell` (the capability fact
 // `sandboxMode` this service reads), without a value dependency on the seam.
-import type {} from '@deepseek-ai/dsh-shell'
-import type { ApprovalPolicy } from '@deepseek-ai/dsh-user-approval'
-import { APPROVAL_POLICIES, setApprovalPolicy } from '@deepseek-ai/dsh-user-approval'
+import type {} from '@agentrans/shell'
+import type { ApprovalPolicy } from '@agentrans/user-approval'
+import { APPROVAL_POLICIES, setApprovalPolicy } from '@agentrans/user-approval'
 // Type-only: resolves the required projection service and optional settings/command children.
-import type { ProjectionHandle } from '@deepseek-ai/dsh-session-projection'
-import type {} from '@deepseek-ai/dsh-commands'
+import type { ProjectionHandle } from '@agentrans/session-projection'
+import type {} from '@agentrans/commands'
 import type { PermissionCatalog, PermissionSelection, PresetOption } from './types.ts'
 
 export type * from './types.ts'
 
-declare module '@deepseek-ai/cordis' {
+declare module '@agentrans/cordis' {
   interface Context {
     permissionPresets: PermissionPresetService
   }
 }
 
-declare module '@deepseek-ai/dsh-session/types' {
+declare module '@agentrans/session/types' {
   interface SessionEventMap {
     /**
      * Records the selected preset as durable, log-only user intent. The knob
@@ -253,7 +253,7 @@ export class PermissionPresetService extends TypertRemoteService {
     // activates only when a command registry is composed.
     ctx.inject(['commands'], (commandCtx) => {
       commandCtx.commands.register({
-        definitionId: CommandDefinitionId('@deepseek-ai/dsh-permission-presets'),
+        definitionId: CommandDefinitionId('@agentrans/permission-presets'),
         name: 'permission',
         description: 'Switch the permission preset (sandbox mode + approval policy)',
         input: { hint: '<preset>' },

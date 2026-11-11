@@ -8,21 +8,21 @@
  * suite runs on every platform without a system `rg` install; the
  * fake-service suite (tools.spec.ts) carries the coverage gate.
  */
-import { executeModelToolFixture, executeToolFixture } from '@deepseek-ai/dsh-tool-testkit'
+import { executeModelToolFixture, executeToolFixture } from '@agentrans/tool-testkit'
 
-import * as NativeToolExecutor from '@deepseek-ai/dsh-tool-executor-native'
-import { provideWorkingDirectoryFixture } from '@deepseek-ai/dsh-agent-loop-testkit'
+import * as NativeToolExecutor from '@agentrans/tool-executor-native'
+import { provideWorkingDirectoryFixture } from '@agentrans/agent-loop-testkit'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { existsSync } from 'node:fs'
 import { mkdir, mkdtemp, rm, symlink, utimes, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join, sep } from 'node:path'
-import { Context } from '@deepseek-ai/cordis'
-import { ToolCallId } from '@deepseek-ai/dsh-llm'
-import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
-import ToolRuntime, { TOOL_ABORTED_BEFORE_DISPATCH } from '@deepseek-ai/dsh-tools'
-import LocalSubprocessRuntime from '@deepseek-ai/dsh-subprocess-local'
-import * as ToolFsSearch from '@deepseek-ai/dsh-tool-fs-search'
+import { Context } from '@agentrans/cordis'
+import { ToolCallId } from '@agentrans/llm'
+import SystemPrompt from '@agentrans/system-prompt'
+import ToolRuntime, { TOOL_ABORTED_BEFORE_DISPATCH } from '@agentrans/tools'
+import LocalSubprocessRuntime from '@agentrans/subprocess-local'
+import * as ToolFsSearch from '@agentrans/tool-fs-search'
 
 const testToolSignal = new AbortController().signal
 

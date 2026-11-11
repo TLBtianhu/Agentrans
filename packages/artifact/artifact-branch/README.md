@@ -3,7 +3,7 @@ description: "Return a manual branch conclusion with user-selected saved Artifac
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-artifact-branch
+# @agentrans/artifact-branch
 
 English | [中文](README.zh.md)
 
@@ -25,10 +25,10 @@ Return one child conclusion with a saved observation or fixed comparison that th
 <a id="use-this-package"></a>
 ## Use this package
 
-The Web composition mounts this plugin alongside Artifact, Session Query and Session Controller. Custom Web compositions add an `@deepseek-ai/dsh-artifact-branch` plugin row. The main Artifact service and headless compositions do not require this bridge.
+The Web composition mounts this plugin alongside Artifact, Session Query and Session Controller. Custom Web compositions add an `@agentrans/artifact-branch` plugin row. The main Artifact service and headless compositions do not require this bridge.
 
 ```yaml
-- name: '@deepseek-ai/dsh-artifact-branch'
+- name: '@agentrans/artifact-branch'
 ```
 
 | Config | Default | Meaning |

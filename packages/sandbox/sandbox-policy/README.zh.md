@@ -3,7 +3,7 @@ description: "面向需要在各项负责强制执行的能力之间组合、配
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-sandbox-policy
+# @agentrans/sandbox-policy
 
 [English](README.md) | 中文
 
@@ -36,7 +36,7 @@ kind: "package-reference"
 用默认模式加载本包；故障安全默认值是 `read-only`，需要 agent（智能体）可写入工作区的部署必须显式选择 `workspace-write`。
 
 ```yaml
-- name: '@deepseek-ai/dsh-sandbox-policy'
+- name: '@agentrans/sandbox-policy'
   config:
     mode: workspace-write
     workspaceRoot: /absolute/path/to/workspace
@@ -50,7 +50,7 @@ kind: "package-reference"
 
 对于关联的 Git worktree，调用方可通过 `additionalWritableRoots` 授予共享 Git 目录的写权限。调用方必须显式选择该目录；策略不会读取 Git 文件或授权父检出目录。这些授权是组合中所有会话共享的部署配置，而非保存的 Session 权限。授权整个 Git 目录也允许修改钩子和配置，后续主机 Git 调用可能在沙箱之外执行它们；仅对可信任务使用此授权。使用物理绝对目录路径。执行限制的主机拒绝不存在的路径、文件和符号链接根目录，包括两次调用之间被替换为符号链接的目录。远端授权在远端主机上验证。
 
-生成的[配置目录](../../../docs/config-catalog.zh.md#deepseek-aidsh-sandbox-policy)是每个受支持字段及其 JSDoc 的穷尽式真源。
+生成的[配置目录](../../../docs/config-catalog.zh.md#agentranssandbox-policy)是每个受支持字段及其 JSDoc 的穷尽式真源。
 
 ### 切换会话模式
 

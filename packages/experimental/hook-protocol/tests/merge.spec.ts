@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { mergeHookOutputs } from '@deepseek-ai/dsh-hook-protocol'
-import type { HookOutput } from '@deepseek-ai/dsh-hook-protocol'
+import { mergeHookOutputs } from '@agentrans/hook-protocol'
+import type { HookOutput } from '@agentrans/hook-protocol'
 
 function out(over: Partial<HookOutput> = {}): HookOutput {
   return { exitCode: 0, stderr: '', stdout: '', ...over }

@@ -5,12 +5,12 @@ import {
 import {
   DisclosureRow, IconChevronRightOutlineRegular, StateDot,
   type DisclosureRowProps, type StateDotState,
-} from '@deepseek-ai/dsh-client-ui-primitives'
-import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
-import type { SessionListState, SessionTarget } from '@deepseek-ai/dsh-api-session-controller/client'
-import { shallowEqual } from '@deepseek-ai/dsh-client-store'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import type { SessionStatusSnapshot } from '@deepseek-ai/dsh-client-ui-session/client'
+} from '@agentrans/client-ui-primitives'
+import type { PropsLocale, PropsRuntime } from '@agentrans/client-ui-slots'
+import type { SessionListState, SessionTarget } from '@agentrans/api-session-controller/client'
+import { shallowEqual } from '@agentrans/client-store'
+import type { SessionId } from '@agentrans/session/types'
+import type { SessionStatusSnapshot } from '@agentrans/client-ui-session/client'
 import type { WorkflowRunKey } from './locales.ts'
 import type {
   WorkflowRunMemberData, WorkflowRunPhaseData, WorkflowRunStatus,

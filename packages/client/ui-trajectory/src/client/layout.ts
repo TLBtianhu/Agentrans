@@ -11,8 +11,8 @@ import type {
   RequestView,
   ToolCallBlock,
   ToolResultNode,
-} from '@deepseek-ai/dsh-client-ui-conversation/client'
-import type { FileAttachmentRef, ImageAttachmentRef } from '@deepseek-ai/dsh-attachment'
+} from '@agentrans/client-ui-conversation/client'
+import type { FileAttachmentRef, ImageAttachmentRef } from '@agentrans/attachment'
 import type {
   TrajectoryCellProps,
   TrajectorySourceBlock,

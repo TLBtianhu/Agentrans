@@ -1,31 +1,31 @@
 // @vitest-environment jsdom
-import { apply as applyMenus, inject as injectMenus } from '@deepseek-ai/dsh-client-ui-context-menu/client'
-import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
+import { apply as applyMenus, inject as injectMenus } from '@agentrans/client-ui-context-menu/client'
+import { createSnapshotStore } from '@agentrans/client-store'
 import { describe, expect, it, onTestFinished, vi } from 'vitest'
 import { act, fireEvent, render } from '@testing-library/react'
 import { useRef } from 'react'
 import {
   SlotTestRuntime, stubConfigForm, usePinnedBrowserLanguages,
-} from '@deepseek-ai/dsh-client-test-runtime'
-import { LocaleRuntime } from '@deepseek-ai/dsh-client-locale/client'
-import { resolveSlotLabel } from '@deepseek-ai/dsh-client-ui-slots'
-import type { ObservableSnapshot } from '@deepseek-ai/dsh-client-store'
-import type { SessionBinding } from '@deepseek-ai/dsh-api-session-controller/client'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import type { WorkspaceId } from '@deepseek-ai/dsh-workspace/types'
+} from '@agentrans/client-test-runtime'
+import { LocaleRuntime } from '@agentrans/client-locale/client'
+import { resolveSlotLabel } from '@agentrans/client-ui-slots'
+import type { ObservableSnapshot } from '@agentrans/client-store'
+import type { SessionBinding } from '@agentrans/api-session-controller/client'
+import type { SessionId } from '@agentrans/session/types'
+import type { WorkspaceId } from '@agentrans/workspace/types'
 import {
   apply as applyConversation, inject as injectConversation,
-} from '@deepseek-ai/dsh-client-ui-conversation/client'
+} from '@agentrans/client-ui-conversation/client'
 import type {
   ConversationLocationDataSource, ConversationLocationDataStore, ConversationTurnDataMap,
-} from '@deepseek-ai/dsh-client-ui-conversation/client'
+} from '@agentrans/client-ui-conversation/client'
 import {
   apply as applyChat, EMPTY_CHAT_SNAPSHOT, inject as injectChat,
-} from '@deepseek-ai/dsh-client-ui-chat/client'
+} from '@agentrans/client-ui-chat/client'
 import type {
   ChatFlowInjected, ChatNodeInjected, ChatSnapshot, TranscriptViewRowInjected, UseChatNodeTurnData, UseDisclosure,
-} from '@deepseek-ai/dsh-client-ui-chat/client'
-import type { QuotaNoticeInjected } from '@deepseek-ai/dsh-client-ui-chat/client'
+} from '@agentrans/client-ui-chat/client'
+import type { QuotaNoticeInjected } from '@agentrans/client-ui-chat/client'
 import type { PerformanceUsageRowInjected } from '../src/client/settings/PerformanceUsageRow.tsx'
 import { CHAT_SETTINGS_NAMESPACE, type ChatSettings } from '../src/chat-settings.ts'
 import { ActivityPill, UsagePill } from '../src/client/chat/StatsPills.tsx'
@@ -33,7 +33,7 @@ import { createFlowMotion, type InputFoldDriver } from '../src/client/chat/flow-
 import { CHAT_FLOW_INJECT, CHAT_NODE_INJECT } from '../src/client/apply.ts'
 import { UserContent } from '../src/client/chat/UserContent.tsx'
 
-declare module '@deepseek-ai/dsh-client-ui-conversation/client' {
+declare module '@agentrans/client-ui-conversation/client' {
   interface ConversationTurnDataMap {
     metric: number
   }
@@ -45,7 +45,7 @@ const SID = 'session-1' as SessionId
 
 async function bench() {
   const runtime = await SlotTestRuntime.create()
-  runtime.ctx.provide('fileDrag', { actions: { prepare: async () => ({ start: () => true, release: () => {} }), reportFailure: () => {} }, read: () => undefined } satisfies import('@deepseek-ai/cordis').Context['fileDrag'])
+  runtime.ctx.provide('fileDrag', { actions: { prepare: async () => ({ start: () => true, release: () => {} }), reportFailure: () => {} }, read: () => undefined } satisfies import('@agentrans/cordis').Context['fileDrag'])
   const chatSettings = stubConfigForm<ChatSettings>()
   runtime.ctx.provide('configForms', {
     developerTools: { enabled: createSnapshotStore(true) },

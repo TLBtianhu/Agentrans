@@ -3,7 +3,7 @@ description: "Run Python model code in fresh CPython processes under the shared 
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-experimental-ptc-runtime-python
+# @agentrans/experimental-ptc-runtime-python
 
 English | [中文](README.zh.md)
 

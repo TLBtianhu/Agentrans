@@ -4,4 +4,4 @@
 # real-Web composition that can render it.
 - insert:
     - id: ui-client-ui-stats
-      name: '@deepseek-ai/dsh-experimental-client-ui-stats'
+      name: '@agentrans/experimental-client-ui-stats'

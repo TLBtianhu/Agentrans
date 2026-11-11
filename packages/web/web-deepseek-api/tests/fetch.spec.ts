@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
-import WebRuntime from '@deepseek-ai/dsh-web'
-import { DeepSeekFetchApiProvider, type DeepSeekFetchApiOptions } from '@deepseek-ai/dsh-web-deepseek-api'
-import * as webApiPlugin from '@deepseek-ai/dsh-web-deepseek-api'
+import { Context } from '@agentrans/cordis'
+import WebRuntime from '@agentrans/web'
+import { DeepSeekFetchApiProvider, type DeepSeekFetchApiOptions } from '@agentrans/web-deepseek-api'
+import * as webApiPlugin from '@agentrans/web-deepseek-api'
 const fetchProvider = (options: DeepSeekFetchApiOptions) => new DeepSeekFetchApiProvider(() => options)
 const options = { resolveApiKey: async () => 'ds-key', baseURL: 'https://api.deepseek.test/api/v1/tools' }
 

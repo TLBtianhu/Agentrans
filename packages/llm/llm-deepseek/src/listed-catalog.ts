@@ -1,9 +1,9 @@
 /** A listed catalog: version gating, this build's model knowledge, and deployment overrides. */
 import semver from 'semver'
-import { LlmError } from '@deepseek-ai/dsh-llm'
-import type { LlmModelBadge } from '@deepseek-ai/dsh-llm'
+import { LlmError } from '@agentrans/llm'
+import type { LlmModelBadge } from '@agentrans/llm'
 import { DEEPSEEK_CLIENT_COMPATIBILITY } from './listing.ts'
-import { assertNever } from '@deepseek-ai/dsh-util-values'
+import { assertNever } from '@agentrans/util-values'
 import { resolveAdapterOptions } from './config.ts'
 import type { ListedFacts, ListingEntry } from './listing.ts'
 import type { DeepSeekCatalogModel } from './types.ts'

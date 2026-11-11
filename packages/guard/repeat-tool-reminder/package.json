@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-repeat-tool-reminder",
+  "name": "@agentrans/repeat-tool-reminder",
   "description": "Repeat-tool-call guard plugin: advisory reminders when an agent loops on identical tool calls",
   "version": "0.1.0",
   "publishConfig": {
@@ -29,22 +29,22 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@deepseek-ai/schemastery": "workspace:~"
+    "@agentrans/schemastery": "workspace:~"
   },
   "peerDependencies": {
-    "@deepseek-ai/dsh-agent": "workspace:*",
-    "@deepseek-ai/dsh-tools": "workspace:*",
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/agent": "workspace:*",
+    "@agentrans/tools": "workspace:*",
+    "@agentrans/cordis": "workspace:~"
   },
   "devDependencies": {
-    "@deepseek-ai/dsh-agent": "workspace:*",
-    "@deepseek-ai/dsh-agent-loop": "workspace:*",
-    "@deepseek-ai/dsh-agent-loop-testkit": "workspace:*",
-    "@deepseek-ai/dsh-llm": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-tool-testkit": "workspace:*",
-    "@deepseek-ai/dsh-tools": "workspace:*",
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-session-projection": "workspace:*"
+    "@agentrans/agent": "workspace:*",
+    "@agentrans/agent-loop": "workspace:*",
+    "@agentrans/agent-loop-testkit": "workspace:*",
+    "@agentrans/llm": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/tool-testkit": "workspace:*",
+    "@agentrans/tools": "workspace:*",
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/session-projection": "workspace:*"
   }
 }

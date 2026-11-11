@@ -3,7 +3,7 @@ description: "Add experimental one-shot coding-agent delegation through OAR with
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-experimental-subagent-oar
+# @agentrans/experimental-subagent-oar
 
 English | [中文](README.zh.md)
 
@@ -29,12 +29,12 @@ Compose this experimental provider with the `subagent_oar` tool to delegate stan
 
 Install and authenticate the native Codex and Claude Code CLIs before delegating to them. Their executables must be available to the DSH Host. The provider starts no native session until a delegation is accepted.
 
-Declare this provider and `@deepseek-ai/dsh-experimental-tool-subagent-oar` as dependencies of your composition, then add these rows through a profile patch:
+Declare this provider and `@agentrans/experimental-tool-subagent-oar` as dependencies of your composition, then add these rows through a profile patch:
 
 ```yaml
 - insert:
     - id: experimental-subagent-oar-codex
-      name: '@deepseek-ai/dsh-experimental-subagent-oar'
+      name: '@agentrans/experimental-subagent-oar'
       config:
         runtime: codex
         providerName: oar-codex
@@ -42,7 +42,7 @@ Declare this provider and `@deepseek-ai/dsh-experimental-tool-subagent-oar` as d
           - -c
           - sandbox_mode="workspace-write"
     - id: experimental-subagent-oar-claude
-      name: '@deepseek-ai/dsh-experimental-subagent-oar'
+      name: '@agentrans/experimental-subagent-oar'
       config:
         runtime: claude
         providerName: oar-claude
@@ -52,7 +52,7 @@ Declare this provider and `@deepseek-ai/dsh-experimental-tool-subagent-oar` as d
           - --permission-prompts
           - none
     - id: tool-subagent-oar
-      name: '@deepseek-ai/dsh-experimental-tool-subagent-oar'
+      name: '@agentrans/experimental-tool-subagent-oar'
       config:
         providers:
           codex: oar-codex
@@ -88,7 +88,7 @@ Each provider instance selects one OAR runtime and registers a unique `providerN
 
 For Claude, select the native permission mode explicitly in `launchArgs` and retain `--permission-prompts none` for unattended work. A Claude instance with no permission-mode argument inherits OAR's permission bypass default. Replacing the example's argument array also replaces its explicit permission settings.
 
-The [configuration catalog](../../../docs/config-catalog.md#deepseek-aidsh-experimental-subagent-oar) owns accepted fields and validation. A child that needs an API credential from an environment variable must receive it through `env`; native account files remain available through the native runtime's settings.
+The [configuration catalog](../../../docs/config-catalog.md#agentransexperimental-subagent-oar) owns accepted fields and validation. A child that needs an API credential from an environment variable must receive it through `env`; native account files remain available through the native runtime's settings.
 
 OAR's pinned default registry includes `antigravity`, `claude`, `codex`, `grok`, `kimi`, `opencode`, and `pi`. Provider configuration accepts every registered runtime id. Codex and Claude have native e2e coverage. Other runtimes need an explicit provider and tool mapping and remain unverified.
 

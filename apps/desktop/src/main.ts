@@ -1,7 +1,7 @@
 import { desktopLaunchContext } from './product-bootstrap.ts'
-import { productLaunchEnvironment } from '@deepseek-ai/dsh-product-layout/launch-context'
+import { productLaunchEnvironment } from '@agentrans/product-layout/launch-context'
 import { installFileActions } from './file-actions.ts'
-import type { ProductEventMap, ProductEvent } from '@deepseek-ai/dsh-client-product-analytics/types'
+import type { ProductEventMap, ProductEvent } from '@agentrans/client-product-analytics/types'
 import { WINDOWS_TITLEBAR_HEIGHT } from './windows-layout.ts'
 /** Electron shell: desktop project ownership, custom protocol, windows, and lifecycle. */
 
@@ -691,7 +691,7 @@ async function main(): Promise<void> {
     if (url.hostname === 'app') {
       if (url.pathname === '/' || url.pathname === '/index.html' || url.pathname.startsWith('/assets/')
         || ['/favicon.svg', '/manifest.webmanifest'].includes(url.pathname)) {
-        return serveWebDocument(request, join(resources.dsh, 'node_modules', '@deepseek-ai', 'dsh-web-frontend', 'dist'))
+        return serveWebDocument(request, join(resources.dsh, 'node_modules', '@agentrans', 'web-frontend', 'dist'))
       }
       if (backend.host === undefined || hostUrl === undefined || hostCookie === undefined) {
         return Promise.resolve(new Response(null, { status: 503 }))

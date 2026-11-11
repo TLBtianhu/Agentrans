@@ -3,7 +3,7 @@ description: "The stdio JSON-RPC serving plugin for deployments that let out-of-
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-sdk-jsonrpc-server
+# @agentrans/sdk-jsonrpc-server
 
 English | [中文](README.zh.md)
 
@@ -65,7 +65,7 @@ The plugin creates one agent per `sessionId` on first use. The surrounding profi
 |---|---|---|
 | `maxTokensAsSuccess` | `false` | Report max-token turn/subagent termination as a successful SDK result |
 
-The profile composition owns each root agent's tools. `input`, `output`, and `exit` are runtime-only test hooks; production uses process stdio and the launcher's `appExit`. The `exit` hook replaces the exit request and must supply application teardown and process completion. Mounting without either exit callback rejects immediately. The generated [configuration catalog](../../../docs/config-catalog.md#deepseek-aidsh-sdk-jsonrpc-server) is the exhaustive source for every accepted field.
+The profile composition owns each root agent's tools. `input`, `output`, and `exit` are runtime-only test hooks; production uses process stdio and the launcher's `appExit`. The `exit` hook replaces the exit request and must supply application teardown and process completion. Mounting without either exit callback rejects immediately. The generated [configuration catalog](../../../docs/config-catalog.md#agentranssdk-jsonrpc-server) is the exhaustive source for every accepted field.
 
 ### stdout is the protocol
 

@@ -2,9 +2,9 @@
 import {
   FILE_DRAG_TOKEN_TYPE, resolveDragFileName,
   type DesktopFileDrag, type DesktopFileSource, type FileDragHandle, type FileDragRequestId,
-} from '@deepseek-ai/dsh-util-file-drag'
-import { randomUUID } from '@deepseek-ai/dsh-util-crypto'
-import type { FileDragSource, PreparedFileDrag } from '@deepseek-ai/dsh-client-ui-primitives'
+} from '@agentrans/util-file-drag'
+import { randomUUID } from '@agentrans/util-crypto'
+import type { FileDragSource, PreparedFileDrag } from '@agentrans/client-ui-primitives'
 
 /** Application-local browser transfer owner, including detached source-node drag end. */
 export class FileTransfers {

@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 import { act, cleanup, fireEvent, render, renderHook, screen, waitFor } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
-import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
-import type { ArtifactId, SceneArtifactSnapshot } from '@deepseek-ai/dsh-artifact/types'
+import { makeTranslate } from '@agentrans/client-test-runtime'
+import type { ArtifactId, SceneArtifactSnapshot } from '@agentrans/artifact/types'
 import { useArtifactActionSubmission } from '../src/client/action-submission.ts'
 import { ArtifactActionRequestError, type ArtifactActionFailure, type RecordArtifactAction } from '../src/client/protocol.ts'
 import { ArtifactCard } from './runtime-harness.tsx'

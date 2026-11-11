@@ -1,7 +1,7 @@
 /** GitHub review writes with commit checks and explicit treatment of uncertain outcomes. */
 
 import { z } from 'zod'
-import type { ChangeRequestRef, ForgeLineComment, ForgeReviewRequest, ForgeReviewResult } from '@deepseek-ai/dsh-experimental-forge'
+import type { ChangeRequestRef, ForgeLineComment, ForgeReviewRequest, ForgeReviewResult } from '@agentrans/experimental-forge'
 import { GhUnavailableError, type GhOutput, type GhRunner } from './gh.ts'
 import { checkedRepository } from './urls.ts'
 

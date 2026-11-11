@@ -2,7 +2,7 @@
 /** Inline TeX primitive: one formula rendered outside a Markdown document. */
 import { cleanup, render } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
-import { InlineTex } from '@deepseek-ai/dsh-client-ui-primitives'
+import { InlineTex } from '@agentrans/client-ui-primitives'
 
 afterEach(cleanup)
 

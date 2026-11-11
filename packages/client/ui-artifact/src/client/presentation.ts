@@ -1,6 +1,6 @@
 /** Session-scoped Artifact presentation: one detached surface per Artifact, one dock and one float per Session. */
-import { defineStore } from '@deepseek-ai/dsh-client-store'
-import type { ArtifactId } from '@deepseek-ai/dsh-artifact/types'
+import { defineStore } from '@agentrans/client-store'
+import type { ArtifactId } from '@agentrans/artifact/types'
 
 /** One Artifact docked beside the conversation. */
 export interface ArtifactDockEntry {

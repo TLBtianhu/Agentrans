@@ -1,7 +1,7 @@
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { DeepSeekHarness } from '@deepseek-ai/dsh-sdk-client'
+import { DeepSeekHarness } from '@agentrans/sdk-client'
 import { expect, it, onTestFinished } from 'vitest'
 
 const networkGuard = new URL('../../../../../packages/test-support/session-snapshot/tests/fixtures/replay-network-guard.mjs', import.meta.url)

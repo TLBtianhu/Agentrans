@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
-import { contextMenuHook } from '@deepseek-ai/dsh-client-test-runtime'
+import { contextMenuHook } from '@agentrans/client-test-runtime'
 /** Image Blob ownership, media types, pane-contained rendering, and failure states. */
 import { useSyncExternalStore } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import type { TabId } from '@deepseek-ai/dsh-client-ui-dockkit'
+import type { SessionId } from '@agentrans/session/types'
+import type { TabId } from '@agentrans/client-ui-dockkit'
 import { ImageBody, imageMediaType, type ImageBodyProps } from '../src/client/image/ImageBody.tsx'
 import { en } from '../src/client/image/locales.ts'
 import { createZoomStore, type ZoomState } from '../src/client/zoom/store.ts'

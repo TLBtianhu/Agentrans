@@ -13,7 +13,7 @@ import type { ViewerInputFixture } from './viewer-input-fixture.client.ts'
 import { installViewerRelay } from './viewer-relay.client.ts'
 
 /** The generated contribution is a build artifact; the mount boundary is what this face test covers. */
-vi.mock('@deepseek-ai/dsh-experimental-liveshare/remote', () => ({ default: { package: '@deepseek-ai/dsh-experimental-liveshare', methods: {} } }))
+vi.mock('@agentrans/experimental-liveshare/remote', () => ({ default: { package: '@agentrans/experimental-liveshare', methods: {} } }))
 
 let inputFixture: ViewerInputFixture | undefined
 let owner: FixtureWorld | undefined
@@ -180,7 +180,7 @@ describe('Assembled liveshare viewer page on a writable share', () => {
     expect(screen.queryByRole('button', { name: '停止生成' })).toBeNull()
     expect(screen.getAllByRole('button', { name: '在新对话中分支' }).length).toBeGreaterThan(0)
     const beforeDeniedSend = owner.prompts.length
-    const scope = inputFixture.context().get('sessions')?.scope('fx-alpha' as import('@deepseek-ai/dsh-session/types').SessionId)
+    const scope = inputFixture.context().get('sessions')?.scope('fx-alpha' as import('@agentrans/session/types').SessionId)
     if (scope === undefined) throw new Error('source scope is missing after downgrade')
     // Negative control: even the live input API cannot submit after Owner downgrade.
     await act(async () => {

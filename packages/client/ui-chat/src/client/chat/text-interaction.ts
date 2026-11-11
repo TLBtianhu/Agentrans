@@ -6,7 +6,7 @@ import type { TextSelection } from './text-selection.ts'
 
 import type {
   TextInteractionGesture, TextInteractionSurface, TextInteractionTrigger,
-} from '@deepseek-ai/dsh-client-ui-conversation/client'
+} from '@agentrans/client-ui-conversation/client'
 
 /** Current area-owned surface and its actions. */
 export interface TextInteractionBinding extends Omit<TextInteractionSurface, 'trigger'> {

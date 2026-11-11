@@ -6,14 +6,14 @@
  * owns root disposal and process completion. Keep named plugin exports with no default export so
  * Loader `unwrapExports` preserves `name`, `inject`, `Config`, and `apply`.
  *
- * @module @deepseek-ai/dsh-sdk-jsonrpc-server
+ * @module @agentrans/sdk-jsonrpc-server
  */
 
-import type { Context } from '@deepseek-ai/cordis'
-import type {} from '@deepseek-ai/dsh-cmdline'
+import type { Context } from '@agentrans/cordis'
+import type {} from '@agentrans/cmdline'
 import type { Readable, Writable } from 'node:stream'
-import Schema from '@deepseek-ai/schemastery'
-import { JsonRpcLineTransport } from '@deepseek-ai/dsh-sdk-protocol'
+import Schema from '@agentrans/schemastery'
+import { JsonRpcLineTransport } from '@agentrans/sdk-protocol'
 import { HarnessSdkJsonRpcServer } from './server.ts'
 
 export * from './server.ts'

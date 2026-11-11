@@ -1,8 +1,8 @@
 /** Chromium acceptance of the shipped Web profile's actual Client plugin and module registries. */
 
-import { FiberState } from '@deepseek-ai/cordis'
-import type { Context, Plugin, RegistryService } from '@deepseek-ai/cordis'
-import type { ClientModuleLoader, ClientModuleLoaderTarget } from '@deepseek-ai/dsh-client-modules/client'
+import { FiberState } from '@agentrans/cordis'
+import type { Context, Plugin, RegistryService } from '@agentrans/cordis'
+import type { ClientModuleLoader, ClientModuleLoaderTarget } from '@agentrans/client-modules/client'
 import { chromium } from 'playwright'
 import { hasExperimentalPackageReference } from '../../../scripts/experimental-package-policy.ts'
 import { expect, it } from 'vitest'
@@ -70,7 +70,7 @@ it('activates the actual default Client registry without experimental packages',
             Object.defineProperty(globalThis, '__ModuleLoader__', { configurable: true, writable: true, value: target })
             const create = target.create.bind(target)
             target.create = function (options) {
-              const cordis = options.staticModules['@deepseek-ai/cordis'] as { RegistryService: typeof RegistryService }
+              const cordis = options.staticModules['@agentrans/cordis'] as { RegistryService: typeof RegistryService }
               const prototype = cordis.RegistryService.prototype
               // eslint-disable-next-line @typescript-eslint/unbound-method -- apply() preserves the runtime registry receiver.
               const plugin = prototype.plugin
@@ -93,12 +93,12 @@ it('activates the actual default Client registry without experimental packages',
       const roster = await page.evaluate(readClientRoster)
       const host = await request('roster')
       for (const name of [
-        '@deepseek-ai/dsh-session-log-deepseek',
-        '@deepseek-ai/dsh-plugin-package-inventory-deepseek',
-        '@deepseek-ai/dsh-session-telemetry-otel',
-        '@deepseek-ai/dsh-host-product-telemetry-otel',
-        '@deepseek-ai/dsh-client-product-analytics',
-        '@deepseek-ai/dsh-client-ui-settings-session-log',
+        '@agentrans/session-log-deepseek',
+        '@agentrans/plugin-package-inventory-deepseek',
+        '@agentrans/session-telemetry-otel',
+        '@agentrans/host-product-telemetry-otel',
+        '@agentrans/client-product-analytics',
+        '@agentrans/client-ui-settings-session-log',
       ]) {
         const entry = host.entries.find(entry => entry.name === name)
         expect(entry, name).toBeDefined()
@@ -108,12 +108,12 @@ it('activates the actual default Client registry without experimental packages',
       expect(roster.entries.map(entry => entry.name).sort()).toEqual(host.client.entries.map(entry => entry.id).sort())
       expect(roster.entries.every(entry => entry.state === FiberState.ACTIVE)).toBe(true)
       expect(roster.plugins.length).toBeGreaterThan(roster.entries.length)
-      expect(roster.plugins.some(plugin => plugin.modules.includes('@deepseek-ai/dsh-client-ui-layout'))).toBe(true)
-      expect(roster.entries.some(entry => entry.name === '@deepseek-ai/dsh-client-ui-settings-session-log')).toBe(false)
-      expect(roster.modules).not.toContain('@deepseek-ai/dsh-client-ui-settings-session-log')
+      expect(roster.plugins.some(plugin => plugin.modules.includes('@agentrans/client-ui-layout'))).toBe(true)
+      expect(roster.entries.some(entry => entry.name === '@agentrans/client-ui-settings-session-log')).toBe(false)
+      expect(roster.modules).not.toContain('@agentrans/client-ui-settings-session-log')
       expect(experimentalClientReferences(roster)).toEqual([])
       const contaminatedHost = await request('mount-experimental-entry')
-      const experimentalName = '@deepseek-ai/dsh-experimental-client-ui-agent-team'
+      const experimentalName = '@agentrans/experimental-client-ui-agent-team'
       expect(contaminatedHost.client.entries.map(entry => entry.id)).toContain(experimentalName)
       await page.reload()
       await expect.poll(async () => {

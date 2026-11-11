@@ -11,11 +11,11 @@ import {
   Button, IconChevronDownOutlineRegular, IconChevronRightOutlineRegular, IconCloseOutlineRegular, IconCopyOutlineRegular,
   IconListPenOutlineRegular, IconRightUpOutlineRegular, IconUserOutlineRegular, Menu, MenuItemButton, StateDot, Tooltip,
   type MenuEntry,
-} from '@deepseek-ai/dsh-client-ui-primitives'
-import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
+} from '@agentrans/client-ui-primitives'
+import type { PropsLocale } from '@agentrans/client-ui-slots'
 import type {
   ChangeRequestCheck, ChangeRequestSnapshot, CheckState, ChecksRollup, ForgeFailure, MergeMethod, MergeRequest,
-} from '@deepseek-ai/dsh-experimental-forge/types'
+} from '@agentrans/experimental-forge/types'
 import type { ForgePanelChangeRequest } from '../types.ts'
 import { formatAgo, formatDuration } from './format.ts'
 import { ChangeRequestGlyph, CheckGlyph } from './glyphs.tsx'

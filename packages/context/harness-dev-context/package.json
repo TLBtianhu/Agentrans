@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-harness-dev-context",
+  "name": "@agentrans/harness-dev-context",
   "description": "Model context naming the DeepSeek Harness checkout and Web GUI URL without letting either change the system prompt",
   "version": "0.1.0",
   "publishConfig": {
@@ -32,20 +32,20 @@
     "zod": "4.4.3"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-agent": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-session-projection": "workspace:*",
-    "@deepseek-ai/dsh-system-prompt": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/agent": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/session-projection": "workspace:*",
+    "@agentrans/system-prompt": "workspace:*"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-agent": "workspace:*",
-    "@deepseek-ai/dsh-agent-loop-testkit": "workspace:*",
-    "@deepseek-ai/dsh-llm": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-session-projection": "workspace:*",
-    "@deepseek-ai/dsh-system-prompt": "workspace:*",
-    "@deepseek-ai/dsh-web-app": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/agent": "workspace:*",
+    "@agentrans/agent-loop-testkit": "workspace:*",
+    "@agentrans/llm": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/session-projection": "workspace:*",
+    "@agentrans/system-prompt": "workspace:*",
+    "@agentrans/web-app": "workspace:*"
   }
 }

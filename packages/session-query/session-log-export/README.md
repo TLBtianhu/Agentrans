@@ -3,7 +3,7 @@ description: "Web Session-log ZIP export and Markdown copy: Host streaming, auth
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-session-log-export
+# @agentrans/session-log-export
 
 English | [中文](README.zh.md)
 
@@ -46,8 +46,8 @@ Choose it for a Web deployment that needs user-facing session export: a readable
 The package entry also exports `formatSessionMarkdown(events, sourcePath?)`: a pure backend utility for callers that already hold a complete committed logical event snapshot in seq order, including any inherited prefix. It reads the latest `session/title` event, returns Markdown ending in one newline, performs no IO, starts no plugin or Session, and does not mutate the events. An optional backend-resolved `sourcePath` is emitted verbatim in a dynamic fenced `Session file:` block after the title; omitted or empty paths add no block. Missing or blank titles produce `Untitled Session`. Only the supplied events are converted; descendant Session logs are not read.
 
 ```ts
-import type { SessionEvent } from '@deepseek-ai/dsh-session'
-import { formatSessionMarkdown } from '@deepseek-ai/dsh-session-log-export'
+import type { SessionEvent } from '@agentrans/session'
+import { formatSessionMarkdown } from '@agentrans/session-log-export'
 
 export function convertTranscript(events: readonly SessionEvent[], sourcePath?: string): string {
   return formatSessionMarkdown(events, sourcePath)
@@ -58,7 +58,7 @@ export function convertTranscript(events: readonly SessionEvent[], sourcePath?: 
 
 ```yaml
 - id: session-log-download
-  name: '@deepseek-ai/dsh-session-log-export'
+  name: '@agentrans/session-log-export'
 ```
 
 The Web bundle mounts the package with Connection, `dsh-commands`, `dsh-client-ui-commands`, `dsh-client-ui-conversation`, and `dsh-client-ui-layout`. The layout package declares the `shell.overlay` seat used by copy feedback; the other client packages provide the Header seat, locale, and command surface.

@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-artifact",
+  "name": "@agentrans/artifact",
   "description": "Session-backed interactive HTML and SceneSpec artifacts and their model-facing tools",
   "version": "0.1.0",
   "publishConfig": {
@@ -89,36 +89,36 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@deepseek-ai/schemastery": "workspace:~",
+    "@agentrans/schemastery": "workspace:~",
     "zod": "4.4.3"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-agent": "workspace:*",
-    "@deepseek-ai/dsh-brand": "workspace:*",
-    "@deepseek-ai/dsh-llm": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-session-input": "workspace:*",
-    "@deepseek-ai/dsh-session-projection": "workspace:*",
-    "@deepseek-ai/dsh-tools": "workspace:*",
-    "@deepseek-ai/dsh-typert-protocol": "workspace:*",
-    "@deepseek-ai/dsh-util-values": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/agent": "workspace:*",
+    "@agentrans/brand": "workspace:*",
+    "@agentrans/llm": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/session-input": "workspace:*",
+    "@agentrans/session-projection": "workspace:*",
+    "@agentrans/tools": "workspace:*",
+    "@agentrans/typert-protocol": "workspace:*",
+    "@agentrans/util-values": "workspace:*"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-agent": "workspace:*",
-    "@deepseek-ai/dsh-brand": "workspace:*",
-    "@deepseek-ai/dsh-llm": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-session-format": "workspace:*",
-    "@deepseek-ai/dsh-session-format-v3-to-v4": "workspace:*",
-    "@deepseek-ai/dsh-session-input": "workspace:*",
-    "@deepseek-ai/dsh-session-projection": "workspace:*",
-    "@deepseek-ai/dsh-system-prompt": "workspace:*",
-    "@deepseek-ai/dsh-tool-executor-native": "workspace:*",
-    "@deepseek-ai/dsh-tool-testkit": "workspace:*",
-    "@deepseek-ai/dsh-tools": "workspace:*",
-    "@deepseek-ai/dsh-typert-protocol": "workspace:*",
-    "@deepseek-ai/dsh-util-values": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/agent": "workspace:*",
+    "@agentrans/brand": "workspace:*",
+    "@agentrans/llm": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/session-format": "workspace:*",
+    "@agentrans/session-format-v3-to-v4": "workspace:*",
+    "@agentrans/session-input": "workspace:*",
+    "@agentrans/session-projection": "workspace:*",
+    "@agentrans/system-prompt": "workspace:*",
+    "@agentrans/tool-executor-native": "workspace:*",
+    "@agentrans/tool-testkit": "workspace:*",
+    "@agentrans/tools": "workspace:*",
+    "@agentrans/typert-protocol": "workspace:*",
+    "@agentrans/util-values": "workspace:*"
   }
 }

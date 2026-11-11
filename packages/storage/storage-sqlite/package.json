@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-storage-sqlite",
+  "name": "@agentrans/storage-sqlite",
   "description": "SQLite storage backend (kv facet) for the DeepSeek Harness storage hub",
   "version": "0.1.0",
   "publishConfig": {
@@ -29,14 +29,14 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@deepseek-ai/dsh-storage": "workspace:*",
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/storage": "workspace:*",
+    "@agentrans/cordis": "workspace:~"
   },
   "dependencies": {
-    "@deepseek-ai/schemastery": "workspace:~"
+    "@agentrans/schemastery": "workspace:~"
   },
   "devDependencies": {
-    "@deepseek-ai/dsh-storage": "workspace:*",
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/storage": "workspace:*",
+    "@agentrans/cordis": "workspace:~"
   }
 }

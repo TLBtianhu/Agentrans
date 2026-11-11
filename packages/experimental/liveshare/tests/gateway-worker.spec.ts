@@ -13,7 +13,7 @@ import type {
   TunnelShareSpec,
   TunnelWorkerCommand,
   TunnelWorkerEvent,
-} from '@deepseek-ai/dsh-experimental-liveshare-protocol'
+} from '@agentrans/experimental-liveshare-protocol'
 import { runGatewayWorker } from '../src/owner-gateway/worker.ts'
 import { FakeWebSocket } from './gateway-worker-fake-ws.ts'
 

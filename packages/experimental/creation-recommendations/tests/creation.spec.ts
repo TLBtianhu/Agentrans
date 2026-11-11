@@ -1,14 +1,14 @@
 import { describe, expect, it, onTestFinished, vi } from 'vitest'
-import { ToolCallId } from '@deepseek-ai/dsh-llm'
-import { appendPluginRecord, SessionId } from '@deepseek-ai/dsh-session'
-import { defineTool } from '@deepseek-ai/dsh-tools'
+import { ToolCallId } from '@agentrans/llm'
+import { appendPluginRecord, SessionId } from '@agentrans/session'
+import { defineTool } from '@agentrans/tools'
 import { readFile, rm } from 'node:fs/promises'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import type { ChangeResult } from '@deepseek-ai/dsh-plugin-manager/types'
+import type { ChangeResult } from '@agentrans/plugin-manager/types'
 import * as CreationRecommendations from '../src/index.ts'
 import { ACTION, fixture, callId, proposal, installedBundle, recordCard, writeBundle } from './fixture.ts'
-import { executeToolFixture } from '@deepseek-ai/dsh-tool-testkit'
+import { executeToolFixture } from '@agentrans/tool-testkit'
 
 /** The Remote result for a recorded page decision. */
 function settled(phase: string, data: object) {
@@ -57,7 +57,7 @@ describe('interface creation', () => {
     const spec = await f.complete()
     expect(spec).toMatchObject({ provider: 'spawn', delivery: 'caller', request: { agentPreset: 'cordis' } })
     expect(spec.request.parent).toBe(f.agent)
-    const guide = fileURLToPath(import.meta.resolve('@deepseek-ai/dsh-creation-recommendations/references/session-tab.md'))
+    const guide = fileURLToPath(import.meta.resolve('@agentrans/creation-recommendations/references/session-tab.md'))
     expect(spec.request.prompt.find(block => block.type === 'text')?.text).toContain(JSON.stringify(guide))
     expect(await readFile(guide, 'utf8')).toContain('conversation.view')
     expect(spec.request.cwd!.startsWith(join(f.agent.session.header.cwd!, '.dsh-created-plugins'))).toBe(true)
@@ -90,7 +90,7 @@ describe('interface creation', () => {
     await f.act('create', 'sidebar-left')
     const spec = await f.complete()
     const instructions: unknown = JSON.parse(spec.request.prompt.find(block => block.type === 'text')!.text)
-    expect(instructions).toMatchObject({ location: 'sidebar-left', uiReference: fileURLToPath(import.meta.resolve('@deepseek-ai/dsh-creation-recommendations/references/sidebar-entry.md')),
+    expect(instructions).toMatchObject({ location: 'sidebar-left', uiReference: fileURLToPath(import.meta.resolve('@agentrans/creation-recommendations/references/sidebar-entry.md')),
       locationPolicy: 'location and uiReference are the user’s final choice in the card. They override any earlier location described in brief; preserve the requested behavior and data scope while adapting the interface to this chosen location.',
     })
     expect(f.current()).toMatchObject({ phase: 'installed', slot: 'sidebar-left' })
@@ -143,7 +143,7 @@ describe('interface creation', () => {
     const spec = await f.complete()
     const instructions: unknown = JSON.parse(spec.request.prompt.find(block => block.type === 'text')!.text)
     const references = ['sidebar-right.md', 'session-tab.md', 'sidebar-entry.md'].map(file =>
-      fileURLToPath(import.meta.resolve('@deepseek-ai/dsh-creation-recommendations/references/' + file)))
+      fileURLToPath(import.meta.resolve('@agentrans/creation-recommendations/references/' + file)))
     expect(instructions).toMatchObject({ location: { request: '左侧入口打开全屏日历' }, uiReferences: references })
     expect(instructions).toHaveProperty('locationPolicy', expect.stringContaining('instead of silently substituting another location'))
     expect(instructions).not.toHaveProperty('uiReference')

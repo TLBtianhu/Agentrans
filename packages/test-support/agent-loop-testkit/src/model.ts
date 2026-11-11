@@ -1,5 +1,5 @@
 /** Model placeholder for consumer tests that do not read or change model selection. */
-import type { Model } from '@deepseek-ai/dsh-agent'
+import type { Model } from '@agentrans/agent'
 
 /**
  * Create an unsupported Model placeholder for structural Agent stubs.

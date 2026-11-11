@@ -9,16 +9,16 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { act, cleanup, screen } from '@testing-library/react'
-import type { TypertResourceKind } from '@deepseek-ai/dsh-api-remote-access/client'
-import { ClientAccessState } from '@deepseek-ai/dsh-api-remote-access/src/client/state.ts'
-import type { WorkspaceId } from '@deepseek-ai/dsh-api-workspace-controller/client'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
-import { LocaleRuntime } from '@deepseek-ai/dsh-client-locale/client'
-import type { PropsRenderSlots } from '@deepseek-ai/dsh-client-ui-slots'
-import { allowAllAccessPlugin, SlotTestRuntime, usePinnedBrowserLanguages } from '@deepseek-ai/dsh-client-test-runtime'
-import { apply as applyMenus, inject as injectMenus } from '@deepseek-ai/dsh-client-ui-context-menu/client'
-import { apply, inject } from '@deepseek-ai/dsh-client-ui-workspace/client'
+import type { TypertResourceKind } from '@agentrans/api-remote-access/client'
+import { ClientAccessState } from '@agentrans/api-remote-access/src/client/state.ts'
+import type { WorkspaceId } from '@agentrans/api-workspace-controller/client'
+import type { SessionId } from '@agentrans/session/types'
+import { createSnapshotStore } from '@agentrans/client-store'
+import { LocaleRuntime } from '@agentrans/client-locale/client'
+import type { PropsRenderSlots } from '@agentrans/client-ui-slots'
+import { allowAllAccessPlugin, SlotTestRuntime, usePinnedBrowserLanguages } from '@agentrans/client-test-runtime'
+import { apply as applyMenus, inject as injectMenus } from '@agentrans/client-ui-context-menu/client'
+import { apply, inject } from '@agentrans/client-ui-workspace/client'
 
 usePinnedBrowserLanguages('zh-CN')
 

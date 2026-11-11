@@ -1,8 +1,8 @@
 /** Canonical patch results, typed refusals, and compact model output. */
-import { FsError } from '@deepseek-ai/dsh-fs'
-import { HarnessError } from '@deepseek-ai/dsh-llm'
+import { FsError } from '@agentrans/fs'
+import { HarnessError } from '@agentrans/llm'
 import { computeHunkDiffs } from './diff.ts'
-import type { FileDiff, InferValue } from '@deepseek-ai/dsh-tools'
+import type { FileDiff, InferValue } from '@agentrans/tools'
 import type { PatchExecutionReport, PatchFailureCode, PatchRefusal } from './patch/types.ts'
 
 /** Strict canonical output; full file texts feed rendering and are excluded from presentation metadata. */

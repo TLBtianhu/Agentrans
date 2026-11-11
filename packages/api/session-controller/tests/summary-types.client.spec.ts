@@ -5,9 +5,9 @@
  */
 
 import { describe, expect, it } from 'vitest'
-import type { TodoItem } from '@deepseek-ai/dsh-tool-todo/types'
-import type {} from '@deepseek-ai/dsh-session-stats/types'
-import type {} from '@deepseek-ai/dsh-session-turn-outline/types'
+import type { TodoItem } from '@agentrans/tool-todo/types'
+import type {} from '@agentrans/session-stats/types'
+import type {} from '@agentrans/session-turn-outline/types'
 import type { SessionSummary } from '../src/client/sessions/service.ts'
 import type { SessionProjectionSnapshot } from '../src/client/sessions/manager.ts'
 

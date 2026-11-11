@@ -1,4 +1,4 @@
-import { Context } from '@deepseek-ai/cordis'
+import { Context } from '@agentrans/cordis'
 import { expect, it } from 'vitest'
 import { mountRuntime } from './setup.ts'
 

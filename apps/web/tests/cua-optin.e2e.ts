@@ -4,10 +4,10 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium, type Browser } from 'playwright'
-import { readProfileManifest } from '@deepseek-ai/dsh-app-boot'
-import { SessionId } from '@deepseek-ai/dsh-session'
-import type {} from '@deepseek-ai/dsh-ptc-runtime'
-import type {} from '@deepseek-ai/dsh-agent-preset-registry'
+import { readProfileManifest } from '@agentrans/app-boot'
+import { SessionId } from '@agentrans/session'
+import type {} from '@agentrans/ptc-runtime'
+import type {} from '@agentrans/agent-preset-registry'
 import { load } from 'js-yaml'
 import { expect, it, vi } from 'vitest'
 import { captureStableAria, compareOrRefreshGolden, launchWebScaffold, webSnapshotMode, type WebScaffold } from './scaffold.ts'
@@ -51,17 +51,17 @@ it.skipIf(process.platform !== 'darwin').each([
     await page.getByRole('navigation', { name: '全局面板' }).getByRole('button', { name: '插件', exact: true }).click()
     const plugins = page.locator('[data-plugin-panel]')
     await plugins.getByRole('button', { name: '更多', exact: true }).waitFor()
-    expect(await page.locator('[data-plugin-package="@deepseek-ai/dsh-cua-bundle"]').count()).toBe(0)
+    expect(await page.locator('[data-plugin-package="@agentrans/cua-bundle"]').count()).toBe(0)
     await plugins.getByRole('button', { name: '更多', exact: true }).click()
-    const card = page.locator('[data-plugin-package="@deepseek-ai/dsh-cua-bundle"]')
+    const card = page.locator('[data-plugin-package="@agentrans/cua-bundle"]')
     expect(await card.count()).toBe(0)
-    expect((await scaffold.ctx.pluginManager.listBundles()).find(bundle => bundle.name === '@deepseek-ai/dsh-cua-bundle'))
+    expect((await scaffold.ctx.pluginManager.listBundles()).find(bundle => bundle.name === '@agentrans/cua-bundle'))
       .toMatchObject({ listedByDefault: false, enabled: false, installed: false })
     await plugins.getByRole('button', { name: '返回插件', exact: true }).click()
     const offerCua = async () => {
       await plugins.getByRole('button', { name: '添加插件', exact: true }).click()
       const dialog = page.getByRole('dialog', { name: '添加插件', exact: true })
-      await dialog.getByRole('textbox', { name: '包名或地址', exact: true }).fill('@deepseek-ai/dsh-cua-bundle')
+      await dialog.getByRole('textbox', { name: '包名或地址', exact: true }).fill('@agentrans/cua-bundle')
       await dialog.getByRole('button', { name: '安装', exact: true }).click()
       const ready = page.getByRole('dialog', { name: '已安装', exact: true })
       await ready.waitFor()
@@ -86,7 +86,7 @@ it.skipIf(process.platform !== 'darwin').each([
     const profileManifest = () => readProfileManifest('scaffold', join(scaffold.harnessHome, 'profiles/scaffold'))
     const selected = () => profileManifest().dsh?.profile?.bundles
     const dependencies = profileManifest().dependencies
-    expect(selected()).not.toContain('@deepseek-ai/dsh-cua-bundle')
+    expect(selected()).not.toContain('@agentrans/cua-bundle')
 
     const enabling = Promise.withResolvers<undefined>()
     const setEnabled = scaffold.ctx.pluginManager.setBundleEnabled.bind(scaffold.ctx.pluginManager)
@@ -118,7 +118,7 @@ it.skipIf(process.platform !== 'darwin').each([
       await captureStableAria(page, '[role="dialog"]', scaffold.workspaceCwd), webSnapshotMode())
     expect(await setup.getByRole('button', { name: '设为 PTC', exact: true }).count()).toBe(0)
     expect(scaffold.ctx.agentPresets.defaultId).toBe(initialDefault)
-    expect(selected()).toContain('@deepseek-ai/dsh-cua-bundle')
+    expect(selected()).toContain('@agentrans/cua-bundle')
     expect(profileManifest().dependencies).toEqual(dependencies)
     expect(await card.getByText('实验性', { exact: true }).count()).toBe(1)
     expect(await card.textContent()).not.toContain('将 PTC 模式改为可持久化')

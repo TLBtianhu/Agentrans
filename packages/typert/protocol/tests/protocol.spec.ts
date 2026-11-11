@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
-import { Context, Service } from '@deepseek-ai/cordis'
+import { Context, Service } from '@agentrans/cordis'
 import { describe, expect, expectTypeOf, it } from 'vitest'
 import {
   bindTypertRemote,
@@ -15,9 +15,9 @@ import {
   type TypertResource,
   type TypertLookup,
   type TypertRemoteEvent,
-} from '@deepseek-ai/dsh-typert-protocol'
+} from '@agentrans/typert-protocol'
 
-const REMOTE_METHOD_DESCRIPTOR_KEY = '@deepseek-ai/dsh-typert-protocol/remote-methods'
+const REMOTE_METHOD_DESCRIPTOR_KEY = '@agentrans/typert-protocol/remote-methods'
 
 interface MetaFixtureSubject {
   readonly subjectId: string
@@ -30,7 +30,7 @@ interface MetaFixtureRequest {
   readonly transform: (subject: MetaFixtureSubject) => Promise<MetaFixtureSubject | undefined>
 }
 
-declare module '@deepseek-ai/cordis' {
+declare module '@agentrans/cordis' {
   interface Events {
     /**
      * Test-only one-way event: bound to no Scope and returning nothing.
@@ -62,7 +62,7 @@ declare module '@deepseek-ai/cordis' {
   }
 }
 
-declare module '@deepseek-ai/dsh-typert-protocol' {
+declare module '@agentrans/typert-protocol' {
   interface TypertLookupMap {
     metaFixture: TypertLookup<MetaFixtureSubject, string>
   }

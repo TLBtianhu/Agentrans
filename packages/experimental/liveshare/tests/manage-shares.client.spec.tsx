@@ -7,7 +7,7 @@ import type {} from '../src/client/index.ts'
 import { LiveshareManageSharesDialog, type LiveshareManageSharesDialogProps } from '../src/client/ManageSharesDialog.tsx'
 import { en } from '../src/client/locales.ts'
 import type { OwnerShareList } from '../src/share-api-types.ts'
-import type { RemoteResult } from '@deepseek-ai/dsh-typert-protocol'
+import type { RemoteResult } from '@agentrans/typert-protocol'
 import { accepted, ownerSharesDouble, refused, requestOf } from './owner-shares-double.client.ts'
 
 afterEach(cleanup)

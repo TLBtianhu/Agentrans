@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-jobs",
+  "name": "@agentrans/jobs",
   "description": "Background job registry (ctx.jobs) for the DeepSeek Harness — shared ids, owner isolation, polling, cancellation, and completion listeners for long-running tool work",
   "version": "0.1.0",
   "publishConfig": {
@@ -36,22 +36,22 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@deepseek-ai/dsh-agent": "workspace:*",
-    "@deepseek-ai/dsh-brand": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-workspace": "workspace:*",
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/agent": "workspace:*",
+    "@agentrans/brand": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/workspace": "workspace:*",
+    "@agentrans/cordis": "workspace:~"
   },
   "peerDependenciesMeta": {
-    "@deepseek-ai/dsh-workspace": {
+    "@agentrans/workspace": {
       "optional": true
     }
   },
   "devDependencies": {
-    "@deepseek-ai/dsh-agent": "workspace:*",
-    "@deepseek-ai/dsh-brand": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-workspace": "workspace:*",
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/agent": "workspace:*",
+    "@agentrans/brand": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/workspace": "workspace:*",
+    "@agentrans/cordis": "workspace:~"
   }
 }

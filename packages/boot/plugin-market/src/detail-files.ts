@@ -4,7 +4,7 @@
  */
 import {
   DetailFailure, encodePath, fetchBody, README_NAMES, readmeByName, type DetailFiles, type ReadFile, type RemoteFileOptions,
-} from '@deepseek-ai/dsh-plugin-detail'
+} from '@agentrans/plugin-detail'
 import type { RepositoryCache } from './repository-cache.ts'
 
 /** A repository as single-file APIs and Git address it. */

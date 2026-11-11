@@ -1,22 +1,22 @@
 // @vitest-environment jsdom
-import { apply as applyMenus, inject as injectMenus } from '@deepseek-ai/dsh-client-ui-context-menu/client'
+import { apply as applyMenus, inject as injectMenus } from '@agentrans/client-ui-context-menu/client'
 /** Sidebar presentation and tab subscriptions through the production slot renderer. */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { act, fireEvent, waitFor } from '@testing-library/react'
 import { useEffect, useState, useSyncExternalStore } from 'react'
-import { SlotTestRuntime, type SlotView } from '@deepseek-ai/dsh-client-test-runtime'
-import { LocaleRuntime } from '@deepseek-ai/dsh-client-locale/client'
-import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
-import type { ShortcutCatalogEntry, ShortcutCommandId } from '@deepseek-ai/dsh-client-shortcuts/client'
-import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
-import type { MainPanelId } from '@deepseek-ai/dsh-client-ui-layout/client'
-import type { PaneId, SplitId, TabId } from '@deepseek-ai/dsh-client-ui-dockkit'
-import { dockPaneIds, getPane } from '@deepseek-ai/dsh-client-ui-dockkit'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
+import { SlotTestRuntime, type SlotView } from '@agentrans/client-test-runtime'
+import { LocaleRuntime } from '@agentrans/client-locale/client'
+import { createSnapshotStore } from '@agentrans/client-store'
+import type { ShortcutCatalogEntry, ShortcutCommandId } from '@agentrans/client-shortcuts/client'
+import type { PropsRuntime } from '@agentrans/client-ui-slots'
+import type { MainPanelId } from '@agentrans/client-ui-layout/client'
+import type { PaneId, SplitId, TabId } from '@agentrans/client-ui-dockkit'
+import { dockPaneIds, getPane } from '@agentrans/client-ui-dockkit'
+import type { SessionId } from '@agentrans/session/types'
 import { apply, inject } from '../src/client/index.ts'
 import { intentsFor } from '../src/client/shell/SidebarRight.tsx'
 import { registerSidebarShortcuts } from '../src/client/shortcuts.ts'
-import { ShortcutRegistry } from '@deepseek-ai/dsh-client-shortcuts/src/client/registry.ts'
+import { ShortcutRegistry } from '@agentrans/client-shortcuts/src/client/registry.ts'
 import type { SidebarRightTabInfo, SidebarRightTabMenuOwnerProps } from '../src/client/contract/slots.ts'
 import type { createSidebarRightStore } from '../src/client/stores.ts'
 
@@ -26,7 +26,7 @@ declare module '../src/client/contract/params.ts' {
   }
 }
 
-declare module '@deepseek-ai/dsh-client-ui-slots' {
+declare module '@agentrans/client-ui-slots' {
   interface SlotMap {
     /** A Conversation-column stand-in rendered before the seat, opening a resource as soon as a seat is mounted. */
     'sidebar-right.test.opener': { kind: 'single'; scope: 'session'; owner: { armed: boolean } }

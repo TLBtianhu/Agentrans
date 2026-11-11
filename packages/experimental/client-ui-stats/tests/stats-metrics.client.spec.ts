@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { AttachmentId, type ImageAttachmentRef } from '@deepseek-ai/dsh-attachment'
+import { AttachmentId, type ImageAttachmentRef } from '@agentrans/attachment'
 import { aggregateTotals, aggregateTurn, buildTurns, turnContext } from '../src/client/stats-aggregate.ts'
 import type { StatsCall, StatsStepMetrics, StatsViewNode } from '../src/client/stats-contract.ts'
 import { CALL_LIMIT } from '../src/client/stats-fold.ts'

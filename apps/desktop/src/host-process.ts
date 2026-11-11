@@ -3,9 +3,9 @@
 import { spawn, type ChildProcess } from 'node:child_process'
 import { join } from 'node:path'
 import { z } from 'zod'
-import type { PlatformSession } from '@deepseek-ai/dsh-deepseek-account'
+import type { PlatformSession } from '@agentrans/deepseek-account'
 import { desktopNodeEnvironment } from './node-environment.ts'
-import { parsePluginOperationRecord, type PluginOperationRecord, type PluginOperationRunId } from '@deepseek-ai/dsh-plugin-manager/diagnostic'
+import { parsePluginOperationRecord, type PluginOperationRecord, type PluginOperationRunId } from '@agentrans/plugin-manager/diagnostic'
 
 interface ReadyEvent {
   readonly type: 'ready'
@@ -208,7 +208,7 @@ export class DesktopHostProcess {
    */
   async start(): Promise<DesktopHostReady> {
     if (this.child !== undefined) return this.readyPromise
-    const entry = join(this.runtimeDir, 'node_modules', '@deepseek-ai', 'dsh-desktop-host', 'lib', 'index.js')
+    const entry = join(this.runtimeDir, 'node_modules', '@agentrans', 'desktop-host', 'lib', 'index.js')
     const child = spawn(this.node, [
       '--expose-internals',
       ...(this.inspectPort === undefined ? [] : [`--inspect=127.0.0.1:${String(this.inspectPort)}`]),

@@ -3,7 +3,7 @@ description: "普通手动 Session 分支的直接父关系校验、已确认助
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-session-branch
+# @agentrans/session-branch
 
 [English](README.md) | 中文
 

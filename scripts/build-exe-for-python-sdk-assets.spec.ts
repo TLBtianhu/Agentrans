@@ -21,10 +21,10 @@ describe('Python runtime executable assets', () => {
     })
 
     expect(result.status).toBe(0)
-    expect(result.stdout).toContain('node_modules/@deepseek-ai/dsh-web-frontend/dist/**/*')
-    expect(result.stdout).toContain('node_modules/@deepseek-ai/dsh-*/**/*.{svg,png,jpg,jpeg,webp}')
+    expect(result.stdout).toContain('node_modules/@agentrans/web-frontend/dist/**/*')
+    expect(result.stdout).toContain('node_modules/@agentrans/*/**/*.{svg,png,jpg,jpeg,webp}')
     expect(result.stdout).not.toContain('skill-badge/assets/**/*')
-    expect(result.stdout).toContain('node_modules/@deepseek-ai/dsh-sandbox-windows-acl/assets/**/*')
+    expect(result.stdout).toContain('node_modules/@agentrans/sandbox-windows-acl/assets/**/*')
     expect(result.stdout).not.toContain('node_modules/**/*.py')
   })
 })

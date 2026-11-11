@@ -5,33 +5,33 @@
 /:
   en: 5c5d7b5f1329ac1b
   zh: b68d332df957109f
-/deepseek-ai-dsh-computer-use:
-  en: 2efee0c5f0d577bc
-  zh: fef4b81bfc121052
-/deepseek-ai-dsh-computer-use/summary:
+/agentrans-computer-use:
+  en: 855a5839f60b9455
+  zh: 6dd6bafca530a201
+/agentrans-computer-use/summary:
   en: 4cb331c550852b23
   zh: d638995ab250397b
-/deepseek-ai-dsh-computer-use/table-of-contents:
+/agentrans-computer-use/table-of-contents:
   en: d152484eb41ac6b4
   zh: 405b30feaf48c087
-/deepseek-ai-dsh-computer-use/use-this-package:
-  en: 0a298fbbcd8dbc00
-  zh: 950de2af46c87f82
-/deepseek-ai-dsh-computer-use/understand-the-implementation:
+/agentrans-computer-use/use-this-package:
+  en: 345a8a1ae96b75da
+  zh: 595b851a39211f55
+/agentrans-computer-use/understand-the-implementation:
   en: 181679887837591a
   zh: cc2e96766ce0aa63
-/deepseek-ai-dsh-computer-use/further-exploration:
+/agentrans-computer-use/further-exploration:
   en: 987295d677466c04
   zh: 9d7b40a04786490e
-/deepseek-ai-dsh-computer-use/model-experience:
+/agentrans-computer-use/model-experience:
   en: 8780c250dfaefaaa
   zh: 1c4b3598a131fb65
-/deepseek-ai-dsh-computer-use/model-experience/kv-cache-effect:
+/agentrans-computer-use/model-experience/kv-cache-effect:
   en: 0cc866a67a19d08b
   zh: e1c3bb5ee2fed596
-/deepseek-ai-dsh-computer-use/known-limitations-and-deferred-work:
+/agentrans-computer-use/known-limitations-and-deferred-work:
   en: 6b8a90585a227a46
   zh: 7e0e3bf026fd67e9
-/deepseek-ai-dsh-computer-use/known-limitations-and-deferred-work/dev-note:
+/agentrans-computer-use/known-limitations-and-deferred-work/dev-note:
   en: e67f633dc6fe7773
   zh: 6c5f9788c6536776

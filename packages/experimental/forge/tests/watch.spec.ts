@@ -1,4 +1,4 @@
-import { Context } from '@deepseek-ai/cordis'
+import { Context } from '@agentrans/cordis'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import ForgeService, { changeRequestKey } from '../src/index.ts'
 import type { ChangeRequestKey, ChangeRequestRef, ChangeRequestSnapshot, ChangeRequestUpdate, ForgeFailure, ForgeRepository } from '../src/types.ts'

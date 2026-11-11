@@ -3,7 +3,7 @@ description: "从插件页面启用变更请求面板与 worktree Session。"
 kind: "package-bundle"
 ---
 
-# @deepseek-ai/dsh-experimental-forge-bundle
+# @agentrans/experimental-forge-bundle
 
 [English](README.md) | 中文
 

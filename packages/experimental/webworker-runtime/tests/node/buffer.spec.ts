@@ -11,7 +11,7 @@ const NodeBuffer = (require('node:buffer') as typeof import('node:buffer')).Buff
 vi.mock('node:buffer', () => require('buffer/') as object)
 
 const ambient = globalThis.Buffer
-const { Buffer: WorkerBuffer } = await import('@deepseek-ai/dsh-experimental-webworker-runtime/src/node/builtin_modules/implemented/buffer.ts')
+const { Buffer: WorkerBuffer } = await import('@agentrans/experimental-webworker-runtime/src/node/builtin_modules/implemented/buffer.ts')
 afterAll(() => {
   Object.defineProperty(globalThis, 'Buffer', { value: ambient, writable: true, configurable: true })
 })

@@ -1,15 +1,15 @@
 import { readFileSync, readdirSync } from 'node:fs'
 import { join, relative } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { SESSION_FORMAT_VERSION, Session, SessionId, type SessionEvent } from '@deepseek-ai/dsh-session'
-import { scheduleDomain } from '@deepseek-ai/dsh-schedule'
-import { createSessionFormatCatalogWithChildren } from '@deepseek-ai/dsh-session-format-catalog'
+import { SESSION_FORMAT_VERSION, Session, SessionId, type SessionEvent } from '@agentrans/session'
+import { scheduleDomain } from '@agentrans/schedule'
+import { createSessionFormatCatalogWithChildren } from '@agentrans/session-format-catalog'
 import {
   generationLogFilename,
   scanLog,
-} from '@deepseek-ai/dsh-session-persistence-jsonl/src/format.ts'
-import { foldSubagentDescriptor } from '@deepseek-ai/dsh-subagent'
-import { projectionCacheDomainSpec } from '@deepseek-ai/dsh-session-projection-cache'
+} from '@agentrans/session-persistence-jsonl/src/format.ts'
+import { foldSubagentDescriptor } from '@agentrans/subagent'
+import { projectionCacheDomainSpec } from '@agentrans/session-projection-cache'
 import {
   buildVfsExampleFiles,
   VFS_EXAMPLE_OLDEST_MESSAGE,

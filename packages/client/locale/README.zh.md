@@ -3,7 +3,7 @@ description: "面向用户与插件作者的 web GUI 本地化说明：语言偏
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-client-locale
+# @agentrans/client-locale
 
 [English](README.md) | 中文
 

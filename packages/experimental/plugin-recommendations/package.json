@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-plugin-recommendations",
+  "name": "@agentrans/plugin-recommendations",
   "description": "Official plugin suggestions with explicit user activation and persistent conversation decisions",
   "version": "0.1.0",
   "publishConfig": {
@@ -37,27 +37,27 @@
   },
   "license": "MIT",
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-typert-protocol": "workspace:*",
-    "@deepseek-ai/dsh-llm": "workspace:*",
-    "@deepseek-ai/dsh-skill": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/typert-protocol": "workspace:*",
+    "@agentrans/llm": "workspace:*",
+    "@agentrans/skill": "workspace:*"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-typert-protocol": "workspace:*",
-    "@deepseek-ai/dsh-llm": "workspace:*",
-    "@deepseek-ai/dsh-agent": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-plugin-manager": "workspace:*",
-    "@deepseek-ai/dsh-package-manifest": "workspace:*",
-    "@deepseek-ai/dsh-api-remote-access": "workspace:*",
-    "@deepseek-ai/dsh-skill": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/typert-protocol": "workspace:*",
+    "@agentrans/llm": "workspace:*",
+    "@agentrans/agent": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/plugin-manager": "workspace:*",
+    "@agentrans/package-manifest": "workspace:*",
+    "@agentrans/api-remote-access": "workspace:*",
+    "@agentrans/skill": "workspace:*"
   },
   "dependencies": {
     "zod": "4.4.3",
-    "@deepseek-ai/dsh-client-ui-plugin-recommendations": "workspace:*",
-    "@deepseek-ai/dsh-action-cards": "workspace:*",
-    "@deepseek-ai/dsh-client-ui-action-cards": "workspace:*"
+    "@agentrans/client-ui-plugin-recommendations": "workspace:*",
+    "@agentrans/action-cards": "workspace:*",
+    "@agentrans/client-ui-action-cards": "workspace:*"
   },
   "files": [
     "icon.svg",

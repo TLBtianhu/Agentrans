@@ -1,8 +1,8 @@
 /** Shared rule controls taken from the existing task detail. */
 import type { CSSProperties, ReactNode } from 'react'
 import clsx from 'clsx'
-import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
-import { IconChevronDownOutlineRegular, IconChevronUpOutlineRegular, Pill } from '@deepseek-ai/dsh-client-ui-primitives'
+import type { PropsLocale } from '@agentrans/client-ui-slots'
+import { IconChevronDownOutlineRegular, IconChevronUpOutlineRegular, Pill } from '@agentrans/client-ui-primitives'
 import css from './TaskManagerPage.module.css'
 
 type Weekday = 1 | 2 | 3 | 4 | 5 | 6 | 7

@@ -14,9 +14,9 @@ import type {
   SessionEvent,
   ToolResultMessage,
   UserMessage,
-} from '@deepseek-ai/dsh-session'
-import type {} from '@deepseek-ai/dsh-session-title'
-import type { FileAttachmentRef, ImageAttachmentRef } from '@deepseek-ai/dsh-attachment'
+} from '@agentrans/session'
+import type {} from '@agentrans/session-title'
+import type { FileAttachmentRef, ImageAttachmentRef } from '@agentrans/attachment'
 
 /** Heading used when the log carries no title and the Session has no name. */
 const UNTITLED_SESSION_MARKDOWN_TITLE = 'Untitled Session'

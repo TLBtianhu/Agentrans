@@ -1,14 +1,14 @@
 /** Native SDK lifecycle and catalog behavior without desktop access. */
-import { executeToolFixture } from '@deepseek-ai/dsh-tool-testkit'
+import { executeToolFixture } from '@agentrans/tool-testkit'
 
-import * as NativeToolExecutor from '@deepseek-ai/dsh-tool-executor-native'
+import * as NativeToolExecutor from '@agentrans/tool-executor-native'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
-import ComputerUseRegistry from '@deepseek-ai/dsh-computer-use'
-import { ComputerUseProviderName } from '@deepseek-ai/dsh-computer-use/brand'
-import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
-import ToolRuntime from '@deepseek-ai/dsh-tools'
-import { ToolCallId } from '@deepseek-ai/dsh-llm'
+import { Context } from '@agentrans/cordis'
+import ComputerUseRegistry from '@agentrans/computer-use'
+import { ComputerUseProviderName } from '@agentrans/computer-use/brand'
+import SystemPrompt from '@agentrans/system-prompt'
+import ToolRuntime from '@agentrans/tools'
+import { ToolCallId } from '@agentrans/llm'
 import * as NativeProvider from '../src/index.ts'
 import { catalog, fixture, resetFixture } from './fixtures/cua-driver.ts'
 

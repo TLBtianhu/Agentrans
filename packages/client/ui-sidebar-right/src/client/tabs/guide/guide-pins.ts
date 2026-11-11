@@ -1,5 +1,5 @@
 /** In-memory pin choices for the guide's tool cards. */
-import { createSnapshotStore, type ObservableSnapshot } from '@deepseek-ai/dsh-client-store'
+import { createSnapshotStore, type ObservableSnapshot } from '@agentrans/client-store'
 import type { SidebarRightGuideBox } from '../../tab-registry.ts'
 
 /** Tab kind whose card always shows and never enters the customization list. */

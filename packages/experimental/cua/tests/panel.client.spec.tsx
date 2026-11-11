@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
 /** Permission UI distinguishes missing privileges, uncertainty, and application consent. */
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
-import { bindSnapshotSelector, makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
-import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
+import { bindSnapshotSelector, makeTranslate } from '@agentrans/client-test-runtime'
+import { createSnapshotStore } from '@agentrans/client-store'
 import type { CuaApplicationId, CuaApplicationState, CuaSystemPermissionState } from '../src/access-types.ts'
-import type { ConfigFormSnapshot } from '@deepseek-ai/dsh-client-ui-settings/client'
+import type { ConfigFormSnapshot } from '@agentrans/client-ui-settings/client'
 import { afterEach, expect, it, vi } from 'vitest'
 import { PermissionPanel, PermissionSetup, PermissionToast, type PermissionPanelProps } from '../src/client/PermissionPanel.tsx'
 import type { PermissionView } from '../src/client/controller.ts'

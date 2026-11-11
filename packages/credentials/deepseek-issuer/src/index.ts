@@ -9,7 +9,7 @@
  *
  * This module carries identity and defaults only. It performs no request,
  * holds no secret, and has no Cordis surface.
- * @module @deepseek-ai/dsh-deepseek-issuer
+ * @module @agentrans/deepseek-issuer
  */
 
 /** Issuer id shared by every DeepSeek capability class. */

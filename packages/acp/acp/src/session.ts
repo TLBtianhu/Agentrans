@@ -1,6 +1,6 @@
 /** One standard ACP session's Agent, configuration, prompt, update, and teardown lifecycle. */
 
-import type { Context } from '@deepseek-ai/cordis'
+import type { Context } from '@agentrans/cordis'
 import {
   RequestError,
   type McpServer,
@@ -10,10 +10,10 @@ import {
   type SessionNotification,
   type StopReason,
 } from '@agentclientprotocol/sdk'
-import type { Agent, AgentHandle, AgentOptions, AgentStatus } from '@deepseek-ai/dsh-agent'
-import { installModelSelection } from '@deepseek-ai/dsh-agent'
-import { createUserMessage, errorChain, type UserMessage } from '@deepseek-ai/dsh-llm'
-import { type Session, type SessionEvent, type SessionId, type TurnEndReason } from '@deepseek-ai/dsh-session'
+import type { Agent, AgentHandle, AgentOptions, AgentStatus } from '@agentrans/agent'
+import { installModelSelection } from '@agentrans/agent'
+import { createUserMessage, errorChain, type UserMessage } from '@agentrans/llm'
+import { type Session, type SessionEvent, type SessionId, type TurnEndReason } from '@agentrans/session'
 import { AcpContentError, admitAcpPrompt } from './content.ts'
 import { turnEndToStopReason } from './codec.ts'
 import { mountAcpMcpServers } from './mcp.ts'

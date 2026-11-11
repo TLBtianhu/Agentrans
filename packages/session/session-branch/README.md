@@ -3,7 +3,7 @@ description: "Pure direct-parent validation, confirmed assistant-result selectio
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-session-branch
+# @agentrans/session-branch
 
 English | [中文](README.zh.md)
 

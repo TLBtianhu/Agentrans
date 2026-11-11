@@ -3,7 +3,7 @@ description: "面向提供方插件的官方 DeepSeek 请求扩展注册表，�
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-deepseek-llm-api-extensions
+# @agentrans/deepseek-llm-api-extensions
 
 [English](README.md) | 中文
 
@@ -31,12 +31,12 @@ kind: "package-reference"
 
 请求的 `purpose` 是适配器转发的生产方自定义字符串，普通对话请求则省略它。注册器转发不熟悉的用途，不替各个字段决定策略。
 
-注册表拥有字段添加与生命周期，不拥有字段语义。`@deepseek-ai/dsh-session-log-deepseek` 拥有 `dsh_session_log`；`@deepseek-ai/dsh-plugin-package-inventory-deepseek` 拥有 `dsh_plugin_packages`。提供方无关的 LLM seam 与 `llm-pi-ai` 都不消费该注册表。
+注册表拥有字段添加与生命周期，不拥有字段语义。`@agentrans/session-log-deepseek` 拥有 `dsh_session_log`；`@agentrans/plugin-package-inventory-deepseek` 拥有 `dsh_plugin_packages`。提供方无关的 LLM seam 与 `llm-pi-ai` 都不消费该注册表。
 
 <a id="model-experience"></a>
 ## 模型体验
 
-通过 `@deepseek-ai/dsh-llm-deepseek` 间接生效；该包在模型的 `messages`、系统提示词与工具 schema 之外发送已注册字段。
+通过 `@agentrans/llm-deepseek` 间接生效；该包在模型的 `messages`、系统提示词与工具 schema 之外发送已注册字段。
 
 #### KV Cache 影响
 

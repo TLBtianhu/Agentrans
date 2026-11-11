@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-session-branch",
+  "name": "@agentrans/session-branch",
   "description": "Pure lineage and confirmed-result rules for ordinary manual Session branches",
   "version": "0.1.0",
   "publishConfig": {
@@ -35,14 +35,14 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@deepseek-ai/dsh-agent": "workspace:*",
-    "@deepseek-ai/dsh-llm": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*"
+    "@agentrans/agent": "workspace:*",
+    "@agentrans/llm": "workspace:*",
+    "@agentrans/session": "workspace:*"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-agent": "workspace:*",
-    "@deepseek-ai/dsh-llm": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/agent": "workspace:*",
+    "@agentrans/llm": "workspace:*",
+    "@agentrans/session": "workspace:*"
   }
 }

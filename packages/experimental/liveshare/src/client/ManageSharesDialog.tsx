@@ -1,8 +1,8 @@
 /** Global owner-side list of shares; each row opens that Session's share dialog. */
 
 import { useEffect, useState, type ReactNode } from 'react'
-import { Button, Modal, RiskConfirmation } from '@deepseek-ai/dsh-client-ui-primitives'
-import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
+import { Button, Modal, RiskConfirmation } from '@agentrans/client-ui-primitives'
+import type { PropsLocale } from '@agentrans/client-ui-slots'
 import type { NS } from './locales.ts'
 import type { OwnerShares } from './owner-shares.ts'
 import type { OutgoingShare } from './share-types.ts'

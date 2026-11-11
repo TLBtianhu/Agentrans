@@ -1,7 +1,7 @@
 /** Wire types for lossless incremental DeepSeek session-log upload. */
 
-import type { SessionEvent, SessionId, SurfaceEventType } from '@deepseek-ai/dsh-session'
-import type { JsonValue } from '@deepseek-ai/dsh-util-values'
+import type { SessionEvent, SessionId, SurfaceEventType } from '@agentrans/session'
+import type { JsonValue } from '@agentrans/util-values'
 
 /** Request identity inspected before preparing a Session-log contribution. */
 export interface SessionLogUploadRequest {
@@ -84,22 +84,22 @@ export interface DeepSeekSessionLogExtension {
   readonly events: readonly DeepSeekSessionLogWireEvent[]
 }
 
-declare module '@deepseek-ai/dsh-deepseek-llm-api-extensions/types' {
+declare module '@agentrans/deepseek-llm-api-extensions/types' {
   interface DeepSeekLlmApiExtensionMap {
     dsh_session_log: DeepSeekSessionLogExtension
   }
 }
 
-declare module '@deepseek-ai/dsh-session/types' {
+declare module '@agentrans/session/types' {
   interface SessionEventMap {
     /** Records that the configured endpoint accepted one delivery through `throughSeq`. */
     'session-log-deepseek/delivery-accepted': {
       /** Session identity the accepted delivery carried; inherited fork markers retain the parent's id. */
-      sessionId: import('@deepseek-ai/dsh-session/types').SessionId
+      sessionId: import('@agentrans/session/types').SessionId
       /** Accepted Session format generation; absence identifies version 0. */
       sessionFormatVersion?: number
       /** Last canonical event included in the accepted request. */
-      throughSeq: import('@deepseek-ai/dsh-session/types').SessionSeq
+      throughSeq: import('@agentrans/session/types').SessionSeq
     }
   }
 }

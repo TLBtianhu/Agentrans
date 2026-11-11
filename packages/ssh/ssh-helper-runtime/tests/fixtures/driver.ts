@@ -2,14 +2,14 @@
 import assert from 'node:assert/strict'
 import { writeFile } from 'node:fs/promises'
 import { basename } from 'node:path'
-import { Context } from '@deepseek-ai/cordis'
-import { boot } from '@deepseek-ai/dsh-app-boot'
-import type { SubprocessHandle } from '@deepseek-ai/dsh-subprocess'
-import type {} from '@deepseek-ai/dsh-ssh'
-import type {} from '@deepseek-ai/dsh-fs-ssh'
-import type {} from '@deepseek-ai/dsh-subprocess-ssh'
-import type {} from '@deepseek-ai/dsh-sandbox-ssh'
-import type {} from '@deepseek-ai/dsh-ptc-runtime-node'
+import { Context } from '@agentrans/cordis'
+import { boot } from '@agentrans/app-boot'
+import type { SubprocessHandle } from '@agentrans/subprocess'
+import type {} from '@agentrans/ssh'
+import type {} from '@agentrans/fs-ssh'
+import type {} from '@agentrans/subprocess-ssh'
+import type {} from '@agentrans/sandbox-ssh'
+import type {} from '@agentrans/ptc-runtime-node'
 
 const [configPath, reportPath, sandbox] = process.argv.slice(2)
 if (configPath === undefined || reportPath === undefined || !['required', 'unavailable', 'portable'].includes(sandbox ?? '')) throw new Error('Artifact driver requires config, report, and expected sandbox availability')

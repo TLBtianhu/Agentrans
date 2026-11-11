@@ -1,12 +1,12 @@
-import { Context } from '@deepseek-ai/cordis'
+import { Context } from '@agentrans/cordis'
 import { describe, expect, it } from 'vitest'
-import type { IndexInjection, WebServer } from '@deepseek-ai/dsh-host-webserver'
+import type { IndexInjection, WebServer } from '@agentrans/host-webserver'
 import * as HostPlugin from '../src/index.ts'
 import { liveConfig, omitsGeneratedPage } from '../../../settings/settings/tests/live-config.ts'
 import { plainConfig } from '../../../settings/settings/src/schema.ts'
 import {
   DEFAULT_PREFERENCE, Config, apply,
-} from '@deepseek-ai/dsh-client-ui-theme'
+} from '@agentrans/client-ui-theme'
 
 /** The Peer an index render speaks for; this listener reads no field of it. */
 const PAGE_PEER = { principal: { kind: 'owner' } } as Parameters<WebServer['renderIndex']>[1]

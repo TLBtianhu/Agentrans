@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-api-settings-controller",
+  "name": "@agentrans/api-settings-controller",
   "description": "Remote owner for the configuration surfaces over the settings-domain seams",
   "version": "0.1.0",
   "publishConfig": {
@@ -46,25 +46,25 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@deepseek-ai/schemastery": "workspace:~",
+    "@agentrans/schemastery": "workspace:~",
     "zod": "4.4.3"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-agent-preset-registry": "workspace:*",
-    "@deepseek-ai/dsh-credentials": "workspace:*",
-    "@deepseek-ai/dsh-native-command": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-settings": "workspace:*",
-    "@deepseek-ai/dsh-typert-protocol": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/agent-preset-registry": "workspace:*",
+    "@agentrans/credentials": "workspace:*",
+    "@agentrans/native-command": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/settings": "workspace:*",
+    "@agentrans/typert-protocol": "workspace:*"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-agent-preset-registry": "workspace:*",
-    "@deepseek-ai/dsh-credentials": "workspace:*",
-    "@deepseek-ai/dsh-native-command": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-settings": "workspace:*",
-    "@deepseek-ai/dsh-typert-protocol": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/agent-preset-registry": "workspace:*",
+    "@agentrans/credentials": "workspace:*",
+    "@agentrans/native-command": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/settings": "workspace:*",
+    "@agentrans/typert-protocol": "workspace:*"
   }
 }

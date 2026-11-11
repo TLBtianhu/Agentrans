@@ -1,12 +1,12 @@
 /** Instance-bound messages exchanged with an opaque Artifact iframe. */
 import type {
   ArtifactRuntimeCommand, ArtifactRuntimeFailure, ArtifactRuntimeIdentity, RuntimeReport,
-} from '@deepseek-ai/dsh-artifact-runtime/types'
-import type { JsonValue } from '@deepseek-ai/dsh-util-values'
-import { ARTIFACT_RUNTIME_FAILURE_MAX_BYTES } from '@deepseek-ai/dsh-artifact/runtime-values'
+} from '@agentrans/artifact-runtime/types'
+import type { JsonValue } from '@agentrans/util-values'
+import { ARTIFACT_RUNTIME_FAILURE_MAX_BYTES } from '@agentrans/artifact/runtime-values'
 import { ARTIFACT_ACTION_MAX_BYTES, isArtifactJsonValue } from './messages.ts'
 
-export { ARTIFACT_RUNTIME_FAILURE_MAX_BYTES } from '@deepseek-ai/dsh-artifact/runtime-values'
+export { ARTIFACT_RUNTIME_FAILURE_MAX_BYTES } from '@agentrans/artifact/runtime-values'
 
 /** One explicit command addressed to a particular source revision and physical iframe. */
 export interface ArtifactRuntimeCommandMessage {

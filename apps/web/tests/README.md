@@ -7,7 +7,7 @@ These tests boot the real web composition in-process and drive it with real brow
 After installing workspace dependencies, install the browsers and their system dependencies from the repository root:
 
 ```sh
-pnpm --filter @deepseek-ai/dsh-web-frontend exec playwright install --with-deps chromium webkit
+pnpm --filter @agentrans/web-frontend exec playwright install --with-deps chromium webkit
 ```
 
 On Linux, `--with-deps` installs dependencies through the system package manager. The persistent CI VM must provide these dependencies through image maintenance; CI installs only the browser binaries, as required by the [failover runbook](../../../.agents/notes/implemented/process/2026-07-26-ci-failover-runbook.md).
@@ -48,7 +48,7 @@ They type-check in the root `tsconfig.host.json`, not in the Client aggregate, b
 
 A new scenario joins both program lists in the same change: its file in the root `tsconfig.host.json` include and in the Client aggregate's `apps/web/tsconfig.json` exclude. That project includes all of `tests`, so a file missing from the exclude compiles as Client code, and the Client compiler gate of `pnpm run typecheck` keeps failing with Host-service errors until it is listed.
 
-## Do not import `@deepseek-ai/dsh-client-*` here
+## Do not import `@agentrans/client-*` here
 
 Importing a Client package — a value or a type — pulls its TypeScript project and referenced projects into the Host build graph. Generated Remote declarations are available before package compilation, but this does not make the Host and Client Cordis `Context` declarations compatible. Keep these tests on the Host face and use only the explicit built-client harness exception below.
 

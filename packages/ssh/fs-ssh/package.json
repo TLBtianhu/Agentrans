@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-fs-ssh",
+  "name": "@agentrans/fs-ssh",
   "description": "Filesystem provider over the shared POSIX SSH helper",
   "version": "0.1.0",
   "publishConfig": {
@@ -29,21 +29,21 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-ssh": "workspace:*",
-    "@deepseek-ai/dsh-fs": "workspace:*",
-    "@deepseek-ai/dsh-sandbox": "workspace:*",
-    "@deepseek-ai/dsh-sandbox-policy": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/ssh": "workspace:*",
+    "@agentrans/fs": "workspace:*",
+    "@agentrans/sandbox": "workspace:*",
+    "@agentrans/sandbox-policy": "workspace:*"
   },
   "dependencies": {
-    "@deepseek-ai/schemastery": "workspace:~",
+    "@agentrans/schemastery": "workspace:~",
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-ssh": "workspace:*",
-    "@deepseek-ai/dsh-fs": "workspace:*",
-    "@deepseek-ai/dsh-sandbox": "workspace:*",
-    "@deepseek-ai/dsh-sandbox-policy": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/ssh": "workspace:*",
+    "@agentrans/fs": "workspace:*",
+    "@agentrans/sandbox": "workspace:*",
+    "@agentrans/sandbox-policy": "workspace:*"
   }
 }

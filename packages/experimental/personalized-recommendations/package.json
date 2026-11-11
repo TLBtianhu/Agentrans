@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-personalized-recommendations",
+  "name": "@agentrans/personalized-recommendations",
   "description": "Personalized pages and built-in plugin recommendations offered as cards below answers",
   "version": "0.1.0",
   "icon": "./icon.svg",
@@ -34,33 +34,33 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@deepseek-ai/dsh-action-cards": "workspace:*",
-    "@deepseek-ai/dsh-client-ui-action-cards": "workspace:*",
-    "@deepseek-ai/dsh-creation-recommendations": "workspace:*",
-    "@deepseek-ai/dsh-client-ui-creation-recommendations": "workspace:*",
-    "@deepseek-ai/dsh-plugin-recommendations": "workspace:*",
-    "@deepseek-ai/dsh-client-ui-plugin-recommendations": "workspace:*"
+    "@agentrans/action-cards": "workspace:*",
+    "@agentrans/client-ui-action-cards": "workspace:*",
+    "@agentrans/creation-recommendations": "workspace:*",
+    "@agentrans/client-ui-creation-recommendations": "workspace:*",
+    "@agentrans/plugin-recommendations": "workspace:*",
+    "@agentrans/client-ui-plugin-recommendations": "workspace:*"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/cordis": "workspace:~"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/cordis-plugin-include": "workspace:~",
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/cordis-plugin-include": "workspace:~",
     "js-yaml": "^4.3.2",
-    "@deepseek-ai/cordis-plugin-timer": "workspace:~",
-    "@deepseek-ai/dsh-agent": "workspace:*",
-    "@deepseek-ai/dsh-api-remote-access": "workspace:*",
-    "@deepseek-ai/dsh-app-boot": "workspace:*",
-    "@deepseek-ai/dsh-hmr": "workspace:*",
-    "@deepseek-ai/dsh-llm": "workspace:*",
-    "@deepseek-ai/dsh-plugin-manager": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-session-projection": "workspace:*",
-    "@deepseek-ai/dsh-skill": "workspace:*",
-    "@deepseek-ai/dsh-system-prompt": "workspace:*",
-    "@deepseek-ai/dsh-tool-executor-native": "workspace:*",
-    "@deepseek-ai/dsh-tools": "workspace:*"
+    "@agentrans/cordis-plugin-timer": "workspace:~",
+    "@agentrans/agent": "workspace:*",
+    "@agentrans/api-remote-access": "workspace:*",
+    "@agentrans/app-boot": "workspace:*",
+    "@agentrans/hmr": "workspace:*",
+    "@agentrans/llm": "workspace:*",
+    "@agentrans/plugin-manager": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/session-projection": "workspace:*",
+    "@agentrans/skill": "workspace:*",
+    "@agentrans/system-prompt": "workspace:*",
+    "@agentrans/tool-executor-native": "workspace:*",
+    "@agentrans/tools": "workspace:*"
   },
   "dsh": {
     "bundle": {

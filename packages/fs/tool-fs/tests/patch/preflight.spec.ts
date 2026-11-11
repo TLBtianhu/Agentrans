@@ -1,8 +1,8 @@
 /** Whole-patch admission rejects all writes while preserving prior observation state. */
 import { mkdir, symlink, writeFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
-import { FsError, FsVersion } from '@deepseek-ai/dsh-fs'
-import type { FsErrorCode } from '@deepseek-ai/dsh-fs'
+import { FsError, FsVersion } from '@agentrans/fs'
+import type { FsErrorCode } from '@agentrans/fs'
 import { expect, it, vi } from 'vitest'
 import { add, move, patch, remove, setup, update } from './harness.ts'
 

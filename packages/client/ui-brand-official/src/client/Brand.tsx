@@ -1,4 +1,4 @@
-import type { SidebarBrandMarkOwnerProps } from '@deepseek-ai/dsh-client-ui-sidebar/client'
+import type { SidebarBrandMarkOwnerProps } from '@agentrans/client-ui-sidebar/client'
 
 /**
  * The product wordmark. A brand name is a trademark rather than localized copy,

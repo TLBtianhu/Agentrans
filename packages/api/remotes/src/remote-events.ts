@@ -6,13 +6,13 @@
  * type-only.
  */
 
-import type {} from '@deepseek-ai/dsh-api-session-controller/remote-events'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import type {} from '@deepseek-ai/dsh-permission-presets/types'
-import type {} from '@deepseek-ai/dsh-plugin-manager/types'
-import type {} from '@deepseek-ai/dsh-plugin-market/types'
-import type {} from '@deepseek-ai/dsh-schedule/client'
-import type { TypertForwardableEventEntry } from '@deepseek-ai/dsh-typert-protocol'
+import type {} from '@agentrans/api-session-controller/remote-events'
+import type { SessionId } from '@agentrans/session/types'
+import type {} from '@agentrans/permission-presets/types'
+import type {} from '@agentrans/plugin-manager/types'
+import type {} from '@agentrans/plugin-market/types'
+import type {} from '@agentrans/schedule/client'
+import type { TypertForwardableEventEntry } from '@agentrans/typert-protocol'
 
 /**
  * Host events this application forwards without renaming. The explicit mode is

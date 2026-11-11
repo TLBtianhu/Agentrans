@@ -5,8 +5,8 @@
  */
 
 import { useState, type ReactNode } from 'react'
-import { Button, IconChevronDownOutlineRegular, IconListPenOutlineRegular } from '@deepseek-ai/dsh-client-ui-primitives'
-import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
+import { Button, IconChevronDownOutlineRegular, IconListPenOutlineRegular } from '@agentrans/client-ui-primitives'
+import type { PropsLocale } from '@agentrans/client-ui-slots'
 import type { ForgeLocalChanges } from '../types.ts'
 import { Counts } from './DiffFile.tsx'
 import { FileLabel } from './FileLabel.tsx'

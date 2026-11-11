@@ -1,5 +1,5 @@
 /** Optional bundles through the shipped Web Loader, live package manager, and real Agent loop. */
-import { executeToolFixture } from '@deepseek-ai/dsh-tool-testkit'
+import { executeToolFixture } from '@agentrans/tool-testkit'
 import { randomUUID } from 'node:crypto'
 import { existsSync } from 'node:fs'
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
@@ -7,30 +7,30 @@ import { createRequire } from 'node:module'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import type { Context } from '@deepseek-ai/cordis'
-import type { Agent, AgentHandle } from '@deepseek-ai/dsh-agent'
-import type { ProfileContext } from '@deepseek-ai/dsh-app-boot'
-import { LlmAdapter, ToolCallId, createUserMessage } from '@deepseek-ai/dsh-llm'
-import type { GenerateOptions, LlmResolvedModelInfo, StreamChunk } from '@deepseek-ai/dsh-llm'
-import { SessionId } from '@deepseek-ai/dsh-session'
-import type {} from '@deepseek-ai/dsh-agent-preset-registry'
-import type {} from '@deepseek-ai/dsh-hmr'
-import type {} from '@deepseek-ai/dsh-plugin-manager'
-import type {} from '@deepseek-ai/dsh-permission-presets'
-import type {} from '@deepseek-ai/dsh-session-title-llm'
-import type {} from '@deepseek-ai/dsh-skill'
-import type {} from '@deepseek-ai/dsh-tools'
+import type { Context } from '@agentrans/cordis'
+import type { Agent, AgentHandle } from '@agentrans/agent'
+import type { ProfileContext } from '@agentrans/app-boot'
+import { LlmAdapter, ToolCallId, createUserMessage } from '@agentrans/llm'
+import type { GenerateOptions, LlmResolvedModelInfo, StreamChunk } from '@agentrans/llm'
+import { SessionId } from '@agentrans/session'
+import type {} from '@agentrans/agent-preset-registry'
+import type {} from '@agentrans/hmr'
+import type {} from '@agentrans/plugin-manager'
+import type {} from '@agentrans/permission-presets'
+import type {} from '@agentrans/session-title-llm'
+import type {} from '@agentrans/skill'
+import type {} from '@agentrans/tools'
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 import { textResponse, toolCallResponse } from '../../../packages/core/agent-loop/tests/mock-adapter.ts'
 
 const root = fileURLToPath(new URL('../../..', import.meta.url))
 const installAnchor = join(root, 'apps/cli/package.json')
 const bundles = {
-  search: '@deepseek-ai/dsh-experimental-session-search',
-  ralph: '@deepseek-ai/dsh-experimental-ralph-bundle',
-  terminal: '@deepseek-ai/dsh-experimental-terminal-bundle',
-  badge: '@deepseek-ai/dsh-experimental-badge-skill-bundle',
-  titles: '@deepseek-ai/dsh-experimental-session-titles-bundle',
+  search: '@agentrans/experimental-session-search',
+  ralph: '@agentrans/experimental-ralph-bundle',
+  terminal: '@agentrans/experimental-terminal-bundle',
+  badge: '@agentrans/experimental-badge-skill-bundle',
+  titles: '@agentrans/experimental-session-titles-bundle',
 } as const
 type Response = StreamChunk[] | ((request: GenerateOptions) => StreamChunk[])
 
@@ -83,10 +83,10 @@ describe.skipIf(!existsSync(join(root, 'apps/cli/lib/bin.js')))('Official option
     originalEnvironment = Object.fromEntries(Object.keys(values).map(key => [key, process.env[key]]))
     Object.assign(process.env, values)
     const require = createRequire(import.meta.url)
-    const app = require(join(root, 'packages/boot/app-boot/lib/index.js')) as typeof import('@deepseek-ai/dsh-app-boot')
-    const cmdline = require(join(root, 'packages/boot/cmdline/lib/index.js')) as typeof import('@deepseek-ai/dsh-cmdline')
+    const app = require(join(root, 'packages/boot/app-boot/lib/index.js')) as typeof import('@agentrans/app-boot')
+    const cmdline = require(join(root, 'packages/boot/cmdline/lib/index.js')) as typeof import('@agentrans/cmdline')
     const directory = join(home, 'profiles', 'web')
-    app.initProfile(directory, ['@deepseek-ai/dsh-base', '@deepseek-ai/dsh-web-app'])
+    app.initProfile(directory, ['@agentrans/base', '@agentrans/web-app'])
     await writeFile(join(directory, 'cordis.yml'), '[]\n')
     await writeFile(join(directory, 'cordis.patch.yml'), JSON.stringify([
       { id: 'agent-default-model', config: { provider: 'bundle-test', model: 'scripted' } },

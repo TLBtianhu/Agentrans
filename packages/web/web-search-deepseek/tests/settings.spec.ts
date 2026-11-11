@@ -1,10 +1,10 @@
 /** The `web-search-deepseek` settings section layered over the composition entry. */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
+import { Context } from '@agentrans/cordis'
 import { liveConfig } from '../../../settings/settings/tests/live-config.ts'
-import WebRuntime from '@deepseek-ai/dsh-web'
-import * as deepseekPlugin from '@deepseek-ai/dsh-web-search-deepseek'
+import WebRuntime from '@agentrans/web'
+import * as deepseekPlugin from '@agentrans/web-search-deepseek'
 
 let savedKey: string | undefined
 

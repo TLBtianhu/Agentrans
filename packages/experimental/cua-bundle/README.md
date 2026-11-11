@@ -3,7 +3,7 @@ description: "Enable optional macOS Computer Use and its permission page."
 kind: "package-bundle"
 ---
 
-# @deepseek-ai/dsh-cua-bundle
+# @agentrans/cua-bundle
 
 English | [中文](README.zh.md)
 
@@ -24,7 +24,7 @@ Enable macOS Computer Use from Plugins for existing and new PTC sessions. Window
 <a id="use-this-package"></a>
 ## Use this package
 
-In macOS Desktop, open **Plugins → Add plugin**, enter `@deepseek-ai/dsh-cua-bundle`, choose **Install**, then **Enable now**. DSH installs the official version matching its runtime into the profile. Published packages contain the signed and notarized helper; users need no compiler. Source Web and development Desktop link the workspace bundle and prepare an ad-hoc helper when enabled. Open Computer Use details, choose PTC if needed, and grant Accessibility and Screen Recording to `DSH Computer Use.app`. Disabled installed bundles remain available for management. For source Web, run these commands from the repository root:
+In macOS Desktop, open **Plugins → Add plugin**, enter `@agentrans/cua-bundle`, choose **Install**, then **Enable now**. DSH installs the official version matching its runtime into the profile. Published packages contain the signed and notarized helper; users need no compiler. Source Web and development Desktop link the workspace bundle and prepare an ad-hoc helper when enabled. Open Computer Use details, choose PTC if needed, and grant Accessibility and Screen Recording to `DSH Computer Use.app`. Disabled installed bundles remain available for management. For source Web, run these commands from the repository root:
 
 ```sh
 pnpm run build

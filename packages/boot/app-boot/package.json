@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-app-boot",
+  "name": "@agentrans/app-boot",
   "description": "Shared boot glue for the app bins: .env loading, fail-loud Loader guards, snapshot-aware config resolution, and the Loader boot sequence",
   "version": "0.1.0",
   "publishConfig": {
@@ -32,9 +32,9 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@deepseek-ai/dsh-atomic-write": "workspace:*",
-    "@deepseek-ai/dsh-official-bundles": "workspace:*",
-    "@deepseek-ai/dsh-package-manifest": "workspace:*",
+    "@agentrans/atomic-write": "workspace:*",
+    "@agentrans/official-bundles": "workspace:*",
+    "@agentrans/package-manifest": "workspace:*",
     "@eslint-community/regexpp": "^4.12.2",
     "ajv": "^8.20.0",
     "js-yaml": "^4.3.2",
@@ -43,24 +43,24 @@
     "semver": "^7.8.5"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis-plugin-group": "workspace:~",
-    "@deepseek-ai/cordis-plugin-include": "workspace:~",
-    "@deepseek-ai/cordis-plugin-loader": "workspace:~",
-    "@deepseek-ai/dsh-launch-environment": "workspace:*",
-    "@deepseek-ai/dsh-home-paths": "workspace:*",
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/cordis-plugin-group": "workspace:~",
+    "@agentrans/cordis-plugin-include": "workspace:~",
+    "@agentrans/cordis-plugin-loader": "workspace:~",
+    "@agentrans/launch-environment": "workspace:*",
+    "@agentrans/home-paths": "workspace:*",
+    "@agentrans/cordis": "workspace:~"
   },
   "devDependencies": {
-    "@deepseek-ai/schemastery": "workspace:~",
-    "@deepseek-ai/cordis-plugin-group": "workspace:~",
-    "@deepseek-ai/cordis-plugin-include": "workspace:~",
-    "@deepseek-ai/cordis-plugin-loader": "workspace:~",
-    "@deepseek-ai/cordis-plugin-timer": "workspace:~",
-    "@deepseek-ai/dsh-launch-environment": "workspace:*",
-    "@deepseek-ai/dsh-home-paths": "workspace:*",
-    "@deepseek-ai/dsh-system-prompt": "workspace:*",
+    "@agentrans/schemastery": "workspace:~",
+    "@agentrans/cordis-plugin-group": "workspace:~",
+    "@agentrans/cordis-plugin-include": "workspace:~",
+    "@agentrans/cordis-plugin-loader": "workspace:~",
+    "@agentrans/cordis-plugin-timer": "workspace:~",
+    "@agentrans/launch-environment": "workspace:*",
+    "@agentrans/home-paths": "workspace:*",
+    "@agentrans/system-prompt": "workspace:*",
     "@types/js-yaml": "^4.0.9",
     "@types/semver": "^7.8.0",
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/cordis": "workspace:~"
   }
 }

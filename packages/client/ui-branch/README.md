@@ -3,7 +3,7 @@ description: "Inline preview, confirmation, and retry for returning one durable 
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-client-ui-branch
+# @agentrans/client-ui-branch
 
 English | [中文](README.zh.md)
 

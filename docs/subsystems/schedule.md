@@ -86,7 +86,7 @@ An omitted creation target defaults to `new_once`. Adding or replacing a `new` o
 <a id="task-management"></a>
 ## Task management
 
-All callers use the same `ScheduleCreateRequest`, `ScheduleCatalogEntry`, `ScheduleTiming`, and `ScheduleEditRequest`. Browser-safe types come from `@deepseek-ai/dsh-schedule/client`. There is no Session-bound management surface or second family of type aliases.
+All callers use the same `ScheduleCreateRequest`, `ScheduleCatalogEntry`, `ScheduleTiming`, and `ScheduleEditRequest`. Browser-safe types come from `@agentrans/schedule/client`. There is no Session-bound management surface or second family of type aliases.
 
 | Operation | Behavior |
 |---|---|

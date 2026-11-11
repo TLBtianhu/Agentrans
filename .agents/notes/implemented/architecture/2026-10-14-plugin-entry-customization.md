@@ -53,7 +53,7 @@ Dependency direction: the three regions do not depend on the plugin package and 
 | `ui-entry-customization` (new package) | Registers the menu-content component into the three actions slots; owns the `entryCustomization` locale namespace; keeps no state |
 | `ui-plugin-manager` | Adds `openList()` to `pluginNavigation`: selects the Installed tab of the Plugins main list without opening a dialog or changing the current Session |
 | `ui-primitives` | Adds `minWidthFromAnchor` to `Menu` so the right-sidebar menu is never narrower than its card; adds `IconAppsAddOutlineRegular` / `IconAppsAddOutlineMedium` (`compact` for card size), shared by the left-sidebar and right-sidebar buttons |
-| `@deepseek-ai/dsh-web-app` | Loads `ui-entry-customization` by default |
+| `@agentrans/web-app` | Loads `ui-entry-customization` by default |
 
 ### Actions slots and menu content
 

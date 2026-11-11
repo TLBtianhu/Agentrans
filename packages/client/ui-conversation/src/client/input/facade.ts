@@ -8,11 +8,11 @@
  * Package-private; the hub alone constructs it and wires the scoped event
  * listeners onto it.
  */
-import type { Context } from '@deepseek-ai/cordis'
-import type { InboxState } from '@deepseek-ai/dsh-agent/types'
+import type { Context } from '@agentrans/cordis'
+import type { InboxState } from '@agentrans/agent/types'
 import {
   createSnapshotStore, type ObservableSnapshot, type SnapshotStore,
-} from '@deepseek-ai/dsh-client-store'
+} from '@agentrans/client-store'
 import type { LexicalEditor } from 'lexical'
 import type {
   CommandClaim, ConsumeTokenRequest, DraftAttachmentId, DraftInitializationOptions, DraftInitializationResult,
@@ -22,7 +22,7 @@ import type {
 import type {
   ArbitrateKey, ArbitrateOutcome, ComposerKeyboard, DraftInput, DraftSnapshot, ReferenceInsert, TokenSpan,
 } from '../contract/draft-editor.ts'
-import type { PromptContextInput } from '@deepseek-ai/dsh-api-session-controller/types'
+import type { PromptContextInput } from '@agentrans/api-session-controller/types'
 import type { InputSubmitMode, MessageSubmission, MessageSubmissionState } from '../contract/composer-submission.ts'
 import type { MathNodeLabels } from './editor/math-node.tsx'
 import { serializeDraftPrompt } from './prompt.ts'

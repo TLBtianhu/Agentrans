@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict'
-import type { Context } from '@deepseek-ai/cordis'
-import { createUserMessage } from '@deepseek-ai/dsh-llm'
-import { defineContentToolFixture } from '@deepseek-ai/dsh-tool-testkit'
-import type {} from '@deepseek-ai/dsh-system-prompt'
-import type {} from '@deepseek-ai/dsh-tools'
+import type { Context } from '@agentrans/cordis'
+import { createUserMessage } from '@agentrans/llm'
+import { defineContentToolFixture } from '@agentrans/tool-testkit'
+import type {} from '@agentrans/system-prompt'
+import type {} from '@agentrans/tools'
 
 export const name = 'snapshot-in-history-series-start'
 export const inject = ['tools', 'systemPrompt']

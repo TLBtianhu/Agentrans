@@ -1,7 +1,7 @@
 /** Configuration-free snapshots captured before a failed startup disposes its plugins. */
 
-import { Context, type FiberState } from '@deepseek-ai/cordis'
-import type { Entry } from '@deepseek-ai/cordis-plugin-loader'
+import { Context, type FiberState } from '@agentrans/cordis'
+import type { Entry } from '@agentrans/cordis-plugin-loader'
 import type {} from './profile-resolution/service.ts'
 
 /** One configured entry at the time startup failed. */

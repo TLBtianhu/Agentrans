@@ -1,9 +1,9 @@
 /** Folded Conversation Views, plugin discovery while reachable, and creation. */
 import {
   IconCheckOutlineRegular, IconPluginPinwheelOutlineRegular, IconPlusOutlineRegular, MenuItemButton,
-} from '@deepseek-ai/dsh-client-ui-primitives'
-import type { HostObservable, InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
-import type {} from '@deepseek-ai/dsh-client-ui-sidebar/client'
+} from '@agentrans/client-ui-primitives'
+import type { HostObservable, InjectFace, PropsLocale, PropsRuntime } from '@agentrans/client-ui-slots'
+import type {} from '@agentrans/client-ui-sidebar/client'
 import css from './EntryMenu.module.css'
 
 /** Navigation region whose More menu hosts one registration. */

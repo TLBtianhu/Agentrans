@@ -1,9 +1,9 @@
-/** Durable fixed-input HTML export vocabulary. @module @deepseek-ai/dsh-artifact-export/types */
-import type { Branded } from '@deepseek-ai/dsh-brand'
-import type { ArtifactExportSource, ArtifactExportSourceSelection } from '@deepseek-ai/dsh-artifact/types'
-import type { FileAttachmentRef } from '@deepseek-ai/dsh-attachment/types'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import type { SessionProjectionSummaryExcluded } from '@deepseek-ai/dsh-session-projection/types'
+/** Durable fixed-input HTML export vocabulary. @module @agentrans/artifact-export/types */
+import type { Branded } from '@agentrans/brand'
+import type { ArtifactExportSource, ArtifactExportSourceSelection } from '@agentrans/artifact/types'
+import type { FileAttachmentRef } from '@agentrans/attachment/types'
+import type { SessionId } from '@agentrans/session/types'
+import type { SessionProjectionSummaryExcluded } from '@agentrans/session-projection/types'
 
 /** Stable retry identity for one export within a Session. */
 export type ArtifactExportId = Branded<'ArtifactExportId'>
@@ -39,7 +39,7 @@ export type ArtifactHtmlExportRecord = {
 /** Complete current export records for one opened Session; result bytes remain in attachment storage. */
 export type ArtifactHtmlExports = Readonly<Record<string, ArtifactHtmlExportRecord>>
 
-declare module '@deepseek-ai/dsh-session/types' {
+declare module '@agentrans/session/types' {
   interface SessionEventMap {
     /**
      * Complete latest state of one fixed-input export; later events supersede that identity's state.
@@ -49,13 +49,13 @@ declare module '@deepseek-ai/dsh-session/types' {
   }
 }
 
-declare module '@deepseek-ai/dsh-session-projection/types' {
+declare module '@agentrans/session-projection/types' {
   interface SessionProjectionMap {
     artifactExports: SessionProjectionSummaryExcluded<ArtifactHtmlExports>
   }
 }
 
-declare module '@deepseek-ai/dsh-typert-protocol' {
+declare module '@agentrans/typert-protocol' {
   interface RemoteErrorDetailsMap {
     'artifact-export/request-conflict': { readonly exportId: ArtifactExportId }
     'artifact-export/limit': { readonly limit: number }

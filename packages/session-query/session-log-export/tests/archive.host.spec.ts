@@ -6,21 +6,21 @@
  * 404, missing descendant → errored stream).
  */
 
-import { SESSION_FORMAT_VERSION, SessionSeq } from '@deepseek-ai/dsh-session'
+import { SESSION_FORMAT_VERSION, SessionSeq } from '@agentrans/session'
 import { randomBytes } from 'node:crypto'
 import { describe, expect, it, vi } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
+import { Context } from '@agentrans/cordis'
 import { unzipSync, strFromU8 } from 'fflate'
-import type { FileAttachmentRef, ImageAttachmentRef } from '@deepseek-ai/dsh-attachment'
-import type { SessionEvent, SessionHeader, SessionId, ToolResultMessage, UserMessage } from '@deepseek-ai/dsh-session'
-import type { SessionLineageNode } from '@deepseek-ai/dsh-session-query'
-import { SessionPersistenceNotFoundError } from '@deepseek-ai/dsh-session-persistence'
-import type { SessionAccess, SessionHandle } from '@deepseek-ai/dsh-session-persistence'
-import { HostConnectionService } from '@deepseek-ai/dsh-client-connection'
-import type { BrowserAuth } from '@deepseek-ai/dsh-client-connection/src/browser-auth.ts'
+import type { FileAttachmentRef, ImageAttachmentRef } from '@agentrans/attachment'
+import type { SessionEvent, SessionHeader, SessionId, ToolResultMessage, UserMessage } from '@agentrans/session'
+import type { SessionLineageNode } from '@agentrans/session-query'
+import { SessionPersistenceNotFoundError } from '@agentrans/session-persistence'
+import type { SessionAccess, SessionHandle } from '@agentrans/session-persistence'
+import { HostConnectionService } from '@agentrans/client-connection'
+import type { BrowserAuth } from '@agentrans/client-connection/src/browser-auth.ts'
 import * as SessionLogExport from '../src/index.ts'
 
-declare module '@deepseek-ai/dsh-llm' {
+declare module '@agentrans/llm' {
   interface ContentBlockMap {
     'plugin:vendor': { type: 'plugin:vendor'; data: { content: readonly unknown[] }; content: readonly unknown[] }
   }

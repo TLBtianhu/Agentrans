@@ -308,7 +308,7 @@ type FsObservation =
 ```ts type-equiv
 /**
  * Minimal structural view of a tool execution the policy plugin needs to derive
- * an observed-state owner. `@deepseek-ai/dsh-tools`' `ToolExecution` contains
+ * an observed-state owner. `@agentrans/tools`' `ToolExecution` contains
  * these fields, so the tool passes its `exec` straight through as the opaque
  * `object` actor on the `fs/*` events; this plugin narrows that actor to
  * `FsObservationActor` without importing `dsh-tools`, `dsh-agent`, or `dsh-session`.
@@ -367,7 +367,7 @@ interface FileReadOutcome {
 `FS_PATCH_MISMATCH` 表示 hunk 在提供方提交阶段未匹配；消息标明补丁行号与失败的搜索阶段。`FS_SAME_TARGET` 表示移动源与目标共享已解析身份。删除意图遵循编辑意图：未见为 `FS_NOT_OBSERVED`，观察到缺失为 `FS_NOT_FOUND`，存在状态提供版本。提供方收到缺失的补丁/删除/移动源时，即使没有防护也使用 `FS_STALE_VERSION`。
 
 ```ts
-import { FS_ERROR_CODES } from '@deepseek-ai/dsh-fs'
+import { FS_ERROR_CODES } from '@agentrans/fs'
 ```
 
 ```ts type-equiv
@@ -379,7 +379,7 @@ type FsErrorCode = typeof FS_ERROR_CODES[number]
 
 ## 文件 IO 不设超时
 
-`read`/`write`/`edit` **不**接受 `timeoutMs`，提供方约定也不设置截止时间——不同于 bash 与 web（它们消费 [`@deepseek-ai/dsh-timeout`](../../packages/util/timeout/README.zh.md)）以及 subprocess 支撑的 `glob`/`grep`（其声明的 `timeoutMs` 由 `@deepseek-ai/dsh-tool-call-timeout-policy` 强制执行）：那些是进程支撑的，截止时间可以真正终止工作。本地系统调用至多是尽力中止——超时无法迫使进行中的 `fsync`/`rename` 停下，因此这里的 `timeoutMs` 会成为 seam 无法强制执行的截止时间，而且恰好落在「显式优于隐式」禁止隐式默认值的位置。取消仍通过工具执行 signal 传播，在系统调用边界尽力中止。
+`read`/`write`/`edit` **不**接受 `timeoutMs`，提供方约定也不设置截止时间——不同于 bash 与 web（它们消费 [`@agentrans/timeout`](../../packages/util/timeout/README.zh.md)）以及 subprocess 支撑的 `glob`/`grep`（其声明的 `timeoutMs` 由 `@agentrans/tool-call-timeout-policy` 强制执行）：那些是进程支撑的，截止时间可以真正终止工作。本地系统调用至多是尽力中止——超时无法迫使进行中的 `fsync`/`rename` 停下，因此这里的 `timeoutMs` 会成为 seam 无法强制执行的截止时间，而且恰好落在「显式优于隐式」禁止隐式默认值的位置。取消仍通过工具执行 signal 传播，在系统调用边界尽力中止。
 
 ## 服务与插件
 

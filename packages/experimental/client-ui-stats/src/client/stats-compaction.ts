@@ -1,7 +1,7 @@
 /** Compaction transaction state and its presentation as a synthetic step row. */
 
-import type { ConversationNodeDefinition } from '@deepseek-ai/dsh-client-ui-conversation/client'
-import type {} from '@deepseek-ai/dsh-compaction/types'
+import type { ConversationNodeDefinition } from '@agentrans/client-ui-conversation/client'
+import type {} from '@agentrans/compaction/types'
 import type { StatsCompactionMetrics, StatsCompactionState } from './stats-contract.ts'
 import {
   cacheHitRate, cacheReadTokens, cacheWriteTokens, contextTokens, isNumber, outputTokens,

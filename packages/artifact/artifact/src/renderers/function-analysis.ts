@@ -1,5 +1,5 @@
 /** Finite function samples and numerical analysis shared by previews and exported animations. */
-import { ExpressionDomainError, evaluateExpression, type ExpressionNode } from '@deepseek-ai/dsh-util-values'
+import { ExpressionDomainError, evaluateExpression, type ExpressionNode } from '@agentrans/util-values'
 
 /** Readings unavailable in the real-number domain are represented by null, including in confirmed JSON. */
 export interface FunctionAnalysis {

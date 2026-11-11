@@ -1,27 +1,27 @@
-import TypertRegistry from '@deepseek-ai/dsh-typert-registry'
-import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
-import SessionInputAdmission from '@deepseek-ai/dsh-session-input'
-import { RemoteError } from '@deepseek-ai/dsh-typert-protocol'
-import { Context } from '@deepseek-ai/cordis'
-import AgentRegistry from '@deepseek-ai/dsh-agent'
-import type { Agent, Inbox } from '@deepseek-ai/dsh-agent'
-import { AttachmentError, AttachmentId } from '@deepseek-ai/dsh-attachment'
-import type { ImageAttachmentRef } from '@deepseek-ai/dsh-attachment'
-import { createUserMessage, MessageId } from '@deepseek-ai/dsh-llm'
-import type { ContextFormed } from '@deepseek-ai/dsh-llm'
+import TypertRegistry from '@agentrans/typert-registry'
+import SessionProjectionRegistry from '@agentrans/session-projection'
+import SessionInputAdmission from '@agentrans/session-input'
+import { RemoteError } from '@agentrans/typert-protocol'
+import { Context } from '@agentrans/cordis'
+import AgentRegistry from '@agentrans/agent'
+import type { Agent, Inbox } from '@agentrans/agent'
+import { AttachmentError, AttachmentId } from '@agentrans/attachment'
+import type { ImageAttachmentRef } from '@agentrans/attachment'
+import { createUserMessage, MessageId } from '@agentrans/llm'
+import type { ContextFormed } from '@agentrans/llm'
 import SessionStore, {
   Session, SessionId, SessionLogOffset,
-} from '@deepseek-ai/dsh-session'
-import type { UserMessage } from '@deepseek-ai/dsh-session'
-import { snapshotSubagentDescriptor, SUBAGENT_DESCRIPTOR_VERSION } from '@deepseek-ai/dsh-subagent'
-import { subagentIdentityProjectionDefinition } from '@deepseek-ai/dsh-subagent/src/projection.ts'
+} from '@agentrans/session'
+import type { UserMessage } from '@agentrans/session'
+import { snapshotSubagentDescriptor, SUBAGENT_DESCRIPTOR_VERSION } from '@agentrans/subagent'
+import { subagentIdentityProjectionDefinition } from '@agentrans/subagent/src/projection.ts'
 import { describe, expect, it, vi, type MockInstance } from 'vitest'
 import { ApiSessionAgentController } from '../src/agent.ts'
 import { SessionCommandController } from '../src/commands.ts'
-import { unsupportedModel, createInboxStub } from '@deepseek-ai/dsh-agent-loop-testkit'
+import { unsupportedModel, createInboxStub } from '@agentrans/agent-loop-testkit'
 import { installSessionReadTestServices, createSessionTestController } from './test-remote.ts'
 
-declare module '@deepseek-ai/dsh-llm' {
+declare module '@agentrans/llm' {
   interface MessageSourceMap {
     'test': { kind: 'test' } & ContextFormed
   }

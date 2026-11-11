@@ -7,8 +7,8 @@
  * each must leave the reader something to do.
  */
 
-import { Context } from '@deepseek-ai/cordis'
-import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
+import { Context } from '@agentrans/cordis'
+import { createSnapshotStore } from '@agentrans/client-store'
 import { act, cleanup } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { apply, inject } from '../src/client/viewer-session-plugin.ts'

@@ -1,9 +1,9 @@
-import { parsePluginOperationRecord } from '@deepseek-ai/dsh-plugin-manager/diagnostic'
+import { parsePluginOperationRecord } from '@agentrans/plugin-manager/diagnostic'
 import type { DesktopHostProcess } from '../src/host-process.ts'
 import { WINDOWS_TITLEBAR_HEIGHT } from '../src/windows-layout.ts'
 const launchFixture = vi.hoisted(() => ({ instanceRoot: undefined as string | undefined }))
 vi.mock('../src/product-bootstrap.ts', async () => {
-  const launchContext = await import('@deepseek-ai/dsh-product-layout/launch-context')
+  const launchContext = await import('@agentrans/product-layout/launch-context')
   const path = await import('node:path')
   const { tmpdir } = await import('node:os')
   return {
@@ -867,14 +867,14 @@ describe('desktop main startup', () => {
     vi.spyOn(harness.app, 'getLocale').mockReturnValue(locale)
     vi.spyOn(harness.app, 'getPreferredSystemLanguages').mockReturnValue([locale])
     const originalName = harness.app.name
-    harness.app.name = '@deepseek-ai/dsh-desktop'
+    harness.app.name = '@agentrans/desktop'
     try {
       await import('../src/main.ts')
       await harness.preparing.promise
       const commands = applicationMenuItems().filter(item => item.visible !== false)
       await expect(JSON.stringify(commands, null, 2) + '\n')
         .toMatchFileSnapshot(`./expected/application-menu-${locale}.json`)
-      expect(harness.app.name).toBe('@deepseek-ai/dsh-desktop')
+      expect(harness.app.name).toBe('@agentrans/desktop')
     } finally { harness.app.name = originalName }
   })
 

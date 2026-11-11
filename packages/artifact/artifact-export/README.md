@@ -3,7 +3,7 @@ description: "Capture original Scene sources and replay conditions, generate imm
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-artifact-export
+# @agentrans/artifact-export
 
 English | [中文](README.zh.md)
 
@@ -28,7 +28,7 @@ Export one original Scene revision or saved particle observation as standalone H
 Mount the plugin with Artifact, the Agent registry, Session projections and an attachment provider that supports verbatim file storage and verified streamed reads. The Web composition mounts it for standalone cards and comparison cells. The main Artifact service remains independent of file storage.
 
 ```yaml
-- name: '@deepseek-ai/dsh-artifact-export'
+- name: '@agentrans/artifact-export'
 ```
 
 | Config | Default | Meaning |

@@ -1,6 +1,6 @@
 /** Chat presentation derived from Host-backed detail, collapse timing, and folded replies. */
 
-import type { ObservableSnapshot } from '@deepseek-ai/dsh-client-store'
+import type { ObservableSnapshot } from '@agentrans/client-store'
 import { DEFAULT_FOLDED_REPLIES, type CollapseTiming, type FoldedReplies, type TranscriptViewMode } from '../chat-settings.ts'
 export { COLLAPSE_TIMINGS, FOLDED_REPLIES, type CollapseTiming, type FoldedReplies } from '../chat-settings.ts'
 

@@ -14,7 +14,7 @@
  * {@link installViewerCarrier} runs in the browser from its own source text, so it must reference no
  * module binding: every constant and helper it needs is declared inside its body.
  *
- * @module @deepseek-ai/dsh-experimental-liveshare-protocol
+ * @module @agentrans/experimental-liveshare-protocol
  */
 
 /** Page global naming the share one viewer page presents; the Liveshare client plugin reads it. */

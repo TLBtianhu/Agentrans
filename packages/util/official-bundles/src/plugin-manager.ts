@@ -6,15 +6,15 @@
  * entry, installation-carried bundles, and unaddressable rows stay protected by their own rules.
  */
 export const PROTECTED_PLUGINS: ReadonlySet<string> = new Set([
-  '@deepseek-ai/dsh-plugin-manager', '@deepseek-ai/cordis-plugin-loader',
-  '@deepseek-ai/cordis-plugin-include', '@deepseek-ai/dsh-api-gateway',
-  '@deepseek-ai/dsh-host-webserver', '@deepseek-ai/dsh-client-modules',
-  '@deepseek-ai/dsh-client-ui-settings-plugin-inventory', '@deepseek-ai/dsh-client-ui-plugin-manager',
-  '@deepseek-ai/dsh-host-plugin-inventory', '@deepseek-ai/dsh-typert-registry',
-  '@deepseek-ai/dsh-api-remotes', '@deepseek-ai/dsh-api-remote-access',
-  '@deepseek-ai/cordis-plugin-timer', '@deepseek-ai/dsh-client-connection',
-  '@deepseek-ai/dsh-host-frontend-static', '@deepseek-ai/dsh-tools',
-  '@deepseek-ai/dsh-hmr',
+  '@agentrans/plugin-manager', '@agentrans/cordis-plugin-loader',
+  '@agentrans/cordis-plugin-include', '@agentrans/api-gateway',
+  '@agentrans/host-webserver', '@agentrans/client-modules',
+  '@agentrans/client-ui-settings-plugin-inventory', '@agentrans/client-ui-plugin-manager',
+  '@agentrans/host-plugin-inventory', '@agentrans/typert-registry',
+  '@agentrans/api-remotes', '@agentrans/api-remote-access',
+  '@agentrans/cordis-plugin-timer', '@agentrans/client-connection',
+  '@agentrans/host-frontend-static', '@agentrans/tools',
+  '@agentrans/hmr',
 ])
 
 /**
@@ -22,13 +22,13 @@ export const PROTECTED_PLUGINS: ReadonlySet<string> = new Set([
  * Their Host availability and activation stay intact.
  */
 export const HIDDEN_BUNDLES: ReadonlySet<string> = new Set([
-  '@deepseek-ai/dsh-base',
-  '@deepseek-ai/dsh-web-app',
-  '@deepseek-ai/dsh-headless',
-  '@deepseek-ai/dsh-sdk-app',
-  '@deepseek-ai/dsh-acp-app',
-  '@deepseek-ai/dsh-sdk-minimal',
-  '@deepseek-ai/dsh-experimental-terminal-bundle',
+  '@agentrans/base',
+  '@agentrans/web-app',
+  '@agentrans/headless',
+  '@agentrans/sdk-app',
+  '@agentrans/acp-app',
+  '@agentrans/sdk-minimal',
+  '@agentrans/experimental-terminal-bundle',
 ])
 
 /**
@@ -36,10 +36,10 @@ export const HIDDEN_BUNDLES: ReadonlySet<string> = new Set([
  * this list, decides whether a bundle appears on the main list.
  */
 export const EXTENSION_BUNDLES: readonly string[] = [
-  '@deepseek-ai/dsh-experimental-agent-team-profile',
-  '@deepseek-ai/dsh-experimental-voice-input-bundle',
-  '@deepseek-ai/dsh-experimental-plugin-market-bundle',
-  '@deepseek-ai/dsh-experimental-auto-review',
+  '@agentrans/experimental-agent-team-profile',
+  '@agentrans/experimental-voice-input-bundle',
+  '@agentrans/experimental-plugin-market-bundle',
+  '@agentrans/experimental-auto-review',
 ]
 
 /**
@@ -47,34 +47,34 @@ export const EXTENSION_BUNDLES: readonly string[] = [
  * which includes every eligible bundle, ranks them last in this order.
  */
 export const MORE_BUNDLES: readonly string[] = [
-  '@deepseek-ai/dsh-personalized-recommendations',
-  '@deepseek-ai/dsh-experimental-inspector-profile',
-  '@deepseek-ai/dsh-cua-bundle',
-  '@deepseek-ai/dsh-experimental-tool-worktree',
-  '@deepseek-ai/dsh-experimental-cot-translation-bundle',
-  '@deepseek-ai/dsh-experimental-session-search',
-  '@deepseek-ai/dsh-experimental-session-titles-bundle',
-  '@deepseek-ai/dsh-experimental-badge-skill-bundle',
-  '@deepseek-ai/dsh-experimental-ralph-bundle',
-  '@deepseek-ai/dsh-subagent-codex',
-  '@deepseek-ai/dsh-subagent-claude-code',
+  '@agentrans/personalized-recommendations',
+  '@agentrans/experimental-inspector-profile',
+  '@agentrans/cua-bundle',
+  '@agentrans/experimental-tool-worktree',
+  '@agentrans/experimental-cot-translation-bundle',
+  '@agentrans/experimental-session-search',
+  '@agentrans/experimental-session-titles-bundle',
+  '@agentrans/experimental-badge-skill-bundle',
+  '@agentrans/experimental-ralph-bundle',
+  '@agentrans/subagent-codex',
+  '@agentrans/subagent-claude-code',
 ]
 
 /** Official bundles the plugin manager marks with the Experimental badge. */
 export const EXPERIMENTAL_BUNDLES: ReadonlySet<string> = new Set([
-  '@deepseek-ai/dsh-personalized-recommendations',
-  '@deepseek-ai/dsh-cua-bundle',
-  '@deepseek-ai/dsh-experimental-agent-team-profile',
-  '@deepseek-ai/dsh-experimental-voice-input-bundle',
-  '@deepseek-ai/dsh-experimental-auto-review',
-  '@deepseek-ai/dsh-experimental-inspector-profile',
-  '@deepseek-ai/dsh-experimental-forge-bundle',
-  '@deepseek-ai/dsh-experimental-tool-worktree',
-  '@deepseek-ai/dsh-experimental-cot-translation-bundle',
-  '@deepseek-ai/dsh-experimental-session-search',
-  '@deepseek-ai/dsh-experimental-session-titles-bundle',
-  '@deepseek-ai/dsh-experimental-badge-skill-bundle',
-  '@deepseek-ai/dsh-experimental-ralph-bundle',
-  '@deepseek-ai/dsh-experimental-plugin-market-bundle',
-  '@deepseek-ai/dsh-experimental-liveshare',
+  '@agentrans/personalized-recommendations',
+  '@agentrans/cua-bundle',
+  '@agentrans/experimental-agent-team-profile',
+  '@agentrans/experimental-voice-input-bundle',
+  '@agentrans/experimental-auto-review',
+  '@agentrans/experimental-inspector-profile',
+  '@agentrans/experimental-forge-bundle',
+  '@agentrans/experimental-tool-worktree',
+  '@agentrans/experimental-cot-translation-bundle',
+  '@agentrans/experimental-session-search',
+  '@agentrans/experimental-session-titles-bundle',
+  '@agentrans/experimental-badge-skill-bundle',
+  '@agentrans/experimental-ralph-bundle',
+  '@agentrans/experimental-plugin-market-bundle',
+  '@agentrans/experimental-liveshare',
 ])

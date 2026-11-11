@@ -1,6 +1,6 @@
 /** Shared management edits remain atomic and ordered against delivery, cancellation, and persistence. */
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import { SessionId } from '@deepseek-ai/dsh-session'
+import { SessionId } from '@agentrans/session'
 import { MemoryMediaPool } from '../../../storage/storage-domain/tests/helpers/memory-backend.ts'
 import { agentFor, gatedScheduleBackend, harness, taskTable } from './harness.ts'
 import type { ScheduleCatalogEntry } from '../src/types.ts'

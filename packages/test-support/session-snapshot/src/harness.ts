@@ -13,7 +13,7 @@
  *
  * See packages/test-support/session-snapshot/README.md.
  *
- * @module @deepseek-ai/dsh-session-snapshot/harness
+ * @module @agentrans/session-snapshot/harness
  */
 
 import { cp, mkdtemp, readFile, readdir, rm } from 'node:fs/promises'
@@ -35,7 +35,7 @@ import {
   type AgentUnderTest,
   type LaunchedAcpTestAgent,
 } from './launcher.ts'
-import { clearedProxyEnv } from '@deepseek-ai/dsh-http-proxy'
+import { clearedProxyEnv } from '@agentrans/http-proxy'
 import {
   assertPersistedSessionVersion,
   latestPersistedSessionPaths,

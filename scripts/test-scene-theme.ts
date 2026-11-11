@@ -8,7 +8,7 @@
  * product contract intact and makes the test DOM a themed surface.
  */
 import { beforeAll } from 'vitest'
-import { SCENE_PALETTE_ROLES, SCENE_PALETTE_TOKENS } from '@deepseek-ai/dsh-artifact/scene-renderers'
+import { SCENE_PALETTE_ROLES, SCENE_PALETTE_TOKENS } from '@agentrans/artifact/scene-renderers'
 
 /** Values mirror the light palette; tests assert behavior, not exact tint. */
 const ROLE_VALUES: Record<(typeof SCENE_PALETTE_ROLES)[number], string> = {

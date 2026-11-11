@@ -7,7 +7,7 @@
  * This module composes those headers and merges cookies for requests the view
  * makes to its own origin.
  */
-import type { AccountClientMetadata } from '@deepseek-ai/dsh-deepseek-account/types'
+import type { AccountClientMetadata } from '@agentrans/deepseek-account/types'
 
 /**
  * Identify native desktop API requests; null leaves non-desktop requests unchanged.

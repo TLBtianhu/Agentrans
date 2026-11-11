@@ -1,11 +1,11 @@
 /** Read immutable plan arguments from a Session history page and earlier pages. */
-import type { Context } from '@deepseek-ai/cordis'
-import type { ResourceProvider } from '@deepseek-ai/dsh-client-resources/client'
-import { RemoteError, remoteErrorOf } from '@deepseek-ai/dsh-typert-protocol'
-import type { RemoteResult } from '@deepseek-ai/dsh-typert-protocol'
+import type { Context } from '@agentrans/cordis'
+import type { ResourceProvider } from '@agentrans/client-resources/client'
+import { RemoteError, remoteErrorOf } from '@agentrans/typert-protocol'
+import type { RemoteResult } from '@agentrans/typert-protocol'
 import { parsePlanAddress, submittedPlan, type SubmittedPlan } from './plan.ts'
 
-declare module '@deepseek-ai/dsh-typert-protocol' {
+declare module '@agentrans/typert-protocol' {
   interface RemoteErrorDetailsMap {
     /** The resource URL does not identify a plan invocation. */
     'plan/invalid-address': Record<string, never>
@@ -16,7 +16,7 @@ declare module '@deepseek-ai/dsh-typert-protocol' {
   }
 }
 
-declare module '@deepseek-ai/dsh-client-ui-slots' {
+declare module '@agentrans/client-ui-slots' {
   interface ResourceProtocolMap {
     /** Immutable Markdown from a logged exit_plan_mode invocation. */
     plan: SubmittedPlan

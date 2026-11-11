@@ -66,7 +66,7 @@ function unmetRequirements(fields: Record<string, unknown>, runtimeVersion: stri
     if (typeof range !== 'string') {
       throw new Error(`Plugin manifest peerDependencies[${JSON.stringify(name)}] must be a string`)
     }
-    if (name !== '@deepseek-ai/dsh' && !name.startsWith('@deepseek-ai/dsh-')) continue
+    if (name !== '@agentrans/dsh' && !name.startsWith('@agentrans/')) continue
     const requirement = ['workspace:^', 'workspace:~', 'workspace:*'].includes(range) ? runtimeVersion : range
     if (!satisfies(runtimeVersion, requirement)) unmet[name] = range
   }
@@ -75,7 +75,7 @@ function unmetRequirements(fields: Record<string, unknown>, runtimeVersion: stri
 
 /**
  * Check the plugin's dsh requirements against the runtime. An own `engines.dsh` range decides alone and
- * peerDependencies are ignored; otherwise every @deepseek-ai/dsh or @deepseek-ai/dsh-* peer must match.
+ * peerDependencies are ignored; otherwise every @agentrans/dsh or @agentrans/* peer must match.
  * Prereleases participate in ranges. For peers only, workspace:^, workspace:~, and workspace:* refer to
  * the current runtime; other empty or invalid ranges, including any workspace: `engines.dsh`, are unmet.
  * @param manifest - parsed plugin package.json; inherited fields are ignored.

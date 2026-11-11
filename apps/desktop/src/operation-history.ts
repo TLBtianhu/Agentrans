@@ -2,7 +2,7 @@
 import { open } from 'node:fs/promises'
 import { join } from 'node:path'
 import { setImmediate } from 'node:timers/promises'
-import { parsePluginOperationRecord, type PluginOperationRecord } from '@deepseek-ai/dsh-plugin-manager/diagnostic'
+import { parsePluginOperationRecord, type PluginOperationRecord } from '@agentrans/plugin-manager/diagnostic'
 
 /** Resource budgets for auxiliary history collection, independent of basic crash report writing. */
 export interface OperationHistoryReadLimits {

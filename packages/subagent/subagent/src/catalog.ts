@@ -1,20 +1,20 @@
 /**
  * Parent-owned durable subagent catalog events and their chunked projection.
  *
- * @module @deepseek-ai/dsh-subagent/catalog
+ * @module @agentrans/subagent/catalog
  */
 
 import { z } from 'zod'
-import { appendChunkedList, chunkedListSchema, iterateChunkedList } from '@deepseek-ai/dsh-chunked-list'
-import type { ChunkedList } from '@deepseek-ai/dsh-chunked-list'
+import { appendChunkedList, chunkedListSchema, iterateChunkedList } from '@agentrans/chunked-list'
+import type { ChunkedList } from '@agentrans/chunked-list'
 import type {
   Session,
   SessionEvent,
   SessionHeader,
   SessionId,
   SessionLogOffset,
-} from '@deepseek-ai/dsh-session'
-import type { ProjectionDefinition } from '@deepseek-ai/dsh-session-projection'
+} from '@agentrans/session'
+import type { ProjectionDefinition } from '@agentrans/session-projection'
 import type { SubagentCatalogEntry } from './projection-types.ts'
 
 /** Catalog payload version emitted by local child creation. */
@@ -35,7 +35,7 @@ export type SubagentCatalogEvent =
     | { readonly version: 2; readonly mode: 'external'; readonly label?: string }
   )
 
-declare module '@deepseek-ai/dsh-session/types' {
+declare module '@agentrans/session/types' {
   interface SessionEventMap {
     /**
      * A direct child's identity and available discovery fields.

@@ -1,6 +1,6 @@
-/** Stable identities and outcomes for Session input admission. @module @deepseek-ai/dsh-session-input/types */
-import type { Branded } from '@deepseek-ai/dsh-brand'
-import type { MessageId } from '@deepseek-ai/dsh-llm'
+/** Stable identities and outcomes for Session input admission. @module @agentrans/session-input/types */
+import type { Branded } from '@agentrans/brand'
+import type { MessageId } from '@agentrans/llm'
 
 /** Existing ordinary-prompt identity; the brand remains unchanged across its owner migration. */
 export type SessionInputRequestId = Branded<'session-request-id'>

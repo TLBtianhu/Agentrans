@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-client-ui-settings-models",
+  "name": "@agentrans/client-ui-settings-models",
   "description": "Models settings and shared product-onboarding dialogs over existing settings and credential joins",
   "version": "0.1.0",
   "publishConfig": {
@@ -29,9 +29,9 @@
   "dsh": {
     "client": {
       "inject": [
-        "@deepseek-ai/dsh-client-ui-settings",
-        "@deepseek-ai/dsh-client-locale",
-        "@deepseek-ai/dsh-api-remotes"
+        "@agentrans/client-ui-settings",
+        "@agentrans/client-locale",
+        "@agentrans/api-remotes"
       ],
       "platform": "web"
     }
@@ -42,26 +42,26 @@
   },
   "license": "MIT",
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/cordis": "workspace:~"
   },
   "devDependencies": {
-    "@deepseek-ai/dsh-host-webserver": "workspace:*",
-    "@deepseek-ai/dsh-api-remotes": "workspace:*",
-    "@deepseek-ai/dsh-client-locale": "workspace:*",
-    "@deepseek-ai/dsh-client-store": "workspace:*",
-    "@deepseek-ai/dsh-client-test-runtime": "workspace:*",
-    "@deepseek-ai/dsh-client-ui-primitives": "workspace:*",
-    "@deepseek-ai/dsh-client-ui-settings": "workspace:*",
-    "@deepseek-ai/dsh-client-ui-slots": "workspace:*",
-    "@deepseek-ai/cordis": "workspace:~",
+    "@agentrans/host-webserver": "workspace:*",
+    "@agentrans/api-remotes": "workspace:*",
+    "@agentrans/client-locale": "workspace:*",
+    "@agentrans/client-store": "workspace:*",
+    "@agentrans/client-test-runtime": "workspace:*",
+    "@agentrans/client-ui-primitives": "workspace:*",
+    "@agentrans/client-ui-settings": "workspace:*",
+    "@agentrans/client-ui-slots": "workspace:*",
+    "@agentrans/cordis": "workspace:~",
     "react": "^18.2.0",
-    "@deepseek-ai/dsh-client-ui-renderer": "workspace:*",
-    "@deepseek-ai/dsh-util-values": "workspace:*",
-    "@deepseek-ai/dsh-remote-mock": "workspace:*",
-    "@deepseek-ai/dsh-client-product-analytics": "workspace:*"
+    "@agentrans/client-ui-renderer": "workspace:*",
+    "@agentrans/util-values": "workspace:*",
+    "@agentrans/remote-mock": "workspace:*",
+    "@agentrans/client-product-analytics": "workspace:*"
   },
   "dependencies": {
-    "@deepseek-ai/schemastery": "workspace:~"
+    "@agentrans/schemastery": "workspace:~"
   },
   "files": [
     "locale/*.json",

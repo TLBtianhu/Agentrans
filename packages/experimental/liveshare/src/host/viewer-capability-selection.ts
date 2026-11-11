@@ -10,10 +10,10 @@
  * written before the selection existed keeps meaning "none", and an explicit empty submission clears
  * the field rather than storing an empty list.
  *
- * @module @deepseek-ai/dsh-experimental-liveshare/src/host/viewer-capability-selection
+ * @module @agentrans/experimental-liveshare/src/host/viewer-capability-selection
  */
 
-import type { RemoteAccessEndpoint } from '@deepseek-ai/dsh-api-remote-access/types'
+import type { RemoteAccessEndpoint } from '@agentrans/api-remote-access/types'
 import type { ViewerCapabilityGroup } from './viewer-declarations.ts'
 import { isRecord } from './wire-json.ts'
 

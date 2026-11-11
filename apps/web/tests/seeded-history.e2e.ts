@@ -15,13 +15,13 @@ import { fileURLToPath } from 'node:url'
 import type { Browser, Page } from 'playwright'
 import { chromium } from 'playwright'
 import { afterAll, beforeAll, describe, expect, it, onTestFailed } from 'vitest'
-import { createLaunchEnvironmentSnapshot } from '@deepseek-ai/dsh-launch-environment'
-import { createMessage, createUserMessage } from '@deepseek-ai/dsh-llm'
-import type { ContentBlock, ContextFormed, Message, MessageSource } from '@deepseek-ai/dsh-llm'
-import { deriveEventMessage, SessionId } from '@deepseek-ai/dsh-session'
-import type { SessionEvent } from '@deepseek-ai/dsh-session'
-import type { TokenMeter } from '@deepseek-ai/dsh-token-meter'
-import type {} from '@deepseek-ai/dsh-api-terminal-controller'
+import { createLaunchEnvironmentSnapshot } from '@agentrans/launch-environment'
+import { createMessage, createUserMessage } from '@agentrans/llm'
+import type { ContentBlock, ContextFormed, Message, MessageSource } from '@agentrans/llm'
+import { deriveEventMessage, SessionId } from '@agentrans/session'
+import type { SessionEvent } from '@agentrans/session'
+import type { TokenMeter } from '@agentrans/token-meter'
+import type {} from '@agentrans/api-terminal-controller'
 import { join } from 'node:path'
 import {
   acknowledgeReloadConnectionLoss, assertFixtureInventory, captureExpandedTurnProcessAria, captureStableAria,
@@ -31,7 +31,7 @@ import {
 } from './scaffold.ts'
 import { expandOwningTurnProcess, newEnglishPage, pinBrowserClock, pinHostClock, saveFailureShot, WEB_FIXTURE_TIME } from './support.ts'
 
-declare module '@deepseek-ai/dsh-llm' {
+declare module '@agentrans/llm' {
   interface MessageSourceMap {
     'fixture': { kind: 'fixture' } & ContextFormed
   }

@@ -1,6 +1,6 @@
 /** Localized plan-owned failures and unmodified external diagnostics. */
-import type { RemoteFailure } from '@deepseek-ai/dsh-typert-protocol'
-import type { TranslateNS } from '@deepseek-ai/dsh-client-locale/client'
+import type { RemoteFailure } from '@agentrans/typert-protocol'
+import type { TranslateNS } from '@agentrans/client-locale/client'
 
 /**
  * Explain a failed plan read in the current locale.

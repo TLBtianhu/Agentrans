@@ -1,6 +1,6 @@
 /** Select PTC for the parent program, then restore native calls before child creation. */
-import { NativeToolExecutor } from '@deepseek-ai/dsh-tool-executor-native'
-import { PtcExecutor } from '@deepseek-ai/dsh-tool-executor-ptc'
+import { NativeToolExecutor } from '@agentrans/tool-executor-native'
+import { PtcExecutor } from '@agentrans/tool-executor-ptc'
 
 export const name = 'advanced-toolchain-presentation'
 export const inject = ['tools']

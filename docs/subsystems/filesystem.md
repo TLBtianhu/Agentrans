@@ -308,7 +308,7 @@ The policy plugin needs just enough execution context to derive the observed-sta
 ```ts type-equiv
 /**
  * Minimal structural view of a tool execution the policy plugin needs to derive
- * an observed-state owner. `@deepseek-ai/dsh-tools`' `ToolExecution` contains
+ * an observed-state owner. `@agentrans/tools`' `ToolExecution` contains
  * these fields, so the tool passes its `exec` straight through as the opaque
  * `object` actor on the `fs/*` events; this plugin narrows that actor to
  * `FsObservationActor` without importing `dsh-tools`, `dsh-agent`, or `dsh-session`.
@@ -367,7 +367,7 @@ Filesystem failures use stable `FsErrorCode` strings carried by `FsError` (`Harn
 `FS_PATCH_MISMATCH` means a hunk failed inside the provider commit; its message names the patch line and failed search stage. `FS_SAME_TARGET` means a move source and destination share the resolved identity. Delete intent follows edit intent: unseen is `FS_NOT_OBSERVED`, observed absence is `FS_NOT_FOUND`, and present state supplies a version. Provider-side missing patch/delete/move sources use `FS_STALE_VERSION` even without a guard.
 
 ```ts
-import { FS_ERROR_CODES } from '@deepseek-ai/dsh-fs'
+import { FS_ERROR_CODES } from '@agentrans/fs'
 ```
 
 ```ts type-equiv
@@ -379,7 +379,7 @@ type FsErrorCode = typeof FS_ERROR_CODES[number]
 
 ## No timeouts on file IO
 
-`read`/`write`/`edit` take **no** `timeoutMs`, and the provider contract arms no deadline — unlike bash and web (which consume [`@deepseek-ai/dsh-timeout`](../../packages/util/timeout/README.md)) and the subprocess-backed `glob`/`grep` (whose declared `timeoutMs` is enforced by `@deepseek-ai/dsh-tool-call-timeout-policy`): those are process-backed, where a deadline can really kill the work. A local syscall is best-effort-abortable at most — a timeout could not force an in-progress `fsync`/`rename` to stop, so a `timeoutMs` here would be a deadline the seam cannot enforce, and an implicit default in the exact place explicit-over-implicit forbids. Cancellation still propagates through the tool-execution signal for best-effort abort at syscall boundaries.
+`read`/`write`/`edit` take **no** `timeoutMs`, and the provider contract arms no deadline — unlike bash and web (which consume [`@agentrans/timeout`](../../packages/util/timeout/README.md)) and the subprocess-backed `glob`/`grep` (whose declared `timeoutMs` is enforced by `@agentrans/tool-call-timeout-policy`): those are process-backed, where a deadline can really kill the work. A local syscall is best-effort-abortable at most — a timeout could not force an in-progress `fsync`/`rename` to stop, so a `timeoutMs` here would be a deadline the seam cannot enforce, and an implicit default in the exact place explicit-over-implicit forbids. Cancellation still propagates through the tool-execution signal for best-effort abort at syscall boundaries.
 
 ## The service and the plugin
 

@@ -35,7 +35,7 @@ afterEach(() => { vi.restoreAllMocks() })
 it.each(['en', 'zh-CN'])('offers exit and restart for a listener conflict without a saved report in %s', async (locale) => {
   const { operations, choice, stopped, recovery } = fixture(locale)
   const pending = recovery.report(new AggregateError([
-    new Error('webserver (@deepseek-ai/dsh-host-webserver): Error: listen EADDRINUSE: address already in use 127.0.0.1:19387'),
+    new Error('webserver (@agentrans/host-webserver): Error: listen EADDRINUSE: address already in use 127.0.0.1:19387'),
   ], 'required startup failure'), 'host')
   await shown(operations)
   const options = operations.show.mock.calls[0]![0]

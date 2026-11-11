@@ -4,27 +4,27 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { performance } from 'node:perf_hooks'
 import { scheduler } from 'node:timers/promises'
-import { Context } from '@deepseek-ai/cordis'
-import AgentLoop from '@deepseek-ai/dsh-agent-loop'
-import { mountAgentLoopTestDependencies } from '@deepseek-ai/dsh-agent-loop-testkit'
-import { agentPresetProjectionDefinition } from '@deepseek-ai/dsh-agent-preset-registry'
-import RemoteAccessService from '@deepseek-ai/dsh-api-remote-access'
-import type SessionController from '@deepseek-ai/dsh-api-session-controller'
-import { currentSessionMessageProjections } from '@deepseek-ai/dsh-session-format-catalog/message-projections'
-import { Session, SessionLogOffset } from '@deepseek-ai/dsh-session'
-import type { SessionId } from '@deepseek-ai/dsh-session'
-import * as JsonlSessionPersistence from '@deepseek-ai/dsh-session-persistence-jsonl'
-import SessionProjectionCache, { checkpointRecord, projectionCacheDomainSpec } from '@deepseek-ai/dsh-session-projection-cache'
-import type { CheckpointRecord } from '@deepseek-ai/dsh-session-projection-cache'
-import SqliteSessionQueryEngine from '@deepseek-ai/dsh-session-query-sqlite'
-import * as SessionStatsPlugin from '@deepseek-ai/dsh-session-stats'
-import SessionTitleService from '@deepseek-ai/dsh-session-title'
-import * as SessionTurnOutlinePlugin from '@deepseek-ai/dsh-session-turn-outline'
-import Storage from '@deepseek-ai/dsh-storage'
-import * as StorageDomain from '@deepseek-ai/dsh-storage-domain'
-import type { KvTable } from '@deepseek-ai/dsh-storage-domain'
-import * as StorageJson from '@deepseek-ai/dsh-storage-json'
-import TokenMeter from '@deepseek-ai/dsh-token-meter'
+import { Context } from '@agentrans/cordis'
+import AgentLoop from '@agentrans/agent-loop'
+import { mountAgentLoopTestDependencies } from '@agentrans/agent-loop-testkit'
+import { agentPresetProjectionDefinition } from '@agentrans/agent-preset-registry'
+import RemoteAccessService from '@agentrans/api-remote-access'
+import type SessionController from '@agentrans/api-session-controller'
+import { currentSessionMessageProjections } from '@agentrans/session-format-catalog/message-projections'
+import { Session, SessionLogOffset } from '@agentrans/session'
+import type { SessionId } from '@agentrans/session'
+import * as JsonlSessionPersistence from '@agentrans/session-persistence-jsonl'
+import SessionProjectionCache, { checkpointRecord, projectionCacheDomainSpec } from '@agentrans/session-projection-cache'
+import type { CheckpointRecord } from '@agentrans/session-projection-cache'
+import SqliteSessionQueryEngine from '@agentrans/session-query-sqlite'
+import * as SessionStatsPlugin from '@agentrans/session-stats'
+import SessionTitleService from '@agentrans/session-title'
+import * as SessionTurnOutlinePlugin from '@agentrans/session-turn-outline'
+import Storage from '@agentrans/storage'
+import * as StorageDomain from '@agentrans/storage-domain'
+import type { KvTable } from '@agentrans/storage-domain'
+import * as StorageJson from '@agentrans/storage-json'
+import TokenMeter from '@agentrans/token-meter'
 import { assertBuiltBenchmarkRuntime } from '../support/built-worker.ts'
 import { serializeRecord } from '../../packages/storage/storage-json/src/format.ts'
 import { ANCHOR_COUNT } from './corpus-shape.ts'
@@ -360,10 +360,10 @@ async function measureFork(root: string, ranks: readonly number[]): Promise<Fork
 }
 
 assertBuiltBenchmarkRuntime(import.meta.url, Object.fromEntries([
-  '@deepseek-ai/dsh-api-session-controller',
-  '@deepseek-ai/dsh-session-persistence-jsonl',
-  '@deepseek-ai/dsh-session-query-sqlite',
-  '@deepseek-ai/dsh-session-projection-cache',
+  '@agentrans/api-session-controller',
+  '@agentrans/session-persistence-jsonl',
+  '@agentrans/session-query-sqlite',
+  '@agentrans/session-projection-cache',
 ].map(name => [name, import.meta.resolve(name)])))
 
 const USAGE = 'usage: session-corpus.worker.js <root> <anchors anchors...|seed name count|list count|search|fork ranks...>'

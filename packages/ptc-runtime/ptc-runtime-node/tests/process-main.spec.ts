@@ -1,4 +1,4 @@
-import type { PtcProgramFormat } from '@deepseek-ai/dsh-ptc-runtime'
+import type { PtcProgramFormat } from '@agentrans/ptc-runtime'
 import { Duplex, PassThrough } from 'node:stream'
 import { setImmediate as nextTurn } from 'node:timers/promises'
 import { expect, it, onTestFinished, vi } from 'vitest'

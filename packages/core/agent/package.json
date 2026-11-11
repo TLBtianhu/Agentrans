@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-agent",
+  "name": "@agentrans/agent",
   "description": "Agent interface, registry, initiator scope, and event vocabulary for the DeepSeek Harness",
   "version": "0.1.0",
   "publishConfig": {
@@ -34,35 +34,35 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@deepseek-ai/dsh-llm": "workspace:*",
-    "@deepseek-ai/dsh-scope": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-session-projection": "workspace:*",
-    "@deepseek-ai/dsh-system-prompt": "workspace:*",
-    "@deepseek-ai/dsh-typert-protocol": "workspace:*",
-    "@deepseek-ai/dsh-util-values": "workspace:*",
-    "@deepseek-ai/dsh-workspace": "workspace:*",
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/llm": "workspace:*",
+    "@agentrans/scope": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/session-projection": "workspace:*",
+    "@agentrans/system-prompt": "workspace:*",
+    "@agentrans/typert-protocol": "workspace:*",
+    "@agentrans/util-values": "workspace:*",
+    "@agentrans/workspace": "workspace:*",
+    "@agentrans/cordis": "workspace:~"
   },
   "peerDependenciesMeta": {
-    "@deepseek-ai/dsh-workspace": {
+    "@agentrans/workspace": {
       "optional": true
     }
   },
   "devDependencies": {
-    "@deepseek-ai/dsh-llm": "workspace:*",
-    "@deepseek-ai/dsh-scope": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-session-projection": "workspace:*",
-    "@deepseek-ai/dsh-system-prompt": "workspace:*",
-    "@deepseek-ai/dsh-typert-protocol": "workspace:*",
-    "@deepseek-ai/dsh-typert-registry": "workspace:*",
-    "@deepseek-ai/dsh-util-values": "workspace:*",
-    "@deepseek-ai/dsh-workspace": "workspace:*",
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/llm": "workspace:*",
+    "@agentrans/scope": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/session-projection": "workspace:*",
+    "@agentrans/system-prompt": "workspace:*",
+    "@agentrans/typert-protocol": "workspace:*",
+    "@agentrans/typert-registry": "workspace:*",
+    "@agentrans/util-values": "workspace:*",
+    "@agentrans/workspace": "workspace:*",
+    "@agentrans/cordis": "workspace:~"
   },
   "dependencies": {
-    "@deepseek-ai/dsh-brand": "workspace:*",
+    "@agentrans/brand": "workspace:*",
     "zod": "4.4.3"
   }
 }

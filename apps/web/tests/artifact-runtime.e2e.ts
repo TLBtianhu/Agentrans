@@ -4,8 +4,8 @@ import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium, type Browser, type Page } from 'playwright'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { brandString } from '@deepseek-ai/dsh-brand'
-import type { ArtifactId } from '@deepseek-ai/dsh-artifact/types'
+import { brandString } from '@agentrans/brand'
+import type { ArtifactId } from '@agentrans/artifact/types'
 import {
   acknowledgeReloadConnectionLoss, assertFixtureInventory, fixtureUserPrompts, launchWebScaffold,
   watchConsole, webSnapshotMode, type WebScaffold,

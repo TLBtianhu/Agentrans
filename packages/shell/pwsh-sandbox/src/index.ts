@@ -1,6 +1,6 @@
 /**
  * Sandbox-consuming PowerShell executor — the pwsh twin of
- * `@deepseek-ai/dsh-bash-sandbox`. It wraps the exact local pwsh argv through
+ * `@agentrans/bash-sandbox`. It wraps the exact local pwsh argv through
  * `ctx.sandbox` (which on Windows resolves to the ACL restricted-token runner
  * chain), inherits local process mechanics, and reports the selected mode,
  * enforcement, and denial facts. Positive runner-executable evidence
@@ -9,12 +9,12 @@
  * other provider rejections retain stage-neutral local-executor semantics. The
  * tool layer owns the escalation approval flow through `ctx.approval`; this
  * executor reports the sandbox facts the tool renders.
- * @module @deepseek-ai/dsh-pwsh-sandbox
+ * @module @agentrans/pwsh-sandbox
  */
 
-import { Context } from '@deepseek-ai/cordis'
-import type { ShellExecRequest, ShellExecSpec, ShellExecution, ShellProcess, ShellRunResult } from '@deepseek-ai/dsh-shell'
-import { SandboxUnavailableError } from '@deepseek-ai/dsh-sandbox'
+import { Context } from '@agentrans/cordis'
+import type { ShellExecRequest, ShellExecSpec, ShellExecution, ShellProcess, ShellRunResult } from '@agentrans/shell'
+import { SandboxUnavailableError } from '@agentrans/sandbox'
 import type {
   ConfinedArgv,
   ConfinedSandboxMode,
@@ -23,16 +23,16 @@ import type {
   SandboxExecutionPolicy,
   SandboxMode,
   SandboxPolicy,
-} from '@deepseek-ai/dsh-sandbox'
-import type {} from '@deepseek-ai/dsh-sandbox-policy'
-import { PwshLocalExecutor } from '@deepseek-ai/dsh-pwsh-local'
-import type { Config as LocalConfig } from '@deepseek-ai/dsh-pwsh-local'
+} from '@agentrans/sandbox'
+import type {} from '@agentrans/sandbox-policy'
+import { PwshLocalExecutor } from '@agentrans/pwsh-local'
+import type { Config as LocalConfig } from '@agentrans/pwsh-local'
 import { classifyDenial, classifyRunnerFailure, isRunnerSpawnFailure, matchesSignature } from './helpers.ts'
 
 /**
  * Plugin config: the local executor's knobs, verbatim. The sandbox policy —
  * the default mode and fallback `workspace-write` root — is NOT here: it lives
- * on `ctx.sandboxPolicy` (`@deepseek-ai/dsh-sandbox-policy`), which resolves
+ * on `ctx.sandboxPolicy` (`@agentrans/sandbox-policy`), which resolves
  * each calling session's mode and cwd for every enforcing capability. The
  * runner choice is likewise the `ctx.sandbox` provider's config, not this
  * executor's.

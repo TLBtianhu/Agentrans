@@ -10,12 +10,12 @@
 
 - insert:
     - id: sdk-app-startup
-      name: '@deepseek-ai/dsh-sdk-app'
+      name: '@agentrans/sdk-app'
       config:
         profile: sdk
 
     - id: sdk-jsonrpc-server
-      name: '@deepseek-ai/dsh-sdk-jsonrpc-server'
+      name: '@agentrans/sdk-jsonrpc-server'
       inject: [sdkAppStartup, loader]
       config:
         maxTokensAsSuccess: !!js "process.env.DSH_MAX_TOKENS_AS_SUCCESS === undefined ? true : JSON.parse(process.env.DSH_MAX_TOKENS_AS_SUCCESS)"
@@ -30,13 +30,13 @@
 # including an empty-string opt-out. Each row can be patched independently.
 - insert:
     - id: workspace-dependencies
-      name: '@deepseek-ai/dsh-tool-workspace-dependencies'
+      name: '@agentrans/tool-workspace-dependencies'
       disabled: !!js "!(process.env.DSH_PRIMARY_RUNTIME ?? process.env.DSH_BUNDLED_PRIMARY_RUNTIME)"
       config:
         source: !!js "process.getBuiltinModule('node:path').resolve(process.env.DSH_PRIMARY_RUNTIME ?? process.env.DSH_BUNDLED_PRIMARY_RUNTIME ?? '')"
 
     - id: skill-office
-      name: '@deepseek-ai/dsh-skill-office'
+      name: '@agentrans/skill-office'
       disabled: !!js "!(process.env.DSH_PRIMARY_RUNTIME ?? process.env.DSH_BUNDLED_PRIMARY_RUNTIME) && !process.env.DSH_BUNDLED_OFFICE_CLI"
       config:
         assetRoot: !!js "process.env.DSH_BUNDLED_OFFICE_SKILLS ?? process.getBuiltinModule('node:path').resolve(process.env.DSH_PRIMARY_RUNTIME ?? process.env.DSH_BUNDLED_PRIMARY_RUNTIME ?? '', '..', 'office-skills')"
@@ -46,32 +46,32 @@
 # Share native desktop tools and model context without starting a Web server.
 - insert:
     - id: connection
-      name: '@deepseek-ai/dsh-client-connection'
+      name: '@agentrans/client-connection'
 
     - id: file-upload
-      name: '@deepseek-ai/dsh-client-file-upload'
+      name: '@agentrans/client-file-upload'
 
     - id: workspace
-      name: '@deepseek-ai/dsh-workspace'
+      name: '@agentrans/workspace'
 
     - id: schedule
-      name: '@deepseek-ai/dsh-schedule'
+      name: '@agentrans/schedule'
       inject: [sdkSessionActivation]
 
     - id: time-context
-      name: '@deepseek-ai/dsh-time-context'
+      name: '@agentrans/time-context'
 
     - id: tool-schedule
-      name: '@deepseek-ai/dsh-tool-schedule'
+      name: '@agentrans/tool-schedule'
 
     - id: tool-ask-user
-      name: '@deepseek-ai/dsh-tool-ask-user'
+      name: '@agentrans/tool-ask-user'
 
     - id: present
-      name: '@deepseek-ai/dsh-tool-present'
+      name: '@agentrans/tool-present'
 
     - id: file-reference-local
-      name: '@deepseek-ai/dsh-file-reference-local'
+      name: '@agentrans/file-reference-local'
 
     - id: deliverable-file-references
-      name: '@deepseek-ai/dsh-deliverable-file-references'
+      name: '@agentrans/deliverable-file-references'

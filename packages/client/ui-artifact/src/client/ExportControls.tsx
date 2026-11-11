@@ -1,12 +1,12 @@
 /** Fixed-input generation requests and projected, verifiable HTML results. */
 import { useEffect, useRef, useState } from 'react'
-import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
-import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
-import type { ArtifactExportSource } from '@deepseek-ai/dsh-artifact/types'
+import { Button } from '@agentrans/client-ui-primitives'
+import type { PropsLocale } from '@agentrans/client-ui-slots'
+import type { ArtifactExportSource } from '@agentrans/artifact/types'
 import type {
   ArtifactExportId, ArtifactHtmlExportFailure, ArtifactHtmlExportRecord, ArtifactHtmlExportRequest,
-} from '@deepseek-ai/dsh-artifact-export/types'
-import { randomUUID } from '@deepseek-ai/dsh-util-crypto'
+} from '@agentrans/artifact-export/types'
+import { randomUUID } from '@agentrans/util-crypto'
 import { ArtifactExportRequestError, type ArtifactExportCommands, type ArtifactExportRequestFailure } from './protocol.ts'
 import css from './ArtifactNodeView.module.css'
 

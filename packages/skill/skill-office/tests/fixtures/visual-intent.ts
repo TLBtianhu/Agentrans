@@ -5,8 +5,8 @@ import { isAbsolute, join, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { execa } from 'execa'
 import { expect, it } from 'vitest'
-import { runLoaderSmoke } from '@deepseek-ai/dsh-loader-smoke'
-import { parseSessionLog } from '@deepseek-ai/dsh-llm-replay'
+import { runLoaderSmoke } from '@agentrans/loader-smoke'
+import { parseSessionLog } from '@agentrans/llm-replay'
 import { officeModelPatches } from './real-office.ts'
 import { renderCliFixture } from './render-cli.ts'
 
@@ -92,8 +92,8 @@ export function registerVisualIntentCases(selected: readonly DocumentFormat[], o
           const fixture = await renderCliFixture(controlRoot, python!, intent === 'blank', callLogPath)
           const testAssetRoot = process.env.DSH_OFFICE_TEST_ASSET_ROOT ?? assetRoot
           await writeFile(configPath, JSON.stringify([
-            { insert: [{ id: 'skill-office', name: '@deepseek-ai/dsh-skill-office', config: { assetRoot: testAssetRoot, node: process.execPath, cli: fixture.cli } }] },
-            { insert: [{ id: 'workspace-dependencies', name: '@deepseek-ai/dsh-tool-workspace-dependencies', config: { source: runtime! } }] },
+            { insert: [{ id: 'skill-office', name: '@agentrans/skill-office', config: { assetRoot: testAssetRoot, node: process.execPath, cli: fixture.cli } }] },
+            { insert: [{ id: 'workspace-dependencies', name: '@agentrans/tool-workspace-dependencies', config: { source: runtime! } }] },
             ...officeModelPatches(),
             { id: 'session-persistence-jsonl', config: { root: sessionRoot, compression: 'none' } },
           ]))

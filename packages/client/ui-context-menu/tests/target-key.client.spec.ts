@@ -2,7 +2,7 @@ import { expect, it } from 'vitest'
 import { menuTargetKey } from '../src/client/target-key.ts'
 import type { ContextMenuTarget } from '../src/client/types.ts'
 
-declare module '@deepseek-ai/dsh-client-ui-context-menu/client' {
+declare module '@agentrans/client-ui-context-menu/client' {
   interface ContextMenuTargetMap { nested: { id: string; data: { a: number; b: readonly (string | null)[] } } }
 }
 

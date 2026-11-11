@@ -1,8 +1,8 @@
 /** Main-document keyboard adapter; local controls arbitrate before window bubbling. */
-import { modalSelector, observeComposition } from '@deepseek-ai/dsh-client-ui-primitives'
+import { modalSelector, observeComposition } from '@agentrans/client-ui-primitives'
 import type { ShortcutContext, ShortcutFixedInput } from './types.ts'
 import type { ShortcutRegistry } from './registry.ts'
-import type { ShortcutPlatform, ShortcutRuntime } from '@deepseek-ai/dsh-shortcut-protocol'
+import type { ShortcutPlatform, ShortcutRuntime } from '@agentrans/shortcut-protocol'
 
 /**
  * Detect the visiting device, never the server operating system.

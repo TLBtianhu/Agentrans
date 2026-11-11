@@ -1,7 +1,7 @@
 /** Fork orchestration: identity, replay, enforcement, and branch annotations. */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import type { ShareRpcActor } from '@deepseek-ai/dsh-experimental-liveshare-protocol'
+import type { ShareRpcActor } from '@agentrans/experimental-liveshare-protocol'
 import type { ForkRecord } from '../src/host/fork-registry.ts'
 import { createViewerFork } from '../src/host/viewer-fork.ts'
 import type { ForkShareState } from '../src/host/fork-policy.ts'

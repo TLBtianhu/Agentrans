@@ -3,13 +3,13 @@ description: "DeepSeek Harness 主目录与共享 agent 配置根目录的共享
 kind: "package-library"
 ---
 
-# @deepseek-ai/dsh-home-paths
+# @agentrans/home-paths
 
 [English](README.md) | 中文
 
 ## 概述
 
-`@deepseek-ai/dsh-home-paths` 让包作者能够解析 DeepSeek Harness 数据根目录，以及其消费方读取的共享 agent 配置根目录。显式路径优先于环境变量，后者优先于操作系统主目录下的默认值；空白环境变量会被忽略。其公开辅助函数可以在不暴露机器绝对路径的情况下显示根目录，仅展开单独或当前用户的波浪号形式，并规范化最终路径段尚不存在的监听目标。请把它作为库依赖直接使用，不要通过 `cordis.yml` 加载。
+`@agentrans/home-paths` 让包作者能够解析 DeepSeek Harness 数据根目录，以及其消费方读取的共享 agent 配置根目录。显式路径优先于环境变量，后者优先于操作系统主目录下的默认值；空白环境变量会被忽略。其公开辅助函数可以在不暴露机器绝对路径的情况下显示根目录，仅展开单独或当前用户的波浪号形式，并规范化最终路径段尚不存在的监听目标。请把它作为库依赖直接使用，不要通过 `cordis.yml` 加载。
 
 ## 目录
 
@@ -29,7 +29,7 @@ kind: "package-library"
 ### 解析主目录
 
 ```ts
-import { resolveDshHome, dshHomePath, dshCachePath } from '@deepseek-ai/dsh-home-paths'
+import { resolveDshHome, dshHomePath, dshCachePath } from '@agentrans/home-paths'
 
 const home = resolveDshHome()                // configured path, else $DSH_HOME, else ~/.dsh
 const settings = dshHomePath('settings')     // join one child onto the resolved home
@@ -43,7 +43,7 @@ const cache = dshCachePath('models')         // $DSH_HOME/cache/models, default 
 ### 解析共享 agents 根目录
 
 ```ts
-import { resolveAgentsHome, agentsHomeDisplay } from '@deepseek-ai/dsh-home-paths'
+import { resolveAgentsHome, agentsHomeDisplay } from '@agentrans/home-paths'
 
 const agents = resolveAgentsHome()   // configured path, else $DSH_AGENTS_HOME, else ~/.agents
 agentsHomeDisplay(agents)            // ~/.agents, or $DSH_AGENTS_HOME for any configured root

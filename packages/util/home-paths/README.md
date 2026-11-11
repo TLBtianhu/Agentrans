@@ -3,13 +3,13 @@ description: "Shared resolution of the DeepSeek Harness home and the shared agen
 kind: "package-library"
 ---
 
-# @deepseek-ai/dsh-home-paths
+# @agentrans/home-paths
 
 English | [中文](README.zh.md)
 
 ## Summary
 
-`@deepseek-ai/dsh-home-paths` lets package authors resolve the DeepSeek Harness data root and the shared agent configuration root their consumers read. An explicit path wins over the environment variable, which wins over the default under the operating-system home; blank environment values are ignored. Its public helpers can render a root without revealing an absolute machine path, expand only bare or current-user tilde forms, and canonicalize watch targets whose final components do not yet exist. Use it as a direct library dependency, not through `cordis.yml`.
+`@agentrans/home-paths` lets package authors resolve the DeepSeek Harness data root and the shared agent configuration root their consumers read. An explicit path wins over the environment variable, which wins over the default under the operating-system home; blank environment values are ignored. Its public helpers can render a root without revealing an absolute machine path, expand only bare or current-user tilde forms, and canonicalize watch targets whose final components do not yet exist. Use it as a direct library dependency, not through `cordis.yml`.
 
 ## Table of Contents
 
@@ -29,7 +29,7 @@ Use these helpers wherever a package must agree with the rest of the harness abo
 ### Resolving the home
 
 ```ts
-import { resolveDshHome, dshHomePath, dshCachePath } from '@deepseek-ai/dsh-home-paths'
+import { resolveDshHome, dshHomePath, dshCachePath } from '@agentrans/home-paths'
 
 const home = resolveDshHome()                // configured path, else $DSH_HOME, else ~/.dsh
 const settings = dshHomePath('settings')     // join one child onto the resolved home
@@ -43,7 +43,7 @@ An explicit configured path has the highest precedence, then `$DSH_HOME`, then t
 ### Resolving the shared agents root
 
 ```ts
-import { resolveAgentsHome, agentsHomeDisplay } from '@deepseek-ai/dsh-home-paths'
+import { resolveAgentsHome, agentsHomeDisplay } from '@agentrans/home-paths'
 
 const agents = resolveAgentsHome()   // configured path, else $DSH_AGENTS_HOME, else ~/.agents
 agentsHomeDisplay(agents)            // ~/.agents, or $DSH_AGENTS_HOME for any configured root

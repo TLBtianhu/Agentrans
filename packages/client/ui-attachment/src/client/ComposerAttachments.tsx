@@ -1,18 +1,18 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type {
   ComposerAttachment, ComposerAttachmentsProps, ComposerImageAttachment,
-} from '@deepseek-ai/dsh-client-ui-conversation/client'
+} from '@agentrans/client-ui-conversation/client'
 import {
   IconCloseFillRegular, IconRefreshOutlineRegular, IconWarningOutlineRegular, Tooltip,
-} from '@deepseek-ai/dsh-client-ui-primitives'
+} from '@agentrans/client-ui-primitives'
 import { AttachmentRail } from '../AttachmentRail.tsx'
 import type { AttachmentRailItem } from '../AttachmentRail.tsx'
 import { DropOverlay } from '../DropOverlay.tsx'
 import { FileCard } from '../FileCard.tsx'
-import { ImageLightbox } from '@deepseek-ai/dsh-client-ui-primitives'
+import { ImageLightbox } from '@agentrans/client-ui-primitives'
 import { attachmentRailLabels, dropOverlayLabels, fileCardLabels, lightboxLabels } from './labels.ts'
 import { installDocumentDropEvents } from './drop-events.ts'
-import type { InjectFace } from '@deepseek-ai/dsh-client-ui-slots'
+import type { InjectFace } from '@agentrans/client-ui-slots'
 import css from './ComposerAttachments.module.css'
 
 /** Rail item retaining its browser-owned attachment for callbacks. */

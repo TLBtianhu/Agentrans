@@ -1,9 +1,9 @@
 /** Tool contribution changes and shared execution policy events. @module */
-import type { Scoped } from '@deepseek-ai/dsh-scope'
+import type { Scoped } from '@agentrans/scope'
 import type { ToolExecution, ToolDispatchExecution, ToolExecutionResult, PreToolDecision, PostToolDecision } from './contracts.ts'
 import type { ToolsService } from './index.ts'
 
-declare module '@deepseek-ai/cordis' {
+declare module '@agentrans/cordis' {
   interface Events {
     /**
      * Allow, deny, cancel, or ask before dispatch. `next()` delegates to allow;
@@ -11,7 +11,7 @@ declare module '@deepseek-ai/cordis' {
      * approval support turns `ask` into denial. Async gates must observe
      * `exec.signal`; the registry rechecks cancellation after they settle but
      * never abandons their promise.
-     * Scope-filtered dispatch (`@deepseek-ai/dsh-scope`): agent-scoped listeners receive only that agent's calls.
+     * Scope-filtered dispatch (`@agentrans/scope`): agent-scoped listeners receive only that agent's calls.
      * @param exec - the pending call (name, parsed arguments, caller agent).
      * @mode waterfall
      */
@@ -22,7 +22,7 @@ declare module '@deepseek-ai/cordis' {
      * identity remains immutable. The registry re-fuses the original caller
      * signal before the body, so replacement cannot detach caller cancellation;
      * wrappers must still restore their signal and reach quiescence.
-     * Scope-filtered dispatch (`@deepseek-ai/dsh-scope`): agent-scoped listeners receive only that agent's calls.
+     * Scope-filtered dispatch (`@agentrans/scope`): agent-scoped listeners receive only that agent's calls.
      * @param exec - the allowed call about to dispatch (name, parsed arguments, caller agent, signal).
      * @mode waterfall
      */
@@ -33,7 +33,7 @@ declare module '@deepseek-ai/cordis' {
      * listeners must observe `exec.signal`; after they settle, caller
      * cancellation replaces only a successful accepted outcome with the code
      * selected by whether the tool body was invoked.
-     * Scope-filtered dispatch (`@deepseek-ai/dsh-scope`): agent-scoped listeners receive only that agent's calls.
+     * Scope-filtered dispatch (`@agentrans/scope`): agent-scoped listeners receive only that agent's calls.
      * @param exec - the call that just ran (name, parsed arguments, caller agent).
      * @param result - the dispatch outcome a listener may accept, replace, or block.
      * @mode waterfall
@@ -41,7 +41,7 @@ declare module '@deepseek-ai/cordis' {
     'tools/post-execute'(this: Scoped<ToolsService>, exec: ToolExecution, result: Readonly<ToolExecutionResult>, next: () => Promise<PostToolDecision>): Promise<PostToolDecision>
     /**
      * Observe the frozen, lossless-JSON final outcome. Listener failures are contained.
-     * Scope-filtered dispatch (`@deepseek-ai/dsh-scope`): keyed by `exec.agent`.
+     * Scope-filtered dispatch (`@agentrans/scope`): keyed by `exec.agent`.
      * @param exec - the execution object that traversed the pipeline.
      * @param result - a deep-frozen snapshot of the final returned result.
      * @mode emit

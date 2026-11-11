@@ -5,7 +5,7 @@ import {
   PRODUCT_LAUNCH_CONTEXT_ENV, ProductLaunchError, applyProductLaunchEnvironment,
   parseProductLaunchContext, prepareProductState, resolveDevelopmentLaunchContext,
   resolvePackagedLaunchContext, type ProductLaunchContext,
-} from '@deepseek-ai/dsh-product-layout/launch-context'
+} from '@agentrans/product-layout/launch-context'
 
 /** Electron operations available before application readiness. */
 interface DesktopProductApplication {

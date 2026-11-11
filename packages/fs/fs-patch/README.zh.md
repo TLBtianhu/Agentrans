@@ -26,7 +26,7 @@ kind: "package-library"
 操作和 hunk（修改块）只包含可 JSON 序列化的值；解析按输入顺序保留重复路径，路径保持为未解析的字符串。
 
 ```ts
-import { applyHunks, parsePatch } from '@deepseek-ai/dsh-fs-patch'
+import { applyHunks, parsePatch } from '@agentrans/fs-patch'
 
 const operations = parsePatch('*** Begin Patch\n*** Update File: hello.txt\n-hello\n+hi\n*** End Patch')
 const operation = operations[0]

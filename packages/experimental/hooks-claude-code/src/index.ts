@@ -5,25 +5,25 @@
  * mapping; shared execution and parsing live in `dsh-hook-protocol`.
  * `updatedInput` is logged and warned but not honored. Bespoke behavior should
  * use typed native plugins on the same extension points.
- * @module @deepseek-ai/dsh-hooks-claude-code
+ * @module @agentrans/hooks-claude-code
  */
 
-import type {} from '@deepseek-ai/dsh-working-directory'
+import type {} from '@agentrans/working-directory'
 import { readFileSync } from 'node:fs'
-import type { Context } from '@deepseek-ai/cordis'
-import z from '@deepseek-ai/schemastery'
-import type { Agent, PreStepDecision } from '@deepseek-ai/dsh-agent'
-import { createUserMessage } from '@deepseek-ai/dsh-llm'
-import type { ContextFormed } from '@deepseek-ai/dsh-llm'
-declare module '@deepseek-ai/dsh-llm' {
+import type { Context } from '@agentrans/cordis'
+import z from '@agentrans/schemastery'
+import type { Agent, PreStepDecision } from '@agentrans/agent'
+import { createUserMessage } from '@agentrans/llm'
+import type { ContextFormed } from '@agentrans/llm'
+declare module '@agentrans/llm' {
   interface MessageSourceMap {
     'hooks-claude-code': { kind: 'hooks-claude-code' } & ContextFormed
   }
 }
 
-import type { ContentBlock, MessageSource } from '@deepseek-ai/dsh-llm'
-import type { UserMessage } from '@deepseek-ai/dsh-session'
-import type { PostToolDecision, PreToolDecision, ToolExecution, ToolExecutionResult } from '@deepseek-ai/dsh-tools'
+import type { ContentBlock, MessageSource } from '@agentrans/llm'
+import type { UserMessage } from '@agentrans/session'
+import type { PostToolDecision, PreToolDecision, ToolExecution, ToolExecutionResult } from '@agentrans/tools'
 import {
   appendHookInvoked,
   appendHookResult,
@@ -35,10 +35,10 @@ import {
   selectHookGroups,
   type HookOutput,
   type MergedHookOutcome,
-} from '@deepseek-ai/dsh-hook-protocol'
+} from '@agentrans/hook-protocol'
 // Pulls in the declaration-merged subagent events and the identity pairing their
 // start/end edges.
-import type { SubagentRunId } from '@deepseek-ai/dsh-subagent'
+import type { SubagentRunId } from '@agentrans/subagent'
 import { parseClaudeCodeConfig, type ClaudeCodeHookConfig } from './config.ts'
 
 export const name = 'hooks-claude-code'

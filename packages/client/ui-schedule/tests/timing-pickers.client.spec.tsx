@@ -5,7 +5,7 @@
  */
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
+import { makeTranslate } from '@agentrans/client-test-runtime'
 import { ClockPicker } from '../src/client/ClockPicker.tsx'
 import { DatePicker } from '../src/client/DatePicker.tsx'
 import { en } from '../src/client/task-manager-locales.ts'

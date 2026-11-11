@@ -12,7 +12,7 @@
  * The page holds no credential, reads no cookie, and writes nothing to the URL, to storage, or to a
  * log: the code lives from the popup's message to the host's answer and nowhere else.
  *
- * @module @deepseek-ai/dsh-experimental-liveshare/src/client/owner-login
+ * @module @agentrans/experimental-liveshare/src/client/owner-login
  */
 
 import { readOwnerIdentity, type OwnerIdentityStatus } from './owner-identity.ts'

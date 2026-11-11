@@ -17,26 +17,26 @@ import type {
   InboxState,
   PreStepDecision,
   RequestErrorAction,
-} from '@deepseek-ai/dsh-agent'
-import { AgentModel, agentEvents, assembleContextFor } from '@deepseek-ai/dsh-agent'
-import type { GenerateOptions, LlmCallConfig, Message, PreparedLlmCall } from '@deepseek-ai/dsh-llm'
+} from '@agentrans/agent'
+import { AgentModel, agentEvents, assembleContextFor } from '@agentrans/agent'
+import type { GenerateOptions, LlmCallConfig, Message, PreparedLlmCall } from '@agentrans/llm'
 import {
   LlmError,
   createAssistantMessage,
   createDeveloperMessage,
   errorChain,
   markAgentLoopRequest,
-} from '@deepseek-ai/dsh-llm'
-import { assertNever, deepFreeze } from '@deepseek-ai/dsh-util-values'
-import type { Scope } from '@deepseek-ai/dsh-scope'
-import { createScope } from '@deepseek-ai/dsh-scope'
-import type { EpochHeader, RequestContext, Session, SessionId, SessionSeq, TurnEndReason, UserMessage } from '@deepseek-ai/dsh-session'
-import { canonicalHeader, headerEquals, ToolCallRecovery } from '@deepseek-ai/dsh-session'
-import { joinContextSections, renderContextSections, renderPrompt } from '@deepseek-ai/dsh-system-prompt'
-import type { PromptAssembly } from '@deepseek-ai/dsh-system-prompt'
-import { ToolActivationError, ToolBatchExecutionError } from '@deepseek-ai/dsh-tools'
-import type { ResolvedToolSet } from '@deepseek-ai/dsh-tools'
-import type { Context } from '@deepseek-ai/cordis'
+} from '@agentrans/llm'
+import { assertNever, deepFreeze } from '@agentrans/util-values'
+import type { Scope } from '@agentrans/scope'
+import { createScope } from '@agentrans/scope'
+import type { EpochHeader, RequestContext, Session, SessionId, SessionSeq, TurnEndReason, UserMessage } from '@agentrans/session'
+import { canonicalHeader, headerEquals, ToolCallRecovery } from '@agentrans/session'
+import { joinContextSections, renderContextSections, renderPrompt } from '@agentrans/system-prompt'
+import type { PromptAssembly } from '@agentrans/system-prompt'
+import { ToolActivationError, ToolBatchExecutionError } from '@agentrans/tools'
+import type { ResolvedToolSet } from '@agentrans/tools'
+import type { Context } from '@agentrans/cordis'
 import { ReactLoopInbox } from './inbox.ts'
 import { RuntimeContextProjection } from './runtime-context.ts'
 import { AssistantStreamAttempt } from './assistant-stream.ts'

@@ -1,13 +1,13 @@
 /**
  * Select built-in tool execution for every Agent in the mounting scope.
  * @module
- * @deprecated Mount @deepseek-ai/dsh-tool-executor-native or @deepseek-ai/dsh-tool-executor-ptc directly.
+ * @deprecated Mount @agentrans/tool-executor-native or @agentrans/tool-executor-ptc directly.
  */
 
-import type { Context } from '@deepseek-ai/cordis'
-import z from '@deepseek-ai/schemastery'
-import * as NativeToolExecutor from '@deepseek-ai/dsh-tool-executor-native'
-import * as PtcToolExecutor from '@deepseek-ai/dsh-tool-executor-ptc'
+import type { Context } from '@agentrans/cordis'
+import z from '@agentrans/schemastery'
+import * as NativeToolExecutor from '@agentrans/tool-executor-native'
+import * as PtcToolExecutor from '@agentrans/tool-executor-ptc'
 
 /** Cordis plugin name. */
 export const name = 'tool-presentation'
@@ -46,7 +46,7 @@ export const Config: z<Config> = z.object({
  * Declare the tool presentation for every agent this composition covers.
  * @param ctx - the mounting composition's scope context (a preset's standing scope).
  * @param config - the selected presentation.
- * @deprecated Mount @deepseek-ai/dsh-tool-executor-native or @deepseek-ai/dsh-tool-executor-ptc directly.
+ * @deprecated Mount @agentrans/tool-executor-native or @agentrans/tool-executor-ptc directly.
  */
 // oxlint-disable-next-line typescript/no-deprecated -- The compatibility plugin still accepts this configuration.
 export function apply(ctx: Context, config: Config): void {

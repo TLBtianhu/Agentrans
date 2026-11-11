@@ -1,16 +1,16 @@
 /** Durable composition of historical chunk collapse and V3 system/reference migration. */
 
-import { Context } from '@deepseek-ai/cordis'
-import { SESSION_FORMAT_VERSION, Session, SessionId, SessionLogOffset, SessionSeq } from '@deepseek-ai/dsh-session'
-import type { SessionEvent, SessionHeader } from '@deepseek-ai/dsh-session'
-import { createSessionFormatCatalog } from '@deepseek-ai/dsh-session-format'
-import { releasedV0SessionFormatCodec, releasedV1SessionFormatCodec, sessionFormatV0ToV1 } from '@deepseek-ai/dsh-session-format-v0-to-v1'
+import { Context } from '@agentrans/cordis'
+import { SESSION_FORMAT_VERSION, Session, SessionId, SessionLogOffset, SessionSeq } from '@agentrans/session'
+import type { SessionEvent, SessionHeader } from '@agentrans/session'
+import { createSessionFormatCatalog } from '@agentrans/session-format'
+import { releasedV0SessionFormatCodec, releasedV1SessionFormatCodec, sessionFormatV0ToV1 } from '@agentrans/session-format-v0-to-v1'
 import {
   assertReleasedV2Header, RELEASED_V2_EVENT_TYPES, releasedV2SessionFormatCodec,
   restoreReleasedV2Artifact, sessionFormatV1ToV2,
-} from '@deepseek-ai/dsh-session-format-v1-to-v2'
-import { SessionFormatUnsupportedError } from '@deepseek-ai/dsh-session-persistence'
-import * as JsonlSessionPersistence from '@deepseek-ai/dsh-session-persistence-jsonl'
+} from '@agentrans/session-format-v1-to-v2'
+import { SessionFormatUnsupportedError } from '@agentrans/session-persistence'
+import * as JsonlSessionPersistence from '@agentrans/session-persistence-jsonl'
 import { appendFile, mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { basename, dirname, join } from 'node:path'

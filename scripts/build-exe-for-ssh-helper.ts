@@ -16,7 +16,7 @@ import { verifyNativePayload } from './ssh-helper/native.ts'
 
 const root = resolve(import.meta.dirname, '..')
 const closureDirectory = 'packages/ssh/ssh-helper-runtime'
-const closureName = '@deepseek-ai/dsh-ssh-helper-runtime'
+const closureName = '@agentrans/ssh-helper-runtime'
 const assets = ['package.json', 'lib/**/*.js', ...['js', 'cjs', 'mjs', 'json', 'node', 'so', 'so.*', 'dylib', 'wasm', 'sh', 'bash'].map(extension => `node_modules/**/*.${extension}`)]
 
 interface Manifest { name: string; version: string; license?: string; dependencies?: Record<string, string> }

@@ -3,7 +3,7 @@ description: "经用户明确选择后创建可持久保留、可移除的界面
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-creation-recommendations
+# @agentrans/creation-recommendations
 
 [English](README.md) | 中文
 

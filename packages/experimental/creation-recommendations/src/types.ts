@@ -1,5 +1,5 @@
 /** Fields, recorded data and user actions of `create_personalized_page` cards. */
-import type { ChangeResult } from '@deepseek-ai/dsh-plugin-manager/types'
+import type { ChangeResult } from '@agentrans/plugin-manager/types'
 
 /** Placements: page is a Session view tab; sidebar-left combines a global page and its left entry. */
 export type CreationSlot = 'sidebar-right' | 'page' | 'sidebar-left'

@@ -5,10 +5,10 @@
  * serve it — `./types` for host consumers, `./client` for client aggregates —
  * with zero content duplication.
  *
- * @module @deepseek-ai/dsh-session-stats/types
+ * @module @agentrans/session-stats/types
  */
 
-import type { SessionProjectionSummaryExcluded } from '@deepseek-ai/dsh-session-projection/types'
+import type { SessionProjectionSummaryExcluded } from '@agentrans/session-projection/types'
 
 // Marks this file a module so the declaration below AUGMENTS the projection
 // table instead of declaring an ambient module.
@@ -40,7 +40,7 @@ export interface SessionStatsProjection {
   decodeTokens: number
 }
 
-declare module '@deepseek-ai/dsh-session-projection/types' {
+declare module '@agentrans/session-projection/types' {
   interface SessionProjectionMap {
     /**
      * Whole-log turn/step counts and wall times; see

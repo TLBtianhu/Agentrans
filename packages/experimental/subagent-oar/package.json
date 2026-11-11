@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-experimental-subagent-oar",
+  "name": "@agentrans/experimental-subagent-oar",
   "description": "Experimental one-shot subagents through OAR runtimes",
   "version": "0.1.0",
   "publishConfig": {
@@ -32,18 +32,18 @@
   "license": "MIT",
   "icon": "./icon.svg",
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-llm": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-subagent": "workspace:*",
-    "@deepseek-ai/dsh-subprocess": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/llm": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/subagent": "workspace:*",
+    "@agentrans/subprocess": "workspace:*"
   },
   "dependencies": {
     "@agentclientprotocol/sdk": "^1.4.0",
-    "@deepseek-ai/dsh-brand": "workspace:*",
-    "@deepseek-ai/dsh-timeout": "workspace:*",
-    "@deepseek-ai/dsh-util-values": "workspace:*",
-    "@deepseek-ai/schemastery": "workspace:~",
+    "@agentrans/brand": "workspace:*",
+    "@agentrans/timeout": "workspace:*",
+    "@agentrans/util-values": "workspace:*",
+    "@agentrans/schemastery": "workspace:~",
     "@earendil-works/pi-ai": "^1.3.0",
     "@earendil-works/pi-coding-agent": "^1.3.0",
     "cross-spawn": "^7.0.6",
@@ -52,21 +52,21 @@
   },
   "devDependencies": {
     "@botiverse/oar": "0.67.0",
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/cordis-plugin-loader": "workspace:~",
-    "@deepseek-ai/dsh-agent": "workspace:*",
-    "@deepseek-ai/dsh-app-boot": "workspace:*",
-    "@deepseek-ai/dsh-llm": "workspace:*",
-    "@deepseek-ai/dsh-loader-smoke": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-session-checkpoint-policy": "workspace:*",
-    "@deepseek-ai/dsh-session-persistence-jsonl": "workspace:*",
-    "@deepseek-ai/dsh-session-projection": "workspace:*",
-    "@deepseek-ai/dsh-subagent": "workspace:*",
-    "@deepseek-ai/dsh-subprocess": "workspace:*",
-    "@deepseek-ai/dsh-tool-jobs": "workspace:*",
-    "@deepseek-ai/dsh-tools": "workspace:*",
-    "@deepseek-ai/dsh-agent-loop-testkit": "workspace:*",
-    "@deepseek-ai/dsh-experimental-tool-subagent-oar": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/cordis-plugin-loader": "workspace:~",
+    "@agentrans/agent": "workspace:*",
+    "@agentrans/app-boot": "workspace:*",
+    "@agentrans/llm": "workspace:*",
+    "@agentrans/loader-smoke": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/session-checkpoint-policy": "workspace:*",
+    "@agentrans/session-persistence-jsonl": "workspace:*",
+    "@agentrans/session-projection": "workspace:*",
+    "@agentrans/subagent": "workspace:*",
+    "@agentrans/subprocess": "workspace:*",
+    "@agentrans/tool-jobs": "workspace:*",
+    "@agentrans/tools": "workspace:*",
+    "@agentrans/agent-loop-testkit": "workspace:*",
+    "@agentrans/experimental-tool-subagent-oar": "workspace:*"
   }
 }

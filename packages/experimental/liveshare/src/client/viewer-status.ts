@@ -6,10 +6,10 @@
  * that simply has nothing in it. The page therefore keeps one state, derived from the share's own answer
  * and from the reads its own transport could not complete, and states it in the page.
  *
- * @module @deepseek-ai/dsh-experimental-liveshare/src/client/viewer-status
+ * @module @agentrans/experimental-liveshare/src/client/viewer-status
  */
 
-import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
+import { createSnapshotStore } from '@agentrans/client-store'
 
 /**
  * One state the page can be in.

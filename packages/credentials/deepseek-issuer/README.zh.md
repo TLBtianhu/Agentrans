@@ -3,7 +3,7 @@ description: "在一个地方持有 DeepSeek 平台身份：各能力类共享�
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-deepseek-issuer
+# @agentrans/deepseek-issuer
 
 [English](README.md) | 中文
 
@@ -27,8 +27,8 @@ kind: "package-reference"
 以 DeepSeek 平台鉴权的 provider 导入凭据引用，以及它自身能力类对应的端点默认值。设置界面导入同一个引用，使它渲染的卡片与它所配置的 provider 指向同一凭据。
 
 ```ts
-import { credentialRef } from '@deepseek-ai/dsh-credentials'
-import { DEEPSEEK_API_KEY_REF, DEEPSEEK_ENDPOINTS } from '@deepseek-ai/dsh-deepseek-issuer'
+import { credentialRef } from '@agentrans/credentials'
+import { DEEPSEEK_API_KEY_REF, DEEPSEEK_ENDPOINTS } from '@agentrans/deepseek-issuer'
 
 const credential = credentialRef(DEEPSEEK_API_KEY_REF)
 const baseURL = DEEPSEEK_ENDPOINTS.models.url

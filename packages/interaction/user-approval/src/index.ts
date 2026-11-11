@@ -1,34 +1,34 @@
 /**
  * Service Definition for the approval capability seam, covering requests, cancellation, audit, and per-session policy. Missing
  * answerers fail closed; grants apply only to the requested action.
- * @module @deepseek-ai/dsh-user-approval
+ * @module @agentrans/user-approval
  */
 
 import { randomUUID } from 'node:crypto'
-import { Context, Service } from '@deepseek-ai/cordis'
-import z from '@deepseek-ai/schemastery'
+import { Context, Service } from '@agentrans/cordis'
+import z from '@agentrans/schemastery'
 import { z as zod } from 'zod'
-import type { Agent } from '@deepseek-ai/dsh-agent'
-import { createUserMessage, type ToolCallId } from '@deepseek-ai/dsh-llm'
-import type { ContextFormed } from '@deepseek-ai/dsh-llm'
-declare module '@deepseek-ai/dsh-llm' {
+import type { Agent } from '@agentrans/agent'
+import { createUserMessage, type ToolCallId } from '@agentrans/llm'
+import type { ContextFormed } from '@agentrans/llm'
+declare module '@agentrans/llm' {
   interface MessageSourceMap {
     'user-approval': { kind: 'user-approval' } & ContextFormed
   }
 }
 
-import { scopeTarget } from '@deepseek-ai/dsh-scope'
-import type { Session, SessionEvent } from '@deepseek-ai/dsh-session'
-import type { ProjectionDefinition, ProjectionHandle } from '@deepseek-ai/dsh-session-projection'
-import type {} from '@deepseek-ai/dsh-system-prompt'
+import { scopeTarget } from '@agentrans/scope'
+import type { Session, SessionEvent } from '@agentrans/session'
+import type { ProjectionDefinition, ProjectionHandle } from '@agentrans/session-projection'
+import type {} from '@agentrans/system-prompt'
 
-declare module '@deepseek-ai/cordis' {
+declare module '@agentrans/cordis' {
   interface Context {
     approval: ApprovalService
   }
 }
 
-declare module '@deepseek-ai/dsh-session/types' {
+declare module '@agentrans/session/types' {
   interface SessionEventMap {
     /**
      * The session's approval policy was switched — log-only, durable,

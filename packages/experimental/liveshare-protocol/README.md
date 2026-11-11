@@ -3,7 +3,7 @@ description: "Liveshare gateway frame codecs and the provider-neutral identity c
 kind: "package-library"
 ---
 
-# @deepseek-ai/dsh-experimental-liveshare-protocol
+# @agentrans/experimental-liveshare-protocol
 
 English | [中文](README.zh.md)
 
@@ -31,8 +31,8 @@ Import this package whenever code must speak the Liveshare wire or resolve one v
 ### Entry point
 
 ```ts
-import { parseGatewayFrame, rawText, sendFrame } from '@deepseek-ai/dsh-experimental-liveshare-protocol'
-import { identityKeyOf, normalizeIdentity } from '@deepseek-ai/dsh-experimental-liveshare-protocol'
+import { parseGatewayFrame, rawText, sendFrame } from '@agentrans/experimental-liveshare-protocol'
+import { identityKeyOf, normalizeIdentity } from '@agentrans/experimental-liveshare-protocol'
 ```
 
 The viewer carrier (`installViewerCarrier`) and the viewer-state vocabulary are published through the root entry, not through their own subpaths, because both faces of the owner page consume them together.

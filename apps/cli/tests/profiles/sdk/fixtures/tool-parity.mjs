@@ -1,6 +1,6 @@
 /** Observe step-admitted capabilities without changing either shipped tool executor. */
 import { writeFile } from 'node:fs/promises'
-import { createUserMessage } from '@deepseek-ai/dsh-llm'
+import { createUserMessage } from '@agentrans/llm'
 
 export const inject = ['tools', 'agents', 'loader']
 

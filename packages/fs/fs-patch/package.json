@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-fs-patch",
+  "name": "@agentrans/fs-patch",
   "description": "Pure Codex-style patch parser and LF text updater with structured match failures",
   "version": "0.1.0",
   "publishConfig": {
@@ -27,9 +27,9 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/cordis": "workspace:~"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/cordis": "workspace:~"
   }
 }

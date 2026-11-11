@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-client-modules",
+  "name": "@agentrans/client-modules",
   "description": "Client module system, dual-face: node half composes the __DSH_BOOT__ entry graph (incremental dsh.client scan, bundle route, index tap, webPlugins service); browser half is the lazy-CJS module table the vendored cordis Loader consumes as its internal seam",
   "version": "0.1.0",
   "publishConfig": {
@@ -39,11 +39,11 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "@deepseek-ai/cordis-plugin-loader": "workspace:~",
-    "@deepseek-ai/dsh-host-webserver": "workspace:*",
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-package-manifest": "workspace:*",
-    "@deepseek-ai/dsh-client-store": "workspace:*"
+    "@agentrans/cordis-plugin-loader": "workspace:~",
+    "@agentrans/host-webserver": "workspace:*",
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/package-manifest": "workspace:*",
+    "@agentrans/client-store": "workspace:*"
   },
   "files": [
     "locale/*.json",
@@ -52,6 +52,6 @@
     "lib/types/**/*.d.ts"
   ],
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/cordis": "workspace:~"
   }
 }

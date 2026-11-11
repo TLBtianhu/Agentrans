@@ -86,7 +86,7 @@ RRULE 接受有界的 RFC 5545 子集，以共享的 [`rrule.ts` 解析器](../.
 <a id="task-management"></a>
 ## 任务管理
 
-所有调用方使用相同的 `ScheduleCreateRequest`、`ScheduleCatalogEntry`、`ScheduleTiming` 和 `ScheduleEditRequest`。浏览器安全类型来自 `@deepseek-ai/dsh-schedule/client`。不存在 Session 绑定的管理入口或第二套类型别名。
+所有调用方使用相同的 `ScheduleCreateRequest`、`ScheduleCatalogEntry`、`ScheduleTiming` 和 `ScheduleEditRequest`。浏览器安全类型来自 `@agentrans/schedule/client`。不存在 Session 绑定的管理入口或第二套类型别名。
 
 | 操作 | 行为 |
 |---|---|

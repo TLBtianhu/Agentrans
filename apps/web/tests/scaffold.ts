@@ -30,10 +30,10 @@ import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'nod
 import { pathToFileURL } from 'node:url'
 import type { Page } from 'playwright'
 import { expect } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
-import { DSH_LAUNCH_ENVIRONMENT_KEY, type LaunchEnvironmentSnapshot } from '@deepseek-ai/dsh-launch-environment'
-import Loader from '@deepseek-ai/cordis-plugin-loader'
-import { entryListSchema, type PatchOptions } from '@deepseek-ai/cordis-plugin-include'
+import { Context } from '@agentrans/cordis'
+import { DSH_LAUNCH_ENVIRONMENT_KEY, type LaunchEnvironmentSnapshot } from '@agentrans/launch-environment'
+import Loader from '@agentrans/cordis-plugin-loader'
+import { entryListSchema, type PatchOptions } from '@agentrans/cordis-plugin-include'
 import yaml from 'js-yaml'
 import {
   captureExpectedWorkspaceSnapshot,
@@ -57,37 +57,37 @@ import {
   stabilizeRefreshLog,
   writesCurrentSessionFixtures,
   type NormalizeContext,
-} from '@deepseek-ai/dsh-session-snapshot'
-import type { Profile, ProfileContext } from '@deepseek-ai/dsh-app-boot'
-import { dshHomePath } from '@deepseek-ai/dsh-home-paths'
-import { LlmAdapter } from '@deepseek-ai/dsh-llm'
+} from '@agentrans/session-snapshot'
+import type { Profile, ProfileContext } from '@agentrans/app-boot'
+import { dshHomePath } from '@agentrans/home-paths'
+import { LlmAdapter } from '@agentrans/llm'
 import type {
   LlmModelInfo, LlmProviderInfo, LlmResolvedModelInfo, RetryPolicyConfig, StreamChunk,
-} from '@deepseek-ai/dsh-llm'
-import type { ReplayHandle, ReplayProviderConfig } from '@deepseek-ai/dsh-llm-replay'
+} from '@agentrans/llm'
+import type { ReplayHandle, ReplayProviderConfig } from '@agentrans/llm-replay'
 import {
   installLlmReplay,
   parseSessionLog,
   prepareSessionSnapshotFixtureForComparison,
-} from '@deepseek-ai/dsh-llm-replay'
-import type { SessionFormatEvent } from '@deepseek-ai/dsh-session-format'
-import { sessionFormatCatalog } from '@deepseek-ai/dsh-session-format-catalog'
+} from '@agentrans/llm-replay'
+import type { SessionFormatEvent } from '@agentrans/session-format'
+import { sessionFormatCatalog } from '@agentrans/session-format-catalog'
 import {
   SESSION_FORMAT_VERSION,
   SessionId,
   type Session,
   type SessionEvent,
   type SessionHeader,
-} from '@deepseek-ai/dsh-session'
-import * as JsonlSessionPersistence from '@deepseek-ai/dsh-session-persistence-jsonl'
+} from '@agentrans/session'
+import * as JsonlSessionPersistence from '@agentrans/session-persistence-jsonl'
 // Empty type imports carry the webServer/agents/sessionPersistence Context merges.
-import type {} from '@deepseek-ai/dsh-host-webserver'
-import type {} from '@deepseek-ai/dsh-agent'
-import { provideCmdline } from '@deepseek-ai/dsh-cmdline'
+import type {} from '@agentrans/host-webserver'
+import type {} from '@agentrans/agent'
+import { provideCmdline } from '@agentrans/cmdline'
 import { startPrefixProxy, type PrefixProxy } from './prefix-proxy.ts'
 import { REPO_ROOT, requireBuilt, requireDist } from './support.ts'
 
-type AppBoot = typeof import('@deepseek-ai/dsh-app-boot')
+type AppBoot = typeof import('@agentrans/app-boot')
 let builtAppBoot: AppBoot | undefined
 
 /**
@@ -98,7 +98,7 @@ let builtAppBoot: AppBoot | undefined
  * helpers this module also exports load without one.
  */
 function appBoot(): AppBoot {
-  builtAppBoot ??= requireBuilt('@deepseek-ai/dsh-app-boot') as AppBoot
+  builtAppBoot ??= requireBuilt('@agentrans/app-boot') as AppBoot
   return builtAppBoot
 }
 
@@ -109,7 +109,7 @@ function appBoot(): AppBoot {
 // import {
 //   WELCOME_NOTICE_ACK_FIELD, WELCOME_NOTICE_SETTINGS_NAMESPACE,
 //   WELCOME_NOTICE_VERSION, WELCOME_NOTICE_COPY,
-// } from '@deepseek-ai/dsh-client-ui-settings-models'
+// } from '@agentrans/client-ui-settings-models'
 export const WELCOME_NOTICE_SETTINGS_NAMESPACE = 'ui-settings-general'
 /** The installed bundle carrying the scaffold's deployment defaults; the plugin manager lists it beside fixture bundles. */
 export const SCAFFOLD_DEFAULTS_BUNDLE = 'dsh-web-scaffold-defaults'
@@ -453,7 +453,7 @@ export interface LaunchOptions {
   /** Preset selection default and additional declarative definitions for this scenario. */
   agentPresets?: {
     default: string
-    definitions?: import('@deepseek-ai/dsh-agent-preset-registry').PresetDefinition[]
+    definitions?: import('@agentrans/agent-preset-registry').PresetDefinition[]
   }
   /**
    * Patch the telemetry exporter URL while preserving the shipped enabled
@@ -688,7 +688,7 @@ export async function launchWebScaffold(options: LaunchOptions = {}): Promise<We
       },
     },
     // The bundle's web-runtime row resolves the same built dist under test
-    // (apps/web IS @deepseek-ai/dsh-web-frontend); native browser opening and the
+    // (apps/web IS @agentrans/web-frontend); native browser opening and the
     // URL line are disabled because this scaffold owns its Playwright browser.
     // Preserve the composed surface-context choice because a patch replaces
     // the row's complete config.
@@ -713,8 +713,8 @@ export async function launchWebScaffold(options: LaunchOptions = {}): Promise<We
     // disable+insert pair.
     { id: 'directory-picker', disabled: true },
     { insert: [
-      { id: 'directory-picker-browse', name: '@deepseek-ai/dsh-host-directory-picker-browse' },
-      { id: 'ui-directory-picker-browse', name: '@deepseek-ai/dsh-client-ui-directory-picker-browse' },
+      { id: 'directory-picker-browse', name: '@agentrans/host-directory-picker-browse' },
+      { id: 'ui-directory-picker-browse', name: '@agentrans/client-ui-directory-picker-browse' },
     ] },
     // Ordinary scenarios exclude host-dependent application discovery. The
     // Open In scenario supplies launch facts that suppress every native probe.
@@ -722,7 +722,7 @@ export async function launchWebScaffold(options: LaunchOptions = {}): Promise<We
     { id: 'ui-open-in-app', disabled: options.openInAppEnvironment === undefined },
     ...options.agentPresets === undefined ? [] : [
       { id: 'agent-preset-registry', config: { default: options.agentPresets.default } },
-      { insert: (options.agentPresets.definitions ?? []).map(config => ({ id: `preset-${config.id}`, name: '@deepseek-ai/dsh-agent-preset', config })) },
+      { insert: (options.agentPresets.definitions ?? []).map(config => ({ id: `preset-${config.id}`, name: '@agentrans/agent-preset', config })) },
     ],
     ...options.deepSeekSearch === undefined
       ? []
@@ -808,7 +808,7 @@ export async function launchWebScaffold(options: LaunchOptions = {}): Promise<We
       // A real profile: the shipped web bundles plus each fixture package,
       // installed the way `dsh plugin add` leaves them.
       const dependencies: Record<string, string> = {}
-      const bundles = ['@deepseek-ai/dsh-base', '@deepseek-ai/dsh-web-app', ...options.profile?.bundles ?? []]
+      const bundles = ['@agentrans/base', '@agentrans/web-app', ...options.profile?.bundles ?? []]
       for (const entry of options.profile?.packages ?? []) {
         const manifest = JSON.parse(await readFile(join(entry.dir, 'package.json'), 'utf8')) as { name: string }
         dependencies[manifest.name] = `file:${entry.dir}`

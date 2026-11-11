@@ -3,7 +3,7 @@ description: "Model context for users and maintainers of the Web GUI that names 
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-harness-dev-context
+# @agentrans/harness-dev-context
 
 English | [中文](README.zh.md)
 

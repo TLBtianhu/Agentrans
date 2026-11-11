@@ -1,9 +1,9 @@
 /** Released readers preserve evidence text without knowing the Artifact producer. */
 import { readFile } from 'node:fs/promises'
 import { expect, it } from 'vitest'
-import { SESSION_FORMAT_VERSION, SessionId } from '@deepseek-ai/dsh-session'
-import { SessionFormatEventCollector, snapshotSessionFormatJson } from '@deepseek-ai/dsh-session-format'
-import { releasedV4SessionFormatCodec, restoreReleasedV4Artifact } from '@deepseek-ai/dsh-session-format-v3-to-v4'
+import { SESSION_FORMAT_VERSION, SessionId } from '@agentrans/session'
+import { SessionFormatEventCollector, snapshotSessionFormatJson } from '@agentrans/session-format'
+import { releasedV4SessionFormatCodec, restoreReleasedV4Artifact } from '@agentrans/session-format-v3-to-v4'
 
 it('retains both conclusion and complete evidence through a released reader that knows only user messages', async () => {
   const message: unknown = JSON.parse(await readFile(new URL('./fixtures/returned-message.json', import.meta.url), 'utf8'))

@@ -2,7 +2,7 @@
 /** Direct component fixtures fail loudly when an unstubbed menu is activated. */
 import { afterEach, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render } from '@testing-library/react'
-import { SessionId } from '@deepseek-ai/dsh-session/types'
+import { SessionId } from '@agentrans/session/types'
 import { contextMenuHook } from '../src/context-menu.ts'
 
 afterEach(cleanup)

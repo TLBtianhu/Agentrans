@@ -1,8 +1,8 @@
 /** Prepared calls retain their endpoint and credential generation. */
 import { afterEach, expect, it } from 'vitest'
 import { DeepSeekAdapter } from '../src/index.ts'
-import { Config, plainOptions, resolveAdapterOptions } from '@deepseek-ai/dsh-llm-deepseek-api-key'
-import type { ResolvedDeepSeekOptions as DeepSeekConnectionOptions } from '@deepseek-ai/dsh-llm-deepseek-api-key'
+import { Config, plainOptions, resolveAdapterOptions } from '@agentrans/llm-deepseek-api-key'
+import type { ResolvedDeepSeekOptions as DeepSeekConnectionOptions } from '@agentrans/llm-deepseek-api-key'
 import { assemble, chunks, MODEL, options, server } from './helpers.ts'
 
 const close: (() => Promise<void>)[] = []

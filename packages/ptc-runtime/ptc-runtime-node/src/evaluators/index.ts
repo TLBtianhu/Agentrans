@@ -1,5 +1,5 @@
 /** Select one child evaluator without process-lifetime policy. */
-import type { PtcProgramFormat } from '@deepseek-ai/dsh-ptc-runtime'
+import type { PtcProgramFormat } from '@agentrans/ptc-runtime'
 import { createAsyncFunctionEvaluator } from './async-function.ts'
 import { createReplEvaluator } from './repl.ts'
 import { createVmScriptEvaluator } from './vm-script.ts'

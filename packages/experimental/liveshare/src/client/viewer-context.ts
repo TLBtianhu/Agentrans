@@ -5,10 +5,10 @@
  * Session, and what the owner lets this reader do beyond reading. The page owns that read rather than
  * a component, because every surface re-reads what the share says while it renders.
  *
- * @module @deepseek-ai/dsh-experimental-liveshare/src/client/viewer-context
+ * @module @agentrans/experimental-liveshare/src/client/viewer-context
  */
 
-import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
+import { createSnapshotStore } from '@agentrans/client-store'
 import { publishViewerCapabilities } from './viewer-capabilities.ts'
 import { noteViewerStatusFacts } from './viewer-status.ts'
 import { VIEWER_READ_TIMEOUT_MS } from '../read-budgets.ts'

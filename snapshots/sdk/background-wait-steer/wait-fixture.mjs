@@ -6,7 +6,7 @@
  * (a throwing observer only logs), and asserted in `agent/turn-stopping`, whose
  * serial dispatch commits the turn — so a violated expectation fails the run.
  */
-import { createUserMessage } from '@deepseek-ai/dsh-llm'
+import { createUserMessage } from '@agentrans/llm'
 
 export const inject = ['jobs', 'tools']
 
@@ -14,7 +14,7 @@ const STEER_TEXT = 'STEER_WHILE_WAITING'
 const PRODUCER_OUTPUT = 'producer ready'
 const STEERED_RESULT = 'producer ready\n[status: running, user steered]'
 
-/** @param {import('@deepseek-ai/cordis').Context} ctx - Scenario-owned runtime. */
+/** @param {import('@agentrans/cordis').Context} ctx - Scenario-owned runtime. */
 export function apply(ctx) {
   let owner
   let id

@@ -3,7 +3,7 @@ description: "Sandboxed HTML and native SceneSpec Artifact cards for the Web GUI
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-client-ui-artifact
+# @agentrans/client-ui-artifact
 
 English | [中文](README.zh.md)
 

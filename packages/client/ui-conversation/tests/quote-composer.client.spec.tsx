@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, expect, it, vi } from 'vitest'
 import { fireEvent, render } from '@testing-library/react'
-import type { Context } from '@deepseek-ai/cordis'
+import type { Context } from '@agentrans/cordis'
 import {
   KEY_BACKSPACE_COMMAND, KEY_DELETE_COMMAND, REDO_COMMAND, UNDO_COMMAND,
   $getRoot, $getSelection, $isRangeSelection, $nodesOfType,

@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { createAssistantMessage, createUserMessage } from '@deepseek-ai/dsh-llm'
-import { MessageId } from '@deepseek-ai/dsh-llm/brand'
-import { SessionLogOffset, SessionSeq } from '@deepseek-ai/dsh-session'
-import type { SessionEvent, SessionId } from '@deepseek-ai/dsh-session'
+import { createAssistantMessage, createUserMessage } from '@agentrans/llm'
+import { MessageId } from '@agentrans/llm/brand'
+import { SessionLogOffset, SessionSeq } from '@agentrans/session'
+import type { SessionEvent, SessionId } from '@agentrans/session'
 import {
   createBranchResultMessage, findBranchResult, selectBranchResult,
 } from '../src/index.ts'

@@ -5,12 +5,12 @@
  * all, records the child the owner created under the logical request so a retry after that record
  * replays it, and records the child before anything can prompt it. Branch facts the reader was given
  * are added to list and projection answers here.
- * @module @deepseek-ai/dsh-experimental-liveshare/src/host/viewer-fork
+ * @module @agentrans/experimental-liveshare/src/host/viewer-fork
  */
 
 import { FORK_LINEAGE_KEY, forkLineageValue, type ForkLineage } from '../fork-lineage.ts'
-import type { ShareRpcActor } from '@deepseek-ai/dsh-experimental-liveshare-protocol'
-import { identityKeyOf } from '@deepseek-ai/dsh-experimental-liveshare-protocol'
+import type { ShareRpcActor } from '@agentrans/experimental-liveshare-protocol'
+import { identityKeyOf } from '@agentrans/experimental-liveshare-protocol'
 import { viewerRequestTarget, type ViewerAnswer } from '../viewer-channel.ts'
 import type { ForkPromptDecision, ForkRegistry } from './fork-registry.ts'
 import { decideFork, type ForkRequest } from './fork-policy.ts'

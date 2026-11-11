@@ -4,7 +4,7 @@ export const inject = ['tools']
 
 /**
  * Select the smaller model after the first tool call, before the next step prepares.
- * @param {import('@deepseek-ai/cordis').Context} ctx - composition context.
+ * @param {import('@agentrans/cordis').Context} ctx - composition context.
  */
 export function apply(ctx) {
   ctx.on('tools/execute', async (exec, next) => {

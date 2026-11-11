@@ -4,9 +4,9 @@ import { chmod, mkdir, mkdtemp, realpath, rm, symlink, writeFile } from 'node:fs
 import { createServer, Socket } from 'node:net'
 import { userInfo } from 'node:os'
 import { join } from 'node:path'
-import type { SubprocessHandle, SubprocessOutcome, SubprocessRuntime } from '@deepseek-ai/dsh-subprocess'
+import type { SubprocessHandle, SubprocessOutcome, SubprocessRuntime } from '@agentrans/subprocess'
 import { describe, expect, it, onTestFinished, vi } from 'vitest'
-import type { NativeClientConfig } from '@deepseek-ai/dsh-cua/native-client'
+import type { NativeClientConfig } from '@agentrans/cua/native-client'
 import { createSharedNativeChannel, type NativeChannel } from '../src/shared-native.ts'
 
 const runtime = vi.hoisted(() => ({ source: '', directory: '', foreignOwner: false }))

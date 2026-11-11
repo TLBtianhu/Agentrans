@@ -4,7 +4,7 @@ import {
   productLaunchEnvironment,
   resolveDevelopmentLaunchContext,
   type ProductLaunchContext,
-} from '@deepseek-ai/dsh-product-layout/launch-context'
+} from '@agentrans/product-layout/launch-context'
 
 /** Development identity and the environment passed to Electron and its Host. */
 export interface DesktopDevelopmentLaunch {

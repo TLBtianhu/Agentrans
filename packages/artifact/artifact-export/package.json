@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-artifact-export",
+  "name": "@agentrans/artifact-export",
   "description": "Fixed-input Scene HTML exports with durable result files",
   "version": "0.1.0",
   "publishConfig": { "access": "public" },
@@ -21,28 +21,28 @@
   },
   "files": ["lib/types/**/*.js", "lib/types/**/*.d.ts", "lib/typert.host.js", "lib/typert.host.d.ts", "lib/typert.remote-client.js", "lib/typert.remote-client.d.ts"],
   "license": "MIT",
-  "dependencies": { "@deepseek-ai/schemastery": "workspace:~", "zod": "4.4.3" },
+  "dependencies": { "@agentrans/schemastery": "workspace:~", "zod": "4.4.3" },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-agent": "workspace:*",
-    "@deepseek-ai/dsh-artifact": "workspace:*",
-    "@deepseek-ai/dsh-attachment": "workspace:*",
-    "@deepseek-ai/dsh-brand": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-session-projection": "workspace:*",
-    "@deepseek-ai/dsh-typert-protocol": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/agent": "workspace:*",
+    "@agentrans/artifact": "workspace:*",
+    "@agentrans/attachment": "workspace:*",
+    "@agentrans/brand": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/session-projection": "workspace:*",
+    "@agentrans/typert-protocol": "workspace:*"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-agent": "workspace:*",
-    "@deepseek-ai/dsh-artifact": "workspace:*",
-    "@deepseek-ai/dsh-attachment": "workspace:*",
-    "@deepseek-ai/dsh-attachment-local": "workspace:*",
-    "@deepseek-ai/dsh-brand": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-session-projection": "workspace:*",
-    "@deepseek-ai/dsh-session-format": "workspace:*",
-    "@deepseek-ai/dsh-session-format-v3-to-v4": "workspace:*",
-    "@deepseek-ai/dsh-typert-protocol": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/agent": "workspace:*",
+    "@agentrans/artifact": "workspace:*",
+    "@agentrans/attachment": "workspace:*",
+    "@agentrans/attachment-local": "workspace:*",
+    "@agentrans/brand": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/session-projection": "workspace:*",
+    "@agentrans/session-format": "workspace:*",
+    "@agentrans/session-format-v3-to-v4": "workspace:*",
+    "@agentrans/typert-protocol": "workspace:*"
   }
 }

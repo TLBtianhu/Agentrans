@@ -1,30 +1,30 @@
 /** Real Loader composition: the bridge mounted from a cordis.yml row beside the shipped core plugins. */
 
-import * as NativeToolExecutor from '@deepseek-ai/dsh-tool-executor-native'
+import * as NativeToolExecutor from '@agentrans/tool-executor-native'
 import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { afterEach, expect, it, vi } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
-import Loader from '@deepseek-ai/cordis-plugin-loader'
-import Include from '@deepseek-ai/cordis-plugin-include'
-import AgentRegistry from '@deepseek-ai/dsh-agent'
-import AgentLoop from '@deepseek-ai/dsh-agent-loop'
-import CommandRuntime from '@deepseek-ai/dsh-commands'
-import LocalFileSystem from '@deepseek-ai/dsh-fs-local'
-import WorkingDirectory from '@deepseek-ai/dsh-working-directory'
-import LlmRuntime, { createUserMessage } from '@deepseek-ai/dsh-llm'
-import SessionStore, { SessionId } from '@deepseek-ai/dsh-session'
-import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
-import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
-import ToolRuntime from '@deepseek-ai/dsh-tools'
-import { defineContentToolFixture } from '@deepseek-ai/dsh-tool-testkit'
+import { Context } from '@agentrans/cordis'
+import Loader from '@agentrans/cordis-plugin-loader'
+import Include from '@agentrans/cordis-plugin-include'
+import AgentRegistry from '@agentrans/agent'
+import AgentLoop from '@agentrans/agent-loop'
+import CommandRuntime from '@agentrans/commands'
+import LocalFileSystem from '@agentrans/fs-local'
+import WorkingDirectory from '@agentrans/working-directory'
+import LlmRuntime, { createUserMessage } from '@agentrans/llm'
+import SessionStore, { SessionId } from '@agentrans/session'
+import SessionProjectionRegistry from '@agentrans/session-projection'
+import SystemPrompt from '@agentrans/system-prompt'
+import ToolRuntime from '@agentrans/tools'
+import { defineContentToolFixture } from '@agentrans/tool-testkit'
 import * as ClaudeCodeMods from '../src/index.ts'
 import { MockAdapter, textResponse, toolCallResponse } from '../../../core/agent-loop/tests/mock-adapter.ts'
 
 // Keep workspace imports in Vitest's source graph even when the config has a package scope.
-vi.mock('@deepseek-ai/cordis-plugin-loader/src/resolve.ts', () => ({ createResolve: () => undefined }))
+vi.mock('@agentrans/cordis-plugin-loader/src/resolve.ts', () => ({ createResolve: () => undefined }))
 
 const FIXTURES = resolve(import.meta.dirname, 'fixtures')
 
@@ -43,19 +43,19 @@ it('loads from cordis.yml, counts the model\'s tool calls, and answers /tally th
   await writeFile(join(root, 'package.json'), JSON.stringify({ type: 'module' }))
   const configPath = join(root, 'cordis.yml')
   const modules = new Map<string, unknown>([
-    ['@deepseek-ai/dsh-llm', LlmRuntime],
-    ['@deepseek-ai/dsh-session', SessionStore],
-    ['@deepseek-ai/dsh-session-projection', SessionProjectionRegistry],
+    ['@agentrans/llm', LlmRuntime],
+    ['@agentrans/session', SessionStore],
+    ['@agentrans/session-projection', SessionProjectionRegistry],
 
-    ['@deepseek-ai/dsh-system-prompt', SystemPrompt],
-    ['@deepseek-ai/dsh-fs-local', LocalFileSystem],
-    ['@deepseek-ai/dsh-working-directory', WorkingDirectory],
-    ['@deepseek-ai/dsh-tools', ToolRuntime],
-    ['@deepseek-ai/dsh-tool-executor-native', NativeToolExecutor],
-    ['@deepseek-ai/dsh-agent', AgentRegistry],
-    ['@deepseek-ai/dsh-agent-loop', AgentLoop],
-    ['@deepseek-ai/dsh-commands', CommandRuntime],
-    ['@deepseek-ai/dsh-experimental-claude-code-mods', ClaudeCodeMods],
+    ['@agentrans/system-prompt', SystemPrompt],
+    ['@agentrans/fs-local', LocalFileSystem],
+    ['@agentrans/working-directory', WorkingDirectory],
+    ['@agentrans/tools', ToolRuntime],
+    ['@agentrans/tool-executor-native', NativeToolExecutor],
+    ['@agentrans/agent', AgentRegistry],
+    ['@agentrans/agent-loop', AgentLoop],
+    ['@agentrans/commands', CommandRuntime],
+    ['@agentrans/experimental-claude-code-mods', ClaudeCodeMods],
   ])
   // A mod is a plugin like any other: here the tutorial mod's `defineMod` wrapper, mounted by file URL after the bridge.
   const firstMod = pathToFileURL(resolve(FIXTURES, 'first-mod.ts')).href

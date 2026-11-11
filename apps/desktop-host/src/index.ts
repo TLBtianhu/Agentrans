@@ -4,13 +4,13 @@ import { delimiter, join } from 'node:path'
 import { randomUUID } from 'node:crypto'
 import {
   PRODUCT_LAUNCH_CONTEXT_ENV, applyProductLaunchEnvironment, parseProductLaunchContext, prepareProductState,
-} from '@deepseek-ai/dsh-product-layout/launch-context'
-import type { PluginOperationRunId } from '@deepseek-ai/dsh-plugin-manager/diagnostic'
+} from '@agentrans/product-layout/launch-context'
+import type { PluginOperationRunId } from '@agentrans/plugin-manager/diagnostic'
 import { formatFatalDiagnostic } from './fatal-diagnostic.ts'
-import type {} from '@deepseek-ai/dsh-client-connection'
-import type {} from '@deepseek-ai/dsh-host-webserver'
-import type {} from '@deepseek-ai/dsh-deepseek-account'
-import { resolveDshHome } from '@deepseek-ai/dsh-home-paths'
+import type {} from '@agentrans/client-connection'
+import type {} from '@agentrans/host-webserver'
+import type {} from '@agentrans/deepseek-account'
+import { resolveDshHome } from '@agentrans/home-paths'
 import * as desktopOffice from './office.ts'
 import { localDragResource } from './file-drag.ts'
 
@@ -26,14 +26,14 @@ async function main(): Promise<void> {
   const launchContext = parseProductLaunchContext(encoded)
   prepareProductState(launchContext)
   applyProductLaunchEnvironment(launchContext, process.env)
-  const { loadLayeredEnv, loadProfileDirectory, reportSkippedBundles } = await import('@deepseek-ai/dsh-app-boot')
-  const { runProfile } = await import('@deepseek-ai/dsh/profile-boot')
+  const { loadLayeredEnv, loadProfileDirectory, reportSkippedBundles } = await import('@agentrans/app-boot')
+  const { runProfile } = await import('@agentrans/dsh/profile-boot')
   const runId = randomUUID() as PluginOperationRunId
   if (process.connected) process.send?.({ type: 'starting', runId }, (error) => { if (error !== null) console.error(error) })
   const runtimeDir = process.argv[2] as string
   const projectDir = process.argv[3] as string
   installOfficeEngineResolution(runtimeDir)
-  const installAnchor = join(runtimeDir, 'node_modules', '@deepseek-ai', 'dsh', 'package.json')
+  const installAnchor = join(runtimeDir, 'node_modules', '@agentrans', 'cli', 'package.json')
   const profile = loadProfileDirectory('dsh', projectDir, installAnchor)
   reportSkippedBundles('dsh', profile)
   const application = runProfile({

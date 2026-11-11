@@ -2,7 +2,7 @@
 import { JSDOM, VirtualConsole } from 'jsdom'
 import { describe, expect, it, onTestFinished } from 'vitest'
 import { buildSceneAnimationHtml } from '../src/client/scene-animation.ts'
-import type { FunctionPlotSpec } from '@deepseek-ai/dsh-artifact/scene'
+import type { FunctionPlotSpec } from '@agentrans/artifact/scene'
 
 const spec: FunctionPlotSpec = {
   kind: 'function-plot',

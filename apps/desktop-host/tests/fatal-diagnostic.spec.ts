@@ -2,7 +2,7 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { expect, it, onTestFinished } from 'vitest'
-import { boot, StartupError } from '@deepseek-ai/dsh-app-boot'
+import { boot, StartupError } from '@agentrans/app-boot'
 import { formatFatalDiagnostic, MAX_FATAL_DIAGNOSTIC_CHARS } from '../src/fatal-diagnostic.ts'
 import { renderCrashReport } from '../../desktop/src/crash-report.ts'
 
@@ -34,7 +34,7 @@ it.each([
 
 it('includes non-enumerable startup entries without copying arbitrary startup logger arguments', () => {
   const error = new StartupError('required plugin did not activate', [{
-    id: 'agent-loop', module: '@deepseek-ai/dsh-agent-loop', required: true, fiberState: undefined,
+    id: 'agent-loop', module: '@agentrans/agent-loop', required: true, fiberState: undefined,
     outcome: { kind: 'pending', missing: ['agents', 'sessions'] },
   }])
   error.startup = { configurationPath: '/profile/cordis.yml', messages: [{
@@ -42,7 +42,7 @@ it('includes non-enumerable startup entries without copying arbitrary startup lo
   }] }
   const report = formatFatalDiagnostic(new Error('Host startup failed', { cause: error }))
   expect(report).toContain('--- startup entries ---')
-  expect(report).toContain('@deepseek-ai/dsh-agent-loop')
+  expect(report).toContain('@agentrans/agent-loop')
   expect(report).toContain("missing: [ 'agents', 'sessions' ]")
   expect(report).toContain('Configuration file: /profile/cordis.yml')
   expect(report).not.toContain('private-plugin-output')

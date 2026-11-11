@@ -1,7 +1,7 @@
 /** Node child evaluation over typed RPC; the host owns process lifetime. */
 import { AsyncLocalStorage } from 'node:async_hooks'
 import type { Duplex } from 'node:stream'
-import type { PtcProgramFormat } from '@deepseek-ai/dsh-ptc-runtime'
+import type { PtcProgramFormat } from '@agentrans/ptc-runtime'
 import { createProcessRpc } from './rpc.ts'
 import { captureStreamWrites, LogBuffer, makeConsoleShim, makeBindingErrorClass, makeNamespaces, prepareCompletion, prepareException } from './bootstrap.ts'
 import type { BindingErrorConstructor, PatchableStream } from './bootstrap.ts'

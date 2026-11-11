@@ -3,16 +3,16 @@ import { createPortal } from 'react-dom'
 import {
   type SessionProjectionMap, type SessionSummary,
   type SessionProjectionSnapshot,
-} from '@deepseek-ai/dsh-api-session-controller/client'
-import type { SubagentAddress } from '@deepseek-ai/dsh-subagent/client'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
+} from '@agentrans/api-session-controller/client'
+import type { SubagentAddress } from '@agentrans/subagent/client'
+import type { SessionId } from '@agentrans/session/types'
 import {
   IconChevronDownOutlineRegular, IconChevronRightOutlineRegular, IconRefreshOutlineRegular, StateDot, Tooltip,
-} from '@deepseek-ai/dsh-client-ui-primitives'
-import type { PropsLocale, PropsRuntime, TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
+} from '@agentrans/client-ui-primitives'
+import type { PropsLocale, PropsRuntime, TranslateNS } from '@agentrans/client-ui-slots'
 import { NS } from './locales.ts'
-import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
-import type {} from '@deepseek-ai/dsh-token-meter/client'
+import type {} from '@agentrans/client-ui-conversation/client'
+import type {} from '@agentrans/token-meter/client'
 import css from './SubagentHeaderLineage.module.css'
 
 type SubagentCatalogSnapshot = Omit<SessionProjectionSnapshot, 'values' | 'state'> & {

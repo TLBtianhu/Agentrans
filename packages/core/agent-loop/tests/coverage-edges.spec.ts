@@ -1,20 +1,20 @@
-import * as NativeToolExecutor from '@deepseek-ai/dsh-tool-executor-native'
+import * as NativeToolExecutor from '@agentrans/tool-executor-native'
 import { describe, expect, it } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
-import LlmRuntime, { createUserMessage, ToolCallId, LlmError, StreamChunk, errorChain  } from '@deepseek-ai/dsh-llm'
-import type { ContextFormed } from '@deepseek-ai/dsh-llm'
-import SessionStore, { SessionId, TurnEndReason } from '@deepseek-ai/dsh-session'
-import type { SessionEvent } from '@deepseek-ai/dsh-session'
-import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
-import ToolRuntime from '@deepseek-ai/dsh-tools'
-import { defineContentToolFixture } from '@deepseek-ai/dsh-tool-testkit'
-import AgentRegistry, { type Agent } from '@deepseek-ai/dsh-agent'
+import { Context } from '@agentrans/cordis'
+import LlmRuntime, { createUserMessage, ToolCallId, LlmError, StreamChunk, errorChain  } from '@agentrans/llm'
+import type { ContextFormed } from '@agentrans/llm'
+import SessionStore, { SessionId, TurnEndReason } from '@agentrans/session'
+import type { SessionEvent } from '@agentrans/session'
+import SystemPrompt from '@agentrans/system-prompt'
+import ToolRuntime from '@agentrans/tools'
+import { defineContentToolFixture } from '@agentrans/tool-testkit'
+import AgentRegistry, { type Agent } from '@agentrans/agent'
 
-import AgentLoop from '@deepseek-ai/dsh-agent-loop'
-import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
+import AgentLoop from '@agentrans/agent-loop'
+import SessionProjectionRegistry from '@agentrans/session-projection'
 import { MockAdapter, textResponse, toolCallResponse } from './mock-adapter.ts'
 
-declare module '@deepseek-ai/dsh-llm' {
+declare module '@agentrans/llm' {
   interface MessageSourceMap {
     'test': { kind: 'test' } & ContextFormed
   }
@@ -225,7 +225,7 @@ describe('disposed vs aborted branching', () => {
 
 describe('structured tool error propagation (the runtime-validation Agent Note, part 2)', () => {
   it('forwards a tool HarnessError onto the tool/result session event', async () => {
-    const { HarnessError } = await import('@deepseek-ai/dsh-llm')
+    const { HarnessError } = await import('@agentrans/llm')
     // First model turn calls the tool; second turn (after the tool result is
     // fed back) ends with plain text so the loop settles.
     const adapter = new MockAdapter([
@@ -255,7 +255,7 @@ describe('structured tool error propagation (the runtime-validation Agent Note, 
 
 describe('request-error action edges', () => {
   it('ignores a retry action returned after the turn was aborted', async () => {
-    const { LlmError } = await import('@deepseek-ai/dsh-llm')
+    const { LlmError } = await import('@agentrans/llm')
     const adapter = new MockAdapter([
       () => { throw new LlmError('busy', 'RATE_LIMIT') },
       textResponse('never used'),
@@ -277,7 +277,7 @@ describe('request-error action edges', () => {
   })
 
   it('completed recovery does not retry when cancellation raced the waterfall', async () => {
-    const { LlmError } = await import('@deepseek-ai/dsh-llm')
+    const { LlmError } = await import('@agentrans/llm')
     const adapter = new MockAdapter([
       () => { throw new LlmError('busy', 'RATE_LIMIT') },
     ])
@@ -374,7 +374,7 @@ describe('persistent step-close rejection', () => {
 
 describe('tool result meta persistence', () => {
   it('records a presentationMeta payload on the tool/result event', async () => {
-    const { defineTool } = await import('@deepseek-ai/dsh-tools')
+    const { defineTool } = await import('@agentrans/tools')
     const adapter = new MockAdapter([
       toolCallResponse('c1', 'meta-tool', {}),
       textResponse('done'),
@@ -432,7 +432,7 @@ describe('turn close failure containment', () => {
 
 describe('recovery without a retry action', () => {
   it('a completed recovery that returns no action leaves the failed turn terminal', async () => {
-    const { LlmError } = await import('@deepseek-ai/dsh-llm')
+    const { LlmError } = await import('@agentrans/llm')
     const adapter = new MockAdapter([
       () => { throw new LlmError('down', 'SERVICE_UNAVAILABLE') },
     ])
@@ -453,7 +453,7 @@ describe('recovery without a retry action', () => {
 
 describe('unrenderable failure settlement', () => {
   it('drops the rendered message when the error chain cannot be rendered', async () => {
-    const { LlmError } = await import('@deepseek-ai/dsh-llm')
+    const { LlmError } = await import('@agentrans/llm')
     const adapter = new MockAdapter([
       () => {
         const error = new LlmError('will become hostile', 'SERVER')
@@ -517,7 +517,7 @@ describe('driver bookkeeping edges', () => {
   })
 
   it('a request failure that concludes recovery after step/end closed keeps the boundary balanced', async () => {
-    const { LlmError } = await import('@deepseek-ai/dsh-llm')
+    const { LlmError } = await import('@agentrans/llm')
     // The failure finish-chunk path returns request-failed AFTER step() has
     // already appended step/end, so the request-failed branch's own
     // step-close guard must see stepOpen === false and skip the append.

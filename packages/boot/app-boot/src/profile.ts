@@ -18,17 +18,17 @@
  * profile directory. Pnpm-managed entries in the profile's `node_modules`
  * resolve first. The runtime resolution supplies packages carried by the
  * installation and selected bundles to Node's ESM and CommonJS resolvers.
- * @module @deepseek-ai/dsh-app-boot/profile
+ * @module @agentrans/app-boot/profile
  */
 
 import { createRequire } from 'node:module'
 import { existsSync, mkdirSync, readdirSync, readFileSync, readlinkSync, realpathSync, rmSync, statSync, unlinkSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join, relative, resolve, sep } from 'node:path'
-import type { EntryOptions } from '@deepseek-ai/cordis-plugin-loader'
-import { applyEntryPatches, type PatchOptions } from '@deepseek-ai/cordis-plugin-include'
-import { resolveDshHome } from '@deepseek-ai/dsh-home-paths'
-import type { DshBundleManifest, DshPackageManifest } from '@deepseek-ai/dsh-package-manifest'
-import { INSTALLATION_OWNED_PROFILE_TUPLES, PROFILE_TEMPLATES, RETIRED_BUNDLES } from '@deepseek-ai/dsh-official-bundles'
+import type { EntryOptions } from '@agentrans/cordis-plugin-loader'
+import { applyEntryPatches, type PatchOptions } from '@agentrans/cordis-plugin-include'
+import { resolveDshHome } from '@agentrans/home-paths'
+import type { DshBundleManifest, DshPackageManifest } from '@agentrans/package-manifest'
+import { INSTALLATION_OWNED_PROFILE_TUPLES, PROFILE_TEMPLATES, RETIRED_BUNDLES } from '@agentrans/official-bundles'
 import { assertBundlePlatform } from './bundle-platform.ts'
 import { evaluatePluginCompatibility, pluginCompatibilityWarning } from './plugin-compatibility.ts'
 import { readProfileVersionExemptions } from './profile-compatibility.ts'
@@ -639,7 +639,7 @@ function packageDirFromAnchor(anchor: string, packageName: string): string | und
 /**
  * Resolve one bundle package's directory: installation anchor first, then the
  * profile directory. The installation-first order is the contract that
- * `@deepseek-ai/dsh-base` (and every other in-box bundle) always comes from
+ * `@agentrans/base` (and every other in-box bundle) always comes from
  * the same installation as the running dsh, never from a profile-local copy.
  * Resolution does not require the package to export `./package.json`.
  * @param binName - the diagnostic prefix on the thrown error.

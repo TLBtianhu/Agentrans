@@ -5,7 +5,7 @@
  * Peer may see, so every read reaches the Owner as that reader.
  */
 
-import type { PeerScope } from '@deepseek-ai/dsh-typert-protocol'
+import type { PeerScope } from '@agentrans/typert-protocol'
 import { describe, expect, it, onTestFinished } from 'vitest'
 import { createViewerReadService } from '../src/host/viewer-read.ts'
 import { READER, readerConnection } from './viewer-read-peers.ts'

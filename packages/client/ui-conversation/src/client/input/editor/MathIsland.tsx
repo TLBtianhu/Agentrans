@@ -8,7 +8,7 @@
 import type { LexicalEditor, NodeKey } from 'lexical'
 import type { JSX } from 'react'
 import { useState } from 'react'
-import { InlineTex } from '@deepseek-ai/dsh-client-ui-primitives'
+import { InlineTex } from '@agentrans/client-ui-primitives'
 import { $getNodeByKey } from 'lexical'
 import { $isMathNode } from './math-node.tsx'
 

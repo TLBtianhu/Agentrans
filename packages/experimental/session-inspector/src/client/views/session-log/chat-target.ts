@@ -1,7 +1,7 @@
 /** Original log coordinates submitted for target-owned Chat reveal. */
 
-import type { SessionEventLike } from '@deepseek-ai/dsh-api-session-controller/client'
-import type { StreamChunk } from '@deepseek-ai/dsh-llm'
+import type { SessionEventLike } from '@agentrans/api-session-controller/client'
+import type { StreamChunk } from '@agentrans/llm'
 import type { InspectorChatTarget } from '../objects.ts'
 
 /** Original owning event and, for an Assistant child row, its selected stream chunk. */

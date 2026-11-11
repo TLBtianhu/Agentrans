@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { contextMenuHook } from '@deepseek-ai/dsh-client-test-runtime'
+import { contextMenuHook } from '@agentrans/client-test-runtime'
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
 import { Menu, MenuItemButton } from '../src/Menu.tsx'

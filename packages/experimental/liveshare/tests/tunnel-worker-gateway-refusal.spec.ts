@@ -16,7 +16,7 @@ import {
   type TunnelRegistrationToken,
   type TunnelWorkerCommand,
   type TunnelWorkerEvent,
-} from '@deepseek-ai/dsh-experimental-liveshare-protocol'
+} from '@agentrans/experimental-liveshare-protocol'
 import { relayRefusal, relayRefusalStatus } from '../src/owner-gateway/relay-refusal.ts'
 
 const workerEntry = fileURLToPath(new URL('../src/owner-gateway/cli.ts', import.meta.url))

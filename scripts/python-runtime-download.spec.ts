@@ -18,12 +18,12 @@ async function fixture() {
   await file(join(resources, 'downloads.json'), JSON.stringify({ identity: 'a'.repeat(64), office: [], pnpm: {} }))
   await mkdir(dirname(bootstrap), { recursive: true })
   await copyFile(new URL('../python/sdk-runtime/runtime-bootstrap.mjs', import.meta.url), bootstrap)
-  await file(join(root, 'node/node_modules/@deepseek-ai/dsh-http-proxy/package.json'), '{"type":"module","exports":"./index.mjs"}')
-  await file(join(root, 'node/node_modules/@deepseek-ai/dsh-http-proxy/index.mjs'), 'export async function installProxyFromEnvironment(env) { if (typeof env.get !== "function") throw new Error("missing environment lookup"); return async () => {} }')
-  await file(join(root, 'node/node_modules/@deepseek-ai/dsh-sandbox-windows-acl/package.json'), '{"type":"module","exports":{"./runner":"./runner.mjs"}}')
-  await file(join(root, 'node/node_modules/@deepseek-ai/dsh-sandbox-windows-acl/runner.mjs'), '')
-  await file(join(root, 'node/node_modules/@deepseek-ai/dsh/package.json'), '{"type":"module"}')
-  await file(join(root, 'node/node_modules/@deepseek-ai/dsh/lib/bin.js'), `
+  await file(join(root, 'node/node_modules/@agentrans/http-proxy/package.json'), '{"type":"module","exports":"./index.mjs"}')
+  await file(join(root, 'node/node_modules/@agentrans/http-proxy/index.mjs'), 'export async function installProxyFromEnvironment(env) { if (typeof env.get !== "function") throw new Error("missing environment lookup"); return async () => {} }')
+  await file(join(root, 'node/node_modules/@agentrans/sandbox-windows-acl/package.json'), '{"type":"module","exports":{"./runner":"./runner.mjs"}}')
+  await file(join(root, 'node/node_modules/@agentrans/sandbox-windows-acl/runner.mjs'), '')
+  await file(join(root, 'node/node_modules/@agentrans/dsh/package.json'), '{"type":"module"}')
+  await file(join(root, 'node/node_modules/@agentrans/dsh/lib/bin.js'), `
     export async function runCli(options = {}) {
       const result = process.argv[2] ? { argv: process.argv.slice(2) }
         : { primary: process.env.DSH_BUNDLED_PRIMARY_RUNTIME, office: process.env.DSH_BUNDLED_OFFICE_CLI };
@@ -31,8 +31,8 @@ async function fixture() {
       console.log(JSON.stringify(result));
     }
   `)
-  await file(join(root, 'node/node_modules/@deepseek-ai/dsh-tool-workspace-dependencies/package.json'), '{"type":"module","exports":"./index.mjs"}')
-  await file(join(root, 'node/node_modules/@deepseek-ai/dsh-tool-workspace-dependencies/index.mjs'), `
+  await file(join(root, 'node/node_modules/@agentrans/tool-workspace-dependencies/package.json'), '{"type":"module","exports":"./index.mjs"}')
+  await file(join(root, 'node/node_modules/@agentrans/tool-workspace-dependencies/index.mjs'), `
     import { readFile } from 'node:fs/promises';
     import { join } from 'node:path';
     export async function resolvePrimaryRuntime(root) {

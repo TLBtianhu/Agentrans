@@ -22,7 +22,7 @@ import { collectRuntimeSourceSpecifiers } from './source-parse-uses.ts'
 const root = resolve(import.meta.dirname, '..')
 
 /** Prefix every first-party package name carries. */
-const PACKAGE_PREFIX = '@deepseek-ai/dsh-'
+const PACKAGE_PREFIX = '@agentrans/'
 
 /** One workspace package resolved from its manifest. */
 export interface WorkspacePackage {

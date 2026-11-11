@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-subagent",
+  "name": "@agentrans/subagent",
   "description": "Abstract subagent seam (ctx.subagents): named-provider registry for delegating to child agents",
   "version": "0.1.0",
   "publishConfig": {
@@ -50,88 +50,88 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@deepseek-ai/dsh-brand": "workspace:*",
-    "@deepseek-ai/dsh-chunked-list": "workspace:*",
-    "@deepseek-ai/dsh-util-values": "workspace:*",
-    "@deepseek-ai/schemastery": "workspace:~",
+    "@agentrans/brand": "workspace:*",
+    "@agentrans/chunked-list": "workspace:*",
+    "@agentrans/util-values": "workspace:*",
+    "@agentrans/schemastery": "workspace:~",
     "zod": "4.4.3"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-agent": "workspace:*",
-    "@deepseek-ai/dsh-agent-preset-registry": "workspace:*",
-    "@deepseek-ai/dsh-attachment": "workspace:*",
-    "@deepseek-ai/dsh-llm": "workspace:*",
-    "@deepseek-ai/dsh-sandbox": "workspace:*",
-    "@deepseek-ai/dsh-sandbox-policy": "workspace:*",
-    "@deepseek-ai/dsh-scope": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-session-persistence": "workspace:*",
-    "@deepseek-ai/dsh-session-projection": "workspace:*",
-    "@deepseek-ai/dsh-session-query": "workspace:*",
-    "@deepseek-ai/dsh-system-prompt": "workspace:*",
-    "@deepseek-ai/dsh-tools": "workspace:*",
-    "@deepseek-ai/dsh-typert-protocol": "workspace:*",
-    "@deepseek-ai/dsh-user-approval": "workspace:*",
-    "@deepseek-ai/dsh-util-time": "workspace:*",
-    "@deepseek-ai/dsh-permission-presets": "workspace:*",
-    "@deepseek-ai/dsh-workspace": "workspace:*",
-    "@deepseek-ai/dsh-working-directory": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/agent": "workspace:*",
+    "@agentrans/agent-preset-registry": "workspace:*",
+    "@agentrans/attachment": "workspace:*",
+    "@agentrans/llm": "workspace:*",
+    "@agentrans/sandbox": "workspace:*",
+    "@agentrans/sandbox-policy": "workspace:*",
+    "@agentrans/scope": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/session-persistence": "workspace:*",
+    "@agentrans/session-projection": "workspace:*",
+    "@agentrans/session-query": "workspace:*",
+    "@agentrans/system-prompt": "workspace:*",
+    "@agentrans/tools": "workspace:*",
+    "@agentrans/typert-protocol": "workspace:*",
+    "@agentrans/user-approval": "workspace:*",
+    "@agentrans/util-time": "workspace:*",
+    "@agentrans/permission-presets": "workspace:*",
+    "@agentrans/workspace": "workspace:*",
+    "@agentrans/working-directory": "workspace:*"
   },
   "peerDependenciesMeta": {
-    "@deepseek-ai/dsh-agent-preset-registry": {
+    "@agentrans/agent-preset-registry": {
       "optional": true
     },
-    "@deepseek-ai/dsh-permission-presets": {
+    "@agentrans/permission-presets": {
       "optional": true
     },
-    "@deepseek-ai/dsh-sandbox": {
+    "@agentrans/sandbox": {
       "optional": true
     },
-    "@deepseek-ai/dsh-sandbox-policy": {
+    "@agentrans/sandbox-policy": {
       "optional": true
     },
-    "@deepseek-ai/dsh-session-persistence": {
+    "@agentrans/session-persistence": {
       "optional": true
     },
-    "@deepseek-ai/dsh-session-query": {
+    "@agentrans/session-query": {
       "optional": true
     },
-    "@deepseek-ai/dsh-workspace": {
+    "@agentrans/workspace": {
       "optional": true
     },
-    "@deepseek-ai/dsh-user-approval": {
+    "@agentrans/user-approval": {
       "optional": true
     }
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-agent": "workspace:*",
-    "@deepseek-ai/dsh-agent-preset-registry": "workspace:*",
-    "@deepseek-ai/dsh-attachment": "workspace:*",
-    "@deepseek-ai/dsh-llm": "workspace:*",
-    "@deepseek-ai/dsh-sandbox": "workspace:*",
-    "@deepseek-ai/dsh-sandbox-policy": "workspace:*",
-    "@deepseek-ai/dsh-scope": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-session-persistence": "workspace:*",
-    "@deepseek-ai/dsh-session-projection": "workspace:*",
-    "@deepseek-ai/dsh-session-query": "workspace:*",
-    "@deepseek-ai/dsh-system-prompt": "workspace:*",
-    "@deepseek-ai/dsh-tool-testkit": "workspace:*",
-    "@deepseek-ai/dsh-tools": "workspace:*",
-    "@deepseek-ai/dsh-typert-protocol": "workspace:*",
-    "@deepseek-ai/dsh-user-approval": "workspace:*",
-    "@deepseek-ai/dsh-util-time": "workspace:*",
-    "@deepseek-ai/dsh-permission-presets": "workspace:*",
-    "@deepseek-ai/dsh-workspace": "workspace:*",
-    "@deepseek-ai/cordis-plugin-include": "workspace:~",
-    "@deepseek-ai/cordis-plugin-loader": "workspace:~",
-    "@deepseek-ai/dsh-agent-loop": "workspace:*",
-    "@deepseek-ai/dsh-agent-loop-testkit": "workspace:*",
-    "@deepseek-ai/dsh-fs-sandbox": "workspace:*",
-    "@deepseek-ai/dsh-tool-fs": "workspace:*",
-    "@deepseek-ai/dsh-session-persistence-jsonl": "workspace:*",
-    "@deepseek-ai/dsh-working-directory": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/agent": "workspace:*",
+    "@agentrans/agent-preset-registry": "workspace:*",
+    "@agentrans/attachment": "workspace:*",
+    "@agentrans/llm": "workspace:*",
+    "@agentrans/sandbox": "workspace:*",
+    "@agentrans/sandbox-policy": "workspace:*",
+    "@agentrans/scope": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/session-persistence": "workspace:*",
+    "@agentrans/session-projection": "workspace:*",
+    "@agentrans/session-query": "workspace:*",
+    "@agentrans/system-prompt": "workspace:*",
+    "@agentrans/tool-testkit": "workspace:*",
+    "@agentrans/tools": "workspace:*",
+    "@agentrans/typert-protocol": "workspace:*",
+    "@agentrans/user-approval": "workspace:*",
+    "@agentrans/util-time": "workspace:*",
+    "@agentrans/permission-presets": "workspace:*",
+    "@agentrans/workspace": "workspace:*",
+    "@agentrans/cordis-plugin-include": "workspace:~",
+    "@agentrans/cordis-plugin-loader": "workspace:~",
+    "@agentrans/agent-loop": "workspace:*",
+    "@agentrans/agent-loop-testkit": "workspace:*",
+    "@agentrans/fs-sandbox": "workspace:*",
+    "@agentrans/tool-fs": "workspace:*",
+    "@agentrans/session-persistence-jsonl": "workspace:*",
+    "@agentrans/working-directory": "workspace:*"
   }
 }

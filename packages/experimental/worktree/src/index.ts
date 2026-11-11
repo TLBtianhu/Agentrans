@@ -1,13 +1,13 @@
 /** Creates a new Git branch and checkout, then changes the calling Session's working directory; restores a removed checkout. */
 
-import { Context, Service } from '@deepseek-ai/cordis'
-import z from '@deepseek-ai/schemastery'
-import type { Agent } from '@deepseek-ai/dsh-agent'
-import type {} from '@deepseek-ai/dsh-fs'
-import type { SandboxExecutionPolicy } from '@deepseek-ai/dsh-sandbox'
-import type {} from '@deepseek-ai/dsh-sandbox-policy'
-import type {} from '@deepseek-ai/dsh-working-directory'
-import { MAX_TIMER_DELAY_MS } from '@deepseek-ai/dsh-timeout'
+import { Context, Service } from '@agentrans/cordis'
+import z from '@agentrans/schemastery'
+import type { Agent } from '@agentrans/agent'
+import type {} from '@agentrans/fs'
+import type { SandboxExecutionPolicy } from '@agentrans/sandbox'
+import type {} from '@agentrans/sandbox-policy'
+import type {} from '@agentrans/working-directory'
+import { MAX_TIMER_DELAY_MS } from '@agentrans/timeout'
 import { PREPARE_DIRECTORY } from './directory.ts'
 import { generatedWorktreeName } from './name.ts'
 import { runCommand } from './process.ts'
@@ -45,7 +45,7 @@ interface WorktreeSpec {
 /** Runs one confined Git command; output with an exit code outside `allowedExitCodes` throws. */
 type GitRun = (directory: string, args: string[], allowedExitCodes?: number[], env?: NodeJS.ProcessEnv) => ReturnType<typeof runCommand>
 
-declare module '@deepseek-ai/cordis' {
+declare module '@agentrans/cordis' {
   interface Context {
     worktrees: WorktreeService
   }

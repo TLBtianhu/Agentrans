@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium, type Browser } from 'playwright'
-import type {} from '@deepseek-ai/dsh-ptc-runtime'
+import type {} from '@agentrans/ptc-runtime'
 import { expect, it, onTestFinished } from 'vitest'
 import { captureStableAria, compareOrRefreshGolden, launchWebScaffold, webSnapshotMode, type WebScaffold } from './scaffold.ts'
 import { connectFreshWorkspaceZh, ZH_BROWSER_LOCALE } from './support.ts'
@@ -43,12 +43,12 @@ it('disables unsupported bundles, shows the Host restriction, and refuses direct
   expect(scaffold.ctx.ptcRuntime.programFormat).toBe('function-body')
   const names = [name]
   await page.locator('[data-plugin-panel]').getByRole('button', { name: '更多', exact: true }).click()
-  const cua = page.locator('[data-plugin-package="@deepseek-ai/dsh-cua-bundle"]')
+  const cua = page.locator('[data-plugin-package="@agentrans/cua-bundle"]')
   expect(await cua.count()).toBe(0)
   if (process.platform !== 'darwin') {
-    expect((await scaffold.ctx.pluginManager.listBundles()).find(bundle => bundle.name === '@deepseek-ai/dsh-cua-bundle'))
+    expect((await scaffold.ctx.pluginManager.listBundles()).find(bundle => bundle.name === '@agentrans/cua-bundle'))
       .toMatchObject({ listedByDefault: false, enabled: false, error: { code: 'unsupported-platform' } })
-    names.push('@deepseek-ai/dsh-cua-bundle')
+    names.push('@agentrans/cua-bundle')
   }
   for (const bundle of names) {
     expect(await scaffold.ctx.pluginManager.setBundleEnabled(bundle, true)).toMatchObject({

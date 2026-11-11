@@ -35,7 +35,7 @@ kind: "package-library"
 ### 入口
 
 ```ts
-import { Duration, canonicalClientTimeZone, fourDigitYearEpoch, parseLocalCalendar, resolveLocalInstant } from '@deepseek-ai/dsh-util-time'
+import { Duration, canonicalClientTimeZone, fourDigitYearEpoch, parseLocalCalendar, resolveLocalInstant } from '@agentrans/util-time'
 
 const zone = canonicalClientTimeZone('US/Eastern')            // 'America/New_York' or undefined
 const stored = fourDigitYearEpoch('2026-03-08T02:30:00.000Z') // { kind: 'accepted', epoch } or a rejection reason

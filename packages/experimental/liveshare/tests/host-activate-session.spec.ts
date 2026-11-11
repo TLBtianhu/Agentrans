@@ -9,7 +9,7 @@
  * than left looking activated.
  */
 
-import { Context } from '@deepseek-ai/cordis'
+import { Context } from '@agentrans/cordis'
 import { describe, expect, it } from 'vitest'
 import { activateSession } from '../src/host/share-host.ts'
 

@@ -3,7 +3,7 @@ import { access, mkdir, readdir, rm, symlink, writeFile } from 'node:fs/promises
 import { join, sep } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import type { Context } from '@deepseek-ai/cordis'
+import type { Context } from '@agentrans/cordis'
 import WorktreeService from '../src/index.ts'
 import type { RestoreWorktreeRequest } from '../src/index.ts'
 import { contents, git, harness, repository, testAgent } from './harness.ts'

@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-tool-working-directory",
+  "name": "@agentrans/tool-working-directory",
   "description": "Read and change the active Session working directory",
   "version": "0.1.0",
   "publishConfig": {
@@ -29,20 +29,20 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-tools": "workspace:*",
-    "@deepseek-ai/dsh-working-directory": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/tools": "workspace:*",
+    "@agentrans/working-directory": "workspace:*"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-tools": "workspace:*",
-    "@deepseek-ai/dsh-working-directory": "workspace:*",
-    "@deepseek-ai/dsh-agent-loop-testkit": "workspace:*",
-    "@deepseek-ai/dsh-fs-local": "workspace:*",
-    "@deepseek-ai/dsh-agent-loop": "workspace:*",
-    "@deepseek-ai/dsh-llm": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-session-projection": "workspace:*",
-    "@deepseek-ai/dsh-system-prompt": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/tools": "workspace:*",
+    "@agentrans/working-directory": "workspace:*",
+    "@agentrans/agent-loop-testkit": "workspace:*",
+    "@agentrans/fs-local": "workspace:*",
+    "@agentrans/agent-loop": "workspace:*",
+    "@agentrans/llm": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/session-projection": "workspace:*",
+    "@agentrans/system-prompt": "workspace:*"
   }
 }

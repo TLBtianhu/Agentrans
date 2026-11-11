@@ -4,11 +4,11 @@
  * Endpoint classification, the source and child write paths, streams, page assets, and the request
  * entry all live here. Each handler re-reads the share's lifecycle and the policy's write refusal at
  * the points the original order required, and every resource it opens is tracked by viewer-lifecycle.
- * @module @deepseek-ai/dsh-experimental-liveshare/src/host/viewer-dispatch
+ * @module @agentrans/experimental-liveshare/src/host/viewer-dispatch
  */
 
-import type { ShareRpcActor } from '@deepseek-ai/dsh-experimental-liveshare-protocol'
-import { identityKeyOf } from '@deepseek-ai/dsh-experimental-liveshare-protocol'
+import type { ShareRpcActor } from '@agentrans/experimental-liveshare-protocol'
+import { identityKeyOf } from '@agentrans/experimental-liveshare-protocol'
 import {
   viewerReadOnlyAnswer,
   viewerRequestTarget,

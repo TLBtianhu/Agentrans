@@ -5,7 +5,7 @@
  * Relay authority, worker channel, and persistence queue the sign-in routes and the viewer reader
  * use. This module states the one interface the Remote service calls, so no surface owns a second
  * copy of a side effect.
- * @module @deepseek-ai/dsh-experimental-liveshare/src/host/share-operations
+ * @module @agentrans/experimental-liveshare/src/host/share-operations
  */
 
 import type {

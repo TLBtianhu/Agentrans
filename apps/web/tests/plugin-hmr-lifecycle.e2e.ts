@@ -8,7 +8,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { chromium, type Browser, type Locator, type Page } from 'playwright'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import type { ChangeResult } from '@deepseek-ai/dsh-plugin-manager'
+import type { ChangeResult } from '@agentrans/plugin-manager'
 import { launchWebScaffold, watchConsole, type WebScaffold } from './scaffold.ts'
 import { PLUGIN_TOGGLE_SETTLE_MS, ZH_BROWSER_LOCALE } from './support.ts'
 

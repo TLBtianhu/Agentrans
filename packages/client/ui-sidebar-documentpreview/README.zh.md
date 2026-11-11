@@ -3,7 +3,7 @@ description: "右侧 Sidebar 的文档预览：共享文件加载与控件，可
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-client-ui-sidebar-documentpreview
+# @agentrans/client-ui-sidebar-documentpreview
 
 [English](README.md) | 中文
 
@@ -30,7 +30,7 @@ kind: "package-reference"
 
 图片拖放回调通过图片入口的注入接口从 [ui-file-drag](../ui-file-drag/README.zh.md) 获取。
 
-- **类型** —— `ctx.sidebarRightTabs.register(...)`，id 为 `@deepseek-ai/dsh-client-ui-sidebar-documentpreview`（这个实现在 tab 系统中的身份，也是其正文注册所用的键），kind `text`，匹配完整文件资源地址的 pattern，档位 `fallback`。`canOpen` 只接受 Session 地址，其中路径可为相对或绝对路径；不认领裸 `absolute` 地址。在 `extension` 或 `builtin` 档以更窄 pattern（比如 `*.png`）注册的类型接走那些地址；其他受支持文件落到这里。整个地址就是内容身份，所以不同目录下同名的两个文件、或同一路径在两个会话之下，是两个 tab；解码后的 basename 是 tab 标题，keyed slot `sidebar.right.pane.tab.title` 会在标题前放置按扩展名选择的 `FileTypeIcon`。
+- **类型** —— `ctx.sidebarRightTabs.register(...)`，id 为 `@agentrans/client-ui-sidebar-documentpreview`（这个实现在 tab 系统中的身份，也是其正文注册所用的键），kind `text`，匹配完整文件资源地址的 pattern，档位 `fallback`。`canOpen` 只接受 Session 地址，其中路径可为相对或绝对路径；不认领裸 `absolute` 地址。在 `extension` 或 `builtin` 档以更窄 pattern（比如 `*.png`）注册的类型接走那些地址；其他受支持文件落到这里。整个地址就是内容身份，所以不同目录下同名的两个文件、或同一路径在两个会话之下，是两个 tab；解码后的 basename 是 tab 标题，keyed slot `sidebar.right.pane.tab.title` 会在标题前放置按扩展名选择的 `FileTypeIcon`。
 - **正文** —— keyed slot `sidebar.right.pane.tab`，键为类型的 id。固定头部在可用时显示 Host 的绝对路径，否则显示请求路径；共享的 [`PathLabel`](../ui-primitives/README.zh.md#component-catalog) 弱化目录颜色，以左侧渐隐保留被裁剪路径的尾部字符，并在悬停时展示完整值。有多个受支持的渲染器时才显示下拉菜单。仅文本兼容的源文件提供纯文本选项；只有一个渲染器时不显示查看器控件。已知的二进制容器后缀没有注册渲染器时，在路径头部下方显示文件类型图标和不支持预览的说明，并且不会发起读取。两个 Session 作用域的 list 子 slot 在文件元数据报出 Host 路径后把当前文件交给其他插件，owner prop 为 `absolutePath`：`sidebar.right.tab.document.actions` 在每个显示头部的状态里渲染在头部自有控件之后、导航栏开关之前，位置在各状态间相同，因此状态切换时不会重新挂载；`sidebar.right.tab.document.unpreviewable` 渲染在不支持预览的空态里，以及可读但本预览无法渲染的文件（`not-text`、`too-large`）的空态里，占据原本放重试的位置；载体或未分类的读取失败仍保留重试，不存在或非普通文件的路径只给说明。两者已发布的占位者都是 [`ui-open-in-app`](../ui-open-in-app/README.zh.md)。预览直接渲染 [`ui-sidebar-files`](../ui-sidebar-files/README.zh.md#the-navigator) 的 Session 作用域 Factory：`sidebar.files.navigator` 位于内容行的正文之后，传入 `{ useTabInfo, page: false, onOpen }`，其中 `onOpen(address)` 调用 `tab.actions.openResource(address, { replaceTab: true })`；`sidebar.files.navigator.toggle` 位于头部末端，传入 `{ useTabInfo }`。两者在停靠与浮动分栏中从加载到完成保持挂载；未注册的 Factory 不绘制内容。导航栏在内容行的定位框与层叠上下文内决定宽度，让正文变窄或覆盖正文，不遮挡浮窗缩放手柄。自行处理 Escape 的渲染器浮层需调用 `preventDefault()`，避免同时关闭导航栏。仅当所选渲染器声明 `wrap: true` 时显示换行开关；图标表示点击后切换到的模式，该偏好按 tab 保存，初始开启。重新载入仍在此头部，不放入 Sidebar 的 tab 条。自动刷新默认开启；独立开关暂时隐藏，状态、文案、样式与切换逻辑保留。正文贴合格的每条边，各渲染器自行提供内容留白，并可拥有内部滚动区。这与文件树右侧预留 2px 滚动条间距的布局有意不同：Preview 使用格的完整宽度，使贴边 HTML 与代码滚动区终止于格的边缘。
 - **共享加载与视图状态**，会话作用域、按 tab id 分桶。store 持有累计页或完整字节、读取与观察版本、待处理 Resource 变化、自动刷新状态、加载/失败状态、渲染器选择、滚动位置、换行和已响应的导航 revision。普通 inject face 调用 Remote 读取，并经声明的 store action 写入。重新载入和加载模式变化会淘汰旧请求；tab 的中止信号清理其状态。
 
@@ -97,7 +97,7 @@ CSV 和 TSV 默认使用表格查看器，也可选择纯文本；CSV 还提供�
 
 将 `.doc`、`.docx`、`.ppt` 和 `.pptx` 打开为 PDF 预览，使用与 PDF 文件相同的加载状态、缩放控件、取消和文本选择能力。[Host 提供方](../../document/office-to-pdf/README.zh.md)负责本地转换，并为其他消费者保留电子表格转换 API。受支持的无效文件、转换失败和超时会显示本地化消息。缺少 Host 服务时显示配置引导。
 
-[Web bundle](../../bundle/web-app/README.zh.md) 以 `ui-sidebar-documentpreview` 挂载本包。通过该条目的 `office` 设置配置临时 Office 缓存；[配置目录](../../../docs/config-catalog.zh.md#deepseek-aidsh-client-ui-sidebar-documentpreview)定义可接受的值。设置注入到每个页面；修改 YAML 后重新加载浏览器页面。
+[Web bundle](../../bundle/web-app/README.zh.md) 以 `ui-sidebar-documentpreview` 挂载本包。通过该条目的 `office` 设置配置临时 Office 缓存；[配置目录](../../../docs/config-catalog.zh.md#agentransclient-ui-sidebar-documentpreview)定义可接受的值。设置注入到每个页面；修改 YAML 后重新加载浏览器页面。
 
 | 字段 | 默认值 | 含义 |
 |---|---|---|

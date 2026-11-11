@@ -3,11 +3,11 @@
  *
  * Every method delegates to the one {@link OwnerShareOperations} implementation that owns each
  * share-management side effect, so the owner page gains a Remote surface without a second copy.
- * @module @deepseek-ai/dsh-experimental-liveshare/src/host/share-remote
+ * @module @agentrans/experimental-liveshare/src/host/share-remote
  */
 
-import type { Context } from '@deepseek-ai/cordis'
-import { Remote, TypertRemoteService } from '@deepseek-ai/dsh-typert-protocol'
+import type { Context } from '@agentrans/cordis'
+import { Remote, TypertRemoteService } from '@agentrans/typert-protocol'
 import type {
   CreateShareRequest,
   CreatedShare,

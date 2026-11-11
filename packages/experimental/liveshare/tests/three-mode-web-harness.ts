@@ -16,10 +16,10 @@ import { fileURLToPath } from 'node:url'
 import {
   parseRemoteStreamServerMessage,
   type RemoteStreamServerMessage,
-} from '@deepseek-ai/dsh-api-gateway/src/stream-protocol.ts'
+} from '@agentrans/api-gateway/src/stream-protocol.ts'
 import { execa } from 'execa'
 import { expect, onTestFinished } from 'vitest'
-import { resolveExampleLaunch } from '@deepseek-ai/dsh-loader-smoke'
+import { resolveExampleLaunch } from '@agentrans/loader-smoke'
 import { WebSocket } from 'ws'
 
 const dshBinScript = fileURLToPath(new URL('../../../../apps/cli/src/bin.ts', import.meta.url))
@@ -397,7 +397,7 @@ export async function bootWebOwner(options: WebOwnerOptions = {}): Promise<WebOw
     private: true,
     dependencies: Object.fromEntries(extraBundles.map(bundle => [bundle, 'workspace:^'])),
     dsh: {
-      profile: { bundles: ['@deepseek-ai/dsh-base', '@deepseek-ai/dsh-web-app', ...extraBundles] },
+      profile: { bundles: ['@agentrans/base', '@agentrans/web-app', ...extraBundles] },
     },
   }, undefined, 2) + '\n')
   if (options.existingCwd === undefined) await writeFile(join(profileDir, 'cordis.patch.yml'), [

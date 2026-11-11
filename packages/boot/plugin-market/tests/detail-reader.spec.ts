@@ -1,6 +1,6 @@
 /** Market entry detail documents: package document, repository README, caching, and images beside a read document. */
 import { afterEach, expect, it, vi } from 'vitest'
-import { DetailFailure, readmeName, type DetailFiles } from '@deepseek-ai/dsh-plugin-detail'
+import { DetailFailure, readmeName, type DetailFiles } from '@agentrans/plugin-detail'
 import { DetailReader, manifestRepository, repositoryOf, type DetailLocation } from '../src/detail.ts'
 import type { RepositoryFileOptions } from '../src/detail-files.ts'
 

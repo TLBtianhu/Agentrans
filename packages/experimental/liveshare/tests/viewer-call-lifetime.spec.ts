@@ -1,6 +1,6 @@
 /** Pending Session calls lose their lifetime when the share or opening viewer is revoked. */
 import { describe, expect, it, onTestFinished, vi } from 'vitest'
-import type { PeerScope } from '@deepseek-ai/dsh-typert-protocol'
+import type { PeerScope } from '@agentrans/typert-protocol'
 import { createViewerReadService } from '../src/host/viewer-read.ts'
 import { readerConnection } from './viewer-read-peers.ts'
 

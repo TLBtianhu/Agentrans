@@ -1,6 +1,6 @@
-import { IconFolderOpenOutlineRegular, IconCopyOutlineRegular, IconPanelLeftOutlineRegular, IconRightUpOutlineRegular } from '@deepseek-ai/dsh-client-ui-primitives'
+import { IconFolderOpenOutlineRegular, IconCopyOutlineRegular, IconPanelLeftOutlineRegular, IconRightUpOutlineRegular } from '@agentrans/client-ui-primitives'
 import { ContextMenuApplicationIcon, registerContextMenus } from './context-menus.tsx'
-import type {} from '@deepseek-ai/dsh-client-ui-context-menu/client'
+import type {} from '@agentrans/client-ui-context-menu/client'
 /**
  * Shared native opening controls for workspace directories, document previews,
  * delivery cards, and changed-file review. Directory choices persist in the browser;
@@ -8,20 +8,20 @@ import type {} from '@deepseek-ai/dsh-client-ui-context-menu/client'
  */
 
 import { createElement } from 'react'
-import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
-import type { ShortcutCommandId } from '@deepseek-ai/dsh-client-shortcuts/client'
-import type { Context as ClientContext } from '@deepseek-ai/cordis'
-import type {} from '@deepseek-ai/dsh-client-locale/client'
-import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
-import type {} from '@deepseek-ai/dsh-client-ui-layout/client'
-import type {} from '@deepseek-ai/dsh-client-ui-session/client'
-import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
-import type {} from '@deepseek-ai/dsh-client-ui-sidebar-documentpreview/client'
-import type {} from '@deepseek-ai/dsh-client-ui-sidebar-files/client'
-import type {} from '@deepseek-ai/dsh-api-gateway/client'
-import type {} from '@deepseek-ai/dsh-api-remotes/client'
-import type {} from '@deepseek-ai/dsh-api-session-controller/remote'
-import { OPEN_IN_APP_ICON_PREFIX_ROUTE } from '@deepseek-ai/dsh-host-open-in-app/shared'
+import type { PropsRuntime } from '@agentrans/client-ui-slots'
+import type { ShortcutCommandId } from '@agentrans/client-shortcuts/client'
+import type { Context as ClientContext } from '@agentrans/cordis'
+import type {} from '@agentrans/client-locale/client'
+import type {} from '@agentrans/client-ui-renderer/client'
+import type {} from '@agentrans/client-ui-layout/client'
+import type {} from '@agentrans/client-ui-session/client'
+import type {} from '@agentrans/client-ui-conversation/client'
+import type {} from '@agentrans/client-ui-sidebar-documentpreview/client'
+import type {} from '@agentrans/client-ui-sidebar-files/client'
+import type {} from '@agentrans/api-gateway/client'
+import type {} from '@agentrans/api-remotes/client'
+import type {} from '@agentrans/api-session-controller/remote'
+import { OPEN_IN_APP_ICON_PREFIX_ROUTE } from '@agentrans/host-open-in-app/shared'
 import { OpenInAppController } from './controller.ts'
 import { registerSessionReveal } from './session-reveal.tsx'
 import { OpenInAppAction, type OpenInAppActionInjected, type OpenInAppActionProps } from './OpenInAppAction.tsx'
@@ -33,7 +33,7 @@ import type { OpenTargetReporter } from './OpenTargetButton.tsx'
 import { en, ja, es, fr, de, ru, pt, NS, zh, type OpenInAppKey } from './locales.ts'
 import { createOpenInAppToastSource, OpenInAppToast } from './open-toast.tsx'
 
-declare module '@deepseek-ai/dsh-client-ui-slots' {
+declare module '@agentrans/client-ui-slots' {
   interface LocaleNamespaceMap {
     /** Session-header "open workspace in application" copy. */
     'open-in-app': OpenInAppKey

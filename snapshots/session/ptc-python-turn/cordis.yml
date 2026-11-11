@@ -1,19 +1,19 @@
 # Python PTC composition: replace the Node provider through
 # the real Loader and render the generated Python SDK prompt.
 - id: agent-default-model
-  name: '@deepseek-ai/dsh-agent-default-model'
+  name: '@agentrans/agent-default-model'
   config:
     provider: deepseek-official
     model: deepseek-v4-pro
 
 - id: session-persistence-jsonl
-  name: '@deepseek-ai/dsh-session-persistence-jsonl'
+  name: '@agentrans/session-persistence-jsonl'
   config:
     root: !!js dshHomePath('sessions')
     compression: !!js 'process.env.DSH_SNAPSHOT === undefined ? ''zstd'' : ''none'''
 
 - id: agent-instructions
-  name: '@deepseek-ai/dsh-agent-instructions'
+  name: '@agentrans/agent-instructions'
   config:
     maxBytes: 65536
 
@@ -34,10 +34,10 @@
 
 - insert:
     - id: ptc-runtime-python
-      name: '@deepseek-ai/dsh-experimental-ptc-runtime-python'
+      name: '@agentrans/experimental-ptc-runtime-python'
 
 - id: system-prompt
-  name: '@deepseek-ai/dsh-system-prompt'
+  name: '@agentrans/system-prompt'
   config:
     personaPrefix: |
       You are a coding assistant powered by the {{model}} model.

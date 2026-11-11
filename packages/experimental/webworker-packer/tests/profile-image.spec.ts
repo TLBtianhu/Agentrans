@@ -9,9 +9,9 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it, type TestContext } from 'vitest'
-import { OPTIONAL_BUNDLES, PROFILE_TEMPLATES } from '@deepseek-ai/dsh-official-bundles'
+import { OPTIONAL_BUNDLES, PROFILE_TEMPLATES } from '@agentrans/official-bundles'
 import yaml from 'js-yaml'
-import { entryListSchema } from '@deepseek-ai/cordis-plugin-include'
+import { entryListSchema } from '@agentrans/cordis-plugin-include'
 import { HOME_PATCH_PATH, MANIFEST_PATH, packVfsImage } from '../src/pack.ts'
 import { installationManifest, platformHomePatch, profileRoster } from '../src/repository.ts'
 
@@ -24,10 +24,10 @@ describe('profile roster', () => {
     expect(roster).toEqual(expect.arrayContaining([
       ...bundles,
       // Rows inserted by the base and Web bundles.
-      '@deepseek-ai/dsh-plugin-manager', '@deepseek-ai/dsh-host-webserver',
+      '@agentrans/plugin-manager', '@agentrans/host-webserver',
       // Rows inserted by optional bundles, including grouped ones.
-      '@deepseek-ai/dsh-session-title-all-prompts-llm', '@deepseek-ai/dsh-experimental-inspector',
-      '@deepseek-ai/dsh-tool-session-query',
+      '@agentrans/session-title-all-prompts-llm', '@agentrans/experimental-inspector',
+      '@agentrans/tool-session-query',
     ]))
     expect(new Set(roster).size).toBe(roster.length)
     expect(roster.every(name => name.startsWith('@') || !name.includes('/'))).toBe(true)
@@ -39,7 +39,7 @@ describe('profile roster', () => {
 
   it('names the CLI manifest as the installation', () => {
     expect(installationManifest(repoRoot)).toEqual({
-      name: '@deepseek-ai/dsh',
+      name: '@agentrans/dsh',
       manifest: join(repoRoot, 'apps/cli/package.json'),
     })
   })

@@ -1,14 +1,14 @@
-import { executeToolFixture } from '@deepseek-ai/dsh-tool-testkit'
-import * as NativeToolExecutor from '@deepseek-ai/dsh-tool-executor-native'
-import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
+import { executeToolFixture } from '@agentrans/tool-testkit'
+import * as NativeToolExecutor from '@agentrans/tool-executor-native'
+import SessionProjectionRegistry from '@agentrans/session-projection'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { unsupportedModel, provideWorkingDirectoryFixture, unsupportedInbox } from '@deepseek-ai/dsh-agent-loop-testkit'
-import { Context } from '@deepseek-ai/cordis'
-import { ToolCallId } from '@deepseek-ai/dsh-llm'
-import { SESSION_FORMAT_VERSION, Session, SessionId } from '@deepseek-ai/dsh-session'
-import AgentRegistry from '@deepseek-ai/dsh-agent'
-import type { Agent } from '@deepseek-ai/dsh-agent'
-import TerminalSessionService from '@deepseek-ai/dsh-terminal'
+import { unsupportedModel, provideWorkingDirectoryFixture, unsupportedInbox } from '@agentrans/agent-loop-testkit'
+import { Context } from '@agentrans/cordis'
+import { ToolCallId } from '@agentrans/llm'
+import { SESSION_FORMAT_VERSION, Session, SessionId } from '@agentrans/session'
+import AgentRegistry from '@agentrans/agent'
+import type { Agent } from '@agentrans/agent'
+import TerminalSessionService from '@agentrans/terminal'
 import type {
   TerminalBackend,
   TerminalBackendSession,
@@ -18,10 +18,10 @@ import type {
   TerminalSessionStatus,
   TerminalSignal,
   TerminalWaitReason,
-} from '@deepseek-ai/dsh-terminal'
-import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
-import ToolRegistry from '@deepseek-ai/dsh-tools'
-import * as ToolPwshPersistent from '@deepseek-ai/dsh-tool-pwsh-persistent'
+} from '@agentrans/terminal'
+import SystemPrompt from '@agentrans/system-prompt'
+import ToolRegistry from '@agentrans/tools'
+import * as ToolPwshPersistent from '@agentrans/tool-pwsh-persistent'
 
 const contexts: Context[] = []
 let callNumber = 0

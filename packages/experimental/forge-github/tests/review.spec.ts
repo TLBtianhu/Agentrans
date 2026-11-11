@@ -1,6 +1,6 @@
 /** GitHub review mutations preserve explicit sides and commits and never retry ambiguous writes. */
 import { describe, expect, it, vi } from 'vitest'
-import type { ForgeReviewRequest } from '@deepseek-ai/dsh-experimental-forge'
+import type { ForgeReviewRequest } from '@agentrans/experimental-forge'
 import { GitHubProvider } from '../src/provider.ts'
 import { GhTimeoutError, GhUnavailableError, type GhRunner } from '../src/gh.ts'
 

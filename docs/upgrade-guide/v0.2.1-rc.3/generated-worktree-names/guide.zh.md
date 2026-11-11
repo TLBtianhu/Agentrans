@@ -16,5 +16,5 @@ description: "自动生成的 worktree 名称将 worktree- 前缀和完整 UUID 
 ## 迁移
 
 1. 更新识别自动生成名称的脚本和忽略规则。优先使用返回的 `path` 与 `branch` 字段，不要按旧模式重新拼接；[worktree 服务参考](../../../../packages/experimental/worktree/README.zh.md#use-this-package)说明了这些字段。
-2. 如需保留旧前缀，在现有的 `@deepseek-ai/dsh-experimental-worktree` 配置行中将 `config.namePrefix` 设为 `worktree-`。这不会恢复完整 UUID 后缀；集成要求特定完整名称时，请显式传入 `name`。
+2. 如需保留旧前缀，在现有的 `@agentrans/experimental-worktree` 配置行中将 `config.namePrefix` 设为 `worktree-`。这不会恢复完整 UUID 后缀；集成要求特定完整名称时，请显式传入 `name`。
 3. 创建一个省略 `name` 的 worktree，检查返回的 `branch` 与 `path`，确认更新后的自动化能识别它。已有 worktree 无需改名或迁移数据。

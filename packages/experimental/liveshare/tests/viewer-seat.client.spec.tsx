@@ -8,8 +8,8 @@
  * grant.
  */
 
-import { Context } from '@deepseek-ai/cordis'
-import { LocaleRuntime } from '@deepseek-ai/dsh-client-locale/client'
+import { Context } from '@agentrans/cordis'
+import { LocaleRuntime } from '@agentrans/client-locale/client'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { ViewerModelSeat } from '../src/client/viewer-model.tsx'

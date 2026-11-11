@@ -1,6 +1,6 @@
 /** Status derivations shared by the header entry, the change request cards, and the changes view. */
 
-import type { ChangeRequestCheck, ChangeRequestSnapshot, ChecksRollup } from '@deepseek-ai/dsh-experimental-forge/types'
+import type { ChangeRequestCheck, ChangeRequestSnapshot, ChecksRollup } from '@agentrans/experimental-forge/types'
 import type { ForgePanelChangeRequest, ForgePanelState } from '../types.ts'
 import type { ForgePanelKey } from './locales.ts'
 

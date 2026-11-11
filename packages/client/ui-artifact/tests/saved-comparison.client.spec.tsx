@@ -1,14 +1,14 @@
 // @vitest-environment jsdom
-import { sessionSnapshot } from '@deepseek-ai/dsh-client-test-runtime'
+import { sessionSnapshot } from '@agentrans/client-test-runtime'
 import type { ComponentProps } from 'react'
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { allowAllAccess, makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
-import { advanceParticleState, createParticleState, observeParticleState } from '@deepseek-ai/dsh-artifact/particle-runtime'
+import { allowAllAccess, makeTranslate } from '@agentrans/client-test-runtime'
+import { advanceParticleState, createParticleState, observeParticleState } from '@agentrans/artifact/particle-runtime'
 import type {
   ArtifactId, ArtifactObservationId, ArtifactObservations, ArtifactSnapshot, SavedParticleObservation, SceneArtifactSnapshot,
-} from '@deepseek-ai/dsh-artifact/types'
-import { SessionId } from '@deepseek-ai/dsh-session/types'
+} from '@agentrans/artifact/types'
+import { SessionId } from '@agentrans/session/types'
 import { ArtifactComparisonNodeView } from './runtime-harness.tsx'
 import { en } from '../src/client/locales.ts'
 import {

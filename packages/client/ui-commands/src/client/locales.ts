@@ -5,7 +5,7 @@
  * popupSelect shell's copy.
  */
 
-import { builtinCommandTokens } from '@deepseek-ai/dsh-commands/builtin'
+import { builtinCommandTokens } from '@agentrans/commands/builtin'
 
 /** Simplified Chinese dictionary (the key-set source of truth). */
 export const zh = {

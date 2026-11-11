@@ -1,6 +1,6 @@
 /** Operations available to the isolated native welcome renderer. */
 
-import type { ProductEventMap } from '@deepseek-ai/dsh-client-product-analytics/types'
+import type { ProductEventMap } from '@agentrans/client-product-analytics/types'
 import type { DesktopLocale } from './locale.ts'
 
 /** Private native welcome channels, installed only while its window exists. */

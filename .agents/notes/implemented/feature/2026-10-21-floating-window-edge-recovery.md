@@ -59,7 +59,7 @@ When `matchMedia('(prefers-reduced-motion: reduce)')` matches, a move clamps to 
 
 ### Change scope
 
-The change touches one package, `@deepseek-ai/dsh-client-ui-dockkit`, and leaves its exports and `DockIntents` unchanged; the `TabRenderer` contract now states when the kit reuses a body.
+The change touches one package, `@agentrans/client-ui-dockkit`, and leaves its exports and `DockIntents` unchanged; the `TabRenderer` contract now states when the kit reuses a body.
 
 | File | Change |
 |---|---|

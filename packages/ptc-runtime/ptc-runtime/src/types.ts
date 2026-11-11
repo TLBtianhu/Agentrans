@@ -3,10 +3,10 @@
  * {@link ../index.ts | PtcRuntime} and what it gets back. Pure types — no
  * runtime code lives here.
  *
- * @module @deepseek-ai/dsh-ptc-runtime/src/types
+ * @module @agentrans/ptc-runtime/src/types
  */
 
-import type { SandboxEnforcement, SandboxExecutionPolicy, SandboxMode } from '@deepseek-ai/dsh-sandbox'
+import type { SandboxEnforcement, SandboxExecutionPolicy, SandboxMode } from '@agentrans/sandbox'
 
 /** Source evaluation form, independent of retained program state. */
 export type PtcProgramFormat = 'function-body' | 'repl' | 'script'

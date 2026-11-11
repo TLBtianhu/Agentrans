@@ -1,8 +1,8 @@
 /** Owner-side served-page resources: rendered index, shell assets, and plugin bundles for a viewer. */
 import { describe, expect, it, onTestFinished, vi } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
-import type { WebServer } from '@deepseek-ai/dsh-host-webserver'
-import type { PeerId, PeerScope } from '@deepseek-ai/dsh-typert-protocol'
+import { Context } from '@agentrans/cordis'
+import type { WebServer } from '@agentrans/host-webserver'
+import type { PeerId, PeerScope } from '@agentrans/typert-protocol'
 import { readViewerAsset } from '../src/host/viewer-assets.ts'
 import { createViewerReadService } from '../src/host/viewer-read.ts'
 

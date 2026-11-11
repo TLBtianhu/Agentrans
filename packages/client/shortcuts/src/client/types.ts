@@ -1,6 +1,6 @@
 /** Command contributions and immutable catalog values. */
-import type { ObservableSnapshot } from '@deepseek-ai/dsh-client-store'
-import type { BindingIssue, NormalizedBinding, ShortcutConfigSnapshot, ShortcutEdit, ShortcutRevision, ShortcutSaveResult, ShortcutBinding, ShortcutCommandId, ShortcutPlatform, ShortcutProfile, ShortcutRuntime } from '@deepseek-ai/dsh-shortcut-protocol'
+import type { ObservableSnapshot } from '@agentrans/client-store'
+import type { BindingIssue, NormalizedBinding, ShortcutConfigSnapshot, ShortcutEdit, ShortcutRevision, ShortcutSaveResult, ShortcutBinding, ShortcutCommandId, ShortcutPlatform, ShortcutProfile, ShortcutRuntime } from '@agentrans/shortcut-protocol'
 
 /** Local input owner resolved before an application command. */
 export type ShortcutRegion = 'page' | 'editable' | 'terminal'

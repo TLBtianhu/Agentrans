@@ -2,7 +2,7 @@ import { mkdtempSync, readFileSync, realpathSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it, onTestFinished, vi } from 'vitest'
-import type { TunnelShareSpec, TunnelWorkerEvent } from '@deepseek-ai/dsh-experimental-liveshare-protocol'
+import type { TunnelShareSpec, TunnelWorkerEvent } from '@agentrans/experimental-liveshare-protocol'
 import { TunnelWorker } from '../src/host/tunnel-worker.ts'
 
 const share: TunnelShareSpec = { shareId: 'share', sessionId: 'session', sessionTitle: 'session',

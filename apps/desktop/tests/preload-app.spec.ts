@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import type { DesktopFileDrag, FileDragHandle, FileDragRequestId } from '@deepseek-ai/dsh-util-file-drag'
+import type { DesktopFileDrag, FileDragHandle, FileDragRequestId } from '@agentrans/util-file-drag'
 import { JSDOM } from 'jsdom'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { syncWindowsAppearance } from '../src/preload-windows.ts'

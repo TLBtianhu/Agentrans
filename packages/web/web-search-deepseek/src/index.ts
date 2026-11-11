@@ -5,20 +5,20 @@
  * every other search reuses `DEEPSEEK_API_KEY`. The provider does not reuse `DEEPSEEK_BASE_URL`;
  * auxiliary search has its own endpoint configuration. The provider reports itself not ready for a
  * model request whose search would have no credential.
- * @module @deepseek-ai/dsh-web-search-deepseek
+ * @module @agentrans/web-search-deepseek
  */
-import type { Volatile } from '@deepseek-ai/cordis'
+import type { Volatile } from '@agentrans/cordis'
 
-import type { Context } from '@deepseek-ai/cordis'
-import z from '@deepseek-ai/schemastery'
-import type {} from '@deepseek-ai/dsh-agent'
-import { credentialRef } from '@deepseek-ai/dsh-credentials'
-import type { CredentialRef } from '@deepseek-ai/dsh-credentials'
-import { DEEPSEEK_API_KEY_REF } from '@deepseek-ai/dsh-deepseek-issuer'
-import type {} from '@deepseek-ai/dsh-deepseek-account'
-import { launchEnvironmentOf } from '@deepseek-ai/dsh-launch-environment'
-import type {} from '@deepseek-ai/dsh-session'
-import type { WebCapabilityState } from '@deepseek-ai/dsh-web'
+import type { Context } from '@agentrans/cordis'
+import z from '@agentrans/schemastery'
+import type {} from '@agentrans/agent'
+import { credentialRef } from '@agentrans/credentials'
+import type { CredentialRef } from '@agentrans/credentials'
+import { DEEPSEEK_API_KEY_REF } from '@agentrans/deepseek-issuer'
+import type {} from '@agentrans/deepseek-account'
+import { launchEnvironmentOf } from '@agentrans/launch-environment'
+import type {} from '@agentrans/session'
+import type { WebCapabilityState } from '@agentrans/web'
 import {
   DeepSeekSearchProvider,
   DEEPSEEK_DEFAULT_API_VERSION,

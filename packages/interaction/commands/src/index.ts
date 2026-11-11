@@ -1,19 +1,19 @@
 /**
  * Plugin-owned human-command registry shared by interactive UI adapters.
- * @module @deepseek-ai/dsh-commands
+ * @module @agentrans/commands
  */
 
-import { Context } from '@deepseek-ai/cordis'
-import { randomUUID } from '@deepseek-ai/dsh-util-crypto'
-import type { Agent } from '@deepseek-ai/dsh-agent'
-import { AttachmentError, admitEncodedImages } from '@deepseek-ai/dsh-attachment'
-import type { EncodedImageAttachment, FileAttachmentRef, ImageAttachmentRef } from '@deepseek-ai/dsh-attachment/types'
-import type { FileBlock, ImageBlock } from '@deepseek-ai/dsh-llm'
-import { NamedEntries, ScopedLayers } from '@deepseek-ai/dsh-scope'
-import type { ScopeKey, ScopeLayer } from '@deepseek-ai/dsh-scope'
-import { SessionSeq } from '@deepseek-ai/dsh-session'
-import type { Session, SessionEvent, SessionEventMap } from '@deepseek-ai/dsh-session'
-import { TypertRemoteService, Remote } from '@deepseek-ai/dsh-typert-protocol'
+import { Context } from '@agentrans/cordis'
+import { randomUUID } from '@agentrans/util-crypto'
+import type { Agent } from '@agentrans/agent'
+import { AttachmentError, admitEncodedImages } from '@agentrans/attachment'
+import type { EncodedImageAttachment, FileAttachmentRef, ImageAttachmentRef } from '@agentrans/attachment/types'
+import type { FileBlock, ImageBlock } from '@agentrans/llm'
+import { NamedEntries, ScopedLayers } from '@agentrans/scope'
+import type { ScopeKey, ScopeLayer } from '@agentrans/scope'
+import { SessionSeq } from '@agentrans/session'
+import type { Session, SessionEvent, SessionEventMap } from '@agentrans/session'
+import { TypertRemoteService, Remote } from '@agentrans/typert-protocol'
 import { CommandId } from './brand.ts'
 import type { CommandDefinitionId } from './brand.ts'
 import type {
@@ -110,7 +110,7 @@ class CommandLayer implements ScopeLayer {
   }
 }
 
-declare module '@deepseek-ai/cordis' {
+declare module '@agentrans/cordis' {
   interface Context {
     commands: CommandRuntime
   }

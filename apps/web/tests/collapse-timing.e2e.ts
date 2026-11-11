@@ -6,8 +6,8 @@ import { fileURLToPath } from 'node:url'
 import type { Browser, Page } from 'playwright'
 import { chromium } from 'playwright'
 import { afterAll, beforeAll, describe, expect, it, onTestFailed } from 'vitest'
-import { deriveReplayScript } from '@deepseek-ai/dsh-llm-replay'
-import { SessionId } from '@deepseek-ai/dsh-session'
+import { deriveReplayScript } from '@agentrans/llm-replay'
+import { SessionId } from '@agentrans/session'
 import {
   assertFixtureInventory, captureStableAria, compareOrRefreshGolden, fixtureUserPrompts,
   launchWebScaffold, parseSeedFixture, readPersistedEvents, seedSession, watchConsole, webSnapshotMode, type WebScaffold,

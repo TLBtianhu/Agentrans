@@ -28,7 +28,7 @@ The JS side has a `whenAccess` for each of the three access Hooks, from the pack
 | `ctx.uiWorkspace.whenAccess(workspaceId, action, callback)` | ui-workspace | `useWorkspaceAccess(workspaceId, action)` |
 
 ```ts ignore-check
-import type { AccessEffect, RemoteEndpoint } from '@deepseek-ai/dsh-api-remote-access/client'
+import type { AccessEffect, RemoteEndpoint } from '@agentrans/api-remote-access/client'
 
 /** The global-resource member; the Session and Workspace versions take the resource id first. */
 export interface WhenAccess {

@@ -2,26 +2,26 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { Context } from '@deepseek-ai/cordis'
-import Loader from '@deepseek-ai/cordis-plugin-loader'
-import AgentRegistry from '@deepseek-ai/dsh-agent'
-import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
-import type { Agent } from '@deepseek-ai/dsh-agent'
-import { credentialRef } from '@deepseek-ai/dsh-credentials'
-import LocalCredentialProvider from '@deepseek-ai/dsh-credentials-local'
-import type { DeepSeekAccount } from '@deepseek-ai/dsh-deepseek-account'
-import SessionStore, { SessionId } from '@deepseek-ai/dsh-session'
-import WebRuntime, { WebError, type WebSearchResult } from '@deepseek-ai/dsh-web'
+import { Context } from '@agentrans/cordis'
+import Loader from '@agentrans/cordis-plugin-loader'
+import AgentRegistry from '@agentrans/agent'
+import SessionProjectionRegistry from '@agentrans/session-projection'
+import type { Agent } from '@agentrans/agent'
+import { credentialRef } from '@agentrans/credentials'
+import LocalCredentialProvider from '@agentrans/credentials-local'
+import type { DeepSeekAccount } from '@agentrans/deepseek-account'
+import SessionStore, { SessionId } from '@agentrans/session'
+import WebRuntime, { WebError, type WebSearchResult } from '@agentrans/web'
 import {
   DeepSeekSearchProvider,
   DEEPSEEK_PROVIDER_ID,
-} from '@deepseek-ai/dsh-web-search-deepseek'
-import * as deepseekPlugin from '@deepseek-ai/dsh-web-search-deepseek'
+} from '@agentrans/web-search-deepseek'
+import * as deepseekPlugin from '@agentrans/web-search-deepseek'
 import { citationSnippets, mapAnthropicResponse } from '../src/provider.ts'
-import type { AnthropicResponse } from '@deepseek-ai/dsh-web-search-deepseek/src/types.ts'
+import type { AnthropicResponse } from '@agentrans/web-search-deepseek/src/types.ts'
 
 /** Construct the provider over a fixed options value; production passes a live thunk. */
-import type { DeepSeekSearchProviderOptions } from '@deepseek-ai/dsh-web-search-deepseek'
+import type { DeepSeekSearchProviderOptions } from '@agentrans/web-search-deepseek'
 
 const searchProvider = (options: DeepSeekSearchProviderOptions): DeepSeekSearchProvider =>
   new DeepSeekSearchProvider(() => options)

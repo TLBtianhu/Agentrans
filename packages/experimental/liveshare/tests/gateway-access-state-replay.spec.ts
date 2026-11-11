@@ -13,7 +13,7 @@ import {
   type TunnelRegistrationToken,
   type TunnelWorkerCommand,
   type TunnelWorkerEvent,
-} from '@deepseek-ai/dsh-experimental-liveshare-protocol'
+} from '@agentrans/experimental-liveshare-protocol'
 
 type RequestEvent = Extract<TunnelWorkerEvent, { type: 'share-rpc-request' }>
 

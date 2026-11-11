@@ -5,57 +5,57 @@
 /:
   en: 09cb25e4bcf56851
   zh: a0a5913941d23eff
-/deepseek-ai-dsh-sdk-client:
-  en: b786affe03adf63c
-  zh: aacb5d4af10ca477
-/deepseek-ai-dsh-sdk-client/summary:
-  en: 4c382739fc421ff5
-  zh: 5af8ac55e7cbf37a
-/deepseek-ai-dsh-sdk-client/table-of-contents:
+/agentrans-sdk-client:
+  en: d057895ab0f4d9e2
+  zh: fc9630152f8d9f63
+/agentrans-sdk-client/summary:
+  en: b59629e7254a67c6
+  zh: 68ef46ecb61e0382
+/agentrans-sdk-client/table-of-contents:
   en: d152484eb41ac6b4
   zh: 09388d293f9be9cb
-/deepseek-ai-dsh-sdk-client/use-this-package:
+/agentrans-sdk-client/use-this-package:
   en: 05aa305e7bd3163a
   zh: d9af0146c2acb2c0
-/deepseek-ai-dsh-sdk-client/use-this-package/running-agent-turns-with-deepseekharness:
+/agentrans-sdk-client/use-this-package/running-agent-turns-with-deepseekharness:
   en: 1a36c54463e17340
   zh: ad67f9cbccc56def
-/deepseek-ai-dsh-sdk-client/use-this-package/run-text-and-native-commands:
+/agentrans-sdk-client/use-this-package/run-text-and-native-commands:
   en: 0a0c9f44ccf17841
   zh: 1f881e22a10dbe49
-/deepseek-ai-dsh-sdk-client/use-this-package/lower-level-control-with-harnessclient:
+/agentrans-sdk-client/use-this-package/lower-level-control-with-harnessclient:
   en: 93f5f28fa70aa1d8
   zh: 224b850b2f801bf2
-/deepseek-ai-dsh-sdk-client/use-this-package/native-user-questions:
+/agentrans-sdk-client/use-this-package/native-user-questions:
   en: f5b9d6a7363bd9e5
   zh: f53b3786d22a729d
-/deepseek-ai-dsh-sdk-client/understand-the-implementation:
+/agentrans-sdk-client/understand-the-implementation:
   en: 8773f50c51da85f0
   zh: 4649ebc69357deb0
-/deepseek-ai-dsh-sdk-client/understand-the-implementation/design-concept:
+/agentrans-sdk-client/understand-the-implementation/design-concept:
   en: ac3c6eae3f8248fc
   zh: b929079016396c8e
-/deepseek-ai-dsh-sdk-client/understand-the-implementation/source-map:
+/agentrans-sdk-client/understand-the-implementation/source-map:
   en: 30248dbcd1be6424
   zh: 0f76d34f27bfad0a
-/deepseek-ai-dsh-sdk-client/understand-the-implementation/owned-activity-flow:
+/agentrans-sdk-client/understand-the-implementation/owned-activity-flow:
   en: 94a42babac5f1c7d
   zh: df9e42ed02f7d002
-/deepseek-ai-dsh-sdk-client/understand-the-implementation/errors-and-teardown:
+/agentrans-sdk-client/understand-the-implementation/errors-and-teardown:
   en: 165364de2cee0a9f
   zh: c4dc37b44e1e621e
-/deepseek-ai-dsh-sdk-client/further-exploration:
+/agentrans-sdk-client/further-exploration:
   en: 1048b6b2c0954717
   zh: 7ce29dd1ca545e06
-/deepseek-ai-dsh-sdk-client/model-experience:
+/agentrans-sdk-client/model-experience:
   en: e82a55513d3cd30e
   zh: ecd8c0875ff2fb87
-/deepseek-ai-dsh-sdk-client/model-experience/kv-cache-effect:
+/agentrans-sdk-client/model-experience/kv-cache-effect:
   en: 7abe0be104a791e7
   zh: 445311f78b1069ca
-/deepseek-ai-dsh-sdk-client/known-limitations-and-deferred-work:
-  en: 8a9471513b53821e
-  zh: 898eb17f3c55ad69
-/deepseek-ai-dsh-sdk-client/known-limitations-and-deferred-work/dev-note:
+/agentrans-sdk-client/known-limitations-and-deferred-work:
+  en: c1bcdd0a5ceeccfc
+  zh: 1a4050aaf2d66a81
+/agentrans-sdk-client/known-limitations-and-deferred-work/dev-note:
   en: 6177a56f053936a4
   zh: 0f4b20228c2d15da

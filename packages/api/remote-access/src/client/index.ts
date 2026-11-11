@@ -9,11 +9,11 @@
  * `whenAccess` over `whenResourceAccess()`. Every
  * answer is a boolean: true for the owner, false without a snapshot or after
  * a non-owner stream fails; the Host enforces every call regardless.
- * @module @deepseek-ai/dsh-api-remote-access/client
+ * @module @agentrans/api-remote-access/client
  */
 
-import type { Context } from '@deepseek-ai/cordis'
-import remoteAccessRemote from '@deepseek-ai/dsh-api-remote-access/remote'
+import type { Context } from '@agentrans/cordis'
+import remoteAccessRemote from '@agentrans/api-remote-access/remote'
 import { REMOTE_ACCESS_SNAPSHOT_KEY } from '../snapshot.ts'
 import { mountAccess } from './mount.ts'
 import { parseInjectedBaseline } from './state.ts'

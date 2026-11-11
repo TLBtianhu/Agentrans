@@ -1,12 +1,12 @@
 /** Current analysis and fixed saved-observation comparison, with explicit model admission. */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
-import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
-import type { JsonValue } from '@deepseek-ai/dsh-util-values'
-import type { ArtifactSnapshot, SavedParticleObservation, SavedParticleObservationRef } from '@deepseek-ai/dsh-artifact/types'
+import type { InjectFace, PropsLocale, PropsRuntime } from '@agentrans/client-ui-slots'
+import { Button } from '@agentrans/client-ui-primitives'
+import type { JsonValue } from '@agentrans/util-values'
+import type { ArtifactSnapshot, SavedParticleObservation, SavedParticleObservationRef } from '@agentrans/artifact/types'
 import {
   buildParticleObservationComparison, ParticleObservationComparisonError,
-} from '@deepseek-ai/dsh-artifact/observation-comparison'
+} from '@agentrans/artifact/observation-comparison'
 import { useArtifactActionSubmission } from './action-submission.ts'
 import { ActionSubmissionFeedback } from './ActionSubmissionFeedback.tsx'
 import { ArtifactCard, type SceneOrigin } from './ArtifactNodeView.tsx'
@@ -15,7 +15,7 @@ import type { ArtifactRuntimeSnapshot } from './runtime-owner.ts'
 import { ArtifactComparisonRequestError, type ArtifactCommand, type ArtifactNodeInjected } from './protocol.ts'
 import { particleRuntimeKey } from './particle-runtime-owner.ts'
 import type { ParticleRunCommand } from './particle-run.ts'
-import type { ArtifactId } from '@deepseek-ai/dsh-artifact/types'
+import type { ArtifactId } from '@agentrans/artifact/types'
 import { artifactHostRouteAvailable } from './artifact-route.ts'
 import css from './ArtifactNodeView.module.css'
 

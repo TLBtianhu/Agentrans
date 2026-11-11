@@ -1,6 +1,6 @@
 /** Client-side cron parsing and the localized sentence the Run time card derives from it. */
 import { describe, expect, it } from 'vitest'
-import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
+import { makeTranslate } from '@agentrans/client-test-runtime'
 import { cronPreview, parseCronExpression } from '../src/client/task-cron.ts'
 import { en, zh } from '../src/client/task-manager-locales.ts'
 

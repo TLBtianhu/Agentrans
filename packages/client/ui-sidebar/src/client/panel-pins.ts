@@ -1,5 +1,5 @@
 /** In-memory pin choices for the global panel launchers. */
-import { createSnapshotStore, type ObservableSnapshot } from '@deepseek-ai/dsh-client-store'
+import { createSnapshotStore, type ObservableSnapshot } from '@agentrans/client-store'
 
 /** Panel whose launcher always shows and never enters the customization list. */
 export const FIXED_PANEL_ID = 'plugins'

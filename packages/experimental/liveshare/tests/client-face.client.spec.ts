@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 /** Which half of the Liveshare client face mounts: the owner's Share action, or the viewer page surfaces. */
 
-import { Context } from '@deepseek-ai/cordis'
+import { Context } from '@agentrans/cordis'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import * as liveshare from '../src/client/index.ts'
 import * as viewerBrand from '../src/client/viewer-brand.tsx'
@@ -12,7 +12,7 @@ import * as viewerSessionRow from '../src/client/viewer-session-row.tsx'
 import * as viewerSharePath from '../src/client/viewer-share-path.tsx'
 
 /** The generated contribution is a build artifact; the mount boundary is what this face test covers. */
-vi.mock('@deepseek-ai/dsh-experimental-liveshare/remote', () => ({ default: { package: '@deepseek-ai/dsh-experimental-liveshare', methods: {} } }))
+vi.mock('@agentrans/experimental-liveshare/remote', () => ({ default: { package: '@agentrans/experimental-liveshare', methods: {} } }))
 
 const VIEWER_PLUGINS = [
   viewerSession, viewerBrand, viewerModel, viewerPermission, viewerSessionRow, viewerSharePath,

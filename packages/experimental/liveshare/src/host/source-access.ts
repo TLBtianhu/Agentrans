@@ -6,15 +6,15 @@
  * the Session rather than to one share, so several shares over it share one installation, and the host
  * releases it once no share is left. Stopping a share stops whatever turn the Session is running, with
  * the owner's own cancellation, without asking which turn or which requester it was.
- * @module @deepseek-ai/dsh-experimental-liveshare/src/host/source-access
+ * @module @agentrans/experimental-liveshare/src/host/source-access
  */
 
-import type { Context } from '@deepseek-ai/cordis'
-import { SessionId, type Session } from '@deepseek-ai/dsh-session'
-import { scopeOf } from '@deepseek-ai/dsh-scope'
-import type { SandboxExecutionPolicy } from '@deepseek-ai/dsh-sandbox'
-import type { ShareRpcActor } from '@deepseek-ai/dsh-experimental-liveshare-protocol'
-import { identityKeyOf } from '@deepseek-ai/dsh-experimental-liveshare-protocol'
+import type { Context } from '@agentrans/cordis'
+import { SessionId, type Session } from '@agentrans/session'
+import { scopeOf } from '@agentrans/scope'
+import type { SandboxExecutionPolicy } from '@agentrans/sandbox'
+import type { ShareRpcActor } from '@agentrans/experimental-liveshare-protocol'
+import { identityKeyOf } from '@agentrans/experimental-liveshare-protocol'
 import {
   installSourceSessionAccess,
   type ForkEnforcementFs,

@@ -1,8 +1,8 @@
 import { useRef, useState } from 'react'
-import type { ISessions } from '@deepseek-ai/dsh-api-session-controller/client'
-import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
-import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
+import type { ISessions } from '@agentrans/api-session-controller/client'
+import type { InjectFace, PropsLocale, PropsRuntime } from '@agentrans/client-ui-slots'
+import { Button } from '@agentrans/client-ui-primitives'
+import type { SessionId } from '@agentrans/session/types'
 import css from './BranchResultAction.module.css'
 
 type ReturnRequest = Parameters<ISessions['returnBranchResult']>[0]

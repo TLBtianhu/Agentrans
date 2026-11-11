@@ -1,6 +1,6 @@
 /** Gesture bindings for direct component fixtures, using the production adapter. */
-import type { ContextMenuTriggerProps, MenuPoint, ContextMenuTarget } from '@deepseek-ai/dsh-client-ui-context-menu/client'
-import { createContextMenuBindings } from '@deepseek-ai/dsh-client-ui-context-menu/src/client/trigger.ts'
+import type { ContextMenuTriggerProps, MenuPoint, ContextMenuTarget } from '@agentrans/client-ui-context-menu/client'
+import { createContextMenuBindings } from '@agentrans/client-ui-context-menu/src/client/trigger.ts'
 
 /**
  * Supply the global hook to a component mounted outside the Slot renderer.

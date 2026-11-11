@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-sdk-app",
+  "name": "@agentrans/sdk-app",
   "description": "The dsh SDK profile bundle: stdio JSON-RPC serving and process lifecycle over dsh-base",
   "version": "0.1.0",
   "publishConfig": {
@@ -36,28 +36,28 @@
     }
   },
   "dependencies": {
-    "@deepseek-ai/dsh-cmdline": "workspace:*",
-    "@deepseek-ai/dsh-sdk-jsonrpc-server": "workspace:*",
-    "@deepseek-ai/schemastery": "workspace:~",
+    "@agentrans/cmdline": "workspace:*",
+    "@agentrans/sdk-jsonrpc-server": "workspace:*",
+    "@agentrans/schemastery": "workspace:~",
     "commander": "^15.0.0",
-    "@deepseek-ai/dsh-skill-office": "workspace:*",
-    "@deepseek-ai/dsh-tool-workspace-dependencies": "workspace:*",
-    "@deepseek-ai/dsh-client-connection": "workspace:*",
-    "@deepseek-ai/dsh-client-file-upload": "workspace:*",
-    "@deepseek-ai/dsh-workspace": "workspace:*",
-    "@deepseek-ai/dsh-schedule": "workspace:*",
-    "@deepseek-ai/dsh-time-context": "workspace:*",
-    "@deepseek-ai/dsh-tool-schedule": "workspace:*",
-    "@deepseek-ai/dsh-tool-ask-user": "workspace:*",
-    "@deepseek-ai/dsh-tool-present": "workspace:*",
-    "@deepseek-ai/dsh-file-reference-local": "workspace:*",
-    "@deepseek-ai/dsh-deliverable-file-references": "workspace:*"
+    "@agentrans/skill-office": "workspace:*",
+    "@agentrans/tool-workspace-dependencies": "workspace:*",
+    "@agentrans/client-connection": "workspace:*",
+    "@agentrans/client-file-upload": "workspace:*",
+    "@agentrans/workspace": "workspace:*",
+    "@agentrans/schedule": "workspace:*",
+    "@agentrans/time-context": "workspace:*",
+    "@agentrans/tool-schedule": "workspace:*",
+    "@agentrans/tool-ask-user": "workspace:*",
+    "@agentrans/tool-present": "workspace:*",
+    "@agentrans/file-reference-local": "workspace:*",
+    "@agentrans/deliverable-file-references": "workspace:*"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/cordis": "workspace:~"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis-plugin-include": "workspace:~",
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/cordis-plugin-include": "workspace:~",
+    "@agentrans/cordis": "workspace:~"
   }
 }

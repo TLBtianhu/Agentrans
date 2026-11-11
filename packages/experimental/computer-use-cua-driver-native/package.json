@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-experimental-computer-use-cua-driver-native",
+  "name": "@agentrans/experimental-computer-use-cua-driver-native",
   "description": "Experimental computer-use provider embedding the Cua Driver native npm SDK",
   "version": "0.1.0",
   "publishConfig": {
@@ -29,33 +29,33 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-computer-use": "workspace:*",
-    "@deepseek-ai/dsh-system-prompt": "workspace:*",
-    "@deepseek-ai/dsh-tools": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/computer-use": "workspace:*",
+    "@agentrans/system-prompt": "workspace:*",
+    "@agentrans/tools": "workspace:*"
   },
   "dependencies": {
-    "@deepseek-ai/dsh-mcp-client": "workspace:*",
-    "@deepseek-ai/schemastery": "workspace:~",
+    "@agentrans/mcp-client": "workspace:*",
+    "@agentrans/schemastery": "workspace:~",
     "@trycua/cua-driver": "0.28.0",
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/cordis-plugin-include": "workspace:~",
-    "@deepseek-ai/cordis-plugin-loader": "workspace:~",
-    "@deepseek-ai/dsh-agent": "workspace:*",
-    "@deepseek-ai/dsh-agent-loop": "workspace:*",
-    "@deepseek-ai/dsh-agent-loop-testkit": "workspace:*",
-    "@deepseek-ai/dsh-attachment": "workspace:*",
-    "@deepseek-ai/dsh-attachment-local": "workspace:*",
-    "@deepseek-ai/dsh-computer-use": "workspace:*",
-    "@deepseek-ai/dsh-llm": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-session-projection": "workspace:*",
-    "@deepseek-ai/dsh-system-prompt": "workspace:*",
-    "@deepseek-ai/dsh-tool-executor-native": "workspace:*",
-    "@deepseek-ai/dsh-tool-testkit": "workspace:*",
-    "@deepseek-ai/dsh-tools": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/cordis-plugin-include": "workspace:~",
+    "@agentrans/cordis-plugin-loader": "workspace:~",
+    "@agentrans/agent": "workspace:*",
+    "@agentrans/agent-loop": "workspace:*",
+    "@agentrans/agent-loop-testkit": "workspace:*",
+    "@agentrans/attachment": "workspace:*",
+    "@agentrans/attachment-local": "workspace:*",
+    "@agentrans/computer-use": "workspace:*",
+    "@agentrans/llm": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/session-projection": "workspace:*",
+    "@agentrans/system-prompt": "workspace:*",
+    "@agentrans/tool-executor-native": "workspace:*",
+    "@agentrans/tool-testkit": "workspace:*",
+    "@agentrans/tools": "workspace:*"
   }
 }

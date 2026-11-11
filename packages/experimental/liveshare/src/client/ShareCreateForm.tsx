@@ -2,12 +2,12 @@
  * The share dialog's create form: the session permission, fork switch, and lifetime, plus the one
  * create action that publishes the Session through the host.
  *
- * @module @deepseek-ai/dsh-experimental-liveshare/src/client/ShareCreateForm
+ * @module @agentrans/experimental-liveshare/src/client/ShareCreateForm
  */
 
 import { useId, useRef, useState, type ReactNode } from 'react'
-import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
+import type { PropsLocale } from '@agentrans/client-ui-slots'
+import type { SessionId } from '@agentrans/session/types'
 import type { CreatedShare } from '../share-api-types.ts'
 import type { NS } from './locales.ts'
 import type { OwnerShares } from './owner-shares.ts'

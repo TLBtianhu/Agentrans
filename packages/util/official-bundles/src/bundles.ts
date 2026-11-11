@@ -9,19 +9,19 @@ export interface ProfileTemplate {
 /** The shipped profile templates auto-initialized on first use, by name. */
 export const PROFILE_TEMPLATES: Record<string, ProfileTemplate> = {
   acp: {
-    bundles: ['@deepseek-ai/dsh-base', '@deepseek-ai/dsh-acp-app'],
+    bundles: ['@agentrans/base', '@agentrans/acp-app'],
   },
   web: {
-    bundles: ['@deepseek-ai/dsh-base', '@deepseek-ai/dsh-web-app'],
+    bundles: ['@agentrans/base', '@agentrans/web-app'],
   },
   headless: {
-    bundles: ['@deepseek-ai/dsh-base', '@deepseek-ai/dsh-headless'],
+    bundles: ['@agentrans/base', '@agentrans/headless'],
   },
   sdk: {
-    bundles: ['@deepseek-ai/dsh-base', '@deepseek-ai/dsh-sdk-app'],
+    bundles: ['@agentrans/base', '@agentrans/sdk-app'],
   },
   'sdk-minimal': {
-    bundles: ['@deepseek-ai/dsh-sdk-minimal'],
+    bundles: ['@agentrans/sdk-minimal'],
   },
 }
 
@@ -30,18 +30,18 @@ export const PROFILE_TEMPLATES: Record<string, ProfileTemplate> = {
  * match with the {@link PROFILE_TEMPLATES} entry of the same name and leaves every other list untouched.
  */
 export const INSTALLATION_OWNED_PROFILE_TUPLES: Readonly<Record<string, readonly string[]>> = {
-  headless: ['@deepseek-ai/dsh-base', '@deepseek-ai/dsh-web-app', '@deepseek-ai/dsh-headless'],
+  headless: ['@agentrans/base', '@agentrans/web-app', '@agentrans/headless'],
 }
 
 /** Bundles an earlier release shipped and the installation no longer carries; app-boot removes them from profiles. */
 export const RETIRED_BUNDLES: ReadonlySet<string> = new Set([
   // The Web composition mounts Schedule itself
   // ([upgrade guide](../../../../docs/upgrade-guide/v0.2.0-rc.2/schedule-bundle-retired/guide.md)).
-  '@deepseek-ai/dsh-experimental-schedule-bundle',
+  '@agentrans/experimental-schedule-bundle',
 ])
 
 /** The bundle list a `dsh plugin` init uses for a name with no shipped template. */
-export const DEFAULT_PROFILE_BUNDLES: readonly string[] = ['@deepseek-ai/dsh-base']
+export const DEFAULT_PROFILE_BUNDLES: readonly string[] = ['@agentrans/base']
 
 /**
  * The bundles the dsh installation ships for a person to switch on: each a
@@ -53,26 +53,26 @@ export const DEFAULT_PROFILE_BUNDLES: readonly string[] = ['@deepseek-ai/dsh-bas
  * [admission](../../../../.agents/notes/implemented/architecture/2026-09-21-experimental-capabilities-as-optional-bundles.md)).
  */
 export const OPTIONAL_BUNDLES: readonly string[] = [
-  '@deepseek-ai/dsh-personalized-recommendations',
-  '@deepseek-ai/dsh-experimental-session-search',
-  '@deepseek-ai/dsh-experimental-ralph-bundle',
-  '@deepseek-ai/dsh-experimental-terminal-bundle',
-  '@deepseek-ai/dsh-experimental-badge-skill-bundle',
-  '@deepseek-ai/dsh-experimental-session-titles-bundle',
-  '@deepseek-ai/dsh-experimental-agent-team-profile',
-  '@deepseek-ai/dsh-experimental-voice-input-bundle',
-  '@deepseek-ai/dsh-experimental-cot-translation-bundle',
-  '@deepseek-ai/dsh-experimental-auto-review',
-  '@deepseek-ai/dsh-experimental-inspector-profile',
-  '@deepseek-ai/dsh-experimental-liveshare',
-  '@deepseek-ai/dsh-experimental-plugin-market-bundle',
-  '@deepseek-ai/dsh-experimental-tool-worktree',
-  '@deepseek-ai/dsh-experimental-forge-bundle',
+  '@agentrans/personalized-recommendations',
+  '@agentrans/experimental-session-search',
+  '@agentrans/experimental-ralph-bundle',
+  '@agentrans/experimental-terminal-bundle',
+  '@agentrans/experimental-badge-skill-bundle',
+  '@agentrans/experimental-session-titles-bundle',
+  '@agentrans/experimental-agent-team-profile',
+  '@agentrans/experimental-voice-input-bundle',
+  '@agentrans/experimental-cot-translation-bundle',
+  '@agentrans/experimental-auto-review',
+  '@agentrans/experimental-inspector-profile',
+  '@agentrans/experimental-liveshare',
+  '@agentrans/experimental-plugin-market-bundle',
+  '@agentrans/experimental-tool-worktree',
+  '@agentrans/experimental-forge-bundle',
 ]
 
 /** Public DSH release members available through the ordinary on-demand bundle installer. */
 export const ON_DEMAND_BUNDLES: readonly string[] = [
-  '@deepseek-ai/dsh-subagent-claude-code',
-  '@deepseek-ai/dsh-subagent-codex',
-  '@deepseek-ai/dsh-cua-bundle',
+  '@agentrans/subagent-claude-code',
+  '@agentrans/subagent-codex',
+  '@agentrans/cua-bundle',
 ]

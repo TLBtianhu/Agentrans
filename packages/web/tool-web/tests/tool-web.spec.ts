@@ -1,18 +1,18 @@
-import { ToolExecutionPipeline } from '@deepseek-ai/dsh-tools/pipeline'
-import { executeToolFixture } from '@deepseek-ai/dsh-tool-testkit'
-import * as NativeToolExecutor from '@deepseek-ai/dsh-tool-executor-native'
+import { ToolExecutionPipeline } from '@agentrans/tools/pipeline'
+import { executeToolFixture } from '@agentrans/tool-testkit'
+import * as NativeToolExecutor from '@agentrans/tool-executor-native'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
-import type { Agent, ModelSelection } from '@deepseek-ai/dsh-agent'
-import { createScope, type Scope } from '@deepseek-ai/dsh-scope'
+import { Context } from '@agentrans/cordis'
+import type { Agent, ModelSelection } from '@agentrans/agent'
+import { createScope, type Scope } from '@agentrans/scope'
 import TurndownService from 'turndown'
-import { ToolCallId } from '@deepseek-ai/dsh-llm'
-import SystemPrompt, { renderPrompt } from '@deepseek-ai/dsh-system-prompt'
-import ToolRuntime, { type ResolvedToolSet, type ToolExecutionInput, type ToolExecutionResult } from '@deepseek-ai/dsh-tools'
-import { SessionId } from '@deepseek-ai/dsh-session'
-import WebRuntime from '@deepseek-ai/dsh-web'
-import type { WebFetchProvider, WebSearchProvider, WebSearchResult } from '@deepseek-ai/dsh-web'
-import * as ToolWeb from '@deepseek-ai/dsh-tool-web'
+import { ToolCallId } from '@agentrans/llm'
+import SystemPrompt, { renderPrompt } from '@agentrans/system-prompt'
+import ToolRuntime, { type ResolvedToolSet, type ToolExecutionInput, type ToolExecutionResult } from '@agentrans/tools'
+import { SessionId } from '@agentrans/session'
+import WebRuntime from '@agentrans/web'
+import type { WebFetchProvider, WebSearchProvider, WebSearchResult } from '@agentrans/web'
+import * as ToolWeb from '@agentrans/tool-web'
 import {
   formatSearchOutput,
   formatFetchOutput,
@@ -27,9 +27,9 @@ import {
   fetchMetaFromResult,
   WEB_SEARCH_MAX_QUERIES,
   WEB_SEARCH_MAX_RESULTS,
-} from '@deepseek-ai/dsh-tool-web'
-import type { ContentBlock } from '@deepseek-ai/dsh-llm'
-import type { ToolResult } from '@deepseek-ai/dsh-tools'
+} from '@agentrans/tool-web'
+import type { ContentBlock } from '@agentrans/llm'
+import type { ToolResult } from '@agentrans/tools'
 import { parseSearchArgs } from '../src/search.ts'
 
 const testToolSignal = new AbortController().signal

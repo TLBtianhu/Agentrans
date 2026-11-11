@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-experimental-browser-use-chrome-devtools-mcp",
+  "name": "@agentrans/experimental-browser-use-chrome-devtools-mcp",
   "description": "Experimental per-Session Chromium browser tools through chrome-devtools-mcp",
   "version": "0.1.0",
   "publishConfig": {
@@ -29,29 +29,29 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@deepseek-ai/dsh-experimental-browser-use-runtime": "workspace:*",
+    "@agentrans/experimental-browser-use-runtime": "workspace:*",
     "chrome-devtools-mcp": "1.9.0"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-browser-use": "workspace:*",
-    "@deepseek-ai/dsh-agent": "workspace:*",
-    "@deepseek-ai/dsh-tools": "workspace:*",
-    "@deepseek-ai/dsh-system-prompt": "workspace:*",
-    "@deepseek-ai/dsh-working-directory": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/browser-use": "workspace:*",
+    "@agentrans/agent": "workspace:*",
+    "@agentrans/tools": "workspace:*",
+    "@agentrans/system-prompt": "workspace:*",
+    "@agentrans/working-directory": "workspace:*"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/cordis-plugin-loader": "workspace:~",
-    "@deepseek-ai/cordis-plugin-include": "workspace:~",
-    "@deepseek-ai/dsh-browser-use": "workspace:*",
-    "@deepseek-ai/dsh-agent": "workspace:*",
-    "@deepseek-ai/dsh-agent-loop": "workspace:*",
-    "@deepseek-ai/dsh-llm": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-tools": "workspace:*",
-    "@deepseek-ai/dsh-system-prompt": "workspace:*",
-    "@deepseek-ai/dsh-session-projection": "workspace:*",
-    "@deepseek-ai/dsh-working-directory": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/cordis-plugin-loader": "workspace:~",
+    "@agentrans/cordis-plugin-include": "workspace:~",
+    "@agentrans/browser-use": "workspace:*",
+    "@agentrans/agent": "workspace:*",
+    "@agentrans/agent-loop": "workspace:*",
+    "@agentrans/llm": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/tools": "workspace:*",
+    "@agentrans/system-prompt": "workspace:*",
+    "@agentrans/session-projection": "workspace:*",
+    "@agentrans/working-directory": "workspace:*"
   }
 }

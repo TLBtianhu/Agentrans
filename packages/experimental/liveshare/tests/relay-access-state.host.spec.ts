@@ -1,14 +1,14 @@
 /** Relay grants apply without owner UI polling; stale snapshots cannot revive denied readers. */
-import { Context } from '@deepseek-ai/cordis'
-import { Peer } from '@deepseek-ai/dsh-client-connection'
+import { Context } from '@agentrans/cordis'
+import { Peer } from '@agentrans/client-connection'
 import { randomUUID } from 'node:crypto'
 import { mkdtempSync, writeFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it, onTestFinished, vi } from 'vitest'
-import type { ShareAccessStateFrame, TunnelRegistrationToken, TunnelWorkerEvent, TunnelRequestToken } from '@deepseek-ai/dsh-experimental-liveshare-protocol'
+import type { ShareAccessStateFrame, TunnelRegistrationToken, TunnelWorkerEvent, TunnelRequestToken } from '@agentrans/experimental-liveshare-protocol'
 import type { TunnelWorkerInput } from '../src/host/tunnel-worker.ts'
-import { identityKeyOf } from '@deepseek-ai/dsh-experimental-liveshare-protocol'
+import { identityKeyOf } from '@agentrans/experimental-liveshare-protocol'
 import { apply } from '../src/host/share-host.ts'
 
 const worker = vi.hoisted(() => ({ event: undefined as ((event: TunnelWorkerEvent) => void) | undefined,

@@ -3,7 +3,7 @@ description: "dsh Web 客户端的主题、字号与字体设置：--dsw-* token
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-client-ui-theme
+# @agentrans/client-ui-theme
 
 [English](README.md) | 中文
 

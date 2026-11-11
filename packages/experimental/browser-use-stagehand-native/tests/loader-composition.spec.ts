@@ -1,24 +1,24 @@
 /** A real Loader and AgentLoop exercise independently configured browser inference and durable screenshots. */
 
-import * as NativeToolExecutor from '@deepseek-ai/dsh-tool-executor-native'
+import * as NativeToolExecutor from '@agentrans/tool-executor-native'
 import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { afterEach, expect, it, vi } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
-import Loader from '@deepseek-ai/cordis-plugin-loader'
-import Include from '@deepseek-ai/cordis-plugin-include'
-import AgentRegistry from '@deepseek-ai/dsh-agent'
-import AgentLoop from '@deepseek-ai/dsh-agent-loop'
-import BrowserUseRegistry from '@deepseek-ai/dsh-browser-use'
-import LocalAttachmentStore from '@deepseek-ai/dsh-attachment-local'
-import LlmRuntime, { LlmAdapter, ToolCallId, createUserMessage } from '@deepseek-ai/dsh-llm'
-import type { GenerateOptions, LlmResolvedModelInfo, StreamChunk } from '@deepseek-ai/dsh-llm'
-import SessionStore, { SessionId } from '@deepseek-ai/dsh-session'
-import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
-import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
-import ToolRuntime from '@deepseek-ai/dsh-tools'
+import { Context } from '@agentrans/cordis'
+import Loader from '@agentrans/cordis-plugin-loader'
+import Include from '@agentrans/cordis-plugin-include'
+import AgentRegistry from '@agentrans/agent'
+import AgentLoop from '@agentrans/agent-loop'
+import BrowserUseRegistry from '@agentrans/browser-use'
+import LocalAttachmentStore from '@agentrans/attachment-local'
+import LlmRuntime, { LlmAdapter, ToolCallId, createUserMessage } from '@agentrans/llm'
+import type { GenerateOptions, LlmResolvedModelInfo, StreamChunk } from '@agentrans/llm'
+import SessionStore, { SessionId } from '@agentrans/session'
+import SessionProjectionRegistry from '@agentrans/session-projection'
+import SystemPrompt from '@agentrans/system-prompt'
+import ToolRuntime from '@agentrans/tools'
 import * as Provider from '../src/index.ts'
 import { resetFixture, screenshotBase64 } from './fixtures/stagehand.ts'
 
@@ -76,24 +76,24 @@ it('loads browser tools from cordis.yml, logs browser results, and admits the sc
   resetFixture()
   root = await mkdtemp(join(tmpdir(), 'dsh-stagehand-composition-'))
   const modules = new Map<string, unknown>([
-    ['@deepseek-ai/dsh-llm', LlmRuntime],
-    ['@deepseek-ai/dsh-session', SessionStore],
-    ['@deepseek-ai/dsh-session-projection', SessionProjectionRegistry],
+    ['@agentrans/llm', LlmRuntime],
+    ['@agentrans/session', SessionStore],
+    ['@agentrans/session-projection', SessionProjectionRegistry],
 
-    ['@deepseek-ai/dsh-system-prompt', SystemPrompt],
-    ['@deepseek-ai/dsh-tools', ToolRuntime],
-    ['@deepseek-ai/dsh-tool-executor-native', NativeToolExecutor],
-    ['@deepseek-ai/dsh-agent', AgentRegistry],
-    ['@deepseek-ai/dsh-agent-loop', AgentLoop],
-    ['@deepseek-ai/dsh-attachment-local', LocalAttachmentStore],
-    ['@deepseek-ai/dsh-browser-use', BrowserUseRegistry],
-    ['@deepseek-ai/dsh-experimental-browser-use-stagehand-native', Provider],
+    ['@agentrans/system-prompt', SystemPrompt],
+    ['@agentrans/tools', ToolRuntime],
+    ['@agentrans/tool-executor-native', NativeToolExecutor],
+    ['@agentrans/agent', AgentRegistry],
+    ['@agentrans/agent-loop', AgentLoop],
+    ['@agentrans/attachment-local', LocalAttachmentStore],
+    ['@agentrans/browser-use', BrowserUseRegistry],
+    ['@agentrans/experimental-browser-use-stagehand-native', Provider],
   ])
   const configPath = join(root, 'cordis.yml')
   await writeFile(configPath, [...modules.keys()].flatMap(name => [
     `- name: '${name}'`,
-    ...name === '@deepseek-ai/dsh-attachment-local' ? ['  config:', `    dshHome: ${JSON.stringify(root)}`] : [],
-    ...name === '@deepseek-ai/dsh-experimental-browser-use-stagehand-native' ? ['  config:', '    mode: launch', '    model:', '      modelName: openai/gpt-5.4-mini', '      apiKey: fixture-model-key'] : [],
+    ...name === '@agentrans/attachment-local' ? ['  config:', `    dshHome: ${JSON.stringify(root)}`] : [],
+    ...name === '@agentrans/experimental-browser-use-stagehand-native' ? ['  config:', '    mode: launch', '    model:', '      modelName: openai/gpt-5.4-mini', '      apiKey: fixture-model-key'] : [],
   ]).join('\n') + '\n')
   const context = ctx = new Context()
   context.baseUrl = pathToFileURL(root).href + '/'

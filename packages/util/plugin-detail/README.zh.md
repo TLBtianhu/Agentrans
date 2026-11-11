@@ -66,10 +66,10 @@ kind: "package-library"
 import {
   DetailFailure, detailImage, detailImageResponse, languageChain, localFiles, NPM_FILE_SOURCES, npmFiles, npmFileSourceOrder,
   readPackageDocument,
-} from '@deepseek-ai/dsh-plugin-detail'
+} from '@agentrans/plugin-detail'
 ```
 
-`DetailFailureReason` 和 `NpmFileSource` 供其他包的 Remote 方法使用，也从 `@deepseek-ai/dsh-plugin-detail/types` 以仅类型方式导出。
+`DetailFailureReason` 和 `NpmFileSource` 供其他包的 Remote 方法使用，也从 `@agentrans/plugin-detail/types` 以仅类型方式导出。
 
 `DetailFiles` 是来源接口：`read(path, maxBytes, signal)` 返回文件的字节或 `undefined`，`readme(dir, maxBytes, signal)` 返回目录的 README。仓库来源在 `plugin-market` 中实现该接口。
 

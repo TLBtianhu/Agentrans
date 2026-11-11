@@ -1,18 +1,18 @@
 /** Confirmed manual-branch result return, lineage validation, isolation, and idempotency. */
 import { describe, expect, it, vi } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
-import AgentRegistry from '@deepseek-ai/dsh-agent'
-import type { Agent, CreateAgentOptions } from '@deepseek-ai/dsh-agent'
-import { unsupportedModel } from '@deepseek-ai/dsh-agent-loop-testkit'
-import { createAssistantMessage, createUserMessage } from '@deepseek-ai/dsh-llm'
+import { Context } from '@agentrans/cordis'
+import AgentRegistry from '@agentrans/agent'
+import type { Agent, CreateAgentOptions } from '@agentrans/agent'
+import { unsupportedModel } from '@agentrans/agent-loop-testkit'
+import { createAssistantMessage, createUserMessage } from '@agentrans/llm'
 import SessionStore, {
   SESSION_FORMAT_VERSION, SessionLogOffset, SessionSeq,
-} from '@deepseek-ai/dsh-session'
-import type { Session, SessionEvent, SessionHeader, SessionId } from '@deepseek-ai/dsh-session'
-import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
-import { selectBranchResult } from '@deepseek-ai/dsh-session-branch'
-import { admitBranchResult } from '@deepseek-ai/dsh-session-branch/admission'
-import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
+} from '@agentrans/session'
+import type { Session, SessionEvent, SessionHeader, SessionId } from '@agentrans/session'
+import SessionProjectionRegistry from '@agentrans/session-projection'
+import { selectBranchResult } from '@agentrans/session-branch'
+import { admitBranchResult } from '@agentrans/session-branch/admission'
+import SystemPrompt from '@agentrans/system-prompt'
 import {
   createSessionTestRemote, installSessionReadTestServices, testSessionPersistence,
 } from './test-remote.ts'

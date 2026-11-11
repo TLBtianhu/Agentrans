@@ -20,7 +20,7 @@ import {
 describe('verify-cordis-config metadata expressions', () => {
   it('accepts a disabled !!js expression', () => {
     const problems = metadataExpressionErrors(
-      { id: 'tool-bash', name: '@deepseek-ai/dsh-tool-bash', disabled: { __jsExpr: "process.platform === 'win32'" } },
+      { id: 'tool-bash', name: '@agentrans/tool-bash', disabled: { __jsExpr: "process.platform === 'win32'" } },
       '[0]',
     )
     expect(problems).toEqual([])
@@ -51,11 +51,11 @@ describe('verify-cordis-config metadata expressions', () => {
 describe('workspace Bundle discovery and product dependency closures', () => {
   it('allows scoped executors on both planes while retaining other plugin rows', () => {
     expect([...exclusivePlaneRowIds([{ insert: [
-      { id: 'native', name: '@deepseek-ai/dsh-tool-executor-native' },
-      { id: 'ptc', name: '@deepseek-ai/dsh-tool-executor-ptc' },
-      { id: 'tools', name: '@deepseek-ai/dsh-tools' },
+      { id: 'native', name: '@agentrans/tool-executor-native' },
+      { id: 'ptc', name: '@agentrans/tool-executor-ptc' },
+      { id: 'tools', name: '@agentrans/tools' },
       { id: 'group', name: 'cordis:group', group: true, config: [
-        { id: 'tool-executor-ptc', name: '@deepseek-ai/dsh-tool-fs' },
+        { id: 'tool-executor-ptc', name: '@agentrans/tool-fs' },
       ] },
     ] }])]).toEqual(['tools', 'group', 'tool-executor-ptc'])
   })
@@ -68,11 +68,11 @@ describe('workspace Bundle discovery and product dependency closures', () => {
       mkdirSync(bundleDir, { recursive: true })
       mkdirSync(plainDir, { recursive: true })
       writeFileSync(join(bundleDir, 'package.json'), JSON.stringify({
-        name: '@deepseek-ai/dsh-subagent-example',
+        name: '@agentrans/subagent-example',
         dsh: { bundle: { patch: './cordis.patch.yml' } },
       }))
       writeFileSync(join(plainDir, 'package.json'), JSON.stringify({
-        name: '@deepseek-ai/dsh-plain',
+        name: '@agentrans/plain',
       }))
 
       expect(bundleManifestPaths(fixture)).toEqual([
@@ -87,19 +87,19 @@ describe('workspace Bundle discovery and product dependency closures', () => {
     const manifestPath = 'packages/subagent/example/package.json'
     const file = 'packages/subagent/example/cordis.patch.yml'
     const manifest = {
-      name: '@deepseek-ai/dsh-subagent-example',
+      name: '@agentrans/subagent-example',
       dependencies: {},
     }
-    const self = { file, name: '@deepseek-ai/dsh-subagent-example' }
+    const self = { file, name: '@agentrans/subagent-example' }
     expect(bundlePluginDependencyErrors(manifestPath, manifest, [self])).toEqual([])
     expect(bundlePluginDependencyErrors(manifestPath, {
-      ...manifest, optionalDependencies: { '@deepseek-ai/dsh-platform-plugin': 'workspace:*' },
-    }, [{ file, name: '@deepseek-ai/dsh-platform-plugin' }])).toEqual([])
+      ...manifest, optionalDependencies: { '@agentrans/platform-plugin': 'workspace:*' },
+    }, [{ file, name: '@agentrans/platform-plugin' }])).toEqual([])
     expect(bundlePluginDependencyErrors(manifestPath, manifest, [
       self,
-      { file, name: '@deepseek-ai/dsh-missing-plugin' },
+      { file, name: '@agentrans/missing-plugin' },
     ])).toEqual([
-      `${file}: @deepseek-ai/dsh-missing-plugin must be declared in ${manifestPath} dependencies or optionalDependencies`,
+      `${file}: @agentrans/missing-plugin must be declared in ${manifestPath} dependencies or optionalDependencies`,
     ])
   })
 })
@@ -109,18 +109,18 @@ describe('package-owned Loader test dependency closures', () => {
     const manifestPath = 'packages/example/owner/package.json'
     const file = 'packages/example/owner/tests/fixtures/cordis.yml'
     const manifest = {
-      name: '@deepseek-ai/dsh-owner',
+      name: '@agentrans/owner',
       dependencies: {},
       devDependencies: {
-        '@deepseek-ai/dsh-declared': 'workspace:^',
+        '@agentrans/declared': 'workspace:^',
       },
     }
     expect(packageTestPluginDependencyErrors(manifestPath, manifest, [
-      { file, name: '@deepseek-ai/dsh-owner' },
-      { file, name: '@deepseek-ai/dsh-declared' },
-      { file, name: '@deepseek-ai/dsh-missing' },
+      { file, name: '@agentrans/owner' },
+      { file, name: '@agentrans/declared' },
+      { file, name: '@agentrans/missing' },
     ])).toEqual([
-      `${file}: @deepseek-ai/dsh-missing must be declared in ${manifestPath} dependencies or devDependencies`,
+      `${file}: @agentrans/missing must be declared in ${manifestPath} dependencies or devDependencies`,
     ])
   })
 
@@ -131,25 +131,25 @@ describe('package-owned Loader test dependency closures', () => {
       const driverDir = join(packageDir, 'tests/fixtures/loader')
       mkdirSync(driverDir, { recursive: true })
       writeFileSync(join(packageDir, 'package.json'), JSON.stringify({
-        name: '@deepseek-ai/dsh-owner',
+        name: '@agentrans/owner',
         devDependencies: {
-          '@deepseek-ai/dsh-declared': 'workspace:^',
+          '@agentrans/declared': 'workspace:^',
         },
       }))
       writeFileSync(join(driverDir, 'driver.ts'), [
-        "import '@deepseek-ai/dsh-owner'",
-        "import '@deepseek-ai/dsh-declared'",
-        "import '@deepseek-ai/dsh-missing'",
+        "import '@agentrans/owner'",
+        "import '@agentrans/declared'",
+        "import '@agentrans/missing'",
       ].join('\n'))
       writeFileSync(join(driverDir, 'cordis.yml'), '[]\n')
-      writeFileSync(join(driverDir, 'fixture.mjs'), "import '@deepseek-ai/dsh-declared'\n")
+      writeFileSync(join(driverDir, 'fixture.mjs'), "import '@agentrans/declared'\n")
       const unrelatedDir = join(packageDir, 'tests/fixtures/unrelated')
       mkdirSync(unrelatedDir, { recursive: true })
-      writeFileSync(join(unrelatedDir, 'driver.ts'), "import '@deepseek-ai/dsh-unrelated'\n")
+      writeFileSync(join(unrelatedDir, 'driver.ts'), "import '@agentrans/unrelated'\n")
 
       expect(packageTestFixtureDependencyErrors(fixture)).toEqual([
         'packages/example/owner/tests/fixtures/loader/driver.ts: '
-        + '@deepseek-ai/dsh-missing must be declared in '
+        + '@agentrans/missing must be declared in '
         + 'packages/example/owner/package.json dependencies or devDependencies',
       ])
     } finally {

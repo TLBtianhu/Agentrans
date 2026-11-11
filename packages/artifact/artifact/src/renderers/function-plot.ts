@@ -1,5 +1,5 @@
 /** Framework-free function-plot renderer shared by the conversation preview and the animation exporter. */
-import { parseExpression } from '@deepseek-ai/dsh-util-values'
+import { parseExpression } from '@agentrans/util-values'
 import { analyzeFunction, evaluateFunction } from './function-analysis.ts'
 import type { FunctionPlotSpec } from '../scene.ts'
 import type { ScenePalette } from '../scene-palette.ts'

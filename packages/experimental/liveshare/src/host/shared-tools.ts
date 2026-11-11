@@ -4,7 +4,7 @@
  * The source-session sandbox and each fork child's limit read this one table, so both admit the same
  * tools at the same tiers. Each entry states how that tool's own arguments name workspace paths and how
  * a checked call is handed back with canonical paths; a tool the table does not name is refused.
- * @module @deepseek-ai/dsh-experimental-liveshare/src/host/shared-tools
+ * @module @agentrans/experimental-liveshare/src/host/shared-tools
  */
 
 import { isRecord } from './wire-json.ts'

@@ -1,7 +1,7 @@
-import { Context } from '@deepseek-ai/cordis'
-import SessionStore, { SessionId, type Session, type SessionSeq } from '@deepseek-ai/dsh-session'
-import LlmRuntime, { LlmAdapter, createUserMessage, type GenerateOptions, type StreamChunk } from '@deepseek-ai/dsh-llm'
-import { SessionTitleProviderId } from '@deepseek-ai/dsh-session-title'
+import { Context } from '@agentrans/cordis'
+import SessionStore, { SessionId, type Session, type SessionSeq } from '@agentrans/session'
+import LlmRuntime, { LlmAdapter, createUserMessage, type GenerateOptions, type StreamChunk } from '@agentrans/llm'
+import { SessionTitleProviderId } from '@agentrans/session-title'
 import { describe, expect, it, onTestFinished } from 'vitest'
 import * as latch from './fixtures/session-title-stability-latch.ts'
 

@@ -1,19 +1,19 @@
 // @vitest-environment jsdom
 /** Session Inspector's Sidebar page follows slot and plugin lifetimes. */
 
-import { Context } from '@deepseek-ai/cordis'
-import { LocaleRuntime } from '@deepseek-ai/dsh-client-locale/client'
-import { SlotRegistry } from '@deepseek-ai/dsh-client-ui-renderer/client'
-import { SidebarRightTabRegistry } from '@deepseek-ai/dsh-client-ui-sidebar-right/src/client/tab-registry.ts'
-import type { PropsRenderSlots } from '@deepseek-ai/dsh-client-ui-slots'
+import { Context } from '@agentrans/cordis'
+import { LocaleRuntime } from '@agentrans/client-locale/client'
+import { SlotRegistry } from '@agentrans/client-ui-renderer/client'
+import { SidebarRightTabRegistry } from '@agentrans/client-ui-sidebar-right/src/client/tab-registry.ts'
+import type { PropsRenderSlots } from '@agentrans/client-ui-slots'
 import { describe, expect, it, onTestFinished, vi } from 'vitest'
-import { MutableSessionEventSource } from '@deepseek-ai/dsh-api-session-controller/client'
-import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
-import { ChatSnapshotBuilder } from '@deepseek-ai/dsh-client-ui-chat/src/client/conversation-nodes/chat-snapshot-builder.ts'
-import type { ChatSnapshot } from '@deepseek-ai/dsh-client-ui-chat/client'
-import { ConversationGroupStore } from '@deepseek-ai/dsh-client-ui-conversation/src/client/conversation/group-store.ts'
-import type { ConversationSnapshot, GroupKey, NodeKey } from '@deepseek-ai/dsh-client-ui-conversation/client'
-import { SessionSeq, type SessionId } from '@deepseek-ai/dsh-session/types'
+import { MutableSessionEventSource } from '@agentrans/api-session-controller/client'
+import { createSnapshotStore } from '@agentrans/client-store'
+import { ChatSnapshotBuilder } from '@agentrans/client-ui-chat/src/client/conversation-nodes/chat-snapshot-builder.ts'
+import type { ChatSnapshot } from '@agentrans/client-ui-chat/client'
+import { ConversationGroupStore } from '@agentrans/client-ui-conversation/src/client/conversation/group-store.ts'
+import type { ConversationSnapshot, GroupKey, NodeKey } from '@agentrans/client-ui-conversation/client'
+import { SessionSeq, type SessionId } from '@agentrans/session/types'
 import type { SessionInspectorInjected } from '../src/client/views/View.tsx'
 import { chatNodeWithLocation } from './chat-node-fixture.client.ts'
 import { apply, inject } from '../src/client/index.ts'
@@ -44,7 +44,7 @@ async function fixture(services?: { sessions: object; uiConversation: object; ui
   return { ctx, tabs, declare }
 }
 
-const ID = '@deepseek-ai/dsh-experimental-session-inspector'
+const ID = '@agentrans/experimental-session-inspector'
 const KIND = 'session-inspector-log'
 
 function inspectorInjector(ctx: Context) {

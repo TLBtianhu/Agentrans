@@ -5,7 +5,7 @@
  * record's signal.
  */
 
-import { defineStore, type EngineStoreHandle } from '@deepseek-ai/dsh-client-store'
+import { defineStore, type EngineStoreHandle } from '@agentrans/client-store'
 import type { ForgeLocalScope } from '../types.ts'
 
 /** One changes tab's choices. */

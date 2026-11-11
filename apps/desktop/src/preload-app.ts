@@ -1,7 +1,7 @@
-import type { FileSaveResult } from '@deepseek-ai/dsh-client-ui-file-actions/types'
+import type { FileSaveResult } from '@agentrans/client-ui-file-actions/types'
 /** Origin-scoped boot, native directory selection, host paths of picked files, and update presentation with native confirmation actions. */
 
-import type { DesktopShortcutInput, ShortcutConfigSnapshot, ShortcutSaveResult } from '@deepseek-ai/dsh-shortcut-protocol'
+import type { DesktopShortcutInput, ShortcutConfigSnapshot, ShortcutSaveResult } from '@agentrans/shortcut-protocol'
 import { contextBridge, ipcRenderer, webUtils } from 'electron'
 import { DESKTOP_IPC, SCHEME, type DshDesktopProductApi, type DesktopUpdatePresentation } from './ipc.ts'
 import { PLATFORM_IPC } from './platform-ipc.ts'
@@ -9,7 +9,7 @@ import { markDocumentPlatform, syncWindowFullscreen } from './preload-platform.t
 import { syncNativeTheme } from './preload-theme.ts'
 import { syncWindowsAppearance } from './preload-windows.ts'
 import { createDesktopBrowserBridge } from './preload-browser.ts'
-import type { FileDragHandle } from '@deepseek-ai/dsh-util-file-drag'
+import type { FileDragHandle } from '@agentrans/util-file-drag'
 
 function createProductApi(): DshDesktopProductApi {
   return {

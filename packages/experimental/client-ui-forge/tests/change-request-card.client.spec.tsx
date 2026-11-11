@@ -2,8 +2,8 @@
 /** One change request card: state glyph, title link, collapsed summary, read notices, and expanded details and actions. */
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
-import type { ForgeFailure, MergeRequest } from '@deepseek-ai/dsh-experimental-forge/types'
+import { makeTranslate } from '@agentrans/client-test-runtime'
+import type { ForgeFailure, MergeRequest } from '@agentrans/experimental-forge/types'
 import { ChangeRequestCard, type ChangeRequestActions } from '../src/client/ChangeRequestCard.tsx'
 import { en } from '../src/client/locales.ts'
 import css from '../src/client/ForgeTab.module.css'

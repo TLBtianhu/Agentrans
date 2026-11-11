@@ -1,10 +1,10 @@
 /**
  * Pure manual-branch result selection, parent-message construction, and replay lookup.
- * @module @deepseek-ai/dsh-session-branch
+ * @module @agentrans/session-branch
  */
 
-import { createUserMessage } from '@deepseek-ai/dsh-llm'
-import type { SessionEvent, SessionId, SessionSeq } from '@deepseek-ai/dsh-session/types'
+import { createUserMessage } from '@agentrans/llm'
+import type { SessionEvent, SessionId, SessionSeq } from '@agentrans/session/types'
 import type {
   BranchLogObservation, BranchResultMessage, BranchResultSelectionResult,
   BranchResultSource, ExistingBranchResult,

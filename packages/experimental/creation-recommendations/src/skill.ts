@@ -1,7 +1,7 @@
 /** On-demand page planning with current plugins for duplicate checks. */
 import { readFile } from 'node:fs/promises'
-import type { Context } from '@deepseek-ai/cordis'
-import { BUNDLED_SKILL_RANK, type SkillCandidate } from '@deepseek-ai/dsh-skill'
+import type { Context } from '@agentrans/cordis'
+import { BUNDLED_SKILL_RANK, type SkillCandidate } from '@agentrans/skill'
 
 /** Register the experiment's skill without a system-prompt section.
  * @param ctx - Owning plugin context with skill and plugin registries.

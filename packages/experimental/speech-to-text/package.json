@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-experimental-speech-to-text",
+  "name": "@agentrans/experimental-speech-to-text",
   "description": "Experimental speech recognition with independently selectable providers",
   "version": "0.1.0",
   "publishConfig": {
@@ -38,23 +38,23 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@deepseek-ai/dsh-brand": "workspace:*",
-    "@deepseek-ai/schemastery": "workspace:~"
+    "@agentrans/brand": "workspace:*",
+    "@agentrans/schemastery": "workspace:~"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-settings": "workspace:*",
-    "@deepseek-ai/cordis-plugin-loader": "workspace:~"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/settings": "workspace:*",
+    "@agentrans/cordis-plugin-loader": "workspace:~"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-app-boot": "workspace:*",
-    "@deepseek-ai/dsh-config-editor": "workspace:*",
-    "@deepseek-ai/dsh-settings": "workspace:*",
-    "@deepseek-ai/cordis-plugin-loader": "workspace:~"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/app-boot": "workspace:*",
+    "@agentrans/config-editor": "workspace:*",
+    "@agentrans/settings": "workspace:*",
+    "@agentrans/cordis-plugin-loader": "workspace:~"
   },
   "peerDependenciesMeta": {
-    "@deepseek-ai/cordis-plugin-loader": {
+    "@agentrans/cordis-plugin-loader": {
       "optional": true
     }
   }

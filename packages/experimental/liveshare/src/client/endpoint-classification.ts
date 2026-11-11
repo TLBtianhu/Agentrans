@@ -4,15 +4,15 @@
  * This module is compiled by the package's Client face, which pulls the production Remote maps in
  * through the Client assembly. `Extract<keyof TypertRemoteMap, string>` therefore names every endpoint
  * a shipped Client build can call; an endpoint added without a table row fails this declaration.
- * @module @deepseek-ai/dsh-experimental-liveshare/src/client/endpoint-classification
+ * @module @agentrans/experimental-liveshare/src/client/endpoint-classification
  */
-import type {} from '@deepseek-ai/dsh-api-remotes/client'
-import type {} from '@deepseek-ai/dsh-api-remote-access/remote'
-import type { RemoteEndpoint } from '@deepseek-ai/dsh-api-remote-access/client'
-import type {} from '@deepseek-ai/dsh-cua/remote'
-import type {} from '@deepseek-ai/dsh-experimental-api-speech-to-text/remote'
-import type {} from '@deepseek-ai/dsh-experimental-claude-code-mods/remote'
-import type {} from '@deepseek-ai/dsh-experimental-client-ui-cot-translation/remote'
+import type {} from '@agentrans/api-remotes/client'
+import type {} from '@agentrans/api-remote-access/remote'
+import type { RemoteEndpoint } from '@agentrans/api-remote-access/client'
+import type {} from '@agentrans/cua/remote'
+import type {} from '@agentrans/experimental-api-speech-to-text/remote'
+import type {} from '@agentrans/experimental-claude-code-mods/remote'
+import type {} from '@agentrans/experimental-client-ui-cot-translation/remote'
 import { VIEWER_ENDPOINT_CLASSES, type ViewerEndpointClass } from '../endpoint-classification.ts'
 
 /**

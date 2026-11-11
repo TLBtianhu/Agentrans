@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import type { FontFamilies, ThemePreference, ThemeSnapshot } from '@deepseek-ai/dsh-client-ui-theme/client'
-import { fontFamilyVariable } from '@deepseek-ai/dsh-client-ui-theme/src/theme-settings.ts'
-import { DARK_ATTRIBUTE, THEME_SOURCE_ATTRIBUTE, ThemePresenter } from '@deepseek-ai/dsh-client-ui-layout/src/client/theme-presenter.ts'
+import type { FontFamilies, ThemePreference, ThemeSnapshot } from '@agentrans/client-ui-theme/client'
+import { fontFamilyVariable } from '@agentrans/client-ui-theme/src/theme-settings.ts'
+import { DARK_ATTRIBUTE, THEME_SOURCE_ATTRIBUTE, ThemePresenter } from '@agentrans/client-ui-layout/src/client/theme-presenter.ts'
 
 const LIGHT_THEME_COLOR = 'rgb(255, 255, 255)'
 const DARK_THEME_COLOR = 'rgb(21, 21, 23)'

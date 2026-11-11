@@ -6,7 +6,7 @@
  * them a hint, and the ones with something to do offer the action itself: re-read, sign in again, ask
  * the owner, or go back to the share directory. No state ends at an error code the reader cannot use.
  *
- * @module @deepseek-ai/dsh-experimental-liveshare/src/client/viewer-status-banner
+ * @module @agentrans/experimental-liveshare/src/client/viewer-status-banner
  */
 
 import { type LiveshareKey, type ViewerTranslate } from './locales.ts'

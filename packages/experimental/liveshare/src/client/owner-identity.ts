@@ -6,7 +6,7 @@
  * only states what the host reported, and states nothing it did not report — an unreadable or
  * absent answer is `unknown`, never a guess from a display name.
  *
- * @module @deepseek-ai/dsh-experimental-liveshare/src/client/owner-identity
+ * @module @agentrans/experimental-liveshare/src/client/owner-identity
  */
 
 /**

@@ -5,27 +5,27 @@
 /:
   en: 8805672f8507e16d
   zh: 07696ec60f8d86e8
-/deepseek-ai-dsh-deepseek-llm-api-extensions:
-  en: f49157e80e6436e6
-  zh: 7dd755bd83603393
-/deepseek-ai-dsh-deepseek-llm-api-extensions/summary:
+/agentrans-deepseek-llm-api-extensions:
+  en: 5a7f61423bb556d8
+  zh: 32a70022944b254f
+/agentrans-deepseek-llm-api-extensions/summary:
   en: 2ee01d6439e60359
   zh: a1fb7c4c0d686895
-/deepseek-ai-dsh-deepseek-llm-api-extensions/table-of-contents:
+/agentrans-deepseek-llm-api-extensions/table-of-contents:
   en: 6b7f62c318c9aad6
   zh: 5e22d58884e60c87
-/deepseek-ai-dsh-deepseek-llm-api-extensions/service:
-  en: 67cf2183647de143
-  zh: 924aad182c107ed8
-/deepseek-ai-dsh-deepseek-llm-api-extensions/model-experience:
-  en: 88a785350ced5c14
-  zh: 755349be023a3f5c
-/deepseek-ai-dsh-deepseek-llm-api-extensions/model-experience/kv-cache-effect:
+/agentrans-deepseek-llm-api-extensions/service:
+  en: 5f1b6eed47c49b35
+  zh: 31d90439a1bef434
+/agentrans-deepseek-llm-api-extensions/model-experience:
+  en: 0dd6edfa21c697c1
+  zh: 815fac4c1974b4f5
+/agentrans-deepseek-llm-api-extensions/model-experience/kv-cache-effect:
   en: 83eb7f1e6ce80b45
   zh: 516811171411ffca
-/deepseek-ai-dsh-deepseek-llm-api-extensions/known-limitations-and-deferred-work:
+/agentrans-deepseek-llm-api-extensions/known-limitations-and-deferred-work:
   en: 440169524f1a1323
   zh: 935424afe40201b7
-/deepseek-ai-dsh-deepseek-llm-api-extensions/known-limitations-and-deferred-work/dev-note:
+/agentrans-deepseek-llm-api-extensions/known-limitations-and-deferred-work/dev-note:
   en: e67f633dc6fe7773
   zh: e88aeb617ffb74ea

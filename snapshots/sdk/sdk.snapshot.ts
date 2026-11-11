@@ -1,7 +1,7 @@
 /**
  * Keyless snapshot coverage for the TypeScript SDK path: each scenario spawns
  * the real `dsh --profile sdk` or `sdk-minimal` runtime through
- * `@deepseek-ai/dsh-sdk-client`, drives recorded turns and standalone commands over stdio JSON-RPC,
+ * `@agentrans/sdk-client`, drives recorded turns and standalone commands over stdio JSON-RPC,
  * and pins the SDK `RunResult`, the complete notification stream, and the
  * persisted session logs. Replay serves recorded model
  * responses via `llm-replay` (`cordis.snapshot.yml`); `DSH_SNAPSHOT=record`
@@ -18,8 +18,8 @@ import { fileURLToPath } from 'node:url'
 import { describe, expect, it, onTestFinished } from 'vitest'
 import { execa } from 'execa'
 import * as yaml from 'js-yaml'
-import { entryListSchema } from '@deepseek-ai/cordis-plugin-include'
-import { resolveExampleLaunch } from '@deepseek-ai/dsh-loader-smoke'
+import { entryListSchema } from '@agentrans/cordis-plugin-include'
+import { resolveExampleLaunch } from '@agentrans/loader-smoke'
 import {
   assertPersistedSessionVersion,
   assertSessionFixtureVersion,
@@ -62,7 +62,7 @@ import {
   type NormalizeContext,
   type SnapshotManifest,
   type WorkspaceSnapshotEntry,
-} from '@deepseek-ai/dsh-session-snapshot'
+} from '@agentrans/session-snapshot'
 import {
   DeepSeekHarness,
   type HarnessNotification,
@@ -71,10 +71,10 @@ import {
   type SdkPromptContentBlock,
   type SdkUserQuestionRequest,
   type SdkUserQuestionResult,
-} from '@deepseek-ai/dsh-sdk-client'
-import { SESSION_FORMAT_VERSION } from '@deepseek-ai/dsh-session'
-import { deriveReplayScript, parseSessionLog } from '@deepseek-ai/dsh-llm-replay'
-import { resolvePwshPath } from '@deepseek-ai/dsh-pwsh-local'
+} from '@agentrans/sdk-client'
+import { SESSION_FORMAT_VERSION } from '@agentrans/session'
+import { deriveReplayScript, parseSessionLog } from '@agentrans/llm-replay'
+import { resolvePwshPath } from '@agentrans/pwsh-local'
 
 const corpusRoot = fileURLToPath(new URL('../', import.meta.url))
 const replayNetworkGuard = new URL('../../packages/test-support/session-snapshot/tests/fixtures/replay-network-guard.mjs', import.meta.url).href
@@ -776,7 +776,7 @@ function replayRouteFacts(rows: readonly JsonObject[], mainRoute: ReplayRoute): 
     provider: titleConfig.provider, model: titleConfig.model,
   }].map((route) => {
     const owners = rows.filter((row) => {
-      if (row.name !== '@deepseek-ai/dsh-llm-replay' || row.disabled !== undefined && row.disabled !== false) return false
+      if (row.name !== '@agentrans/llm-replay' || row.disabled !== undefined && row.disabled !== false) return false
       const config = row.config as JsonObject | undefined
       return Array.isArray(config?.providers) && config.providers.some((provider: JsonObject) => provider.id === route.provider
         && Array.isArray(provider.models) && provider.models.some((model: JsonObject) => model.id === route.model))
@@ -1321,10 +1321,10 @@ describe('TypeScript SDK snapshots over the jsonrpc runtime', () => {
     const rows: JsonObject[] = [
       { id: 'llm-deepseek', disabled: true },
       { id: 'session-title-provider', config: { provider: 'title-replay', model: 'fixture-title' } },
-      { id: 'main-replay', name: '@deepseek-ai/dsh-llm-replay', config: {
+      { id: 'main-replay', name: '@agentrans/llm-replay', config: {
         providers: [{ id: main.provider, models: [{ id: main.model }] }],
       } },
-      { id: 'title-replay', name: '@deepseek-ai/dsh-llm-replay', config: {
+      { id: 'title-replay', name: '@agentrans/llm-replay', config: {
         providers: [{ id: 'title-replay', models: [{ id: 'fixture-title' }] }],
       } },
     ]

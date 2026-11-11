@@ -2,7 +2,7 @@ import fs from 'node:fs'
 import fsPromises from 'node:fs/promises'
 import path from 'node:path'
 import url from 'node:url'
-import type { Dict } from '@deepseek-ai/cosmokit'
+import type { Dict } from '@agentrans/cosmokit'
 
 /** Resolve a specifier to its URL in one configuration project. */
 export type Resolve = (specifier: string) => string

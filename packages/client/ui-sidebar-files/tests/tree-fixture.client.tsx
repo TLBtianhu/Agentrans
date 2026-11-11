@@ -1,8 +1,8 @@
 /** Direct component fixture for the tree's framework seats; integration specs use the real renderer. */
 import { useMemo } from 'react'
 import type { ReactNode } from 'react'
-import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
-import type { FactoryComponentPropsOf, FactoryLocalComponent } from '@deepseek-ai/dsh-client-ui-slots'
+import { makeTranslate } from '@agentrans/client-test-runtime'
+import type { FactoryComponentPropsOf, FactoryLocalComponent } from '@agentrans/client-ui-slots'
 import { FileTree } from '../src/client/FileTree.tsx'
 import type { FileTreeInput, TreeEntry } from '../src/client/FileTree.tsx'
 import { en } from '../src/client/locales.ts'

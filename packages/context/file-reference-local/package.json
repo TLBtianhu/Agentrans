@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-file-reference-local",
+  "name": "@agentrans/file-reference-local",
   "description": "Local-filesystem ctx.fileReferences provider with bounded fuzzy indexes",
   "version": "0.1.0",
   "publishConfig": {
@@ -34,26 +34,26 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@deepseek-ai/schemastery": "workspace:~"
+    "@agentrans/schemastery": "workspace:~"
   },
   "peerDependencies": {
-    "@deepseek-ai/dsh-agent": "workspace:*",
-    "@deepseek-ai/dsh-file-reference": "workspace:*",
-    "@deepseek-ai/dsh-system-prompt": "workspace:*",
-    "@deepseek-ai/dsh-tools": "workspace:*",
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-working-directory": "workspace:*"
+    "@agentrans/agent": "workspace:*",
+    "@agentrans/file-reference": "workspace:*",
+    "@agentrans/system-prompt": "workspace:*",
+    "@agentrans/tools": "workspace:*",
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/working-directory": "workspace:*"
   },
   "devDependencies": {
-    "@deepseek-ai/dsh-agent": "workspace:*",
-    "@deepseek-ai/dsh-file-reference": "workspace:*",
-    "@deepseek-ai/dsh-system-prompt": "workspace:*",
-    "@deepseek-ai/dsh-tool-executor-native": "workspace:*",
-    "@deepseek-ai/dsh-tool-testkit": "workspace:*",
-    "@deepseek-ai/dsh-tools": "workspace:*",
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-working-directory": "workspace:*",
-    "@deepseek-ai/dsh-fs-local": "workspace:*",
-    "@deepseek-ai/dsh-session-projection": "workspace:*"
+    "@agentrans/agent": "workspace:*",
+    "@agentrans/file-reference": "workspace:*",
+    "@agentrans/system-prompt": "workspace:*",
+    "@agentrans/tool-executor-native": "workspace:*",
+    "@agentrans/tool-testkit": "workspace:*",
+    "@agentrans/tools": "workspace:*",
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/working-directory": "workspace:*",
+    "@agentrans/fs-local": "workspace:*",
+    "@agentrans/session-projection": "workspace:*"
   }
 }

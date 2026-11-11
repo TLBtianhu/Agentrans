@@ -18,7 +18,7 @@ With `compaction-basic` automatic mode enabled, a provider/model switch now chec
 2. For small windows, configure `headroomTokens` in `cordis.yml` under the exact provider/model policy. The default is 65,536 tokens and must fit alongside the routed request's output reservation. For a 65,536-token window with a 4,096-token request output cap, this policy leaves a positive pressure budget:
 
    ```yaml
-   - name: '@deepseek-ai/dsh-compaction-basic'
+   - name: '@agentrans/compaction-basic'
      config:
        modelPolicies:
          - provider: local

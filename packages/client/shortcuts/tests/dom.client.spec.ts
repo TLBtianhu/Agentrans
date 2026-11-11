@@ -4,7 +4,7 @@ import { fireEvent } from '@testing-library/dom'
 import { installKeyboard, detectEnvironment } from '../src/client/dom.ts'
 import { ShortcutRegistry } from '../src/client/registry.ts'
 import type { ShortcutFixedInput } from '../src/client/types.ts'
-import type { ShortcutCommandId } from '@deepseek-ai/dsh-shortcut-protocol'
+import type { ShortcutCommandId } from '@agentrans/shortcut-protocol'
 
 let dispose: (() => void) | undefined
 afterEach(() => { dispose?.(); document.body.replaceChildren(); vi.restoreAllMocks() })

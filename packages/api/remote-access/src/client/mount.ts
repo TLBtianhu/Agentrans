@@ -3,20 +3,20 @@
  * the `remoteAccess` Client service, and publishes the global-resource `useRemoteAccess` Hook.
  * The entry module supplies the generated `remoteAccess` contribution, so
  * specs mount a fake one.
- * @module @deepseek-ai/dsh-api-remote-access/src/client/mount
+ * @module @agentrans/api-remote-access/src/client/mount
  */
 
-import { Service, type Context } from '@deepseek-ai/cordis'
+import { Service, type Context } from '@agentrans/cordis'
 import {
   RemoteSnapshotStream,
   RemoteStreamCarrierError,
   type ClientRemote,
-} from '@deepseek-ai/dsh-api-gateway/client'
-import type {} from '@deepseek-ai/dsh-api-remote-access/remote'
-import type { HostObservable, RootStandardSourceContribution } from '@deepseek-ai/dsh-client-ui-slots'
+} from '@agentrans/api-gateway/client'
+import type {} from '@agentrans/api-remote-access/remote'
+import type { HostObservable, RootStandardSourceContribution } from '@agentrans/client-ui-slots'
 // Type-only: the SlotRegistry (`ctx.slots`) merge.
-import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
-import type { TypertRemoteContribution, TypertRemoteMap, TypertResourceKind } from '@deepseek-ai/dsh-typert-protocol'
+import type {} from '@agentrans/client-ui-renderer/client'
+import type { TypertRemoteContribution, TypertRemoteMap, TypertResourceKind } from '@agentrans/typert-protocol'
 import type { RemoteAccessFrame } from '../types.ts'
 import { ClientAccessState, type Baseline } from './state.ts'
 import { whenAllowed, type AccessEffect } from './when-allowed.ts'
@@ -66,14 +66,14 @@ export interface ClientRemoteAccess {
   whenResourceAccess(kind: TypertResourceKind, id: string, action: RemoteEndpoint, callback: () => AccessEffect): () => void
 }
 
-declare module '@deepseek-ai/cordis' {
+declare module '@agentrans/cordis' {
   interface Context {
     /** Client access answers for the calling Peer. */
     remoteAccess: ClientRemoteAccess
   }
 }
 
-declare module '@deepseek-ai/dsh-client-ui-slots' {
+declare module '@agentrans/client-ui-slots' {
   interface GlobalStandardProps {
     /** Whether the current Peer may call `action` on the global resource. */
     useRemoteAccess: (action: RemoteEndpoint) => boolean

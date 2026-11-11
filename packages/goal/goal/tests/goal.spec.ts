@@ -1,23 +1,23 @@
-import { Service } from '@deepseek-ai/cordis'
+import { Service } from '@agentrans/cordis'
 import { describe, expect, it, vi } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
-import AgentRegistry, { agentEvents } from '@deepseek-ai/dsh-agent'
-import type { Agent } from '@deepseek-ai/dsh-agent'
-import { createUserMessage, HarnessError } from '@deepseek-ai/dsh-llm'
-import type { ContextFormed } from '@deepseek-ai/dsh-llm'
-import SessionStore, { Session, SessionId, type UserMessage } from '@deepseek-ai/dsh-session'
-import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
+import { Context } from '@agentrans/cordis'
+import AgentRegistry, { agentEvents } from '@agentrans/agent'
+import type { Agent } from '@agentrans/agent'
+import { createUserMessage, HarnessError } from '@agentrans/llm'
+import type { ContextFormed } from '@agentrans/llm'
+import SessionStore, { Session, SessionId, type UserMessage } from '@agentrans/session'
+import SessionProjectionRegistry from '@agentrans/session-projection'
 import GoalService, {
   GoalError,
   GoalId,
   decodeGoalChange,
   foldGoal,
-} from '@deepseek-ai/dsh-goal'
-import type { GoalChangeMeta, GoalRef, GoalSnapshotChangeMeta } from '@deepseek-ai/dsh-goal'
-import { unsupportedModel, createInboxStub } from '@deepseek-ai/dsh-agent-loop-testkit'
-import { remoteMethods } from '@deepseek-ai/dsh-typert-protocol'
+} from '@agentrans/goal'
+import type { GoalChangeMeta, GoalRef, GoalSnapshotChangeMeta } from '@agentrans/goal'
+import { unsupportedModel, createInboxStub } from '@agentrans/agent-loop-testkit'
+import { remoteMethods } from '@agentrans/typert-protocol'
 
-declare module '@deepseek-ai/dsh-llm' {
+declare module '@agentrans/llm' {
   interface MessageSourceMap {
     'test': { kind: 'test' } & ContextFormed
     'ordinary-user-message': { kind: 'ordinary-user-message' } & ContextFormed
@@ -79,7 +79,7 @@ function stubAgentForSession(session: Session, suppliedCtx?: Context): StubAgent
 /** Build a registry-compatible agent around a fresh session. */
 function stubAgent(
   rawId: string,
-  seed?: readonly import('@deepseek-ai/dsh-session').SessionEvent[],
+  seed?: readonly import('@agentrans/session').SessionEvent[],
   ctx?: Context,
 ): StubAgent {
   const session = ctx === undefined

@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import type { AttachmentId } from '@deepseek-ai/dsh-attachment'
-import type { ContentBlock, MessageId, ToolCallId } from '@deepseek-ai/dsh-llm'
-import type { SessionEvent, SessionSeq } from '@deepseek-ai/dsh-session'
-import type {} from '@deepseek-ai/dsh-session-title'
-import { brandNumber, brandString } from '@deepseek-ai/dsh-brand'
+import type { AttachmentId } from '@agentrans/attachment'
+import type { ContentBlock, MessageId, ToolCallId } from '@agentrans/llm'
+import type { SessionEvent, SessionSeq } from '@agentrans/session'
+import type {} from '@agentrans/session-title'
+import { brandNumber, brandString } from '@agentrans/brand'
 import { formatSessionMarkdown } from '../src/markdown.ts'
 
 const messageId = (value: string): MessageId => brandString<MessageId>(value)

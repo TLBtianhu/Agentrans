@@ -93,19 +93,19 @@ describe('RepositoryCleaner', () => {
     write(join(root, 'packages/core/live/package.json'), '{}')
     write(join(root, 'packages/hooks/stale/lib/index.js'))
     const hoisted = join(root, 'node_modules/.pnpm/node_modules')
-    link(join(root, 'packages/core/live'), join(hoisted, '@deepseek-ai/dsh-live'))
-    link(join(root, 'packages/hooks/gone'), join(hoisted, '@deepseek-ai/dsh-gone'))
-    link(join(root, 'packages/hooks/stale'), join(hoisted, '@deepseek-ai/dsh-stale'))
+    link(join(root, 'packages/core/live'), join(hoisted, '@agentrans/live'))
+    link(join(root, 'packages/hooks/gone'), join(hoisted, '@agentrans/gone'))
+    link(join(root, 'packages/hooks/stale'), join(hoisted, '@agentrans/stale'))
     link(join(root, 'packages/hooks/plain'), join(hoisted, 'plain'))
     link(join(hoisted, 'loop'), join(hoisted, 'loop'))
-    link(join(root, 'packages/hooks/top'), join(root, 'node_modules/@deepseek-ai/dsh-top'))
+    link(join(root, 'packages/hooks/top'), join(root, 'node_modules/@agentrans/top'))
 
     await new RepositoryCleaner(root).clean()
 
-    expect(readdirSync(join(hoisted, '@deepseek-ai'))).toEqual(['dsh-live'])
-    expect(readdirSync(hoisted)).toEqual(['@deepseek-ai'])
+    expect(readdirSync(join(hoisted, '@agentrans'))).toEqual(['dsh-live'])
+    expect(readdirSync(hoisted)).toEqual(['@agentrans'])
     expect(readdirSync(join(root, 'node_modules/@deepseek-ai'))).toEqual([])
-    expect(existsSync(join(hoisted, '@deepseek-ai/dsh-live/package.json'))).toBe(true)
+    expect(existsSync(join(hoisted, '@agentrans/live/package.json'))).toBe(true)
   })
 
   it('does not scan node_modules outside the repository', async () => {

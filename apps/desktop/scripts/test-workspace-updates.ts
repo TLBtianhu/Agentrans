@@ -5,7 +5,7 @@ import { cp, mkdir, mkdtemp, readFile, realpath, symlink, writeFile } from 'node
 import { createRequire } from 'node:module'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { prepareProductState, productLaunchEnvironment, resolveProductLaunchContext } from '@deepseek-ai/dsh-product-layout/launch-context'
+import { prepareProductState, productLaunchEnvironment, resolveProductLaunchContext } from '@agentrans/product-layout/launch-context'
 import { createDevelopmentProjectMetadata, createPluginProfile } from '../src/project-manager.ts'
 import { removeOwnedDirectory } from '../src/owned-directory.ts'
 import { DESKTOP_HOST_PROTOCOL_VERSION } from '../src/host-protocol.ts'
@@ -39,7 +39,7 @@ try {
   createPluginProfile(profile)
   await writeFile(join(project, 'desktop-runtime.json'), JSON.stringify({
     schemaVersion: 1, release, ...desktopTargetPlatform(target), files: [],
-    sharedPackages: ['@deepseek-ai/dsh', '@deepseek-ai/dsh-desktop-host']
+    sharedPackages: ['@agentrans/dsh', '@agentrans/desktop-host']
       .map(name => ({ name, version: manifest.version, path: `node_modules/${name}` })),
   }))
   await cp(join(repo, 'apps/desktop/lib/types'), join(application, 'lib'), { recursive: true })

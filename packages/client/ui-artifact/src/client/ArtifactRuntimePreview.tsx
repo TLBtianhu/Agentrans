@@ -1,7 +1,7 @@
 /** One physical preview lease; source views and remounts never reuse an old document's readiness. */
 import { Component, useCallback, useMemo, useRef, useState, type ComponentProps } from 'react'
-import { randomUUID } from '@deepseek-ai/dsh-util-crypto'
-import type { ArtifactRuntimeIdentity, ArtifactRuntimeId, RuntimeReport } from '@deepseek-ai/dsh-artifact-runtime/types'
+import { randomUUID } from '@agentrans/util-crypto'
+import type { ArtifactRuntimeIdentity, ArtifactRuntimeId, RuntimeReport } from '@agentrans/artifact-runtime/types'
 import { createArtifactDocument } from './document.ts'
 import { parseArtifactRuntimeMessage, type ArtifactRuntimeCommandMessage } from './runtime-messages.ts'
 import type { ArtifactSnapshot } from './protocol.ts'
@@ -63,7 +63,7 @@ export function ArtifactRuntimePreview({ snapshot, native, runtime, title, faile
     if (key !== undefined) actions?.report(key, identity, value)
   }, [key, actions, identity])
   const nativeState = native?.onStateChange
-  const reportState = useCallback((state: import('@deepseek-ai/dsh-util-values').JsonValue) => {
+  const reportState = useCallback((state: import('@agentrans/util-values').JsonValue) => {
     if (key !== undefined) actions?.state(key, identity, state)
     nativeState?.(state)
   }, [key, actions, identity, nativeState])

@@ -5,24 +5,24 @@
 /:
   en: a16f3a25592b9a2d
   zh: 6be5e99282ce23d9
-/deepseek-ai-dsh-client-ui-approval:
-  en: b2f2246f0d0ce69c
-  zh: e4919920818c09b5
-/deepseek-ai-dsh-client-ui-approval/summary:
+/agentrans-client-ui-approval:
+  en: 0fcecfe7b60d5725
+  zh: decd30fb79829d9d
+/agentrans-client-ui-approval/summary:
   en: 8d6c7c6e63f849f6
   zh: d89fa273e30b99d3
-/deepseek-ai-dsh-client-ui-approval/table-of-contents:
+/agentrans-client-ui-approval/table-of-contents:
   en: 7b5184a35d7607f9
   zh: 55ebfea4d5ad26ed
-/deepseek-ai-dsh-client-ui-approval/model-experience:
+/agentrans-client-ui-approval/model-experience:
   en: 8161dce49e9f899c
   zh: a17401e1e78ba6be
-/deepseek-ai-dsh-client-ui-approval/model-experience/kv-cache-effect:
+/agentrans-client-ui-approval/model-experience/kv-cache-effect:
   en: adf7112e0691b89e
   zh: 14eeddcff985119f
-/deepseek-ai-dsh-client-ui-approval/known-limitations-and-deferred-work:
+/agentrans-client-ui-approval/known-limitations-and-deferred-work:
   en: 23588a4cd32f363c
   zh: 19402f024f0f926a
-/deepseek-ai-dsh-client-ui-approval/known-limitations-and-deferred-work/dev-note:
+/agentrans-client-ui-approval/known-limitations-and-deferred-work/dev-note:
   en: e67f633dc6fe7773
   zh: e88aeb617ffb74ea

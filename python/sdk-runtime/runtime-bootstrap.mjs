@@ -29,7 +29,7 @@ async function downloadResource(kind) {
     const staging = await mkdtemp(join(cache, `.${kind}-`))
     let disposeProxy
     try {
-      const { installProxyFromEnvironment } = await import('@deepseek-ai/dsh-http-proxy')
+      const { installProxyFromEnvironment } = await import('@agentrans/http-proxy')
       disposeProxy = await installProxyFromEnvironment({ get(name) {
         const value = process.env[name]
         return value === undefined ? undefined : { value }
@@ -68,7 +68,7 @@ if (office !== undefined) {
     },
   })
   process.env.DSH_BUNDLED_OFFICE_NODE = join(office, 'node', 'bin', process.platform === 'win32' ? 'node.exe' : 'node')
-  process.env.DSH_BUNDLED_OFFICE_CLI = join(office, 'node_modules', '@deepseek-ai', 'libreoffice-kit', 'lib', 'cli.js')
+  process.env.DSH_BUNDLED_OFFICE_CLI = join(office, 'node_modules', '@agentrans', 'libreoffice-kit', 'lib', 'cli.js')
 } else if (isSea()) {
   process.env.DSH_BUNDLED_OFFICE_CLI = ''
 }
@@ -77,7 +77,7 @@ if (downloads !== undefined) process.env.DSH_BUNDLED_OFFICE_SKILLS = join(resour
 const selectorName = 'DSH_SUBPROCESS_RUNNER'
 const selection = process.env[selectorName]
 const aclRunner = process.platform === 'win32'
-  ? fileURLToPath(import.meta.resolve('@deepseek-ai/dsh-sandbox-windows-acl/runner'))
+  ? fileURLToPath(import.meta.resolve('@agentrans/sandbox-windows-acl/runner'))
   : undefined
 
 const resource = process.env.DSH_RUNTIME_DOWNLOAD
@@ -88,10 +88,10 @@ if (resource !== undefined) {
   console.log(JSON.stringify(path))
 } else if (aclRunner !== undefined && process.argv[2] === aclRunner) {
   process.argv.splice(1, 1)
-  await import('@deepseek-ai/dsh-sandbox-windows-acl/runner')
+  await import('@agentrans/sandbox-windows-acl/runner')
 } else if (process.env.DSH_PTC_RUNTIME_NODE === '1') {
   Reflect.deleteProperty(process.env, 'DSH_PTC_RUNTIME_NODE')
-  await import('@deepseek-ai/dsh-ptc-runtime-node/process')
+  await import('@agentrans/ptc-runtime-node/process')
 } else if (selection === undefined) {
   if (cache !== undefined && existsSync(join(cache, 'primary', 'complete'))) {
     process.env.DSH_BUNDLED_PRIMARY_RUNTIME = join(cache, 'primary', 'primary-runtime')
@@ -99,17 +99,17 @@ if (resource !== undefined) {
   let packageManager
   const primary = process.env.DSH_PRIMARY_RUNTIME ?? process.env.DSH_BUNDLED_PRIMARY_RUNTIME
   if (primary !== undefined && primary !== '') {
-    const { resolvePrimaryRuntime } = await import('@deepseek-ai/dsh-tool-workspace-dependencies')
+    const { resolvePrimaryRuntime } = await import('@agentrans/tool-workspace-dependencies')
     const { node, pnpm } = await resolvePrimaryRuntime(primary)
     if (node !== undefined && pnpm !== undefined) {
       packageManager = { command: node, args: [pnpm],
         env: { PATH: `${dirname(node)}${delimiter}${process.env.PATH ?? ''}` } }
     }
   }
-  const { runCli } = await import('@deepseek-ai/dsh/lib/bin.js')
+  const { runCli } = await import('@agentrans/dsh/lib/bin.js')
   await runCli({ packageManager })
 } else {
   Reflect.deleteProperty(process.env, selectorName)
-  const { runSelectedSubprocessRunner } = await import('@deepseek-ai/dsh-subprocess-local/runner')
+  const { runSelectedSubprocessRunner } = await import('@agentrans/subprocess-local/runner')
   await runSelectedSubprocessRunner(selection)
 }

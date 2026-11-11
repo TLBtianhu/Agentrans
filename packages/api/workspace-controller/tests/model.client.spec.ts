@@ -22,9 +22,9 @@ import type {
   WorkspaceId,
   WorkspaceView,
 } from '../src/types.ts'
-import { RemoteError, type RemoteFailure, type RemoteResult, type RemoteStreamHandle } from '@deepseek-ai/dsh-typert-protocol'
-import { streamHandle } from '@deepseek-ai/dsh-remote-mock'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
+import { RemoteError, type RemoteFailure, type RemoteResult, type RemoteStreamHandle } from '@agentrans/typert-protocol'
+import { streamHandle } from '@agentrans/remote-mock'
+import type { SessionId } from '@agentrans/session/types'
 
 const sid = (id: string): SessionId => id as SessionId
 const wid = (id: string): WorkspaceId => id as WorkspaceId

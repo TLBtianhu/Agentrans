@@ -5,11 +5,11 @@
  * scripts this face and reads the calls it recorded instead of stubbing `fetch`. A spec overrides
  * only the methods its case exercises; every other method resolves as an empty, accepted Host.
  *
- * @module @deepseek-ai/dsh-experimental-liveshare/tests/owner-shares-double
+ * @module @agentrans/experimental-liveshare/tests/owner-shares-double
  */
 
-import { RemoteError } from '@deepseek-ai/dsh-client-test-runtime'
-import type { RemoteErrorCode, RemoteErrorDetailsMap, RemoteFailure, RemoteResult } from '@deepseek-ai/dsh-typert-protocol'
+import { RemoteError } from '@agentrans/client-test-runtime'
+import type { RemoteErrorCode, RemoteErrorDetailsMap, RemoteFailure, RemoteResult } from '@agentrans/typert-protocol'
 import type { OwnerShares } from '../src/client/owner-shares.ts'
 import type { ShareAccess } from '../src/share-api-types.ts'
 

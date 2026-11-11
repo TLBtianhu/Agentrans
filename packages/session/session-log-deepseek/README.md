@@ -3,7 +3,7 @@ description: "Incremental canonical session-log upload for deployments enabling 
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-session-log-deepseek
+# @agentrans/session-log-deepseek
 
 English | [中文](README.zh.md)
 
@@ -48,8 +48,8 @@ For a request carrying a live `sessionId`, the plugin folds the greatest accepte
 Plugins can register synchronous, side-effect-free predicates with `ctx.sessionLogDeepSeek.registerExclusion()`. A predicate receives the live `sessionId` and optional request `purpose`; `true` skips this request's log field and acceptance callback. Any matching predicate excludes the upload. With no matching predicates, normal eligibility applies. A throwing predicate omits this log contribution, and the request-extension registry reports its first preparation failure; the model request continues with other prepared fields.
 
 ```ts
-import type { Context } from '@deepseek-ai/cordis'
-import type {} from '@deepseek-ai/dsh-session-log-deepseek'
+import type { Context } from '@agentrans/cordis'
+import type {} from '@agentrans/session-log-deepseek'
 
 export function apply(ctx: Context): void {
   ctx.inject(['sessionLogDeepSeek'], (child) => {

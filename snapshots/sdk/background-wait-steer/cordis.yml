@@ -3,12 +3,12 @@
 # next-step inbox, where the fixture checks the single notice the released read
 # withheld; no provider title or durable session-log mirror may add records.
 - id: skill-filesystem
-  name: '@deepseek-ai/dsh-skill-filesystem'
+  name: '@agentrans/skill-filesystem'
   config:
     includeDefaultRoots: false
 
 - id: session-persistence-jsonl
-  name: '@deepseek-ai/dsh-session-persistence-jsonl'
+  name: '@agentrans/session-persistence-jsonl'
   config:
     root: !!js dshHomePath('sessions')
     compression: none
@@ -30,7 +30,7 @@
   disabled: true
 
 - id: tool-jobs
-  name: '@deepseek-ai/dsh-tool-jobs'
+  name: '@agentrans/tool-jobs'
   config:
     completionDelivery: quiet
 

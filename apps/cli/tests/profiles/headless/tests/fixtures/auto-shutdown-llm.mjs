@@ -1,4 +1,4 @@
-import { LlmAdapter } from '@deepseek-ai/dsh-llm'
+import { LlmAdapter } from '@agentrans/llm'
 
 /** A completed turn with no tool or auxiliary model work. */
 class AutoShutdownAdapter extends LlmAdapter {
@@ -18,7 +18,7 @@ export const inject = ['llm']
 
 /**
  * Register the deterministic no-tool model.
- * @param {import('@deepseek-ai/cordis').Context} ctx - fixture context.
+ * @param {import('@agentrans/cordis').Context} ctx - fixture context.
  */
 export function apply(ctx) {
   ctx.llm.registerAdapter(['auto-shutdown'], new AutoShutdownAdapter())

@@ -2,12 +2,12 @@
  * Types for the TypeScript SDK client: launch options, notification shapes,
  * and owned activity results.
  *
- * @module @deepseek-ai/dsh-sdk-client/types
+ * @module @agentrans/sdk-client/types
  */
 
-import type { ContentBlock, ReasoningEffortId } from '@deepseek-ai/dsh-llm'
-import type { SdkPromptContentBlock, SdkUserQuestionResult, SdkUserQuestionRequest } from '@deepseek-ai/dsh-sdk-protocol'
-import type { SessionEvent } from '@deepseek-ai/dsh-session'
+import type { ContentBlock, ReasoningEffortId } from '@agentrans/llm'
+import type { SdkPromptContentBlock, SdkUserQuestionResult, SdkUserQuestionRequest } from '@agentrans/sdk-protocol'
+import type { SessionEvent } from '@agentrans/session'
 
 /** One server-to-client notification as received off the wire. */
 export interface HarnessNotification {
@@ -38,7 +38,7 @@ export interface HarnessClientOptions {
    * The complete child environment, read when {@link HarnessClient.start}
    * spawns. `undefined` reads the parent env at that time; passing an object
    * reads that object at spawn and replaces the parent environment entirely, so callers own
-   * credential policy (see `scrubbedParentEnv` in `@deepseek-ai/dsh-subprocess`
+   * credential policy (see `scrubbedParentEnv` in `@agentrans/subprocess`
    * for the shared scrub-then-merge base).
    */
   env?: NodeJS.ProcessEnv
@@ -87,5 +87,5 @@ export interface RunResult {
 /** Re-exported content-block alias so SDK callers need no extra import. */
 export type { ContentBlock }
 export type { SdkPromptContentBlock }
-export type { SdkEncodedImageBlock } from '@deepseek-ai/dsh-sdk-protocol'
-export type { SdkUserQuestionAnswer, SdkUserQuestionResult, SdkUserQuestionRequest } from '@deepseek-ai/dsh-sdk-protocol'
+export type { SdkEncodedImageBlock } from '@agentrans/sdk-protocol'
+export type { SdkUserQuestionAnswer, SdkUserQuestionResult, SdkUserQuestionRequest } from '@agentrans/sdk-protocol'

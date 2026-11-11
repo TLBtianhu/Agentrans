@@ -2,7 +2,7 @@
 import { afterEach, expect, it, vi } from 'vitest'
 import {
   PACKAGE_ASSET_EXPORT, PACKAGE_ASSET_EXPORT_TARGET, PACKAGE_ASSET_MEDIA_TYPES, packageAssetReference,
-} from '@deepseek-ai/dsh-client-modules/src/assets.ts'
+} from '@agentrans/client-modules/src/assets.ts'
 import { packPackageAssets, packageAssetResolver } from '../src/package-assets.ts'
 import { MemoryVfs } from '../src/storage/memory.ts'
 import { parseTar } from '../src/storage/tar.ts'

@@ -3,7 +3,7 @@ description: "将用户明确选择的粒子实验或 HTML 程序自报状态与
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-artifact-followup
+# @agentrans/artifact-followup
 
 [English](README.md) | 中文
 
@@ -28,7 +28,7 @@ kind: "package-reference"
 将本插件与 Artifact、Session Controller 一起挂载。它注册 `artifact` 追问上下文提供者，不暴露独立发送操作。普通 `session/prompt` 授权和附件准入规则继续生效。不需要文件系统权限、额外消息来源或新 Session 事件。
 
 ```yaml
-- name: '@deepseek-ai/dsh-artifact-followup'
+- name: '@agentrans/artifact-followup'
 ```
 
 | Config | 默认值 | 含义 |

@@ -17,7 +17,7 @@ Native particle comparisons use two explicitly selected saved observations inste
 
 ## Migration
 
-1. In a custom `cordis.yml`, mount `@deepseek-ai/dsh-session-projection` alongside `@deepseek-ai/dsh-artifact`. Programmatic consumers await the Artifact plugin before calling its synchronous methods.
+1. In a custom `cordis.yml`, mount `@agentrans/session-projection` alongside `@agentrans/artifact`. Programmatic consumers await the Artifact plugin before calling its synchronous methods.
 2. Keep readers that understand `artifact/observations` when opening Sessions with saved experiments. Do not delete events or rewrite logs to make an older build accept them.
 3. Save a named particle observation, reload the Session, and restore it. Check its displayed source revision and exported values. Only **Send to Agent** admits the saved observation as input; retries do not admit it twice in the same Session.
 4. For a native particle comparison, save and select one observation on each side, then send the comparison explicitly. Check both source revisions and checkpoints. After reload, saved observations remain available, but reselect the pair; selection itself is local. Sending the same ordered pair again does not duplicate input in that Session.

@@ -1,4 +1,4 @@
-import type { Context } from '@deepseek-ai/cordis'
+import type { Context } from '@agentrans/cordis'
 import base from '../styles/base.css?inline'
 import cornerShape from '../styles/corner-shape.css?inline'
 import designPlatform from '../styles/design-platform.css?inline'
@@ -9,7 +9,7 @@ import gradientShadowText from '../styles/gradient-shadow-text.css?inline'
 import scenePalette from '../styles/scene-palette.css?inline'
 import shiki from '../styles/shiki.css?inline'
 
-const PLUGIN_ID = '@deepseek-ai/dsh-client-ui-theme'
+const PLUGIN_ID = '@agentrans/client-ui-theme'
 const HAIRLINE_WIDTH = '--dsh-hairline-width'
 
 const STYLES = [

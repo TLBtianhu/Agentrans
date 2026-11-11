@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 /** Selecting the one Session a served viewer page presents, once the page's list carries it. */
 
-import { Context } from '@deepseek-ai/cordis'
+import { Context } from '@agentrans/cordis'
 import { describe, expect, it, vi } from 'vitest'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
+import type { SessionId } from '@agentrans/session/types'
 import { openSharedSession } from '../src/client/viewer-session.ts'
 
 const SHARED = 'fx-shared' as SessionId

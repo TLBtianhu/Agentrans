@@ -1,5 +1,5 @@
 /** Plugin-owned text gesture handlers, scoped by the dispatching conversation. */
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
+import type { SessionId } from '@agentrans/session/types'
 import type { TextInteractionDefinition, TextInteractionGesture } from '../contract/text-interaction.ts'
 import { ConversationDefinitionRegistry } from './definition-registry.ts'
 

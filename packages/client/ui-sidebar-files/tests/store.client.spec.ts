@@ -1,10 +1,10 @@
 /** Pane-local directory caches, expansion preferences, refresh settings, and navigator choices. */
 import { describe, expect, it } from 'vitest'
-import { RemoteError } from '@deepseek-ai/dsh-client-test-runtime'
+import { RemoteError } from '@agentrans/client-test-runtime'
 import { createFilesStore } from '../src/client/store.ts'
 import { DEFAULT_NAVIGATOR_WIDTH } from '../src/client/store.ts'
 import type { DirLevel } from '../src/client/store.ts'
-import type { PaneId } from '@deepseek-ai/dsh-client-ui-dockkit'
+import type { PaneId } from '@agentrans/client-ui-dockkit'
 
 const ROOT = '/work/app'
 const PANE = 'pane-1' as PaneId

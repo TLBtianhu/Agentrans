@@ -6,10 +6,10 @@
  * list and resets whenever that list changes.
  */
 import clsx from 'clsx'
-import { Input } from '@deepseek-ai/dsh-client-ui-primitives'
-import type { PropsLocale, PropsRuntime, PropsStore } from '@deepseek-ai/dsh-client-ui-slots'
+import { Input } from '@agentrans/client-ui-primitives'
+import type { PropsLocale, PropsRuntime, PropsStore } from '@agentrans/client-ui-slots'
 import { normalizeFontFamily, type FontRole } from '../theme-settings.ts'
-import type {} from '@deepseek-ai/dsh-client-ui-settings/client'
+import type {} from '@agentrans/client-ui-settings/client'
 import type { createFontRowStore } from './settings-store.ts'
 import rowCss from './FontSizeRow.module.css'
 import css from './FontFamilyRow.module.css'

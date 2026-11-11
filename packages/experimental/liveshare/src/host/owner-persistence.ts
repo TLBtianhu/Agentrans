@@ -3,13 +3,13 @@
  *
  * One JSON document holds everything this host must survive a restart with, and every write is
  * serialized per file so the newest content is the one that lands last.
- * @module @deepseek-ai/dsh-experimental-liveshare/src/host/owner-persistence
+ * @module @agentrans/experimental-liveshare/src/host/owner-persistence
  */
 
 import { randomBytes } from 'node:crypto'
 import { base64Url } from './base64-url.ts'
 import { existsSync, readFileSync } from 'node:fs'
-import { writeFileAtomic } from '@deepseek-ai/dsh-atomic-write'
+import { writeFileAtomic } from '@agentrans/atomic-write'
 import type { ShareAccessSelection } from '../share-api-types.ts'
 import type { ViewerSessionMode } from './fork-policy.ts'
 import { normalizeRelayUrl } from './relay-url.ts'

@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
-import { contextMenuHook } from '@deepseek-ai/dsh-client-test-runtime'
+import { contextMenuHook } from '@agentrans/client-test-runtime'
 /** Cleanup errors remain reachable after the terminal tab has disappeared. */
 import { afterEach, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, within } from '@testing-library/react'
-import { allowAllAccess, makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
-import type { TerminalCloseFailure } from '@deepseek-ai/dsh-api-terminal-controller/client'
-import type { WebTerminalId } from '@deepseek-ai/dsh-api-terminal-controller/types'
+import { allowAllAccess, makeTranslate } from '@agentrans/client-test-runtime'
+import type { TerminalCloseFailure } from '@agentrans/api-terminal-controller/client'
+import type { WebTerminalId } from '@agentrans/api-terminal-controller/types'
 import { TerminalCleanup } from '../src/client/TerminalCleanup.tsx'
 import { en } from '../src/client/locales.ts'
 

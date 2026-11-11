@@ -6,7 +6,7 @@
  * mapping rather than the policy.
  */
 
-import { Context } from '@deepseek-ai/cordis'
+import { Context } from '@agentrans/cordis'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { LiveshareShares } from '../src/host/share-remote.ts'
 

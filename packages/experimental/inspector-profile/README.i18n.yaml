@@ -5,30 +5,30 @@
 /:
   en: aa49ff99ef11a495
   zh: f84909651e2f37a7
-/deepseek-ai-dsh-experimental-inspector-profile:
-  en: a83fef9afaa2d5c3
-  zh: 95ff381e7be3afe6
-/deepseek-ai-dsh-experimental-inspector-profile/summary:
+/agentrans-experimental-inspector-profile:
+  en: c520794a0f77423f
+  zh: 0440e5fa50670db0
+/agentrans-experimental-inspector-profile/summary:
   en: 8d5fa68b8b450f94
   zh: c06b222e34ef6209
-/deepseek-ai-dsh-experimental-inspector-profile/table-of-contents:
+/agentrans-experimental-inspector-profile/table-of-contents:
   en: 76368b6b1da79c80
   zh: 52384aee991ac542
-/deepseek-ai-dsh-experimental-inspector-profile/use-this-package:
-  en: 6b26d2edcafa205a
-  zh: 17de10f3009e35c7
-/deepseek-ai-dsh-experimental-inspector-profile/understand-the-implementation:
+/agentrans-experimental-inspector-profile/use-this-package:
+  en: a82fcbc286e3f77a
+  zh: f8b2310f9b5821c7
+/agentrans-experimental-inspector-profile/understand-the-implementation:
   en: 9195e72189dd4461
   zh: c2d1209c14a42088
-/deepseek-ai-dsh-experimental-inspector-profile/model-experience:
+/agentrans-experimental-inspector-profile/model-experience:
   en: 315bc90149039d2d
   zh: 047edcb035f61b74
-/deepseek-ai-dsh-experimental-inspector-profile/model-experience/kv-cache-effect:
+/agentrans-experimental-inspector-profile/model-experience/kv-cache-effect:
   en: 5204b2605806c13d
   zh: b6a76f5152f7f503
-/deepseek-ai-dsh-experimental-inspector-profile/known-limitations-and-deferred-work:
+/agentrans-experimental-inspector-profile/known-limitations-and-deferred-work:
   en: 309c542ad0a9de41
   zh: d2a3ac173d11afa6
-/deepseek-ai-dsh-experimental-inspector-profile/known-limitations-and-deferred-work/dev-note:
+/agentrans-experimental-inspector-profile/known-limitations-and-deferred-work/dev-note:
   en: e67f633dc6fe7773
   zh: 8ec3e73528ddb1a6

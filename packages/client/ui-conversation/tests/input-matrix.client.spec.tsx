@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { contextMenuHook } from '@deepseek-ai/dsh-client-test-runtime'
+import { contextMenuHook } from '@agentrans/client-test-runtime'
 /**
  * Impact-matrix projection tests (row by row): what each
  * phase projects onto the InputBar — enter routing, visuals (command chip /
@@ -7,20 +7,20 @@ import { contextMenuHook } from '@deepseek-ai/dsh-client-test-runtime'
  * React over jsdom per the client testing discipline; the machine is real.
  */
 import './control-row-dom.ts'
-import type { GlobalStandardProps } from '@deepseek-ai/dsh-client-ui-slots'
+import type { GlobalStandardProps } from '@agentrans/client-ui-slots'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { act, cleanup, fireEvent, render } from '@testing-library/react'
-import type { Context } from '@deepseek-ai/cordis'
-import type { SessionSnapshot } from '@deepseek-ai/dsh-api-session-controller/client'
-import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
+import type { Context } from '@agentrans/cordis'
+import type { SessionSnapshot } from '@agentrans/api-session-controller/client'
+import { createSnapshotStore } from '@agentrans/client-store'
 import {
   allowAllAccess, bindSnapshotSelector, conversationSnapshot, sessionSnapshot,
-} from '@deepseek-ai/dsh-client-test-runtime'
-import type { SessionStatusSnapshot } from '@deepseek-ai/dsh-client-ui-session/client'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
+} from '@agentrans/client-test-runtime'
+import type { SessionStatusSnapshot } from '@agentrans/client-ui-session/client'
+import type { SessionId } from '@agentrans/session/types'
 import type { SubmitAttachment, SubmitOutcome } from '../src/client/contract/input.ts'
-import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
-import { zh as commonZh } from '@deepseek-ai/dsh-client-locale/src/locales/zh.ts'
+import { makeTranslate } from '@agentrans/client-test-runtime'
+import { zh as commonZh } from '@agentrans/client-locale/src/locales/zh.ts'
 import type { DraftAttachmentId } from '../src/client/contract/input.ts'
 import { SessionInputShell } from '../src/client/input/facade.ts'
 import { InputBar } from '../src/client/skeleton/InputBar.tsx'

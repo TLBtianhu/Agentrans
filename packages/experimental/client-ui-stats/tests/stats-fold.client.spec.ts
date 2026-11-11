@@ -1,4 +1,4 @@
-declare module '@deepseek-ai/dsh-llm' {
+declare module '@agentrans/llm' {
   interface MessageSourceMap {
     'team-message': { readonly kind: 'team-message'; readonly senderName: string }
     'agent-message': { readonly kind: 'agent-message' }
@@ -6,8 +6,8 @@ declare module '@deepseek-ai/dsh-llm' {
 }
 
 import { beforeEach, describe, expect, it } from 'vitest'
-import type { SessionEventLike } from '@deepseek-ai/dsh-api-session-controller/client'
-import { AttachmentId } from '@deepseek-ai/dsh-attachment'
+import type { SessionEventLike } from '@agentrans/api-session-controller/client'
+import { AttachmentId } from '@agentrans/attachment'
 import {
   LlmAttemptId,
   MessageId,
@@ -20,11 +20,11 @@ import {
   type TokenUsage,
   type ToolResultMessage,
   type UserMessage,
-} from '@deepseek-ai/dsh-llm'
-import { RetryId } from '@deepseek-ai/dsh-llm-retry'
-import type {} from '@deepseek-ai/dsh-llm-retry/types'
-import { SessionSeq, type SessionEventMap, type SessionEventType } from '@deepseek-ai/dsh-session/types'
-import type {} from '@deepseek-ai/dsh-tool-executor-ptc/types'
+} from '@agentrans/llm'
+import { RetryId } from '@agentrans/llm-retry'
+import type {} from '@agentrans/llm-retry/types'
+import { SessionSeq, type SessionEventMap, type SessionEventType } from '@agentrans/session/types'
+import type {} from '@agentrans/tool-executor-ptc/types'
 import {
   CALL_LIMIT, fallbackState, foldEvent, isCodeMode, newState, promptOf, stepMetrics, toolSpanUnion, triggerSenderOf,
 } from '../src/client/stats-fold.ts'

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { executeToolFixture } from '@deepseek-ai/dsh-tool-testkit'
+import { executeToolFixture } from '@agentrans/tool-testkit'
 /**
  * Test driver: boot the tool-pwsh Loader composition, execute one real
  * foreground and one real background pwsh command through the tool registry,
@@ -8,8 +8,8 @@ import { executeToolFixture } from '@deepseek-ai/dsh-tool-testkit'
  */
 
 import { writeFile } from 'node:fs/promises'
-import { boot, resolveConfigPath } from '@deepseek-ai/dsh-app-boot'
-import { ToolCallId } from '@deepseek-ai/dsh-llm'
+import { boot, resolveConfigPath } from '@agentrans/app-boot'
+import { ToolCallId } from '@agentrans/llm'
 
 const configPath = process.argv[2]
 if (configPath === undefined) throw new Error('tool-pwsh driver requires a config path')

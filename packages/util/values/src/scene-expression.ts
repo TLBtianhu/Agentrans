@@ -2,7 +2,7 @@
  * Safe, dependency-free mathematical expression parsing and evaluation for
  * browsers and Node.js. Only the explicit grammar in this module is accepted;
  * source text is never executed.
- * @module @deepseek-ai/dsh-artifact/scene-expression
+ * @module @agentrans/artifact/scene-expression
  */
 
 const MAX_NODE_COUNT = 256

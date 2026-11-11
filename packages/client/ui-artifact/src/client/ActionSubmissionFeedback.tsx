@@ -1,6 +1,6 @@
 /** Review and recovery for one captured Artifact input, independent of the current preview. */
-import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
-import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
+import { Button } from '@agentrans/client-ui-primitives'
+import type { PropsLocale } from '@agentrans/client-ui-slots'
 import type { ArtifactActionSubmissionState } from './action-submission.ts'
 import type { ArtifactActionFailure } from './protocol.ts'
 import css from './ArtifactNodeView.module.css'

@@ -62,7 +62,7 @@ interface ToolDefinition extends ToolSchema {
   finalizeContent?(exec: Readonly<ToolExecution>, result: Readonly<ToolExecutionResult>): ContentBlock[] | undefined
   /**
    * Cooperative tool-call timeout budget in milliseconds. Omit for no deadline.
-   * Enforced by `@deepseek-ai/dsh-tool-call-timeout-policy` (a `tools/execute` wrapper); it
+   * Enforced by `@agentrans/tool-call-timeout-policy` (a `tools/execute` wrapper); it
    * is NEVER sent to the model — `schemas()` whitelists only name/description/
    * parameters. Declaring it asserts this tool forwards `exec.signal` to a
    * cooperative implementation that can reach quiescence when the signal aborts.
@@ -768,7 +768,7 @@ Source: [`packages/core/tools/src/events.ts`](../../packages/core/tools/src/even
 
 #### `tools/execute` — waterfall
 
-Around-dispatch waterfall for timeout, retry, or metrics. `next()` returns a normalized result; wrappers may change only `exec.signal`, while call identity remains immutable. The registry re-fuses the original caller signal before the body, so replacement cannot detach caller cancellation; wrappers must still restore their signal and reach quiescence. Scope-filtered dispatch (`@deepseek-ai/dsh-scope`): agent-scoped listeners receive only that agent's calls.
+Around-dispatch waterfall for timeout, retry, or metrics. `next()` returns a normalized result; wrappers may change only `exec.signal`, while call identity remains immutable. The registry re-fuses the original caller signal before the body, so replacement cannot detach caller cancellation; wrappers must still restore their signal and reach quiescence. Scope-filtered dispatch (`@agentrans/scope`): agent-scoped listeners receive only that agent's calls.
 
 ```ts cordis-catalog
 /**
@@ -777,7 +777,7 @@ Around-dispatch waterfall for timeout, retry, or metrics. `next()` returns a nor
  * identity remains immutable. The registry re-fuses the original caller
  * signal before the body, so replacement cannot detach caller cancellation;
  * wrappers must still restore their signal and reach quiescence.
- * Scope-filtered dispatch (`@deepseek-ai/dsh-scope`): agent-scoped listeners receive only that agent's calls.
+ * Scope-filtered dispatch (`@agentrans/scope`): agent-scoped listeners receive only that agent's calls.
  * @param exec - the allowed call about to dispatch (name, parsed arguments, caller agent, signal).
  * @mode waterfall
  */
@@ -792,7 +792,7 @@ Source: [`packages/core/tools/src/events.ts`](../../packages/core/tools/src/even
 
 #### `tools/post-execute` — waterfall
 
-Accept, replace, enrich, or block a normalized dispatch result. `next()` accepts it unchanged; thrown tools still reach this waterfall as errors. Async listeners must observe `exec.signal`; after they settle, caller cancellation replaces only a successful accepted outcome with the code selected by whether the tool body was invoked. Scope-filtered dispatch (`@deepseek-ai/dsh-scope`): agent-scoped listeners receive only that agent's calls.
+Accept, replace, enrich, or block a normalized dispatch result. `next()` accepts it unchanged; thrown tools still reach this waterfall as errors. Async listeners must observe `exec.signal`; after they settle, caller cancellation replaces only a successful accepted outcome with the code selected by whether the tool body was invoked. Scope-filtered dispatch (`@agentrans/scope`): agent-scoped listeners receive only that agent's calls.
 
 ```ts cordis-catalog
 /**
@@ -801,7 +801,7 @@ Accept, replace, enrich, or block a normalized dispatch result. `next()` accepts
  * listeners must observe `exec.signal`; after they settle, caller
  * cancellation replaces only a successful accepted outcome with the code
  * selected by whether the tool body was invoked.
- * Scope-filtered dispatch (`@deepseek-ai/dsh-scope`): agent-scoped listeners receive only that agent's calls.
+ * Scope-filtered dispatch (`@agentrans/scope`): agent-scoped listeners receive only that agent's calls.
  * @param exec - the call that just ran (name, parsed arguments, caller agent).
  * @param result - the dispatch outcome a listener may accept, replace, or block.
  * @mode waterfall
@@ -817,7 +817,7 @@ Source: [`packages/core/tools/src/events.ts`](../../packages/core/tools/src/even
 
 #### `tools/pre-execute` — waterfall
 
-Allow, deny, cancel, or ask before dispatch. `next()` delegates to allow; `cancel` selects the canonical pre-dispatch cancellation result, and missing approval support turns `ask` into denial. Async gates must observe `exec.signal`; the registry rechecks cancellation after they settle but never abandons their promise. Scope-filtered dispatch (`@deepseek-ai/dsh-scope`): agent-scoped listeners receive only that agent's calls.
+Allow, deny, cancel, or ask before dispatch. `next()` delegates to allow; `cancel` selects the canonical pre-dispatch cancellation result, and missing approval support turns `ask` into denial. Async gates must observe `exec.signal`; the registry rechecks cancellation after they settle but never abandons their promise. Scope-filtered dispatch (`@agentrans/scope`): agent-scoped listeners receive only that agent's calls.
 
 ```ts cordis-catalog
 /**
@@ -826,7 +826,7 @@ Allow, deny, cancel, or ask before dispatch. `next()` delegates to allow; `cance
  * approval support turns `ask` into denial. Async gates must observe
  * `exec.signal`; the registry rechecks cancellation after they settle but
  * never abandons their promise.
- * Scope-filtered dispatch (`@deepseek-ai/dsh-scope`): agent-scoped listeners receive only that agent's calls.
+ * Scope-filtered dispatch (`@agentrans/scope`): agent-scoped listeners receive only that agent's calls.
  * @param exec - the pending call (name, parsed arguments, caller agent).
  * @mode waterfall
  */
@@ -841,7 +841,7 @@ Source: [`packages/core/tools/src/events.ts`](../../packages/core/tools/src/even
 
 #### `tools/ptc-dispatch-log` — waterfall
 
-Allow a listener to replace content in the DURABLE LOG COPY of one `run_code` sub-dispatch outcome before the bridge appends its `tool/ptc-dispatch` event. `next()` keeps the content unchanged; a listener may return replacement blocks (e.g. the spill policy's preview + locator for an oversized text result). Only the logged copy is affected — the program already received the complete value, and the model sees neither. A throwing listener is contained: the bridge falls back to logging the original settled content. Scope-filtered dispatch (`@deepseek-ai/dsh-scope`): agent-scoped listeners receive only that agent's dispatches.
+Allow a listener to replace content in the DURABLE LOG COPY of one `run_code` sub-dispatch outcome before the bridge appends its `tool/ptc-dispatch` event. `next()` keeps the content unchanged; a listener may return replacement blocks (e.g. the spill policy's preview + locator for an oversized text result). Only the logged copy is affected — the program already received the complete value, and the model sees neither. A throwing listener is contained: the bridge falls back to logging the original settled content. Scope-filtered dispatch (`@agentrans/scope`): agent-scoped listeners receive only that agent's dispatches.
 
 ```ts cordis-catalog
 /**
@@ -853,7 +853,7 @@ Allow a listener to replace content in the DURABLE LOG COPY of one `run_code` su
  * logged copy is affected — the program already received the complete
  * value, and the model sees neither. A throwing listener is contained:
  * the bridge falls back to logging the original settled content.
- * Scope-filtered dispatch (`@deepseek-ai/dsh-scope`): agent-scoped listeners receive only that agent's dispatches.
+ * Scope-filtered dispatch (`@agentrans/scope`): agent-scoped listeners receive only that agent's dispatches.
  * @param dispatch - the parent execution, sub-call identity, and the settled content to log.
  * @mode waterfall
  */
@@ -868,12 +868,12 @@ Source: [`packages/core/tool-executor-ptc/src/runtime-types.ts`](../../packages/
 
 #### `tools/result` — emit
 
-Observe the frozen, lossless-JSON final outcome. Listener failures are contained. Scope-filtered dispatch (`@deepseek-ai/dsh-scope`): keyed by `exec.agent`.
+Observe the frozen, lossless-JSON final outcome. Listener failures are contained. Scope-filtered dispatch (`@agentrans/scope`): keyed by `exec.agent`.
 
 ```ts cordis-catalog
 /**
  * Observe the frozen, lossless-JSON final outcome. Listener failures are contained.
- * Scope-filtered dispatch (`@deepseek-ai/dsh-scope`): keyed by `exec.agent`.
+ * Scope-filtered dispatch (`@agentrans/scope`): keyed by `exec.agent`.
  * @param exec - the execution object that traversed the pipeline.
  * @param result - a deep-frozen snapshot of the final returned result.
  * @mode emit

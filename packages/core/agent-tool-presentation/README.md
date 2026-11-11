@@ -3,11 +3,11 @@ description: "The agent-plane presentation selector for users and maintainers ch
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-agent-tool-presentation
+# @agentrans/agent-tool-presentation
 
 English | [中文](README.zh.md)
 
-> **Deprecated:** For new configurations, mount `@deepseek-ai/dsh-tool-executor-native` or `@deepseek-ai/dsh-tool-executor-ptc` directly. Existing configurations remain supported. To migrate, replace this selector row with the corresponding executor row and remove `config.mode`; do not load both in the same scope.
+> **Deprecated:** For new configurations, mount `@agentrans/tool-executor-native` or `@agentrans/tool-executor-ptc` directly. Existing configurations remain supported. To migrate, replace this selector row with the corresponding executor row and remove `config.mode`; do not load both in the same scope.
 
 ## Summary
 
@@ -32,7 +32,7 @@ Add this row to an agent preset to fix how every agent joined to that preset see
 ### Add the row to a preset
 
 ```yaml
-- name: '@deepseek-ai/dsh-agent-tool-presentation'
+- name: '@agentrans/agent-tool-presentation'
   config:
     mode: ptc
 ```
@@ -41,7 +41,7 @@ Add this row to an agent preset to fix how every agent joined to that preset see
 |---|---|---|
 | `mode` | required | `native` — every schema; `ptc` — `run_code` plus generated SDK |
 
-The generated [configuration catalog](../../../docs/config-catalog.md#deepseek-aidsh-agent-tool-presentation) is the exhaustive source for every accepted field. `mode` is required rather than defaulted because a preset without this row inherits the deployment default.
+The generated [configuration catalog](../../../docs/config-catalog.md#agentransagent-tool-presentation) is the exhaustive source for every accepted field. `mode` is required rather than defaulted because a preset without this row inherits the deployment default.
 
 ### What PTC mode requires
 

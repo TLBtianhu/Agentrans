@@ -1,7 +1,7 @@
 /** Pure Discover query and display helpers over market search results. */
-import type { LocalizedText } from '@deepseek-ai/dsh-package-manifest'
-import type { MarketIndexSummary, MarketListingEntry, MarketListingVersion, MarketSort } from '@deepseek-ai/dsh-api-remotes/client'
-import type { MarketIndexMetadata } from '@deepseek-ai/dsh-plugin-market-index'
+import type { LocalizedText } from '@agentrans/package-manifest'
+import type { MarketIndexSummary, MarketListingEntry, MarketListingVersion, MarketSort } from '@agentrans/api-remotes/client'
+import type { MarketIndexMetadata } from '@agentrans/plugin-market-index'
 
 /** The Discover query: text, filters, and order, without paging. */
 export interface DiscoverQuery {

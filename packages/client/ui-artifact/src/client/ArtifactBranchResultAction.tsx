@@ -1,14 +1,14 @@
 /** Explicit return of one branch conclusion with immutable saved particle evidence. */
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
-import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
-import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import type { ArtifactBranchEvidenceSelection, ArtifactBranchResultRequest } from '@deepseek-ai/dsh-artifact-branch/types'
-import type { SavedParticleObservation, SavedParticleObservationRef } from '@deepseek-ai/dsh-artifact/types'
+import type { InjectFace, PropsLocale, PropsRuntime } from '@agentrans/client-ui-slots'
+import { Button } from '@agentrans/client-ui-primitives'
+import type { SessionId } from '@agentrans/session/types'
+import type { ArtifactBranchEvidenceSelection, ArtifactBranchResultRequest } from '@agentrans/artifact-branch/types'
+import type { SavedParticleObservation, SavedParticleObservationRef } from '@agentrans/artifact/types'
 import {
   buildParticleObservationComparison, ParticleObservationComparisonError,
-} from '@deepseek-ai/dsh-artifact/observation-comparison'
-import { observeParticleState, restoreParticleCheckpoint, ParticleRuntimeError } from '@deepseek-ai/dsh-artifact/particle-runtime'
+} from '@agentrans/artifact/observation-comparison'
+import { observeParticleState, restoreParticleCheckpoint, ParticleRuntimeError } from '@agentrans/artifact/particle-runtime'
 import {
   ArtifactBranchReturnError, type ArtifactBranchReturnFailure, type ReturnArtifactBranchResult,
 } from './protocol.ts'

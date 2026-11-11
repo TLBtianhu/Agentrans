@@ -1,7 +1,7 @@
 /** Fixed-answer access stand-ins: the `remoteAccess` service and the plugin that installs it with the global Hook. */
-import { Context } from '@deepseek-ai/cordis'
-import type { RemoteEndpoint } from '@deepseek-ai/dsh-api-remote-access/client'
-import type { RootStandardSourceContribution } from '@deepseek-ai/dsh-client-ui-slots'
+import { Context } from '@agentrans/cordis'
+import type { RemoteEndpoint } from '@agentrans/api-remote-access/client'
+import type { RootStandardSourceContribution } from '@agentrans/client-ui-slots'
 import { describe, expect, it, vi } from 'vitest'
 import { allowAllAccess, allowAllAccessPlugin, StaticRemoteAccess, staticAccessPlugin } from '../src/access.ts'
 

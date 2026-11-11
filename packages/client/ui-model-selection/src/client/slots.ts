@@ -1,8 +1,8 @@
 /** Composer model selection injection and inline label extension. */
-import type { RemoteResult } from '@deepseek-ai/dsh-typert-protocol'
-import type { ModelSelection } from '@deepseek-ai/dsh-api-remotes/client'
-import type { ModelCatalogModel, ModelProviderGroup } from '@deepseek-ai/dsh-api-session-controller/types'
-import type { SnapshotStore } from '@deepseek-ai/dsh-client-store'
+import type { RemoteResult } from '@agentrans/typert-protocol'
+import type { ModelSelection } from '@agentrans/api-remotes/client'
+import type { ModelCatalogModel, ModelProviderGroup } from '@agentrans/api-session-controller/types'
+import type { SnapshotStore } from '@agentrans/client-store'
 import type { ModelDirectoryState } from './directory.ts'
 
 /** Catalog data for a model name inside the composer's existing controls. */
@@ -17,7 +17,7 @@ export interface ModelLabelOwner {
   selected: boolean
 }
 
-declare module '@deepseek-ai/dsh-client-ui-slots' {
+declare module '@agentrans/client-ui-slots' {
   interface SlotMap {
     /**
      * Non-interactive inline model label; selection controls remain owner-managed.

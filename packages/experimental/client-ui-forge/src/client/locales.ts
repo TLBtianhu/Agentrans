@@ -520,7 +520,7 @@ export const en: Record<ForgePanelKey, string> = {
   'toast.promptFailed': 'The message could not be sent',
 }
 
-declare module '@deepseek-ai/dsh-client-ui-slots' {
+declare module '@agentrans/client-ui-slots' {
   interface LocaleNamespaceMap {
     /** Forge panel tab, changes view, header button, worktree option and creation card, and action notices. */
     forgePanel: ForgePanelKey

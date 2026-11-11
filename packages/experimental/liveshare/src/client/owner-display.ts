@@ -7,7 +7,7 @@
  * already knows the display name; this store lets the attribution line use it
  * without persisting a display name into Session logs.
  *
- * @module @deepseek-ai/dsh-experimental-liveshare/src/client/owner-display
+ * @module @agentrans/experimental-liveshare/src/client/owner-display
  */
 
 import { useSyncExternalStore } from 'react'

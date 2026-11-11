@@ -1,7 +1,7 @@
 /** Strict JSON validation for actions crossing from an opaque Artifact iframe. */
-import type { ArtifactId } from '@deepseek-ai/dsh-artifact/types'
+import type { ArtifactId } from '@agentrans/artifact/types'
 import type { ArtifactPayload } from './protocol.ts'
-import { isBoundedArtifactJson, ARTIFACT_JSON_MAX_DEPTH, ARTIFACT_JSON_MAX_NODES } from '@deepseek-ai/dsh-artifact/runtime-values'
+import { isBoundedArtifactJson, ARTIFACT_JSON_MAX_DEPTH, ARTIFACT_JSON_MAX_NODES } from '@agentrans/artifact/runtime-values'
 
 /** Complete serialized message limit in UTF-8 bytes. */
 export const ARTIFACT_ACTION_MAX_BYTES = 16_384

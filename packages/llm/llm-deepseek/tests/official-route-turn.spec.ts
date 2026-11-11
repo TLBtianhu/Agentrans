@@ -1,15 +1,15 @@
 /** Turns on the official endpoint report credential failures on the model request, after the prompt is recorded. */
 import { afterEach, expect, it, vi } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
-import LlmRuntime, { createUserMessage } from '@deepseek-ai/dsh-llm'
-import AgentRegistry from '@deepseek-ai/dsh-agent'
-import AgentLoop from '@deepseek-ai/dsh-agent-loop'
-import SessionStore, { SessionId } from '@deepseek-ai/dsh-session'
-import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
-import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
-import ToolRuntime from '@deepseek-ai/dsh-tools'
-import * as NativeToolExecutor from '@deepseek-ai/dsh-tool-executor-native'
-import * as DeepSeek from '@deepseek-ai/dsh-llm-deepseek-api-key'
+import { Context } from '@agentrans/cordis'
+import LlmRuntime, { createUserMessage } from '@agentrans/llm'
+import AgentRegistry from '@agentrans/agent'
+import AgentLoop from '@agentrans/agent-loop'
+import SessionStore, { SessionId } from '@agentrans/session'
+import SessionProjectionRegistry from '@agentrans/session-projection'
+import SystemPrompt from '@agentrans/system-prompt'
+import ToolRuntime from '@agentrans/tools'
+import * as NativeToolExecutor from '@agentrans/tool-executor-native'
+import * as DeepSeek from '@agentrans/llm-deepseek-api-key'
 
 const contexts: Context[] = []
 afterEach(async () => {

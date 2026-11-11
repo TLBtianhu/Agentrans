@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { contextMenuHook } from '@deepseek-ai/dsh-client-test-runtime'
+import { contextMenuHook } from '@agentrans/client-test-runtime'
 /**
  * What the body draws from its pages and the file's metadata, and what it does
  * with a navigation: load until the asked line is held, jump to it once, then
@@ -12,10 +12,10 @@ import { contextMenuHook } from '@deepseek-ai/dsh-client-test-runtime'
  */
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react'
-import { RemoteError } from '@deepseek-ai/dsh-client-test-runtime'
-import type { FileNavigatorInput } from '@deepseek-ai/dsh-client-ui-sidebar-files/client'
-import type { TabId } from '@deepseek-ai/dsh-client-ui-dockkit'
-import type { OwnerOf } from '@deepseek-ai/dsh-client-ui-slots'
+import { RemoteError } from '@agentrans/client-test-runtime'
+import type { FileNavigatorInput } from '@agentrans/client-ui-sidebar-files/client'
+import type { TabId } from '@agentrans/client-ui-dockkit'
+import type { OwnerOf } from '@agentrans/client-ui-slots'
 import { TextPreview } from '../src/client/TextPreview.tsx'
 import type { TextPreviewProps } from '../src/client/TextPreview.tsx'
 import { CodeBody } from '../src/client/code/CodeBody.tsx'

@@ -1,19 +1,19 @@
 // @vitest-environment jsdom
-import { contextMenuHook } from '@deepseek-ai/dsh-client-test-runtime'
-import type { ShortcutCatalogEntry, ShortcutCommandId } from '@deepseek-ai/dsh-client-shortcuts/client'
-import type { GlobalStandardProps } from '@deepseek-ai/dsh-client-ui-slots'
+import { contextMenuHook } from '@agentrans/client-test-runtime'
+import type { ShortcutCatalogEntry, ShortcutCommandId } from '@agentrans/client-shortcuts/client'
+import type { GlobalStandardProps } from '@agentrans/client-ui-slots'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useEffect, useState } from 'react'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { createSettingsShellStore } from '../src/client/shell-store.ts'
-import { allowAllAccess, bindSnapshotSelector, makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
-import type { SessionListState } from '@deepseek-ai/dsh-api-session-controller/client'
-import { SessionId } from '@deepseek-ai/dsh-session/types'
+import { allowAllAccess, bindSnapshotSelector, makeTranslate } from '@agentrans/client-test-runtime'
+import type { SessionListState } from '@agentrans/api-session-controller/client'
+import { SessionId } from '@agentrans/session/types'
 import type { SettingsRootComponentProps } from '../src/client/shell-contract.ts'
 import { SettingsRoot } from '../src/client/SettingsRoot.tsx'
 import { en, zh } from '../src/client/locales.ts'
 import type { DesktopUpdateView } from '../src/types.ts'
-import { Modal } from '@deepseek-ai/dsh-client-ui-primitives'
+import { Modal } from '@agentrans/client-ui-primitives'
 
 // Every fixture carries the resource hook the resources plugin merges into GlobalStandardProps.
 const useResource = (() => ({ status: 'none' as const, value: undefined, failure: undefined, reload: () => {} })) as GlobalStandardProps['useResource']

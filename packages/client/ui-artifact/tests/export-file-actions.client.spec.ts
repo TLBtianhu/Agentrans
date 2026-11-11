@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
 import { Blob as NodeBlob } from 'node:buffer'
 import { afterEach, expect, it, vi } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
+import { Context } from '@agentrans/cordis'
 import { BrowserFileActions } from '../../ui-file-actions/src/client/files.ts'
 import { downloadArtifactExport } from '../src/client/protocol.ts'
-import type { ArtifactHtmlExportRecord } from '@deepseek-ai/dsh-artifact-export/types'
+import type { ArtifactHtmlExportRecord } from '@agentrans/artifact-export/types'
 
 afterEach(() => { vi.unstubAllGlobals(); vi.restoreAllMocks() })
 

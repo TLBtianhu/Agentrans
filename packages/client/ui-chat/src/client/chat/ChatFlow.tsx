@@ -1,7 +1,7 @@
 /** Ordered Chat rows, local echoes, and running status share the flow slot's parent. */
 import { memo, type ReactElement } from 'react'
-import type { PendingSubmission } from '@deepseek-ai/dsh-api-session-controller/client'
-import { assertNever } from '@deepseek-ai/dsh-util-values'
+import type { PendingSubmission } from '@agentrans/api-session-controller/client'
+import { assertNever } from '@agentrans/util-values'
 import type { ChatFlowSlotProps } from '../contract/slots.ts'
 import { ChatNodeSeat } from './ChatNodeSeat.tsx'
 import { ChatGroupSeat } from './ChatGroupSeat.tsx'

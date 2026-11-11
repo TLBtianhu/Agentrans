@@ -4,15 +4,15 @@
  * cap, the stability-window budget reset, and disposal stopping reconnection.
  * Isolated file so vi.mock of the MCP SDK doesn't pollute other test suites.
  */
-import { executeToolFixture } from '@deepseek-ai/dsh-tool-testkit'
-import * as NativeToolExecutor from '@deepseek-ai/dsh-tool-executor-native'
+import { executeToolFixture } from '@agentrans/tool-testkit'
+import * as NativeToolExecutor from '@agentrans/tool-executor-native'
 import { describe, expect, it, vi, beforeEach } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
-import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
-import ToolRuntime from '@deepseek-ai/dsh-tools'
-import McpResources from '@deepseek-ai/dsh-mcp-resources'
-import { ToolCallId } from '@deepseek-ai/dsh-llm'
-import type { Config } from '@deepseek-ai/dsh-mcp-client'
+import { Context } from '@agentrans/cordis'
+import SystemPrompt from '@agentrans/system-prompt'
+import ToolRuntime from '@agentrans/tools'
+import McpResources from '@agentrans/mcp-resources'
+import { ToolCallId } from '@agentrans/llm'
+import type { Config } from '@agentrans/mcp-client'
 
 // ---- Mock MCP SDK ----
 
@@ -57,8 +57,8 @@ vi.mock('@modelcontextprotocol/client/stdio', () => ({
 
 // vi.mock is hoisted above static imports, so the modules under test see the
 // mocked SDK even through a static import.
-import { apply } from '@deepseek-ai/dsh-mcp-client/src/index.ts'
-import { RECONNECT_DEFAULTS, resolveReconnectPolicy, startConnection } from '@deepseek-ai/dsh-mcp-client/src/connection.ts'
+import { apply } from '@agentrans/mcp-client/src/index.ts'
+import { RECONNECT_DEFAULTS, resolveReconnectPolicy, startConnection } from '@agentrans/mcp-client/src/connection.ts'
 
 // ---- Helpers ----
 

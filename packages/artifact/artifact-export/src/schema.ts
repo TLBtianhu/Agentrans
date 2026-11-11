@@ -1,11 +1,11 @@
 /** Validation at export request, event, and checkpoint boundaries. */
 import { z } from 'zod'
-import { brandString } from '@deepseek-ai/dsh-brand'
-import type { ArtifactId, ArtifactObservationId } from '@deepseek-ai/dsh-artifact/types'
-import { normalizeSceneSpec } from '@deepseek-ai/dsh-artifact/scene'
-import { restoreParticleCheckpoint } from '@deepseek-ai/dsh-artifact/particle-runtime'
-import { AttachmentId } from '@deepseek-ai/dsh-attachment'
-import { SessionId } from '@deepseek-ai/dsh-session'
+import { brandString } from '@agentrans/brand'
+import type { ArtifactId, ArtifactObservationId } from '@agentrans/artifact/types'
+import { normalizeSceneSpec } from '@agentrans/artifact/scene'
+import { restoreParticleCheckpoint } from '@agentrans/artifact/particle-runtime'
+import { AttachmentId } from '@agentrans/attachment'
+import { SessionId } from '@agentrans/session'
 import type { ArtifactExportId, ArtifactHtmlExportInput, ArtifactHtmlExportRecord, ArtifactHtmlExportRequest, ArtifactHtmlExports } from './types.ts'
 
 const identity = z.string().regex(/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/)

@@ -1,6 +1,6 @@
 /** The workspace navigator's listed levels as the file tree's entries and directory states. */
 import { describe, expect, it } from 'vitest'
-import { makeTranslate, RemoteError } from '@deepseek-ai/dsh-client-test-runtime'
+import { makeTranslate, RemoteError } from '@agentrans/client-test-runtime'
 import { zh } from '../src/client/locales.ts'
 import type { FilesTreeState } from '../src/client/store.ts'
 import { parentOf, treeRootOf, workspaceDirectories, workspaceEntries } from '../src/client/workspace-tree.ts'

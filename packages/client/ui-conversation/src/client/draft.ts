@@ -1,6 +1,6 @@
 /** Semantic draft snapshots shared by storage, programmatic input, and editor restoration. */
 import { z } from 'zod'
-import { formatQuoteText } from '@deepseek-ai/dsh-client-ui-primitives'
+import { formatQuoteText } from '@agentrans/client-ui-primitives'
 import type { DraftInput, DraftQuote, DraftReference, DraftSnapshot, Occurrence } from './contract/draft-editor.ts'
 
 const referenceSchema = z.object({

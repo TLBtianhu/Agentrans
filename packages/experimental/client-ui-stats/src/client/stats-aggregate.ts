@@ -1,6 +1,6 @@
 /** Turn aggregation over the step metrics a window holds. */
 
-import type { ImageAttachmentRef } from '@deepseek-ai/dsh-attachment'
+import type { ImageAttachmentRef } from '@agentrans/attachment'
 import type {
   StatsCall, StatsCompactionMetrics, StatsContribution, StatsEventMetrics, StatsStepMetrics, StatsToolCount,
   StatsTurnMetrics,

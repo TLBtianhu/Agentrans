@@ -1,6 +1,6 @@
 /**
  * Output capture, result encoding, and host binding proxies over the process channel.
- * @module @deepseek-ai/dsh-ptc-runtime-node/src/bootstrap
+ * @module @agentrans/ptc-runtime-node/src/bootstrap
  */
 
 import { inspect, types } from 'node:util'

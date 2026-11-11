@@ -1,24 +1,24 @@
-/** Source-bound experiment facts and attributed program reports on an ordinary question. @module @deepseek-ai/dsh-artifact-followup */
+/** Source-bound experiment facts and attributed program reports on an ordinary question. @module @agentrans/artifact-followup */
 import { Buffer } from 'node:buffer'
-import type { Context } from '@deepseek-ai/cordis'
-import z from '@deepseek-ai/schemastery'
+import type { Context } from '@agentrans/cordis'
+import z from '@agentrans/schemastery'
 import { z as zod } from 'zod'
-import type { Agent } from '@deepseek-ai/dsh-agent'
-import type {} from '@deepseek-ai/dsh-api-session-controller'
-import { ArtifactError } from '@deepseek-ai/dsh-artifact'
-import type ArtifactService from '@deepseek-ai/dsh-artifact'
-import type { ArtifactId, ArtifactObservationId } from '@deepseek-ai/dsh-artifact/types'
-import { buildParticleObservationComparison, ParticleObservationComparisonError } from '@deepseek-ai/dsh-artifact/observation-comparison'
-import { createParticleCheckpoint, observeParticleState, restoreParticleCheckpoint, ParticleRuntimeError } from '@deepseek-ai/dsh-artifact/particle-runtime'
+import type { Agent } from '@agentrans/agent'
+import type {} from '@agentrans/api-session-controller'
+import { ArtifactError } from '@agentrans/artifact'
+import type ArtifactService from '@agentrans/artifact'
+import type { ArtifactId, ArtifactObservationId } from '@agentrans/artifact/types'
+import { buildParticleObservationComparison, ParticleObservationComparisonError } from '@agentrans/artifact/observation-comparison'
+import { createParticleCheckpoint, observeParticleState, restoreParticleCheckpoint, ParticleRuntimeError } from '@agentrans/artifact/particle-runtime'
 import {
   isBoundedArtifactJson, ARTIFACT_JSON_MAX_DEPTH, ARTIFACT_JSON_MAX_NODES, ARTIFACT_RUNTIME_FAILURE_MAX_BYTES,
-} from '@deepseek-ai/dsh-artifact/runtime-values'
-import type { ArtifactRuntimeId } from '@deepseek-ai/dsh-artifact-runtime/types'
-import { brandString } from '@deepseek-ai/dsh-brand'
-import type { TextBlock } from '@deepseek-ai/dsh-llm'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import { RemoteError } from '@deepseek-ai/dsh-typert-protocol'
-import { assertNever, type JsonValue } from '@deepseek-ai/dsh-util-values'
+} from '@agentrans/artifact/runtime-values'
+import type { ArtifactRuntimeId } from '@agentrans/artifact-runtime/types'
+import { brandString } from '@agentrans/brand'
+import type { TextBlock } from '@agentrans/llm'
+import type { SessionId } from '@agentrans/session/types'
+import { RemoteError } from '@agentrans/typert-protocol'
+import { assertNever, type JsonValue } from '@agentrans/util-values'
 import type {
   ArtifactProgramQuestionCapture, ArtifactPromptContextFacts, ArtifactPromptContextRejectionReason,
   ArtifactPromptContextSelection, ArtifactQuestionContext,

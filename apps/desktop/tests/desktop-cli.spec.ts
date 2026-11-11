@@ -6,13 +6,13 @@ import { tmpdir } from 'node:os'
 import { afterEach, expect, it, onTestFinished, vi } from 'vitest'
 import {
   PRODUCT_LAUNCH_CONTEXT_ENV, parseProductLaunchContext, resolveProductLaunchContext, serializeProductLaunchContext,
-} from '@deepseek-ai/dsh-product-layout/launch-context'
-import { runCli } from '@deepseek-ai/dsh/lib/bin.js'
+} from '@agentrans/product-layout/launch-context'
+import { runCli } from '@agentrans/dsh/lib/bin.js'
 import { runDesktopCli } from '../../desktop-host/src/cli.ts'
 import { installOfficeEngineResolution } from '../../desktop-host/src/office-engine.ts'
 import { configureDesktopProduct } from '../src/product-context.ts'
 
-vi.mock('@deepseek-ai/dsh/lib/bin.js', () => ({ runCli: vi.fn() }))
+vi.mock('@agentrans/dsh/lib/bin.js', () => ({ runCli: vi.fn() }))
 vi.mock('../../desktop-host/src/office-engine.ts', () => ({ installOfficeEngineResolution: vi.fn() }))
 
 afterEach(() => {

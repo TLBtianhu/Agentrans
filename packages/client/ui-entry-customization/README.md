@@ -3,7 +3,7 @@ description: "Offer plugin browsing and a Creator draft in three navigation regi
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-client-ui-entry-customization
+# @agentrans/client-ui-entry-customization
 
 English | [中文](README.zh.md)
 
@@ -26,7 +26,7 @@ Browse plugins and prepare a reviewable Creator draft from the More menus of the
 <a id="use-this-package"></a>
 ## Use this package
 
-The `@deepseek-ai/dsh-web-app` bundle loads this package by default; it needs no Plugins switch or profile selection. A region shows its More button only while its actions slot has a registration, so unloading this package removes all three buttons.
+The `@agentrans/web-app` bundle loads this package by default; it needs no Plugins switch or profile selection. A region shows its More button only while its actions slot has a registration, so unloading this package removes all three buttons.
 
 Open **More** beneath the left navigation entries, **More conversation views** after the Conversation View tabs, or **More tools** after the right-sidebar guide cards. Left-sidebar and guide menus offer only **Browse other plugins** (when available) and **Create your plugin**. The Conversation menu also lists folded Views before those actions and marks the active View with a check on the right. None of these menus provide pin controls or sorting.
 

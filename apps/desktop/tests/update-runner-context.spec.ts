@@ -5,7 +5,7 @@ import { mkdir, readFile, readdir, realpath, rm, writeFile } from 'node:fs/promi
 import { tmpdir } from 'node:os'
 import { dirname, join, relative, resolve } from 'node:path'
 import { afterEach, expect, it, vi } from 'vitest'
-import { parseProductLaunchContext } from '@deepseek-ai/dsh-product-layout/launch-context'
+import { parseProductLaunchContext } from '@agentrans/product-layout/launch-context'
 import { configureDesktopProduct } from '../src/product-context.ts'
 
 const { launched, allocated, electronPath } = vi.hoisted(() => ({

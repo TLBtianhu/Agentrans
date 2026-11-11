@@ -1,11 +1,11 @@
-/** Artifact protocol values shared by Host services, tools, and Clients. @module @deepseek-ai/dsh-artifact/types */
+/** Artifact protocol values shared by Host services, tools, and Clients. @module @agentrans/artifact/types */
 
-import type { Branded } from '@deepseek-ai/dsh-brand'
-import type { MessageId } from '@deepseek-ai/dsh-llm'
-import type { JsonValue } from '@deepseek-ai/dsh-util-values'
+import type { Branded } from '@agentrans/brand'
+import type { MessageId } from '@agentrans/llm'
+import type { JsonValue } from '@agentrans/util-values'
 import type { SceneSpec } from './scene.ts'
 import type { ParticleCheckpoint, ParticleObservation } from './particle-runtime.ts'
-import type { SessionProjectionSummaryExcluded } from '@deepseek-ai/dsh-session-projection/types'
+import type { SessionProjectionSummaryExcluded } from '@agentrans/session-projection/types'
 
 /** Stable identity of one artifact within a Session. */
 export type ArtifactId = Branded<'ArtifactId'>
@@ -173,7 +173,7 @@ export interface ArtifactRecordResult {
   readonly revision: number
 }
 
-declare module '@deepseek-ai/dsh-session/types' {
+declare module '@agentrans/session/types' {
   interface SessionEventMap {
     /**
      * Complete current value of one artifact revision; later events for the same id supersede earlier ones.
@@ -188,14 +188,14 @@ declare module '@deepseek-ai/dsh-session/types' {
   }
 }
 
-declare module '@deepseek-ai/dsh-session-projection/types' {
+declare module '@agentrans/session-projection/types' {
   interface SessionProjectionMap {
     /** Saved observations with their source revisions, excluded from compact Session summaries. */
     artifactObservations: SessionProjectionSummaryExcluded<ArtifactObservations>
   }
 }
 
-declare module '@deepseek-ai/dsh-typert-protocol' {
+declare module '@agentrans/typert-protocol' {
   interface RemoteErrorDetailsMap {
     /** An accepted or in-flight message identity belongs to different action content. */
     'artifact/action-conflict': { readonly requestId: MessageId }
@@ -220,7 +220,7 @@ declare module '@deepseek-ai/dsh-typert-protocol' {
   }
 }
 
-declare module '@deepseek-ai/dsh-llm' {
+declare module '@agentrans/llm' {
   interface MessageSourceMap {
     /**
      * User-reviewed intent from an artifact. It supplies text input only and grants no file, network, or approval authority.

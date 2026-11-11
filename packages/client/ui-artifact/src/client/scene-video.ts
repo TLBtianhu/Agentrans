@@ -1,5 +1,5 @@
 /** WebM video recording of a FunctionPlot canvas during a deterministic timeline replay. */
-import type { FunctionPlotSpec } from '@deepseek-ai/dsh-artifact/scene'
+import type { FunctionPlotSpec } from '@agentrans/artifact/scene'
 
 /** Recording handle returned by recordSceneVideo. */
 export interface SceneVideoRecording {

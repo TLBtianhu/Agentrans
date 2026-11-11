@@ -1,20 +1,20 @@
 import { describe, expect, expectTypeOf, it, onTestFinished, vi } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
-import { AttachmentId } from '@deepseek-ai/dsh-attachment'
-import BasicCompactionEngine from '@deepseek-ai/dsh-compaction-basic'
-import type { BasicCompactionConfig } from '@deepseek-ai/dsh-compaction-basic'
-import { selectCompactableRange } from '@deepseek-ai/dsh-compaction-basic/src/region.ts'
-import { frameSummary } from '@deepseek-ai/dsh-compaction-basic/src/summarizer.ts'
-import type { SummarizationInput, SummaryResult } from '@deepseek-ai/dsh-compaction-basic/src/summarizer.ts'
-import { CompactionId, toolPairingBalancedAfter, toolPairingBalancedBefore } from '@deepseek-ai/dsh-compaction'
+import { Context } from '@agentrans/cordis'
+import { AttachmentId } from '@agentrans/attachment'
+import BasicCompactionEngine from '@agentrans/compaction-basic'
+import type { BasicCompactionConfig } from '@agentrans/compaction-basic'
+import { selectCompactableRange } from '@agentrans/compaction-basic/src/region.ts'
+import { frameSummary } from '@agentrans/compaction-basic/src/summarizer.ts'
+import type { SummarizationInput, SummaryResult } from '@agentrans/compaction-basic/src/summarizer.ts'
+import { CompactionId, toolPairingBalancedAfter, toolPairingBalancedBefore } from '@agentrans/compaction'
 import {
   resolveCompactSpec,
   resolveConfig,
   resolveTargetPolicy,
-} from '@deepseek-ai/dsh-compaction-basic/src/config.ts'
-import type { CompactionResult } from '@deepseek-ai/dsh-compaction'
-import LlmRuntime, { createUserMessage, ToolCallId, CONTEXT_WINDOW_EXCEEDED_CODE, createSystemMessage, createToolResultMessage, LlmAdapter , createMessage } from '@deepseek-ai/dsh-llm'
-import type { ContextFormed } from '@deepseek-ai/dsh-llm'
+} from '@agentrans/compaction-basic/src/config.ts'
+import type { CompactionResult } from '@agentrans/compaction'
+import LlmRuntime, { createUserMessage, ToolCallId, CONTEXT_WINDOW_EXCEEDED_CODE, createSystemMessage, createToolResultMessage, LlmAdapter , createMessage } from '@agentrans/llm'
+import type { ContextFormed } from '@agentrans/llm'
 import type {
   ContentBlock,
   GenerateOptions,
@@ -24,14 +24,14 @@ import type {
   Message,
   StreamChunk,
   TokenUsage,
-} from '@deepseek-ai/dsh-llm'
-import SessionStore, { Session, SessionId, SessionSeq } from '@deepseek-ai/dsh-session'
-import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
-import TokenMeter from '@deepseek-ai/dsh-token-meter'
-import { agentEvents, type Agent, type RequestErrorAction } from '@deepseek-ai/dsh-agent'
-import ToolResultPruner from '@deepseek-ai/dsh-compaction-tool-result-pruner'
+} from '@agentrans/llm'
+import SessionStore, { Session, SessionId, SessionSeq } from '@agentrans/session'
+import SessionProjectionRegistry from '@agentrans/session-projection'
+import TokenMeter from '@agentrans/token-meter'
+import { agentEvents, type Agent, type RequestErrorAction } from '@agentrans/agent'
+import ToolResultPruner from '@agentrans/compaction-tool-result-pruner'
 
-declare module '@deepseek-ai/dsh-llm' {
+declare module '@agentrans/llm' {
   interface MessageSourceMap {
     'test': { kind: 'test' } & ContextFormed
   }

@@ -6,10 +6,10 @@ import { userInfo } from 'node:os'
 import { join } from 'node:path'
 import { PassThrough, Writable } from 'node:stream'
 import { setTimeout as delay } from 'node:timers/promises'
-import type { SubprocessHandle, SubprocessOutcome, SubprocessRuntime } from '@deepseek-ai/dsh-subprocess'
+import type { SubprocessHandle, SubprocessOutcome, SubprocessRuntime } from '@agentrans/subprocess'
 import { z } from 'zod'
-import type { NativeClientConfig, NativeChannel } from '@deepseek-ai/dsh-cua/native-client'
-export type { NativeChannel } from '@deepseek-ai/dsh-cua/native-client'
+import type { NativeClientConfig, NativeChannel } from '@agentrans/cua/native-client'
+export type { NativeChannel } from '@agentrans/cua/native-client'
 
 const Ready = z.object({
   type: z.literal('ready'), protocol: z.literal(1), runtimeKey: z.string(),

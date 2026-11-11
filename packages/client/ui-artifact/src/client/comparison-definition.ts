@@ -1,8 +1,8 @@
 /** Comparison-group Artifact events folded into one stable Chat Node per group. */
-import type { SessionEventLike } from '@deepseek-ai/dsh-api-session-controller/client'
-import type {} from '@deepseek-ai/dsh-artifact/types'
-import type {} from '@deepseek-ai/dsh-client-ui-chat/client'
-import type { ConversationNodeDefinition } from '@deepseek-ai/dsh-client-ui-conversation/client'
+import type { SessionEventLike } from '@agentrans/api-session-controller/client'
+import type {} from '@agentrans/artifact/types'
+import type {} from '@agentrans/client-ui-chat/client'
+import type { ConversationNodeDefinition } from '@agentrans/client-ui-conversation/client'
 import type { ArtifactComparisonSnapshot, ArtifactSnapshot } from './protocol.ts'
 
 interface ComparisonState {
@@ -10,7 +10,7 @@ interface ComparisonState {
   readonly variant?: ArtifactSnapshot
 }
 
-declare module '@deepseek-ai/dsh-client-ui-chat/client' {
+declare module '@agentrans/client-ui-chat/client' {
   interface ChatNodeDataMap {
     /** Independent control and variant snapshots belonging to one comparison group. */
     'artifact-comparison': ArtifactComparisonSnapshot

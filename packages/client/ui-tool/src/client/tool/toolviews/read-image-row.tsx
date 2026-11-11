@@ -18,7 +18,7 @@
 // alone.
 
 import { toolFileInject } from '../file-menu.ts'
-import type { Context } from '@deepseek-ai/cordis'
+import type { Context } from '@agentrans/cordis'
 import { imageCardModel } from '../models/image-card-model.ts'
 import { readFamilyRow, type ReadImageRowProps } from './read-family-row.tsx'
 import { CONVERSATION_NS as NS } from '../../locale.ts'

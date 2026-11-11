@@ -4,10 +4,10 @@
  * `fetch()` composes these with transport (redirect following, byte caps,
  * decoding).
  *
- * @module @deepseek-ai/dsh-web-fetch-http/policy
+ * @module @agentrans/web-fetch-http/policy
  */
 
-import { WebError } from '@deepseek-ai/dsh-web'
+import { WebError } from '@agentrans/web'
 
 /** Maximum accepted request URL length enforced by the fetch provider. */
 export const WEB_FETCH_MAX_URL_LENGTH = 2048

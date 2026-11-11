@@ -5,10 +5,10 @@
  * Host's `liveshareShares/` code; the surfaces read the code instead of mapping an HTTP status. The
  * interface is stated here rather than derived from the generated namespace so the package's client
  * declarations name the request and result types directly.
- * @module @deepseek-ai/dsh-experimental-liveshare/src/client/owner-shares
+ * @module @agentrans/experimental-liveshare/src/client/owner-shares
  */
 
-import type { RemoteResult } from '@deepseek-ai/dsh-typert-protocol'
+import type { RemoteResult } from '@agentrans/typert-protocol'
 import type {
   CreatedShare,
   CreateShareRequest,

@@ -10,9 +10,9 @@
 
 import { createHash } from 'node:crypto'
 import { z } from 'zod'
-import { defineDomain } from '@deepseek-ai/dsh-storage-domain'
-import type { ChangeRequestListener, ChangeRequestRef, ChangeRequestSnapshot } from '@deepseek-ai/dsh-experimental-forge/types'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
+import { defineDomain } from '@agentrans/storage-domain'
+import type { ChangeRequestListener, ChangeRequestRef, ChangeRequestSnapshot } from '@agentrans/experimental-forge/types'
+import type { SessionId } from '@agentrans/session/types'
 import type { ForgeChangeRequestListState, ForgeChangeRequestStatesFrame } from './types.ts'
 
 const stateSchema: z.ZodType<ForgeChangeRequestListState> = z.object({

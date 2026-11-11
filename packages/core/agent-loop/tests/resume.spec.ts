@@ -1,26 +1,26 @@
-import * as NativeToolExecutor from '@deepseek-ai/dsh-tool-executor-native'
-import { ToolCallId, createMessage, createUserMessage } from '@deepseek-ai/dsh-llm'
+import * as NativeToolExecutor from '@agentrans/tool-executor-native'
+import { ToolCallId, createMessage, createUserMessage } from '@agentrans/llm'
 import { afterEach, describe, expect, it, vi, type MockInstance } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
+import { Context } from '@agentrans/cordis'
 import { appendFile, mkdtemp, readdir, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import LlmRuntime from '@deepseek-ai/dsh-llm'
-import type { ContextFormed } from '@deepseek-ai/dsh-llm'
-import SessionStore, { SessionLogOffset, SessionSeq, Session, SessionId, TOOL_NOT_STARTED, TOOL_OUTCOME_UNKNOWN } from '@deepseek-ai/dsh-session'
-import type { SessionEvent } from '@deepseek-ai/dsh-session'
-import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
-import ToolRuntime from '@deepseek-ai/dsh-tools'
-import { defineContentToolFixture } from '@deepseek-ai/dsh-tool-testkit'
-import AgentRegistry, { type Agent } from '@deepseek-ai/dsh-agent'
-import { SessionAlreadyExistsError, type SessionHandle } from '@deepseek-ai/dsh-session-persistence'
+import LlmRuntime from '@agentrans/llm'
+import type { ContextFormed } from '@agentrans/llm'
+import SessionStore, { SessionLogOffset, SessionSeq, Session, SessionId, TOOL_NOT_STARTED, TOOL_OUTCOME_UNKNOWN } from '@agentrans/session'
+import type { SessionEvent } from '@agentrans/session'
+import SystemPrompt from '@agentrans/system-prompt'
+import ToolRuntime from '@agentrans/tools'
+import { defineContentToolFixture } from '@agentrans/tool-testkit'
+import AgentRegistry, { type Agent } from '@agentrans/agent'
+import { SessionAlreadyExistsError, type SessionHandle } from '@agentrans/session-persistence'
 
-import * as JsonlSessionPersistence from '@deepseek-ai/dsh-session-persistence-jsonl'
-import AgentLoop from '@deepseek-ai/dsh-agent-loop'
-import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
+import * as JsonlSessionPersistence from '@agentrans/session-persistence-jsonl'
+import AgentLoop from '@agentrans/agent-loop'
+import SessionProjectionRegistry from '@agentrans/session-projection'
 import { MockAdapter, textResponse } from './mock-adapter.ts'
 
-declare module '@deepseek-ai/dsh-llm' {
+declare module '@agentrans/llm' {
   interface MessageSourceMap {
     'tool-bash': { kind: 'tool-bash' } & ContextFormed
   }

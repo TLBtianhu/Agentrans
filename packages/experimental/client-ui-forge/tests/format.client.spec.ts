@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
+import { makeTranslate } from '@agentrans/client-test-runtime'
 import { formatAgo, formatDuration } from '../src/client/format.ts'
 import { en, zh } from '../src/client/locales.ts'
 

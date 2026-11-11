@@ -21,10 +21,10 @@ import { fileURLToPath } from 'node:url'
 import type { Browser, Page } from 'playwright'
 import { chromium } from 'playwright'
 import { afterAll, beforeAll, describe, expect, it, onTestFailed } from 'vitest'
-import { ToolCallId, createAssistantMessage, createToolResultMessage, createUserMessage } from '@deepseek-ai/dsh-llm'
-import { SESSION_FORMAT_VERSION, Session, SessionId } from '@deepseek-ai/dsh-session'
-import type { JsonValue } from '@deepseek-ai/dsh-util-values'
-import type {} from '@deepseek-ai/dsh-session-title'
+import { ToolCallId, createAssistantMessage, createToolResultMessage, createUserMessage } from '@agentrans/llm'
+import { SESSION_FORMAT_VERSION, Session, SessionId } from '@agentrans/session'
+import type { JsonValue } from '@agentrans/util-values'
+import type {} from '@agentrans/session-title'
 import {
   assertFixtureInventory,
   captureStableAria,

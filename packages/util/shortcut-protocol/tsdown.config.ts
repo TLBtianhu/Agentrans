@@ -17,5 +17,5 @@ export default defineConfig({
   fixedExtension: false,
   dts: false,
   clean: false,
-  noExternal: [/^@deepseek-ai\/dsh-(?:brand|util-crypto|util-values)$/u],
+  noExternal: [/^@agentrans\/(?:brand|util-crypto|util-values)$/u],
 })

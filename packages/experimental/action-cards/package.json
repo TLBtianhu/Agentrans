@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-action-cards",
+  "name": "@agentrans/action-cards",
   "description": "Optional action cards below answers: one shared proposal tool, card state, user actions and status notices",
   "version": "0.1.0",
   "publishConfig": {
@@ -36,28 +36,28 @@
   },
   "license": "MIT",
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-typert-protocol": "workspace:*",
-    "@deepseek-ai/dsh-llm": "workspace:*",
-    "@deepseek-ai/dsh-tools": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/typert-protocol": "workspace:*",
+    "@agentrans/llm": "workspace:*",
+    "@agentrans/tools": "workspace:*",
+    "@agentrans/session": "workspace:*"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-typert-protocol": "workspace:*",
-    "@deepseek-ai/dsh-llm": "workspace:*",
-    "@deepseek-ai/dsh-tools": "workspace:*",
-    "@deepseek-ai/dsh-agent": "workspace:*",
-    "@deepseek-ai/dsh-agent-loop": "workspace:*",
-    "@deepseek-ai/dsh-agent-loop-testkit": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-session-projection": "workspace:*",
-    "@deepseek-ai/dsh-api-remote-access": "workspace:*",
-    "@deepseek-ai/dsh-sandbox-policy": "workspace:*",
-    "@deepseek-ai/dsh-skill": "workspace:*",
-    "@deepseek-ai/dsh-tool-skill": "workspace:*",
-    "@deepseek-ai/dsh-tool-testkit": "workspace:*",
-    "@deepseek-ai/dsh-util-values": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/typert-protocol": "workspace:*",
+    "@agentrans/llm": "workspace:*",
+    "@agentrans/tools": "workspace:*",
+    "@agentrans/agent": "workspace:*",
+    "@agentrans/agent-loop": "workspace:*",
+    "@agentrans/agent-loop-testkit": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/session-projection": "workspace:*",
+    "@agentrans/api-remote-access": "workspace:*",
+    "@agentrans/sandbox-policy": "workspace:*",
+    "@agentrans/skill": "workspace:*",
+    "@agentrans/tool-skill": "workspace:*",
+    "@agentrans/tool-testkit": "workspace:*",
+    "@agentrans/util-values": "workspace:*"
   },
   "dependencies": {
     "zod": "4.4.3"

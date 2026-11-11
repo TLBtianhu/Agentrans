@@ -5,12 +5,12 @@
  * one, and answers the connectivity and permission checks the dialog's ordered flow runs. This hook
  * keeps those facts and the owner's draft; the step guide itself belongs to the dialog.
  *
- * @module @deepseek-ai/dsh-experimental-liveshare/src/client/share-relay-address
+ * @module @agentrans/experimental-liveshare/src/client/share-relay-address
  */
 
 import { useEffect, useRef, useState } from 'react'
-import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
+import type { PropsLocale } from '@agentrans/client-ui-slots'
+import type { SessionId } from '@agentrans/session/types'
 import type { NS } from './locales.ts'
 import type { OwnerShares } from './owner-shares.ts'
 

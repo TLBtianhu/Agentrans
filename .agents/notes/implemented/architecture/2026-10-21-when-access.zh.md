@@ -28,7 +28,7 @@ JS 侧有与三个访问 Hook 一一对应的 `whenAccess`，由各自 Hook 的�
 | `ctx.uiWorkspace.whenAccess(workspaceId, action, callback)` | ui-workspace | `useWorkspaceAccess(workspaceId, action)` |
 
 ```ts ignore-check
-import type { AccessEffect, RemoteEndpoint } from '@deepseek-ai/dsh-api-remote-access/client'
+import type { AccessEffect, RemoteEndpoint } from '@agentrans/api-remote-access/client'
 
 /** The global-resource member; the Session and Workspace versions take the resource id first. */
 export interface WhenAccess {

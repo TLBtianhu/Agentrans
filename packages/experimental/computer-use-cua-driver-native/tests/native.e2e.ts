@@ -1,13 +1,13 @@
 /** Opt-in native SDK compatibility check without screenshots, input, or permission prompts. */
-import { executeToolFixture } from '@deepseek-ai/dsh-tool-testkit'
+import { executeToolFixture } from '@agentrans/tool-testkit'
 
-import * as NativeToolExecutor from '@deepseek-ai/dsh-tool-executor-native'
+import * as NativeToolExecutor from '@agentrans/tool-executor-native'
 import { expect, it } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
-import ComputerUseRegistry from '@deepseek-ai/dsh-computer-use'
-import { ToolCallId } from '@deepseek-ai/dsh-llm'
-import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
-import ToolRuntime from '@deepseek-ai/dsh-tools'
+import { Context } from '@agentrans/cordis'
+import ComputerUseRegistry from '@agentrans/computer-use'
+import { ToolCallId } from '@agentrans/llm'
+import SystemPrompt from '@agentrans/system-prompt'
+import ToolRuntime from '@agentrans/tools'
 import * as NativeProvider from '../src/index.ts'
 
 it.skipIf(process.env.DSH_COMPUTER_USE_NATIVE_E2E !== '1')(

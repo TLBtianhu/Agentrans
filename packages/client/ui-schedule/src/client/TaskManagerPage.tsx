@@ -5,10 +5,10 @@ import {
   Button, IconClockOutlineRegular, IconCloseOutlineRegular, IconEllipsisOutlineRegular, IconPlusOutlineRegular,
   IconSearchOutlineRegular, IconTrashOutlineRegular, IconChevronDownOutlineRegular, IconEditOutlineRegular,
   Input, Menu, MenuItemButton, Modal, ReferenceIconRegular, Tooltip,
-} from '@deepseek-ai/dsh-client-ui-primitives'
-import type { HostObservable, InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
-import type {} from '@deepseek-ai/dsh-client-ui-layout/client'
-import type { ScheduleId, ScheduleCatalogEntry, ScheduleCreateRequest } from '@deepseek-ai/dsh-schedule/client'
+} from '@agentrans/client-ui-primitives'
+import type { HostObservable, InjectFace, PropsLocale, PropsRuntime } from '@agentrans/client-ui-slots'
+import type {} from '@agentrans/client-ui-layout/client'
+import type { ScheduleId, ScheduleCatalogEntry, ScheduleCreateRequest } from '@agentrans/schedule/client'
 import { TaskCreateDialog, type TaskCreateOutcome } from './TaskCreateDialog.tsx'
 import { projectChoices } from './TaskEditorFields.tsx'
 import { taskNextRunAt, taskSessionId } from './task-record.ts'

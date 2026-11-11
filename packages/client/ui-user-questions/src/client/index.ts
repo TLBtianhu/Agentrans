@@ -10,21 +10,21 @@
  * `plan-review` intent as the plan decision card and every other request as
  * the generic question flow. Both use the same carrier and composer seat.
  */
-import type { Context as ClientContext } from '@deepseek-ai/cordis'
-import type { InboxWireState } from '@deepseek-ai/dsh-agent/types'
-import type {} from '@deepseek-ai/dsh-api-remotes/client'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import type {} from '@deepseek-ai/dsh-client-ui-chat/client'
-import type { ComposerChainProps } from '@deepseek-ai/dsh-client-ui-conversation/client'
-import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
-import type { PendingInteractionPublisher } from '@deepseek-ai/dsh-client-ui-session/client'
-import type { TypertClientEventListener } from '@deepseek-ai/dsh-typert-protocol'
-import type { AskUserQuestionItem, PendingUserQuestion, UserQuestionProjectionView } from '@deepseek-ai/dsh-user-questions/types'
+import type { Context as ClientContext } from '@agentrans/cordis'
+import type { InboxWireState } from '@agentrans/agent/types'
+import type {} from '@agentrans/api-remotes/client'
+import type { SessionId } from '@agentrans/session/types'
+import type {} from '@agentrans/client-ui-chat/client'
+import type { ComposerChainProps } from '@agentrans/client-ui-conversation/client'
+import type {} from '@agentrans/client-ui-renderer/client'
+import type { PendingInteractionPublisher } from '@agentrans/client-ui-session/client'
+import type { TypertClientEventListener } from '@agentrans/typert-protocol'
+import type { AskUserQuestionItem, PendingUserQuestion, UserQuestionProjectionView } from '@agentrans/user-questions/types'
 // Type-only: pulls the locale plugin's Context merge (ctx.locale).
-import type {} from '@deepseek-ai/dsh-client-locale/client'
-import type { UserQuestionPanels, UserQuestionRecord } from '@deepseek-ai/dsh-client-ui-tool/client'
-import type { ToolCallId } from '@deepseek-ai/dsh-llm'
-import { brandString } from '@deepseek-ai/dsh-brand'
+import type {} from '@agentrans/client-locale/client'
+import type { UserQuestionPanels, UserQuestionRecord } from '@agentrans/client-ui-tool/client'
+import type { ToolCallId } from '@agentrans/llm'
+import { brandString } from '@agentrans/brand'
 import { createWaterfallRequest, PendingQuestion, type QuestionRpcChannel } from './contract/slots.ts'
 import { createQuestionDraftStore } from './draft-store.ts'
 import { QuestionComposer } from './QuestionComposer.tsx'
@@ -37,7 +37,7 @@ export type {
 } from './contract/slots.ts'
 export type { QuestionKey } from './locales.ts'
 
-declare module '@deepseek-ai/dsh-client-ui-slots' {
+declare module '@agentrans/client-ui-slots' {
   interface LocaleNamespaceMap {
     /** The question composer's copy. */
     question: QuestionKey

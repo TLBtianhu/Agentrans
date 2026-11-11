@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-sandbox-ssh",
+  "name": "@agentrans/sandbox-ssh",
   "description": "Remote POSIX sandbox argv provider over the shared SSH helper",
   "version": "0.1.0",
   "publishConfig": {
@@ -29,17 +29,17 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-ssh": "workspace:*",
-    "@deepseek-ai/dsh-sandbox": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/ssh": "workspace:*",
+    "@agentrans/sandbox": "workspace:*"
   },
   "dependencies": {
-    "@deepseek-ai/schemastery": "workspace:~",
+    "@agentrans/schemastery": "workspace:~",
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-ssh": "workspace:*",
-    "@deepseek-ai/dsh-sandbox": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/ssh": "workspace:*",
+    "@agentrans/sandbox": "workspace:*"
   }
 }

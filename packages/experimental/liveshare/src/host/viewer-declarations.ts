@@ -14,13 +14,13 @@
  * The service carries no `Context` key of its own, so a plugin reads it through
  * {@link viewerDeclarationsOf}, which preserves the calling context; the lookup is untyped by
  * construction, so the accessor narrows the value it finds.
- * @module @deepseek-ai/dsh-experimental-liveshare/src/host/viewer-declarations
+ * @module @agentrans/experimental-liveshare/src/host/viewer-declarations
  */
 
-import { Service, type Context } from '@deepseek-ai/cordis'
-import type {} from '@deepseek-ai/cordis-plugin-loader'
-import { isTypertRemoteSegment, type InvocationDescriptor } from '@deepseek-ai/dsh-typert-protocol'
-import type { RemoteAccessEndpoint } from '@deepseek-ai/dsh-api-remote-access/types'
+import { Service, type Context } from '@agentrans/cordis'
+import type {} from '@agentrans/cordis-plugin-loader'
+import { isTypertRemoteSegment, type InvocationDescriptor } from '@agentrans/typert-protocol'
+import type { RemoteAccessEndpoint } from '@agentrans/api-remote-access/types'
 
 /**
  * Name the capability service is provided under. Deliberately not a `Context` key: a key would enter the

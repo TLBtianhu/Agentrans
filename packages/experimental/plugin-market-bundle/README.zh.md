@@ -3,7 +3,7 @@ description: "从插件管理页启用实验性的自定义插件索引。"
 kind: "package-bundle"
 ---
 
-# @deepseek-ai/dsh-experimental-plugin-market-bundle
+# @agentrans/experimental-plugin-market-bundle
 
 [English](README.md) | 中文
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { Duration } from '@deepseek-ai/dsh-util-time'
+import { Duration } from '@agentrans/util-time'
 
 /** Rebuild a span from its own parts, so a wrong split shows up as a wrong total. */
 const partSum = (parts: {

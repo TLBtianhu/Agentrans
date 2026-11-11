@@ -72,7 +72,7 @@ it.skipIf(process.platform === 'win32')('keeps npm tarball bytes when reusing a 
     mkdirSync(output)
     stageCuaHelperPayload(f.payload, packageRoot, identity)
     writeFileSync(join(packageRoot, 'package.json'), JSON.stringify({
-      name: '@deepseek-ai/dsh-experimental-cua-macos', version: identity.version, type: 'module',
+      name: '@agentrans/experimental-cua-macos', version: identity.version, type: 'module',
       files: ['lib/index.js', 'native/bin', CUA_MANIFEST],
     }))
     writeFileSync(join(packageRoot, 'lib/index.js'), 'export const provider = "fixture";\n')

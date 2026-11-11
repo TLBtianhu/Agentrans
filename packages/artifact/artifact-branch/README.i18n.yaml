@@ -5,45 +5,45 @@
 /:
   en: affaa8a1010182f3
   zh: c7d630a3c74d36b7
-/deepseek-ai-dsh-artifact-branch:
-  en: 21eb1abe8d866ae8
-  zh: b53cb0bfb55ddba9
-/deepseek-ai-dsh-artifact-branch/summary:
+/agentrans-artifact-branch:
+  en: 67ab1cb7473b67ef
+  zh: b5dfcdcde62799f9
+/agentrans-artifact-branch/summary:
   en: d71bd23bb786cdab
   zh: 9aeb47bec04e183a
-/deepseek-ai-dsh-artifact-branch/table-of-contents:
+/agentrans-artifact-branch/table-of-contents:
   en: d152484eb41ac6b4
   zh: f0f7f88fe2f53b05
-/deepseek-ai-dsh-artifact-branch/use-this-package:
-  en: 53c340b2c132b34f
-  zh: 5a46830ce5343134
-/deepseek-ai-dsh-artifact-branch/understand-the-implementation:
+/agentrans-artifact-branch/use-this-package:
+  en: 175766cbff0545c4
+  zh: c10d198c8520285c
+/agentrans-artifact-branch/understand-the-implementation:
   en: 884bf1d1daaaa537
   zh: 8891566df261b3b4
-/deepseek-ai-dsh-artifact-branch/further-exploration:
+/agentrans-artifact-branch/further-exploration:
   en: dd25bcdd6bf7b863
   zh: 873f0573e843cb2b
-/deepseek-ai-dsh-artifact-branch/model-experience:
+/agentrans-artifact-branch/model-experience:
   en: 215e7ba838619b7b
   zh: a311da3843709f90
-/deepseek-ai-dsh-artifact-branch/model-experience/confirmed-evidence-bearing-result:
+/agentrans-artifact-branch/model-experience/confirmed-evidence-bearing-result:
   en: 3a4bbae34908e0cc
   zh: cb1c3b9387392f75
-/deepseek-ai-dsh-artifact-branch/model-experience/confirmed-evidence-bearing-result/what-the-model-sees:
+/agentrans-artifact-branch/model-experience/confirmed-evidence-bearing-result/what-the-model-sees:
   en: 2af41071dc8b6f27
   zh: ba1b56dc6e71cedf
-/deepseek-ai-dsh-artifact-branch/model-experience/confirmed-evidence-bearing-result/token-effect:
+/agentrans-artifact-branch/model-experience/confirmed-evidence-bearing-result/token-effect:
   en: ec288d1bf28a1fc8
   zh: a902b87ff154146b
-/deepseek-ai-dsh-artifact-branch/model-experience/confirmed-evidence-bearing-result/kv-cache-effect:
+/agentrans-artifact-branch/model-experience/confirmed-evidence-bearing-result/kv-cache-effect:
   en: c07495122756366f
   zh: 35301144d3f2c8ed
-/deepseek-ai-dsh-artifact-branch/model-experience/confirmed-evidence-bearing-result/kv-cache-effect/evidence-attribution:
+/agentrans-artifact-branch/model-experience/confirmed-evidence-bearing-result/kv-cache-effect/evidence-attribution:
   en: 43942d08393a6bea
   zh: 52813df595e2b1ab
-/deepseek-ai-dsh-artifact-branch/known-limitations-and-deferred-work:
+/agentrans-artifact-branch/known-limitations-and-deferred-work:
   en: 386d31144a47b777
   zh: 7a45b3aeec8da2e6
-/deepseek-ai-dsh-artifact-branch/known-limitations-and-deferred-work/dev-note:
+/agentrans-artifact-branch/known-limitations-and-deferred-work/dev-note:
   en: 3408957ec7d1c7aa
   zh: 0cf2e111184eb446

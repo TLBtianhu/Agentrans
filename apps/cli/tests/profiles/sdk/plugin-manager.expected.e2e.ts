@@ -4,7 +4,7 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { DeepSeekHarness } from '@deepseek-ai/dsh-sdk-client'
+import { DeepSeekHarness } from '@agentrans/sdk-client'
 import { expect, it } from 'vitest'
 import { z } from 'zod'
 import { profileEnvironment } from './fixtures/profile-environment.ts'
@@ -33,7 +33,7 @@ it.for(['standard', 'ptc'] as const)('keeps %s plugin changes pending until the 
           const messages = current.messages as { content: { type: string; content?: { text: string }[] }[] }[]
           const result = messages.flatMap(message => message.content).findLast(block => block.type === 'tool_result')
           const page = listPage.parse(JSON.parse(result!.content![0]!.text))
-          const row = page.entries.find(entry => entry.moduleName === '@deepseek-ai/dsh-tool-web')
+          const row = page.entries.find(entry => entry.moduleName === '@agentrans/tool-web')
           if (row !== undefined) {
             args = { action: 'set_plugin', target: row.entryId, enabled: false }
             phase = 'set'
@@ -117,7 +117,7 @@ it.for(['unavailable', 'approved', 'missing-pnpm'] as const)('reports the %s plu
       try { requests.push(JSON.parse(body) as Record<string, unknown>) }
       catch (error) { fixtureError = error }
       const args = scenario === 'missing-pnpm'
-        ? { action: 'install_bundle', target: '@deepseek-ai/dsh-subagent-codex' }
+        ? { action: 'install_bundle', target: '@agentrans/subagent-codex' }
         : { action: 'list_plugins', limit: 1 }
       const call = { type: 'tool_use', id: 'prerequisite', name: 'plugin_manager', input: args }
       response.writeHead(200, { 'content-type': 'text/event-stream' })

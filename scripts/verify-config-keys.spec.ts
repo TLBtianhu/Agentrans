@@ -12,8 +12,8 @@ describe('config key verification', () => {
   })
 
   it('resolves the owning package of a Loader row', () => {
-    expect(configOwnerPackage('@deepseek-ai/dsh-agent-loop')).toBe('@deepseek-ai/dsh-agent-loop')
-    expect(configOwnerPackage('@deepseek-ai/dsh-plugin-manager/tools')).toBe('@deepseek-ai/dsh-plugin-manager')
+    expect(configOwnerPackage('@agentrans/agent-loop')).toBe('@agentrans/agent-loop')
+    expect(configOwnerPackage('@agentrans/plugin-manager/tools')).toBe('@agentrans/plugin-manager')
     expect(configOwnerPackage('cordis-plugin-timer')).toBe('cordis-plugin-timer')
     expect(configOwnerPackage('./local/plugin.ts')).toBeUndefined()
   })

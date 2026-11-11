@@ -1,6 +1,6 @@
 /** The API-key route follows the official listing only for the built-in catalog on the official endpoint. */
 import { expect, it } from 'vitest'
-import { resolveAdapterOptions as resolveProtocolOptions } from '@deepseek-ai/dsh-llm-deepseek'
+import { resolveAdapterOptions as resolveProtocolOptions } from '@agentrans/llm-deepseek'
 import { Config, plainOptions, resolveAdapterOptions } from '../src/config.ts'
 
 const LISTING = { url: 'https://api.deepseek.com/models', timeoutMs: 5_000, maxAgeMs: 600_000 }

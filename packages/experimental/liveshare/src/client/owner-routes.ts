@@ -9,7 +9,7 @@
  * the root leaves a mounted deployment behind. Every entry here is the path the owner host registers
  * with its leading slash stripped; `verify-client-route-resolution` keeps the two forms apart.
  *
- * @module @deepseek-ai/dsh-experimental-liveshare/src/client/owner-routes
+ * @module @agentrans/experimental-liveshare/src/client/owner-routes
  */
 
 /** Same-origin owner endpoints the share sign-in calls. */

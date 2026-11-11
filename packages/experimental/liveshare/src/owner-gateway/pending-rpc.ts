@@ -1,7 +1,7 @@
 /** Correlate IPC requests by worker-issued tokens and Relay ids by their exact socket. */
 
 import { randomUUID } from 'node:crypto'
-import type { TunnelRequestToken } from '@deepseek-ai/dsh-experimental-liveshare-protocol'
+import type { TunnelRequestToken } from '@agentrans/experimental-liveshare-protocol'
 
 /** One request and the exact Relay connection that may receive its response. */
 export interface PendingRequest<T> {

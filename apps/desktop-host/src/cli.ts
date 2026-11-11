@@ -4,7 +4,7 @@ import { delimiter, dirname, join, resolve } from 'node:path'
 import {
   PRODUCT_LAUNCH_CONTEXT_ENV, ProductLaunchError,
   applyProductLaunchEnvironment, prepareProductState, resolvePackagedLaunchContext,
-} from '@deepseek-ai/dsh-product-layout/launch-context'
+} from '@agentrans/product-layout/launch-context'
 import { installOfficeEngineResolution, runtimeArchivePath } from './office-engine.ts'
 
 /**
@@ -21,7 +21,7 @@ export async function runDesktopCli(runtimeDir: string, supportDir: string): Pro
   prepareProductState(context)
   applyProductLaunchEnvironment(context, process.env)
   installOfficeEngineResolution(runtimeDir)
-  const { runCli } = await import('@deepseek-ai/dsh/lib/bin.js')
+  const { runCli } = await import('@agentrans/dsh/lib/bin.js')
   await runCli({
     manageDesktopProfile: true,
     packageManager: {

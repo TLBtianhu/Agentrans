@@ -1,7 +1,7 @@
 /** Command registration, normalized default bindings, and synchronous dispatch. */
-import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
-import { bindingIssue, bindingKey, effectiveShortcuts, initialShortcutConfig, isWebBindingAllowed, normalizeBinding, overlappingBindings, presentBinding, resolveShortcutDefault } from '@deepseek-ai/dsh-shortcut-protocol'
-import type { ShortcutCommandId, ShortcutConfigSnapshot, ShortcutDefinition, ShortcutPlatform, ShortcutRuntime } from '@deepseek-ai/dsh-shortcut-protocol'
+import { createSnapshotStore } from '@agentrans/client-store'
+import { bindingIssue, bindingKey, effectiveShortcuts, initialShortcutConfig, isWebBindingAllowed, normalizeBinding, overlappingBindings, presentBinding, resolveShortcutDefault } from '@agentrans/shortcut-protocol'
+import type { ShortcutCommandId, ShortcutConfigSnapshot, ShortcutDefinition, ShortcutPlatform, ShortcutRuntime } from '@agentrans/shortcut-protocol'
 import type { ShortcutCatalogEntry, ShortcutCommand, ShortcutContext, ShortcutGesture,
   ShortcutFixedCommand, ShortcutFixedCatalogEntry } from './types.ts'
 

@@ -3,7 +3,7 @@ description: "Define test tools and invoke tool pipelines or selected executors 
 kind: "package-library"
 ---
 
-# @deepseek-ai/dsh-tool-testkit
+# @agentrans/tool-testkit
 
 English | [中文](README.zh.md)
 
@@ -25,10 +25,10 @@ Use this package to define content-producing test tools and exercise tool execut
 <a id="use-this-package"></a>
 ## Use this package
 
-Add `@deepseek-ai/dsh-tool-testkit` to the consuming package's `devDependencies`. Define a fixture when the test needs rendered content without a domain-specific result value:
+Add `@agentrans/tool-testkit` to the consuming package's `devDependencies`. Define a fixture when the test needs rendered content without a domain-specific result value:
 
 ```ts
-import { defineContentToolFixture } from '@deepseek-ai/dsh-tool-testkit'
+import { defineContentToolFixture } from '@agentrans/tool-testkit'
 
 const tool = defineContentToolFixture({
   name: 'echo',

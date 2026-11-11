@@ -6,17 +6,17 @@
  * states the page's condition; which writes each Session offers comes from the calling Peer's access
  * snapshot, which every surface reads through its own access Hook.
  *
- * @module @deepseek-ai/dsh-experimental-liveshare/src/client/viewer-session-plugin
+ * @module @agentrans/experimental-liveshare/src/client/viewer-session-plugin
  */
 
-import type { Context as ClientContext } from '@deepseek-ai/cordis'
-import type { ComposerBlock } from '@deepseek-ai/dsh-client-ui-conversation/client'
-import type { HostObservable } from '@deepseek-ai/dsh-client-ui-slots'
-import type { ConnectionHandle } from '@deepseek-ai/dsh-client-connection/client'
+import type { Context as ClientContext } from '@agentrans/cordis'
+import type { ComposerBlock } from '@agentrans/client-ui-conversation/client'
+import type { HostObservable } from '@agentrans/client-ui-slots'
+import type { ConnectionHandle } from '@agentrans/client-connection/client'
 // Type-only: pulls the `remoteAccess` Client service merge.
-import type {} from '@deepseek-ai/dsh-api-remote-access/client'
+import type {} from '@agentrans/api-remote-access/client'
 // Type-only: pulls the `locale` Client service merge.
-import type {} from '@deepseek-ai/dsh-client-locale/client'
+import type {} from '@agentrans/client-locale/client'
 import { openSharedSession } from './viewer-session.ts'
 import {
   PAGE_WIDE_REFUSALS,

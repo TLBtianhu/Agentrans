@@ -1,5 +1,5 @@
 import { memo, useCallback, useMemo } from 'react'
-import type { InjectFace, PropsRenderSlots } from '@deepseek-ai/dsh-client-ui-slots'
+import type { InjectFace, PropsRenderSlots } from '@agentrans/client-ui-slots'
 import type { ChatFileMentions, ChatNodeViewProps, PresentationInjected, TurnTailOwnerProps } from '../contract/slots.ts'
 import { AssistantMarkdown } from './AssistantMarkdown.tsx'
 import { MessageIconActions } from './MessageIconActions.tsx'

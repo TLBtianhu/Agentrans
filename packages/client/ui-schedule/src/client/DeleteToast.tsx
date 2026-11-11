@@ -9,10 +9,10 @@
  * it.
  */
 import type { ReactNode } from 'react'
-import { IconWarningOutlineRegular, Toast } from '@deepseek-ai/dsh-client-ui-primitives'
-import type { HostObservable, InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
-import type {} from '@deepseek-ai/dsh-client-ui-layout/client'
-import { assertNever } from '@deepseek-ai/dsh-util-values'
+import { IconWarningOutlineRegular, Toast } from '@agentrans/client-ui-primitives'
+import type { HostObservable, InjectFace, PropsLocale, PropsRuntime } from '@agentrans/client-ui-slots'
+import type {} from '@agentrans/client-ui-layout/client'
+import { assertNever } from '@agentrans/util-values'
 import type { CatalogDeleteOutcome } from './catalog-source.ts'
 import type { ClearEndedOutcome } from './clear-ended.ts'
 

@@ -1,6 +1,6 @@
 /** Self-contained program API injected before authored HTML scripts in one opaque iframe. */
-import type { ArtifactRuntimeCommand, ArtifactRuntimeFailure, ArtifactRuntimeIdentity, RuntimeReport } from '@deepseek-ai/dsh-artifact-runtime/types'
-import { isBoundedArtifactJson } from '@deepseek-ai/dsh-artifact/runtime-values'
+import type { ArtifactRuntimeCommand, ArtifactRuntimeFailure, ArtifactRuntimeIdentity, RuntimeReport } from '@agentrans/artifact-runtime/types'
+import { isBoundedArtifactJson } from '@agentrans/artifact/runtime-values'
 import { ARTIFACT_ACTION_MAX_BYTES, ARTIFACT_ACTION_MAX_DEPTH, ARTIFACT_ACTION_MAX_NODES } from './messages.ts'
 import { ARTIFACT_RUNTIME_FAILURE_MAX_BYTES } from './runtime-messages.ts'
 

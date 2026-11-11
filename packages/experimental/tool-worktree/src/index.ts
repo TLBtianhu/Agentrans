@@ -1,8 +1,8 @@
 /** Model tool for creating and entering a new Git worktree through the shared runtime. */
 
-import type { Context } from '@deepseek-ai/cordis'
-import type {} from '@deepseek-ai/dsh-experimental-worktree'
-import { defineTool } from '@deepseek-ai/dsh-tools'
+import type { Context } from '@agentrans/cordis'
+import type {} from '@agentrans/experimental-worktree'
+import { defineTool } from '@agentrans/tools'
 
 /** Cordis plugin name. */
 export const name = 'tool-worktree'

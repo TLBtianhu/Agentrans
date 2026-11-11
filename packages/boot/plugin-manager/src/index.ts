@@ -4,19 +4,19 @@ import { existsSync, readFileSync } from 'node:fs'
 import { readFile, rm } from 'node:fs/promises'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { withFileLock, writeFileAtomic } from '@deepseek-ai/dsh-atomic-write'
-import { Context } from '@deepseek-ai/cordis'
-import type { EntryOptions } from '@deepseek-ai/cordis-plugin-loader'
-import type { PatchOptions } from '@deepseek-ai/cordis-plugin-include'
-import z from '@deepseek-ai/schemastery'
+import { withFileLock, writeFileAtomic } from '@agentrans/atomic-write'
+import { Context } from '@agentrans/cordis'
+import type { EntryOptions } from '@agentrans/cordis-plugin-loader'
+import type { PatchOptions } from '@agentrans/cordis-plugin-include'
+import z from '@agentrans/schemastery'
 import semver from 'semver'
-import { TypertRemoteService, Remote, RemoteError, remoteErrorOf } from '@deepseek-ai/dsh-typert-protocol'
-import { detailImageResponse, NPM_FILE_SOURCES } from '@deepseek-ai/dsh-plugin-detail'
-import type { NpmFileSource } from '@deepseek-ai/dsh-plugin-detail/types'
-import { MAX_TIMER_DELAY_MS } from '@deepseek-ai/dsh-timeout'
-import type {} from '@deepseek-ai/dsh-client-connection'
+import { TypertRemoteService, Remote, RemoteError, remoteErrorOf } from '@agentrans/typert-protocol'
+import { detailImageResponse, NPM_FILE_SOURCES } from '@agentrans/plugin-detail'
+import type { NpmFileSource } from '@agentrans/plugin-detail/types'
+import { MAX_TIMER_DELAY_MS } from '@agentrans/timeout'
+import type {} from '@agentrans/client-connection'
 import { readBundleDocument, readBundleImage, type BundleDetailOptions } from './bundle-detail.ts'
-import { pluginEntryId, readPluginInventory } from '@deepseek-ai/dsh-host-plugin-inventory'
+import { pluginEntryId, readPluginInventory } from '@agentrans/host-plugin-inventory'
 import {
   readPluginMeta, readProfileManifest, resolveBundleDir, loadOverlayPatches, composeEntries,
   readProfilePatches, bundlePatchPaths,
@@ -24,10 +24,10 @@ import {
   setProfileVersionExemption, validatePluginVersionExemption, PROFILE_COMPATIBILITY_FILENAME,
   getDshRuntimeVersion, ResolutionRestartRequired,
   assertBundlePlatform, UnsupportedBundlePlatformError,
-} from '@deepseek-ai/dsh-app-boot'
-import { OPTIONAL_BUNDLES, OFFICIAL_ON_DEMAND_CATALOG, PROTECTED_PLUGINS } from '@deepseek-ai/dsh-official-bundles'
-import type {} from '@deepseek-ai/dsh-hmr'
-import type { ProfileContext, ProfileManifest } from '@deepseek-ai/dsh-app-boot'
+} from '@agentrans/app-boot'
+import { OPTIONAL_BUNDLES, OFFICIAL_ON_DEMAND_CATALOG, PROTECTED_PLUGINS } from '@agentrans/official-bundles'
+import type {} from '@agentrans/hmr'
+import type { ProfileContext, ProfileManifest } from '@agentrans/app-boot'
 import { bundleManifest, readProfileRegistry, registryArguments, runProfilePnpm, saveManifest, viewProfilePackage } from './operations.ts'
 import { classifyInstallFailure } from './install-failure.ts'
 import { officialBundleInstallTarget } from './official-install-target.ts'
@@ -301,7 +301,7 @@ function diagnosticVersion(value: unknown): string | undefined {
   return typeof value === 'string' && value.length <= 128 ? value : undefined
 }
 
-declare module '@deepseek-ai/cordis' {
+declare module '@agentrans/cordis' {
   interface Context {
     /** Persistent management of the current profile's composition and packages. */
     pluginManager: PluginManager

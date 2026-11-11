@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import type { ArtifactId, ArtifactSnapshot } from '@deepseek-ai/dsh-artifact/types'
-import type { ArtifactRuntimeIdentity, ArtifactRuntimeId } from '@deepseek-ai/dsh-artifact-runtime/types'
+import type { ArtifactId, ArtifactSnapshot } from '@agentrans/artifact/types'
+import type { ArtifactRuntimeIdentity, ArtifactRuntimeId } from '@agentrans/artifact-runtime/types'
 import { ArtifactRuntimePreview } from '../src/client/ArtifactRuntimePreview.tsx'
 import { ArtifactRuntimeOwner } from '../src/client/runtime-owner.ts'
 import { runtimeChannel } from './runtime-channel.client.ts'

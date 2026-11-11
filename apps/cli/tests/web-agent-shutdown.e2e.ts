@@ -6,7 +6,7 @@ import { createInterface } from 'node:readline'
 import { fileURLToPath } from 'node:url'
 import { execa } from 'execa'
 import { expect, it } from 'vitest'
-import { resolveExampleLaunch } from '@deepseek-ai/dsh-loader-smoke'
+import { resolveExampleLaunch } from '@agentrans/loader-smoke'
 
 it.each([
   { state: 'idle', cancelFirst: false },

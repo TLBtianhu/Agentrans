@@ -1,12 +1,12 @@
-/** Verbatim content-addressed local file storage. @module @deepseek-ai/dsh-attachment-local/file-store */
+/** Verbatim content-addressed local file storage. @module @agentrans/attachment-local/file-store */
 
 import { createHash } from 'node:crypto'
 import { createReadStream } from 'node:fs'
 import { join } from 'node:path'
-import { AttachmentError, AttachmentId } from '@deepseek-ai/dsh-attachment'
+import { AttachmentError, AttachmentId } from '@agentrans/attachment'
 import type {
   FileAttachmentRef, SaveFileAttachment, SaveFileStreamAttachment,
-} from '@deepseek-ai/dsh-attachment'
+} from '@agentrans/attachment'
 import {
   publishImmutableAlias, publishImmutableObject, publishImmutableObjectStream,
 } from './store.ts'

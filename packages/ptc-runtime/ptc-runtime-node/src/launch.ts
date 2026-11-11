@@ -1,8 +1,8 @@
 /** Select source or built bootstrap assets in the mounted execution world. */
 import { dirname, isAbsolute, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import type { FileSystem } from '@deepseek-ai/dsh-fs'
-import { assertNever } from '@deepseek-ai/dsh-util-values'
+import type { FileSystem } from '@agentrans/fs'
+import { assertNever } from '@agentrans/util-values'
 
 /** Deployment-owned worker invocation in the subprocess execution world. */
 export type LaunchConfig = {
@@ -66,7 +66,7 @@ function scriptBootstrapArgs(
     return [mapped(fileURLToPath(new URL('./process.js', import.meta.url))), String(maxMessageBytes)]
   }
   const entry = mapped(fileURLToPath(new URL('./process.ts', import.meta.url)))
-  const subprocess = dirname(fileURLToPath(import.meta.resolve('@deepseek-ai/dsh-subprocess/package.json')))
+  const subprocess = dirname(fileURLToPath(import.meta.resolve('@agentrans/subprocess/package.json')))
   const helper = mapped(resolve(subprocess, 'src/control.ts'))
   const source = `const {openInheritedControlChannel}=await import(${JSON.stringify(pathToFileURL(helper).href)});const {runNodeMain}=await import(${JSON.stringify(pathToFileURL(entry).href)});await runNodeMain(openInheritedControlChannel(),${maxMessageBytes},process);`
   return ['--input-type=module', '--eval', source]

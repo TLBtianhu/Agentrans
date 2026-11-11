@@ -1,9 +1,9 @@
-# Agent preset cordis: one `@deepseek-ai/dsh-agent-preset` declaration inserted
+# Agent preset cordis: one `@agentrans/agent-preset` declaration inserted
 # after the web patch. Edits saved from the Web editor override this row's
 # `config.plugins` by id from the profile patch.
 - insert:
     - id: preset-cordis
-      name: '@deepseek-ai/dsh-agent-preset'
+      name: '@agentrans/agent-preset'
       config:
         id: cordis
         order: 4
@@ -11,39 +11,39 @@
           # Same persona as `standard`: tool descriptions and the skill catalog carry
           # the operating detail, and the skills own the preset-authoring rules.
           - id: persona
-            name: '@deepseek-ai/dsh-persona'
+            name: '@agentrans/persona'
             config:
               prefix: >-
                 You are a coding agent powered by the {{model}} model.
           - id: agent-instructions
-            name: '@deepseek-ai/dsh-agent-instructions'
+            name: '@agentrans/agent-instructions'
             config:
               maxBytes: 65536
           - id: time-context
-            name: '@deepseek-ai/dsh-time-context'
+            name: '@agentrans/time-context'
           - id: tool-bash
-            name: '@deepseek-ai/dsh-tool-bash'
+            name: '@agentrans/tool-bash'
             disabled: !!js process.platform === 'win32'
           - id: tool-pwsh
-            name: '@deepseek-ai/dsh-tool-pwsh'
+            name: '@agentrans/tool-pwsh'
             disabled: !!js process.platform !== 'win32'
           - id: tool-fs
-            name: '@deepseek-ai/dsh-tool-fs'
+            name: '@agentrans/tool-fs'
             config:
               # Set true to add the apply_patch tool beside edit.
               applyPatch: false
           - id: tool-fs-search
-            name: '@deepseek-ai/dsh-tool-fs-search'
+            name: '@agentrans/tool-fs-search'
             config:
               sampleOverCapGlobResults: false
           - id: tool-jobs
-            name: '@deepseek-ai/dsh-tool-jobs'
+            name: '@agentrans/tool-jobs'
           - id: tool-schedule
-            name: '@deepseek-ai/dsh-tool-schedule'
+            name: '@agentrans/tool-schedule'
           - id: command-goal
-            name: '@deepseek-ai/dsh-command-goal'
+            name: '@agentrans/command-goal'
           - id: tool-goal
-            name: '@deepseek-ai/dsh-tool-goal'
+            name: '@agentrans/tool-goal'
           - id: planning
             name: cordis:group
             group: true
@@ -51,7 +51,7 @@
               planMode: true
             config:
               - id: plan-mode
-                name: '@deepseek-ai/dsh-plan-mode'
+                name: '@agentrans/plan-mode'
                 config:
                   section: |
                     You are in plan mode. Stay in plan mode until the user approves your plan through exit_plan_mode or switches the session mode. Imperative language to implement changes means plan the implementation, not execute it. A user's conversational agreement — including an answer confirming something you asked — approves nothing and does not end plan mode; fold the confirmed decision into the plan and submit it through exit_plan_mode.
@@ -73,11 +73,11 @@
               toolResultPruner: true
             config:
               - id: compaction-basic
-                name: '@deepseek-ai/dsh-compaction-basic'
+                name: '@agentrans/compaction-basic'
               - id: command-compact
-                name: '@deepseek-ai/dsh-command-compact'
+                name: '@agentrans/command-compact'
               - id: tool-result-pruner
-                name: '@deepseek-ai/dsh-compaction-tool-result-pruner'
+                name: '@agentrans/compaction-tool-result-pruner'
                 config:
                   thresholdChars: 8192
                   headChars: 4096
@@ -89,56 +89,56 @@
               workflowEngine: true
             config:
               - id: tool-subagent-control
-                name: '@deepseek-ai/dsh-tool-subagent-control'
+                name: '@agentrans/tool-subagent-control'
               - id: tool-subagent
-                name: '@deepseek-ai/dsh-tool-subagent'
+                name: '@agentrans/tool-subagent'
                 config:
                   provider: spawn
                   toolName: subagent
                   modelSelection: true
                   modelDiscovery: true
               - id: tool-subagent-fork
-                name: '@deepseek-ai/dsh-tool-subagent'
+                name: '@agentrans/tool-subagent'
                 config:
                   provider: fork
                   toolName: subagent_fork
               - id: workflow-ptc
-                name: '@deepseek-ai/dsh-workflow-ptc'
+                name: '@agentrans/workflow-ptc'
                 config:
                   provider: spawn
               - id: tool-workflow
-                name: '@deepseek-ai/dsh-tool-workflow'
+                name: '@agentrans/tool-workflow'
           - id: tool-ask-user
-            name: '@deepseek-ai/dsh-tool-ask-user'
+            name: '@agentrans/tool-ask-user'
           - id: tool-todo
-            name: '@deepseek-ai/dsh-tool-todo'
+            name: '@agentrans/tool-todo'
             config:
               allowParallelInProgress: true
           - id: tool-web
-            name: '@deepseek-ai/dsh-tool-web'
+            name: '@agentrans/tool-web'
             config:
               fetch: true
               searchTimeoutMs: 60000
           - id: tool-cordis
-            name: '@deepseek-ai/dsh-tool-cordis'
+            name: '@agentrans/tool-cordis'
           - id: skill-filesystem
-            name: '@deepseek-ai/dsh-skill-filesystem'
+            name: '@agentrans/skill-filesystem'
             config:
               customSkillDirs:
-                - !!js process.getBuiltinModule('node:path').join(process.getBuiltinModule('node:path').dirname(process.getBuiltinModule('node:module').createRequire(baseUrl).resolve('@deepseek-ai/dsh-agent-preset/package.json')), 'skills')
+                - !!js process.getBuiltinModule('node:path').join(process.getBuiltinModule('node:path').dirname(process.getBuiltinModule('node:module').createRequire(baseUrl).resolve('@agentrans/agent-preset/package.json')), 'skills')
           - id: tool-skill
-            name: '@deepseek-ai/dsh-tool-skill'
+            name: '@agentrans/tool-skill'
           - id: present
-            name: '@deepseek-ai/dsh-tool-present'
+            name: '@agentrans/tool-present'
           - id: artifact
-            name: '@deepseek-ai/dsh-artifact/tool'
+            name: '@agentrans/artifact/tool'
           - id: scene
-            name: '@deepseek-ai/dsh-artifact/scene-tool'
+            name: '@agentrans/artifact/scene-tool'
           - id: artifact-runtime
-            name: '@deepseek-ai/dsh-artifact-runtime/tool'
+            name: '@agentrans/artifact-runtime/tool'
           - id: tool-plugin-manager
-            name: '@deepseek-ai/dsh-plugin-manager/tools'
+            name: '@agentrans/plugin-manager/tools'
             disabled: !!js "!ctx.get('profileContext')"
           - id: tool-plugin-market
-            name: '@deepseek-ai/dsh-plugin-market/tools'
+            name: '@agentrans/plugin-market/tools'
             disabled: !!js "!ctx.get('profileContext')"

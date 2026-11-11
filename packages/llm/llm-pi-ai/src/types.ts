@@ -1,6 +1,6 @@
 /** Request metadata exposed to pi-ai transport-header contributors. */
 
-import type { GenerateOptions } from '@deepseek-ai/dsh-llm'
+import type { GenerateOptions } from '@agentrans/llm'
 
 /** Model-hidden routing metadata from the exact prepared adapter call. */
 export interface PiAiRequestHeaderContext extends Readonly<Pick<GenerateOptions<string>,

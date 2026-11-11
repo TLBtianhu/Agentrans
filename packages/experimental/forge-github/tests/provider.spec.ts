@@ -1,4 +1,4 @@
-import { changeRequestKey } from '@deepseek-ai/dsh-experimental-forge'
+import { changeRequestKey } from '@agentrans/experimental-forge'
 import { describe, expect, it } from 'vitest'
 import { GhOutputLimitError, GhTimeoutError, GhUnavailableError } from '../src/gh.ts'
 import type { GhOutput, GhRunner } from '../src/gh.ts'

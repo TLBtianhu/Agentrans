@@ -1,8 +1,8 @@
 /** Browser-safe panel state, the worktree request record, Remote error codes, and Host configuration of the forge panel. */
 
-import type {} from '@deepseek-ai/dsh-typert-protocol'
-import type { ChangeRequestSnapshot, ForgeReadiness, ForgeRepository } from '@deepseek-ai/dsh-experimental-forge/types'
-import type { SessionChangeRequest } from '@deepseek-ai/dsh-experimental-forge-session/types'
+import type {} from '@agentrans/typert-protocol'
+import type { ChangeRequestSnapshot, ForgeReadiness, ForgeRepository } from '@agentrans/experimental-forge/types'
+import type { SessionChangeRequest } from '@agentrans/experimental-forge-session/types'
 
 /** Git facts for the checkout that contains the Session's current directory. */
 export interface ForgeCheckout {
@@ -341,7 +341,7 @@ export interface Config {
   maxCachedDiffBytes?: number
 }
 
-declare module '@deepseek-ai/dsh-typert-protocol' {
+declare module '@agentrans/typert-protocol' {
   interface RemoteErrorDetailsMap {
     /** No registered provider serves the change request URL. */
     'forgePanel/unrecognized-url': Record<string, never>
@@ -383,14 +383,14 @@ declare module '@deepseek-ai/dsh-typert-protocol' {
   }
 }
 
-declare module '@deepseek-ai/dsh-session/types' {
+declare module '@agentrans/session/types' {
   interface PluginRecordMap {
     /** A request, withdrawal, or creation of the worktree a Session starts in. */
     'plugin:client-ui-forge/worktree': WorktreeRecord
   }
 }
 
-declare module '@deepseek-ai/dsh-session-projection/types' {
+declare module '@agentrans/session-projection/types' {
   interface SessionProjectionMap {
     /** The worktree the panel created for the Session while the Session works in it, else null. */
     forgeWorktree: ForgeSessionWorktree | null

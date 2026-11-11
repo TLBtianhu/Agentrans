@@ -2,10 +2,10 @@
 /** Quote display consumes decoded text without evaluating its contents. */
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
-import { formatQuoteText } from '@deepseek-ai/dsh-client-ui-primitives'
-import { UserTextRegistry } from '@deepseek-ai/dsh-client-ui-conversation/src/client/conversation/user-text-registry.ts'
-import type { UserTextFacts } from '@deepseek-ai/dsh-client-ui-conversation/client'
+import { Context } from '@agentrans/cordis'
+import { formatQuoteText } from '@agentrans/client-ui-primitives'
+import { UserTextRegistry } from '@agentrans/client-ui-conversation/src/client/conversation/user-text-registry.ts'
+import type { UserTextFacts } from '@agentrans/client-ui-conversation/client'
 import { quoteRule } from '../src/client/quote-rule.ts'
 import { createUserTextFixture } from '../../../client/ui-conversation/tests/user-text-component-fixture.client.tsx'
 

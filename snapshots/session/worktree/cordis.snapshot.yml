@@ -3,7 +3,7 @@
 
 - insert:
     - id: llm-replay
-      name: '@deepseek-ai/dsh-llm-replay'
+      name: '@agentrans/llm-replay'
       config:
         providers:
           - id: deepseek-official
@@ -17,6 +17,6 @@
 
 - insert:
     - id: worktree
-      name: '@deepseek-ai/dsh-experimental-worktree'
+      name: '@agentrans/experimental-worktree'
     - id: tool-worktree
-      name: '@deepseek-ai/dsh-experimental-tool-worktree'
+      name: '@agentrans/experimental-tool-worktree'

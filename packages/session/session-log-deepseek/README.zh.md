@@ -3,7 +3,7 @@ description: "面向启用官方 DeepSeek 请求元数据的部署，增量上�
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-session-log-deepseek
+# @agentrans/session-log-deepseek
 
 [English](README.md) | 中文
 
@@ -48,8 +48,8 @@ Agentrans 随附基础组合包关闭此插件行，Web 组合包关闭其设置
 插件可通过 `ctx.sessionLogDeepSeek.registerExclusion()` 注册同步、无副作用的判断函数。函数接收存活的 `sessionId` 与可选请求用途 `purpose`；返回 `true` 时，省略本次请求的日志字段与接受回调。任意条件匹配都会排除上传。没有条件匹配时，应用普通上传资格判断。条件抛错时省略本次日志贡献，请求扩展注册器报告首次准备失败；模型请求继续携带其他已准备字段。
 
 ```ts
-import type { Context } from '@deepseek-ai/cordis'
-import type {} from '@deepseek-ai/dsh-session-log-deepseek'
+import type { Context } from '@agentrans/cordis'
+import type {} from '@agentrans/session-log-deepseek'
 
 export function apply(ctx: Context): void {
   ctx.inject(['sessionLogDeepSeek'], (child) => {

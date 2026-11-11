@@ -15,14 +15,14 @@
 import { createHash } from 'node:crypto'
 import { isDeepStrictEqual } from 'node:util'
 import { specTypeSchemas, type Client, type ImageContent } from '@modelcontextprotocol/client'
-import type { Context } from '@deepseek-ai/cordis'
-import { isImageAdmissionError } from '@deepseek-ai/dsh-attachment'
-import type { AttachmentStore, ImageAttachmentRef, ImageMediaType, SaveImageAttachment } from '@deepseek-ai/dsh-attachment'
-import type { ContentBlock } from '@deepseek-ai/dsh-llm'
-import type { ToolDefinition, ToolExecution, ToolExecutionResult } from '@deepseek-ai/dsh-tools'
-import { assertSupportedJsonSchema } from '@deepseek-ai/dsh-tools'
-import type { JsonSchemaNode } from '@deepseek-ai/dsh-tools'
-import type { JsonValue } from '@deepseek-ai/dsh-util-values'
+import type { Context } from '@agentrans/cordis'
+import { isImageAdmissionError } from '@agentrans/attachment'
+import type { AttachmentStore, ImageAttachmentRef, ImageMediaType, SaveImageAttachment } from '@agentrans/attachment'
+import type { ContentBlock } from '@agentrans/llm'
+import type { ToolDefinition, ToolExecution, ToolExecutionResult } from '@agentrans/tools'
+import { assertSupportedJsonSchema } from '@agentrans/tools'
+import type { JsonSchemaNode } from '@agentrans/tools'
+import type { JsonValue } from '@agentrans/util-values'
 
 /** Resolved options relevant to tool bridging. */
 export interface ToolBridgeOptions {

@@ -12,5 +12,5 @@ export default defineConfig({
   dts: false,
   clean: true,
   tsconfig: '../../../../tsconfig.base.json',
-  deps: { neverBundle: [/^@deepseek-ai\//], onlyBundle: false },
+  deps: { neverBundle: [/^@agentrans\//], onlyBundle: false },
 })

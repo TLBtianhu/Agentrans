@@ -6,8 +6,8 @@
 import { randomUUID } from 'node:crypto'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import type { SessionId } from '@deepseek-ai/dsh-session'
-import type { DailyScheduleRecord, ScheduleCatalogEntry, ScheduleTask } from '@deepseek-ai/dsh-schedule'
+import type { SessionId } from '@agentrans/session'
+import type { DailyScheduleRecord, ScheduleCatalogEntry, ScheduleTask } from '@agentrans/schedule'
 import { expect, it } from 'vitest'
 import { withDefaultWeb, webGet, webRequest } from './default-web-process.ts'
 

@@ -5,120 +5,120 @@
 /:
   en: 9fd8e0cf5872dc5b
   zh: c5209369edd2e941
-/deepseek-ai-dsh-sdk-jsonrpc-server:
-  en: 96813b70808d7c86
-  zh: ab20ab1cb59432c1
-/deepseek-ai-dsh-sdk-jsonrpc-server/summary:
+/agentrans-sdk-jsonrpc-server:
+  en: c51e45e417e515b3
+  zh: c80aa1bf3ea0f724
+/agentrans-sdk-jsonrpc-server/summary:
   en: 6b2e63cdc5dde6d0
   zh: a2ffe5532dcd4527
-/deepseek-ai-dsh-sdk-jsonrpc-server/table-of-contents:
+/agentrans-sdk-jsonrpc-server/table-of-contents:
   en: d152484eb41ac6b4
   zh: 09388d293f9be9cb
-/deepseek-ai-dsh-sdk-jsonrpc-server/use-this-package:
+/agentrans-sdk-jsonrpc-server/use-this-package:
   en: 48bda8dc9e6a0f36
   zh: d519c87f60ee77a0
-/deepseek-ai-dsh-sdk-jsonrpc-server/use-this-package/wiring:
+/agentrans-sdk-jsonrpc-server/use-this-package/wiring:
   en: 83544764febf1b54
   zh: 68b5b11cceeee8b0
-/deepseek-ai-dsh-sdk-jsonrpc-server/use-this-package/configuration:
-  en: 88e2ea228488f14c
-  zh: 364f933478684036
-/deepseek-ai-dsh-sdk-jsonrpc-server/use-this-package/stdout-is-the-protocol:
+/agentrans-sdk-jsonrpc-server/use-this-package/configuration:
+  en: 30df49f21e31f017
+  zh: ec76675c5c6beba9
+/agentrans-sdk-jsonrpc-server/use-this-package/stdout-is-the-protocol:
   en: 784b68b5a498f2d5
   zh: 2c3c5a1490845179
-/deepseek-ai-dsh-sdk-jsonrpc-server/use-this-package/what-sdk-clients-can-do:
+/agentrans-sdk-jsonrpc-server/use-this-package/what-sdk-clients-can-do:
   en: 3e657fa4c9586454
   zh: 26d572f91e124cc5
-/deepseek-ai-dsh-sdk-jsonrpc-server/use-this-package/native-user-questions:
+/agentrans-sdk-jsonrpc-server/use-this-package/native-user-questions:
   en: 5100c311c8476f93
   zh: 60d4bc3165731246
-/deepseek-ai-dsh-sdk-jsonrpc-server/use-this-package/shutdown-and-exit:
+/agentrans-sdk-jsonrpc-server/use-this-package/shutdown-and-exit:
   en: dbe2244f4fd9e38a
   zh: d1a38bda11089ec8
-/deepseek-ai-dsh-sdk-jsonrpc-server/understand-the-implementation:
+/agentrans-sdk-jsonrpc-server/understand-the-implementation:
   en: eca39e7027d67d8f
   zh: dd3f494276322857
-/deepseek-ai-dsh-sdk-jsonrpc-server/understand-the-implementation/design-concept:
+/agentrans-sdk-jsonrpc-server/understand-the-implementation/design-concept:
   en: d1d0cd8ac2ff2f45
   zh: 229c811e2bcf1acc
-/deepseek-ai-dsh-sdk-jsonrpc-server/understand-the-implementation/source-map:
+/agentrans-sdk-jsonrpc-server/understand-the-implementation/source-map:
   en: 783bd2b6628c0680
   zh: ca5b6b730893ddec
-/deepseek-ai-dsh-sdk-jsonrpc-server/understand-the-implementation/request-flow:
+/agentrans-sdk-jsonrpc-server/understand-the-implementation/request-flow:
   en: 2171138a6a88e26e
   zh: fd410beea988ed81
-/deepseek-ai-dsh-sdk-jsonrpc-server/understand-the-implementation/teardown:
+/agentrans-sdk-jsonrpc-server/understand-the-implementation/teardown:
   en: 4205fac5cf93edbf
   zh: 8b81e1f3666cf580
-/deepseek-ai-dsh-sdk-jsonrpc-server/further-exploration:
+/agentrans-sdk-jsonrpc-server/further-exploration:
   en: cea854984c56c75a
   zh: 1ee5eaab8305e10d
-/deepseek-ai-dsh-sdk-jsonrpc-server/model-experience:
+/agentrans-sdk-jsonrpc-server/model-experience:
   en: 215e7ba838619b7b
   zh: a311da3843709f90
-/deepseek-ai-dsh-sdk-jsonrpc-server/model-experience/sdk-user-message:
+/agentrans-sdk-jsonrpc-server/model-experience/sdk-user-message:
   en: 04d1b73cd8e06dfe
   zh: cd67fbbfdf39f776
-/deepseek-ai-dsh-sdk-jsonrpc-server/model-experience/sdk-user-message/what-the-model-sees:
+/agentrans-sdk-jsonrpc-server/model-experience/sdk-user-message/what-the-model-sees:
   en: 04c09df4f7053490
   zh: 236f0f0b97892821
-/deepseek-ai-dsh-sdk-jsonrpc-server/model-experience/sdk-user-message/token-effect:
+/agentrans-sdk-jsonrpc-server/model-experience/sdk-user-message/token-effect:
   en: 372ed851986b76d2
   zh: 075b94a565275368
-/deepseek-ai-dsh-sdk-jsonrpc-server/model-experience/sdk-user-message/kv-cache-effect:
+/agentrans-sdk-jsonrpc-server/model-experience/sdk-user-message/kv-cache-effect:
   en: f5d5f97a153f7c70
   zh: f681f89596f500f5
-/deepseek-ai-dsh-sdk-jsonrpc-server/model-experience/manual-compaction:
+/agentrans-sdk-jsonrpc-server/model-experience/manual-compaction:
   en: fa59bcc530a2f385
   zh: 4b17b38c0b30e85f
-/deepseek-ai-dsh-sdk-jsonrpc-server/model-experience/manual-compaction/what-the-model-sees:
+/agentrans-sdk-jsonrpc-server/model-experience/manual-compaction/what-the-model-sees:
   en: 2be503bfb0db7b70
   zh: 1e0e2da4a8bc243b
-/deepseek-ai-dsh-sdk-jsonrpc-server/model-experience/manual-compaction/token-effect:
+/agentrans-sdk-jsonrpc-server/model-experience/manual-compaction/token-effect:
   en: 8f0d7b5a80cc1240
   zh: 2c28370ab2ff5556
-/deepseek-ai-dsh-sdk-jsonrpc-server/model-experience/manual-compaction/kv-cache-effect:
+/agentrans-sdk-jsonrpc-server/model-experience/manual-compaction/kv-cache-effect:
   en: 6575950aede7f71e
   zh: bfbfbba8b10fc448
-/deepseek-ai-dsh-sdk-jsonrpc-server/model-experience/session-permission-changes:
+/agentrans-sdk-jsonrpc-server/model-experience/session-permission-changes:
   en: 9a6bbed77944026e
   zh: 0cf9e179dddeeeb5
-/deepseek-ai-dsh-sdk-jsonrpc-server/model-experience/session-permission-changes/what-the-model-sees:
+/agentrans-sdk-jsonrpc-server/model-experience/session-permission-changes/what-the-model-sees:
   en: 2ee1c7fe78fd7637
   zh: d8f4efac56c1606f
-/deepseek-ai-dsh-sdk-jsonrpc-server/model-experience/session-permission-changes/token-effect:
+/agentrans-sdk-jsonrpc-server/model-experience/session-permission-changes/token-effect:
   en: 6fd7b795a324c0e9
   zh: e13a949d27e91e4d
-/deepseek-ai-dsh-sdk-jsonrpc-server/model-experience/session-permission-changes/kv-cache-effect:
+/agentrans-sdk-jsonrpc-server/model-experience/session-permission-changes/kv-cache-effect:
   en: a6c8c78f7e558ed1
   zh: 410aef8f5f230d67
-/deepseek-ai-dsh-sdk-jsonrpc-server/model-experience/plan-commands:
+/agentrans-sdk-jsonrpc-server/model-experience/plan-commands:
   en: 6714c05c148b2a6e
   zh: e85929c987561499
-/deepseek-ai-dsh-sdk-jsonrpc-server/model-experience/plan-commands/what-the-model-sees:
+/agentrans-sdk-jsonrpc-server/model-experience/plan-commands/what-the-model-sees:
   en: 4edf946453a31daf
   zh: 47f3d6c9095a80d8
-/deepseek-ai-dsh-sdk-jsonrpc-server/model-experience/plan-commands/token-effect:
+/agentrans-sdk-jsonrpc-server/model-experience/plan-commands/token-effect:
   en: 915597a108a3e579
   zh: 22f818fa1e6a5e1c
-/deepseek-ai-dsh-sdk-jsonrpc-server/model-experience/plan-commands/kv-cache-effect:
+/agentrans-sdk-jsonrpc-server/model-experience/plan-commands/kv-cache-effect:
   en: 1403de19597c9bfd
   zh: a3d41798c45577cb
-/deepseek-ai-dsh-sdk-jsonrpc-server/model-experience/goal-commands:
+/agentrans-sdk-jsonrpc-server/model-experience/goal-commands:
   en: 00f1a91f6d15e4a0
   zh: cad13107ea16b3de
-/deepseek-ai-dsh-sdk-jsonrpc-server/model-experience/goal-commands/what-the-model-sees:
+/agentrans-sdk-jsonrpc-server/model-experience/goal-commands/what-the-model-sees:
   en: 3b29854591a9432f
   zh: 08dc50393d547828
-/deepseek-ai-dsh-sdk-jsonrpc-server/model-experience/goal-commands/token-effect:
+/agentrans-sdk-jsonrpc-server/model-experience/goal-commands/token-effect:
   en: 7a4c40ba3c812bca
   zh: 8ba8e1c5e1a1c58d
-/deepseek-ai-dsh-sdk-jsonrpc-server/model-experience/goal-commands/kv-cache-effect:
+/agentrans-sdk-jsonrpc-server/model-experience/goal-commands/kv-cache-effect:
   en: f4edb02fb1124718
   zh: 0f70aae68553eb5a
-/deepseek-ai-dsh-sdk-jsonrpc-server/known-limitations-and-deferred-work:
+/agentrans-sdk-jsonrpc-server/known-limitations-and-deferred-work:
   en: a9789c8053e7779b
   zh: c87685a746de8892
-/deepseek-ai-dsh-sdk-jsonrpc-server/known-limitations-and-deferred-work/dev-note:
+/agentrans-sdk-jsonrpc-server/known-limitations-and-deferred-work/dev-note:
   en: 583a835f84c55c33
   zh: a4377e2c9bea8c4e

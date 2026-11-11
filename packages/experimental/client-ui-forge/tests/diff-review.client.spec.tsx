@@ -2,7 +2,7 @@
 /** Diff gestures, browser clipboard output, and retained comments at their captured lines. */
 import { act, cleanup, fireEvent, render, within } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
-import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
+import { makeTranslate } from '@agentrans/client-test-runtime'
 import { DiffFile, type DiffFileProps } from '../src/client/DiffFile.tsx'
 import { en } from '../src/client/locales.ts'
 import { ReviewQueue } from '../src/client/review-queue.ts'

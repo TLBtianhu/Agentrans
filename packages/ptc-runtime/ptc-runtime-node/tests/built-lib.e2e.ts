@@ -19,14 +19,14 @@ describe.skipIf(!built)('built lib real load path (plain node)', () => {
   it.each(['per-call', 'vm-script'] as const)('runs TypeScript and bindings through published exports in %s mode', async (executionMode) => {
     const program = 'const doubled: number = await tools.double({ n: 21 }); console.log("halfway", doubled); let failure; try { await tools.fail({}) } catch (error) { failure = { typed: error instanceof ToolCallError, name: error.name, toolName: error.toolName, message: error.message } }; ' + (executionMode === 'per-call' ? 'return { doubled, failure };' : '({ doubled, failure })')
     const script = `
-      const { Context } = await import('@deepseek-ai/cordis')
-      const { NodePtcRuntime } = await import('@deepseek-ai/dsh-ptc-runtime-node')
+      const { Context } = await import('@agentrans/cordis')
+      const { NodePtcRuntime } = await import('@agentrans/ptc-runtime-node')
       const ctx = new Context()
       for (const name of ['session-projection', 'fs-local', 'subprocess-local', 'sandbox-local']) {
-        const plugin = await import('@deepseek-ai/dsh-' + name)
+        const plugin = await import('@agentrans/' + name)
         await ctx.plugin(plugin.default, {})
       }
-      const { default: SandboxPolicy } = await import('@deepseek-ai/dsh-sandbox-policy')
+      const { default: SandboxPolicy } = await import('@agentrans/sandbox-policy')
       await ctx.plugin(SandboxPolicy, { mode: 'read-only' })
       await ctx.plugin(NodePtcRuntime, ${JSON.stringify({ executionMode })})
       const result = await ctx.ptcRuntime.run(ctx.ptcRuntime.resolve({

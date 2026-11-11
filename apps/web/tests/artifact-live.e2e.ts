@@ -1,10 +1,10 @@
 /** Opt-in real-provider acceptance of one particle Artifact across two ordinary questions. */
 import { mkdir, mkdtemp, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { FiberState } from '@deepseek-ai/cordis'
-import type {} from '@deepseek-ai/dsh-artifact/types'
-import type {} from '@deepseek-ai/dsh-artifact-followup/types'
-import type { SessionId } from '@deepseek-ai/dsh-session'
+import { FiberState } from '@agentrans/cordis'
+import type {} from '@agentrans/artifact/types'
+import type {} from '@agentrans/artifact-followup/types'
+import type { SessionId } from '@agentrans/session'
 import { chromium, type Browser, type Page } from 'playwright'
 import { describe, expect, it } from 'vitest'
 import {
@@ -79,9 +79,9 @@ describe.skipIf(!LIVE)('web live: real DeepSeek particle Artifact', () => {
       expect(world.mode).toBe('record')
       const entries = [...world.ctx.loader.entries()]
       expect(entries.some(entry => entry.options.id === 'llm-deepseek'
-        && entry.options.name === '@deepseek-ai/dsh-llm-deepseek-api-key'
+        && entry.options.name === '@agentrans/llm-deepseek-api-key'
         && entry.fiber?.state === FiberState.ACTIVE)).toBe(true)
-      expect(entries.filter(entry => entry.options.name === '@deepseek-ai/dsh-llm-replay')).toEqual([])
+      expect(entries.filter(entry => entry.options.name === '@agentrans/llm-replay')).toEqual([])
       expect([...world.ctx.registry.values()].some(runtime => runtime.name === 'llm-replay')).toBe(false)
       const executablePath = process.env.DSH_PLAYWRIGHT_EXECUTABLE_PATH
       browser = await chromium.launch(executablePath === undefined ? {} : { executablePath })

@@ -8,8 +8,8 @@
  * with no way in.
  */
 import type { JSX } from 'react'
-import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
-import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
+import type { PropsLocale } from '@agentrans/client-ui-slots'
+import { Button } from '@agentrans/client-ui-primitives'
 
 /** Data the slot injects: the insertion verb bound to this session's composer. */
 export interface MathInsertInjected {

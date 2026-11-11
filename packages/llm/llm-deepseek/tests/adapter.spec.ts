@@ -1,33 +1,33 @@
 /** HTTP lifecycle, routing and optional Cordis services under real composition. */
-import * as NativeToolExecutor from '@deepseek-ai/dsh-tool-executor-native'
-import type { DeepSeekAccount } from '@deepseek-ai/dsh-deepseek-account'
+import * as NativeToolExecutor from '@agentrans/tool-executor-native'
+import type { DeepSeekAccount } from '@agentrans/deepseek-account'
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { Context, LoggerLevel, Service } from '@deepseek-ai/cordis'
-import LocalAttachments from '@deepseek-ai/dsh-attachment-local'
-import AgentRegistry from '@deepseek-ai/dsh-agent'
-import type { Agent } from '@deepseek-ai/dsh-agent'
-import AgentLoop from '@deepseek-ai/dsh-agent-loop'
-import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
-import ToolRuntime from '@deepseek-ai/dsh-tools'
-import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
-import { AttachmentId } from '@deepseek-ai/dsh-attachment'
-import Loader from '@deepseek-ai/cordis-plugin-loader'
-import Include from '@deepseek-ai/cordis-plugin-include'
-import LlmRuntime, { createAssistantMessage, createDeveloperMessage, createSystemMessage, createToolResultMessage, createUserMessage, ToolCallId } from '@deepseek-ai/dsh-llm'
-import type { Message } from '@deepseek-ai/dsh-llm'
-import { credentialRef } from '@deepseek-ai/dsh-credentials'
-import LocalCredentials from '@deepseek-ai/dsh-credentials-local'
+import { Context, LoggerLevel, Service } from '@agentrans/cordis'
+import LocalAttachments from '@agentrans/attachment-local'
+import AgentRegistry from '@agentrans/agent'
+import type { Agent } from '@agentrans/agent'
+import AgentLoop from '@agentrans/agent-loop'
+import SystemPrompt from '@agentrans/system-prompt'
+import ToolRuntime from '@agentrans/tools'
+import SessionProjectionRegistry from '@agentrans/session-projection'
+import { AttachmentId } from '@agentrans/attachment'
+import Loader from '@agentrans/cordis-plugin-loader'
+import Include from '@agentrans/cordis-plugin-include'
+import LlmRuntime, { createAssistantMessage, createDeveloperMessage, createSystemMessage, createToolResultMessage, createUserMessage, ToolCallId } from '@agentrans/llm'
+import type { Message } from '@agentrans/llm'
+import { credentialRef } from '@agentrans/credentials'
+import LocalCredentials from '@agentrans/credentials-local'
 import { profileComposition } from '../../../settings/settings/tests/profile-composition.ts'
-import SessionStore, { SessionId } from '@deepseek-ai/dsh-session'
+import SessionStore, { SessionId } from '@agentrans/session'
 import { DeepSeekAdapter } from '../src/adapter.ts'
 import { object } from '../src/replay.ts'
 import { DeepSeekFileStore } from '../src/file-store.ts'
-import * as Messages from '@deepseek-ai/dsh-llm-deepseek-api-key'
-import * as AccountProvider from '@deepseek-ai/dsh-llm-deepseek-account'
+import * as Messages from '@agentrans/llm-deepseek-api-key'
+import * as AccountProvider from '@agentrans/llm-deepseek-account'
 import { adapter, assemble, chunks, MODEL, options, prepareExtensions, server, sse, textEvents, user, sourceModuleLoader } from './helpers.ts'
 
 const cleanup: (() => Promise<unknown>)[] = []
@@ -57,7 +57,7 @@ async function send(agent: Agent, text: string) {
   expect(agent.session.snapshotEvents().at(-1)).toMatchObject({ type: 'turn/end', data: { reason: { kind: 'completed' } } })
 }
 
-declare module '@deepseek-ai/dsh-llm' {
+declare module '@agentrans/llm' {
   interface MessageSourceMap {
     'saved-notice': { kind: 'saved-notice' }
   }
@@ -312,12 +312,12 @@ describe('Cordis provider composition', () => {
     await ctx.plugin(Loader)
     ctx.loader.builtins.include = Include
     const modules = new Map<string, unknown>([
-      ['@deepseek-ai/dsh-llm', LlmRuntime], ['@deepseek-ai/dsh-llm-deepseek-api-key', Messages], ['@deepseek-ai/dsh-llm-deepseek-account', AccountProvider],
-      ['@deepseek-ai/dsh-credentials-local', LocalCredentials],
-      ['@deepseek-ai/dsh-agent', AgentRegistry], ['@deepseek-ai/dsh-agent-loop', AgentLoop],
-      ['@deepseek-ai/dsh-session', SessionStore], ['@deepseek-ai/dsh-session-projection', SessionProjectionRegistry],
-      ['@deepseek-ai/dsh-system-prompt', SystemPrompt], ['@deepseek-ai/dsh-tools', ToolRuntime],
-      ['@deepseek-ai/dsh-tool-executor-native', NativeToolExecutor],
+      ['@agentrans/llm', LlmRuntime], ['@agentrans/llm-deepseek-api-key', Messages], ['@agentrans/llm-deepseek-account', AccountProvider],
+      ['@agentrans/credentials-local', LocalCredentials],
+      ['@agentrans/agent', AgentRegistry], ['@agentrans/agent-loop', AgentLoop],
+      ['@agentrans/session', SessionStore], ['@agentrans/session-projection', SessionProjectionRegistry],
+      ['@agentrans/system-prompt', SystemPrompt], ['@agentrans/tools', ToolRuntime],
+      ['@agentrans/tool-executor-native', NativeToolExecutor],
     ])
     // The importer supplies source modules while Loader still owns configuration and effects.
     for (const name of modules.keys()) {

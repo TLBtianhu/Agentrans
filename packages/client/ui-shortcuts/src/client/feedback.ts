@@ -1,7 +1,7 @@
 /** Localized failures shared by direct removal and inline shortcut editing. */
-import type { ShortcutConfigSnapshot, ShortcutRuntime, ShortcutSaveResult } from '@deepseek-ai/dsh-shortcut-protocol'
-import type { ShortcutCatalogEntry } from '@deepseek-ai/dsh-client-shortcuts/client'
-import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
+import type { ShortcutConfigSnapshot, ShortcutRuntime, ShortcutSaveResult } from '@agentrans/shortcut-protocol'
+import type { ShortcutCatalogEntry } from '@agentrans/client-shortcuts/client'
+import type { PropsLocale } from '@agentrans/client-ui-slots'
 
 /**
  * Identify the unreadable preferences, their recovery path, and the bindings still in use.

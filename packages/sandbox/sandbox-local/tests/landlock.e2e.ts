@@ -4,10 +4,10 @@ import { mkdtemp, rm } from 'node:fs/promises'
 import { homedir, tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
-import type { SandboxPolicy } from '@deepseek-ai/dsh-sandbox'
+import { Context } from '@agentrans/cordis'
+import type { SandboxPolicy } from '@agentrans/sandbox'
 import { launcherPath } from '@deepseek-ai/node-addon-system/landlock-run'
-import { LocalSandboxProvider } from '@deepseek-ai/dsh-sandbox-local'
+import { LocalSandboxProvider } from '@agentrans/sandbox-local'
 import { checkExtraWrites, checkRedirectedRoot } from './extra-roots.ts'
 
 /**

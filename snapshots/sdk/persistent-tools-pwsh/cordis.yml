@@ -22,7 +22,7 @@
 
 - insert:
     - id: tool-str-replace-editor
-      name: '@deepseek-ai/dsh-tool-str-replace-editor'
+      name: '@agentrans/tool-str-replace-editor'
       config:
         maxOutputChars: 16000
 

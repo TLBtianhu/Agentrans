@@ -6,7 +6,7 @@
  * declared, which is how a released composition ended up with no owner surface at all.
  */
 
-import { Context } from '@deepseek-ai/cordis'
+import { Context } from '@agentrans/cordis'
 import { describe, expect, it } from 'vitest'
 import type { Config } from '../src/host/share-host.ts'
 import * as ShareHost from '../src/host/share-host.ts'

@@ -1,12 +1,12 @@
 /** Durable per-session state for the user-controlled model-selection opt-in. */
 
 import { z as zod } from 'zod'
-import type { Session } from '@deepseek-ai/dsh-session'
-import type { ProjectionHandle } from '@deepseek-ai/dsh-session-projection'
-import type { ProjectionDefinition } from '@deepseek-ai/dsh-session-projection'
+import type { Session } from '@agentrans/session'
+import type { ProjectionHandle } from '@agentrans/session-projection'
+import type { ProjectionDefinition } from '@agentrans/session-projection'
 import { assertAllowedModelRoutes, type AllowedModelRoute } from './model-selection.ts'
 
-declare module '@deepseek-ai/dsh-session/types' {
+declare module '@agentrans/session/types' {
   interface SessionEventMap {
     /**
      * Records this Session’s authorized child provider/model routes. Appended

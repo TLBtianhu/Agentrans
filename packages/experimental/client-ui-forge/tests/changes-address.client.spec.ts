@@ -1,7 +1,7 @@
 /** Changes tab addresses, titles, the tab type definition, and the per-tab store. */
 import { describe, expect, it } from 'vitest'
-import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
-import { SessionId } from '@deepseek-ai/dsh-session/types'
+import { makeTranslate } from '@agentrans/client-test-runtime'
+import { SessionId } from '@agentrans/session/types'
 import {
   CHANGES_ID, CHANGES_KIND, changesAddress, changesDefinition, changesTitle, parseChangesAddress,
 } from '../src/client/changes-address.ts'

@@ -1,7 +1,7 @@
 /** Bounded Host failure details sent to the Desktop crash reporter. */
 
 import { inspect } from 'node:util'
-import { StartupError } from '@deepseek-ai/dsh-app-boot'
+import { StartupError } from '@agentrans/app-boot'
 
 /** Maximum characters carried by one fatal diagnostic, including its truncation notice. */
 export const MAX_FATAL_DIAGNOSTIC_CHARS = 64 * 1024

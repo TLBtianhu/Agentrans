@@ -1,9 +1,9 @@
 /** Unified JSON-value schema DSL, inference, compilation, and tool definition helpers. @module dsh-tools/schema */
 
-import { HarnessError } from '@deepseek-ai/dsh-llm'
-import type { ContentBlock, ToolSchema } from '@deepseek-ai/dsh-llm'
-import { snapshotJsonValue } from '@deepseek-ai/dsh-util-values'
-import type { JsonValue } from '@deepseek-ai/dsh-util-values'
+import { HarnessError } from '@agentrans/llm'
+import type { ContentBlock, ToolSchema } from '@agentrans/llm'
+import { snapshotJsonValue } from '@agentrans/util-values'
+import type { JsonValue } from '@agentrans/util-values'
 import type { ToolDefinition, ToolExecution, ToolExecutionResult, ToolRunContext, ToolResult } from './contracts.ts'
 import { assertSupportedJsonSchema, isJsonSchemaRecord, isPlainJsonArray, JsonSchemaError, validateJsonSchemaValue } from './json-schema.ts'
 import type { JsonSchemaNode, JsonSchemaScalar, ObjectJsonSchema } from './json-schema.ts'
@@ -497,7 +497,7 @@ export interface DefineToolOptions<S extends ParameterSchemaSpec, O extends Valu
     /** Pure replayable presentation metadata for native and nested calls. */
     presentationMeta?(args: InferArgs<S>, value: InferValue<NoInfer<O>>): JsonValue
   }
-  /** Requests deferred loading of the tool definition; see {@link @deepseek-ai/dsh-llm#ToolSchema.deferLoading}. */
+  /** Requests deferred loading of the tool definition; see {@link @agentrans/llm#ToolSchema.deferLoading}. */
   readonly deferLoading?: true
   /** Optional positive cooperative timeout budget in milliseconds. */
   readonly timeoutMs?: number

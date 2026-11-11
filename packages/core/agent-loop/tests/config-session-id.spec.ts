@@ -1,25 +1,25 @@
-import * as NativeToolExecutor from '@deepseek-ai/dsh-tool-executor-native'
-import { createUserMessage, ReasoningEffortId } from '@deepseek-ai/dsh-llm'
+import * as NativeToolExecutor from '@agentrans/tool-executor-native'
+import { createUserMessage, ReasoningEffortId } from '@agentrans/llm'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
+import { Context } from '@agentrans/cordis'
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import LlmRuntime from '@deepseek-ai/dsh-llm'
-import type { ContextFormed } from '@deepseek-ai/dsh-llm'
-import SessionStore, { SessionId } from '@deepseek-ai/dsh-session'
-import type { SessionEvent } from '@deepseek-ai/dsh-session'
-import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
-import ToolRuntime from '@deepseek-ai/dsh-tools'
-import AgentRegistry, { type Agent } from '@deepseek-ai/dsh-agent'
-import type { SessionHandle } from '@deepseek-ai/dsh-session-persistence'
+import LlmRuntime from '@agentrans/llm'
+import type { ContextFormed } from '@agentrans/llm'
+import SessionStore, { SessionId } from '@agentrans/session'
+import type { SessionEvent } from '@agentrans/session'
+import SystemPrompt from '@agentrans/system-prompt'
+import ToolRuntime from '@agentrans/tools'
+import AgentRegistry, { type Agent } from '@agentrans/agent'
+import type { SessionHandle } from '@agentrans/session-persistence'
 
-import * as JsonlSessionPersistence from '@deepseek-ai/dsh-session-persistence-jsonl'
-import AgentLoop, { CONFIGURED_AGENT_IDENTITIES_KEY } from '@deepseek-ai/dsh-agent-loop'
-import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
+import * as JsonlSessionPersistence from '@agentrans/session-persistence-jsonl'
+import AgentLoop, { CONFIGURED_AGENT_IDENTITIES_KEY } from '@agentrans/agent-loop'
+import SessionProjectionRegistry from '@agentrans/session-projection'
 import { MockAdapter, textResponse } from './mock-adapter.ts'
 
-declare module '@deepseek-ai/dsh-llm' {
+declare module '@agentrans/llm' {
   interface MessageSourceMap {
     'test': { kind: 'test' } & ContextFormed
   }

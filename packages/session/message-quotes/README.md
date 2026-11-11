@@ -3,7 +3,7 @@ description: "Quotation controls and Markdown blockquote presentation."
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-message-quotes
+# @agentrans/message-quotes
 
 English | [中文](README.zh.md)
 

@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 import { act, fireEvent } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { SlotTestRuntime, RemoteError } from '@deepseek-ai/dsh-client-test-runtime'
-import { LocaleRuntime } from '@deepseek-ai/dsh-client-locale/client'
-import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
+import { SlotTestRuntime, RemoteError } from '@agentrans/client-test-runtime'
+import { LocaleRuntime } from '@agentrans/client-locale/client'
+import { createSnapshotStore } from '@agentrans/client-store'
 import { runtimeChannel } from './runtime-channel.client.ts'
 import { apply as hostApply } from '../src/index.ts'
 import { CHAT_NODE_INJECT } from '../../ui-chat/src/client/apply.ts'
@@ -16,13 +16,13 @@ import {
 import type { ArtifactId, ArtifactNodeInjected } from '../src/client/protocol.ts'
 import type { ArtifactPromptContextInjected } from '../src/client/ArtifactPromptContext.tsx'
 import { en } from '../src/client/locales.ts'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import type { JsonValue } from '@deepseek-ai/dsh-util-values'
-import { createParticleState, observeParticleState } from '@deepseek-ai/dsh-artifact/particle-runtime'
-import type { ArtifactActionRequest, ArtifactObservationId, SavedParticleObservation } from '@deepseek-ai/dsh-artifact/types'
-import type { ArtifactBranchResultRequest } from '@deepseek-ai/dsh-artifact-branch/types'
-import type { ArtifactHtmlExportRequest, ArtifactHtmlExportRecord, ArtifactExportId } from '@deepseek-ai/dsh-artifact-export/types'
-import type { FileActions } from '@deepseek-ai/dsh-client-ui-file-actions/client'
+import type { SessionId } from '@agentrans/session/types'
+import type { JsonValue } from '@agentrans/util-values'
+import { createParticleState, observeParticleState } from '@agentrans/artifact/particle-runtime'
+import type { ArtifactActionRequest, ArtifactObservationId, SavedParticleObservation } from '@agentrans/artifact/types'
+import type { ArtifactBranchResultRequest } from '@agentrans/artifact-branch/types'
+import type { ArtifactHtmlExportRequest, ArtifactHtmlExportRecord, ArtifactExportId } from '@agentrans/artifact-export/types'
+import type { FileActions } from '@agentrans/client-ui-file-actions/client'
 
 let runtime: SlotTestRuntime | undefined
 afterEach(async () => {

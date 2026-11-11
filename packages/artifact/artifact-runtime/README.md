@@ -3,7 +3,7 @@ description: "Inspect source-supported operations and currently connected render
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-artifact-runtime
+# @agentrans/artifact-runtime
 
 English | [中文](README.zh.md)
 
@@ -25,10 +25,10 @@ Keep source support and reported execution separate. One physical Remote stream 
 <a id="use-this-package"></a>
 ## Use this package
 
-Mount this service beside Artifact, and mount `@deepseek-ai/dsh-artifact-runtime/tool` in Agent presets that offer interactive artifacts. The Remote namespace and Context service key are `artifactRuntime`. Report registration uses an explicit Session resource; it does not resolve an Agent, open a cold Session, append input or execute authored code. The Web composition restricts report attachment to the owner.
+Mount this service beside Artifact, and mount `@agentrans/artifact-runtime/tool` in Agent presets that offer interactive artifacts. The Remote namespace and Context service key are `artifactRuntime`. Report registration uses an explicit Session resource; it does not resolve an Agent, open a cold Session, append input or execute authored code. The Web composition restricts report attachment to the owner.
 
 ```yaml
-- name: '@deepseek-ai/dsh-artifact-runtime'
+- name: '@agentrans/artifact-runtime'
 ```
 
 | Config | Default | Meaning |

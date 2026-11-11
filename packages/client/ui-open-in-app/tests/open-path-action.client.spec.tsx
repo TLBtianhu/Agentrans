@@ -6,8 +6,8 @@
  */
 import { afterEach, describe, expect, it, vi, type Mock } from 'vitest'
 import { act, cleanup, fireEvent, render, renderHook, screen } from '@testing-library/react'
-import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
-import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
+import { makeTranslate } from '@agentrans/client-test-runtime'
+import { createSnapshotStore } from '@agentrans/client-store'
 import { OpenPathAction, type OpenPathActionProps } from '../src/client/OpenPathAction.tsx'
 import { OpenPathEmptyAction, type OpenPathEmptyActionProps } from '../src/client/OpenPathEmptyAction.tsx'
 import type { OpenInAppPathAction } from '../src/client/open-path.ts'

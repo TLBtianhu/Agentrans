@@ -1,9 +1,9 @@
 /** Fork enforcement installation refusals and the confined tool bodies it registers. */
 
 import { describe, expect, it, vi } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
-import { createScope } from '@deepseek-ai/dsh-scope'
-import type { ToolDefinition } from '@deepseek-ai/dsh-tools'
+import { Context } from '@agentrans/cordis'
+import { createScope } from '@agentrans/scope'
+import type { ToolDefinition } from '@agentrans/tools'
 import { READ_ONLY_FORK_CEILING, type ForkCeiling } from '../src/host/fork-policy.ts'
 import { SHARED_TOOL_PROFILES, sharedToolNames } from '../src/host/shared-tools.ts'
 import {

@@ -10,14 +10,14 @@
  */
 
 import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
+import { Context } from '@agentrans/cordis'
 import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, symlinkSync, utimesSync, writeFileSync } from 'node:fs'
 import { realpath } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { basename, dirname, isAbsolute, join, normalize } from 'node:path'
-import { ToolCallId } from '@deepseek-ai/dsh-llm'
-import { SessionId } from '@deepseek-ai/dsh-session'
-import type { SaveTextSpill } from '@deepseek-ai/dsh-spill'
+import { ToolCallId } from '@agentrans/llm'
+import { SessionId } from '@agentrans/session'
+import type { SaveTextSpill } from '@agentrans/spill'
 import LocalSpillStore, {
   DEFAULT_ROOT_PREFIX,
   discoverDefaultRoots,
@@ -27,8 +27,8 @@ import LocalSpillStore, {
   saveTextFile,
   sessionDir,
   sweepSpillRoots,
-} from '@deepseek-ai/dsh-spill-local'
-import type { SweepRoot } from '@deepseek-ai/dsh-spill-local'
+} from '@agentrans/spill-local'
+import type { SweepRoot } from '@agentrans/spill-local'
 import { gatherSweepRoots } from '../src/cleanup.ts'
 
 const DAY_MS = 24 * 60 * 60 * 1000

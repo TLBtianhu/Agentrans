@@ -1,5 +1,5 @@
 /** Lossless guided and Custom editor projections for typed Schedule timing. */
-import type { ScheduleCatalogEntry, ScheduleTiming } from '@deepseek-ai/dsh-schedule/client'
+import type { ScheduleCatalogEntry, ScheduleTiming } from '@agentrans/schedule/client'
 import { hostFrequencyKind, ruleFields } from './task-record.ts'
 
 /** Periods represented by guided controls, plus a lossless advanced editor. */

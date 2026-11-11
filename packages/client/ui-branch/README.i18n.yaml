@@ -5,39 +5,39 @@
 /:
   en: 5c86cb3be4c12359
   zh: 80e88c711a2cd89a
-/deepseek-ai-dsh-client-ui-branch:
-  en: 5f066fe9cda39088
-  zh: 9cd13e154888e6e3
-/deepseek-ai-dsh-client-ui-branch/summary:
+/agentrans-client-ui-branch:
+  en: 077c6affd83b2a4f
+  zh: 7cb76128940ef3a1
+/agentrans-client-ui-branch/summary:
   en: b3f182b7423e5835
   zh: 9f46b337fdbfd6ce
-/deepseek-ai-dsh-client-ui-branch/table-of-contents:
+/agentrans-client-ui-branch/table-of-contents:
   en: d7fbbba70852c433
   zh: 513fd1eaf300716d
-/deepseek-ai-dsh-client-ui-branch/use-this-package:
+/agentrans-client-ui-branch/use-this-package:
   en: ebadc410150cec01
   zh: dbfea280df66e6a1
-/deepseek-ai-dsh-client-ui-branch/model-experience:
+/agentrans-client-ui-branch/model-experience:
   en: 215e7ba838619b7b
   zh: a311da3843709f90
-/deepseek-ai-dsh-client-ui-branch/model-experience/returning-a-branch-result:
+/agentrans-client-ui-branch/model-experience/returning-a-branch-result:
   en: 2b6ca56388e08228
   zh: c2b29257c57490f9
-/deepseek-ai-dsh-client-ui-branch/model-experience/returning-a-branch-result/what-the-model-sees:
+/agentrans-client-ui-branch/model-experience/returning-a-branch-result/what-the-model-sees:
   en: 595a3cb464d4badb
   zh: c2f5ca330a45ac69
-/deepseek-ai-dsh-client-ui-branch/model-experience/returning-a-branch-result/token-effect:
+/agentrans-client-ui-branch/model-experience/returning-a-branch-result/token-effect:
   en: 866f86b8872f9d01
   zh: 2f0cb4bccacc8e0a
-/deepseek-ai-dsh-client-ui-branch/model-experience/returning-a-branch-result/kv-cache-effect:
+/agentrans-client-ui-branch/model-experience/returning-a-branch-result/kv-cache-effect:
   en: 339cecc308c30d2a
   zh: 35fff7c047a838be
-/deepseek-ai-dsh-client-ui-branch/model-experience/returning-a-branch-result/kv-cache-effect/return-boundary:
+/agentrans-client-ui-branch/model-experience/returning-a-branch-result/kv-cache-effect/return-boundary:
   en: 1694075f063dd308
   zh: 97d80984625686e6
-/deepseek-ai-dsh-client-ui-branch/known-limitations-and-deferred-work:
+/agentrans-client-ui-branch/known-limitations-and-deferred-work:
   en: 33f971bcac56a27d
   zh: b9944a342d9270b7
-/deepseek-ai-dsh-client-ui-branch/known-limitations-and-deferred-work/dev-note:
+/agentrans-client-ui-branch/known-limitations-and-deferred-work/dev-note:
   en: b434943487e6ea4a
   zh: 63ee56a6a6826114

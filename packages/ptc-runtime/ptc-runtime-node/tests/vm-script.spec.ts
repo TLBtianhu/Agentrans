@@ -1,4 +1,4 @@
-import type { PtcProgramFormat } from '@deepseek-ai/dsh-ptc-runtime'
+import type { PtcProgramFormat } from '@agentrans/ptc-runtime'
 import { expect, it, onTestFinished, vi } from 'vitest'
 import { Parser } from 'acorn'
 import { createProgramEvaluator } from '../src/evaluators/index.ts'

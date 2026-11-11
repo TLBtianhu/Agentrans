@@ -1,6 +1,6 @@
 /** Business-owned mappings into the keyed Workspace Toast slot. */
-import type { Context } from '@deepseek-ai/cordis'
-import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
+import type { Context } from '@agentrans/cordis'
+import type { PropsRuntime } from '@agentrans/client-ui-slots'
 import type { RowToastActions, WorkspaceViewStoreHandle } from '../contract/slots.ts'
 import type { ArchiveToastInjected, ToastDisplayInjected } from '../contract/toast.ts'
 import { ArchiveToastEntry, ToastEntry, WorkspaceToast } from './Toast.tsx'

@@ -6,8 +6,8 @@
  * declaring fiber before the plugin body runs. The Loader owns that field; these helpers install the same
  * values a real Loader composition would, without booting a config tree.
  */
-import type { Context, Fiber, Inject } from '@deepseek-ai/cordis'
-import type { TypertContribution } from '@deepseek-ai/dsh-typert-registry'
+import type { Context, Fiber, Inject } from '@agentrans/cordis'
+import type { TypertContribution } from '@agentrans/typert-registry'
 import { z } from 'zod'
 
 /**

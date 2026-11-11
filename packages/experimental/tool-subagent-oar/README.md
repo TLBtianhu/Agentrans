@@ -3,7 +3,7 @@ description: "Expose one external subagent tool that selects a configured runtim
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-experimental-tool-subagent-oar
+# @agentrans/experimental-tool-subagent-oar
 
 English | [中文](README.zh.md)
 
@@ -36,7 +36,7 @@ Choose this tool when one model-facing entry should select among independent, on
 With `oar-codex` and `oar-claude` already registered, mount this row in the composition:
 
 ```yaml
-- name: '@deepseek-ai/dsh-experimental-tool-subagent-oar'
+- name: '@agentrans/experimental-tool-subagent-oar'
   config:
     providers:
       codex: oar-codex
@@ -48,7 +48,7 @@ With `oar-codex` and `oar-claude` already registered, mount this row in the comp
 | `providers` | required | Nonempty map from model-visible runtime aliases to registered provider names |
 | `toolName` | `subagent_oar` | Tool name; every mounted instance needs a distinct name |
 
-The [configuration catalog](../../../docs/config-catalog.md#deepseek-aidsh-experimental-tool-subagent-oar) owns accepted fields and validation. A call requires `runtime`, `description`, and `prompt`; optional `cwd` selects the child directory, with relative paths resolved from the parent's current directory. The prompt must contain the context the child needs. Native installation, authentication, model settings, and permissions belong to the selected provider.
+The [configuration catalog](../../../docs/config-catalog.md#agentransexperimental-tool-subagent-oar) owns accepted fields and validation. A call requires `runtime`, `description`, and `prompt`; optional `cwd` selects the child directory, with relative paths resolved from the parent's current directory. The prompt must contain the context the child needs. Native installation, authentication, model settings, and permissions belong to the selected provider.
 
 -----
 
@@ -80,7 +80,7 @@ The [configuration catalog](../../../docs/config-catalog.md#deepseek-aidsh-exper
 
 #### What the model sees
 
-The [tool catalog](../../../docs/tool-catalog.md#deepseek-aidsh-experimental-tool-subagent-oar) owns the description and argument schema. The `runtime` enum contains the configured aliases. After acceptance, the tool returns `started subagent <id>`, where `<id>` identifies the child. The shared subagent service later supplies the child's answer or failure notice.
+The [tool catalog](../../../docs/tool-catalog.md#agentransexperimental-tool-subagent-oar) owns the description and argument schema. The `runtime` enum contains the configured aliases. After acceptance, the tool returns `started subagent <id>`, where `<id>` identifies the child. The shared subagent service later supplies the child's answer or failure notice.
 
 #### Token effect
 

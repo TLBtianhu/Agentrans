@@ -1,6 +1,6 @@
 /** Whitelisted operation records shared by diagnostic transport and durable readers. */
 import { z } from 'zod'
-import type { Branded } from '@deepseek-ai/dsh-brand'
+import type { Branded } from '@agentrans/brand'
 import type { ChangeResult, ManagementError, PluginChange, PluginOperation, PluginOperationId, RestartReason } from './types.ts'
 
 /** Identifies the process lifetime which observed management operations. */

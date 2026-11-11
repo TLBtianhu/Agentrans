@@ -6,11 +6,11 @@
  * states what the host reported, and states nothing it did not report — an unreadable or absent answer
  * is `unknown`, never a guess from a display name.
  *
- * @module @deepseek-ai/dsh-experimental-liveshare/src/client/owner-identity-login
+ * @module @agentrans/experimental-liveshare/src/client/owner-identity-login
  */
 
 import { useEffect, useRef, useState } from 'react'
-import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
+import type { PropsLocale } from '@agentrans/client-ui-slots'
 import { identitySubjectLabel } from '../owner-identity.ts'
 import type { NS } from './locales.ts'
 import { readOwnerIdentity, UNKNOWN_OWNER_IDENTITY, type OwnerIdentityStatus } from './owner-identity.ts'

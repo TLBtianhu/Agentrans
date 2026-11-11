@@ -4,7 +4,7 @@ import { join } from 'node:path'
 import { expect, it, onTestFinished, vi } from 'vitest'
 import {
   PRODUCT_LAUNCH_CONTEXT_ENV, resolveProductLaunchContext, serializeProductLaunchContext,
-} from '@deepseek-ai/dsh-product-layout/launch-context'
+} from '@agentrans/product-layout/launch-context'
 import { configureDesktopProduct } from '../src/product-context.ts'
 
 function fixture() {

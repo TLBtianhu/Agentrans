@@ -1,6 +1,6 @@
 /** Host-wide removal of every ended task, as the management page's one action reports it. */
-import type { RemoteResult } from '@deepseek-ai/dsh-api-remotes/client'
-import type { ScheduleDeleteInactiveResult } from '@deepseek-ai/dsh-schedule/client'
+import type { RemoteResult } from '@agentrans/api-remotes/client'
+import type { ScheduleDeleteInactiveResult } from '@agentrans/schedule/client'
 
 /** How one bulk removal settled; the wiring reports it as an app-wide notice. */
 export type ClearEndedOutcome =

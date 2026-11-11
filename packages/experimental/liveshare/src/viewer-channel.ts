@@ -5,12 +5,12 @@
  * ignorant of DSH endpoints and payloads. Both halves of the package import these types; the
  * Relay only moves the encoded values.
  *
- * @module @deepseek-ai/dsh-experimental-liveshare/src/viewer-channel
+ * @module @agentrans/experimental-liveshare/src/viewer-channel
  */
 
 /**
  * Page global the Relay's carrier installs on a viewer page. The carrier writes the same name in
- * `@deepseek-ai/dsh-experimental-liveshare-protocol`; it is restated here because a client bundle may
+ * `@agentrans/experimental-liveshare-protocol`; it is restated here because a client bundle may
  * not import that package's values.
  */
 export const LIVESHARE_VIEWER_GLOBAL = '__DSH_LIVESHARE_VIEWER__'

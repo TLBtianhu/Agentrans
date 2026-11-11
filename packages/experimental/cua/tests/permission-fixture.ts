@@ -1,5 +1,5 @@
 /** Policy tests use the real store's in-memory composition and injectable durable-write failures. */
-import type { Context } from '@deepseek-ai/cordis'
+import type { Context } from '@agentrans/cordis'
 import { isDeepStrictEqual } from 'node:util'
 import { vi } from 'vitest'
 import { CuaPermissionStore, type PermissionState } from '../src/permission-store.ts'

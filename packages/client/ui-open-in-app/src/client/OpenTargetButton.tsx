@@ -3,9 +3,9 @@ import { useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import {
   IconChevronDownOutlineRegular, IconFolderOpenOutlineRegular, IconRightUpOutlineRegular, Menu, Tooltip,
-} from '@deepseek-ai/dsh-client-ui-primitives'
-import type { ShortcutCatalogEntry } from '@deepseek-ai/dsh-client-shortcuts/client'
-import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
+} from '@agentrans/client-ui-primitives'
+import type { ShortcutCatalogEntry } from '@agentrans/client-shortcuts/client'
+import type { TranslateNS } from '@agentrans/client-ui-slots'
 import type { OpenInAppOutcome } from './outcome.ts'
 import type { NS } from './locales.ts'
 import css from './OpenTargetButton.module.css'

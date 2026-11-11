@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-shortcut-protocol",
+  "name": "@agentrans/shortcut-protocol",
   "description": "Physical-key and versioned shortcut preference protocol shared by the Client and the Desktop main process",
   "version": "0.1.0",
   "publishConfig": {
@@ -29,8 +29,8 @@
     "lib/types/**/*.d.ts"
   ],
   "dependencies": {
-    "@deepseek-ai/dsh-brand": "workspace:*",
-    "@deepseek-ai/dsh-util-crypto": "workspace:*",
-    "@deepseek-ai/dsh-util-values": "workspace:*"
+    "@agentrans/brand": "workspace:*",
+    "@agentrans/util-crypto": "workspace:*",
+    "@agentrans/util-values": "workspace:*"
   }
 }

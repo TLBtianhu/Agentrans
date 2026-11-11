@@ -24,7 +24,7 @@ import {
   resolveSystemPromptSnapshotPath,
   systemPromptSnapshotFilename,
   type SnapshotManifest,
-} from '@deepseek-ai/dsh-session-snapshot'
+} from '@agentrans/session-snapshot'
 import { assertSnapshotCorpusPolicy } from './session-snapshot-corpus-policy.ts'
 
 const repoRoot = resolve(import.meta.dirname, '..')

@@ -11,7 +11,7 @@ test('the real Landlock subpath imports without platform packages or dlopen, whi
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'system-landlock-entry-'));
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }), { timeout: 120_000 });
   const entry = fileURLToPath(new URL('../packages/entry/', import.meta.url));
-  const installed = path.join(dir, 'node_modules', '@deepseek-ai', 'node-addon-system');
+  const installed = path.join(dir, 'node_modules', '@agentrans', 'node-addon-system');
   fs.mkdirSync(installed, { recursive: true });
   fs.copyFileSync(path.join(entry, 'package.json'), path.join(installed, 'package.json'));
   // Only the real entry payload is present; no platform package or addon is copied.

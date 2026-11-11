@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { MockInstance } from 'vitest'
-import { SessionId, SessionSeq } from '@deepseek-ai/dsh-session'
+import { SessionId, SessionSeq } from '@agentrans/session'
 import { agentFor, boundTask, gatedScheduleBackend, harness, recordOf, seededTask, seedTasks } from './harness.ts'
 import { MemoryMediaPool } from '../../../storage/storage-domain/tests/helpers/memory-backend.ts'
 import { scheduleDomain } from '../src/storage.ts'

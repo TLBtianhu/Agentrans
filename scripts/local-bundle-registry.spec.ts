@@ -131,9 +131,9 @@ describe('catalog and local closure', () => {
     }
     expect(selection.workspaceNames).toEqual(expect.arrayContaining(selection.members.map(member => member.name)))
     // A vendor package keeps its own version line, so a run must not assume one shared version.
-    expect(packages.get('@deepseek-ai/cordis')?.manifest.version)
-      .not.toBe(packages.get('@deepseek-ai/dsh-brand')?.manifest.version)
-    expect(selection.foreignTargets).toEqual(process.platform === 'darwin' ? [] : ['@deepseek-ai/dsh-experimental-cua-macos'])
+    expect(packages.get('@agentrans/cordis')?.manifest.version)
+      .not.toBe(packages.get('@agentrans/brand')?.manifest.version)
+    expect(selection.foreignTargets).toEqual(process.platform === 'darwin' ? [] : ['@agentrans/experimental-cua-macos'])
   })
 
   it('follows install, optional, and required peer edges but not optional peers', () => {
@@ -353,7 +353,7 @@ describe('registry HTTP', () => {
     const destination = temporaryDirectory('dsh-local-registry-miss-')
     const { artifact } = fabricate({ destination, name: '@scope/local', version: '1.0.0', source: 'export default 1\n' })
     const url = await servingRun({
-      destination, artifacts: [artifact], workspaceNames: ['@scope/local', '@deepseek-ai/dsh-private-thing'],
+      destination, artifacts: [artifact], workspaceNames: ['@scope/local', '@agentrans/private-thing'],
     })
     const owned = await fetch(`${url}@deepseek-ai%2fdsh-private-thing`)
     expect(owned.status).toBe(404)

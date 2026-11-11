@@ -3,7 +3,7 @@ description: "Shared messaging, interruption, and child discovery tools for user
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-tool-subagent-control
+# @agentrans/tool-subagent-control
 
 English | [中文](README.zh.md)
 
@@ -32,12 +32,12 @@ Mount this package once per tool scope. It requires `tools`, `subagents`, and `a
 With the required services available, load the subagent service, a backend, the delegation tool, and this package to expose all three control and discovery tools:
 
 ```yaml
-- name: '@deepseek-ai/dsh-subagent'
-- name: '@deepseek-ai/dsh-subagent-spawn-in-process'
-- name: '@deepseek-ai/dsh-tool-subagent'
+- name: '@agentrans/subagent'
+- name: '@agentrans/subagent-spawn-in-process'
+- name: '@agentrans/tool-subagent'
   config:
     provider: spawn
-- name: '@deepseek-ai/dsh-tool-subagent-control'
+- name: '@agentrans/tool-subagent-control'
 ```
 
 This package takes no configuration. Its main entry registers `send_message`, `interrupt_agent`, and `list_agents` together; existing tool restrictions can hide individual tools.
@@ -94,7 +94,7 @@ Read these pages when the package-level contract is not enough; they move from t
 
 - [Subagent subsystem](../../../docs/subsystems/subagent.md) — continuable children, activations, inbox, interrupt, and follow-up authority.
 - [dsh-tool-subagent](../tool-subagent/README.md) — the delegation tool that starts continuable children.
-- [Generated tool catalog](../../../docs/tool-catalog.md#deepseek-aidsh-tool-subagent-control) — the tool schemas.
+- [Generated tool catalog](../../../docs/tool-catalog.md#agentranstool-subagent-control) — the tool schemas.
 
 -----
 
@@ -105,7 +105,7 @@ Read these pages when the package-level contract is not enough; they move from t
 
 #### What the model sees
 
-The generated [schemas](../../../docs/tool-catalog.md#deepseek-aidsh-tool-subagent-control): `send_message` takes `agent_id` and `message`; `interrupt_agent` takes `agent_id`; `list_agents` accepts an optional `scope`.
+The generated [schemas](../../../docs/tool-catalog.md#agentranstool-subagent-control): `send_message` takes `agent_id` and `message`; `interrupt_agent` takes `agent_id`; `list_agents` accepts an optional `scope`.
 
 #### Token effect
 

@@ -5,33 +5,33 @@
 /:
   en: 1c32778606f3027a
   zh: db7994fdb50333c8
-/deepseek-ai-dsh-api-remotes:
-  en: f0e152bd9c846ec4
-  zh: dba8ab5fa1181276
-/deepseek-ai-dsh-api-remotes/summary:
+/agentrans-api-remotes:
+  en: 235317bbb61d3815
+  zh: ab92a6683efc8574
+/agentrans-api-remotes/summary:
   en: 3c54c157bb823fd0
   zh: 0db6778e94ae671c
-/deepseek-ai-dsh-api-remotes/table-of-contents:
+/agentrans-api-remotes/table-of-contents:
   en: a7a78c6d1aeebeb3
   zh: 4bb69f32d8b05ba3
-/deepseek-ai-dsh-api-remotes/use-this-package:
-  en: a80d44e0683768a5
-  zh: 379833ac180e5418
-/deepseek-ai-dsh-api-remotes/forwarded-host-events:
+/agentrans-api-remotes/use-this-package:
+  en: 7749e0198d7a3ee1
+  zh: d038a9813f22a3fd
+/agentrans-api-remotes/forwarded-host-events:
   en: 31bb9a2f50094b84
   zh: 226c055739d5def7
-/deepseek-ai-dsh-api-remotes/build-boundary:
-  en: a73c2b7e1069a750
-  zh: 5b3f87a9ea29cb14
-/deepseek-ai-dsh-api-remotes/model-experience:
+/agentrans-api-remotes/build-boundary:
+  en: 3f7f3a1db70b5fcf
+  zh: 4d4e22fa2111f171
+/agentrans-api-remotes/model-experience:
   en: 6a60ae036c71e76f
   zh: bf5e86a5ac5b4be4
-/deepseek-ai-dsh-api-remotes/model-experience/kv-cache-effect:
+/agentrans-api-remotes/model-experience/kv-cache-effect:
   en: 6b51b98ce6368599
   zh: 3d7a63126352741d
-/deepseek-ai-dsh-api-remotes/known-limitations-and-deferred-work:
+/agentrans-api-remotes/known-limitations-and-deferred-work:
   en: 00a837c9e7b5a800
   zh: 1b86e789327b7798
-/deepseek-ai-dsh-api-remotes/known-limitations-and-deferred-work/dev-note:
+/agentrans-api-remotes/known-limitations-and-deferred-work/dev-note:
   en: d60df1790fac729c
   zh: cfc4e027025639bf

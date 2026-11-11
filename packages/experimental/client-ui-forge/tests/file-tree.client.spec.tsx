@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { act, cleanup, fireEvent, render } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
-import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
+import { makeTranslate } from '@agentrans/client-test-runtime'
 import type { ForgeDiffFile } from '../src/types.ts'
 import { ChangedFiles, type ChangedFilesState } from '../src/client/ChangedFiles.tsx'
 import { changedFileTree, filterFileTree } from '../src/client/file-tree.ts'

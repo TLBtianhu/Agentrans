@@ -1,5 +1,5 @@
 /** In-memory pin choices for the Conversation View tabs. */
-import { createSnapshotStore, type ObservableSnapshot } from '@deepseek-ai/dsh-client-store'
+import { createSnapshotStore, type ObservableSnapshot } from '@agentrans/client-store'
 
 /** View whose tab always shows and never enters the customization list. */
 export const FIXED_VIEW_ID = 'chat'

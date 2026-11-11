@@ -74,7 +74,7 @@ if (entry === undefined || editor === undefined) throw new Error('Configuration 
 await editor.edit(entry, current => ({ ...current, field: value }))
 ```
 
-`change` returns the row's complete config. The editor keeps the rest of the file, validates the candidate, serializes the write with other profile changes, and rejects values that a higher layer overrides. Report a rejection or a missing editor to the user instead of claiming the value was saved. Editing an ordinary field restarts the plugin so `apply` rebuilds its state; a field declared `.volatile()` updates in place and is read with `config.field.get()`. Store secrets, such as a token from an in-app sign-in or binding flow, as `ctx.credentials.modifyRecord()` records, not configuration; declare `credentials` in `inject` or read it with `ctx.get('credentials')`, and see the `@deepseek-ai/dsh-credentials` README for record keys.
+`change` returns the row's complete config. The editor keeps the rest of the file, validates the candidate, serializes the write with other profile changes, and rejects values that a higher layer overrides. Report a rejection or a missing editor to the user instead of claiming the value was saved. Editing an ordinary field restarts the plugin so `apply` rebuilds its state; a field declared `.volatile()` updates in place and is read with `config.field.get()`. Store secrets, such as a token from an in-app sign-in or binding flow, as `ctx.credentials.modifyRecord()` records, not configuration; declare `credentials` in `inject` or read it with `ctx.get('credentials')`, and see the `@agentrans/credentials` README for record keys.
 
 ## Install, enable, and observe
 

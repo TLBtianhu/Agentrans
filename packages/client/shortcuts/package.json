@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-client-shortcuts",
+  "name": "@agentrans/client-shortcuts",
   "description": "Application keyboard command registry and physical-key routing",
   "version": "0.1.0",
   "publishConfig": {
@@ -29,7 +29,7 @@
   "dsh": {
     "client": {
       "inject": [
-        "@deepseek-ai/dsh-client-locale"
+        "@agentrans/client-locale"
       ],
       "platform": "web"
     }
@@ -40,17 +40,17 @@
   },
   "license": "MIT",
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/cordis": "workspace:~"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-client-locale": "workspace:*",
-    "@deepseek-ai/dsh-client-store": "workspace:*",
-    "@deepseek-ai/dsh-client-ui-primitives": "workspace:*",
-    "@deepseek-ai/dsh-brand": "workspace:*",
-    "@deepseek-ai/dsh-shortcut-protocol": "workspace:*",
-    "@deepseek-ai/dsh-client-test-runtime": "workspace:*",
-    "@deepseek-ai/dsh-host-webserver": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/client-locale": "workspace:*",
+    "@agentrans/client-store": "workspace:*",
+    "@agentrans/client-ui-primitives": "workspace:*",
+    "@agentrans/brand": "workspace:*",
+    "@agentrans/shortcut-protocol": "workspace:*",
+    "@agentrans/client-test-runtime": "workspace:*",
+    "@agentrans/host-webserver": "workspace:*"
   },
   "files": [
     "locale/*.json",
@@ -59,8 +59,8 @@
     "lib/types/**/*.d.ts"
   ],
   "dependencies": {
-    "@deepseek-ai/dsh-util-crypto": "workspace:*",
-    "@deepseek-ai/dsh-util-values": "workspace:*",
-    "@deepseek-ai/schemastery": "workspace:~"
+    "@agentrans/util-crypto": "workspace:*",
+    "@agentrans/util-values": "workspace:*",
+    "@agentrans/schemastery": "workspace:~"
   }
 }

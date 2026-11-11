@@ -17,6 +17,6 @@
 /apps-web-browser-e2e/these-are-host-face-tests:
   en: 101d687b1d98c5b7
   zh: f8c31115e8a15be7
-/apps-web-browser-e2e/do-not-import-deepseek-ai-dsh-client-here:
-  en: 7cc75a6413647142
-  zh: a8c541f9b93e9f7f
+/apps-web-browser-e2e/do-not-import-agentrans-client-here:
+  en: 335cb54506e88729
+  zh: 196ed5d23fc867ee

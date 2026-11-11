@@ -5,57 +5,57 @@
 /:
   en: 35f64a68381efbd0
   zh: dd2c508ba263d788
-/deepseek-ai-dsh-session-snapshot:
-  en: b184b97e2d1e1fa7
-  zh: 7d4b4cc8d73446af
-/deepseek-ai-dsh-session-snapshot/summary:
+/agentrans-session-snapshot:
+  en: aceea3cdb3e0cf94
+  zh: 8fcb762e12106759
+/agentrans-session-snapshot/summary:
   en: 5d11e1dbbf5dd1cf
   zh: 7a54089ed26ddd8f
-/deepseek-ai-dsh-session-snapshot/table-of-contents:
+/agentrans-session-snapshot/table-of-contents:
   en: d152484eb41ac6b4
   zh: 09388d293f9be9cb
-/deepseek-ai-dsh-session-snapshot/use-this-package:
+/agentrans-session-snapshot/use-this-package:
   en: 594ad1f3e6f02054
   zh: 7ca4f565976704be
-/deepseek-ai-dsh-session-snapshot/use-this-package/writing-a-snapshot-suite:
+/agentrans-session-snapshot/use-this-package/writing-a-snapshot-suite:
   en: 57ff7c89e7696ee8
   zh: b885ac1b4edc8c56
-/deepseek-ai-dsh-session-snapshot/use-this-package/record-replay-and-refresh:
+/agentrans-session-snapshot/use-this-package/record-replay-and-refresh:
   en: bbb5bee0dee4f81e
   zh: 73a9288f28690d15
-/deepseek-ai-dsh-session-snapshot/use-this-package/pinning-request-headers-and-system-prompts:
+/agentrans-session-snapshot/use-this-package/pinning-request-headers-and-system-prompts:
   en: 6b11d5111e1a3222
   zh: de4d3889b1a5ebb4
-/deepseek-ai-dsh-session-snapshot/use-this-package/platform-and-composition-variants:
+/agentrans-session-snapshot/use-this-package/platform-and-composition-variants:
   en: 81c8879bb99aba4f
   zh: edf8d974842598c9
-/deepseek-ai-dsh-session-snapshot/use-this-package/what-can-go-wrong:
+/agentrans-session-snapshot/use-this-package/what-can-go-wrong:
   en: 0b03592947ca43d6
   zh: b14a64238c4b5f80
-/deepseek-ai-dsh-session-snapshot/understand-the-implementation:
+/agentrans-session-snapshot/understand-the-implementation:
   en: 18ff76b440fe40da
   zh: 4dbf2eb5f9ee98a2
-/deepseek-ai-dsh-session-snapshot/understand-the-implementation/design:
+/agentrans-session-snapshot/understand-the-implementation/design:
   en: 8771607f15c4f4e1
   zh: 7c2cf395f704717c
-/deepseek-ai-dsh-session-snapshot/understand-the-implementation/source-map:
+/agentrans-session-snapshot/understand-the-implementation/source-map:
   en: 4d095c454a1f056c
   zh: e38476aa269041f1
-/deepseek-ai-dsh-session-snapshot/understand-the-implementation/data-flow:
+/agentrans-session-snapshot/understand-the-implementation/data-flow:
   en: a71c8ab2e78798c5
   zh: 419cebed1c023fbf
-/deepseek-ai-dsh-session-snapshot/further-exploration:
+/agentrans-session-snapshot/further-exploration:
   en: 84279d50373a156a
   zh: fcd600bf386f6efe
-/deepseek-ai-dsh-session-snapshot/model-experience:
+/agentrans-session-snapshot/model-experience:
   en: 9f12d94ab5e31ade
   zh: 7c75a17565caca1c
-/deepseek-ai-dsh-session-snapshot/model-experience/kv-cache-effect:
+/agentrans-session-snapshot/model-experience/kv-cache-effect:
   en: ca75c51c89c2c9b0
   zh: f57cc48a1b5cbfa9
-/deepseek-ai-dsh-session-snapshot/known-limitations-and-deferred-work:
+/agentrans-session-snapshot/known-limitations-and-deferred-work:
   en: 42e871839dddaf6d
   zh: b7ab1d313527612b
-/deepseek-ai-dsh-session-snapshot/known-limitations-and-deferred-work/dev-note:
+/agentrans-session-snapshot/known-limitations-and-deferred-work/dev-note:
   en: e67f633dc6fe7773
   zh: 3bb0c20c93f16f98

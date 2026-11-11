@@ -2,28 +2,28 @@
  * JSON-RPC methods and notifications for out-of-process harness SDKs.
  * The surrounding context owns plugins, persistence, and configured adapters.
  *
- * @module @deepseek-ai/dsh-sdk-jsonrpc-server/server
+ * @module @agentrans/sdk-jsonrpc-server/server
  */
 
-import type { Context } from '@deepseek-ai/cordis'
+import type { Context } from '@agentrans/cordis'
 import { AsyncLocalStorage } from 'node:async_hooks'
 import { resolve } from 'node:path'
 import { QueryActivity } from './query-activity.ts'
 import { SdkUserQuestionBridge } from './user-questions.ts'
 import { queryCommand } from './query-input.ts'
 import { queryCommandImages, queryContent } from './query-content.ts'
-import { brandString } from '@deepseek-ai/dsh-brand'
-import type { Agent, AgentHandle } from '@deepseek-ai/dsh-agent'
-import { admitEncodedImages, type EncodedImageAttachment, type ImageAttachmentRef } from '@deepseek-ai/dsh-attachment'
-import { createUserMessage, ReasoningEffortId, type ContentBlock } from '@deepseek-ai/dsh-llm'
-import { carrierKeyOf, type Scoped } from '@deepseek-ai/dsh-scope'
-import type { SessionId, SessionLogOffset } from '@deepseek-ai/dsh-session'
-import type {} from '@deepseek-ai/dsh-working-directory'
-import type {} from '@deepseek-ai/dsh-user-approval'
+import { brandString } from '@agentrans/brand'
+import type { Agent, AgentHandle } from '@agentrans/agent'
+import { admitEncodedImages, type EncodedImageAttachment, type ImageAttachmentRef } from '@agentrans/attachment'
+import { createUserMessage, ReasoningEffortId, type ContentBlock } from '@agentrans/llm'
+import { carrierKeyOf, type Scoped } from '@agentrans/scope'
+import type { SessionId, SessionLogOffset } from '@agentrans/session'
+import type {} from '@agentrans/working-directory'
+import type {} from '@agentrans/user-approval'
 
-import type {} from '@deepseek-ai/dsh-schedule'
-import type SubagentRuntime from '@deepseek-ai/dsh-subagent'
-import type { SubagentRunEndInfo } from '@deepseek-ai/dsh-subagent'
+import type {} from '@agentrans/schedule'
+import type SubagentRuntime from '@agentrans/subagent'
+import type { SubagentRunEndInfo } from '@agentrans/subagent'
 import type {
   ApprovalRequestParams,
   CommandExecution,
@@ -43,7 +43,7 @@ import type {
   SdkEncodedImageBlock,
   SubagentFinishedNotification,
   SubagentStartedNotification,
-} from '@deepseek-ai/dsh-sdk-protocol'
+} from '@agentrans/sdk-protocol'
 
 interface SessionRecord {
   handle: AgentHandle
@@ -558,7 +558,7 @@ export class HarnessSdkJsonRpcServer {
     // No preset composition: this server's compositions keep the model-facing
     // rows in the host plane, so this agent reads them from the global layer. A
     // deployment that configures a roster has to join one here first
-    // (@deepseek-ai/dsh-agent-preset-registry README, "Composing a child agent").
+    // (@agentrans/agent-preset-registry README, "Composing a child agent").
     const agentOptions = {
       provider: this.provider,
       model: this.model,

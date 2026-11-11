@@ -3,7 +3,7 @@ description: "Physical-key types, versioned shortcut documents, and the persiste
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-shortcut-protocol
+# @agentrans/shortcut-protocol
 
 English | [中文](README.zh.md)
 

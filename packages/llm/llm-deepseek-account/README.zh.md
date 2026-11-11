@@ -3,7 +3,7 @@ description: "DeepSeek 账号鉴权、模型列表与模型门控。"
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-llm-deepseek-account
+# @agentrans/llm-deepseek-account
 
 [English](README.md) | 中文
 
@@ -41,7 +41,7 @@ kind: "package-reference"
 
 ```yaml
 - id: llm-deepseek-account
-  name: '@deepseek-ai/dsh-llm-deepseek-account'
+  name: '@agentrans/llm-deepseek-account'
   config:
     reasoningEffort: high
     modelOverrides:

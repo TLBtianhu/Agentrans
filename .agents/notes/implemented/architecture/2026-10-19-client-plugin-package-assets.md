@@ -21,7 +21,7 @@ Client code imports an image (`import art from './assets/a.webp'`), and the pack
 ```text
 src/client/assets/running-whale@2x.png
 lib/assets/running-whale@2x-06738fa29b2f.png
-plugins/@deepseek-ai/dsh-client-ui-chat/assets/running-whale%402x-06738fa29b2f.png
+plugins/@agentrans/client-ui-chat/assets/running-whale%402x-06738fa29b2f.png
 ```
 
 Each path segment is percent-encoded with `encodeURIComponent` and then `!`, `'`, `(`, `)`, and `*`, so the reference is also a valid unquoted CSS `url()`, and the package name is emitted verbatim. The URL is relative to the shell document, like every app-owned route, so it resolves under any mount and from injected `<style>` text. Components need no hook, injected value, or service: the URL is a module constant computed when the module first runs.

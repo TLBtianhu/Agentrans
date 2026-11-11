@@ -6,18 +6,18 @@
  * Peers, and lifecycle refusals; {@link createViewerFork} owns fork orchestration and branch facts;
  * {@link createViewerDispatch} classifies and answers each request. This module states the services
  * those parts read and the interface the host mounts, so a host sees one reader with one contract.
- * @module @deepseek-ai/dsh-experimental-liveshare/src/host/viewer-read
+ * @module @agentrans/experimental-liveshare/src/host/viewer-read
  */
 
-import type { TypertGatewayWireStream } from '@deepseek-ai/dsh-api-gateway/types'
-import type { HostConnectionHandle } from '@deepseek-ai/dsh-client-connection'
-import type { PeerScope } from '@deepseek-ai/dsh-typert-protocol'
+import type { TypertGatewayWireStream } from '@agentrans/api-gateway/types'
+import type { HostConnectionHandle } from '@agentrans/client-connection'
+import type { PeerScope } from '@agentrans/typert-protocol'
 import type { ViewerAnswer, ViewerRequest } from '../viewer-channel.ts'
 import type { ForkRegistry } from './fork-registry.ts'
 import type { ForkShareState } from './fork-policy.ts'
 import type { ReaderWriteAction } from './viewer-access-policy.ts'
 import type { ShareViewerPrincipal } from './viewer-principal.ts'
-import type { ShareRpcActor } from '@deepseek-ai/dsh-experimental-liveshare-protocol'
+import type { ShareRpcActor } from '@agentrans/experimental-liveshare-protocol'
 import { createViewerDispatch, type ViewerDispatch } from './viewer-dispatch.ts'
 import { createViewerFork, type ViewerFork } from './viewer-fork.ts'
 import { createViewerLifecycle, type ViewerLifecycle } from './viewer-lifecycle.ts'

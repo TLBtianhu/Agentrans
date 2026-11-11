@@ -1,5 +1,5 @@
 /** Typed methods shared by the host and its co-shipped Node execution process, and validation of untrusted program results. */
-import type { PtcProgramFormat, PtcJsonValue, PtcRunFailure } from '@deepseek-ai/dsh-ptc-runtime'
+import type { PtcProgramFormat, PtcJsonValue, PtcRunFailure } from '@agentrans/ptc-runtime'
 import { decodePtcJsonWire, type PtcJsonWire } from './json-wire.ts'
 
 /** Inputs for one program; host functions remain in the parent process. */

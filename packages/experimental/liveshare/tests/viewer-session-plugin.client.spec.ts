@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
 /** What the viewer page's own plugin blocks under its access snapshot, and whose scopes it touches. */
 
-import { Context } from '@deepseek-ai/cordis'
-import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
+import { Context } from '@agentrans/cordis'
+import { createSnapshotStore } from '@agentrans/client-store'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
+import type { SessionId } from '@agentrans/session/types'
 import { apply, inject, viewerSignInHref } from '../src/client/viewer-session-plugin.ts'
 import { publishViewerCapabilities, viewerCapabilities } from '../src/client/viewer-capabilities.ts'
 import { viewerContextFacts } from '../src/client/viewer-context.ts'
@@ -12,7 +12,7 @@ import { viewerStatus, viewerStatusFacts } from '../src/client/viewer-status.ts'
 import { en, zh } from '../src/client/locales.ts'
 import { cleanup, render } from '@testing-library/react'
 import { createElement, createRef } from 'react'
-import { DraftEditor } from '@deepseek-ai/dsh-client-ui-conversation/src/client/input/editor/DraftEditor.tsx'
+import { DraftEditor } from '@agentrans/client-ui-conversation/src/client/input/editor/DraftEditor.tsx'
 import {
   provideViewerConnection, provideViewerLocale, provideViewerRemoteAccess, type ViewerRemoteAccess,
 } from './viewer-plugin-services.client.ts'

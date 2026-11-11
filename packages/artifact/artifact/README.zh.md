@@ -3,7 +3,7 @@ description: "Session 持久化 HTML 和 SceneSpec Artifact、模型创建/更�
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-artifact
+# @agentrans/artifact
 
 [English](README.md) | 中文
 
@@ -25,7 +25,7 @@ kind: "package-reference"
 <a id="use-this-package"></a>
 ## 使用
 
-以 `@deepseek-ai/dsh-artifact` 挂载服务，以 `@deepseek-ai/dsh-artifact/tool` 挂载 HTML 工具，以 `@deepseek-ai/dsh-artifact/scene-tool` 挂载 SceneSpec 工具。服务依赖 Session Projection，并在同步读取前等待注册完成。它负责校验、读取当前修订号和提交 Session；每个工具先准备快照，只有最终工具结果成功才提交。SceneSpec 使用版本化 SceneCatalog 和安全表达式解析器校验，不使用 `eval`。
+以 `@agentrans/artifact` 挂载服务，以 `@agentrans/artifact/tool` 挂载 HTML 工具，以 `@agentrans/artifact/scene-tool` 挂载 SceneSpec 工具。服务依赖 Session Projection，并在同步读取前等待注册完成。它负责校验、读取当前修订号和提交 Session；每个工具先准备快照，只有最终工具结果成功才提交。SceneSpec 使用版本化 SceneCatalog 和安全表达式解析器校验，不使用 `eval`。
 
 | 配置 | 默认值 | 含义 |
 |---|---|---|
@@ -52,7 +52,7 @@ Scene 快照使用 `format: 'scene'` 和完整的 `spec`。目录校验函数图
 
 `runtime-values` 入口提供共用 JSON 遍历与诊断上限。其有界无损普通数据子集拒绝负零、稀疏数组、访问器、symbol、数组额外属性与非普通对象，不修改或丢弃报告数据。浏览器解析、不透明程序桥接和 Host 问题准入共用此校验器；它不执行 getter，也不验证程序所报数值的真实性。
 
-不依赖 DOM 的 `@deepseek-ai/dsh-artifact/particle-runtime` 入口为预览和独立导出提供同一份固定步长粒子计算。带版本号的检查点记录步数，恢复时必须使用同一 SceneSpec 和修订。观察输出将 `-0` 规范为 `0` 以便写入 JSON，内部积分状态不变。它不持久化状态，也不授予执行权限。
+不依赖 DOM 的 `@agentrans/artifact/particle-runtime` 入口为预览和独立导出提供同一份固定步长粒子计算。带版本号的检查点记录步数，恢复时必须使用同一 SceneSpec 和修订。观察输出将 `-0` 规范为 `0` 以便写入 JSON，内部积分状态不变。它不持久化状态，也不授予执行权限。
 
 浏览器安全入口 `scene-renderers` 与 `scene-export` 拥有共用画布计算和独立 HTML 生成器。每个渲染器接收已解析的 `ScenePalette`，只按其中的角色取色——主文字、次级文字、强调、成功、底色、网格、四个序列色与一个高亮——因此它从不读取文档，一张样式表即可为所有原生场景换色。`resolveScenePalette(read)` 把这些角色映射到 `--dsw-alias-*` 自定义属性，缺少某个角色时抛出指名该角色的 `ScenePaletteError`，而不是画成透明。`SCENE_STYLE_PALETTES` 声明每种风格的调色板归属：`editorial` 跟随宿主调色板，`transit-map`、`blueprint`、`math-proof-lecture` 与 `particles` 属于 `self-contained` 风格，保留各自刻意的调色板。`buildSceneAnimationHtml(spec, title, checkpoint?, origin?)` 可将固定来源身份与重放条件作为转义 JSON 嵌入文件。导出物没有宿主主题，因此自带两套调色板并把匹配的一套交给同一批渲染器。非粒子场景按源码默认条件导出，不捕获浏览器局部滑块、选择或 iframe 状态。持久文件生成和重试回执归独立的 [Artifact 导出服务](../artifact-export/README.zh.md) 所有。
 

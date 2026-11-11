@@ -1,5 +1,5 @@
 /** Original-byte transfer, platform save selection, and pasteable image encoding. */
-import { resolveDragFileName } from '@deepseek-ai/dsh-util-file-drag'
+import { resolveDragFileName } from '@agentrans/util-file-drag'
 import type { DesktopFileActions, FileActions, FileActionSource, FileSaveResult } from '../types.ts'
 
 /**

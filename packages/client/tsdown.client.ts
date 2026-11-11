@@ -80,10 +80,10 @@ function styleInjectionModule(
  * Contract layers and pure folds a client bundle may inline: browser-safe
  * values with no runtime identity shared across bundles. Private calculation
  * errors stay with their caller; services and singleton state do not inline.
- * Everything else under @deepseek-ai/* is either a module-table entry
+ * Everything else under @agentrans/* is either a module-table entry
  * (external) or a leak the purity gate rejects.
  */
-export const INLINE_SAFE = /^(?:@deepseek-ai\/dsh-(?:file-reference|session|llm|tools|brand|official-bundles|deque|output-retention|typert-protocol|shortcut-protocol|util-crypto|util-time|util-values|util-workspace-path)(?:\/|$)|@deepseek-ai\/dsh-util-file-drag$|@deepseek-ai\/dsh-token-meter\/client$|@deepseek-ai\/dsh-commands\/builtin$|@deepseek-ai\/dsh-native-command\/types$|@deepseek-ai\/dsh-host-open-in-app\/shared$|@deepseek-ai\/dsh-plugin-manager\/registry$|@deepseek-ai\/dsh-agent-preset-registry\/display$|@deepseek-ai\/dsh-api-workspace-controller\/default-workspace$|@deepseek-ai\/dsh-spill-policy\/notice$|@deepseek-ai\/dsh-artifact\/(?:particle-runtime|observation-comparison|scene-export|scene-renderers|capabilities|runtime-values)$)/
+export const INLINE_SAFE = /^(?:@agentrans\/(?:file-reference|session|llm|tools|brand|official-bundles|deque|output-retention|typert-protocol|shortcut-protocol|util-crypto|util-time|util-values|util-workspace-path)(?:\/|$)|@agentrans\/util-file-drag$|@agentrans\/token-meter\/client$|@agentrans\/commands\/builtin$|@agentrans\/native-command\/types$|@agentrans\/host-open-in-app\/shared$|@agentrans\/plugin-manager\/registry$|@agentrans\/agent-preset-registry\/display$|@agentrans\/api-workspace-controller\/default-workspace$|@agentrans\/spill-policy\/notice$|@agentrans\/artifact\/(?:particle-runtime|observation-comparison|scene-export|scene-renderers|capabilities|runtime-values)$)/
 
 /**
  * Vendored framework libraries: rescoped into @deepseek-ai, so the gate below
@@ -91,10 +91,10 @@ export const INLINE_SAFE = /^(?:@deepseek-ai\/dsh-(?:file-reference|session|llm|
  * identity to share — the framework itself is a requested module-table row
  * (external), while these are ordinary libraries a browser bundle inlines.
  */
-const VENDORED_LIBRARY = /^@deepseek-ai\/(?:(?:cosmokit|schemastery)(?:\/|$)|cordis-plugin-timer$)/
+const VENDORED_LIBRARY = /^@agentrans\/(?:(?:cosmokit|schemastery)(?:\/|$)|cordis-plugin-timer$)/
 
 /** Generated descriptor/codec contribution with no shared runtime identity. */
-const GENERATED_REMOTE = /^@deepseek-ai\/dsh-[a-z0-9]+(?:-[a-z0-9]+)*\/remote$/
+const GENERATED_REMOTE = /^@agentrans\/[a-z0-9]+(?:-[a-z0-9]+)*\/remote$/
 
 /**
  * Workspace mode replaces an empty config array with the root defaults. A
@@ -843,7 +843,7 @@ function clientConfig(
       // Cross-plugin collaboration goes through cordis services instead.
       name: 'dsh-client-bundle-purity',
       resolveId(source: string) {
-        if (!source.startsWith('@deepseek-ai/')) return null
+        if (!source.startsWith('@agentrans/')) return null
         if (isRequested(source)) return null // requested module-table row: external wins
         if (VENDORED_LIBRARY.test(source)) return null // vendored library: inline, no shared identity
         if (INLINE_SAFE.test(source) || GENERATED_REMOTE.test(source)) return null // wire contribution: inline is the point

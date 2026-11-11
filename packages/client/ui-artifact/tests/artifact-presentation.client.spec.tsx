@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
-import { sessionSnapshot } from '@deepseek-ai/dsh-client-test-runtime'
+import { sessionSnapshot } from '@agentrans/client-test-runtime'
 import type { ComponentProps } from 'react'
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { makeTranslate, allowAllAccess, bindSnapshotSelector } from '@deepseek-ai/dsh-client-test-runtime'
-import { SessionId } from '@deepseek-ai/dsh-session/types'
+import { makeTranslate, allowAllAccess, bindSnapshotSelector } from '@agentrans/client-test-runtime'
+import { SessionId } from '@agentrans/session/types'
 import { ArtifactNodeView } from './runtime-harness.tsx'
 import { artifactPresentationStore, type ArtifactPresentationState } from '../src/client/presentation.ts'
 import { en } from '../src/client/locales.ts'

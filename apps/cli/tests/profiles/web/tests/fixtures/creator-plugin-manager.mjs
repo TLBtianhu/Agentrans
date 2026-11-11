@@ -1,5 +1,5 @@
 /** Test-only IPC assertions over real Creator presets and profile management. */
-import { executeModelToolFixture } from '@deepseek-ai/dsh-tool-testkit'
+import { executeModelToolFixture } from '@agentrans/tool-testkit'
 
 export const inject = ['agents', 'agentPresets', 'tools', 'pluginManager', 'permissionPresets']
 

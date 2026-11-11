@@ -1,10 +1,10 @@
 /** Local controls for one Artifact revision's particle simulation. */
-import type { ParticleSystemSpec } from '@deepseek-ai/dsh-artifact/scene'
+import type { ParticleSystemSpec } from '@agentrans/artifact/scene'
 import { nativeRuntimeFailure } from './native-runtime.ts'
-import { assertNever } from '@deepseek-ai/dsh-util-values'
+import { assertNever } from '@agentrans/util-values'
 import {
   ParticleRuntimeError, createParticleState, stepParticleState, type ParticleState,
-} from '@deepseek-ai/dsh-artifact/particle-runtime'
+} from '@agentrans/artifact/particle-runtime'
 
 /** Simulation values and playback intent owned by the Artifact card. */
 export interface ParticleRun {

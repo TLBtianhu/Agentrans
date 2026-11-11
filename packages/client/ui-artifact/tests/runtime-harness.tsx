@@ -1,8 +1,8 @@
 /** Test-only framework source binding for pure card and node tests. */
 import { useEffect, useLayoutEffect, useMemo, useSyncExternalStore, type ComponentProps } from 'react'
-import { createSnapshotStore, type ObservableSnapshot } from '@deepseek-ai/dsh-client-store'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import type { ArtifactSnapshot } from '@deepseek-ai/dsh-artifact/types'
+import { createSnapshotStore, type ObservableSnapshot } from '@agentrans/client-store'
+import type { SessionId } from '@agentrans/session/types'
+import type { ArtifactSnapshot } from '@agentrans/artifact/types'
 import { ArtifactCard as RealCard, ArtifactNodeView as RealNode } from '../src/client/ArtifactNodeView.tsx'
 import { ArtifactComparisonNodeView as RealComparison } from '../src/client/ArtifactComparisonNodeView.tsx'
 import { ArtifactRuntimeOwner, type ArtifactRuntimeSnapshot, type ArtifactRuntimeActions } from '../src/client/runtime-owner.ts'

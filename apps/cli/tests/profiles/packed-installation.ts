@@ -115,7 +115,7 @@ export async function createPackedInstallation(temporaryPrefix: string, extraPac
   const sourceDirectories = [root, ...[...packages.values()].map(member => member.directory)]
   const initialLinks = await workspaceLinks(sourceDirectories)
   onTestFinished(async () => { expect(await workspaceLinks(sourceDirectories)).toEqual(initialLinks) })
-  const closure = packedWorkspaceClosure('@deepseek-ai/dsh', packages)
+  const closure = packedWorkspaceClosure('@agentrans/dsh', packages)
   // These idle-profile tests create no Session or confined process. The native
   // platform packages load lazily for those operations and have separate smokes.
   const supportsIdleProfile = (member: WorkspacePackage) => (
@@ -174,7 +174,7 @@ export async function createPackedInstallation(temporaryPrefix: string, extraPac
     ignoredOptionalDependencies: closure.filter(member => !members.has(member.name)).map(member => member.name),
     allowBuilds: {
       ...workspaceSettings.allowBuilds,
-      [`@deepseek-ai/dsh-subprocess-local@file:${relative(installation, tarballs.get('@deepseek-ai/dsh-subprocess-local')!).split(sep).join('/')}`]: true,
+      [`@agentrans/subprocess-local@file:${relative(installation, tarballs.get('@agentrans/subprocess-local')!).split(sep).join('/')}`]: true,
     },
     patchedDependencies: workspaceSettings.patchedDependencies,
     minimumReleaseAgeExclude: workspaceSettings.minimumReleaseAgeExclude,

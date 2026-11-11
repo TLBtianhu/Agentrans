@@ -3,7 +3,7 @@
 import { mkdir, mkdtemp, readFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { Context } from '@deepseek-ai/cordis'
+import { Context } from '@agentrans/cordis'
 import { claudeRuntime } from '@botiverse/oar/runtimes/claude'
 import { expect, it } from 'vitest'
 import { externalTestParent } from '../../../subagent/subagent/tests/external-activation-helpers.ts'

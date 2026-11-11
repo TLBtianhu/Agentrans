@@ -1,5 +1,5 @@
 /** Versioned SceneSpec definitions and validation for model-generated scenes. */
-import { parseExpression } from '@deepseek-ai/dsh-util-values'
+import { parseExpression } from '@agentrans/util-values'
 import type { ArtifactSourceCapabilities } from './capabilities.ts'
 
 /** Bounded numeric parameter exposed by a SceneSpec. */

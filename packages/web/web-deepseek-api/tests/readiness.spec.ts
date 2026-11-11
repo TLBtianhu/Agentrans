@@ -3,15 +3,15 @@
  * providers read one credential, so every case runs for both operations.
  */
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
-import AgentRegistry from '@deepseek-ai/dsh-agent'
-import type { Agent } from '@deepseek-ai/dsh-agent'
-import type { DeepSeekAccount } from '@deepseek-ai/dsh-deepseek-account'
-import { DSH_LAUNCH_ENVIRONMENT_KEY, createLaunchEnvironmentSnapshot } from '@deepseek-ai/dsh-launch-environment'
-import SessionStore, { SessionId } from '@deepseek-ai/dsh-session'
-import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
-import WebRuntime from '@deepseek-ai/dsh-web'
-import * as webApiPlugin from '@deepseek-ai/dsh-web-deepseek-api'
+import { Context } from '@agentrans/cordis'
+import AgentRegistry from '@agentrans/agent'
+import type { Agent } from '@agentrans/agent'
+import type { DeepSeekAccount } from '@agentrans/deepseek-account'
+import { DSH_LAUNCH_ENVIRONMENT_KEY, createLaunchEnvironmentSnapshot } from '@agentrans/launch-environment'
+import SessionStore, { SessionId } from '@agentrans/session'
+import SessionProjectionRegistry from '@agentrans/session-projection'
+import WebRuntime from '@agentrans/web'
+import * as webApiPlugin from '@agentrans/web-deepseek-api'
 
 type Operation = 'search' | 'fetch'
 

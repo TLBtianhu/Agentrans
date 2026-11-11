@@ -1,7 +1,7 @@
 /** A requests refresh reports its own authorization refusal while cancelling older revoked work. */
 import { describe, expect, it, onTestFinished, vi } from 'vitest'
-import { identityKeyOf } from '@deepseek-ai/dsh-experimental-liveshare-protocol'
-import type { PeerScope } from '@deepseek-ai/dsh-typert-protocol'
+import { identityKeyOf } from '@agentrans/experimental-liveshare-protocol'
+import type { PeerScope } from '@agentrans/typert-protocol'
 import { createViewerReadService, type ViewerReadDeps } from '../src/host/viewer-read.ts'
 import { readerConnection } from './viewer-read-peers.ts'
 

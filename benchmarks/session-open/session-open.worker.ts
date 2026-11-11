@@ -2,20 +2,20 @@
 
 import { performance } from 'node:perf_hooks'
 import { scheduler } from 'node:timers/promises'
-import { Context } from '@deepseek-ai/cordis'
-import AgentLoop from '@deepseek-ai/dsh-agent-loop'
-import { mountAgentLoopTestDependencies } from '@deepseek-ai/dsh-agent-loop-testkit'
-import { agentPresetProjectionDefinition } from '@deepseek-ai/dsh-agent-preset-registry'
+import { Context } from '@agentrans/cordis'
+import AgentLoop from '@agentrans/agent-loop'
+import { mountAgentLoopTestDependencies } from '@agentrans/agent-loop-testkit'
+import { agentPresetProjectionDefinition } from '@agentrans/agent-preset-registry'
 import SessionStore, {
   interruptedTurnClosers,
   SessionId,
   SessionLogOffset,
   SessionPreparation,
-} from '@deepseek-ai/dsh-session'
-import AgentRegistry, { type AgentHandle } from '@deepseek-ai/dsh-agent'
-import * as JsonlSessionPersistence from '@deepseek-ai/dsh-session-persistence-jsonl'
-import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
-import SessionQueryEngine from '@deepseek-ai/dsh-session-query'
+} from '@agentrans/session'
+import AgentRegistry, { type AgentHandle } from '@agentrans/agent'
+import * as JsonlSessionPersistence from '@agentrans/session-persistence-jsonl'
+import SessionProjectionRegistry from '@agentrans/session-projection'
+import SessionQueryEngine from '@agentrans/session-query'
 import type {
   SessionEventSearchPage,
   SessionEventSearchRequest,
@@ -23,11 +23,11 @@ import type {
   SessionSearchHit,
   SessionSearchPage,
   SessionSearchRequest,
-} from '@deepseek-ai/dsh-session-query'
-import * as SessionStatsPlugin from '@deepseek-ai/dsh-session-stats'
-import SessionTitleService from '@deepseek-ai/dsh-session-title'
-import * as SessionTurnOutlinePlugin from '@deepseek-ai/dsh-session-turn-outline'
-import TokenMeter from '@deepseek-ai/dsh-token-meter'
+} from '@agentrans/session-query'
+import * as SessionStatsPlugin from '@agentrans/session-stats'
+import SessionTitleService from '@agentrans/session-title'
+import * as SessionTurnOutlinePlugin from '@agentrans/session-turn-outline'
+import TokenMeter from '@agentrans/token-meter'
 // These Host-only adapters have no public Node export and are compiled into the benchmark worker.
 import { HistoryController } from '../../packages/api/session-controller/src/history/controller.ts'
 import { WebController } from '../../packages/api/session-controller/src/web/controller.ts'
@@ -290,7 +290,7 @@ class SessionBenchmarkHost {
 }
 
 assertBuiltBenchmarkRuntime(import.meta.url, {
-  '@deepseek-ai/dsh-session-persistence-jsonl': import.meta.resolve('@deepseek-ai/dsh-session-persistence-jsonl'),
+  '@agentrans/session-persistence-jsonl': import.meta.resolve('@agentrans/session-persistence-jsonl'),
 })
 
 const [root, scenarioValue] = process.argv.slice(2)

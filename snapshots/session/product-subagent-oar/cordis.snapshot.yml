@@ -1,5 +1,5 @@
 - id: llm-deepseek
-  name: '@deepseek-ai/dsh-llm-deepseek-api-key'
+  name: '@agentrans/llm-deepseek-api-key'
   disabled: true
 
 - id: plugin-package-inventory-deepseek
@@ -7,7 +7,7 @@
 
 - insert:
     - id: llm-replay
-      name: '@deepseek-ai/dsh-llm-replay'
+      name: '@agentrans/llm-replay'
       config:
         providers:
           - id: deepseek-official
@@ -18,7 +18,7 @@
 
 - insert:
     - id: experimental-subagent-oar-codex
-      name: '@deepseek-ai/dsh-experimental-subagent-oar'
+      name: '@agentrans/experimental-subagent-oar'
       config:
         runtime: codex
         providerName: oar-codex
@@ -26,7 +26,7 @@
           - -c
           - sandbox_mode="workspace-write"
     - id: experimental-subagent-oar-claude
-      name: '@deepseek-ai/dsh-experimental-subagent-oar'
+      name: '@agentrans/experimental-subagent-oar'
       config:
         runtime: claude
         providerName: oar-claude
@@ -36,7 +36,7 @@
           - --permission-prompts
           - none
     - id: tool-subagent-oar
-      name: '@deepseek-ai/dsh-experimental-tool-subagent-oar'
+      name: '@agentrans/experimental-tool-subagent-oar'
       config:
         providers:
           codex: oar-codex

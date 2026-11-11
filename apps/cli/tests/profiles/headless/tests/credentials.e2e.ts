@@ -5,8 +5,8 @@ import { once } from 'node:events'
 import type { AddressInfo } from 'node:net'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { startMockLlmServer } from '@deepseek-ai/dsh-llm-mock-server'
-import { runLoaderSmoke } from '@deepseek-ai/dsh-loader-smoke'
+import { startMockLlmServer } from '@agentrans/llm-mock-server'
+import { runLoaderSmoke } from '@agentrans/loader-smoke'
 import { describe, expect, it } from 'vitest'
 
 const binScript = fileURLToPath(new URL('../../../../../../apps/cli/src/bin.ts', import.meta.url))

@@ -3,7 +3,7 @@ description: "Create persistent removable interface plugins after an explicit us
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-creation-recommendations
+# @agentrans/creation-recommendations
 
 English | [中文](README.zh.md)
 

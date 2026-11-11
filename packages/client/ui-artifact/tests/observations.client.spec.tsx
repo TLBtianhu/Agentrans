@@ -2,11 +2,11 @@
 import type { ComponentProps } from 'react'
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
-import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
+import { makeTranslate } from '@agentrans/client-test-runtime'
 import {
   advanceParticleState, createParticleCheckpoint, createParticleState, observeParticleState,
-} from '@deepseek-ai/dsh-artifact/particle-runtime'
-import type { ArtifactId, ArtifactObservationId, SceneArtifactSnapshot, SavedParticleObservation } from '@deepseek-ai/dsh-artifact/types'
+} from '@agentrans/artifact/particle-runtime'
+import type { ArtifactId, ArtifactObservationId, SceneArtifactSnapshot, SavedParticleObservation } from '@agentrans/artifact/types'
 import { ArtifactCard } from './runtime-harness.tsx'
 import { en } from '../src/client/locales.ts'
 import { ArtifactObservationSaveError, type ArtifactExportCommands, type SaveArtifactObservation, type SendArtifactObservation } from '../src/client/protocol.ts'

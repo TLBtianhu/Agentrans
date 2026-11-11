@@ -4,7 +4,7 @@ import { randomUUID } from 'node:crypto'
 import { EventEmitter } from 'node:events'
 import type { Readable, Writable } from 'node:stream'
 import { z } from 'zod'
-import type { Branded } from '@deepseek-ai/dsh-brand'
+import type { Branded } from '@agentrans/brand'
 
 /** Wire version shared by the client package, the installed helper and its embedded PTC worker. */
 export const SSH_PROTOCOL_VERSION = 3

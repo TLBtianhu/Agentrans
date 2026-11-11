@@ -2,8 +2,8 @@
 
 import type { ReactNode } from 'react'
 import clsx from 'clsx'
-import { IconCheckCircleFillRegular, IconCloseCircleFillRegular } from '@deepseek-ai/dsh-client-ui-primitives'
-import type { CheckState } from '@deepseek-ai/dsh-experimental-forge/types'
+import { IconCheckCircleFillRegular, IconCloseCircleFillRegular } from '@agentrans/client-ui-primitives'
+import type { CheckState } from '@agentrans/experimental-forge/types'
 import type { ChangeRequestTone } from './status.ts'
 import css from './ForgeTab.module.css'
 

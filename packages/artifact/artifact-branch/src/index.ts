@@ -1,21 +1,21 @@
 /** Confirmed branch-result return with Host-resolved, immutable Artifact evidence. */
-import { Context } from '@deepseek-ai/cordis'
-import z from '@deepseek-ai/schemastery'
-import type {} from '@deepseek-ai/dsh-artifact'
-import type { ArtifactObservations, SavedParticleObservation, SavedParticleObservationRef } from '@deepseek-ai/dsh-artifact/types'
-import { buildParticleObservationComparison, ParticleObservationComparisonError } from '@deepseek-ai/dsh-artifact/observation-comparison'
-import { createParticleCheckpoint, observeParticleState, restoreParticleCheckpoint } from '@deepseek-ai/dsh-artifact/particle-runtime'
-import type { SessionBranchResultValue } from '@deepseek-ai/dsh-api-session-controller'
-import { SessionSeq } from '@deepseek-ai/dsh-session'
-import { selectBranchResult } from '@deepseek-ai/dsh-session-branch'
-import { admitBranchResult, BranchResultAdmissionBusy, BranchResultAdmissionConflict } from '@deepseek-ai/dsh-session-branch/admission'
-import { SessionQueryError, type SessionObservation } from '@deepseek-ai/dsh-session-query'
-import { Remote, RemoteError, TypertRemoteService } from '@deepseek-ai/dsh-typert-protocol'
+import { Context } from '@agentrans/cordis'
+import z from '@agentrans/schemastery'
+import type {} from '@agentrans/artifact'
+import type { ArtifactObservations, SavedParticleObservation, SavedParticleObservationRef } from '@agentrans/artifact/types'
+import { buildParticleObservationComparison, ParticleObservationComparisonError } from '@agentrans/artifact/observation-comparison'
+import { createParticleCheckpoint, observeParticleState, restoreParticleCheckpoint } from '@agentrans/artifact/particle-runtime'
+import type { SessionBranchResultValue } from '@agentrans/api-session-controller'
+import { SessionSeq } from '@agentrans/session'
+import { selectBranchResult } from '@agentrans/session-branch'
+import { admitBranchResult, BranchResultAdmissionBusy, BranchResultAdmissionConflict } from '@agentrans/session-branch/admission'
+import { SessionQueryError, type SessionObservation } from '@agentrans/session-query'
+import { Remote, RemoteError, TypertRemoteService } from '@agentrans/typert-protocol'
 import type { ArtifactBranchEvidenceSelection, ArtifactBranchResultRequest } from './types.ts'
 
 export type * from './types.ts'
 
-declare module '@deepseek-ai/cordis' {
+declare module '@agentrans/cordis' {
   interface Context {
     /** Return manually selected branch conclusions with saved Artifact evidence. */
     artifactBranchResults: ArtifactBranchResults

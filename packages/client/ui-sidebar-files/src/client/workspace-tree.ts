@@ -9,9 +9,9 @@
  * Windows drive root `C:\` becomes `C:`, and a top-level child's key still
  * ends at its parent's last `/`.
  */
-import type { RemoteFailure } from '@deepseek-ai/dsh-api-remotes/client'
+import type { RemoteFailure } from '@agentrans/api-remotes/client'
 import type { TreeDirectoryState, TreeEntry } from './FileTree.tsx'
-import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
+import type { TranslateNS } from '@agentrans/client-ui-slots'
 import type {} from './locales.ts'
 import { childPath, type FilesTreeState } from './store.ts'
 

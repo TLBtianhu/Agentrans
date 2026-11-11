@@ -1,9 +1,9 @@
 /** Native permission status and revocable application consent on the existing plugin page. */
 import { useEffect, useState } from 'react'
-import { Button, IconSettingsOutlineRegular, Modal, Toast } from '@deepseek-ai/dsh-client-ui-primitives'
-import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
-import type {} from '@deepseek-ai/dsh-client-ui-plugin-manager/client'
-import type { ConfigForm } from '@deepseek-ai/dsh-client-ui-settings/client'
+import { Button, IconSettingsOutlineRegular, Modal, Toast } from '@agentrans/client-ui-primitives'
+import type { InjectFace, PropsLocale, PropsRuntime } from '@agentrans/client-ui-slots'
+import type {} from '@agentrans/client-ui-plugin-manager/client'
+import type { ConfigForm } from '@agentrans/client-ui-settings/client'
 import type { CuaApplicationGrant, CuaSystemPermissionState } from '../access-types.ts'
 import type { PermissionFace } from './controller.ts'
 import type { NS } from './locales.ts'

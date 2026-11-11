@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import clsx from 'clsx'
-import { Button, IconChevronDownOutlineRegular, Menu, MenuItemButton } from '@deepseek-ai/dsh-client-ui-primitives'
-import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
+import { Button, IconChevronDownOutlineRegular, Menu, MenuItemButton } from '@agentrans/client-ui-primitives'
+import type { PropsLocale } from '@agentrans/client-ui-slots'
 import type { ReviewQueue } from './review-queue.ts'
 import type { ReviewSelection, ReviewSource } from './review.ts'
 import type { NS } from './locales.ts'

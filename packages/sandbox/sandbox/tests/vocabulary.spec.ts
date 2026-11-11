@@ -7,7 +7,7 @@
  */
 
 import { describe, expect, it } from 'vitest'
-import { SANDBOX_UNAVAILABLE, SandboxUnavailableError, SandboxUnsupportedPolicyError } from '@deepseek-ai/dsh-sandbox'
+import { SANDBOX_UNAVAILABLE, SandboxUnavailableError, SandboxUnsupportedPolicyError } from '@agentrans/sandbox'
 
 describe('SandboxUnsupportedPolicyError', () => {
   it('distinguishes an unsupported policy from an unavailable backend', () => {

@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-webhook",
+  "name": "@agentrans/webhook",
   "description": "Fire-and-forget webhook rule runtime that creates Workspace-backed DeepSeek Harness Sessions",
   "version": "0.1.0",
   "publishConfig": {
@@ -34,31 +34,31 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-agent": "workspace:*",
-    "@deepseek-ai/dsh-agent-default-model": "workspace:*",
-    "@deepseek-ai/dsh-agent-preset-registry": "workspace:*",
-    "@deepseek-ai/dsh-llm": "workspace:*",
-    "@deepseek-ai/dsh-permission-presets": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-session-title": "workspace:*",
-    "@deepseek-ai/dsh-workspace": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/agent": "workspace:*",
+    "@agentrans/agent-default-model": "workspace:*",
+    "@agentrans/agent-preset-registry": "workspace:*",
+    "@agentrans/llm": "workspace:*",
+    "@agentrans/permission-presets": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/session-title": "workspace:*",
+    "@agentrans/workspace": "workspace:*"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/cordis-plugin-include": "workspace:~",
-    "@deepseek-ai/cordis-plugin-loader": "workspace:~",
-    "@deepseek-ai/dsh-agent": "workspace:*",
-    "@deepseek-ai/dsh-agent-default-model": "workspace:*",
-    "@deepseek-ai/dsh-agent-preset-registry": "workspace:*",
-    "@deepseek-ai/dsh-llm": "workspace:*",
-    "@deepseek-ai/dsh-permission-presets": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-session-title": "workspace:*",
-    "@deepseek-ai/dsh-workspace": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/cordis-plugin-include": "workspace:~",
+    "@agentrans/cordis-plugin-loader": "workspace:~",
+    "@agentrans/agent": "workspace:*",
+    "@agentrans/agent-default-model": "workspace:*",
+    "@agentrans/agent-preset-registry": "workspace:*",
+    "@agentrans/llm": "workspace:*",
+    "@agentrans/permission-presets": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/session-title": "workspace:*",
+    "@agentrans/workspace": "workspace:*"
   },
   "dependencies": {
-    "@deepseek-ai/dsh-brand": "workspace:*",
-    "@deepseek-ai/dsh-util-values": "workspace:*"
+    "@agentrans/brand": "workspace:*",
+    "@agentrans/util-values": "workspace:*"
   }
 }

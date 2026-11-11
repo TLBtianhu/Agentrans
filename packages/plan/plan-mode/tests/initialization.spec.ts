@@ -1,10 +1,10 @@
 /** Prompt assembly must not omit plan guidance during activation. */
-import { Context } from '@deepseek-ai/cordis'
-import AgentLoop from '@deepseek-ai/dsh-agent-loop'
-import { mountAgentLoopTestDependencies } from '@deepseek-ai/dsh-agent-loop-testkit'
-import { createUserMessage } from '@deepseek-ai/dsh-llm'
-import PlanModeController from '@deepseek-ai/dsh-plan-mode'
-import { Session, SessionId } from '@deepseek-ai/dsh-session'
+import { Context } from '@agentrans/cordis'
+import AgentLoop from '@agentrans/agent-loop'
+import { mountAgentLoopTestDependencies } from '@agentrans/agent-loop-testkit'
+import { createUserMessage } from '@agentrans/llm'
+import PlanModeController from '@agentrans/plan-mode'
+import { Session, SessionId } from '@agentrans/session'
 import { describe, expect, it, onTestFinished, vi } from 'vitest'
 import { MockAdapter, textResponse } from '../../../core/agent-loop/tests/mock-adapter.ts'
 

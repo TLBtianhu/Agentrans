@@ -1,8 +1,8 @@
 /** Host registry and HTTP adapter for generic Connection RPC channels. */
 
-import { Context, Service } from '@deepseek-ai/cordis'
-import type { WebRoute } from '@deepseek-ai/dsh-host-webserver'
-import type { PeerId, PeerScope, Principal } from '@deepseek-ai/dsh-typert-protocol'
+import { Context, Service } from '@agentrans/cordis'
+import type { WebRoute } from '@agentrans/host-webserver'
+import type { PeerId, PeerScope, Principal } from '@agentrans/typert-protocol'
 import type { ConnectionInteractions } from './connect-protocol.ts'
 import {
   RpcId,
@@ -59,7 +59,7 @@ interface ConnectionServerResponse {
   readonly result: ConnectionRpcResult<unknown>
 }
 
-declare module '@deepseek-ai/cordis' {
+declare module '@agentrans/cordis' {
   interface Context {
     /** Host Connection transport and RPC registrations. */
     connection: HostConnectionHandle

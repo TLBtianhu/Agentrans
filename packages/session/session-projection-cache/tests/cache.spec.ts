@@ -14,7 +14,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
-import { Context } from '@deepseek-ai/cordis'
+import { Context } from '@agentrans/cordis'
 import { z } from 'zod'
 import SessionStore, {
   SESSION_FORMAT_VERSION,
@@ -22,23 +22,23 @@ import SessionStore, {
   SessionId,
   SessionLogOffset,
   SessionSeq,
-} from '@deepseek-ai/dsh-session'
-import type { SessionEvent, SessionHeader } from '@deepseek-ai/dsh-session'
-import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
-import type { ProjectionDefinition } from '@deepseek-ai/dsh-session-projection'
-import type { SessionProjectionSummaryExcluded } from '@deepseek-ai/dsh-session-projection/types'
-import Storage from '@deepseek-ai/dsh-storage'
+} from '@agentrans/session'
+import type { SessionEvent, SessionHeader } from '@agentrans/session'
+import SessionProjectionRegistry from '@agentrans/session-projection'
+import type { ProjectionDefinition } from '@agentrans/session-projection'
+import type { SessionProjectionSummaryExcluded } from '@agentrans/session-projection/types'
+import Storage from '@agentrans/storage'
 import {
   apply as storageJsonApply, Config as storageJsonConfig, inject as storageJsonInject, name as storageJsonName,
-} from '@deepseek-ai/dsh-storage-json'
+} from '@agentrans/storage-json'
 import {
   apply as storageDomainApply, Config as storageDomainConfig, inject as storageDomainInject, name as storageDomainName,
-} from '@deepseek-ai/dsh-storage-domain'
+} from '@agentrans/storage-domain'
 import SessionProjectionCache from '../src/index.ts'
 import { checkpointRecord, projectionCacheDomainSpec } from '../src/spec.ts'
 import type { CheckpointRecord } from '../src/spec.ts'
 
-declare module '@deepseek-ai/dsh-session-projection/types' {
+declare module '@agentrans/session-projection/types' {
   interface SessionProjectionMap {
     'cache-test/marks': { marks: string[] }
     'cache-test/secondary-marks': { marks: string[] }
@@ -48,7 +48,7 @@ declare module '@deepseek-ai/dsh-session-projection/types' {
   }
 }
 
-declare module '@deepseek-ai/dsh-session/types' {
+declare module '@agentrans/session/types' {
   interface SessionEventMap {
     'cache-test/mark': { marks: string[] }
   }

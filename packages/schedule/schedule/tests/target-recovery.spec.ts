@@ -1,8 +1,8 @@
 /** A failed creation of a reserved Session keeps its task due, and the next drive request creates that same Session. */
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import type { Agent } from '@deepseek-ai/dsh-agent'
-import { SessionId } from '@deepseek-ai/dsh-session'
-import { RemoteError } from '@deepseek-ai/dsh-typert-protocol'
+import type { Agent } from '@agentrans/agent'
+import { SessionId } from '@agentrans/session'
+import { RemoteError } from '@agentrans/typert-protocol'
 import { ScheduleId } from '../src/domain.ts'
 import { createRRuleScheduleRecord } from '../src/domain.ts'
 import { ScheduleRuntime } from '../src/runtime.ts'

@@ -10,9 +10,9 @@ import {
   type AgentUnderTest,
   type InputScript,
   type NormalizeContext,
-} from '@deepseek-ai/dsh-session-snapshot'
-import { foldGoal } from '@deepseek-ai/dsh-goal'
-import type { SessionEvent } from '@deepseek-ai/dsh-session'
+} from '@agentrans/session-snapshot'
+import { foldGoal } from '@agentrans/goal'
+import type { SessionEvent } from '@agentrans/session'
 import { describe, expect, it } from 'vitest'
 
 // This lifecycle proof has goal-specific timestamp normalization and semantic

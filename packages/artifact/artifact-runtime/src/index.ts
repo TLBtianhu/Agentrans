@@ -1,19 +1,19 @@
-/** Source-bound live reports with stream-owned lifetime and bounded model inspection. @module @deepseek-ai/dsh-artifact-runtime */
+/** Source-bound live reports with stream-owned lifetime and bounded model inspection. @module @agentrans/artifact-runtime */
 import { Buffer } from 'node:buffer'
-import { Context } from '@deepseek-ai/cordis'
-import z from '@deepseek-ai/schemastery'
+import { Context } from '@agentrans/cordis'
+import z from '@agentrans/schemastery'
 import { z as schema } from 'zod'
-import type { Agent } from '@deepseek-ai/dsh-agent'
-import type { ArtifactId } from '@deepseek-ai/dsh-artifact/types'
-import type {} from '@deepseek-ai/dsh-artifact'
-import { getArtifactSourceCapabilities } from '@deepseek-ai/dsh-artifact/capabilities'
-import { Remote, RemoteError, TypertRemoteService, type RemoteStream } from '@deepseek-ai/dsh-typert-protocol'
-import type { SessionId } from '@deepseek-ai/dsh-session'
+import type { Agent } from '@agentrans/agent'
+import type { ArtifactId } from '@agentrans/artifact/types'
+import type {} from '@agentrans/artifact'
+import { getArtifactSourceCapabilities } from '@agentrans/artifact/capabilities'
+import { Remote, RemoteError, TypertRemoteService, type RemoteStream } from '@agentrans/typert-protocol'
+import type { SessionId } from '@agentrans/session'
 import type { ArtifactRuntimeIdentity, ArtifactRuntimeInspection, ArtifactRuntimeWaitResult, RuntimeAck, RuntimeReport } from './types.ts'
 
 export type * from './types.ts'
 
-declare module '@deepseek-ai/cordis' {
+declare module '@agentrans/cordis' {
   interface Context {
     /** Live renderer/program reports; historical tool results never become current execution state. */
     artifactRuntime: ArtifactRuntime

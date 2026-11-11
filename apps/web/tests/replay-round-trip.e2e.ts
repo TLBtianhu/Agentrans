@@ -1,4 +1,4 @@
-import { executeToolFixture } from '@deepseek-ai/dsh-tool-testkit'
+import { executeToolFixture } from '@agentrans/tool-testkit'
 // Web e2e scenario: fresh round trip. A real chromium types a prompt into the
 // real composer; the wire, Remote gateway, agent loop, and the REAL bash tool (echo
 // in the temp workspace) all run; the model adapter is dsh-llm-replay (keyless)
@@ -19,10 +19,10 @@ import { fileURLToPath } from 'node:url'
 import type { Browser, Page, Route, WebSocketRoute } from 'playwright'
 import { chromium } from 'playwright'
 import { afterAll, beforeAll, describe, expect, it, onTestFailed } from 'vitest'
-import { ToolCallId, expandAssistantStream } from '@deepseek-ai/dsh-llm'
-import { SessionId, type Session, type SessionEvent } from '@deepseek-ai/dsh-session'
-import type { SessionListValue } from '@deepseek-ai/dsh-api-session-controller/types'
-import type { RemoteResult } from '@deepseek-ai/dsh-typert-protocol'
+import { ToolCallId, expandAssistantStream } from '@agentrans/llm'
+import { SessionId, type Session, type SessionEvent } from '@agentrans/session'
+import type { SessionListValue } from '@agentrans/api-session-controller/types'
+import type { RemoteResult } from '@agentrans/typert-protocol'
 import {
   acknowledgeReloadConnectionLoss, assertFixtureInventory, captureExpandedTurnProcessAria, captureStableAria,
   compareOrRefreshGolden, fixtureUserPrompts,

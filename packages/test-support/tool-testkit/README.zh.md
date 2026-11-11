@@ -3,7 +3,7 @@ description: "在仓库测试和基准测试中定义测试工具，并调用工
 kind: "package-library"
 ---
 
-# @deepseek-ai/dsh-tool-testkit
+# @agentrans/tool-testkit
 
 [English](README.md) | 中文
 
@@ -25,10 +25,10 @@ kind: "package-library"
 <a id="use-this-package"></a>
 ## 使用本包
 
-将 `@deepseek-ai/dsh-tool-testkit` 加入消费包的 `devDependencies`。测试只需要渲染内容而不需要领域结果值时，可以定义以下 fixture：
+将 `@agentrans/tool-testkit` 加入消费包的 `devDependencies`。测试只需要渲染内容而不需要领域结果值时，可以定义以下 fixture：
 
 ```ts
-import { defineContentToolFixture } from '@deepseek-ai/dsh-tool-testkit'
+import { defineContentToolFixture } from '@agentrans/tool-testkit'
 
 const tool = defineContentToolFixture({
   name: 'echo',

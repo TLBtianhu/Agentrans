@@ -1,6 +1,6 @@
 /** RFC 5545 recurrence validation, occurrence arithmetic, and strict decoding of Host task records. */
 import { describe, expect, it } from 'vitest'
-import { MAX_FOUR_DIGIT_YEAR_MS, MIN_FOUR_DIGIT_YEAR_MS } from '@deepseek-ai/dsh-util-time'
+import { MAX_FOUR_DIGIT_YEAR_MS, MIN_FOUR_DIGIT_YEAR_MS } from '@agentrans/util-time'
 import { ScheduleId } from '../src/domain.ts'
 import type { RecurringOccurrence } from '../src/domain.ts'
 import {

@@ -3,7 +3,7 @@ description: "Experimental conversation view showing per-turn and per-step conte
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-experimental-client-ui-stats
+# @agentrans/experimental-client-ui-stats
 
 English | [中文](README.zh.md)
 
@@ -29,13 +29,13 @@ Mount it in a client composition that already provides `slots`, `sessions`, `uiC
 
 ### When to choose it
 
-Choose it when you need to compare turns or steps by prompt length, cache reuse, and where wall time went. Choose `@deepseek-ai/dsh-client-ui-trajectory` when you need the full event ledger with request headers and tool payloads; the two panels read the same Session and can be enabled together.
+Choose it when you need to compare turns or steps by prompt length, cache reuse, and where wall time went. Choose `@agentrans/client-ui-trajectory` when you need the full event ledger with request headers and tool payloads; the two panels read the same Session and can be enabled together.
 
 ### Minimal configuration
 
 ```yaml
 - id: ui-stats
-  name: '@deepseek-ai/dsh-experimental-client-ui-stats'
+  name: '@agentrans/experimental-client-ui-stats'
 ```
 
 -----
@@ -79,8 +79,8 @@ Windows are bounded: when a step's `step/start` is outside the loaded window, it
 <a id="further-exploration"></a>
 ## Further Exploration
 
-- [`@deepseek-ai/dsh-client-ui-trajectory`](../../client/ui-trajectory/README.md) — the event ledger this panel borrows its table conventions from.
-- [`@deepseek-ai/dsh-session-stats`](../../session/session-stats/README.md) — the host-side session totals the footer vocabulary follows.
+- [`@agentrans/client-ui-trajectory`](../../client/ui-trajectory/README.md) — the event ledger this panel borrows its table conventions from.
+- [`@agentrans/session-stats`](../../session/session-stats/README.md) — the host-side session totals the footer vocabulary follows.
 - [`docs/subsystems/conversation.md`](../../../docs/subsystems/conversation.md) — how view targets and Definitions assemble.
 
 -----
@@ -98,7 +98,7 @@ No effect. The package never constructs a model request and never mutates a prom
 
 <a id="known-limitations-and-deferred-work"></a>
 
-- **Not mounted by the default product.** The Web bundle refuses experimental packages by rule; the optional Developer tools bundle (`@deepseek-ai/dsh-experimental-inspector-profile`) mounts this view, or a profile can add the row explicitly.
+- **Not mounted by the default product.** The Web bundle refuses experimental packages by rule; the optional Developer tools bundle (`@agentrans/experimental-inspector-profile`) mounts this view, or a profile can add the row explicitly.
 - **Trimmed windows lose start times.** When the loaded window begins mid-step, first-token, model time, and total time cannot be derived; the row says `start unknown` instead of estimating.
 - **Code-Mode dispatches merge by root-call context.** Inner calls carry no turn or step, so each root call opens its own context keyed by the root call id, and the builder merges its dispatches into the step that owns the runner. A window that lost the dispatch start still merges the calls but cannot show their measured duration.
 - **Older-page retries are explicit.** A page request reports `grew`, `exhausted`, or `retry`; when Chat or Trajectory owns the Session's in-flight page, the Statistics trigger stays visible instead of marking history exhausted or throwing.
@@ -114,7 +114,7 @@ No effect. The package never constructs a model request and never mutates a prom
 <details>
 <summary>Working context for maintainers — click to expand</summary>
 
-The panel was ported from a standalone client plugin. The table vocabulary follows `@deepseek-ai/dsh-session-stats` (model time, tool time, first token, output speed), while the layout follows the Trajectory table so the two tabs read alike.
+The panel was ported from a standalone client plugin. The table vocabulary follows `@agentrans/session-stats` (model time, tool time, first token, output speed), while the layout follows the Trajectory table so the two tabs read alike.
 
 </details>
 

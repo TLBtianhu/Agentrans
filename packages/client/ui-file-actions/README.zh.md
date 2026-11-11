@@ -3,7 +3,7 @@ description: "下载和另存原始文件时保持编码不变"
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-client-ui-file-actions
+# @agentrans/client-ui-file-actions
 
 [English](README.md) | 中文
 

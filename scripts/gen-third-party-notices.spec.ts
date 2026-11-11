@@ -59,7 +59,7 @@ describe('tierExternalDeps', () => {
   it('discloses host-bundled OAR as runtime code and applies runtime license checks', () => {
     const { manifests, names } = workspace({
       'packages/experimental/subagent-oar/package.json': {
-        name: '@deepseek-ai/dsh-experimental-subagent-oar',
+        name: '@agentrans/experimental-subagent-oar',
         devDependencies: { '@botiverse/oar': '0.67.0', 'host-build-tool': '^1' },
       },
     })
@@ -75,7 +75,7 @@ describe('tierExternalDeps', () => {
   it('keeps unrelated OAR development declarations out of runtime disclosure', () => {
     const { manifests, names } = workspace({
       'packages/experimental/unrelated/package.json': {
-        name: '@deepseek-ai/dsh-experimental-unrelated',
+        name: '@agentrans/experimental-unrelated',
         devDependencies: { '@botiverse/oar': '0.67.0' },
       },
     })
@@ -85,12 +85,12 @@ describe('tierExternalDeps', () => {
   it('rejects an OAR embedding owner that omits its required dependency declaration', () => {
     const { manifests, names } = workspace({
       'packages/experimental/subagent-oar/package.json': {
-        name: '@deepseek-ai/dsh-experimental-subagent-oar',
+        name: '@agentrans/experimental-subagent-oar',
         devDependencies: { 'host-build-tool': '^1' },
       },
     })
     expect(() => tierExternalDeps(manifests, names))
-      .toThrow('@deepseek-ai/dsh-experimental-subagent-oar embeds @botiverse/oar but does not declare it')
+      .toThrow('@agentrans/experimental-subagent-oar embeds @botiverse/oar but does not declare it')
   })
 
   it('limits the LibreOffice exception to its reviewed package identity and MPL terms', () => {
@@ -104,7 +104,7 @@ describe('tierExternalDeps', () => {
     }
     for (const dependency of [
       { name: 'unrelated-library', license: 'MPL-2.0' },
-      { name: '@deepseek-ai/dsh-libreoffice-kit', license: 'MPL-2.0' },
+      { name: '@deepseek-ai/libreoffice-kit', license: 'MPL-2.0' },
       { name: '@deepseek-ai/libreoffice-kit-unreviewed', license: 'MPL-2.0' },
       { name: '@deepseek-ai/libreoffice-kit', license: 'GPL-3.0-only' },
       { name: '@deepseek-ai/libreoffice-kit', license: 'UNKNOWN' },
@@ -149,12 +149,12 @@ describe('tierExternalDeps', () => {
     const { manifests, names } = workspace({
       // Root tooling and test infrastructure never ship, whichever section declares them.
       'package.json': { dependencies: { 'root-runtime-looking': '^1' }, devDependencies: { 'lint-tool': '^1' } },
-      'packages/test-support/loader-smoke/package.json': { name: '@deepseek-ai/dsh-loader-smoke', dependencies: { 'smoke-helper': '^1' } },
-      'packages/test-support/client-runtime/package.json': { name: '@deepseek-ai/dsh-client-test-runtime', dependencies: { 'test-lib': '^1' } },
+      'packages/test-support/loader-smoke/package.json': { name: '@agentrans/loader-smoke', dependencies: { 'smoke-helper': '^1' } },
+      'packages/test-support/client-runtime/package.json': { name: '@agentrans/client-test-runtime', dependencies: { 'test-lib': '^1' } },
       'website/package.json': { devDependencies: { 'site-tool': '^1' } },
       // A plugin package's runtime dependency ships even when no app mounts it by default.
-      'packages/mcp/mcp-client/package.json': { name: '@deepseek-ai/dsh-mcp-client', dependencies: { 'protocol-sdk': '^1' }, devDependencies: { 'protocol-fixture-server': '^1' } },
-      'apps/cli/package.json': { name: '@deepseek-ai/dsh-cli', dependencies: { 'cli-lib': '^1', '@deepseek-ai/dsh-mcp-client': 'workspace:^' } },
+      'packages/mcp/mcp-client/package.json': { name: '@agentrans/mcp-client', dependencies: { 'protocol-sdk': '^1' }, devDependencies: { 'protocol-fixture-server': '^1' } },
+      'apps/cli/package.json': { name: '@agentrans/cli', dependencies: { 'cli-lib': '^1', '@agentrans/mcp-client': 'workspace:^' } },
     })
 
     expect(tierExternalDeps(manifests, names)).toEqual(new Map([
@@ -173,12 +173,12 @@ describe('tierExternalDeps', () => {
   it('keeps a package runtime when any shipping area declares it, and excludes workspace links', () => {
     const { manifests, names } = workspace({
       'package.json': { devDependencies: { shared: '^1' } },
-      'packages/interaction/tui/package.json': { name: '@deepseek-ai/dsh-tui', dependencies: { shared: '^1', '@deepseek-ai/dsh-cli': 'workspace:^' } },
-      'apps/cli/package.json': { name: '@deepseek-ai/dsh-cli' },
+      'packages/interaction/tui/package.json': { name: '@agentrans/tui', dependencies: { shared: '^1', '@agentrans/cli': 'workspace:^' } },
+      'apps/cli/package.json': { name: '@agentrans/cli' },
     })
 
     expect(tierExternalDeps(manifests, names).get('shared')).toBe(true)
-    expect(tierExternalDeps(manifests, names).has('@deepseek-ai/dsh-cli')).toBe(false)
+    expect(tierExternalDeps(manifests, names).has('@agentrans/cli')).toBe(false)
   })
 })
 
@@ -256,7 +256,7 @@ describe('parseVendoredRows', () => {
 
     expect(rows.length).toBeGreaterThan(0)
     expect(rows).toContainEqual({
-      npmName: '@deepseek-ai/cordis',
+      npmName: '@agentrans/cordis',
       upstreamName: 'cordis',
       upstream: 'https://github.com/cordiverse/cordis',
     })
@@ -265,7 +265,7 @@ describe('parseVendoredRows', () => {
   })
 
   it('yields nothing when the table columns change, so the generator fails loud', () => {
-    expect(parseVendoredRows('| `cordis/` | `@deepseek-ai/cordis` | cordis | 4.0.0 | https://example.com | `abc123` |\n')).toEqual([])
+    expect(parseVendoredRows('| `cordis/` | `@agentrans/cordis` | cordis | 4.0.0 | https://example.com | `abc123` |\n')).toEqual([])
   })
 
   it('covers every vendored directory, so no package can drop out of the notices', () => {

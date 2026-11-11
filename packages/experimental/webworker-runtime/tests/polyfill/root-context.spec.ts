@@ -2,8 +2,8 @@
 import { expect, it } from 'vitest'
 import {
   AsyncLocalStorage, __restoreAll, __snapshotAll, bindAsyncContext, runAtAsyncContextRoot,
-} from '@deepseek-ai/dsh-experimental-webworker-runtime/src/node/builtin_modules/implemented/async_hooks.ts'
-import { installTimerGlobals } from '@deepseek-ai/dsh-experimental-webworker-runtime/src/node/globals/timers.ts'
+} from '@agentrans/experimental-webworker-runtime/src/node/builtin_modules/implemented/async_hooks.ts'
+import { installTimerGlobals } from '@agentrans/experimental-webworker-runtime/src/node/globals/timers.ts'
 
 it('keeps a root-bound callback outside a later transaction and restores its caller', () => {
   const store = new AsyncLocalStorage<string>()

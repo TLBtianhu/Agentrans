@@ -1,6 +1,6 @@
 /** Controllable tunnel worker process for the supervisor unit bench. */
 
-import type { TunnelWorkerEvent } from '@deepseek-ai/dsh-experimental-liveshare-protocol'
+import type { TunnelWorkerEvent } from '@agentrans/experimental-liveshare-protocol'
 import type { TunnelProcessCommand, TunnelWorkerInput } from '../src/host/tunnel-worker.ts'
 
 /** One worker the supervisor started, driven by the spec. */

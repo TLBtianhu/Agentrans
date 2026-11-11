@@ -1,7 +1,7 @@
 /** Host-only commit rules shared by plain and evidence-bearing branch-result consumers. */
-import type { Agent } from '@deepseek-ai/dsh-agent'
-import type { TextBlock } from '@deepseek-ai/dsh-llm'
-import type { SessionEvent } from '@deepseek-ai/dsh-session/types'
+import type { Agent } from '@agentrans/agent'
+import type { TextBlock } from '@agentrans/llm'
+import type { SessionEvent } from '@agentrans/session/types'
 import { createBranchResultMessage, findBranchResult } from './index.ts'
 import type { BranchResultMessage, BranchResultSelection, ExistingBranchResult } from './types.ts'
 

@@ -1,6 +1,6 @@
 vi.mock('../src/web-document.ts', () => ({ authenticateWebHost: async () => 'test-cookie', serveWebDocument: vi.fn(), forwardWebRequest: vi.fn() }))
 vi.mock('../src/product-bootstrap.ts', async () => {
-  const launchContext = await import('@deepseek-ai/dsh-product-layout/launch-context')
+  const launchContext = await import('@agentrans/product-layout/launch-context')
   const path = await import('node:path')
   const { tmpdir } = await import('node:os')
   return { desktopLaunchContext: launchContext.resolveProductLaunchContext({

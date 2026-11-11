@@ -1,10 +1,10 @@
 - insert:
     - id: forge
-      name: '@deepseek-ai/dsh-experimental-forge'
+      name: '@agentrans/experimental-forge'
     - id: forge-github
-      name: '@deepseek-ai/dsh-experimental-forge-github'
+      name: '@agentrans/experimental-forge-github'
     - id: forge-session
-      name: '@deepseek-ai/dsh-experimental-forge-session'
+      name: '@agentrans/experimental-forge-session'
     - id: optional-forge-panel
       name: cordis:group
       group: true
@@ -12,6 +12,6 @@
         worktrees: true
       config:
         - id: forge-worktree
-          name: '@deepseek-ai/dsh-experimental-worktree'
+          name: '@agentrans/experimental-worktree'
         - id: forge-panel
-          name: '@deepseek-ai/dsh-experimental-client-ui-forge'
+          name: '@agentrans/experimental-client-ui-forge'

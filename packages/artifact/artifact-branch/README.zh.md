@@ -3,7 +3,7 @@ description: "将手动分支结论连同用户选择的已保存 Artifact 观�
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-artifact-branch
+# @agentrans/artifact-branch
 
 [English](README.md) | 中文
 
@@ -25,10 +25,10 @@ kind: "package-reference"
 <a id="use-this-package"></a>
 ## 使用本包
 
-Web 组合将本插件与 Artifact、Session Query 和 Session Controller 一同挂载。自定义 Web 组合需添加 `@deepseek-ai/dsh-artifact-branch` 插件行。主 Artifact 服务和 headless 组合不依赖这个桥接能力。
+Web 组合将本插件与 Artifact、Session Query 和 Session Controller 一同挂载。自定义 Web 组合需添加 `@agentrans/artifact-branch` 插件行。主 Artifact 服务和 headless 组合不依赖这个桥接能力。
 
 ```yaml
-- name: '@deepseek-ai/dsh-artifact-branch'
+- name: '@agentrans/artifact-branch'
 ```
 
 | 配置 | 默认值 | 含义 |

@@ -8,13 +8,13 @@
  *
  * The Liveshare client face mounts this module only on a viewer page.
  *
- * @module @deepseek-ai/dsh-experimental-liveshare/src/client/viewer-share-path
+ * @module @agentrans/experimental-liveshare/src/client/viewer-share-path
  */
 
 import type { ReactNode } from 'react'
-import type { Context as ClientContext } from '@deepseek-ai/cordis'
-import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
-import type { SidebarRightTabDefinition } from '@deepseek-ai/dsh-client-ui-sidebar-right/client'
+import type { Context as ClientContext } from '@agentrans/cordis'
+import type { PropsLocale, PropsRuntime } from '@agentrans/client-ui-slots'
+import type { SidebarRightTabDefinition } from '@agentrans/client-ui-sidebar-right/client'
 import { NS } from './locales.ts'
 import css from './viewer-share-path.module.css'
 
@@ -24,7 +24,7 @@ export const name = 'liveshare-viewer-share-path'
 export const inject: readonly string[] = ['slots', 'sidebarRightTabs']
 
 /** This implementation's identity in the tab system; also the key its body registers under. */
-const SHARE_PATH_ID = '@deepseek-ai/dsh-experimental-liveshare/viewer-share-path'
+const SHARE_PATH_ID = '@agentrans/experimental-liveshare/viewer-share-path'
 
 /** The tab kind this page owns. */
 const SHARE_PATH_KIND = 'liveshare-share-path'

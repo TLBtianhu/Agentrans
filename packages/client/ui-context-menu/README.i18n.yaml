@@ -5,36 +5,36 @@
 /:
   en: c7a386986f8aa0d7
   zh: a4bace64648d0a89
-/deepseek-ai-dsh-client-ui-context-menu:
-  en: f165f99dfbea7ed2
-  zh: 0f2835e7726dd0f5
-/deepseek-ai-dsh-client-ui-context-menu/summary:
+/agentrans-client-ui-context-menu:
+  en: bfa50c694fba291d
+  zh: 580c84f3280179b2
+/agentrans-client-ui-context-menu/summary:
   en: 7d22e21395a76909
   zh: e9f98068a4c5fde7
-/deepseek-ai-dsh-client-ui-context-menu/table-of-contents:
+/agentrans-client-ui-context-menu/table-of-contents:
   en: d152484eb41ac6b4
   zh: 725b47765ee8f30b
-/deepseek-ai-dsh-client-ui-context-menu/use-this-package:
+/agentrans-client-ui-context-menu/use-this-package:
   en: c84c65c7d24d51c3
   zh: 98c8f40a326a8f0b
-/deepseek-ai-dsh-client-ui-context-menu/use-this-package/register-actions:
-  en: 11bea09005de2678
-  zh: d56e25d2d93022aa
-/deepseek-ai-dsh-client-ui-context-menu/understand-the-implementation:
+/agentrans-client-ui-context-menu/use-this-package/register-actions:
+  en: e432242764e7533c
+  zh: 7cfdaeded6c7b78a
+/agentrans-client-ui-context-menu/understand-the-implementation:
   en: 5b7717fad8457145
   zh: 19a06fca8060cf62
-/deepseek-ai-dsh-client-ui-context-menu/further-exploration:
+/agentrans-client-ui-context-menu/further-exploration:
   en: 6d538e70a88f070b
   zh: f90577fe9c8d1799
-/deepseek-ai-dsh-client-ui-context-menu/model-experience:
+/agentrans-client-ui-context-menu/model-experience:
   en: bb3787b3201a6724
   zh: e51cbb66f42a433d
-/deepseek-ai-dsh-client-ui-context-menu/model-experience/kv-cache-effect:
+/agentrans-client-ui-context-menu/model-experience/kv-cache-effect:
   en: e5fe67ca0631f67a
   zh: b26e6107f2638589
-/deepseek-ai-dsh-client-ui-context-menu/known-limitations-and-deferred-work:
+/agentrans-client-ui-context-menu/known-limitations-and-deferred-work:
   en: ac1e5554e7f3109f
   zh: c2df38df3b9ea4f2
-/deepseek-ai-dsh-client-ui-context-menu/known-limitations-and-deferred-work/dev-note:
+/agentrans-client-ui-context-menu/known-limitations-and-deferred-work/dev-note:
   en: e67f633dc6fe7773
   zh: 6c5f9788c6536776

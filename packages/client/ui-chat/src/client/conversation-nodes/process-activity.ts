@@ -1,6 +1,6 @@
 /** Tool-category and live-detail interpretation owned by Chat grouping. */
 import { reasoningText } from '../reasoning-text.ts'
-import type { ToolArgs } from '@deepseek-ai/dsh-client-ui-conversation/client'
+import type { ToolArgs } from '@agentrans/client-ui-conversation/client'
 import type { ProcessActivity, ProcessActivitySummary } from '../contract/process-groups.ts'
 import type { ChatNode } from '../contract/chat-nodes.ts'
 import { isRunningTool } from '../contract/chat-nodes.ts'

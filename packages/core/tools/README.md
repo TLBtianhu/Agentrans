@@ -3,7 +3,7 @@ description: "The tool registry and execution pipeline for tool authors and main
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-tools
+# @agentrans/tools
 
 English | [中文](README.zh.md)
 
@@ -37,8 +37,8 @@ Canonical values belong to execution; the Session records rendered content and o
 
 ```ts
 import { readFile } from 'node:fs/promises'
-import type { Context } from '@deepseek-ai/cordis'
-import { defineTool } from '@deepseek-ai/dsh-tools'
+import type { Context } from '@agentrans/cordis'
+import { defineTool } from '@agentrans/tools'
 
 declare const ctx: Context
 
@@ -77,8 +77,8 @@ The unified schema DSL supports `string`, `number`, `integer`, `boolean`, `null`
 Mount one executor in the deployment, preset, or Agent scope. The nearest scope selects the provider; duplicate providers in one scope fail. Native exposes visible capabilities directly; PTC exposes `run_code` and a generated SDK. Executor registration and disposal do not emit `tools/change`; prompt assemblies and batches resolve the current executor when they run.
 
 ```yaml
-- name: '@deepseek-ai/dsh-tools'
-- name: '@deepseek-ai/dsh-tool-executor-native'
+- name: '@agentrans/tools'
+- name: '@agentrans/tool-executor-native'
 ```
 
 Agent-step concurrency uses the [agent-loop configuration](../agent-loop/README.md). See the [native](../tool-executor-native/README.md) or [PTC](../tool-executor-ptc/README.md) package for executor settings. Custom providers implement only `describe(definitions)` and `execute(batch)`; the shared pipeline is optional. The registry selects the current scoped executor separately for prompt descriptions and each `ctx.tools.execute()` batch. An accepted batch settles through its selected provider even if that provider unloads; settlement may include cancellation errors according to the provider’s disposal policy. New batches reject until a replacement is registered.
@@ -146,7 +146,7 @@ Tool plugins call `ctx.tools.register()` and their schemas flow into prompt asse
 The package-level contract is enough for most consumers; read these when you need the surrounding domain.
 
 - [Tools subsystem](../../../docs/subsystems/tools.md) — the full pipeline types, schema DSL, and generated service API.
-- [Generated tool catalog](../../../docs/tool-catalog.md#deepseek-aidsh-tool-executor-ptc) — the shipped tools' schemas the model receives.
+- [Generated tool catalog](../../../docs/tool-catalog.md#agentranstool-executor-ptc) — the shipped tools' schemas the model receives.
 - [Tool execution pipeline](../../../docs/tool-execution-pipeline.md) — the pipeline visualized.
 - [Adding a tool cookbook](../../../docs/cookbook/adding-a-tool.md) — step-by-step tool authoring.
 - [Tool testkit](../../test-support/tool-testkit/README.md) — tool-definition and execution fixtures for tests and benchmarks.
@@ -162,7 +162,7 @@ The package-level contract is enough for most consumers; read these when you nee
 
 #### What the model sees
 
-In normal mode the model sees each visible definition's exact name, description, and JSON Schema; the shipped definitions are recorded in the generated [tool catalog](../../../docs/tool-catalog.md#deepseek-aidsh-tool-executor-ptc). Agent-scoped restrictions, shadows, and extension registrations change that agent's end-tool set.
+In normal mode the model sees each visible definition's exact name, description, and JSON Schema; the shipped definitions are recorded in the generated [tool catalog](../../../docs/tool-catalog.md#agentranstool-executor-ptc). Agent-scoped restrictions, shadows, and extension registrations change that agent's end-tool set.
 
 #### Token effect
 
@@ -196,7 +196,7 @@ These limits define when the registry needs special care. They are current packa
 - **Concurrency policy is not an event gate** — `executionMode()` reads the resolved tool definition directly; plugins can only declare a classifier on definitions they own.
 - **`tools/pre-execute` deliberately cannot rewrite `exec.arguments`** — logged and rendered args would desync from what ran; the rewrite design is [a proposed Agent Note](../../../.agents/notes/proposed/feature/2026-06-30-pre-tool-input-rewrite.md).
 - **Caller-defined subagent and workflow structured outputs remain object-rooted** — this is a consumer-level guard; the shared schema vocabulary and tool outputs support every JSON root.
-- **`timeoutMs` on a definition is declarative only** — the registry never enforces deadlines; enforcement requires the `@deepseek-ai/dsh-tool-call-timeout-policy` wrapper.
+- **`timeoutMs` on a definition is declarative only** — the registry never enforces deadlines; enforcement requires the `@agentrans/tool-call-timeout-policy` wrapper.
 
 `defineTool()`, registry schema projection, and system-prompt assembly preserve `deferLoading: true`. The marker requests deferred definition loading and does not imply a `tool-addition` record; the [LLM package](../../../packages/llm/llm/README.md#known-limitations-and-deferred-work) documents provider enforcement limits.
 

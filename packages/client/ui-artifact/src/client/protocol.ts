@@ -1,21 +1,21 @@
 /** Client-local Artifact protocol types and the generated-Remote adapter. */
-import type { Context as ClientContext } from '@deepseek-ai/cordis'
+import type { Context as ClientContext } from '@agentrans/cordis'
 import type {
   ArtifactId, ArtifactSnapshot, ArtifactObservationId, SavedParticleObservation, SavedParticleObservationRef, ArtifactActionRequest,
-} from '@deepseek-ai/dsh-artifact/types'
-import type { ParticleCheckpoint } from '@deepseek-ai/dsh-artifact/particle-runtime'
-import type { RemoteErrorCode, RemoteErrorDetailsMap } from '@deepseek-ai/dsh-api-remotes/client'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import type { JsonValue } from '@deepseek-ai/dsh-util-values'
-import type { ArtifactBranchResultRequest } from '@deepseek-ai/dsh-artifact-branch/types'
-import type { SessionBranchResultValue } from '@deepseek-ai/dsh-api-session-controller/types'
-import type { ArtifactExportId, ArtifactHtmlExportRecord, ArtifactHtmlExportRequest } from '@deepseek-ai/dsh-artifact-export/types'
-import type { ObservableSnapshot } from '@deepseek-ai/dsh-client-store'
+} from '@agentrans/artifact/types'
+import type { ParticleCheckpoint } from '@agentrans/artifact/particle-runtime'
+import type { RemoteErrorCode, RemoteErrorDetailsMap } from '@agentrans/api-remotes/client'
+import type { SessionId } from '@agentrans/session/types'
+import type { JsonValue } from '@agentrans/util-values'
+import type { ArtifactBranchResultRequest } from '@agentrans/artifact-branch/types'
+import type { SessionBranchResultValue } from '@agentrans/api-session-controller/types'
+import type { ArtifactExportId, ArtifactHtmlExportRecord, ArtifactHtmlExportRequest } from '@agentrans/artifact-export/types'
+import type { ObservableSnapshot } from '@agentrans/client-store'
 import type { ArtifactParticleRuntime } from './particle-runtime-owner.ts'
 import type { ParticleRunCommand } from './particle-run.ts'
-import type { ArtifactRuntimeIdentity } from '@deepseek-ai/dsh-artifact-runtime/types'
+import type { ArtifactRuntimeIdentity } from '@agentrans/artifact-runtime/types'
 import type { ArtifactRuntimeActions, ArtifactRuntimeSnapshot } from './runtime-owner.ts'
-import type { FileSaveResult } from '@deepseek-ai/dsh-client-ui-file-actions/client'
+import type { FileSaveResult } from '@agentrans/client-ui-file-actions/client'
 
 /** Semantic placement requested by the user or Agent; the host owns the actual layout. */
 export type ArtifactPlacement = 'inline' | 'beside' | 'focus' | 'pip'

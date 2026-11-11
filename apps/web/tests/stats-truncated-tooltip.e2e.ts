@@ -2,8 +2,8 @@
 // row shows its full reading in a tooltip on hover. The seed is generated, not recorded: no line is model output.
 import type { Browser, Page } from 'playwright'
 import { chromium } from 'playwright'
-import { createSystemMessage } from '@deepseek-ai/dsh-llm'
-import { SESSION_FORMAT_VERSION } from '@deepseek-ai/dsh-session'
+import { createSystemMessage } from '@agentrans/llm'
+import { SESSION_FORMAT_VERSION } from '@agentrans/session'
 import { afterAll, beforeAll, describe, expect, it, onTestFailed } from 'vitest'
 import { launchWebScaffold, seedSession, watchConsole, webSnapshotMode, type WebScaffold } from './scaffold.ts'
 import { newEnglishPage, saveFailureShot } from './support.ts'

@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-host-webserver",
+  "name": "@agentrans/host-webserver",
   "description": "Web route-registration plugin: HTTP and upgrade routes, per-Peer index transform taps, and static dist fallback",
   "version": "0.1.0",
   "publishConfig": {
@@ -29,17 +29,17 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/cordis": "workspace:~"
   },
   "dependencies": {
-    "@deepseek-ai/schemastery": "workspace:~",
+    "@agentrans/schemastery": "workspace:~",
     "compression": "^1.8.1",
     "ipaddr.js": "^2.5.0",
     "negotiator": "^1.1.0"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-typert-protocol": "workspace:*",
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/typert-protocol": "workspace:*",
     "@types/compression": "^1.8.1",
     "@types/negotiator": "^0.6.5",
     "selfsigned": "^4.0.1"

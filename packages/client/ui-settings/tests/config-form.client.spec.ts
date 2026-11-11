@@ -1,12 +1,12 @@
-import { Context } from '@deepseek-ai/cordis'
-import z from '@deepseek-ai/schemastery'
+import { Context } from '@agentrans/cordis'
+import z from '@agentrans/schemastery'
 import { describe, expect, it, vi } from 'vitest'
 import type {
   SettingsNamespaceView, SettingsPathOpView,
-} from '@deepseek-ai/dsh-api-remotes/client'
-import { RemoteError, TestRemote } from '@deepseek-ai/dsh-client-test-runtime'
-import type { JsonValue } from '@deepseek-ai/dsh-util-values'
-import type { ConfigForm } from '@deepseek-ai/dsh-client-ui-settings/client'
+} from '@agentrans/api-remotes/client'
+import { RemoteError, TestRemote } from '@agentrans/client-test-runtime'
+import type { JsonValue } from '@agentrans/util-values'
+import type { ConfigForm } from '@agentrans/client-ui-settings/client'
 import { SettingsSchemaService } from '../src/client/schema.ts'
 import { ConfigFormController, ConfigForms } from '../src/client/config-form.ts'
 import { SettingsDescribeMirror } from '../src/client/settings-mirror.ts'

@@ -1,8 +1,8 @@
 import { expect, it } from 'vitest'
-import { createToolResultMessage, createUserMessage, ToolCallId } from '@deepseek-ai/dsh-llm'
+import { createToolResultMessage, createUserMessage, ToolCallId } from '@agentrans/llm'
 import {
   appendPluginRecord, Session, SESSION_FORMAT_VERSION, SessionId, SessionLogOffset, SessionSeq, type SessionEvent, type SessionHeader,
-} from '@deepseek-ai/dsh-session'
+} from '@agentrans/session'
 import { actionCardProjection, type ActionCardState } from '../src/projection.ts'
 import type { ActionCardDecision } from '../src/types.ts'
 

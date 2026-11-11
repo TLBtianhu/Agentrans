@@ -2,28 +2,28 @@
 
 import { Readable } from 'node:stream'
 import { afterEach, describe, expect, it } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
-import { brandString } from '@deepseek-ai/dsh-brand'
-import AgentRegistry from '@deepseek-ai/dsh-agent'
+import { Context } from '@agentrans/cordis'
+import { brandString } from '@agentrans/brand'
+import AgentRegistry from '@agentrans/agent'
 import type {
   Agent,
   AgentHandle,
   AssistantStreamFrame,
   CreateAgentOptions,
   ResumeAgentOptions,
-} from '@deepseek-ai/dsh-agent'
-import AgentDefaultModelConfig from '@deepseek-ai/dsh-agent-default-model'
-import { LlmAttemptId, ReasoningEffortId, ToolCallId, createAssistantMessage, createToolResultMessage, createUserMessage, type MessageId, type StreamChunk } from '@deepseek-ai/dsh-llm'
-import SessionStore, { SessionLogOffset } from '@deepseek-ai/dsh-session'
-import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
-import SandboxPolicyService from '@deepseek-ai/dsh-sandbox-policy'
-import ApprovalService, { setApprovalPolicy, type ApprovalPolicy } from '@deepseek-ai/dsh-user-approval'
-import type { Session, SessionId, UserMessage } from '@deepseek-ai/dsh-session'
-import { SessionQueryError } from '@deepseek-ai/dsh-session-query'
-import { AgentModel, modelSelectionProjectionDefinition } from '@deepseek-ai/dsh-agent'
-import { createInboxStub, provideWorkingDirectoryFixture } from '@deepseek-ai/dsh-agent-loop-testkit'
+} from '@agentrans/agent'
+import AgentDefaultModelConfig from '@agentrans/agent-default-model'
+import { LlmAttemptId, ReasoningEffortId, ToolCallId, createAssistantMessage, createToolResultMessage, createUserMessage, type MessageId, type StreamChunk } from '@agentrans/llm'
+import SessionStore, { SessionLogOffset } from '@agentrans/session'
+import SessionProjectionRegistry from '@agentrans/session-projection'
+import SandboxPolicyService from '@agentrans/sandbox-policy'
+import ApprovalService, { setApprovalPolicy, type ApprovalPolicy } from '@agentrans/user-approval'
+import type { Session, SessionId, UserMessage } from '@agentrans/session'
+import { SessionQueryError } from '@agentrans/session-query'
+import { AgentModel, modelSelectionProjectionDefinition } from '@agentrans/agent'
+import { createInboxStub, provideWorkingDirectoryFixture } from '@agentrans/agent-loop-testkit'
 import { apply, Config } from '../src/index.ts'
-import SubagentRuntime from '@deepseek-ai/dsh-subagent'
+import SubagentRuntime from '@agentrans/subagent'
 import { internals } from '../src/runner-internals.ts'
 
 const originalInternals = { ...internals }

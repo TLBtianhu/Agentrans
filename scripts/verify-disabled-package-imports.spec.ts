@@ -6,22 +6,22 @@ import {
   packageNameOf,
 } from './verify-disabled-package-imports.ts'
 
-const disabled = new Set(['@deepseek-ai/dsh-session-log-deepseek'])
+const disabled = new Set(['@agentrans/session-log-deepseek'])
 
 describe('shipped-but-off package imports', () => {
   it('rejects a runtime import', () => {
-    const source = "import { SessionLog } from '@deepseek-ai/dsh-session-log-deepseek'\nexport const use = SessionLog\n"
+    const source = "import { SessionLog } from '@agentrans/session-log-deepseek'\nexport const use = SessionLog\n"
     expect(disabledImportsInSource('packages/x/src/index.ts', source, disabled))
-      .toEqual([expect.stringContaining('imports @deepseek-ai/dsh-session-log-deepseek at runtime')])
+      .toEqual([expect.stringContaining('imports @agentrans/session-log-deepseek at runtime')])
   })
 
   it('accepts a type-only import used for declaration merging', () => {
-    expect(disabledImportsInSource('packages/x/src/index.ts', "import type {} from '@deepseek-ai/dsh-session-log-deepseek'\n", disabled))
+    expect(disabledImportsInSource('packages/x/src/index.ts', "import type {} from '@agentrans/session-log-deepseek'\n", disabled))
       .toEqual([])
   })
 
   it('reads the package name from a disabled package manifest', () => {
-    expect(packageNameOf('packages/session/session-log-deepseek')).toBe('@deepseek-ai/dsh-session-log-deepseek')
+    expect(packageNameOf('packages/session/session-log-deepseek')).toBe('@agentrans/session-log-deepseek')
     expect(packageNameOf('packages/nonexistent/package')).toBeUndefined()
   })
 

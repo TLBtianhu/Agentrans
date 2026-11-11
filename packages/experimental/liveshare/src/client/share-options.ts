@@ -1,11 +1,11 @@
 /**
  * Choice lists the share dialog's create form and stored-share edit panel both present.
  *
- * @module @deepseek-ai/dsh-experimental-liveshare/src/client/share-options
+ * @module @agentrans/experimental-liveshare/src/client/share-options
  */
 
-import type { SegmentedControlOption } from '@deepseek-ai/dsh-client-ui-primitives'
-import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
+import type { SegmentedControlOption } from '@agentrans/client-ui-primitives'
+import type { PropsLocale } from '@agentrans/client-ui-slots'
 import type { NS } from './locales.ts'
 import { SESSION_MODES, type ViewerSessionMode } from './viewer-capabilities.ts'
 

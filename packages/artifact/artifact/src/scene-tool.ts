@@ -1,8 +1,8 @@
 /** Model-facing SceneSpec create/update tool with compare-and-set revisions. */
-import type { Context } from '@deepseek-ai/cordis'
-import z from '@deepseek-ai/schemastery'
-import type { Agent } from '@deepseek-ai/dsh-agent'
-import { defineTool, type ToolExecution } from '@deepseek-ai/dsh-tools'
+import type { Context } from '@agentrans/cordis'
+import z from '@agentrans/schemastery'
+import type { Agent } from '@agentrans/agent'
+import { defineTool, type ToolExecution } from '@agentrans/tools'
 import { ArtifactError } from './index.ts'
 import type { ArtifactSnapshot } from './types.ts'
 

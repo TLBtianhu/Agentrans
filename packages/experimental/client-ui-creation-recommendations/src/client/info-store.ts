@@ -1,4 +1,4 @@
-import { createSnapshotStore, type SnapshotStore } from '@deepseek-ai/dsh-client-store'
+import { createSnapshotStore, type SnapshotStore } from '@agentrans/client-store'
 
 /** Remember the dismissed creation notice across sessions in this browser.
  * @returns a plugin-owned preference; unavailable storage only disables persistence.

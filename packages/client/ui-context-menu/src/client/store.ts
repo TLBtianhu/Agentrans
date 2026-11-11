@@ -1,5 +1,5 @@
 /** Single-popup viewing state and feedback retained outside trigger components. */
-import { defineStore, type EngineStoreHandle } from '@deepseek-ai/dsh-client-store'
+import { defineStore, type EngineStoreHandle } from '@agentrans/client-store'
 import type { MenuActionView, MenuPoint, ContextMenuTarget } from './types.ts'
 
 interface Notice { id: number; text: string; success: boolean; action?: { label: string; onClick: () => void } }

@@ -2,9 +2,9 @@
 /** The files page and its tree, over controlled directory watches and deferred listings. */
 import { afterEach, describe, expect, it, onTestFinished, vi } from 'vitest'
 import { act, cleanup, fireEvent, within } from '@testing-library/react'
-import { makeTranslate, RemoteError } from '@deepseek-ai/dsh-client-test-runtime'
-import type { RemoteFailure } from '@deepseek-ai/dsh-api-remotes/client'
-import { fileAddressFor } from '@deepseek-ai/dsh-util-workspace-path'
+import { makeTranslate, RemoteError } from '@agentrans/client-test-runtime'
+import type { RemoteFailure } from '@agentrans/api-remotes/client'
+import { fileAddressFor } from '@agentrans/util-workspace-path'
 import { failureLine } from '../src/client/workspace-tree.ts'
 import type { DirLevel } from '../src/client/store.ts'
 import { zh } from '../src/client/locales.ts'

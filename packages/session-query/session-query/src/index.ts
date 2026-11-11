@@ -1,20 +1,20 @@
 /**
  * Service Definition for combined session-history reads, traces, filters, and full-text search.
  *
- * @module @deepseek-ai/dsh-session-query
+ * @module @agentrans/session-query
  */
 
-import { currentSessionMessageProjections } from '@deepseek-ai/dsh-session-format-catalog/message-projections'
-import { Context, Service } from '@deepseek-ai/cordis'
+import { currentSessionMessageProjections } from '@agentrans/session-format-catalog/message-projections'
+import { Context, Service } from '@agentrans/cordis'
 import {
   Session,
   SessionSeq,
   snapshotSessionEvent,
   type SessionId,
   type SessionSeq as SessionSeqType,
-} from '@deepseek-ai/dsh-session'
-import { foldSessionTitle } from '@deepseek-ai/dsh-session-title'
-import type { SessionTitleSnapshot } from '@deepseek-ai/dsh-session-title'
+} from '@agentrans/session'
+import { foldSessionTitle } from '@agentrans/session-title'
+import type { SessionTitleSnapshot } from '@agentrans/session-title'
 import type {
   SessionEventResultFilter,
   SessionEventSearchPage,
@@ -82,7 +82,7 @@ export {
 export { assertSessionHeadersCompatible } from './sources.ts'
 export type { SessionObservation, SessionObservationOptions } from './observation.ts'
 
-declare module '@deepseek-ai/cordis' {
+declare module '@agentrans/cordis' {
   interface Context {
     sessionQuery: SessionQueryEngine
   }

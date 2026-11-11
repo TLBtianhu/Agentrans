@@ -3,7 +3,7 @@ import { Blob as NodeBlob } from 'node:buffer'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { BrowserFileActions, exportName } from '../src/client/files.ts'
 import type { DesktopFileActions } from '../src/types.ts'
-import { Context } from '@deepseek-ai/cordis'
+import { Context } from '@agentrans/cordis'
 import { apply as clientApply } from '../src/client/index.ts'
 import { apply as hostApply } from '../src/index.ts'
 

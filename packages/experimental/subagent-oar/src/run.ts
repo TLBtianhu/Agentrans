@@ -2,7 +2,7 @@
  * One-shot OAR execution, root-answer selection, and owned session disposal.
  * Native records remain in OAR; DSH receives assistant text and fixed failure facts.
  *
- * @module @deepseek-ai/dsh-experimental-subagent-oar/run
+ * @module @agentrans/experimental-subagent-oar/run
  */
 
 import { randomUUID } from 'node:crypto'
@@ -15,9 +15,9 @@ import type {
   TurnOutcome,
 } from '@botiverse/oar'
 import { awaitTurnEnd } from '@botiverse/oar/observe'
-import { brandString } from '@deepseek-ai/dsh-brand'
-import type { ContentBlock } from '@deepseek-ai/dsh-llm'
-import type { SessionId } from '@deepseek-ai/dsh-session'
+import { brandString } from '@agentrans/brand'
+import type { ContentBlock } from '@agentrans/llm'
+import type { SessionId } from '@agentrans/session'
 import {
   assertUsableCwd,
   settleRunResult,
@@ -26,8 +26,8 @@ import {
   type SubagentResult,
   type SubagentRun,
   type SubagentStopReason,
-} from '@deepseek-ai/dsh-subagent'
-import { assertNever } from '@deepseek-ai/dsh-util-values'
+} from '@agentrans/subagent'
+import { assertNever } from '@agentrans/util-values'
 import { oarEnvironment } from './environment.ts'
 
 /** Resolved deployment settings and the runtime owned by one provider instance. */

@@ -1,4 +1,4 @@
-import OTel from '@deepseek-ai/dsh-otel'
+import OTel from '@agentrans/otel'
 /**
  * OTel backend unit tier: wire assertions against a scripted `node:http`
  * mock collector through the SDK's REAL pipeline (BatchLogRecordProcessor →
@@ -13,14 +13,14 @@ import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { gunzipSync } from 'node:zlib'
-import { Context } from '@deepseek-ai/cordis'
-import { getOrCreateAnonymousUserId } from '@deepseek-ai/dsh-anonymous-user-id'
-import Loader from '@deepseek-ai/cordis-plugin-loader'
-import { recordFeedback } from '@deepseek-ai/dsh-command-feedback'
-import { createAssistantMessage } from '@deepseek-ai/dsh-llm'
-import SessionStore, { SESSION_FORMAT_VERSION, Session, SessionId, SessionLogOffset, SessionSeq } from '@deepseek-ai/dsh-session'
-import MessageFeedbackService from '@deepseek-ai/dsh-message-feedback'
-import * as JsonlPersistence from '@deepseek-ai/dsh-session-persistence-jsonl'
+import { Context } from '@agentrans/cordis'
+import { getOrCreateAnonymousUserId } from '@agentrans/anonymous-user-id'
+import Loader from '@agentrans/cordis-plugin-loader'
+import { recordFeedback } from '@agentrans/command-feedback'
+import { createAssistantMessage } from '@agentrans/llm'
+import SessionStore, { SESSION_FORMAT_VERSION, Session, SessionId, SessionLogOffset, SessionSeq } from '@agentrans/session'
+import MessageFeedbackService from '@agentrans/message-feedback'
+import * as JsonlPersistence from '@agentrans/session-persistence-jsonl'
 import OpenTelemetrySessionBackend, { Config, DEFAULT_TELEMETRY_MODE, SessionTelemetryMode } from '../src/index.ts'
 
 interface Capture {
@@ -171,8 +171,8 @@ describe('OpenTelemetrySessionBackend wire', () => {
     expect(resource).toContainEqual({ key: 'user.id', value: { stringValue: getOrCreateAnonymousUserId() } })
 
     const records = allRecords(captures)
-    const ledger = records.filter(r => r.scope === '@deepseek-ai/dsh-session-telemetry-otel')
-    const ops = records.filter(r => r.scope === '@deepseek-ai/dsh-session-telemetry-otel/ops')
+    const ledger = records.filter(r => r.scope === '@agentrans/session-telemetry-otel')
+    const ops = records.filter(r => r.scope === '@agentrans/session-telemetry-otel/ops')
 
     const start = ledger.find(r => r.record.attributes?.some(a => a.key === 'event.type' && a.value.stringValue === 'turn/start'))
     expect(start).toBeDefined()

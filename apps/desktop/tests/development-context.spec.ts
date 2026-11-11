@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, mkdtempSync, realpathSync, rmSync } from 'node:f
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { expect, it, onTestFinished } from 'vitest'
-import { parseProductLaunchContext, prepareProductState } from '@deepseek-ai/dsh-product-layout/launch-context'
+import { parseProductLaunchContext, prepareProductState } from '@agentrans/product-layout/launch-context'
 import { resolveDesktopDevelopmentLaunch } from '../scripts/development-context.ts'
 
 function fixture(): { root: string; source: string } {

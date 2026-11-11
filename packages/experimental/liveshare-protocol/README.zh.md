@@ -3,7 +3,7 @@ description: "owner bundle 与 Relay 共用的 Liveshare gateway 帧编解码，
 kind: "package-library"
 ---
 
-# @deepseek-ai/dsh-experimental-liveshare-protocol
+# @agentrans/experimental-liveshare-protocol
 
 [English](README.md) | 中文
 
@@ -31,8 +31,8 @@ kind: "package-library"
 ### 入口
 
 ```ts
-import { parseGatewayFrame, rawText, sendFrame } from '@deepseek-ai/dsh-experimental-liveshare-protocol'
-import { identityKeyOf, normalizeIdentity } from '@deepseek-ai/dsh-experimental-liveshare-protocol'
+import { parseGatewayFrame, rawText, sendFrame } from '@agentrans/experimental-liveshare-protocol'
+import { identityKeyOf, normalizeIdentity } from '@agentrans/experimental-liveshare-protocol'
 ```
 
 查看页载体（`installViewerCarrier`）与查看页状态词汇通过根入口发布，而不是各自的子路径，因为 owner 页面的两个面会一起消费它们。

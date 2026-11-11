@@ -1,6 +1,6 @@
 /** Browser entry for the Web client. */
-import '@deepseek-ai/dsh-client-ui-theme/brand-font.css'
-import { AppWebEntry, applyIndexInjections } from '@deepseek-ai/dsh-client-web'
+import '@agentrans/client-ui-theme/brand-font.css'
+import { AppWebEntry, applyIndexInjections } from '@agentrans/client-web'
 
 interface DesktopBootGlobal {
   dshDesktopBoot?: {

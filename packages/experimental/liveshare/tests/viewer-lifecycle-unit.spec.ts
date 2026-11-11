@@ -1,7 +1,7 @@
 /** Viewer lifecycle: calls, peers, streams, sweeps, and share teardown. */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import type { ShareRpcActor } from '@deepseek-ai/dsh-experimental-liveshare-protocol'
+import type { ShareRpcActor } from '@agentrans/experimental-liveshare-protocol'
 import { createViewerLifecycle, VIEWER_STREAM_IDLE_TTL_MS } from '../src/host/viewer-lifecycle.ts'
 import type { OpenStream } from '../src/host/viewer-lifecycle.ts'
 

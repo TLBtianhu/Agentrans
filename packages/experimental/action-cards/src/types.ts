@@ -1,9 +1,9 @@
 /** Card proposals, recorded decisions and user-action results shared by every action kind. */
-import type { ContextFormed } from '@deepseek-ai/dsh-llm'
-import type { ToolCallId } from '@deepseek-ai/dsh-llm/brand'
-import type { SessionSeq } from '@deepseek-ai/dsh-session/types'
-import type { SessionProjectionSummaryExcluded } from '@deepseek-ai/dsh-session-projection/types'
-import type { JsonValue } from '@deepseek-ai/dsh-util-values'
+import type { ContextFormed } from '@agentrans/llm'
+import type { ToolCallId } from '@agentrans/llm/brand'
+import type { SessionSeq } from '@agentrans/session/types'
+import type { SessionProjectionSummaryExcluded } from '@agentrans/session-projection/types'
+import type { JsonValue } from '@agentrans/util-values'
 
 /** Kind-defined JSON fields of a proposal or decision; each kind validates its own fields. */
 export type ActionCardFields = Readonly<Record<string, JsonValue>>
@@ -54,7 +54,7 @@ export type ActionCardResult =
   | { readonly status: 'refused'; readonly reason: string }
   | { readonly status: 'unconfirmed'; readonly reason: string }
 
-declare module '@deepseek-ai/dsh-llm' {
+declare module '@agentrans/llm' {
   interface MessageSourceMap {
     /** Card status notice; other readers preserve the recorded text without this plugin.
      * The producer uses through only to acknowledge delivered decisions.
@@ -64,14 +64,14 @@ declare module '@deepseek-ai/dsh-llm' {
   }
 }
 
-declare module '@deepseek-ai/dsh-session/types' {
+declare module '@agentrans/session/types' {
   interface PluginRecordMap {
     /** Dismissals and kind-defined progress of action cards. */
     'plugin:action-cards/decision': ActionCardDecision
   }
 }
 
-declare module '@deepseek-ai/dsh-session-projection/types' {
+declare module '@agentrans/session-projection/types' {
   interface SessionProjectionMap {
     /** Action card proposals and decisions for the currently open Session. */
     actionCards: SessionProjectionSummaryExcluded<ActionCardView>

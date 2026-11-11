@@ -1,14 +1,14 @@
 /** Reconnect-safe Workspace baseline and increment producer. */
 
-import type { Context } from '@deepseek-ai/cordis'
-import { Deque } from '@deepseek-ai/dsh-deque'
-import type { DomainChanged } from '@deepseek-ai/dsh-storage-domain'
-import type { Workspace, WorkspaceRecord } from '@deepseek-ai/dsh-workspace'
+import type { Context } from '@agentrans/cordis'
+import { Deque } from '@agentrans/deque'
+import type { DomainChanged } from '@agentrans/storage-domain'
+import type { Workspace, WorkspaceRecord } from '@agentrans/workspace'
 import {
   workspaceDomainState,
   workspaceRecord,
   WorkspaceId,
-} from '@deepseek-ai/dsh-workspace'
+} from '@agentrans/workspace'
 import type {
   WorkspaceBaseline,
   WorkspaceFollowFrame,

@@ -1,8 +1,8 @@
 /** Session-bound ownership of actual renderer reports, live Host registration, and command acknowledgements. */
-import { randomUUID } from '@deepseek-ai/dsh-util-crypto'
-import { deepEqualJson, type JsonValue } from '@deepseek-ai/dsh-util-values'
-import type { ObservableSnapshot } from '@deepseek-ai/dsh-client-store'
-import type { ArtifactRuntimeCommand, ArtifactRuntimeIdentity, RuntimeAck, RuntimeReport } from '@deepseek-ai/dsh-artifact-runtime/types'
+import { randomUUID } from '@agentrans/util-crypto'
+import { deepEqualJson, type JsonValue } from '@agentrans/util-values'
+import type { ObservableSnapshot } from '@agentrans/client-store'
+import type { ArtifactRuntimeCommand, ArtifactRuntimeIdentity, RuntimeAck, RuntimeReport } from '@agentrans/artifact-runtime/types'
 import type { BrowserArtifactRuntimeMessage } from './runtime-messages.ts'
 
 /** The report stream owned by one mounted renderer. */

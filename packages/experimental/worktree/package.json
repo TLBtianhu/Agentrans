@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-experimental-worktree",
+  "name": "@agentrans/experimental-worktree",
   "description": "Creates a named Git worktree and changes the calling Session working directory",
   "version": "0.1.0",
   "publishConfig": {
@@ -29,32 +29,32 @@
     "directory": "packages/experimental/worktree"
   },
   "dependencies": {
-    "@deepseek-ai/schemastery": "workspace:~",
-    "@deepseek-ai/dsh-timeout": "workspace:*"
+    "@agentrans/schemastery": "workspace:~",
+    "@agentrans/timeout": "workspace:*"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-agent": "workspace:*",
-    "@deepseek-ai/dsh-fs": "workspace:*",
-    "@deepseek-ai/dsh-sandbox": "workspace:*",
-    "@deepseek-ai/dsh-sandbox-policy": "workspace:*",
-    "@deepseek-ai/dsh-subprocess": "workspace:*",
-    "@deepseek-ai/dsh-working-directory": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/agent": "workspace:*",
+    "@agentrans/fs": "workspace:*",
+    "@agentrans/sandbox": "workspace:*",
+    "@agentrans/sandbox-policy": "workspace:*",
+    "@agentrans/subprocess": "workspace:*",
+    "@agentrans/working-directory": "workspace:*"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-agent": "workspace:*",
-    "@deepseek-ai/dsh-agent-loop-testkit": "workspace:*",
-    "@deepseek-ai/dsh-fs": "workspace:*",
-    "@deepseek-ai/dsh-fs-local": "workspace:*",
-    "@deepseek-ai/dsh-sandbox": "workspace:*",
-    "@deepseek-ai/dsh-sandbox-local": "workspace:*",
-    "@deepseek-ai/dsh-sandbox-policy": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-session-projection": "workspace:*",
-    "@deepseek-ai/dsh-subprocess": "workspace:*",
-    "@deepseek-ai/dsh-subprocess-local": "workspace:*",
-    "@deepseek-ai/dsh-system-prompt": "workspace:*",
-    "@deepseek-ai/dsh-working-directory": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/agent": "workspace:*",
+    "@agentrans/agent-loop-testkit": "workspace:*",
+    "@agentrans/fs": "workspace:*",
+    "@agentrans/fs-local": "workspace:*",
+    "@agentrans/sandbox": "workspace:*",
+    "@agentrans/sandbox-local": "workspace:*",
+    "@agentrans/sandbox-policy": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/session-projection": "workspace:*",
+    "@agentrans/subprocess": "workspace:*",
+    "@agentrans/subprocess-local": "workspace:*",
+    "@agentrans/system-prompt": "workspace:*",
+    "@agentrans/working-directory": "workspace:*"
   }
 }

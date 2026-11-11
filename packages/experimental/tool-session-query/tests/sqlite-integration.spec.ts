@@ -1,24 +1,24 @@
-import { executeToolFixture } from '@deepseek-ai/dsh-tool-testkit'
-import * as NativeToolExecutor from '@deepseek-ai/dsh-tool-executor-native'
+import { executeToolFixture } from '@agentrans/tool-testkit'
+import * as NativeToolExecutor from '@agentrans/tool-executor-native'
 import { afterEach, describe, expect, it } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
+import { Context } from '@agentrans/cordis'
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import AgentRegistry, { type Agent } from '@deepseek-ai/dsh-agent'
-import { createUserMessage, ToolCallId  } from '@deepseek-ai/dsh-llm'
+import AgentRegistry, { type Agent } from '@agentrans/agent'
+import { createUserMessage, ToolCallId  } from '@agentrans/llm'
 import SessionStore, {
   SESSION_FORMAT_VERSION,
   SessionId,
   SessionSeq,
   type Session,
-} from '@deepseek-ai/dsh-session'
-import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
-import * as JsonlSessionPersistence from '@deepseek-ai/dsh-session-persistence-jsonl'
-import SqliteSessionQueryEngine from '@deepseek-ai/dsh-session-query-sqlite'
-import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
-import ToolRuntime from '@deepseek-ai/dsh-tools'
-import * as ToolSessionQuery from '@deepseek-ai/dsh-tool-session-query'
+} from '@agentrans/session'
+import SessionProjectionRegistry from '@agentrans/session-projection'
+import * as JsonlSessionPersistence from '@agentrans/session-persistence-jsonl'
+import SqliteSessionQueryEngine from '@agentrans/session-query-sqlite'
+import SystemPrompt from '@agentrans/system-prompt'
+import ToolRuntime from '@agentrans/tools'
+import * as ToolSessionQuery from '@agentrans/tool-session-query'
 
 const temporaryDirectories: string[] = []
 const contexts: Context[] = []

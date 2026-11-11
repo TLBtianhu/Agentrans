@@ -1,5 +1,5 @@
 /** Test-only app booting the legacy plugin through a real Cordis Loader file. */
-import { boot } from '@deepseek-ai/dsh-app-boot'
+import { boot } from '@agentrans/app-boot'
 import type {} from './legacy-plugin.ts'
 
 const configPath = process.argv[2]

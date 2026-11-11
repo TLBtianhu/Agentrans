@@ -37,11 +37,11 @@ interface BundlePlugin {
 
 type PluginName = 'dsh-css-modules-inline' | 'dsh-css-global-inline' | 'dsh-css-text-inline' | 'dsh-package-asset'
 
-const PACKAGE_NAME = '@deepseek-ai/dsh-client-asset-fixture'
+const PACKAGE_NAME = '@agentrans/client-asset-fixture'
 const ASSET_EXPORTS = { './client': './lib/client.js', './assets/*': './lib/assets/*' }
 const WHALE = Uint8Array.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2, 3])
 const WHALE_REV = packageAssetRevision(WHALE)
-const WHALE_URL = `plugins/@deepseek-ai/dsh-client-asset-fixture/assets/whale-${WHALE_REV}.png`
+const WHALE_URL = `plugins/@agentrans/client-asset-fixture/assets/whale-${WHALE_REV}.png`
 
 /** The resolver call identifier a compiled module emits before rendering. */
 const RESOLVER_CALL = /__dshPackageAsset_[0-9a-f]{12}(?=\()/u
@@ -212,7 +212,7 @@ describe('client bundle package asset imports', () => {
     const first = await load.call(context, id)
     const second = await load.call(context, id)
 
-    const expected = `export default ${resolverCall(first)}("plugins/@deepseek-ai/dsh-client-asset-fixture/assets/icons/whale%402x-${WHALE_REV}.png");`
+    const expected = `export default ${resolverCall(first)}("plugins/@agentrans/client-asset-fixture/assets/icons/whale%402x-${WHALE_REV}.png");`
     expect(id).toBe(asset)
     expect([first, second]).toEqual([expected, expected])
     expect(emittedFiles(context)).toEqual([{
@@ -377,7 +377,7 @@ describe('client bundle package asset imports', () => {
     expect(css).toContain('content:"__dshPackageAsset0__"')
     expect(css).toContain(`url(resolved:${WHALE_URL})`)
     // A real file whose name shares the placeholder prefix is still a package asset.
-    expect(css).toContain(`url(resolved:plugins/@deepseek-ai/dsh-client-asset-fixture/assets/__dshPackageAsset_logo-${WHALE_REV}.png)`)
+    expect(css).toContain(`url(resolved:plugins/@agentrans/client-asset-fixture/assets/__dshPackageAsset_logo-${WHALE_REV}.png)`)
   })
 
   it('rejects an uppercase extension, which the asset import types do not declare', async () => {
@@ -398,7 +398,7 @@ describe('client bundle package asset imports', () => {
     const importer = join(root, 'src/client/index.ts')
 
     const output = await loadImport(plugin, recordingContext(), './View.module.css', importer)
-    const reference = `plugins/@deepseek-ai/dsh-client-asset-fixture/assets/whale%282x%29-${WHALE_REV}.png`
+    const reference = `plugins/@agentrans/client-asset-fixture/assets/whale%282x%29-${WHALE_REV}.png`
     // The served Web app returns the reference unchanged; the text must still parse as one url() declaration.
     const css = stylesheetText(output, asset => asset)
     expect(css).toContain(`url(${reference})`)

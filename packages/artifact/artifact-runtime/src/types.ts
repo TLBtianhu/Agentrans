@@ -1,8 +1,8 @@
-/** Live Artifact runtime reports. @module @deepseek-ai/dsh-artifact-runtime/types */
-import type { Branded } from '@deepseek-ai/dsh-brand'
-import type { ArtifactId, ArtifactFormat } from '@deepseek-ai/dsh-artifact/types'
-import type { SceneSpec } from '@deepseek-ai/dsh-artifact/scene'
-import type { ArtifactSourceCapabilities } from '@deepseek-ai/dsh-artifact/capabilities'
+/** Live Artifact runtime reports. @module @agentrans/artifact-runtime/types */
+import type { Branded } from '@agentrans/brand'
+import type { ArtifactId, ArtifactFormat } from '@agentrans/artifact/types'
+import type { SceneSpec } from '@agentrans/artifact/scene'
+import type { ArtifactSourceCapabilities } from '@agentrans/artifact/capabilities'
 
 /** Identity of one mounted runtime, replaced whenever its document or native renderer is recreated. */
 export type ArtifactRuntimeId = Branded<'ArtifactRuntimeId'>
@@ -74,7 +74,7 @@ export interface ArtifactRuntimeWaitResult extends ArtifactRuntimeInspection {
   }
 }
 
-declare module '@deepseek-ai/dsh-typert-protocol' {
+declare module '@agentrans/typert-protocol' {
   interface RemoteErrorDetailsMap {
     /** Report registration or input was rejected; no rejected report is retained. */
     'artifact-runtime/rejected': {

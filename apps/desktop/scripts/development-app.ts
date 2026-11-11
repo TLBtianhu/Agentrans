@@ -3,7 +3,7 @@ import { execFileSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
-import { PRODUCT_LAUNCH_CONTEXT_ENV, serializeProductLaunchContext, type ProductLaunchContext } from '@deepseek-ai/dsh-product-layout/launch-context'
+import { PRODUCT_LAUNCH_CONTEXT_ENV, serializeProductLaunchContext, type ProductLaunchContext } from '@agentrans/product-layout/launch-context'
 
 /** Workspace and runtime settings captured for Launch Services cold starts. */
 export interface DevelopmentAppOptions {

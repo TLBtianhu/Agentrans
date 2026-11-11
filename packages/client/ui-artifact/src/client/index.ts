@@ -1,21 +1,21 @@
 /** Artifact Conversation plugin, browser registrations only. */
-import z from '@deepseek-ai/schemastery'
+import z from '@agentrans/schemastery'
 import { artifactHostRouteAvailable } from './artifact-route.ts'
 import { ArtifactRuntimeOwner } from './runtime-owner.ts'
-import type { Context as ClientContext } from '@deepseek-ai/cordis'
-import type {} from '@deepseek-ai/dsh-api-remotes/client'
-import type { ChatNode } from '@deepseek-ai/dsh-client-ui-chat/client'
-import type {} from '@deepseek-ai/dsh-client-locale/client'
-import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
-import type {} from '@deepseek-ai/dsh-client-ui-workspace/client'
-import type {} from '@deepseek-ai/dsh-client-ui-file-actions/client'
-import type { SessionBinding } from '@deepseek-ai/dsh-api-session-controller/client'
-import type { ObservableSnapshot } from '@deepseek-ai/dsh-client-store'
-import type { ArtifactSnapshot } from '@deepseek-ai/dsh-artifact/types'
+import type { Context as ClientContext } from '@agentrans/cordis'
+import type {} from '@agentrans/api-remotes/client'
+import type { ChatNode } from '@agentrans/client-ui-chat/client'
+import type {} from '@agentrans/client-locale/client'
+import type {} from '@agentrans/client-ui-renderer/client'
+import type {} from '@agentrans/client-ui-workspace/client'
+import type {} from '@agentrans/client-ui-file-actions/client'
+import type { SessionBinding } from '@agentrans/api-session-controller/client'
+import type { ObservableSnapshot } from '@agentrans/client-store'
+import type { ArtifactSnapshot } from '@agentrans/artifact/types'
 import type { ParticleRunCommand } from './particle-run.ts'
 import { ArtifactInteractionOwner, particleRuntimeIdentity } from './particle-runtime-owner.ts'
 import { ArtifactPromptContext, type ArtifactPromptContextInjected } from './ArtifactPromptContext.tsx'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
+import type { SessionId } from '@agentrans/session/types'
 import { programContextTextRule, questionContextTextRule } from './question-context-text.ts'
 import { ProgramContextMessage, QuestionContextMessage } from './QuestionContextMessage.tsx'
 import { ArtifactNodeView } from './ArtifactNodeView.tsx'
@@ -34,7 +34,7 @@ import {
 export type { ArtifactKey } from './locales.ts'
 export type { ArtifactId, ArtifactComparisonSnapshot, ArtifactNodeInjected, ArtifactPayload, ArtifactSnapshot, RecordArtifactAction } from './protocol.ts'
 
-declare module '@deepseek-ai/dsh-client-ui-slots' {
+declare module '@agentrans/client-ui-slots' {
   interface LocaleNamespaceMap {
     /** Artifact card and action confirmation copy. */
     artifact: ArtifactKey

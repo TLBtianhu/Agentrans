@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-host-directory-picker-native",
+  "name": "@agentrans/host-directory-picker-native",
   "description": "Native-OS-chooser backend of the directory-picker seam for the DeepSeek Harness web GUI host",
   "version": "0.1.0",
   "publishConfig": {
@@ -34,15 +34,15 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@deepseek-ai/dsh-host-directory-picker": "workspace:*",
-    "@deepseek-ai/dsh-native-command": "workspace:*",
+    "@agentrans/host-directory-picker": "workspace:*",
+    "@agentrans/native-command": "workspace:*",
     "koffi": "3.1.1"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/cordis": "workspace:~"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
+    "@agentrans/cordis": "workspace:~",
     "tsx": "^4.23.13"
   }
 }

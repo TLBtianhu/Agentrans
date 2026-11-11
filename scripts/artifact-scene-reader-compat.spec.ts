@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 import { expect, it } from 'vitest'
 import {
   normalizeFunctionPlot, normalizeSceneSpec, SceneValidationError, type FunctionPlotSpec, type SceneSpec,
-} from '@deepseek-ai/dsh-artifact/scene'
+} from '@agentrans/artifact/scene'
 import { parsePersistenceSnapshot } from './persistence-changes.ts'
 import type { CanonicalSchema } from './persistence-schema-model.ts'
 

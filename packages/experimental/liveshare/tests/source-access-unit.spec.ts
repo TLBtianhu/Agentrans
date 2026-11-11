@@ -1,7 +1,7 @@
 /** Source Session access layering: refusals, preparation, turn control, and child authorization. */
 
-import { Context } from '@deepseek-ai/cordis'
-import { createScope } from '@deepseek-ai/dsh-scope'
+import { Context } from '@agentrans/cordis'
+import { createScope } from '@agentrans/scope'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { activateSession, createSourceAccess } from '../src/host/source-access.ts'
 

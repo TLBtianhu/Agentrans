@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { contextMenuHook } from '@deepseek-ai/dsh-client-test-runtime'
+import { contextMenuHook } from '@agentrans/client-test-runtime'
 /**
  * The guide tab's body: the chain seam, and the shipped guide behind it.
  *
@@ -10,17 +10,17 @@ import { contextMenuHook } from '@deepseek-ai/dsh-client-test-runtime'
  */
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { act, cleanup, fireEvent, render } from '@testing-library/react'
-import type { GlobalStandardProps, RenderOpts, SessionStandardProps } from '@deepseek-ai/dsh-client-ui-slots'
-import type { ShortcutCatalogEntry } from '@deepseek-ai/dsh-client-shortcuts/client'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import type { PaneId, TabId } from '@deepseek-ai/dsh-client-ui-dockkit'
+import type { GlobalStandardProps, RenderOpts, SessionStandardProps } from '@agentrans/client-ui-slots'
+import type { ShortcutCatalogEntry } from '@agentrans/client-shortcuts/client'
+import type { SessionId } from '@agentrans/session/types'
+import type { PaneId, TabId } from '@agentrans/client-ui-dockkit'
 import type { ReactNode } from 'react'
-import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
-import type { IconProps } from '@deepseek-ai/dsh-client-ui-primitives'
+import { createSnapshotStore } from '@agentrans/client-store'
+import type { IconProps } from '@agentrans/client-ui-primitives'
 import { GuideBody } from '../src/client/tabs/guide/GuideBody.tsx'
 import type { GuideBodyProps } from '../src/client/tabs/guide/GuideBody.tsx'
 import type { SidebarRightGuideBox } from '../src/client/tab-registry.ts'
-import { allowAllAccess, bindSnapshotSelector, makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
+import { allowAllAccess, bindSnapshotSelector, makeTranslate } from '@agentrans/client-test-runtime'
 import type { SidebarRightGuideActionsOwnerProps } from '../src/client/contract/slots.ts'
 import { en } from '../src/client/locales.ts'
 import css from '../src/client/tabs/guide/GuideBody.module.css'

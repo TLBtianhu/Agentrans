@@ -3,7 +3,7 @@ description: "面向让进程外 SDK 客户端在 DeepSeek Harness 运行时中�
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-sdk-jsonrpc-server
+# @agentrans/sdk-jsonrpc-server
 
 [English](README.md) | 中文
 
@@ -65,7 +65,7 @@ Host 与桌面适配器共用 `dsh-commands/builtin` 的定义身份及中英文
 |---|---|---|
 | `maxTokensAsSuccess` | `false` | 把 max-token 轮次或 subagent 终止报告为成功的 SDK 结果 |
 
-profile 组合拥有每个根 agent 的工具。`input`、`output` 与 `exit` 是仅供测试的运行时钩子；生产环境使用进程 stdio 和启动器的 `appExit`。`exit` 钩子替换退出请求，须负责应用清理和进程退出。缺少这两个退出回调时，挂载立即拒绝。生成的[配置目录](../../../docs/config-catalog.zh.md#deepseek-aidsh-sdk-jsonrpc-server)是每个受支持字段的穷尽式真源。
+profile 组合拥有每个根 agent 的工具。`input`、`output` 与 `exit` 是仅供测试的运行时钩子；生产环境使用进程 stdio 和启动器的 `appExit`。`exit` 钩子替换退出请求，须负责应用清理和进程退出。缺少这两个退出回调时，挂载立即拒绝。生成的[配置目录](../../../docs/config-catalog.zh.md#agentranssdk-jsonrpc-server)是每个受支持字段的穷尽式真源。
 
 ### stdout 即协议
 

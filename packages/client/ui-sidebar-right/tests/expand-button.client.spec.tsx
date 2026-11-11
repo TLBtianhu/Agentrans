@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { contextMenuHook } from '@deepseek-ai/dsh-client-test-runtime'
+import { contextMenuHook } from '@agentrans/client-test-runtime'
 /**
  * Mobile devices preserve the header control's identity; desktops release
  * its header space while open.
@@ -7,11 +7,11 @@ import { contextMenuHook } from '@deepseek-ai/dsh-client-test-runtime'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { act, cleanup, fireEvent, render } from '@testing-library/react'
 import { useSyncExternalStore } from 'react'
-import * as uiPrimitives from '@deepseek-ai/dsh-client-ui-primitives'
-import type { GlobalStandardProps, SessionStandardProps } from '@deepseek-ai/dsh-client-ui-slots'
-import type { ShortcutCatalogEntry } from '@deepseek-ai/dsh-client-shortcuts/client'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import { allowAllAccess } from '@deepseek-ai/dsh-client-test-runtime'
+import * as uiPrimitives from '@agentrans/client-ui-primitives'
+import type { GlobalStandardProps, SessionStandardProps } from '@agentrans/client-ui-slots'
+import type { ShortcutCatalogEntry } from '@agentrans/client-shortcuts/client'
+import type { SessionId } from '@agentrans/session/types'
+import { allowAllAccess } from '@agentrans/client-test-runtime'
 import { ExpandButton } from '../src/client/shell/ExpandButton.tsx'
 import type { ExpandButtonProps } from '../src/client/shell/ExpandButton.tsx'
 import { createSidebarRightStore } from '../src/client/stores.ts'

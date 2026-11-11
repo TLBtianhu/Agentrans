@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-product-layout",
+  "name": "@agentrans/product-layout",
   "description": "Single-root installation layout, manifests, integration state, and runtime activation for Agentrans",
   "version": "0.1.0",
   "private": true,
@@ -25,9 +25,9 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/cordis": "workspace:~"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/cordis": "workspace:~"
   }
 }

@@ -3,7 +3,7 @@ description: "应用作用域内的文件传递与本地化拖放失败反馈。
 kind: package-reference
 ---
 
-# @deepseek-ai/dsh-client-ui-file-drag
+# @agentrans/client-ui-file-drag
 
 [English](README.md) | 中文
 

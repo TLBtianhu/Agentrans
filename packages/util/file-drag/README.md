@@ -3,7 +3,7 @@ description: "Shared export filenames and native file drag requests for Web and 
 kind: "package-library"
 ---
 
-# @deepseek-ai/dsh-util-file-drag
+# @agentrans/util-file-drag
 
 English | [中文](README.zh.md)
 

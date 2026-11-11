@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-experimental-session-search",
+  "name": "@agentrans/experimental-session-search",
   "description": "Give agents tools to search and read earlier sessions from the current workspace.",
   "version": "0.1.0",
   "icon": "./icon.svg",
@@ -40,13 +40,13 @@
     }
   },
   "dependencies": {
-    "@deepseek-ai/dsh-session-query-sqlite": "workspace:*",
-    "@deepseek-ai/dsh-tool-session-query": "workspace:*"
+    "@agentrans/session-query-sqlite": "workspace:*",
+    "@agentrans/tool-session-query": "workspace:*"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/cordis": "workspace:~"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/cordis": "workspace:~"
   }
 }

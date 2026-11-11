@@ -121,7 +121,7 @@ describe('product identifiers', () => {
   it('still renames other libraries in a preset consumer and reverses them', () => {
     const file = 'packages/client/ui-agent-preset/src/client/CreatePluginMenuItem.tsx'
     const text = "const preset = 'cordis'\nimport utils from 'cosmokit'\nimport Schema from 'schemastery'\n"
-    const scoped = "const preset = 'cordis'\nimport utils from '@deepseek-ai/cosmokit'\nimport Schema from '@deepseek-ai/schemastery'\n"
+    const scoped = "const preset = 'cordis'\nimport utils from '@agentrans/cosmokit'\nimport Schema from '@agentrans/schemastery'\n"
     expect(rescopeText(text, file)).toEqual({ text: scoped, lines: 2 })
     expect(rescopeText(scoped, file)).toEqual({ text: scoped, lines: 0 })
     expect(rescopeText(scoped, file, true)).toEqual({ text, lines: 2 })
@@ -130,26 +130,26 @@ describe('product identifiers', () => {
   it('keeps unlisted package references subject to residue detection', () => {
     const file = 'packages/example/src/index.ts'
     const text = "import { Context } from 'cordis'\nimport type Schema from 'schemastery'\n"
-    const scoped = "import { Context } from '@deepseek-ai/cordis'\nimport type Schema from '@deepseek-ai/schemastery'\n"
+    const scoped = "import { Context } from '@agentrans/cordis'\nimport type Schema from '@agentrans/schemastery'\n"
     expect(rescopeText(text, file)).toEqual({ text: scoped, lines: 2 })
     expect(rescopeText(scoped, file)).toEqual({ text: scoped, lines: 0 })
     expect(rescopeText(scoped, file, true)).toEqual({ text, lines: 2 })
-    expect(rescopeText("ctx.emit('cordis/inspect-query')", file).text).toBe("ctx.emit('@deepseek-ai/cordis/inspect-query')")
+    expect(rescopeText("ctx.emit('cordis/inspect-query')", file).text).toBe("ctx.emit('@agentrans/cordis/inspect-query')")
   })
 
   it.each([
-    ['import', "import { Context } from 'cordis'", "import { Context } from '@deepseek-ai/cordis'"],
-    ['multiline import', "import {\n  Context,\n} from 'cordis'", "import {\n  Context,\n} from '@deepseek-ai/cordis'"],
-    ['side-effect import', "import 'cordis'", "import '@deepseek-ai/cordis'"],
-    ['export', "export { Context } from 'cordis/subpath'", "export { Context } from '@deepseek-ai/cordis/subpath'"],
-    ['import equals', "import Cordis = require('cordis')", "import Cordis = require('@deepseek-ai/cordis')"],
-    ['dynamic import', 'const cordis = import(`cordis`)', 'const cordis = import(`@deepseek-ai/cordis`)'],
-    ['require', 'const cordis = require("cordis/subpath")', 'const cordis = require("@deepseek-ai/cordis/subpath")'],
-    ['import type', "type Context = import('cordis').Context", "type Context = import('@deepseek-ai/cordis').Context"],
-    ['module declaration', "declare module 'cordis' {}", "declare module '@deepseek-ai/cordis' {}"],
-    ['JSDoc type', "/** @param {import('cordis').Context} ctx */\nfunction apply(ctx) {}", "/** @param {import('@deepseek-ai/cordis').Context} ctx */\nfunction apply(ctx) {}"],
-    ['JSDoc import', "/** @import { Context } from 'cordis' */\nfunction apply(ctx) {}", "/** @import { Context } from '@deepseek-ai/cordis' */\nfunction apply(ctx) {}"],
-    ['same-line imports', "import 'cordis'; import 'cordis/subpath'", "import '@deepseek-ai/cordis'; import '@deepseek-ai/cordis/subpath'"],
+    ['import', "import { Context } from 'cordis'", "import { Context } from '@agentrans/cordis'"],
+    ['multiline import', "import {\n  Context,\n} from 'cordis'", "import {\n  Context,\n} from '@agentrans/cordis'"],
+    ['side-effect import', "import 'cordis'", "import '@agentrans/cordis'"],
+    ['export', "export { Context } from 'cordis/subpath'", "export { Context } from '@agentrans/cordis/subpath'"],
+    ['import equals', "import Cordis = require('cordis')", "import Cordis = require('@agentrans/cordis')"],
+    ['dynamic import', 'const cordis = import(`cordis`)', 'const cordis = import(`@agentrans/cordis`)'],
+    ['require', 'const cordis = require("cordis/subpath")', 'const cordis = require("@agentrans/cordis/subpath")'],
+    ['import type', "type Context = import('cordis').Context", "type Context = import('@agentrans/cordis').Context"],
+    ['module declaration', "declare module 'cordis' {}", "declare module '@agentrans/cordis' {}"],
+    ['JSDoc type', "/** @param {import('cordis').Context} ctx */\nfunction apply(ctx) {}", "/** @param {import('@agentrans/cordis').Context} ctx */\nfunction apply(ctx) {}"],
+    ['JSDoc import', "/** @import { Context } from 'cordis' */\nfunction apply(ctx) {}", "/** @import { Context } from '@agentrans/cordis' */\nfunction apply(ctx) {}"],
+    ['same-line imports', "import 'cordis'; import 'cordis/subpath'", "import '@agentrans/cordis'; import '@agentrans/cordis/subpath'"],
   ])('rewrites %s without changing same-file product data', (_label, source, target) => {
     const file = 'packages/client/ui-agent-preset/src/client/CreatePluginMenuItem.tsx'
     const product = "const preset = 'cordis'\nctx.emit('cordis/inspect-query')\nconst fixture = \"import 'cordis'\"\n"
@@ -170,7 +170,7 @@ describe('product identifiers', () => {
     ['snapshots/session/cordis-inspect-timeout/client-fixture.mjs', 2],
   ] as const)('reverses real package references in %s and restores them', (file, lines) => {
     const scoped = readFileSync(new URL(`../${file}`, import.meta.url), 'utf8')
-    const text = scoped.replaceAll("'@deepseek-ai/cordis'", "'cordis'")
+    const text = scoped.replaceAll("'@agentrans/cordis'", "'cordis'")
     expect(text).not.toBe(scoped)
     expectRoundTrip(file, text, scoped, lines)
     expect(rescopeText(text, file, true)).toEqual({ text, lines: 0 })
@@ -179,13 +179,13 @@ describe('product identifiers', () => {
   it('rewrites multiline fenced imports while preserving prose and fenced product data', () => {
     const file = 'docs/subsystems/extensions.md'
     const text = "The `cordis` preset.\n```ts\nconst preset = 'cordis'\nimport {\n  Context,\n} from 'cordis'\n```\n"
-    const scoped = "The `cordis` preset.\n```ts\nconst preset = 'cordis'\nimport {\n  Context,\n} from '@deepseek-ai/cordis'\n```\n"
+    const scoped = "The `cordis` preset.\n```ts\nconst preset = 'cordis'\nimport {\n  Context,\n} from '@agentrans/cordis'\n```\n"
     expectRoundTrip(file, text, scoped, 1)
   })
 
   it.each(['cordis', "'cordis'", '"cordis/subpath"'])('rewrites the YAML name %s without changing product comments', (name) => {
     const text = `# The 'cordis' preset.\n- name: ${name} # 'cordis' stays product data\n`
-    const scoped = `# The 'cordis' preset.\n- name: ${name.replace('cordis', '@deepseek-ai/cordis')} # 'cordis' stays product data\n`
+    const scoped = `# The 'cordis' preset.\n- name: ${name.replace('cordis', '@agentrans/cordis')} # 'cordis' stays product data\n`
     for (const [file, wrap] of [
       ['packages/bundle/web-app/cordis.patch.yml', (value: string) => value],
       ['docs/subsystems/extensions.md', (value: string) => `The \`cordis\` preset.\n\`\`\`yaml\n${value}\`\`\`\n`],
@@ -195,7 +195,7 @@ describe('product identifiers', () => {
   })
 
   it.each(['scripts/rescope-vendor.spec.ts', 'scripts/gen-third-party-notices.spec.ts'])('keeps both package spellings in the fixture owner %s', (file) => {
-    const text = "import 'cordis'\nimport '@deepseek-ai/cordis'\nconst fixture = \"import 'cosmokit'\"\n"
+    const text = "import 'cordis'\nimport '@agentrans/cordis'\nconst fixture = \"import 'cosmokit'\"\n"
     expect(rescopeText(text, file)).toEqual({ text, lines: 0 })
     expect(rescopeText(text, file, true)).toEqual({ text, lines: 0 })
   })
@@ -203,20 +203,20 @@ describe('product identifiers', () => {
   it('keeps schema runtime identifiers while rewriting their same-file import', () => {
     const file = 'vendor/loader/src/config/diff.ts'
     const text = "const key = Symbol.for('schemastery')\nconst metadata = { vendor: 'schemastery' }\nimport Schema from 'schemastery'\n"
-    const scoped = "const key = Symbol.for('schemastery')\nconst metadata = { vendor: 'schemastery' }\nimport Schema from '@deepseek-ai/schemastery'\n"
+    const scoped = "const key = Symbol.for('schemastery')\nconst metadata = { vendor: 'schemastery' }\nimport Schema from '@agentrans/schemastery'\n"
     expectRoundTrip(file, text, scoped, 1)
   })
 
   it('rewrites declarations in an older event-name exception', () => {
     const file = 'packages/extensions/cordis-host-runner/src/index.ts'
     const text = "ctx.emit('cordis/inspect-query')\nimport { Context } from 'cordis'\ndeclare module 'cordis' {}\n"
-    const scoped = "ctx.emit('cordis/inspect-query')\nimport { Context } from '@deepseek-ai/cordis'\ndeclare module '@deepseek-ai/cordis' {}\n"
+    const scoped = "ctx.emit('cordis/inspect-query')\nimport { Context } from '@agentrans/cordis'\ndeclare module '@agentrans/cordis' {}\n"
     expectRoundTrip(file, text, scoped, 2)
   })
 
   it.each(['```ts\n```\n', "```ts\nimport 'cordis'\n"])('keeps fence line counts without requiring a closing fence', (text) => {
     const file = 'docs/subsystems/extensions.md'
-    const scoped = text.replace("import 'cordis'", "import '@deepseek-ai/cordis'")
+    const scoped = text.replace("import 'cordis'", "import '@agentrans/cordis'")
     expectRoundTrip(file, text, scoped, scoped === text ? 0 : 1)
   })
 })

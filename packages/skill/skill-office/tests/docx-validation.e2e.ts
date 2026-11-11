@@ -4,9 +4,9 @@ import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { execa } from 'execa'
 import { expect, it } from 'vitest'
-import { runLoaderSmoke } from '@deepseek-ai/dsh-loader-smoke'
-import { parseSessionLog } from '@deepseek-ai/dsh-llm-replay'
-import type {} from '@deepseek-ai/dsh-tool-executor-ptc/types'
+import { runLoaderSmoke } from '@agentrans/loader-smoke'
+import { parseSessionLog } from '@agentrans/llm-replay'
+import type {} from '@agentrans/tool-executor-ptc/types'
 import { expectNoRenderContext, officeModelPatches } from './fixtures/real-office.ts'
 
 const repo = fileURLToPath(new URL('../../../../', import.meta.url))
@@ -36,8 +36,8 @@ d.add_paragraph('Q1: 12; Q2: 18')
 d.save('input.docx')
 `], { cwd })
       await writeFile(join(cwd, 'office.patch.json'), JSON.stringify([
-        { insert: [{ id: 'skill-office', name: '@deepseek-ai/dsh-skill-office', config: { assetRoot: join(repo, 'packages/skill/skill-office/assets') } }] },
-        { insert: [{ id: 'workspace-dependencies', name: '@deepseek-ai/dsh-tool-workspace-dependencies', config: { source: runtime! } }] },
+        { insert: [{ id: 'skill-office', name: '@agentrans/skill-office', config: { assetRoot: join(repo, 'packages/skill/skill-office/assets') } }] },
+        { insert: [{ id: 'workspace-dependencies', name: '@agentrans/tool-workspace-dependencies', config: { source: runtime! } }] },
         ...officeModelPatches(),
         { id: 'session-persistence-jsonl', config: { root: join(cwd, '.sessions'), compression: 'none' } },
       ]))

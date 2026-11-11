@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-api-workspace-controller",
+  "name": "@agentrans/api-workspace-controller",
   "description": "Workspace Remote commands and reconnect-safe state transport",
   "version": "0.1.0",
   "publishConfig": {
@@ -45,11 +45,11 @@
   "dsh": {
     "client": {
       "external": [
-        "@deepseek-ai/dsh-api-gateway/client"
+        "@agentrans/api-gateway/client"
       ],
       "inject": [
-        "@deepseek-ai/dsh-api-gateway",
-        "@deepseek-ai/dsh-client-connection"
+        "@agentrans/api-gateway",
+        "@agentrans/client-connection"
       ],
       "platform": "web"
     }
@@ -71,33 +71,33 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@deepseek-ai/dsh-deque": "workspace:*",
-    "@deepseek-ai/dsh-native-command": "workspace:*",
-    "@deepseek-ai/schemastery": "workspace:~",
+    "@agentrans/deque": "workspace:*",
+    "@agentrans/native-command": "workspace:*",
+    "@agentrans/schemastery": "workspace:~",
     "zod": "4.4.3"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-api-gateway": "workspace:*",
-    "@deepseek-ai/dsh-client-connection": "workspace:*",
-    "@deepseek-ai/dsh-host-directory-picker": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-storage-domain": "workspace:*",
-    "@deepseek-ai/dsh-typert-protocol": "workspace:*",
-    "@deepseek-ai/dsh-workspace": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/api-gateway": "workspace:*",
+    "@agentrans/client-connection": "workspace:*",
+    "@agentrans/host-directory-picker": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/storage-domain": "workspace:*",
+    "@agentrans/typert-protocol": "workspace:*",
+    "@agentrans/workspace": "workspace:*"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-api-gateway": "workspace:*",
-    "@deepseek-ai/dsh-api-remote-access": "workspace:*",
-    "@deepseek-ai/dsh-client-connection": "workspace:*",
-    "@deepseek-ai/dsh-client-store": "workspace:*",
-    "@deepseek-ai/dsh-client-test-runtime": "workspace:*",
-    "@deepseek-ai/dsh-host-directory-picker": "workspace:*",
-    "@deepseek-ai/dsh-remote-mock": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-storage-domain": "workspace:*",
-    "@deepseek-ai/dsh-typert-protocol": "workspace:*",
-    "@deepseek-ai/dsh-workspace": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/api-gateway": "workspace:*",
+    "@agentrans/api-remote-access": "workspace:*",
+    "@agentrans/client-connection": "workspace:*",
+    "@agentrans/client-store": "workspace:*",
+    "@agentrans/client-test-runtime": "workspace:*",
+    "@agentrans/host-directory-picker": "workspace:*",
+    "@agentrans/remote-mock": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/storage-domain": "workspace:*",
+    "@agentrans/typert-protocol": "workspace:*",
+    "@agentrans/workspace": "workspace:*"
   }
 }

@@ -26,7 +26,7 @@ Parse a complete Codex-style patch into ordered file operations with `parsePatch
 Operations and hunks contain only JSON-serializable values, and parsing retains repeated paths in input order as unresolved strings.
 
 ```ts
-import { applyHunks, parsePatch } from '@deepseek-ai/dsh-fs-patch'
+import { applyHunks, parsePatch } from '@agentrans/fs-patch'
 
 const operations = parsePatch('*** Begin Patch\n*** Update File: hello.txt\n-hello\n+hi\n*** End Patch')
 const operation = operations[0]

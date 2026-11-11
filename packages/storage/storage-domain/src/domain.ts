@@ -7,11 +7,11 @@
  * medium) unless the backend reports `unknown-state`, which quarantines the
  * domain: reads and later writes reject until close. Events carry values that
  * equal the in-memory state at emission, in write order.
- * @module @deepseek-ai/dsh-storage-domain/src/domain
+ * @module @agentrans/storage-domain/src/domain
  */
 
-import type { Context } from '@deepseek-ai/cordis'
-import { StorageError, type KvUnit } from '@deepseek-ai/dsh-storage'
+import type { Context } from '@agentrans/cordis'
+import { StorageError, type KvUnit } from '@agentrans/storage'
 import { DomainError } from './error.ts'
 import type { DomainSpec, DomainGlobalSpec, TableKeyOf, TableValueOf } from './spec.ts'
 import type { DomainChanged } from './events.ts'

@@ -4,7 +4,7 @@ import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium, type Browser, type Download, type Page } from 'playwright'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { parseSessionLog } from '@deepseek-ai/dsh-llm-replay'
+import { parseSessionLog } from '@agentrans/llm-replay'
 import {
   acknowledgeReloadConnectionLoss, assertFixtureInventory, launchWebScaffold,
   watchConsole, webSnapshotMode, type WebScaffold,

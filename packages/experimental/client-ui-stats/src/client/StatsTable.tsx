@@ -7,12 +7,12 @@ import {
   Fragment, useCallback, useEffect, useMemo, useState,
   type ReactElement, type ReactNode,
 } from 'react'
-import type { ImageAttachmentRef } from '@deepseek-ai/dsh-attachment'
-import type { ObservableSnapshot } from '@deepseek-ai/dsh-client-store'
-import { HoverCard, ImageLightbox, MarkdownText } from '@deepseek-ai/dsh-client-ui-primitives'
-import type { MarkdownLabels } from '@deepseek-ai/dsh-client-ui-primitives'
-import type { ConvViewProps } from '@deepseek-ai/dsh-client-ui-conversation/client'
-import type { InjectFace, PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
+import type { ImageAttachmentRef } from '@agentrans/attachment'
+import type { ObservableSnapshot } from '@agentrans/client-store'
+import { HoverCard, ImageLightbox, MarkdownText } from '@agentrans/client-ui-primitives'
+import type { MarkdownLabels } from '@agentrans/client-ui-primitives'
+import type { ConvViewProps } from '@agentrans/client-ui-conversation/client'
+import type { InjectFace, PropsLocale } from '@agentrans/client-ui-slots'
 import type {
   StatsCall, StatsCompactionMetrics, StatsEventKind, StatsEventMetrics, StatsSnapshot, StatsStepMetrics,
   LoadOlderResult, StatsToolCount, StatsTurnMetrics,
@@ -28,8 +28,8 @@ import { CALL_LIMIT } from './stats-fold.ts'
 import type { StatsTranslate } from './locales.ts'
 import css from './stats.module.css'
 // Type-only: merges sessionStats and tokenUsage into SessionProjectionMap for useProjection.
-import type {} from '@deepseek-ai/dsh-session-stats/client'
-import type {} from '@deepseek-ai/dsh-token-meter/client'
+import type {} from '@agentrans/session-stats/client'
+import type {} from '@agentrans/token-meter/client'
 
 /** Steps one turn renders before the "show all" control appears. */
 const STEP_LIMIT = 24

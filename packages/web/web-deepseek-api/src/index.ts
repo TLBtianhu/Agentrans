@@ -7,14 +7,14 @@
  * service allows the endpoint; every other request uses the configured key. Both
  * providers report themselves not ready for a model request whose operation would
  * have no credential.
- * @module @deepseek-ai/dsh-web-deepseek-api
+ * @module @agentrans/web-deepseek-api
  */
-import type { Context, Volatile } from '@deepseek-ai/cordis'
-import z from '@deepseek-ai/schemastery'
-import type {} from '@deepseek-ai/dsh-agent'
-import type { Session } from '@deepseek-ai/dsh-session'
-import type {} from '@deepseek-ai/dsh-web'
-import { DEEPSEEK_API_KEY_REF } from '@deepseek-ai/dsh-deepseek-issuer'
+import type { Context, Volatile } from '@agentrans/cordis'
+import z from '@agentrans/schemastery'
+import type {} from '@agentrans/agent'
+import type { Session } from '@agentrans/session'
+import type {} from '@agentrans/web'
+import { DEEPSEEK_API_KEY_REF } from '@agentrans/deepseek-issuer'
 import { DeepSeekFetchApiProvider } from './fetch.ts'
 import { DEEPSEEK_DEFAULT_COUNT, DEEPSEEK_WEB_API_BASE_URL, DeepSeekSearchApiProvider } from './search.ts'
 import { deepSeekWebAuth, deepSeekWebCredentialState } from './transport.ts'

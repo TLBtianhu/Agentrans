@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-experimental-forge-bundle",
+  "name": "@agentrans/experimental-forge-bundle",
   "description": "Experimental change request panel and worktree option for Sessions in Git repositories",
   "version": "0.1.0",
   "icon": "./icon.svg",
@@ -33,17 +33,17 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@deepseek-ai/dsh-experimental-client-ui-forge": "workspace:*",
-    "@deepseek-ai/dsh-experimental-forge": "workspace:*",
-    "@deepseek-ai/dsh-experimental-forge-github": "workspace:*",
-    "@deepseek-ai/dsh-experimental-forge-session": "workspace:*",
-    "@deepseek-ai/dsh-experimental-worktree": "workspace:*"
+    "@agentrans/experimental-client-ui-forge": "workspace:*",
+    "@agentrans/experimental-forge": "workspace:*",
+    "@agentrans/experimental-forge-github": "workspace:*",
+    "@agentrans/experimental-forge-session": "workspace:*",
+    "@agentrans/experimental-worktree": "workspace:*"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/cordis": "workspace:~"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/cordis": "workspace:~"
   },
   "dsh": {
     "bundle": {

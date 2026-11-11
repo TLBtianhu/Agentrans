@@ -5,54 +5,54 @@
 /:
   en: 65283627208ef4c9
   zh: aa3f833ec24bb65a
-/deepseek-ai-dsh-plugin-manager:
-  en: e6cbfe169f5fb57b
-  zh: be378036d645a242
-/deepseek-ai-dsh-plugin-manager/summary:
+/agentrans-plugin-manager:
+  en: b1aee7f2e54550e2
+  zh: f0cc5b22e85a684b
+/agentrans-plugin-manager/summary:
   en: d6afcaa1594efcdb
   zh: 459cb6ac0dcb2d46
-/deepseek-ai-dsh-plugin-manager/table-of-contents:
+/agentrans-plugin-manager/table-of-contents:
   en: 87679c51aa3693f5
   zh: 11684a48a5806afb
-/deepseek-ai-dsh-plugin-manager/use-this-package:
-  en: ae0905aa47cc971d
-  zh: b22fc6e831fac136
-/deepseek-ai-dsh-plugin-manager/use-this-package/version-compatibility-and-exemptions:
+/agentrans-plugin-manager/use-this-package:
+  en: 2e55fc6dd4bce23f
+  zh: 27665810c40316f7
+/agentrans-plugin-manager/use-this-package/version-compatibility-and-exemptions:
   en: 483285658e267dd5
   zh: 846bec2daac59a96
-/deepseek-ai-dsh-plugin-manager/use-this-package/configuration:
+/agentrans-plugin-manager/use-this-package/configuration:
   en: ccec56c785b3ca28
   zh: b945f933888fc7cb
-/deepseek-ai-dsh-plugin-manager/use-this-package/bundle-detail-documents:
+/agentrans-plugin-manager/use-this-package/bundle-detail-documents:
   en: 99b084ff497011d2
   zh: 6c047796c1991784
-/deepseek-ai-dsh-plugin-manager/understand-the-implementation:
-  en: c224bfcb3eb3dbd2
-  zh: 8b9c96970a90dccc
-/deepseek-ai-dsh-plugin-manager/further-exploration:
+/agentrans-plugin-manager/understand-the-implementation:
+  en: 6f6c5966a2bcdb8e
+  zh: 54442fcebcd2c1de
+/agentrans-plugin-manager/further-exploration:
   en: c6538243d8702a0d
   zh: 04a82d923353c75f
-/deepseek-ai-dsh-plugin-manager/model-experience:
+/agentrans-plugin-manager/model-experience:
   en: 215e7ba838619b7b
   zh: a311da3843709f90
-/deepseek-ai-dsh-plugin-manager/model-experience/management-tool:
+/agentrans-plugin-manager/model-experience/management-tool:
   en: 1815ec6ce56c80d4
   zh: 2d7ac75d3b25eb6b
-/deepseek-ai-dsh-plugin-manager/model-experience/management-tool/what-the-model-sees:
-  en: b1dae91f98350290
-  zh: 802ae86d923ac6ce
-/deepseek-ai-dsh-plugin-manager/model-experience/management-tool/token-effect:
+/agentrans-plugin-manager/model-experience/management-tool/what-the-model-sees:
+  en: ad7254b65958127a
+  zh: bffe91dd661af4d3
+/agentrans-plugin-manager/model-experience/management-tool/token-effect:
   en: bc70208bd361dbcd
   zh: bb651d6066066c6c
-/deepseek-ai-dsh-plugin-manager/model-experience/management-tool/kv-cache-effect:
+/agentrans-plugin-manager/model-experience/management-tool/kv-cache-effect:
   en: c29f60be7f3edc1a
   zh: d9b9388b96ef95cc
-/deepseek-ai-dsh-plugin-manager/known-limitations-and-deferred-work:
+/agentrans-plugin-manager/known-limitations-and-deferred-work:
   en: d26075545fe1e990
   zh: 068c07d642843c94
-/deepseek-ai-dsh-plugin-manager/known-limitations-and-deferred-work/failure-behavior:
+/agentrans-plugin-manager/known-limitations-and-deferred-work/failure-behavior:
   en: 3fde425e82bbd0f4
   zh: 531e2365e7d67480
-/deepseek-ai-dsh-plugin-manager/known-limitations-and-deferred-work/dev-note:
+/agentrans-plugin-manager/known-limitations-and-deferred-work/dev-note:
   en: e67f633dc6fe7773
   zh: 3bb0c20c93f16f98

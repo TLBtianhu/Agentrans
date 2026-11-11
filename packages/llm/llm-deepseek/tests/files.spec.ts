@@ -1,8 +1,8 @@
 /** Messages file-reference admission, bounded recovery and request-wide inline fallback. */
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { AttachmentId, ImageVariantId } from '@deepseek-ai/dsh-attachment'
-import type { ImageAttachmentRef, RequestImageAttachment } from '@deepseek-ai/dsh-attachment'
-import { createAssistantMessage, createToolResultMessage, LlmError, ToolCallId } from '@deepseek-ai/dsh-llm'
+import { AttachmentId, ImageVariantId } from '@agentrans/attachment'
+import type { ImageAttachmentRef, RequestImageAttachment } from '@agentrans/attachment'
+import { createAssistantMessage, createToolResultMessage, LlmError, ToolCallId } from '@agentrans/llm'
 import { DeepSeekFileId } from '../src/file-id.ts'
 import { DeepSeekFileStore } from '../src/file-store.ts'
 import { resolveAdapterOptions } from '../src/config.ts'

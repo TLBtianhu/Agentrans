@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { WebError } from '@deepseek-ai/dsh-web'
+import { WebError } from '@agentrans/web'
 import { dispatchDeepSeekWeb, type DeepSeekWebAuth } from '../src/transport.ts'
 const options = { resolveApiKey: async () => 'ds-key', baseURL: 'https://api.deepseek.test/anthropic/v1' }
 

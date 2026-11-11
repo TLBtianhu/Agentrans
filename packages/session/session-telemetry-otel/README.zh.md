@@ -3,7 +3,7 @@ description: "面向部署方的 OpenTelemetry 会话遥测后端说明，用于
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-session-telemetry-otel
+# @agentrans/session-telemetry-otel
 
 [English](README.md) | 中文
 
@@ -46,7 +46,7 @@ Agentrans 随附基础组合包关闭此插件行。下述模式与配置默认�
 
 ```yaml
 - id: sessionTelemetry-otel
-  name: '@deepseek-ai/dsh-session-telemetry-otel'
+  name: '@agentrans/session-telemetry-otel'
   config:
     mode: FEEDBACK_ONLY       # optional; defaults to FEEDBACK_ONLY
     shutdownTimeoutMillis: 3000 # optional; defaults to 3000
@@ -119,7 +119,7 @@ Agentrans 随附基础组合包关闭此插件行。下述模式与配置默认�
 - [会话遥测 seam](../session-telemetry/README.zh.md)——捕获约定、记录词汇与脱敏 waterfall。
 - [会话遥测子系统](../../../docs/subsystems/session-telemetry.zh.md)——能力拆分与类型声明。
 - [匿名用户身份](../../identity/anonymous-user-id/README.zh.md)——作为 OTel Resource `user.id` 上报的 id。
-- [生成配置目录](../../../docs/config-catalog.zh.md#deepseek-aidsh-session-telemetry-otel)——每个受支持配置字段及其源声明。
+- [生成配置目录](../../../docs/config-catalog.zh.md#agentranssession-telemetry-otel)——每个受支持配置字段及其源声明。
 
 -----
 

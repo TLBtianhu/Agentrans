@@ -3,7 +3,7 @@ description: "提供引用控件与 Markdown blockquote 展示的插件。"
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-message-quotes
+# @agentrans/message-quotes
 
 [English](README.md) | 中文
 

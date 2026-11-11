@@ -4,11 +4,11 @@ import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { zstdDecompressSync } from 'node:zlib'
-import { resolveExampleLaunch } from '@deepseek-ai/dsh-loader-smoke'
-import { scanZstdFrames } from '@deepseek-ai/dsh-session-persistence-jsonl/src/zstd.js'
+import { resolveExampleLaunch } from '@agentrans/loader-smoke'
+import { scanZstdFrames } from '@agentrans/session-persistence-jsonl/src/zstd.js'
 import { execa } from 'execa'
 import { describe, expect, it, onTestFinished } from 'vitest'
-import { workspaceDependencyPaths, type PrimaryRuntimeManifest } from '@deepseek-ai/dsh-tool-workspace-dependencies'
+import { workspaceDependencyPaths, type PrimaryRuntimeManifest } from '@agentrans/tool-workspace-dependencies'
 
 import { messagesResponse } from './fixtures/messages-response.ts'
 
@@ -68,7 +68,7 @@ describe('Python SDK dsh profile keyless smoke', () => {
     if (editorEnabled) await writeFile(editorPatch, [
       '- insert:',
       '    - id: tool-str-replace-editor',
-      "      name: '@deepseek-ai/dsh-tool-str-replace-editor'",
+      "      name: '@agentrans/tool-str-replace-editor'",
       '',
     ].join('\n'))
     const modelRequests: Record<string, unknown>[] = []
@@ -367,7 +367,7 @@ describe('Python SDK dsh profile keyless smoke', () => {
         await readFile(join(root, '.dsh', 'profiles', 'sdk-minimal', 'package.json'), 'utf8'),
       ) as { dsh?: { profile?: { bundles?: string[] } } }
       expect(profile.dsh?.profile).toEqual({
-        bundles: ['@deepseek-ai/dsh-sdk-minimal'],
+        bundles: ['@agentrans/sdk-minimal'],
       })
       expect(modelRequests[0]?.tools).toEqual(expect.any(Array))
       const tools = modelRequests[0]?.tools as { name?: string }[]
@@ -506,7 +506,7 @@ describe('Python SDK dsh profile keyless smoke', () => {
       expect(exitCode, stderr).toBe(1)
       expect(stdout).toBe('')
       expect(stderr).toContain('startup failed:')
-      expect(stderr).toContain('sdk-jsonrpc-server (required)\n    Package: @deepseek-ai/dsh-sdk-jsonrpc-server\n    SyntaxError')
+      expect(stderr).toContain('sdk-jsonrpc-server (required)\n    Package: @agentrans/sdk-jsonrpc-server\n    SyntaxError')
       expect(stderr).toContain('sometimes')
     } finally {
       await rm(root, { recursive: true, force: true })

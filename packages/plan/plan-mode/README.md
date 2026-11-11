@@ -3,7 +3,7 @@ description: "Plan mode for users and maintainers choosing, configuring, or debu
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-plan-mode
+# @agentrans/plan-mode
 
 English | [中文](README.zh.md)
 
@@ -36,7 +36,7 @@ Choose plan mode when the agent should explore and design before executing and y
 The only required configuration is the guidance text the agent follows while planning; anything else you add fails at load.
 
 ```yaml
-- name: '@deepseek-ai/dsh-plan-mode'
+- name: '@agentrans/plan-mode'
   config:
     section: |
       You are in plan mode. Explore and design before presenting the complete
@@ -47,7 +47,7 @@ The only required configuration is the guidance text the agent follows while pla
 |---|---|---|
 | `section` | required | Guidance rendered as the `plan:policy` prompt section while plan mode is active |
 
-The generated [configuration catalog](../../../docs/config-catalog.md#deepseek-aidsh-plan-mode) is the exhaustive source for every accepted field and its JSDoc.
+The generated [configuration catalog](../../../docs/config-catalog.md#agentransplan-mode) is the exhaustive source for every accepted field and its JSDoc.
 
 <a id="model-and-human-interactions"></a>
 ### Entering and leaving plan mode
@@ -119,8 +119,8 @@ Read these pages when the package-level contract is not enough. They move from t
 
 - [Plan mode subsystem reference](../../../docs/subsystems/plan.md) — how plan mode behaves, its configuration, and the exit tool's contract.
 - [plan/ package map](../README.md) — the group and its single package.
-- [exit_plan_mode tool catalog entry](../../../docs/tool-catalog.md#deepseek-aidsh-plan-mode) — the exact schema the model receives.
-- [Generated configuration catalog](../../../docs/config-catalog.md#deepseek-aidsh-plan-mode) — every accepted config field and its meaning.
+- [exit_plan_mode tool catalog entry](../../../docs/tool-catalog.md#agentransplan-mode) — the exact schema the model receives.
+- [Generated configuration catalog](../../../docs/config-catalog.md#agentransplan-mode) — every accepted config field and its meaning.
 - [archived Plan-specific collaboration state](../../../.agents/notes/archived/simplification/2026-07-22-plan-specific-collaboration-state.md) — the design decision behind plan mode.
 
 -----
@@ -166,7 +166,7 @@ The user block is append-only conversation growth. Entering or leaving plan mode
 
 #### What the model sees
 
-The [`exit_plan_mode` schema](../../../docs/tool-catalog.md#deepseek-aidsh-plan-mode) is offered from the first plan-mode entry in a Session; earlier calls return `UNKNOWN_TOOL`, calls after leaving plan mode fail as unavailable outside plan mode, and an approved in-mode review returns the canonical `{ approved: true }` value and renders the existing confirmation text. Rejection remains a failed call carrying review feedback. A dismissed review returns `{ approved: false }`, renders a note that the user will reply, and concludes the turn without another model request.
+The [`exit_plan_mode` schema](../../../docs/tool-catalog.md#agentransplan-mode) is offered from the first plan-mode entry in a Session; earlier calls return `UNKNOWN_TOOL`, calls after leaving plan mode fail as unavailable outside plan mode, and an approved in-mode review returns the canonical `{ approved: true }` value and renders the existing confirmation text. Rejection remains a failed call carrying review feedback. A dismissed review returns `{ approved: false }`, renders a note that the user will reply, and concludes the turn without another model request.
 
 #### Token effect
 

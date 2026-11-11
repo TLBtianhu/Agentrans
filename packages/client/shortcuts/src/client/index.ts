@@ -1,11 +1,11 @@
 /** Browser command service, with one keyboard adapter per plugin lifetime. */
-import { Service } from '@deepseek-ai/cordis'
-import type { Context } from '@deepseek-ai/cordis'
-import type {} from '@deepseek-ai/dsh-client-locale/client'
+import { Service } from '@agentrans/cordis'
+import type { Context } from '@agentrans/cordis'
+import type {} from '@agentrans/client-locale/client'
 import { ShortcutRegistry } from './registry.ts'
 import { detectEnvironment, installKeyboard } from './dom.ts'
-import { bindingIssue, initialShortcutConfig, normalizeBinding, overlappingBindings, presentBinding } from '@deepseek-ai/dsh-shortcut-protocol'
-import type { DesktopKeyboardApi, DesktopShortcutsApi, ShortcutSaveResult } from '@deepseek-ai/dsh-shortcut-protocol'
+import { bindingIssue, initialShortcutConfig, normalizeBinding, overlappingBindings, presentBinding } from '@agentrans/shortcut-protocol'
+import type { DesktopKeyboardApi, DesktopShortcutsApi, ShortcutSaveResult } from '@agentrans/shortcut-protocol'
 import { desktopShortcutStorage, webShortcutStorage } from './storage.ts'
 import type { Shortcuts } from './types.ts'
 import type { ShortcutFixedInput } from './types.ts'
@@ -14,9 +14,9 @@ import { Config } from '../config.ts'
 
 export type { ShortcutCatalogEntry, ShortcutCommand, ShortcutContext, ShortcutGesture, Shortcuts } from './types.ts'
 export type { ShortcutFixedInput, ShortcutFixedCommand, ShortcutFixedCatalogEntry } from './types.ts'
-export type { ShortcutBinding, ShortcutCommandId, ShortcutPlatform, ShortcutRuntime } from '@deepseek-ai/dsh-shortcut-protocol'
+export type { ShortcutBinding, ShortcutCommandId, ShortcutPlatform, ShortcutRuntime } from '@agentrans/shortcut-protocol'
 
-declare module '@deepseek-ai/cordis' {
+declare module '@agentrans/cordis' {
   interface Context {
     /** Window-local application commands and effective keycap catalog. */
     shortcuts: Shortcuts

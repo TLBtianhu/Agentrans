@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { contextMenuHook } from '@deepseek-ai/dsh-client-test-runtime'
+import { contextMenuHook } from '@agentrans/client-test-runtime'
 // InputBar behavior over the editor + submit-machine wiring: Enter-send
 // semantics (IME guard, Shift newline, busy Enter policy, Ctrl/Meta steering,
 // repeat suppression), running semantics (input stays free; continuable
@@ -9,10 +9,10 @@ import { contextMenuHook } from '@deepseek-ai/dsh-client-test-runtime'
 // root listener routes them through the keymap commands); draft writes drive
 // the shell (jsdom's beforeinput lacks the ranges Lexical needs).
 
-import * as uiPrimitives from '@deepseek-ai/dsh-client-ui-primitives'
+import * as uiPrimitives from '@agentrans/client-ui-primitives'
 import './control-row-dom.ts'
-import type { InboxState } from '@deepseek-ai/dsh-agent/types'
-import type { GlobalStandardProps } from '@deepseek-ai/dsh-client-ui-slots'
+import type { InboxState } from '@agentrans/agent/types'
+import type { GlobalStandardProps } from '@agentrans/client-ui-slots'
 import { afterEach, describe, expect, it, onTestFinished, vi } from 'vitest'
 import { act, cleanup, fireEvent, render } from '@testing-library/react'
 import { createPortal } from 'react-dom'
@@ -20,13 +20,13 @@ import { $getRoot, $isTextNode } from 'lexical'
 import {
   allowAllAccess, bindSnapshotSelector, conversationSnapshot as conversationFixture, makeTranslate, RemoteError,
   sessionSnapshot as sessionFixture,
-} from '@deepseek-ai/dsh-client-test-runtime'
-import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
-import type { SessionListState, SessionSnapshot } from '@deepseek-ai/dsh-api-session-controller/client'
-import type { ContextPressureProjection } from '@deepseek-ai/dsh-token-meter/client'
-import { zh as commonZh } from '@deepseek-ai/dsh-client-locale/src/locales/zh.ts'
-import type { Context } from '@deepseek-ai/cordis'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
+} from '@agentrans/client-test-runtime'
+import { createSnapshotStore } from '@agentrans/client-store'
+import type { SessionListState, SessionSnapshot } from '@agentrans/api-session-controller/client'
+import type { ContextPressureProjection } from '@agentrans/token-meter/client'
+import { zh as commonZh } from '@agentrans/client-locale/src/locales/zh.ts'
+import type { Context } from '@agentrans/cordis'
+import type { SessionId } from '@agentrans/session/types'
 import type { SubmitOutcome } from '../src/client/contract/input.ts'
 import { SessionInputShell } from '../src/client/input/facade.ts'
 import { $replaceDetectSpanWithText, $selectDetectSpan } from '../src/client/input/editor/span-map.ts'
@@ -1606,7 +1606,7 @@ describe('running and lock semantics', () => {
       })
     }
     vi.resetModules()
-    const detection = await import('@deepseek-ai/dsh-client-ui-primitives/src/focus.ts')
+    const detection = await import('@agentrans/client-ui-primitives/src/focus.ts')
     const device = vi.spyOn(uiPrimitives, 'isMobileDevice').mockImplementation(detection.isMobileDevice)
     onTestFinished(() => { device.mockRestore() })
     const outside = document.createElement('input')

@@ -1,13 +1,13 @@
 import { AcpSession } from '../src/session.ts'
 import { mountWorkingDirectoryFixture } from '../../../subagent/subagent/tests/working-directory-fixture.ts'
-import { createUserMessage, type StreamChunk } from '@deepseek-ai/dsh-llm'
-import type { ContextFormed } from '@deepseek-ai/dsh-llm'
+import { createUserMessage, type StreamChunk } from '@agentrans/llm'
+import type { ContextFormed } from '@agentrans/llm'
 import { afterEach, describe, expect, it, onTestFinished, vi } from 'vitest'
 import { PROTOCOL_VERSION } from '@agentclientprotocol/sdk'
-import { SessionId } from '@deepseek-ai/dsh-session'
+import { SessionId } from '@agentrans/session'
 import { setImmediate } from 'node:timers/promises'
-import SubagentRuntime, { NO_START_CAPABILITIES } from '@deepseek-ai/dsh-subagent'
-import { defineContentToolFixture } from '@deepseek-ai/dsh-tool-testkit'
+import SubagentRuntime, { NO_START_CAPABILITIES } from '@agentrans/subagent'
+import { defineContentToolFixture } from '@agentrans/tool-testkit'
 import { toolCallResponse } from '../../../core/agent-loop/tests/mock-adapter.ts'
 import {
   errorResponse,
@@ -17,7 +17,7 @@ import {
   type BridgeHarness,
 } from './harness.ts'
 
-declare module '@deepseek-ai/dsh-llm' {
+declare module '@agentrans/llm' {
   interface MessageSourceMap {
     'test': { kind: 'test' } & ContextFormed
   }

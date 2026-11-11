@@ -1,7 +1,7 @@
 /** The package's single public entry carries the whole shared contract. */
 
 import { expect, it } from 'vitest'
-import * as root from '@deepseek-ai/dsh-experimental-liveshare-protocol'
+import * as root from '@agentrans/experimental-liveshare-protocol'
 import { MockIdentityProvider } from '../src/identity/mock.ts'
 
 it('publishes the wire, identity, carrier, and viewer-state contracts from the package root', () => {

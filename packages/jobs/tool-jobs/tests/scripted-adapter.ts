@@ -3,7 +3,7 @@
  * consumes the next scripted stream, and every request is retained so a spec
  * can assert what the model saw.
  */
-import { LlmAdapter, type GenerateOptions, type StreamChunk } from '@deepseek-ai/dsh-llm'
+import { LlmAdapter, type GenerateOptions, type StreamChunk } from '@agentrans/llm'
 
 /** One scripted model call: fixed chunks, or a function of the request. */
 export type ScriptedCall = readonly StreamChunk[] | ((options: GenerateOptions) => readonly StreamChunk[])

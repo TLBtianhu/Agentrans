@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import { DetailFailure } from '@deepseek-ai/dsh-plugin-detail'
+import { DetailFailure } from '@agentrans/plugin-detail'
 import { RepositoryCache, type RepositoryCacheOptions } from '../src/repository-cache.ts'
 
 /** Await a rejection that matches `fields` and whose message contains `message`. */

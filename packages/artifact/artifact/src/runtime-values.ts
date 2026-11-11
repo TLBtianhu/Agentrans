@@ -1,5 +1,5 @@
 /** Bounded lossless plain-data JSON shared by Host admission, browser parsers, and isolated program bridges. */
-import type { JsonValue } from '@deepseek-ai/dsh-util-values'
+import type { JsonValue } from '@agentrans/util-values'
 
 /** Maximum nested protocol values, including the root. */
 export const ARTIFACT_JSON_MAX_DEPTH = 32

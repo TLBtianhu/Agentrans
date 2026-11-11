@@ -5,29 +5,29 @@
  * commit + image-block rendering, attachment admission failures, and the
  * regression that `read` keeps its text-only contract.
  */
-import { ToolExecutionPipeline } from '@deepseek-ai/dsh-tools/pipeline'
-import { executeToolFixture, executeModelToolFixture } from '@deepseek-ai/dsh-tool-testkit'
+import { ToolExecutionPipeline } from '@agentrans/tools/pipeline'
+import { executeToolFixture, executeModelToolFixture } from '@agentrans/tool-testkit'
 
-import * as NativeToolExecutor from '@deepseek-ai/dsh-tool-executor-native'
-import * as PtcToolExecutor from '@deepseek-ai/dsh-tool-executor-ptc'
-import { provideWorkingDirectoryFixture } from '@deepseek-ai/dsh-agent-loop-testkit'
+import * as NativeToolExecutor from '@agentrans/tool-executor-native'
+import * as PtcToolExecutor from '@agentrans/tool-executor-ptc'
+import { provideWorkingDirectoryFixture } from '@agentrans/agent-loop-testkit'
 import { afterEach, beforeEach, describe, expect, it, onTestFinished } from 'vitest'
 import { mkdir, mkdtemp, realpath, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { Context } from '@deepseek-ai/cordis'
-import { PtcRuntime } from '@deepseek-ai/dsh-ptc-runtime'
-import type { PtcRunRequest, PtcRunResult } from '@deepseek-ai/dsh-ptc-runtime'
-import { ToolCallId, LlmAdapter, LlmRuntime } from '@deepseek-ai/dsh-llm'
-import type { GenerateOptions, LlmModelInfo, LlmResolvedModelInfo, Message, StreamChunk } from '@deepseek-ai/dsh-llm'
-import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
-import ToolRuntime, { RUN_CODE_NAME } from '@deepseek-ai/dsh-tools'
-import LocalFileSystem from '@deepseek-ai/dsh-fs-local'
-import * as FsPolicy from '@deepseek-ai/dsh-fs-observation-policy'
-import LocalAttachmentStore from '@deepseek-ai/dsh-attachment-local'
-import { AttachmentError, AttachmentId, AttachmentStore } from '@deepseek-ai/dsh-attachment'
-import type { ImageAttachmentLimits, ImageAttachmentRef, SaveImageAttachment, StoredImageAttachment } from '@deepseek-ai/dsh-attachment'
-import * as ToolFs from '@deepseek-ai/dsh-tool-fs'
+import { Context } from '@agentrans/cordis'
+import { PtcRuntime } from '@agentrans/ptc-runtime'
+import type { PtcRunRequest, PtcRunResult } from '@agentrans/ptc-runtime'
+import { ToolCallId, LlmAdapter, LlmRuntime } from '@agentrans/llm'
+import type { GenerateOptions, LlmModelInfo, LlmResolvedModelInfo, Message, StreamChunk } from '@agentrans/llm'
+import SystemPrompt from '@agentrans/system-prompt'
+import ToolRuntime, { RUN_CODE_NAME } from '@agentrans/tools'
+import LocalFileSystem from '@agentrans/fs-local'
+import * as FsPolicy from '@agentrans/fs-observation-policy'
+import LocalAttachmentStore from '@agentrans/attachment-local'
+import { AttachmentError, AttachmentId, AttachmentStore } from '@agentrans/attachment'
+import type { ImageAttachmentLimits, ImageAttachmentRef, SaveImageAttachment, StoredImageAttachment } from '@agentrans/attachment'
+import * as ToolFs from '@agentrans/tool-fs'
 import {
   applyReadImageTool,
   formatImageReadOutput,
@@ -75,7 +75,7 @@ class CatalogAdapter extends LlmAdapter {
 
 /** In-process PTC mode seam fake that invokes the real registry bindings. */
 class FakeRuntime extends PtcRuntime {
-  resolve(request: import('@deepseek-ai/dsh-ptc-runtime').PtcRunRequest): import('@deepseek-ai/dsh-ptc-runtime').PtcRunSpec { return { ...request, cwd: request.cwd ?? process.cwd(), timeoutMs: request.timeoutMs ?? 120_000 } }
+  resolve(request: import('@agentrans/ptc-runtime').PtcRunRequest): import('@agentrans/ptc-runtime').PtcRunSpec { return { ...request, cwd: request.cwd ?? process.cwd(), timeoutMs: request.timeoutMs ?? 120_000 } }
 
   readonly language = 'typescript'
   readonly isolation = 'fake'

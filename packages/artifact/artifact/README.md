@@ -3,7 +3,7 @@ description: "Session-backed HTML and SceneSpec artifacts, model-facing create/u
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-artifact
+# @agentrans/artifact
 
 English | [中文](README.zh.md)
 
@@ -25,7 +25,7 @@ This package owns durable HTML and SceneSpec Artifacts: complete snapshots with 
 <a id="use-this-package"></a>
 ## Use this package
 
-Mount the service as `@deepseek-ai/dsh-artifact`, the HTML tool as `@deepseek-ai/dsh-artifact/tool`, and the SceneSpec tool as `@deepseek-ai/dsh-artifact/scene-tool`. The service requires Session Projection and awaits registration before synchronous reads. It owns validation, current-revision lookup, and Session commits. Each tool prepares a snapshot but commits it only after its authoritative successful tool result. SceneSpec validation uses the versioned SceneCatalog and a safe expression parser, never `eval`.
+Mount the service as `@agentrans/artifact`, the HTML tool as `@agentrans/artifact/tool`, and the SceneSpec tool as `@agentrans/artifact/scene-tool`. The service requires Session Projection and awaits registration before synchronous reads. It owns validation, current-revision lookup, and Session commits. Each tool prepares a snapshot but commits it only after its authoritative successful tool result. SceneSpec validation uses the versioned SceneCatalog and a safe expression parser, never `eval`.
 
 | Config | Default | Meaning |
 |---|---|---|
@@ -52,7 +52,7 @@ The DOM-free `capabilities` entry exposes `getArtifactSourceCapabilities(snapsho
 
 The `runtime-values` entry supplies shared JSON traversal and diagnostic limits. Its bounded lossless plain-data subset rejects negative zero, sparse arrays, accessors, symbols, extra array properties and non-plain objects instead of changing or discarding reported data. Browser parsing, the isolated program bridge and Host question admission use this validator; it neither executes getters nor verifies the values reported by a program.
 
-The DOM-free `@deepseek-ai/dsh-artifact/particle-runtime` entry supplies the same fixed-step particle calculation to previews and standalone exports. Its versioned checkpoint records a step count and requires the same SceneSpec and revision for restoration. Observation output converts `-0` to `0` for JSON; internal integration state is unchanged. It does not persist state or grant execution permissions.
+The DOM-free `@agentrans/artifact/particle-runtime` entry supplies the same fixed-step particle calculation to previews and standalone exports. Its versioned checkpoint records a step count and requires the same SceneSpec and revision for restoration. Observation output converts `-0` to `0` for JSON; internal integration state is unchanged. It does not persist state or grant execution permissions.
 
 The browser-safe `scene-renderers` and `scene-export` entries own the shared canvas calculations and standalone HTML generator. Every renderer takes a resolved `ScenePalette` and draws only from its roles — ink, muted ink, accent, success, surface, grid, four series colors, and a highlight — so it never reads the document and one sheet retints all native scenes. `resolveScenePalette(read)` maps those roles onto `--dsw-alias-*` custom properties and throws `ScenePaletteError` naming the missing role instead of drawing transparent ink. `SCENE_STYLE_PALETTES` declares the palette owner for each style: `editorial` draws from the host palette, while `transit-map`, `blueprint`, `math-proof-lecture` and `particles` are `self-contained` styles that keep their own deliberate palette. `buildSceneAnimationHtml(spec, title, checkpoint?, origin?)` embeds optional fixed source identity and replay conditions as escaped JSON. An export has no host theme, so it pins both of its own palettes and hands the matching one to the same renderers. Export generation uses source defaults for non-particle scenes; it does not capture browser-local sliders, selection, or iframe state. Durable file generation and retry receipts belong to the separate [Artifact export service](../artifact-export/README.md).
 

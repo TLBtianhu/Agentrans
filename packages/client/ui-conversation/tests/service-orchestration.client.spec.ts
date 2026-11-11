@@ -3,17 +3,17 @@
 // TestSessions mints tagged scopes through the production createScope, so the
 // service's scopeOf/binding path runs against production resolution (no local
 // tag probe).
-import type { UserMessage } from '@deepseek-ai/dsh-llm/types'
-import type { MessageId } from '@deepseek-ai/dsh-llm/brand'
-import { Context } from '@deepseek-ai/cordis'
+import type { UserMessage } from '@agentrans/llm/types'
+import type { MessageId } from '@agentrans/llm/brand'
+import { Context } from '@agentrans/cordis'
 import { describe, expect, it, vi } from 'vitest'
-import { makeTranslate, RemoteError, SlotTestRuntime } from '@deepseek-ai/dsh-client-test-runtime'
-import { createClientTest, webApp } from '@deepseek-ai/dsh-client-test-runtime/src/assembly/index.ts'
-import { Session } from '@deepseek-ai/dsh-api-session-controller/src/client/sessions/session.ts'
+import { makeTranslate, RemoteError, SlotTestRuntime } from '@agentrans/client-test-runtime'
+import { createClientTest, webApp } from '@agentrans/client-test-runtime/src/assembly/index.ts'
+import { Session } from '@agentrans/api-session-controller/src/client/sessions/session.ts'
 import type {
   BeginSubmissionInput, PendingSubmissionRetirement, SessionFace,
-} from '@deepseek-ai/dsh-api-session-controller/client'
-import { SessionSeq, type SessionId } from '@deepseek-ai/dsh-session/types'
+} from '@agentrans/api-session-controller/client'
+import { SessionSeq, type SessionId } from '@agentrans/session/types'
 import { ComposerBlockRegistry } from '../src/client/input/blocks.ts'
 import { InputHub } from '../src/client/input/hub.ts'
 import { reportMessageSubmission } from '../src/client/input/submission-analytics.ts'
@@ -33,7 +33,7 @@ const UPLOAD_IMAGES = true
 /** `createDrafts` mode of a draft whose images travel inline, as a subagent continuation's do. */
 const INLINE_IMAGES = false
 
-const sessionIt = createClientTest({ roster: webApp.closure(['@deepseek-ai/dsh-api-gateway']) })
+const sessionIt = createClientTest({ roster: webApp.closure(['@agentrans/api-gateway']) })
 
 async function bench(maxConcurrentFileUploads = 2) {
   const runtime = await SlotTestRuntime.create()

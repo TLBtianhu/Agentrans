@@ -1,7 +1,7 @@
 /** General Settings row for work-details presentation. */
 
-import type { SnapshotStore } from '@deepseek-ai/dsh-client-store'
-import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
+import type { SnapshotStore } from '@agentrans/client-store'
+import type { InjectFace, PropsLocale, PropsRuntime } from '@agentrans/client-ui-slots'
 import { TRANSCRIPT_VIEW_MODES, type TranscriptViewMode } from '../../chat-settings.ts'
 import type { ChatKey } from '../locale.ts'
 import { COLLAPSE_TIMINGS, FOLDED_REPLIES, type CollapseTiming, type FoldedReplies } from '../presentation-policy.ts'

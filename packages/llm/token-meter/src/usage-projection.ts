@@ -3,11 +3,11 @@
  */
 
 import { z } from 'zod'
-import { lastAssistantStreamChunk, type TokenUsage } from '@deepseek-ai/dsh-llm'
-import type {} from '@deepseek-ai/dsh-llm-retry/types'
-import { SessionSeq } from '@deepseek-ai/dsh-session'
-import type { SessionEvent } from '@deepseek-ai/dsh-session'
-import type { ProjectionDefinition } from '@deepseek-ai/dsh-session-projection'
+import { lastAssistantStreamChunk, type TokenUsage } from '@agentrans/llm'
+import type {} from '@agentrans/llm-retry/types'
+import { SessionSeq } from '@agentrans/session'
+import type { SessionEvent } from '@agentrans/session'
+import type { ProjectionDefinition } from '@agentrans/session-projection'
 import type { ContextPressureProjection, TokenUsageProjection } from './projection.ts'
 import { foldSurfaceProjection } from './surface-projection.ts'
 

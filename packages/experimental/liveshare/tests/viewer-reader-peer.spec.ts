@@ -4,7 +4,7 @@
  * signal is awaited; the reader table forgets the Peer at once, so the next admitted request gets a new one.
  */
 import { describe, expect, it, onTestFinished, vi } from 'vitest'
-import type { PeerScope } from '@deepseek-ai/dsh-typert-protocol'
+import type { PeerScope } from '@agentrans/typert-protocol'
 import { createViewerReadService, type ViewerReadGateway } from '../src/host/viewer-read.ts'
 import { READER, readerConnection, type ReaderFetch } from './viewer-read-peers.ts'
 

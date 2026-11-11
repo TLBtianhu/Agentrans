@@ -5,8 +5,8 @@ import { mkdir, mkdtemp, readFile, realpath, rm, writeFile } from 'node:fs/promi
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { DeepSeekHarness } from '@deepseek-ai/dsh-sdk-client'
-import type {} from '@deepseek-ai/dsh-session-log-deepseek'
+import { DeepSeekHarness } from '@agentrans/sdk-client'
+import type {} from '@agentrans/session-log-deepseek'
 import { expect, it, onTestFinished } from 'vitest'
 
 const probe = fileURLToPath(new URL('./fixtures/sharing-probe.mjs', import.meta.url))
@@ -111,8 +111,8 @@ it.each([false, true])('sdk-minimal keeps sharing opt-in through an actual SDK m
     const inventory = object(request.body.dsh_plugin_packages)
     expect(inventory).toMatchObject({ version: 1 })
     expect(inventory.packages).toEqual(expect.arrayContaining([
-      expect.objectContaining({ name: '@deepseek-ai/dsh-deepseek-llm-api-extensions' }),
-      expect.objectContaining({ name: '@deepseek-ai/dsh-llm-deepseek-api-key' }),
+      expect.objectContaining({ name: '@agentrans/deepseek-llm-api-extensions' }),
+      expect.objectContaining({ name: '@agentrans/llm-deepseek-api-key' }),
     ]))
     expect(result.events.some(event => event.type === 'session-log-deepseek/delivery-accepted')).toBe(true)
   } else {

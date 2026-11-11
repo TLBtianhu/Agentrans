@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-artifact-followup",
+  "name": "@agentrans/artifact-followup",
   "description": "Host-validated experimental context attached to ordinary questions",
   "version": "0.1.0",
   "publishConfig": { "access": "public" },
@@ -19,29 +19,29 @@
   },
   "files": ["lib/types/**/*.js", "lib/types/**/*.d.ts"],
   "license": "MIT",
-  "dependencies": { "@deepseek-ai/schemastery": "workspace:~", "zod": "4.4.3" },
+  "dependencies": { "@agentrans/schemastery": "workspace:~", "zod": "4.4.3" },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-api-session-controller": "workspace:*",
-    "@deepseek-ai/dsh-artifact": "workspace:*",
-    "@deepseek-ai/dsh-artifact-runtime": "workspace:*",
-    "@deepseek-ai/dsh-brand": "workspace:*",
-    "@deepseek-ai/dsh-typert-protocol": "workspace:*",
-    "@deepseek-ai/dsh-util-values": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/api-session-controller": "workspace:*",
+    "@agentrans/artifact": "workspace:*",
+    "@agentrans/artifact-runtime": "workspace:*",
+    "@agentrans/brand": "workspace:*",
+    "@agentrans/typert-protocol": "workspace:*",
+    "@agentrans/util-values": "workspace:*"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-agent": "workspace:*",
-    "@deepseek-ai/dsh-api-session-controller": "workspace:*",
-    "@deepseek-ai/dsh-artifact": "workspace:*",
-    "@deepseek-ai/dsh-artifact-runtime": "workspace:*",
-    "@deepseek-ai/dsh-brand": "workspace:*",
-    "@deepseek-ai/dsh-llm": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-session-format": "workspace:*",
-    "@deepseek-ai/dsh-session-format-v3-to-v4": "workspace:*",
-    "@deepseek-ai/dsh-session-projection": "workspace:*",
-    "@deepseek-ai/dsh-typert-protocol": "workspace:*",
-    "@deepseek-ai/dsh-util-values": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/agent": "workspace:*",
+    "@agentrans/api-session-controller": "workspace:*",
+    "@agentrans/artifact": "workspace:*",
+    "@agentrans/artifact-runtime": "workspace:*",
+    "@agentrans/brand": "workspace:*",
+    "@agentrans/llm": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/session-format": "workspace:*",
+    "@agentrans/session-format-v3-to-v4": "workspace:*",
+    "@agentrans/session-projection": "workspace:*",
+    "@agentrans/typert-protocol": "workspace:*",
+    "@agentrans/util-values": "workspace:*"
   }
 }

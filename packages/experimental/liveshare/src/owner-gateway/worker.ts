@@ -21,7 +21,7 @@ import {
   type TunnelShareSpec,
   type TunnelRegistrationToken,
   type TunnelWorkerEvent,
-} from '@deepseek-ai/dsh-experimental-liveshare-protocol'
+} from '@agentrans/experimental-liveshare-protocol'
 import { PendingRpc, type PendingRequest } from './pending-rpc.ts'
 
 const HEARTBEAT_INTERVAL_MS = 25_000

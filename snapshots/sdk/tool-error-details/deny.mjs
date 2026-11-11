@@ -1,5 +1,5 @@
 /** A fixed error producer for SDK transport coverage; it does not enable Auto. */
-import { PtcExecutor } from '@deepseek-ai/dsh-tool-executor-ptc'
+import { PtcExecutor } from '@agentrans/tool-executor-ptc'
 
 export const name = 'structured-denial-fixture'
 export const inject = ['tools']

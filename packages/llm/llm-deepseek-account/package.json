@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-llm-deepseek-account",
+  "name": "@agentrans/llm-deepseek-account",
   "description": "DeepSeek account provider authentication and discovery",
   "version": "0.1.0",
   "publishConfig": {
@@ -29,32 +29,32 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@deepseek-ai/cosmokit": "workspace:~",
-    "@deepseek-ai/schemastery": "workspace:~"
+    "@agentrans/cosmokit": "workspace:~",
+    "@agentrans/schemastery": "workspace:~"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-llm": "workspace:*",
-    "@deepseek-ai/dsh-llm-deepseek": "workspace:*",
-    "@deepseek-ai/dsh-launch-environment": "workspace:*",
-    "@deepseek-ai/dsh-deepseek-account": "workspace:*",
-    "@deepseek-ai/cordis-plugin-loader": "workspace:~"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/llm": "workspace:*",
+    "@agentrans/llm-deepseek": "workspace:*",
+    "@agentrans/launch-environment": "workspace:*",
+    "@agentrans/deepseek-account": "workspace:*",
+    "@agentrans/cordis-plugin-loader": "workspace:~"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-llm": "workspace:*",
-    "@deepseek-ai/dsh-llm-deepseek": "workspace:*",
-    "@deepseek-ai/dsh-launch-environment": "workspace:*",
-    "@deepseek-ai/dsh-deepseek-account": "workspace:*",
-    "@deepseek-ai/cordis-plugin-loader": "workspace:~",
-    "@deepseek-ai/dsh-llm-deepseek-api-key": "workspace:*",
-    "@deepseek-ai/dsh-timeout": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/llm": "workspace:*",
+    "@agentrans/llm-deepseek": "workspace:*",
+    "@agentrans/launch-environment": "workspace:*",
+    "@agentrans/deepseek-account": "workspace:*",
+    "@agentrans/cordis-plugin-loader": "workspace:~",
+    "@agentrans/llm-deepseek-api-key": "workspace:*",
+    "@agentrans/timeout": "workspace:*"
   },
   "peerDependenciesMeta": {
-    "@deepseek-ai/dsh-deepseek-account": {
+    "@agentrans/deepseek-account": {
       "optional": true
     },
-    "@deepseek-ai/cordis-plugin-loader": {
+    "@agentrans/cordis-plugin-loader": {
       "optional": true
     }
   }

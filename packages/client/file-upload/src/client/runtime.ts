@@ -1,11 +1,11 @@
 /** Background browser upload implementation for Blob and byte-stream bodies. */
 
-import { Service, type Context } from '@deepseek-ai/cordis'
-import type { ImageMediaType } from '@deepseek-ai/dsh-attachment/types'
-import { bytesToBase64 } from '@deepseek-ai/dsh-util-crypto'
-import { RemoteError } from '@deepseek-ai/dsh-typert-protocol'
-import type { RemoteResult } from '@deepseek-ai/dsh-typert-protocol'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
+import { Service, type Context } from '@agentrans/cordis'
+import type { ImageMediaType } from '@agentrans/attachment/types'
+import { bytesToBase64 } from '@agentrans/util-crypto'
+import { RemoteError } from '@agentrans/typert-protocol'
+import type { RemoteResult } from '@agentrans/typert-protocol'
+import type { SessionId } from '@agentrans/session/types'
 import { FILE_UPLOAD_ROUTE } from '../protocol.ts'
 import type {
   ClientFileUploadHooks, EncodedFileUploadRequest, FileUploadFetch, FileUploadValue, ImageUploadValue,

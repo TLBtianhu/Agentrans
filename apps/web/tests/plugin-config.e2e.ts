@@ -114,8 +114,8 @@ describe('web e2e: plugin configuration pages', () => {
     // ui-plugin-manager), so it holds fewer cards than the installed optional-bundle list.
     const bundles = await scaffold.ctx.pluginManager.listBundles()
     const hiddenBundles = new Set([
-      '@deepseek-ai/dsh-experimental-terminal-bundle',
-      '@deepseek-ai/dsh-experimental-liveshare',
+      '@agentrans/experimental-terminal-bundle',
+      '@agentrans/experimental-liveshare',
     ])
     expect(await panel.locator('[data-plugin-group="more"] [data-plugin-package]').count())
       .toBe(bundles.filter(bundle => !hiddenBundles.has(bundle.name)

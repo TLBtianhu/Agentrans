@@ -1,5 +1,5 @@
 /** Conversation text gestures and plugin-owned action surfaces. */
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
+import type { SessionId } from '@agentrans/session/types'
 
 /** Browser gesture offered to text interaction consumers. */
 export type TextInteractionTrigger = 'selection' | 'contextmenu'

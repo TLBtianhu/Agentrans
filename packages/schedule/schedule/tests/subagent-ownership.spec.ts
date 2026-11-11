@@ -1,6 +1,6 @@
 /** Host Schedule refuses to arm delivery for a Session a delegated child owns. */
-import type { Context } from '@deepseek-ai/cordis'
-import { SessionId } from '@deepseek-ai/dsh-session'
+import type { Context } from '@agentrans/cordis'
+import { SessionId } from '@agentrans/session'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { createAfterScheduleRecord, ScheduleId } from '../src/domain.ts'
 import type { ScheduleTask } from '../src/storage.ts'

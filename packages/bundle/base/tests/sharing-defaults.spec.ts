@@ -6,27 +6,27 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { afterEach, expect, it, vi } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
-import Loader, { type ModuleLoaderV2 } from '@deepseek-ai/cordis-plugin-loader'
-import Include from '@deepseek-ai/cordis-plugin-include'
-import { loadOverlayPatches } from '@deepseek-ai/dsh-app-boot'
-import LlmRuntime, { createAssistantMessage, createUserMessage } from '@deepseek-ai/dsh-llm'
-import SessionStore, { SessionId } from '@deepseek-ai/dsh-session'
-import AgentRegistry from '@deepseek-ai/dsh-agent'
-import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
-import DeepSeekExtensions from '@deepseek-ai/dsh-deepseek-llm-api-extensions'
-import * as DeepSeek from '@deepseek-ai/dsh-llm-deepseek-api-key'
-import * as PiAi from '@deepseek-ai/dsh-llm-pi-ai'
-import * as Persistence from '@deepseek-ai/dsh-session-persistence-jsonl'
-import * as Commands from '@deepseek-ai/dsh-commands'
-import * as Feedback from '@deepseek-ai/dsh-command-feedback'
-import MessageFeedback from '@deepseek-ai/dsh-message-feedback'
-import * as SessionLog from '@deepseek-ai/dsh-session-log-deepseek'
-import * as Inventory from '@deepseek-ai/dsh-plugin-package-inventory-deepseek'
-import SessionTelemetry from '@deepseek-ai/dsh-session-telemetry-otel'
-import OTel from '@deepseek-ai/dsh-otel'
-import ProductTelemetry from '@deepseek-ai/dsh-host-product-telemetry-otel'
-import ProductAnalytics from '@deepseek-ai/dsh-client-product-analytics'
+import { Context } from '@agentrans/cordis'
+import Loader, { type ModuleLoaderV2 } from '@agentrans/cordis-plugin-loader'
+import Include from '@agentrans/cordis-plugin-include'
+import { loadOverlayPatches } from '@agentrans/app-boot'
+import LlmRuntime, { createAssistantMessage, createUserMessage } from '@agentrans/llm'
+import SessionStore, { SessionId } from '@agentrans/session'
+import AgentRegistry from '@agentrans/agent'
+import SessionProjectionRegistry from '@agentrans/session-projection'
+import DeepSeekExtensions from '@agentrans/deepseek-llm-api-extensions'
+import * as DeepSeek from '@agentrans/llm-deepseek-api-key'
+import * as PiAi from '@agentrans/llm-pi-ai'
+import * as Persistence from '@agentrans/session-persistence-jsonl'
+import * as Commands from '@agentrans/commands'
+import * as Feedback from '@agentrans/command-feedback'
+import MessageFeedback from '@agentrans/message-feedback'
+import * as SessionLog from '@agentrans/session-log-deepseek'
+import * as Inventory from '@agentrans/plugin-package-inventory-deepseek'
+import SessionTelemetry from '@agentrans/session-telemetry-otel'
+import OTel from '@agentrans/otel'
+import ProductTelemetry from '@agentrans/host-product-telemetry-otel'
+import ProductAnalytics from '@agentrans/client-product-analytics'
 
 let root: string | undefined
 let context: Context | undefined
@@ -113,15 +113,15 @@ it.each(['desktop', 'web'])('keeps %s model requests and local feedback independ
     return fetch(input, init)
   })
   const modules = new Map<string, unknown>([
-    ['@deepseek-ai/dsh-llm', LlmRuntime], ['@deepseek-ai/dsh-session', SessionStore],
-    ['@deepseek-ai/dsh-agent', AgentRegistry], ['@deepseek-ai/dsh-session-projection', SessionProjectionRegistry],
-    ['@deepseek-ai/dsh-deepseek-llm-api-extensions', DeepSeekExtensions],
-    ['@deepseek-ai/dsh-llm-deepseek-api-key', DeepSeek], ['@deepseek-ai/dsh-llm-pi-ai', PiAi],
-    ['@deepseek-ai/dsh-session-persistence-jsonl', Persistence], ['@deepseek-ai/dsh-commands', Commands],
-    ['@deepseek-ai/dsh-command-feedback', Feedback], ['@deepseek-ai/dsh-message-feedback', MessageFeedback],
-    ['@deepseek-ai/dsh-session-log-deepseek', SessionLog], ['@deepseek-ai/dsh-plugin-package-inventory-deepseek', Inventory],
-    ['@deepseek-ai/dsh-session-telemetry-otel', SessionTelemetry], ['@deepseek-ai/dsh-otel', OTel],
-    ['@deepseek-ai/dsh-host-product-telemetry-otel', ProductTelemetry], ['@deepseek-ai/dsh-client-product-analytics', ProductAnalytics],
+    ['@agentrans/llm', LlmRuntime], ['@agentrans/session', SessionStore],
+    ['@agentrans/agent', AgentRegistry], ['@agentrans/session-projection', SessionProjectionRegistry],
+    ['@agentrans/deepseek-llm-api-extensions', DeepSeekExtensions],
+    ['@agentrans/llm-deepseek-api-key', DeepSeek], ['@agentrans/llm-pi-ai', PiAi],
+    ['@agentrans/session-persistence-jsonl', Persistence], ['@agentrans/commands', Commands],
+    ['@agentrans/command-feedback', Feedback], ['@agentrans/message-feedback', MessageFeedback],
+    ['@agentrans/session-log-deepseek', SessionLog], ['@agentrans/plugin-package-inventory-deepseek', Inventory],
+    ['@agentrans/session-telemetry-otel', SessionTelemetry], ['@agentrans/otel', OTel],
+    ['@agentrans/host-product-telemetry-otel', ProductTelemetry], ['@agentrans/client-product-analytics', ProductAnalytics],
   ])
   const rows = [new URL('../cordis.patch.yml', import.meta.url), new URL('../../web-app/cordis.patch.yml', import.meta.url)]
     .flatMap(file => loadOverlayPatches('sharing-defaults', fileURLToPath(file)))

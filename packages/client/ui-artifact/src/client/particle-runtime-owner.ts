@@ -1,14 +1,14 @@
 /** Particle calculation and explicit question choices over canonical particle and program-report sources. */
-import { createSnapshotStore, type ObservableSnapshot } from '@deepseek-ai/dsh-client-store'
-import type { ArtifactId, ArtifactSnapshot, SavedParticleObservation, SavedParticleObservationRef } from '@deepseek-ai/dsh-artifact/types'
-import type { ParticleSystemSpec } from '@deepseek-ai/dsh-artifact/scene'
-import { deepFreeze, snapshotJsonValue } from '@deepseek-ai/dsh-util-values'
-import type { ArtifactRuntimeIdentity } from '@deepseek-ai/dsh-artifact-runtime/types'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
+import { createSnapshotStore, type ObservableSnapshot } from '@agentrans/client-store'
+import type { ArtifactId, ArtifactSnapshot, SavedParticleObservation, SavedParticleObservationRef } from '@agentrans/artifact/types'
+import type { ParticleSystemSpec } from '@agentrans/artifact/scene'
+import { deepFreeze, snapshotJsonValue } from '@agentrans/util-values'
+import type { ArtifactRuntimeIdentity } from '@agentrans/artifact-runtime/types'
+import type { SessionId } from '@agentrans/session/types'
 import type { ArtifactRuntimeSnapshot } from './runtime-owner.ts'
 import { runtimeQuestionAvailability, type RuntimeQuestionAvailability } from './runtime-question.ts'
-import type { ArtifactProgramQuestionCapture, ArtifactPromptContextSelection } from '@deepseek-ai/dsh-artifact-followup/types'
-import { createParticleCheckpoint } from '@deepseek-ai/dsh-artifact/particle-runtime'
+import type { ArtifactProgramQuestionCapture, ArtifactPromptContextSelection } from '@agentrans/artifact-followup/types'
+import { createParticleCheckpoint } from '@agentrans/artifact/particle-runtime'
 import { createParticleRun, updateParticleRun, type ParticleRun, type ParticleRunCommand } from './particle-run.ts'
 
 /** Current source and its sole live calculation. */

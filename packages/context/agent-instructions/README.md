@@ -3,7 +3,7 @@ description: "Workspace-instruction context for users and maintainers enabling, 
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-agent-instructions
+# @agentrans/agent-instructions
 
 English | [中文](README.zh.md)
 
@@ -37,12 +37,12 @@ The first request includes one durable baseline message with the user-global cha
 
 The defaults suit a typical checkout: `.git` marks the project root, `AGENTS.md` and `CLAUDE.md` are the base candidates, and `AGENTS.local.md` and `CLAUDE.local.md` are additive local overlays. Only `maxBytes` is required — it caps the user-global chain and the project chain separately within each rendered message, so each deployment chooses its prompt budget explicitly; a message that holds both chains is at most twice `maxBytes`.
 
-The harness home holding the user-global `AGENTS.md` is process policy rather than row configuration: the plugin resolves `$DSH_HOME`, or `~/.dsh`, through `@deepseek-ai/dsh-home-paths`, so instruction loading always reads the process home. The shared agents root resolves the same way, from `$DSH_AGENTS_HOME` or `~/.agents`. Stray `dshHome` and `agentsHome` row keys are ignored.
+The harness home holding the user-global `AGENTS.md` is process policy rather than row configuration: the plugin resolves `$DSH_HOME`, or `~/.dsh`, through `@agentrans/home-paths`, so instruction loading always reads the process home. The shared agents root resolves the same way, from `$DSH_AGENTS_HOME` or `~/.agents`. Stray `dshHome` and `agentsHome` row keys are ignored.
 
 Root discovery climbs only when a marker probe confirms that the marker is absent. A permission or I/O failure stops discovery and surfaces the host or filesystem-provider error instead of selecting an ancestor project. The [historical root-marker metadata decision](../../../.agents/notes/archived/bug-fix/2026-09-03-root-marker-metadata-failures.md) records why discovery fails instead of substituting another root.
 
 ```yaml
-- name: '@deepseek-ai/dsh-agent-instructions'
+- name: '@agentrans/agent-instructions'
   config:
     maxBytes: 65536
 ```
@@ -67,7 +67,7 @@ export interface Config {
 | `instructionFileCandidates` | `['AGENTS.md', 'CLAUDE.md']` | Base file names loaded in each project directory |
 | `localInstructionFileCandidates` | `['AGENTS.local.md', 'CLAUDE.local.md']` | Local overlay file names loaded after the base files |
 
-The generated [configuration catalog](../../../docs/config-catalog.md#deepseek-aidsh-agent-instructions) is the exhaustive source for every accepted field and its JSDoc.
+The generated [configuration catalog](../../../docs/config-catalog.md#agentransagent-instructions) is the exhaustive source for every accepted field and its JSDoc.
 
 ### Observing the budget
 
@@ -120,7 +120,7 @@ Read these pages when the package-level contract is not enough. They move from t
 - [Documentation standard](../../../docs/AGENTS.md) — what `AGENTS.md` instruction files contain and how they are maintained.
 - [Workspace-context decision record](../../../.agents/notes/archived/feature/2026-06-24-workspace-context.md) — per-agent/session isolation and lifecycle rationale.
 - [Context group map](../README.md) — sibling request-context packages.
-- [Generated configuration catalog](../../../docs/config-catalog.md#deepseek-aidsh-agent-instructions) — every accepted config field and its source declaration.
+- [Generated configuration catalog](../../../docs/config-catalog.md#agentransagent-instructions) — every accepted config field and its source declaration.
 
 -----
 

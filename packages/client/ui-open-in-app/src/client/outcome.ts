@@ -1,5 +1,5 @@
 /** Settled native gestures shared by directory, path, and delivery controls. */
-import type { PresentedOpenFailure, PresentedOpenOutcome } from '@deepseek-ai/dsh-client-ui-deliverables/client'
+import type { PresentedOpenFailure, PresentedOpenOutcome } from '@agentrans/client-ui-deliverables/client'
 
 /** Failure kind of one settled gesture, keyed to the `path.*` copy it announces. */
 export type OpenInAppPathFailure = PresentedOpenFailure

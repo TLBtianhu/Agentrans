@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
+import { makeTranslate } from '@agentrans/client-test-runtime'
 import { MapView } from '../src/client/MapView.tsx'
 import { en } from '../src/client/locales.ts'
-import type { MapSpec } from '@deepseek-ai/dsh-artifact/scene'
+import type { MapSpec } from '@agentrans/artifact/scene'
 import type { ArtifactId, RecordArtifactAction } from '../src/client/protocol.ts'
 
 const t = makeTranslate(en)

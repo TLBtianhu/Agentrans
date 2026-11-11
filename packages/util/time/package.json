@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-util-time",
+  "name": "@agentrans/util-time",
   "description": "Strict instant and IANA zone parsing, millisecond spans, and bounded Cron/RRULE recurrence arithmetic",
   "version": "0.1.0",
   "publishConfig": {
@@ -32,9 +32,9 @@
     "rrule": "2.8.1"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/cordis": "workspace:~"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/cordis": "workspace:~"
   }
 }

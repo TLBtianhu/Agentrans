@@ -115,7 +115,7 @@ The shared Desktop/SDK runtime builder omits directories named `tests` beneath N
 
 | Decision | Why | Direct consequence |
 |---|---|---|
-| Release identity | The shell API, Web client, backend, and plugin graph are qualified as one combination; independent versions would create untested combinations and ambiguous update availability. | Electron and `@deepseek-ai/dsh` always have the same exact version. A dsh upgrade is a Desktop release, even when the shell code is unchanged. |
+| Release identity | The shell API, Web client, backend, and plugin graph are qualified as one combination; independent versions would create untested combinations and ambiguous update availability. | Electron and `@agentrans/dsh` always have the same exact version. A dsh upgrade is a Desktop release, even when the shell code is unchanged. |
 | Runtime | The application must run without a system Node.js or pnpm installation. | dsh runs under Electron with `ELECTRON_RUN_AS_NODE=1` and `--expose-internals` and every package operation uses the bundled pnpm. Package-manager configuration and the Host environment follow the user's settings. Package scripts use a `node` shell launcher that forwards to Electron. |
 | Package sources | Core installation at startup adds work even when offline. | `app.asar/dsh` carries a complete production dependency tree; the profile installs only external plugins. |
 | State ownership | Sharing executable dependency graphs would let CLI and Desktop change each other's dsh, Cordis, plugin, or native-module versions, while two desktop processes could race on the same profile. | Electron acquires its process-lifetime single-instance lock before any profile access and exclusively owns `$DSH_HOME/profiles/desktop` plus its package-manager state. Desktop and its bundled CLI use one explicit product instance, isolated from npm dsh and other development, verification, or user instances. |
@@ -207,7 +207,7 @@ The Web counterparts are `pnpm run dev:web` and `pnpm run start:web`, documented
 
 The [native/renderer keyboard tests](tests/keyboard.spec.ts) compile as part of the repository Client typecheck. Their Desktop imports are limited to Cordis-free input, persistence, IPC, browser-guest, and overlay modules.
 
-Dependency installation does not run the locked Electron package's separate binary installer. Before running the [Windows console-signal tests](tests/windows-cli-signals.spec.ts) directly, prepare the locked Electron binary with `pnpm --filter @deepseek-ai/dsh-desktop exec install-electron` from the repository root. For downloads through a proxy, enable `ELECTRON_GET_USE_PROXY=1` for that installer process. Windows coverage aggregates require successful provisioning before the instrumented unit inventory starts.
+Dependency installation does not run the locked Electron package's separate binary installer. Before running the [Windows console-signal tests](tests/windows-cli-signals.spec.ts) directly, prepare the locked Electron binary with `pnpm --filter @agentrans/desktop exec install-electron` from the repository root. For downloads through a proxy, enable `ELECTRON_GET_USE_PROXY=1` for that installer process. Windows coverage aggregates require successful provisioning before the instrumented unit inventory starts.
 
 <a id="startup-onboarding"></a>
 

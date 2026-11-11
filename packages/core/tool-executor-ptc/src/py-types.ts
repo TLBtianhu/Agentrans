@@ -2,7 +2,7 @@
  * PTC mode codegen — Python flavor. The pure projection from registered tool schemas to the
  * Python SDK text the model programs against under `runtime.language === 'python'`. Sibling of
  * {@link ./ts-types.ts | ts-types.ts}; the two files are two projections of the same registry
- * store, keyed by the loaded {@link @deepseek-ai/dsh-ptc-runtime#PtcRuntime.language | PTC
+ * store, keyed by the loaded {@link @agentrans/ptc-runtime#PtcRuntime.language | PTC
  * runtime's language}.
  *
  * With the PTC executor selected, native tool schemas are omitted from the request. This generated
@@ -13,8 +13,8 @@
  * @module
  */
 
-import { assertSupportedJsonSchema } from '@deepseek-ai/dsh-tools'
-import type { JsonSchemaNode, JsonSchemaScalar } from '@deepseek-ai/dsh-tools'
+import { assertSupportedJsonSchema } from '@agentrans/tools'
+import type { JsonSchemaNode, JsonSchemaScalar } from '@agentrans/tools'
 import type { ToolSdkSchema } from './ts-types.ts'
 
 /**

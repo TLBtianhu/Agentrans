@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-experimental-forge-session",
+  "name": "@agentrans/experimental-forge-session",
   "description": "Binds change requests to the Session that created, pushed, or tracked them",
   "version": "0.1.0",
   "publishConfig": {
@@ -32,56 +32,56 @@
     "directory": "packages/experimental/forge-session"
   },
   "dependencies": {
-    "@deepseek-ai/dsh-timeout": "workspace:*",
-    "@deepseek-ai/dsh-util-values": "workspace:*",
-    "@deepseek-ai/schemastery": "workspace:~",
+    "@agentrans/timeout": "workspace:*",
+    "@agentrans/util-values": "workspace:*",
+    "@agentrans/schemastery": "workspace:~",
     "shell-quote": "^1.12.0",
     "zod": "^4.4.3"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-experimental-forge": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-session-projection": "workspace:*",
-    "@deepseek-ai/dsh-shell": "workspace:*",
-    "@deepseek-ai/dsh-shell-env": "workspace:*",
-    "@deepseek-ai/dsh-tools": "workspace:*",
-    "@deepseek-ai/dsh-sandbox-policy": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/experimental-forge": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/session-projection": "workspace:*",
+    "@agentrans/shell": "workspace:*",
+    "@agentrans/shell-env": "workspace:*",
+    "@agentrans/tools": "workspace:*",
+    "@agentrans/sandbox-policy": "workspace:*"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/cordis-plugin-include": "workspace:~",
-    "@deepseek-ai/cordis-plugin-loader": "workspace:~",
-    "@deepseek-ai/dsh-agent": "workspace:*",
-    "@deepseek-ai/dsh-agent-loop": "workspace:*",
-    "@deepseek-ai/dsh-bash-local": "workspace:*",
-    "@deepseek-ai/dsh-experimental-forge": "workspace:*",
-    "@deepseek-ai/dsh-experimental-forge-github": "workspace:*",
-    "@deepseek-ai/dsh-fs-local": "workspace:*",
-    "@deepseek-ai/dsh-llm": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-session-projection": "workspace:*",
-    "@deepseek-ai/dsh-shell-env": "workspace:*",
-    "@deepseek-ai/dsh-subprocess-local": "workspace:*",
-    "@deepseek-ai/dsh-system-prompt": "workspace:*",
-    "@deepseek-ai/dsh-tool-bash": "workspace:*",
-    "@deepseek-ai/dsh-tool-executor-native": "workspace:*",
-    "@deepseek-ai/dsh-tools": "workspace:*",
-    "@deepseek-ai/dsh-working-directory": "workspace:*",
-    "@deepseek-ai/dsh-shell": "workspace:*",
-    "@deepseek-ai/dsh-sandbox-policy": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/cordis-plugin-include": "workspace:~",
+    "@agentrans/cordis-plugin-loader": "workspace:~",
+    "@agentrans/agent": "workspace:*",
+    "@agentrans/agent-loop": "workspace:*",
+    "@agentrans/bash-local": "workspace:*",
+    "@agentrans/experimental-forge": "workspace:*",
+    "@agentrans/experimental-forge-github": "workspace:*",
+    "@agentrans/fs-local": "workspace:*",
+    "@agentrans/llm": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/session-projection": "workspace:*",
+    "@agentrans/shell-env": "workspace:*",
+    "@agentrans/subprocess-local": "workspace:*",
+    "@agentrans/system-prompt": "workspace:*",
+    "@agentrans/tool-bash": "workspace:*",
+    "@agentrans/tool-executor-native": "workspace:*",
+    "@agentrans/tools": "workspace:*",
+    "@agentrans/working-directory": "workspace:*",
+    "@agentrans/shell": "workspace:*",
+    "@agentrans/sandbox-policy": "workspace:*"
   },
   "peerDependenciesMeta": {
-    "@deepseek-ai/dsh-shell": {
+    "@agentrans/shell": {
       "optional": true
     },
-    "@deepseek-ai/dsh-shell-env": {
+    "@agentrans/shell-env": {
       "optional": true
     },
-    "@deepseek-ai/dsh-tools": {
+    "@agentrans/tools": {
       "optional": true
     },
-    "@deepseek-ai/dsh-sandbox-policy": {
+    "@agentrans/sandbox-policy": {
       "optional": true
     }
   }

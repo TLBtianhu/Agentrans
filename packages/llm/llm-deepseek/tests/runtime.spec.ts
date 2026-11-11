@@ -1,12 +1,12 @@
-import * as Protocol from '@deepseek-ai/dsh-llm-deepseek'
+import * as Protocol from '@agentrans/llm-deepseek'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { Context } from '@deepseek-ai/cordis'
-import { AttachmentId, ImageVariantId } from '@deepseek-ai/dsh-attachment'
-import type { AttachmentStore, ImageAttachmentRef, RequestImageAttachment } from '@deepseek-ai/dsh-attachment'
-import { createLaunchEnvironmentSnapshot } from '@deepseek-ai/dsh-launch-environment'
+import { Context } from '@agentrans/cordis'
+import { AttachmentId, ImageVariantId } from '@agentrans/attachment'
+import type { AttachmentStore, ImageAttachmentRef, RequestImageAttachment } from '@agentrans/attachment'
+import { createLaunchEnvironmentSnapshot } from '@agentrans/launch-environment'
 import LlmRuntime, { ToolCallId, createUserMessage,
   CONTEXT_WINDOW_EXCEEDED_CODE,
   createToolResultMessage,
@@ -16,14 +16,14 @@ import LlmRuntime, { ToolCallId, createUserMessage,
   QUOTA_EXCEEDED_CODE,
   ReasoningEffortId,
   userAgent,
-} from '@deepseek-ai/dsh-llm'
-import { MAX_TIMER_DELAY_MS } from '@deepseek-ai/dsh-timeout'
-import { SessionId } from '@deepseek-ai/dsh-session'
-import DeepSeekLlmApiExtensionRegistry from '@deepseek-ai/dsh-deepseek-llm-api-extensions'
-import type { PreparedDeepSeekLlmApiExtensions } from '@deepseek-ai/dsh-deepseek-llm-api-extensions'
-import * as LlmDeepSeek from '@deepseek-ai/dsh-llm-deepseek-api-key'
-import { DeepSeekAdapter, resolveAdapterOptions } from '@deepseek-ai/dsh-llm-deepseek'
-import type { ContextFormed } from '@deepseek-ai/dsh-llm'
+} from '@agentrans/llm'
+import { MAX_TIMER_DELAY_MS } from '@agentrans/timeout'
+import { SessionId } from '@agentrans/session'
+import DeepSeekLlmApiExtensionRegistry from '@agentrans/deepseek-llm-api-extensions'
+import type { PreparedDeepSeekLlmApiExtensions } from '@agentrans/deepseek-llm-api-extensions'
+import * as LlmDeepSeek from '@agentrans/llm-deepseek-api-key'
+import { DeepSeekAdapter, resolveAdapterOptions } from '@agentrans/llm-deepseek'
+import type { ContextFormed } from '@agentrans/llm'
 import { providerError } from '../src/transport.ts'
 import { resolveRequestImageTarget } from '../src/request-pricing.ts'
 import { assemble } from './assemble.ts'
@@ -31,7 +31,7 @@ import { closeMockServers, mockServer, textEvents } from './mock-server.ts'
 import type { Behavior } from './mock-server.ts'
 import { requestImageStore } from './helpers.ts'
 
-declare module '@deepseek-ai/dsh-llm' {
+declare module '@agentrans/llm' {
   interface MessageSourceMap {
     'test': { kind: 'test' } & ContextFormed
   }

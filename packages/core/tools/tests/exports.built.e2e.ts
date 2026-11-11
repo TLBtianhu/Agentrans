@@ -10,15 +10,15 @@ const pipelineBundle = fileURLToPath(new URL('../lib/pipeline.js', import.meta.u
 const execFileAsync = promisify(execFile)
 const probe = String.raw`
 import assert from 'node:assert/strict'
-import { Context } from '@deepseek-ai/cordis'
-import * as tools from '@deepseek-ai/dsh-tools'
-import { ToolExecutionPipeline, executeToolBatch } from '@deepseek-ai/dsh-tools/pipeline'
-import { defineContentToolFixture } from '@deepseek-ai/dsh-tool-testkit'
+import { Context } from '@agentrans/cordis'
+import * as tools from '@agentrans/tools'
+import { ToolExecutionPipeline, executeToolBatch } from '@agentrans/tools/pipeline'
+import { defineContentToolFixture } from '@agentrans/tool-testkit'
 
 assert.equal(Object.hasOwn(tools, 'defineContentToolFixture'), false)
 assert.equal(Object.hasOwn(tools, 'executeToolFixture'), false)
 assert.equal(Object.hasOwn(tools, 'executeModelToolFixture'), false)
-await assert.rejects(import('@deepseek-ai/dsh-tools/testing'), { code: 'ERR_PACKAGE_PATH_NOT_EXPORTED' })
+await assert.rejects(import('@agentrans/tools/testing'), { code: 'ERR_PACKAGE_PATH_NOT_EXPORTED' })
 const ctx = new Context()
 try {
   const cause = new Error('registry lookup failed')

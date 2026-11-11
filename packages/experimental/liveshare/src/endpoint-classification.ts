@@ -11,7 +11,7 @@
  * Classes: `reader-*` entries are decided by the share-viewer policy and can never be exposed through
  * a plugin declaration; `always-allowed` bypasses every policy; `plugin-offered` is reachable only
  * through a plugin's live declaration and the owner's selection; `owner-only` is never exposed.
- * @module @deepseek-ai/dsh-experimental-liveshare/src/endpoint-classification
+ * @module @agentrans/experimental-liveshare/src/endpoint-classification
  */
 
 /** Why one Remote endpoint may be called on a share viewer's behalf. */

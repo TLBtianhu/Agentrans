@@ -12,7 +12,7 @@ import {
   type TunnelShareSpec,
   type TunnelWorkerCommand,
   type TunnelWorkerEvent,
-} from '@deepseek-ai/dsh-experimental-liveshare-protocol'
+} from '@agentrans/experimental-liveshare-protocol'
 import {
   INITIAL_RETRY_BACKOFF,
   RETRY_STABLE_MS,

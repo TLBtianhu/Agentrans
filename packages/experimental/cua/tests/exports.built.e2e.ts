@@ -2,7 +2,7 @@
 import { execFile } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
-import { resolveExampleLaunch } from '@deepseek-ai/dsh-loader-smoke'
+import { resolveExampleLaunch } from '@agentrans/loader-smoke'
 import { expect, it, onTestFinished } from 'vitest'
 
 it('loads the built Host, object API and native exports without Client dependencies', async () => {

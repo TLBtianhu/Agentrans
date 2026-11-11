@@ -3,9 +3,9 @@ import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promis
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { ToolCallId } from '@deepseek-ai/dsh-llm'
-import type {} from '@deepseek-ai/dsh-user-approval'
-import type {} from '@deepseek-ai/dsh-agent-preset-registry'
+import { ToolCallId } from '@agentrans/llm'
+import type {} from '@agentrans/user-approval'
+import type {} from '@agentrans/agent-preset-registry'
 import { chromium, type Browser } from 'playwright'
 import { expect, it, onTestFailed, onTestFinished, vi } from 'vitest'
 import { captureStableAria, compareOrRefreshGolden, launchWebScaffold, webSnapshotMode, watchConsole, type WebScaffold } from './scaffold.ts'
@@ -41,7 +41,7 @@ it.skipIf(process.platform !== 'darwin')('keeps system requests pending until fr
     extraOverlayPath: fixturePatch,
   })
   resources.scaffold = scaffold
-  expect((await scaffold.ctx.pluginManager.listBundles()).find(bundle => bundle.name === '@deepseek-ai/dsh-cua-bundle'))
+  expect((await scaffold.ctx.pluginManager.listBundles()).find(bundle => bundle.name === '@agentrans/cua-bundle'))
     .toMatchObject({ listedByDefault: false, enabled: true, installed: true })
   const browser = await chromium.launch()
   resources.browser = browser
@@ -74,7 +74,7 @@ it.skipIf(process.platform !== 'darwin')('keeps system requests pending until fr
   expect((await grant).results).toMatchObject([{ result: { isError: false } }])
   await approval.waitFor({ state: 'hidden' })
   await page.getByRole('button', { name: 'Plugins', exact: true }).click()
-  const card = page.locator('[data-plugin-package="@deepseek-ai/dsh-cua-bundle"]')
+  const card = page.locator('[data-plugin-package="@agentrans/cua-bundle"]')
   expect(await card.getByRole('button', { name: /Accessibility permission|Screen Recording permission/ }).count()).toBe(0)
   await page.setViewportSize({ width: 1680, height: 600 })
   const plugins = page.locator('[data-plugin-panel]')
@@ -196,7 +196,7 @@ it.skipIf(process.platform !== 'darwin')('keeps system requests pending until fr
       for (let cycle = 0; cycle < 3; cycle++) {
         await toggle.click()
         await expect.poll(async () => (await scaffold.ctx.pluginManager.listBundles())
-          .find(bundle => bundle.name === '@deepseek-ai/dsh-cua-bundle'))
+          .find(bundle => bundle.name === '@agentrans/cua-bundle'))
           .toMatchObject({ enabled: false, installed: true })
         await expect.poll(() => toggle.getAttribute('aria-checked'), { timeout: PLUGIN_TOGGLE_SETTLE_MS }).toBe('false')
         await expect.poll(() => toggle.isEnabled(), { timeout: PLUGIN_TOGGLE_SETTLE_MS }).toBe(true)

@@ -4,11 +4,11 @@
  * name does, and how an offer that a share selected reaches an already open access snapshot.
  */
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
-import TypertGatewayService from '@deepseek-ai/dsh-api-gateway'
-import RemoteAccessService, { type RemoteAccessFrame } from '@deepseek-ai/dsh-api-remote-access'
-import { Peer } from '@deepseek-ai/dsh-client-connection'
-import TypertRegistry from '@deepseek-ai/dsh-typert-registry'
+import { Context } from '@agentrans/cordis'
+import TypertGatewayService from '@agentrans/api-gateway'
+import RemoteAccessService, { type RemoteAccessFrame } from '@agentrans/api-remote-access'
+import { Peer } from '@agentrans/client-connection'
+import TypertRegistry from '@agentrans/typert-registry'
 import { createViewerAccessPolicy, type ViewerAccessFacts } from '../src/host/viewer-access-policy.ts'
 import {
   VIEWER_DECLARATIONS_SERVICE,

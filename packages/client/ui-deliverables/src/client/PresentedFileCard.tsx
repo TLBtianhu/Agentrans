@@ -1,9 +1,9 @@
-import type { ContextMenuTriggerProps } from '@deepseek-ai/dsh-client-ui-context-menu/client'
+import type { ContextMenuTriggerProps } from '@agentrans/client-ui-context-menu/client'
 /** File identity, Sidebar preview, and contributed native actions for one delivery. */
 import type { ReactNode } from 'react'
-import { resolveWorkspacePath } from '@deepseek-ai/dsh-util-workspace-path'
-import { FileTypeIcon, fileExtension } from '@deepseek-ai/dsh-client-ui-primitives'
-import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
+import { resolveWorkspacePath } from '@agentrans/util-workspace-path'
+import { FileTypeIcon, fileExtension } from '@agentrans/client-ui-primitives'
+import type { PropsLocale } from '@agentrans/client-ui-slots'
 import type { PresentedHost } from '../presented.ts'
 import type { PresentedOpenPhase } from './present-open.ts'
 import { basename, type PresentedPath } from './turn-deliverables.ts'

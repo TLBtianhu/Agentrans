@@ -1,5 +1,5 @@
 /** Artifact operations use root Session routing; subagent continuation has no corresponding Host operation route. */
-import type { SessionSnapshot } from '@deepseek-ai/dsh-api-session-controller/client'
+import type { SessionSnapshot } from '@agentrans/api-session-controller/client'
 
 /**
  * Distinguish the real continuation route from a root Session or ordinary manual branch.

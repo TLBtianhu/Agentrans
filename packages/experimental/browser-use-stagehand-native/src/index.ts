@@ -1,22 +1,22 @@
 /**
  * Stagehand browser tools with one native browser runtime per live Session.
- * @module @deepseek-ai/dsh-experimental-browser-use-stagehand-native
+ * @module @agentrans/experimental-browser-use-stagehand-native
  */
 
-import type { Context } from '@deepseek-ai/cordis'
-import Schema from '@deepseek-ai/schemastery'
-import { BrowserUseProviderName } from '@deepseek-ai/dsh-browser-use/brand'
-import { SessionResources } from '@deepseek-ai/dsh-experimental-browser-use-runtime'
-import { createMcpToolDefinition } from '@deepseek-ai/dsh-mcp-client'
+import type { Context } from '@agentrans/cordis'
+import Schema from '@agentrans/schemastery'
+import { BrowserUseProviderName } from '@agentrans/browser-use/brand'
+import { SessionResources } from '@agentrans/experimental-browser-use-runtime'
+import { createMcpToolDefinition } from '@agentrans/mcp-client'
 import { z } from 'zod'
 import { browserInputs, stagehandModelSchema, StagehandDrainError } from './native.ts'
 import type { BrowserMethod, NativeBrowserRuntime, StagehandModelConfig } from './native.ts'
 import { openBrowserWorker } from './worker-client.ts'
 import { launchChromium } from './launch.ts'
-import type {} from '@deepseek-ai/dsh-agent'
-import type {} from '@deepseek-ai/dsh-browser-use'
-import type {} from '@deepseek-ai/dsh-system-prompt'
-import type {} from '@deepseek-ai/dsh-tools'
+import type {} from '@agentrans/agent'
+import type {} from '@agentrans/browser-use'
+import type {} from '@agentrans/system-prompt'
+import type {} from '@agentrans/tools'
 
 /** Cordis identity for the native Stagehand provider. */
 export const name = 'experimental-browser-use-stagehand-native'

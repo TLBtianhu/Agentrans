@@ -1,8 +1,8 @@
 /** One transient, identity-stable Artifact action operation shared by native, iframe and current-comparison surfaces. */
 import { useEffect, useRef, useState } from 'react'
-import type { ArtifactActionRequest } from '@deepseek-ai/dsh-artifact/types'
-import { randomUUID } from '@deepseek-ai/dsh-util-crypto'
-import { deepFreeze } from '@deepseek-ai/dsh-util-values'
+import type { ArtifactActionRequest } from '@agentrans/artifact/types'
+import { randomUUID } from '@agentrans/util-crypto'
+import { deepFreeze } from '@agentrans/util-values'
 import { ArtifactActionRequestError, type ArtifactActionFailure, type RecordArtifactAction } from './protocol.ts'
 
 /** Complete local submission state; retained request data never follows later program or source changes. */

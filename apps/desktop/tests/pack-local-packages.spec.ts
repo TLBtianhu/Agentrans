@@ -31,7 +31,7 @@ function fixture(profile: 'local' | 'official' = 'local'): string {
   write(root, 'package.json', JSON.stringify({ name: 'desktop-pack-fixture', version: '1.2.3', private: true }))
   write(root, 'pnpm-workspace.yaml', 'packages:\n  - packages/*/*\n')
   write(root, 'packages/client/probe/package.json', JSON.stringify({
-    name: '@deepseek-ai/dsh-probe', version: '1.2.3', files: ['lib', 'src'],
+    name: '@agentrans/probe', version: '1.2.3', files: ['lib', 'src'],
   }))
   write(root, 'packages/client/probe/lib/index.js', 'export const probe = true\n')
   write(root, 'packages/client/probe/lib/client.js', 'export const client = true\n')
@@ -78,7 +78,7 @@ it('packs local client artifacts without a release publication record', async ()
   expect(result.code, result.output).toBe(0)
   expect(readdirSync(join(root, 'packed'))).toEqual(['deepseek-ai-dsh-probe-1.2.3.tgz'])
   expect(packedIdentity(join(root, 'packed/deepseek-ai-dsh-probe-1.2.3.tgz')))
-    .toEqual({ name: '@deepseek-ai/dsh-probe', version: '1.2.3' })
+    .toEqual({ name: '@agentrans/probe', version: '1.2.3' })
   expect(existsSync(join(root, 'packed', PUBLISH_ORDER_FILE))).toBe(false)
 }, testTimeout)
 

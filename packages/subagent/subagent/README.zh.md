@@ -3,7 +3,7 @@ description: "面向用户与维护者的 subagent 委派 seam，用于选择提
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-subagent
+# @agentrans/subagent
 
 [English](README.md) | 中文
 
@@ -31,12 +31,12 @@ kind: "package-reference"
 
 ### 启用委派
 
-一起挂载本服务、`@deepseek-ai/dsh-session-projection`、提供方与委派工具；本服务等待投影注册表可用后才初始化。提供方按配置名称注册，每个工具行选择一个提供方。最小配置如下：
+一起挂载本服务、`@agentrans/session-projection`、提供方与委派工具；本服务等待投影注册表可用后才初始化。提供方按配置名称注册，每个工具行选择一个提供方。最小配置如下：
 
 ```yaml
-- name: '@deepseek-ai/dsh-subagent'
-- name: '@deepseek-ai/dsh-subagent-spawn-in-process'
-- name: '@deepseek-ai/dsh-tool-subagent'
+- name: '@agentrans/subagent'
+- name: '@agentrans/subagent-spawn-in-process'
+- name: '@agentrans/tool-subagent'
   config:
     provider: spawn
     toolName: subagent

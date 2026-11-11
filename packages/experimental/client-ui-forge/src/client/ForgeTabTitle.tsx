@@ -1,7 +1,7 @@
 /** Chip title of the forge tab: the change request glyph and the localized tab name. */
 
 import type { ReactNode } from 'react'
-import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
+import type { PropsLocale } from '@agentrans/client-ui-slots'
 import { ChangeRequestGlyph } from './glyphs.tsx'
 import type { NS } from './locales.ts'
 import css from './ForgeTab.module.css'

@@ -8,7 +8,7 @@
  * interactive form is the other branch of the same component rather than a second control kept in
  * step by hand.
  *
- * @module @deepseek-ai/dsh-experimental-liveshare/src/client/viewer-seat
+ * @module @agentrans/experimental-liveshare/src/client/viewer-seat
  */
 
 import type { ReactNode } from 'react'

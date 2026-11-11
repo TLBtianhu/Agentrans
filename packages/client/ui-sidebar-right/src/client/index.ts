@@ -1,7 +1,7 @@
-import { IconCloseOutlineRegular } from '@deepseek-ai/dsh-client-ui-primitives'
-import type { ShortcutCommandId } from '@deepseek-ai/dsh-client-shortcuts/client'
+import { IconCloseOutlineRegular } from '@agentrans/client-ui-primitives'
+import type { ShortcutCommandId } from '@agentrans/client-shortcuts/client'
 import { TabMenuContent } from './shell/TabMenuContent.tsx'
-import type {} from '@deepseek-ai/dsh-client-ui-context-menu/client'
+import type {} from '@agentrans/client-ui-context-menu/client'
 /**
  * Browser half: fill the frame's right column with the panel, put the expand
  * button in the conversation header, and own the seats a tab type registers
@@ -24,17 +24,17 @@ import type {} from '@deepseek-ai/dsh-client-ui-context-menu/client'
  * guide registers through those stages unmodified, exactly as a type shipped
  * from another package does — `ui-sidebar-documentpreview` is the live proof.
  */
-import type {} from '@deepseek-ai/dsh-client-shortcuts/client'
+import type {} from '@agentrans/client-shortcuts/client'
 import { observeSidebarFocus } from './focus.ts'
 import { registerSidebarShortcuts } from './shortcuts.ts'
-import type { Context as ClientContext } from '@deepseek-ai/cordis'
-import type {} from '@deepseek-ai/dsh-client-resources/client'
-import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
-import type {} from '@deepseek-ai/dsh-client-ui-session/client'
-import type { ILayout } from '@deepseek-ai/dsh-client-ui-layout/client'
-import type {} from '@deepseek-ai/dsh-client-ui-layout/client'
-import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
+import type { Context as ClientContext } from '@agentrans/cordis'
+import type {} from '@agentrans/client-resources/client'
+import type {} from '@agentrans/client-ui-renderer/client'
+import type {} from '@agentrans/client-ui-session/client'
+import type { ILayout } from '@agentrans/client-ui-layout/client'
+import type {} from '@agentrans/client-ui-layout/client'
+import type {} from '@agentrans/client-ui-conversation/client'
+import type { SessionId } from '@agentrans/session/types'
 import type {} from './contract/slots.ts'
 import { GuideBody, type GuideInjected } from './tabs/guide/GuideBody.tsx'
 import { GuideTitle } from './tabs/guide/GuideTitle.tsx'
@@ -50,7 +50,7 @@ import { en, ja, es, fr, de, ru, pt, zh } from './locales.ts'
 import { GUIDE_ID, guideDefinition } from './tabs/guide/definition.ts'
 import { createGuidePins } from './tabs/guide/guide-pins.ts'
 import { guideTabInfoFactory, tabInfoFactory } from './tab-info.ts'
-import type { TabId } from '@deepseek-ai/dsh-client-ui-dockkit'
+import type { TabId } from '@agentrans/client-ui-dockkit'
 import { defaultSeed } from './contract/seed.ts'
 
 export type { SidebarRightTarget } from './focus.ts'
@@ -76,7 +76,7 @@ export type {
   SidebarRightTabParams, SidebarRightTabParamsFor, SidebarRightTabParamsMap,
 } from './contract/params.ts'
 // The layout ids and rectangle the navigation face takes, so a caller needs no import from the kit.
-export type { FloatRect, PaneId, TabId, TabRecord } from '@deepseek-ai/dsh-client-ui-dockkit'
+export type { FloatRect, PaneId, TabId, TabRecord } from '@agentrans/client-ui-dockkit'
 export type { PinResource, SidebarRightNavigator, TabOccurrence, SidebarRightOccurrenceId } from './tab-domain.ts'
 export type { SidebarRightKey } from './locales.ts'
 export type { OpenContentIntent } from './stores.ts'
@@ -88,7 +88,7 @@ const NS = 'sidebarRight'
 /** Required browser services: the slot registry, the frame's panel actions, copy, and the resource model. */
 export const inject = ['contextMenus', 'slots', 'layout', 'locale', 'resources', 'sessions', 'uiSession', 'shortcuts']
 
-declare module '@deepseek-ai/cordis' {
+declare module '@agentrans/cordis' {
   interface Context {
     /** Right-Sidebar navigation and presentation face. */
     sidebarRight: SidebarRightController

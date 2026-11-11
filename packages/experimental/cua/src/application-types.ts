@@ -1,5 +1,5 @@
 /** Application identities admitted from native selection or saved provider configuration. */
-import type { Branded } from '@deepseek-ai/dsh-brand'
+import type { Branded } from '@agentrans/brand'
 
 /** Native-provider digest of platform application metadata, separate from process and window handles. */
 export type CuaApplicationId = Branded<'CuaApplicationId'>

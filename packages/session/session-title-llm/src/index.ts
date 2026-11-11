@@ -3,20 +3,20 @@
  * preparation, input/token/time bounds, cancellation, exact auxiliary request
  * logging, and stream assembly. Title wording, length targets, reasoning
  * selection, and output interpretation belong to each provider.
- * @module @deepseek-ai/dsh-session-title-llm
+ * @module @agentrans/session-title-llm
  */
 
-declare module '@deepseek-ai/dsh-llm/types' {
+declare module '@agentrans/llm/types' {
   interface LlmRequestPurposeMap {
     'session-title': true
   }
 }
 
-import type { Context } from '@deepseek-ai/cordis'
-import z from '@deepseek-ai/schemastery'
-import { createUserMessage, BlockAssembler } from '@deepseek-ai/dsh-llm'
-import type { ContextFormed } from '@deepseek-ai/dsh-llm'
-declare module '@deepseek-ai/dsh-llm' {
+import type { Context } from '@agentrans/cordis'
+import z from '@agentrans/schemastery'
+import { createUserMessage, BlockAssembler } from '@agentrans/llm'
+import type { ContextFormed } from '@agentrans/llm'
+declare module '@agentrans/llm' {
   interface MessageSourceMap {
     'dsh-session-title-llm': { kind: 'dsh-session-title-llm' } & ContextFormed
   }
@@ -29,15 +29,15 @@ import type {
   LlmResolvedModelInfo,
   Message,
   ReasoningEffortId,
-} from '@deepseek-ai/dsh-llm'
-import { deadline, MAX_TIMER_DELAY_MS } from '@deepseek-ai/dsh-timeout'
-import { assertNever, deepFreeze } from '@deepseek-ai/dsh-util-values'
-import type { SessionSeq } from '@deepseek-ai/dsh-session'
-import { SessionTitleProviderId } from '@deepseek-ai/dsh-session-title'
+} from '@agentrans/llm'
+import { deadline, MAX_TIMER_DELAY_MS } from '@agentrans/timeout'
+import { assertNever, deepFreeze } from '@agentrans/util-values'
+import type { SessionSeq } from '@agentrans/session'
+import { SessionTitleProviderId } from '@agentrans/session-title'
 import type {
   SessionTitleModelIdentity,
   SessionTitleProviderRequest,
-} from '@deepseek-ai/dsh-session-title'
+} from '@agentrans/session-title'
 
 /** Exact model-visible request recorded before one auxiliary title dispatch. */
 export interface SessionTitleLlmRequestEventData {
@@ -57,7 +57,7 @@ export interface SessionTitleLlmRequestEventData {
   readonly reasoningEffort?: ReasoningEffortId
 }
 
-declare module '@deepseek-ai/dsh-session/types' {
+declare module '@agentrans/session/types' {
   interface SessionEventMap {
     /** Log-only pre-dispatch record of one session-title model request. */
     'session/title-llm-request': SessionTitleLlmRequestEventData

@@ -3,7 +3,7 @@ description: "无需导入 React 组件即可向右键菜单添加操作"
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-client-ui-context-menu
+# @agentrans/client-ui-context-menu
 
 [English](README.md) | 中文
 
@@ -37,7 +37,7 @@ Web 应用 bundle 挂载此客户端插件。外部客户端插件在 `dsh.clien
 
 贡献可通过 `observe(target)` 声明权限、成员状态或本地化标签的数据源。数据源更新时，针对同一捕获目标重新解析该贡献并替换回调；过期的异步准备会被取消。关闭菜单和卸载插件都会释放所有订阅。
 
-通过对 `@deepseek-ai/dsh-client-ui-context-menu/client` 的声明合并扩展 `ContextMenuTargetMap`，即可增加目标类别；`ContextMenuTarget` 从该映射派生 `{ kind, value }` 联合类型。通过 `ctx.contextMenus.open(target, { x, y })` 打开目标。目标值使用不可变、可 JSON 序列化的标识与元数据。执行回调捕获该值，并在操作前重新检查可变资源。新注册项在下次打开时生效。注销会移除可见操作并取消待处理的元数据查询。
+通过对 `@agentrans/client-ui-context-menu/client` 的声明合并扩展 `ContextMenuTargetMap`，即可增加目标类别；`ContextMenuTarget` 从该映射派生 `{ kind, value }` 联合类型。通过 `ctx.contextMenus.open(target, { x, y })` 打开目标。目标值使用不可变、可 JSON 序列化的标识与元数据。执行回调捕获该值，并在操作前重新检查可变资源。新注册项在下次打开时生效。注销会移除可见操作并取消待处理的元数据查询。
 
 `ctx.contextMenus.resolve(target)` 为其他渲染器提供独立菜单实例。订阅不可变操作视图，选择已发布的 ID，并在所属界面关闭时释放。视图仅包含展示字段。回调保留在注册表中，最多执行一次。关闭和替换菜单会取消元数据查询，已选中操作则自行管理执行与取消。提供方或操作拒绝时由持久的覆盖层提示；操作的本地化 `failureLabel` 提供具体的恢复建议。
 

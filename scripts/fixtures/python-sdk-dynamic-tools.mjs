@@ -2,7 +2,7 @@
 export const name = 'python-sdk-dynamic-tools'
 export const inject = ['tools']
 
-/** @param {import('@deepseek-ai/cordis').Context} ctx - Scenario-owned tool registry. */
+/** @param {import('@agentrans/cordis').Context} ctx - Scenario-owned tool registry. */
 export function apply(ctx) {
   let active = false
   ctx.tools.register({

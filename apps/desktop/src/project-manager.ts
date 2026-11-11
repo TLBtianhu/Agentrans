@@ -22,12 +22,12 @@ import {
 import type { DesktopPaths } from './paths.ts'
 import type { DesktopRelease } from './release.ts'
 import { readDesktopRuntime } from './runtime-tree.ts'
-import { initProfile, removeLinkProjections, sanitizeProfile } from '@deepseek-ai/dsh-app-boot'
-import { PROFILE_TEMPLATES, type ProfileTemplate } from '@deepseek-ai/dsh-official-bundles'
+import { initProfile, removeLinkProjections, sanitizeProfile } from '@agentrans/app-boot'
+import { PROFILE_TEMPLATES, type ProfileTemplate } from '@agentrans/official-bundles'
 
-const PROJECT_NAME = '@deepseek-ai/dsh-desktop-runtime'
-const DSH_PACKAGE = '@deepseek-ai/dsh'
-const CORE_BUILD_PACKAGE = '@deepseek-ai/dsh-subprocess-local'
+const PROJECT_NAME = '@agentrans/desktop-runtime'
+const DSH_PACKAGE = '@agentrans/dsh'
+const CORE_BUILD_PACKAGE = '@agentrans/subprocess-local'
 const WEB_PROFILE = PROFILE_TEMPLATES.web as ProfileTemplate
 const WORKSPACE_SETTINGS = 'nodeLinker: hoisted\nautoInstallPeers: false\n'
 function writeJson(path: string, value: unknown): void {

@@ -1,8 +1,8 @@
 /** Private, replayable reservation of this Session's first accepted input identities. */
 import { createHash } from 'node:crypto'
 import { z } from 'zod'
-import type { UserMessage } from '@deepseek-ai/dsh-llm'
-import type { ProjectionDefinition } from '@deepseek-ai/dsh-session-projection'
+import type { UserMessage } from '@agentrans/llm'
+import type { ProjectionDefinition } from '@agentrans/session-projection'
 
 /** The original acceptance remains reserved after queue edits, removal and claim. */
 export interface InputReceiptState {

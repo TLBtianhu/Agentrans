@@ -18,7 +18,7 @@ description: "自动模型切换要求有效的目标压力预算与成功的压
 2. 对于小窗口，在 `cordis.yml` 的精确提供方／模型策略下配置 `headroomTokens`。默认值为 65,536 token，必须与路由请求的输出预留共同适配窗口。对于 65,536 token 窗口与 4,096 token 的请求输出上限，下列策略会留下正数压力预算：
 
    ```yaml
-   - name: '@deepseek-ai/dsh-compaction-basic'
+   - name: '@agentrans/compaction-basic'
      config:
        modelPolicies:
          - provider: local

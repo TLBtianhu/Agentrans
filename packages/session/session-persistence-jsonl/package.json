@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-session-persistence-jsonl",
+  "name": "@agentrans/session-persistence-jsonl",
   "description": "JSONL durable session persistence backend for the DeepSeek Harness",
   "version": "0.1.0",
   "publishConfig": {
@@ -30,24 +30,24 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-session-persistence": "workspace:*",
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/session": "workspace:*",
+    "@agentrans/session-persistence": "workspace:*",
+    "@agentrans/cordis": "workspace:~"
   },
   "dependencies": {
-    "@deepseek-ai/dsh-llm": "workspace:*",
-    "@deepseek-ai/dsh-session-format": "workspace:*",
-    "@deepseek-ai/dsh-session-format-catalog": "workspace:*",
-    "@deepseek-ai/dsh-session-format-v3-to-v4": "workspace:*",
+    "@agentrans/llm": "workspace:*",
+    "@agentrans/session-format": "workspace:*",
+    "@agentrans/session-format-catalog": "workspace:*",
+    "@agentrans/session-format-v3-to-v4": "workspace:*",
     "@deepseek-ai/node-addon-system": "workspace:~",
-    "@deepseek-ai/schemastery": "workspace:~",
+    "@agentrans/schemastery": "workspace:~",
     "koffi": "3.1.1",
     "p-limit": "7.3.3"
   },
   "devDependencies": {
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-session-format-v0-to-v1": "workspace:*",
-    "@deepseek-ai/dsh-session-persistence": "workspace:*",
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/session": "workspace:*",
+    "@agentrans/session-format-v0-to-v1": "workspace:*",
+    "@agentrans/session-persistence": "workspace:*",
+    "@agentrans/cordis": "workspace:~"
   }
 }

@@ -3,7 +3,7 @@ description: "面向工具作者与维护者的工具注册表与执行流水线
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-tools
+# @agentrans/tools
 
 [English](README.md) | 中文
 
@@ -37,8 +37,8 @@ kind: "package-reference"
 
 ```ts
 import { readFile } from 'node:fs/promises'
-import type { Context } from '@deepseek-ai/cordis'
-import { defineTool } from '@deepseek-ai/dsh-tools'
+import type { Context } from '@agentrans/cordis'
+import { defineTool } from '@agentrans/tools'
 
 declare const ctx: Context
 
@@ -77,8 +77,8 @@ ctx.tools.register(defineTool({
 在部署、预设或 Agent 作用域中挂载一个执行器。最近的作用域决定提供者，同一作用域的重复提供者会报错。原生执行器直接公开可见能力；PTC 执行器公开 `run_code` 和生成的 SDK。执行器注册和卸载不触发 `tools/change`；提示词组装和批次执行在运行时解析当前执行器。
 
 ```yaml
-- name: '@deepseek-ai/dsh-tools'
-- name: '@deepseek-ai/dsh-tool-executor-native'
+- name: '@agentrans/tools'
+- name: '@agentrans/tool-executor-native'
 ```
 
 Agent 步骤的并发上限使用 [agent-loop 配置](../agent-loop/README.zh.md)。执行器设置参见[原生](../tool-executor-native/README.zh.md)或 [PTC](../tool-executor-ptc/README.zh.md) 包。自定义提供者只需实现 `describe(definitions)` 和 `execute(batch)`，共享流水线为可选项。注册表分别为提示词描述和每次 `ctx.tools.execute()` 批次选择当前作用域的执行器。已接纳批次仍由所选提供者结算，即使该提供者已卸载；根据提供者的卸载策略，结果可能包含取消错误。注册替代提供者之前，新批次会被拒绝。
@@ -146,7 +146,7 @@ Agent 步骤的并发上限使用 [agent-loop 配置](../agent-loop/README.zh.md
 包级约定对大多数消费方已经足够；需要周边领域时再阅读以下页面。
 
 - [工具子系统](../../../docs/subsystems/tools.zh.md)——完整流水线类型、schema DSL 与生成的服务 API。
-- [生成工具目录](../../../docs/tool-catalog.zh.md#deepseek-aidsh-tool-executor-ptc)——模型收到的已交付工具 schema。
+- [生成工具目录](../../../docs/tool-catalog.zh.md#agentranstool-executor-ptc)——模型收到的已交付工具 schema。
 - [工具执行流水线](../../../docs/tool-execution-pipeline.zh.md)——可视化流水线。
 - [添加工具实操手册](../../../docs/cookbook/adding-a-tool.zh.md)——分步骤的工具编写指南。
 - [工具测试工具包](../../test-support/tool-testkit/README.zh.md)——测试和基准测试使用的工具定义与执行 fixture。
@@ -162,7 +162,7 @@ Agent 步骤的并发上限使用 [agent-loop 配置](../agent-loop/README.zh.md
 
 #### 模型看到什么
 
-在普通模式下，模型会看到每个可见定义的确切名称、描述与 JSON Schema；已交付定义记录在生成的[工具目录](../../../docs/tool-catalog.zh.md#deepseek-aidsh-tool-executor-ptc)中。agent 作用域的限制、遮蔽与扩展注册会改变该 agent 的最终工具集合。
+在普通模式下，模型会看到每个可见定义的确切名称、描述与 JSON Schema；已交付定义记录在生成的[工具目录](../../../docs/tool-catalog.zh.md#agentranstool-executor-ptc)中。agent 作用域的限制、遮蔽与扩展注册会改变该 agent 的最终工具集合。
 
 #### Token 影响
 
@@ -196,7 +196,7 @@ Agent 步骤的并发上限使用 [agent-loop 配置](../agent-loop/README.zh.md
 - **并发策略不是事件门禁**：`executionMode()` 直接读取已解析的工具定义；插件只能在自身拥有的定义上声明分类器。
 - **`tools/pre-execute` 有意不允许改写 `exec.arguments`**：否则日志记录与呈现的参数会与实际运行内容失去同步；改写设计记录在[拟议的 Agent Note](../../../.agents/notes/proposed/feature/2026-06-30-pre-tool-input-rewrite.zh.md)中。
 - **调用方定义的 subagent 与工作流结构化输出仍要求对象根**：这是消费方层面的守卫；共享 schema 词汇与工具输出支持任意 JSON 根。
-- **定义中的 `timeoutMs` 仅作声明之用**：注册表绝不会强制执行截止时间；要强制执行，必须使用 `@deepseek-ai/dsh-tool-call-timeout-policy` 包装层。
+- **定义中的 `timeoutMs` 仅作声明之用**：注册表绝不会强制执行截止时间；要强制执行，必须使用 `@agentrans/tool-call-timeout-policy` 包装层。
 
 `defineTool()`、注册表模式投影和系统提示组装会保留 `deferLoading: true`。该标记请求延迟加载工具定义，并不意味着存在 `tool-addition` 记录；提供方执行语义的限制见 [LLM 包](../../../packages/llm/llm/README.zh.md#known-limitations-and-deferred-work)。
 

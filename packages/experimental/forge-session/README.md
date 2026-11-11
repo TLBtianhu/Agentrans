@@ -3,7 +3,7 @@ description: "Bind change requests to the Session that created, pushed, or track
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-experimental-forge-session
+# @agentrans/experimental-forge-session
 
 English | [中文](README.zh.md)
 
@@ -28,10 +28,10 @@ List the pull requests a Session is working on without a separate registry. A pr
 Mount the service with the forge registry, a provider, and the Session projection registry.
 
 ```yaml
-- name: '@deepseek-ai/dsh-session-projection'
-- name: '@deepseek-ai/dsh-experimental-forge'
-- name: '@deepseek-ai/dsh-experimental-forge-github'
-- name: '@deepseek-ai/dsh-experimental-forge-session'
+- name: '@agentrans/session-projection'
+- name: '@agentrans/experimental-forge'
+- name: '@agentrans/experimental-forge-github'
+- name: '@agentrans/experimental-forge-session'
 ```
 
 `ctx.forgeSession.changeRequests(session)` returns the visible bindings in first-recorded order. Each entry carries the URL, its `origin` (`created`, `referenced`, `discovered`, or `tracked`), the provider reference or `null` when no provider serves the URL, and the latest polling result or `null`. `watch(session, listener)` is an effect on the calling fiber: while a Session has a watcher, every visible binding that a provider serves is polled, and listeners receive the complete list after each later binding change, provider registration change, or polling result. Provider changes resynchronize existing watches, including URLs that were previously unserved. `track(session, url)` binds a URL under the provider's canonical form, or restores a dismissed binding, and throws when no provider recognizes the URL. `dismiss(session, url)` hides a visible binding; other URLs leave the log unchanged. `discoverBranch(session, remote, branch)` runs the lookup that follows a push for a branch on the remote at `remote` and resolves once it has recorded its bindings or failed; a remote that no provider serves changes nothing.
@@ -40,7 +40,7 @@ A `bash` or `pwsh` call binds evidence only from its first result, and only when
 
 Numeric `gh pr view`, `edit`, and `checkout` selectors accept `--repo OWNER/REPO`, `--repo=OWNER/REPO`, and `-R OWNER/REPO` in either argument order. A repository containing its host, or a literal `GH_HOST` assignment, supplies a URL directly. For a single command, optionally piped through `head`, `tail`, or `cat`, a completed foreground Bash call without a host runs a read-only `gh pr view <number> --repo <repository> --json url` through the same shell service, cwd, literal environment assignments, managed environment, and standing sandbox policy. The CLI resolves its configured host. A successful lookup appends a `reference` binding record; failures leave bindings unchanged and log a warning. This live observer requires `tools`, `shell`, and `shellEnv`; projection-only compositions still recover recorded URLs. Queries share `discoveryTimeoutMs`, stop on caller cancellation, and are aborted and awaited on service disposal.
 
-Binding actions are `plugin:forge-session/binding` records listed in the [experimental persistence catalog](../../../docs/experimental-persistence-catalog.md); fork and resume carry them with the shell events, so a fork starts with its parent's bindings. `discoveryTimeoutMs` is listed in the [configuration catalog](../../../docs/config-catalog.md#deepseek-aidsh-experimental-forge-session).
+Binding actions are `plugin:forge-session/binding` records listed in the [experimental persistence catalog](../../../docs/experimental-persistence-catalog.md); fork and resume carry them with the shell events, so a fork starts with its parent's bindings. `discoveryTimeoutMs` is listed in the [configuration catalog](../../../docs/config-catalog.md#agentransexperimental-forge-session).
 
 -----
 

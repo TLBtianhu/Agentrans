@@ -53,7 +53,7 @@ ui-entry-customization (default-loaded)
 | `ui-entry-customization`（新包） | 往三个 actions slot 注册菜单内容组件；`entryCustomization` 文案命名空间；不保存状态 |
 | `ui-plugin-manager` | `pluginNavigation` 增加 `openList()`：切到插件页主列表的“已安装”标签，不打开对话框，不改变当前会话 |
 | `ui-primitives` | `Menu` 增加 `minWidthFromAnchor`，让右侧栏菜单不窄于卡片；新增 `IconAppsAddOutlineRegular` / `IconAppsAddOutlineMedium`（`compact` 用于卡片尺寸），供左侧栏和右侧栏的按钮共用 |
-| `@deepseek-ai/dsh-web-app` | 默认加载 `ui-entry-customization` |
+| `@agentrans/web-app` | 默认加载 `ui-entry-customization` |
 
 ### actions slot 与菜单内容
 

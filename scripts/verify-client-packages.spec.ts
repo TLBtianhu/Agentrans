@@ -21,7 +21,7 @@ import {
   type ClientPackageFacts,
 } from './verify-client-packages.ts'
 
-const CORDIS = '@deepseek-ai/cordis'
+const CORDIS = '@agentrans/cordis'
 const roots: string[] = []
 
 afterEach(() => {
@@ -33,7 +33,7 @@ function declaration(
   fields: Partial<Omit<ClientDeclaration, 'name' | 'manifest'>> = {},
 ): ClientDeclaration {
   return {
-    name: short.startsWith('@') ? short : '@deepseek-ai/dsh-client-' + short,
+    name: short.startsWith('@') ? short : '@agentrans/client-' + short,
     manifest: 'packages/client/' + short.replace(/^.*\//, '') + '/package.json',
     dynamic: true,
     platform: 'web',
@@ -102,34 +102,34 @@ describe('source package uses', () => {
 
   it('counts type imports, module augmentations, dynamic imports, and JSX', () => {
     const uses = collectSourcePackageUses('feature.tsx', [
-      "import type { A } from '@deepseek-ai/dsh-a/subpath'",
-      "declare module '@deepseek-ai/dsh-client-ui-slots' {}",
-      "const load = () => import('@deepseek-ai/dsh-b/remote')",
+      "import type { A } from '@agentrans/a/subpath'",
+      "declare module '@agentrans/client-ui-slots' {}",
+      "const load = () => import('@agentrans/b/remote')",
       'export const view = <div />',
       "export type { Local } from './local.ts'",
     ].join('\n'))
 
     expect([...uses].sort()).toEqual([
-      '@deepseek-ai/dsh-a',
-      '@deepseek-ai/dsh-b',
-      '@deepseek-ai/dsh-client-ui-slots',
+      '@agentrans/a',
+      '@agentrans/b',
+      '@agentrans/client-ui-slots',
       'react',
     ])
     expect([...collectRuntimeSourcePackageUses('feature.tsx', [
-      "import type { A } from '@deepseek-ai/dsh-a/subpath'",
-      "declare module '@deepseek-ai/dsh-client-ui-slots' {}",
-      "const load = () => import('@deepseek-ai/dsh-b')",
+      "import type { A } from '@agentrans/a/subpath'",
+      "declare module '@agentrans/client-ui-slots' {}",
+      "const load = () => import('@agentrans/b')",
       'export const view = <div />',
     ].join('\n'))].sort()).toEqual([
-      '@deepseek-ai/dsh-b',
+      '@agentrans/b',
       'react',
     ])
     expect([...collectRuntimeSourceSpecifiers('feature.tsx', [
-      "import type { A } from '@deepseek-ai/dsh-a/subpath'",
-      "const load = () => import('@deepseek-ai/dsh-b/remote')",
+      "import type { A } from '@agentrans/a/subpath'",
+      "const load = () => import('@agentrans/b/remote')",
       'export const view = <div />',
     ].join('\n'))].sort()).toEqual([
-      '@deepseek-ai/dsh-b/remote',
+      '@agentrans/b/remote',
       'react',
     ])
     expect([...collectLocalSourceSpecifiers('feature.ts', [
@@ -138,7 +138,7 @@ describe('source package uses', () => {
       "const load = () => import('./lazy.ts')",
       "const legacy = require('./legacy.ts')",
       "declare module './augmentation.ts' {}",
-      "import '@deepseek-ai/dsh-a'",
+      "import '@agentrans/a'",
     ].join('\n'))].sort()).toEqual([
       './lazy.ts',
       './legacy.ts',
@@ -185,7 +185,7 @@ describe('package modes', () => {
       parserPreloadIds: [],
     }))).toEqual([
       'packages/client/web/src/platform.ts: parser-preloaded external '
-      + '"@deepseek-ai/dsh-client-bootstrap/client" has no matching PARSER_PRELOAD_IDS row in '
+      + '"@agentrans/client-bootstrap/client" has no matching PARSER_PRELOAD_IDS row in '
       + 'packages/client/modules/src/index.ts',
     ])
   })
@@ -194,57 +194,57 @@ describe('package modes', () => {
 describe('module requests', () => {
   it('rejects runtime requests from one client feature package to another dynamic row', () => {
     const ui = declaration('ui', {
-      external: ['@deepseek-ai/dsh-client-slots/client'],
+      external: ['@agentrans/client-slots/client'],
       runtimeSourceUses: {
-        '@deepseek-ai/dsh-client-slots': ['packages/client/ui/src/client/index.ts'],
+        '@agentrans/client-slots': ['packages/client/ui/src/client/index.ts'],
       },
     })
     const slots = declaration('slots')
     expect(collectClientPackageViolations(facts([], { declarations: [ui, slots] }))).toEqual([
       ui.manifest + ': client feature package requests runtime external '
-      + '"@deepseek-ai/dsh-client-slots/client"; import shared types only or call an injected Cordis service',
+      + '"@agentrans/client-slots/client"; import shared types only or call an injected Cordis service',
     ])
   })
 
   it('rejects stale externals and accepts a runtime import outside client feature packages', () => {
     const gateway = {
-      ...declaration('@deepseek-ai/dsh-api-gateway'), manifest: 'packages/api/gateway/package.json',
+      ...declaration('@agentrans/api-gateway'), manifest: 'packages/api/gateway/package.json',
     }
-    const stale = { ...declaration('@deepseek-ai/dsh-api-stale', {
-      external: ['@deepseek-ai/dsh-api-gateway/client'],
+    const stale = { ...declaration('@agentrans/api-stale', {
+      external: ['@agentrans/api-gateway/client'],
     }), manifest: 'packages/api/stale/package.json' }
-    const live = { ...declaration('@deepseek-ai/dsh-api-live', {
-      external: ['@deepseek-ai/dsh-api-gateway/client'],
+    const live = { ...declaration('@agentrans/api-live', {
+      external: ['@agentrans/api-gateway/client'],
       runtimeSourceUses: {
-        '@deepseek-ai/dsh-api-gateway': ['packages/api/live/src/client/index.ts'],
+        '@agentrans/api-gateway': ['packages/api/live/src/client/index.ts'],
       },
       runtimeSourceSpecifiers: {
-        '@deepseek-ai/dsh-api-gateway/client': ['packages/api/live/src/client/index.ts'],
+        '@agentrans/api-gateway/client': ['packages/api/live/src/client/index.ts'],
       },
     }), manifest: 'packages/api/live/package.json' }
     expect(collectClientPackageViolations(facts([], {
       declarations: [gateway, stale, live],
     }))).toEqual([
-      stale.manifest + ': dsh.client.external "@deepseek-ai/dsh-api-gateway/client"'
+      stale.manifest + ': dsh.client.external "@agentrans/api-gateway/client"'
       + ' has no runtime import or re-export in production source; remove the stale declaration',
     ])
   })
 
   it('requires the exact external subpath to be imported at runtime', () => {
     const gateway = {
-      ...declaration('@deepseek-ai/dsh-api-gateway'), manifest: 'packages/api/gateway/package.json',
+      ...declaration('@agentrans/api-gateway'), manifest: 'packages/api/gateway/package.json',
     }
-    const subject = { ...declaration('@deepseek-ai/dsh-api-session-controller', {
-      external: ['@deepseek-ai/dsh-api-gateway/client'],
+    const subject = { ...declaration('@agentrans/api-session-controller', {
+      external: ['@agentrans/api-gateway/client'],
       runtimeSourceUses: {
-        '@deepseek-ai/dsh-api-gateway': ['packages/api/session-controller/src/client/index.ts'],
+        '@agentrans/api-gateway': ['packages/api/session-controller/src/client/index.ts'],
       },
       runtimeSourceSpecifiers: {
-        '@deepseek-ai/dsh-api-gateway/remote': ['packages/api/session-controller/src/client/index.ts'],
+        '@agentrans/api-gateway/remote': ['packages/api/session-controller/src/client/index.ts'],
       },
     }), manifest: 'packages/api/session-controller/package.json' }
     expect(collectClientPackageViolations(facts([], { declarations: [gateway, subject] }))).toEqual([
-      subject.manifest + ': dsh.client.external "@deepseek-ai/dsh-api-gateway/client"'
+      subject.manifest + ': dsh.client.external "@agentrans/api-gateway/client"'
       + ' has no runtime import or re-export in production source; remove the stale declaration',
     ])
   })
@@ -261,8 +261,8 @@ describe('module requests', () => {
 
   it('rejects duplicates, empty values, self-requests, and missing suppliers', () => {
     const ui = declaration('ui', {
-      external: ['', '@deepseek-ai/dsh-client-ui', '@deepseek-ai/dsh-missing', '@deepseek-ai/dsh-missing'],
-      inject: ['', '@deepseek-ai/dsh-a', '@deepseek-ai/dsh-a'],
+      external: ['', '@agentrans/client-ui', '@agentrans/missing', '@agentrans/missing'],
+      inject: ['', '@agentrans/a', '@agentrans/a'],
     })
     const found = collectClientPackageViolations(facts([], { declarations: [ui] }))
     expect(found).toHaveLength(6)
@@ -273,17 +273,17 @@ describe('module requests', () => {
   })
 
   it('rejects synchronous module-request cycles but ignores inject cycles', () => {
-    const a = { ...declaration('@deepseek-ai/dsh-api-a', {
-      external: ['@deepseek-ai/dsh-api-b'],
-      inject: ['@deepseek-ai/dsh-api-b'],
-      runtimeSourceUses: { '@deepseek-ai/dsh-api-b': ['packages/api/a/src/client.ts'] },
-      runtimeSourceSpecifiers: { '@deepseek-ai/dsh-api-b': ['packages/api/a/src/client.ts'] },
+    const a = { ...declaration('@agentrans/api-a', {
+      external: ['@agentrans/api-b'],
+      inject: ['@agentrans/api-b'],
+      runtimeSourceUses: { '@agentrans/api-b': ['packages/api/a/src/client.ts'] },
+      runtimeSourceSpecifiers: { '@agentrans/api-b': ['packages/api/a/src/client.ts'] },
     }), manifest: 'packages/api/a/package.json' }
-    const b = { ...declaration('@deepseek-ai/dsh-api-b', {
-      external: ['@deepseek-ai/dsh-api-a'],
-      inject: ['@deepseek-ai/dsh-api-a'],
-      runtimeSourceUses: { '@deepseek-ai/dsh-api-a': ['packages/client/b/src/client.ts'] },
-      runtimeSourceSpecifiers: { '@deepseek-ai/dsh-api-a': ['packages/client/b/src/client.ts'] },
+    const b = { ...declaration('@agentrans/api-b', {
+      external: ['@agentrans/api-a'],
+      inject: ['@agentrans/api-a'],
+      runtimeSourceUses: { '@agentrans/api-a': ['packages/client/b/src/client.ts'] },
+      runtimeSourceSpecifiers: { '@agentrans/api-a': ['packages/client/b/src/client.ts'] },
     }), manifest: 'packages/api/b/package.json' }
     const found = collectClientPackageViolations(facts([], { declarations: [a, b] }))
     expect(found).toHaveLength(1)
@@ -307,7 +307,7 @@ describe('package assets', () => {
       "import styles from './View.module.css'",
       "import font from './assets/font.woff2'",
       "import raw from './assets/raw.svg?raw'",
-      "import shared from '@deepseek-ai/dsh-client-other/assets/shared.svg'",
+      "import shared from '@agentrans/client-other/assets/shared.svg'",
       "import rooted from '/assets/rooted.svg'",
     ].join('\n'))]).toEqual([
       './assets/art.webp',
@@ -476,19 +476,19 @@ describe('manifest declarations', () => {
     const root = mkdtempSync(join(tmpdir(), 'client-packages-fix-'))
     roots.push(root)
     const subject = pkg('feature', {
-      external: ['', 'react', '@deepseek-ai/dsh-client-feature', '@deepseek-ai/dsh-missing'],
-      inject: ['', '@deepseek-ai/dsh-agent', '@deepseek-ai/dsh-agent'],
+      external: ['', 'react', '@agentrans/client-feature', '@agentrans/missing'],
+      inject: ['', '@agentrans/agent', '@agentrans/agent'],
       sourceUses: {
-        '@deepseek-ai/dsh-agent': ['packages/client/feature/src/index.ts'],
-        '@deepseek-ai/dsh-client-ui-slots': ['packages/client/feature/src/view.tsx'],
+        '@agentrans/agent': ['packages/client/feature/src/index.ts'],
+        '@agentrans/client-ui-slots': ['packages/client/feature/src/view.tsx'],
       },
       dependencies: {
         [CORDIS]: 'workspace:^',
-        '@deepseek-ai/dsh-agent': 'workspace:*',
+        '@agentrans/agent': 'workspace:*',
       },
       peerDependencies: {
-        '@deepseek-ai/dsh-client-ui-slots': 'workspace:^',
-        '@deepseek-ai/cordis-plugin-loader': 'workspace:^',
+        '@agentrans/client-ui-slots': 'workspace:^',
+        '@agentrans/cordis-plugin-loader': 'workspace:^',
       },
       devDependencies: {},
     })
@@ -517,8 +517,8 @@ describe('manifest declarations', () => {
       devDependencies: Record<string, string>
     }
     expect(fixed.dsh.client).toMatchObject({
-      external: ['@deepseek-ai/dsh-missing'],
-      inject: ['@deepseek-ai/dsh-agent'],
+      external: ['@agentrans/missing'],
+      inject: ['@agentrans/agent'],
     })
     expect(fixed.dependencies).toEqual(subject.dependencies)
     expect(fixed.peerDependencies).toEqual(subject.peerDependencies)

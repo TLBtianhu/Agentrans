@@ -1,6 +1,6 @@
 /** One share reader's principal: the Relay-asserted identity and display name, and how two readers compare. */
 
-import type { ShareRpcActor } from '@deepseek-ai/dsh-experimental-liveshare-protocol'
+import type { ShareRpcActor } from '@agentrans/experimental-liveshare-protocol'
 import { describe, expect, it } from 'vitest'
 import {
   isShareViewer, shareViewerOf, shareViewerPrincipal,

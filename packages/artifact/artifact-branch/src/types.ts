@@ -1,6 +1,6 @@
 /** User-confirmed Artifact evidence selected for one ordinary branch conclusion. */
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import type { SavedParticleObservationRef, ParticleObservationComparisonErrorCode } from '@deepseek-ai/dsh-artifact/types'
+import type { SessionId } from '@agentrans/session/types'
+import type { SavedParticleObservationRef, ParticleObservationComparisonErrorCode } from '@agentrans/artifact/types'
 
 /** Exact saved observation or ordered comparison pair resolved only in the child Session. */
 export type ArtifactBranchEvidenceSelection =
@@ -23,7 +23,7 @@ export interface ArtifactBranchResultRequest {
 /** A source selection that cannot supply the requested branch-local evidence. */
 export type ArtifactBranchEvidenceFailure = 'OBSERVATION_NOT_FOUND' | 'PROJECTION_UNAVAILABLE' | ParticleObservationComparisonErrorCode
 
-declare module '@deepseek-ai/dsh-typert-protocol' {
+declare module '@agentrans/typert-protocol' {
   interface RemoteErrorDetailsMap {
     /** The child cut cannot resolve compatible saved evidence; no parent message was appended. */
     'artifact-branch/evidence-unavailable': { readonly reason: ArtifactBranchEvidenceFailure }

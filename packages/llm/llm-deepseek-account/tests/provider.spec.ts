@@ -2,10 +2,10 @@
 import { createServer } from 'node:http'
 import type { IncomingMessage, Server, ServerResponse } from 'node:http'
 import { afterEach, expect, it, vi } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
-import LlmRuntime, { ReasoningEffortId } from '@deepseek-ai/dsh-llm'
-import type { DeepSeekAccount } from '@deepseek-ai/dsh-deepseek-account'
-import * as ApiKey from '@deepseek-ai/dsh-llm-deepseek-api-key'
+import { Context } from '@agentrans/cordis'
+import LlmRuntime, { ReasoningEffortId } from '@agentrans/llm'
+import type { DeepSeekAccount } from '@agentrans/deepseek-account'
+import * as ApiKey from '@agentrans/llm-deepseek-api-key'
 import * as Account from '../src/index.ts'
 
 const MESSAGES = { output_modalities: ['text'], api_capabilities: { anthropic_messages: {} } }

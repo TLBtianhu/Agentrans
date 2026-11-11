@@ -3,7 +3,7 @@
 
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
+import type { SessionId } from '@agentrans/session/types'
 import type {} from '../src/client/index.ts'
 import { LiveshareShareDialog, type LiveshareShareDialogProps } from '../src/client/ShareDialog.tsx'
 import { ShareCapabilitiesPicker } from '../src/client/ShareCapabilitiesPicker.tsx'

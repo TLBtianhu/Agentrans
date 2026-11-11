@@ -7,8 +7,8 @@ import { fileURLToPath } from 'node:url'
 import { chromium, type Browser, type Page } from 'playwright'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import WebSocket from 'ws'
-import type {} from '@deepseek-ai/dsh-tool-present/types'
-import { deriveReplayScript, parseSessionLog } from '@deepseek-ai/dsh-llm-replay'
+import type {} from '@agentrans/tool-present/types'
+import { deriveReplayScript, parseSessionLog } from '@agentrans/llm-replay'
 import {
   assertFinalWorkspaceSnapshot, captureExpandedTurnProcessAria, compareOrRefreshGolden,
   fixtureUserPrompts, launchWebScaffold, recordFixture, watchConsole,

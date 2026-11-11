@@ -1,12 +1,12 @@
-/** Explicit Artifact selections attached to one ordinary question. @module @deepseek-ai/dsh-artifact-followup/types */
+/** Explicit Artifact selections attached to one ordinary question. @module @agentrans/artifact-followup/types */
 import type {
   ArtifactId, ParticleObservationComparison, ParticleObservationComparisonErrorCode,
   SavedParticleObservation, SavedParticleObservationRef, SceneArtifactSnapshot, HtmlArtifactSnapshot,
-} from '@deepseek-ai/dsh-artifact/types'
-import type { ParticleCheckpoint, ParticleObservation } from '@deepseek-ai/dsh-artifact/particle-runtime'
-import type { ArtifactRuntimeFailure, ArtifactRuntimeId } from '@deepseek-ai/dsh-artifact-runtime/types'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import type { JsonValue } from '@deepseek-ai/dsh-util-values'
+} from '@agentrans/artifact/types'
+import type { ParticleCheckpoint, ParticleObservation } from '@agentrans/artifact/particle-runtime'
+import type { ArtifactRuntimeFailure, ArtifactRuntimeId } from '@agentrans/artifact-runtime/types'
+import type { SessionId } from '@agentrans/session/types'
+import type { JsonValue } from '@agentrans/util-values'
 
 /** User-selected program report; state is data reported by the program, not a Host-recomputed observation. */
 export type ArtifactProgramQuestionCapture =
@@ -68,7 +68,7 @@ export type ArtifactPromptContextRejectionReason =
   | 'INVALID_SELECTION' | 'SOURCE_NOT_FOUND' | 'STALE_REVISION' | 'UNSUPPORTED_SOURCE' | 'INVALID_CHECKPOINT'
   | 'CONTEXT_TOO_LARGE' | 'SESSION_MISMATCH' | ParticleObservationComparisonErrorCode
 
-declare module '@deepseek-ai/dsh-typert-protocol' {
+declare module '@agentrans/typert-protocol' {
   interface RemoteErrorDetailsMap {
     'artifact-followup/context-rejected': {
       readonly reason: ArtifactPromptContextRejectionReason

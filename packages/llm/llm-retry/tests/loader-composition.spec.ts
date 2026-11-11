@@ -1,20 +1,20 @@
-import * as NativeToolExecutor from '@deepseek-ai/dsh-tool-executor-native'
+import * as NativeToolExecutor from '@agentrans/tool-executor-native'
 import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { afterEach, describe, expect, it } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
-import Loader from '@deepseek-ai/cordis-plugin-loader'
-import Include from '@deepseek-ai/cordis-plugin-include'
-import AgentRegistry from '@deepseek-ai/dsh-agent'
-import AgentLoop from '@deepseek-ai/dsh-agent-loop'
-import LlmRuntime, { createUserMessage, LlmAdapter, LlmError, resolveRetryPolicy  } from '@deepseek-ai/dsh-llm'
-import type { GenerateOptions, ResolvedRetryPolicy, StreamChunk } from '@deepseek-ai/dsh-llm'
-import SessionStore, { SessionId } from '@deepseek-ai/dsh-session'
-import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
-import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
-import ToolRuntime from '@deepseek-ai/dsh-tools'
+import { Context } from '@agentrans/cordis'
+import Loader from '@agentrans/cordis-plugin-loader'
+import Include from '@agentrans/cordis-plugin-include'
+import AgentRegistry from '@agentrans/agent'
+import AgentLoop from '@agentrans/agent-loop'
+import LlmRuntime, { createUserMessage, LlmAdapter, LlmError, resolveRetryPolicy  } from '@agentrans/llm'
+import type { GenerateOptions, ResolvedRetryPolicy, StreamChunk } from '@agentrans/llm'
+import SessionStore, { SessionId } from '@agentrans/session'
+import SessionProjectionRegistry from '@agentrans/session-projection'
+import SystemPrompt from '@agentrans/system-prompt'
+import ToolRuntime from '@agentrans/tools'
 import * as retry from '../src/index.ts'
 
 let root: string | undefined
@@ -60,16 +60,16 @@ async function loadYaml(lines: readonly string[]): Promise<Context> {
   await context.plugin(Loader)
   context.loader.builtins.include = Include
   const modules = new Map<string, unknown>([
-    ['@deepseek-ai/dsh-llm', LlmRuntime],
-    ['@deepseek-ai/dsh-session', SessionStore],
-    ['@deepseek-ai/dsh-session-projection', SessionProjectionRegistry],
+    ['@agentrans/llm', LlmRuntime],
+    ['@agentrans/session', SessionStore],
+    ['@agentrans/session-projection', SessionProjectionRegistry],
 
-    ['@deepseek-ai/dsh-system-prompt', SystemPrompt],
-    ['@deepseek-ai/dsh-tools', ToolRuntime],
-    ['@deepseek-ai/dsh-tool-executor-native', NativeToolExecutor],
-    ['@deepseek-ai/dsh-agent', AgentRegistry],
-    ['@deepseek-ai/dsh-llm-retry', retry],
-    ['@deepseek-ai/dsh-agent-loop', AgentLoop],
+    ['@agentrans/system-prompt', SystemPrompt],
+    ['@agentrans/tools', ToolRuntime],
+    ['@agentrans/tool-executor-native', NativeToolExecutor],
+    ['@agentrans/agent', AgentRegistry],
+    ['@agentrans/llm-retry', retry],
+    ['@agentrans/agent-loop', AgentLoop],
   ])
   context.loader.internal = {
     version: 'v2',
@@ -92,15 +92,15 @@ describe('real Loader composition', () => {
   // to trip the default 5s budget on cold caches.
   it('loads provider-supplied policy and records recovery through the shipping loop', { timeout: 60_000 }, async () => {
     const loaded = await loadYaml([
-      "- name: '@deepseek-ai/dsh-llm'",
-      "- name: '@deepseek-ai/dsh-session'",
-      "- name: '@deepseek-ai/dsh-session-projection'",
-      "- name: '@deepseek-ai/dsh-system-prompt'",
-      "- name: '@deepseek-ai/dsh-tools'",
-      "- name: '@deepseek-ai/dsh-tool-executor-native'",
-      "- name: '@deepseek-ai/dsh-agent'",
-      "- name: '@deepseek-ai/dsh-llm-retry'",
-      "- name: '@deepseek-ai/dsh-agent-loop'",
+      "- name: '@agentrans/llm'",
+      "- name: '@agentrans/session'",
+      "- name: '@agentrans/session-projection'",
+      "- name: '@agentrans/system-prompt'",
+      "- name: '@agentrans/tools'",
+      "- name: '@agentrans/tool-executor-native'",
+      "- name: '@agentrans/agent'",
+      "- name: '@agentrans/llm-retry'",
+      "- name: '@agentrans/agent-loop'",
     ])
 
     const unloaded = [...loaded.loader.entries()]

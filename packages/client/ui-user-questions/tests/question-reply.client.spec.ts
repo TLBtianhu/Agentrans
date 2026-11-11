@@ -1,7 +1,7 @@
 /** Late-reply conversation node: source matching and payload projection. */
 import { describe, expect, it } from 'vitest'
-import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
-import { SessionSeq } from '@deepseek-ai/dsh-session'
+import { makeTranslate } from '@agentrans/client-test-runtime'
+import { SessionSeq } from '@agentrans/session'
 import type { ChatConversationViewNode } from '../../ui-chat/src/client/contract/chat-nodes.ts'
 import type { ChatSnapshot } from '../../ui-chat/src/client/contract/snapshot.ts'
 import { chatViewDefinition } from '../../ui-chat/src/client/conversation-nodes/chat-snapshot-builder.ts'
@@ -9,7 +9,7 @@ import { assistantDefinition } from '../../ui-chat/src/client/conversation-nodes
 import { toolDefinition } from '../../ui-chat/src/client/conversation-nodes/tool.ts'
 import { turnProcessDefinition } from '../../ui-chat/src/client/conversation-nodes/turn-process.ts'
 import { isAtOrOutside } from '../../ui-chat/src/client/contract/group-tree.ts'
-import type { ConversationViewNode } from '@deepseek-ai/dsh-client-ui-conversation/client'
+import type { ConversationViewNode } from '@agentrans/client-ui-conversation/client'
 import { messageDefinition } from '../../ui-chat/src/client/conversation-nodes/message.ts'
 import { ConversationNodeAssembler } from '../../ui-conversation/src/client/conversation/assembler.ts'
 import { en } from '../src/client/locales.ts'

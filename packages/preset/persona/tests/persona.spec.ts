@@ -1,9 +1,9 @@
-import { Context } from '@deepseek-ai/cordis'
-import SystemPrompt, { renderPrompt } from '@deepseek-ai/dsh-system-prompt'
-import { createScope, type ScopeKey } from '@deepseek-ai/dsh-scope'
+import { Context } from '@agentrans/cordis'
+import SystemPrompt, { renderPrompt } from '@agentrans/system-prompt'
+import { createScope, type ScopeKey } from '@agentrans/scope'
 import { describe, expect, it } from 'vitest'
-import * as Persona from '@deepseek-ai/dsh-persona'
-import { PERSONA_SUFFIX_SECTION, PERSONA_PREFIX_SECTION } from '@deepseek-ai/dsh-persona'
+import * as Persona from '@agentrans/persona'
+import { PERSONA_SUFFIX_SECTION, PERSONA_PREFIX_SECTION } from '@agentrans/persona'
 
 async function harness(deploymentPersona: string): Promise<Context> {
   const ctx = new Context()

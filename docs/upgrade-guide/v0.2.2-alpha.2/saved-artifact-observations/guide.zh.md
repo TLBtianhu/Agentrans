@@ -17,7 +17,7 @@ description: "Artifact 恢复现在依赖 Session Projection，旧读取器会�
 
 ## 迁移
 
-1. 在自定义 `cordis.yml` 中，与 `@deepseek-ai/dsh-artifact` 一同挂载 `@deepseek-ai/dsh-session-projection`。编程调用方在调用同步方法前等待 Artifact 插件就绪。
+1. 在自定义 `cordis.yml` 中，与 `@agentrans/artifact` 一同挂载 `@agentrans/session-projection`。编程调用方在调用同步方法前等待 Artifact 插件就绪。
 2. 打开含已保存实验的 Session 时，使用认识 `artifact/observations` 的读取器。不要删除事件或改写日志来让旧构建接受它们。
 3. 保存一个有名称的粒子观察，重新加载 Session 后恢复。核对显示的源码修订与导出数值。只有“发送给 Agent”会将已保存观察准入为输入；重试不会在同一 Session 重复准入。
 4. 原生粒子比较需要在两侧各保存并选择一条观察，再明确发送比较。核对两侧源码修订和检查点。重新加载后，已保存观察仍可使用，但需要重新选择比较双方；选择本身属于本地状态。同一 Session 再次发送同一有序组合不会重复输入。

@@ -1,8 +1,8 @@
 /** DeepSeek `GET /models` listing: one authenticated request and per-entry decoding. */
-import { attributionHeaders, LlmError } from '@deepseek-ai/dsh-llm'
+import { attributionHeaders, LlmError } from '@agentrans/llm'
 import { createRequire } from 'node:module'
-import type { LlmModelBadge, LlmModelBadgeTone, ModelModality } from '@deepseek-ai/dsh-llm'
-import { timeoutOf } from '@deepseek-ai/dsh-timeout'
+import type { LlmModelBadge, LlmModelBadgeTone, ModelModality } from '@agentrans/llm'
+import { timeoutOf } from '@agentrans/timeout'
 
 const { version } = createRequire(import.meta.url)('../package.json') as { version: string }
 

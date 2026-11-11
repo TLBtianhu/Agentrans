@@ -59,7 +59,7 @@ x = x + v * h
 
 ### 改动范围
 
-变更只涉及一个包 `@deepseek-ai/dsh-client-ui-dockkit`，其导出与 `DockIntents` 保持不变；`TabRenderer` 的约定写明了套件何时复用标签页内容。
+变更只涉及一个包 `@agentrans/client-ui-dockkit`，其导出与 `DockIntents` 保持不变；`TabRenderer` 的约定写明了套件何时复用标签页内容。
 
 | 文件 | 变更 |
 |---|---|

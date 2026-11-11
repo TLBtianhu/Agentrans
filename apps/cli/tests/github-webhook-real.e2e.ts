@@ -13,8 +13,8 @@ import { setTimeout as delay } from 'node:timers/promises'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import WebSocket from 'ws'
-import { initProfile } from '@deepseek-ai/dsh-app-boot'
-import { PROFILE_TEMPLATES } from '@deepseek-ai/dsh-official-bundles'
+import { initProfile } from '@agentrans/app-boot'
+import { PROFILE_TEMPLATES } from '@agentrans/official-bundles'
 
 const REPO_ROOT = fileURLToPath(new URL('../../..', import.meta.url))
 const BUILT_BIN = join(REPO_ROOT, 'apps/cli/lib/bin.js')
@@ -363,7 +363,7 @@ describe.skipIf(!process.env.DEEPSEEK_API_KEY)('GitHub webhook through the real 
     initProfile(profile, PROFILE_TEMPLATES.web!.bundles)
     const manifestPath = join(profile, 'package.json')
     const manifest = JSON.parse(await readFile(manifestPath, 'utf8')) as { dependencies: Record<string, string> }
-    for (const name of ['@deepseek-ai/dsh-webhook', '@deepseek-ai/dsh-webhook-github']) {
+    for (const name of ['@agentrans/webhook', '@agentrans/webhook-github']) {
       const directory = dirname(fileURLToPath(import.meta.resolve(`${name}/package.json`)))
       const link = join(profile, 'node_modules', name)
       await mkdir(dirname(link), { recursive: true })

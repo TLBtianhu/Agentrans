@@ -1,15 +1,15 @@
 /** Conditional registrations share step admission with direct and nested execution. */
-import { executeModelToolFixture, executeToolFixture } from '@deepseek-ai/dsh-tool-testkit'
-import * as NativeToolExecutor from '@deepseek-ai/dsh-tool-executor-native'
+import { executeModelToolFixture, executeToolFixture } from '@agentrans/tool-testkit'
+import * as NativeToolExecutor from '@agentrans/tool-executor-native'
 import { afterEach, expect, it } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
-import type { Agent } from '@deepseek-ai/dsh-agent'
-import { ToolCallId } from '@deepseek-ai/dsh-llm'
-import { createScope, type Scope } from '@deepseek-ai/dsh-scope'
-import { SessionId } from '@deepseek-ai/dsh-session'
-import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
-import ToolRuntime, { defineTool, TOOL_ABORTED_BEFORE_DISPATCH, ToolActivationError } from '@deepseek-ai/dsh-tools'
-import type { ToolExecutionInput, ToolExecutionResult } from '@deepseek-ai/dsh-tools'
+import { Context } from '@agentrans/cordis'
+import type { Agent } from '@agentrans/agent'
+import { ToolCallId } from '@agentrans/llm'
+import { createScope, type Scope } from '@agentrans/scope'
+import { SessionId } from '@agentrans/session'
+import SystemPrompt from '@agentrans/system-prompt'
+import ToolRuntime, { defineTool, TOOL_ABORTED_BEFORE_DISPATCH, ToolActivationError } from '@agentrans/tools'
+import type { ToolExecutionInput, ToolExecutionResult } from '@agentrans/tools'
 
 const TEST_MODEL_SELECTION = { provider: 'test', model: 'test' }
 const contexts: Context[] = []

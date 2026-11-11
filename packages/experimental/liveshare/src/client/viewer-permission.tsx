@@ -7,14 +7,14 @@
  * shipped permission control is shadowed here, because the owner's own preset for the Session is
  * not this reader's permission and offering it would offer a change nothing may make.
  *
- * @module @deepseek-ai/dsh-experimental-liveshare/src/client/viewer-permission
+ * @module @agentrans/experimental-liveshare/src/client/viewer-permission
  */
 
 import { useSyncExternalStore, type ReactNode } from 'react'
-import type { Context as ClientContext } from '@deepseek-ai/cordis'
-import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
+import type { Context as ClientContext } from '@agentrans/cordis'
+import type {} from '@agentrans/client-ui-renderer/client'
+import type { SessionId } from '@agentrans/session/types'
+import type { PropsLocale } from '@agentrans/client-ui-slots'
 import { type LiveshareKey, NS, type ViewerTranslate } from './locales.ts'
 import { viewerCapabilities, type ViewerCapabilities } from './viewer-capabilities.ts'
 import { ViewerSeat, VIEWER_SEAT_PRIORITY } from './viewer-seat.tsx'

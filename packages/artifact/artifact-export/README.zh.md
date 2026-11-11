@@ -3,7 +3,7 @@ description: "固定原始 Scene 源码与重放条件，生成不可变 HTML �
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-artifact-export
+# @agentrans/artifact-export
 
 [English](README.md) | 中文
 
@@ -28,7 +28,7 @@ kind: "package-reference"
 将本插件与 Artifact、Agent 注册表、Session 投影，以及支持原样文件存储和完整性验证流读取的附件提供者一起挂载。Web 组合为独立卡片和比较单元挂载此能力。主 Artifact 服务继续独立于文件存储。
 
 ```yaml
-- name: '@deepseek-ai/dsh-artifact-export'
+- name: '@agentrans/artifact-export'
 ```
 
 | 配置 | 默认值 | 含义 |

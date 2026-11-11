@@ -1,14 +1,14 @@
 /** Legacy projection calls keep their effect ownership while new callers await retained readers. */
 /* oxlint-disable typescript/no-deprecated -- exercise the public compatibility API. */
 import { setImmediate } from 'node:timers/promises'
-import { Context, FiberState } from '@deepseek-ai/cordis'
-import SessionStore from '@deepseek-ai/dsh-session'
-import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
-import type { ProjectionDefinition } from '@deepseek-ai/dsh-session-projection'
+import { Context, FiberState } from '@agentrans/cordis'
+import SessionStore from '@agentrans/session'
+import SessionProjectionRegistry from '@agentrans/session-projection'
+import type { ProjectionDefinition } from '@agentrans/session-projection'
 import { describe, expect, it, onTestFinished, vi } from 'vitest'
 import { z } from 'zod'
 
-declare module '@deepseek-ai/dsh-session-projection/types' {
+declare module '@agentrans/session-projection/types' {
   interface SessionProjectionMap {
     'test/legacy': number
     'test/legacy-unread-wire': number

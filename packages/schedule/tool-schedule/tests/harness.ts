@@ -1,8 +1,8 @@
 /** Agent-scoped Schedule tool tests reuse the Host Schedule harness and mount the tools under a scope. */
-import type { Context } from '@deepseek-ai/cordis'
-import type { Agent } from '@deepseek-ai/dsh-agent'
-import { PtcRuntime } from '@deepseek-ai/dsh-ptc-runtime'
-import { createScope, type Scope } from '@deepseek-ai/dsh-scope'
+import type { Context } from '@agentrans/cordis'
+import type { Agent } from '@agentrans/agent'
+import { PtcRuntime } from '@agentrans/ptc-runtime'
+import { createScope, type Scope } from '@agentrans/scope'
 import * as ToolSchedule from '../src/index.ts'
 
 export { agentFor, boundTask, harness, seedTasks } from '../../schedule/tests/harness.ts'

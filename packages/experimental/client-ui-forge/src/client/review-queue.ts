@@ -1,7 +1,7 @@
 /** Browser-persisted review drafts and the write whose outcome still needs confirmation. */
 
 import { z } from 'zod'
-import type { ForgeReviewRequest } from '@deepseek-ai/dsh-experimental-forge/types'
+import type { ForgeReviewRequest } from '@agentrans/experimental-forge/types'
 import type { ReviewSelection, ReviewSource } from './review.ts'
 
 const line = z.object({ path: z.string(), side: z.enum(['L', 'R']), startLine: z.number().int().positive(), endLine: z.number().int().positive(), body: z.string() })

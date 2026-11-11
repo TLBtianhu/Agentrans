@@ -1,5 +1,5 @@
 /** Resolution failures preserve operation order and use raw spelling only for unresolved paths. */
-import { FsError } from '@deepseek-ai/dsh-fs'
+import { FsError } from '@agentrans/fs'
 import { expect, it, vi } from 'vitest'
 import { add, move, patch, setup, update } from './harness.ts'
 

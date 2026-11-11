@@ -4,13 +4,13 @@
  * keep no state; an image request resolves its bundle and document again.
  */
 import semver from 'semver'
-import { resolveBundleDir } from '@deepseek-ai/dsh-app-boot'
-import type { ProfileContext } from '@deepseek-ai/dsh-app-boot'
+import { resolveBundleDir } from '@agentrans/app-boot'
+import type { ProfileContext } from '@agentrans/app-boot'
 import {
   DetailFailure, detailImage, languageChain, localFiles, npmFileSourceOrder, npmFiles, readPackageDocument,
   type DetailFiles, type NpmFileSource,
-} from '@deepseek-ai/dsh-plugin-detail'
-import { RemoteError } from '@deepseek-ai/dsh-typert-protocol'
+} from '@agentrans/plugin-detail'
+import { RemoteError } from '@agentrans/typert-protocol'
 import type { BundleDetail, BundleInfo } from './types.ts'
 
 /** Limits and sources of bundle detail reads. */

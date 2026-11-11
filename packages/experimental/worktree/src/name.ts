@@ -1,7 +1,7 @@
 /** Generated worktree names that lead back to the Session that created them. */
 
 import { randomBytes } from 'node:crypto'
-import type { Agent } from '@deepseek-ai/dsh-agent'
+import type { Agent } from '@agentrans/agent'
 
 const UUID = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i
 

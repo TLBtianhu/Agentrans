@@ -3,7 +3,7 @@ description: "Web GUI 的沙箱 HTML 和原生 SceneSpec Artifact 卡片：版�
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-client-ui-artifact
+# @agentrans/client-ui-artifact
 
 [English](README.md) | 中文
 

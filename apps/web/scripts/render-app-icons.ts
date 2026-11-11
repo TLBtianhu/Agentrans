@@ -11,7 +11,7 @@
  * install icon, the tray bitmap and the desktop icon cannot drift apart.
  *
  * The committed PNGs are the output; rerun
- * `pnpm --filter @deepseek-ai/dsh-web-frontend run render:app-icons` after the
+ * `pnpm --filter @agentrans/web-frontend run render:app-icons` after the
  * artwork changes.
  * @module render-app-icons
  */
@@ -19,7 +19,7 @@
 import { readFile, writeFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { assertNever } from '@deepseek-ai/dsh-util-values'
+import { assertNever } from '@agentrans/util-values'
 
 /** Vector source owned by the desktop application; a 1024-unit square tile. */
 export const TILE_SOURCE = fileURLToPath(new URL('../../desktop/resources/icon.svg', import.meta.url))

@@ -3,7 +3,7 @@
  *
  * The type lives apart from the plugin assembly so the persistence, Relay authority, HTTP, and
  * supervision modules do not import the assembly they are wired into.
- * @module @deepseek-ai/dsh-experimental-liveshare/src/host/owner-types
+ * @module @agentrans/experimental-liveshare/src/host/owner-types
  */
 
 import type { ShareAccessSelection } from '../share-api-types.ts'

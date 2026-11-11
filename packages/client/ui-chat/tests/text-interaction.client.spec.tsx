@@ -3,9 +3,9 @@ import { createRef, useCallback, useMemo, useRef } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { act, cleanup, fireEvent, render, renderHook } from '@testing-library/react'
 import { useTextInteraction } from '../src/client/chat/text-interaction.ts'
-import { SessionId } from '@deepseek-ai/dsh-session/types'
+import { SessionId } from '@agentrans/session/types'
 import type { TextInteractionBinding } from '../src/client/chat/text-interaction.ts'
-import type { TextInteractionGesture, TextInteractionRequest } from '@deepseek-ai/dsh-client-ui-conversation/client'
+import type { TextInteractionGesture, TextInteractionRequest } from '@agentrans/client-ui-conversation/client'
 
 const rect = (left: number, top: number, width: number, height: number): DOMRect => new DOMRect(left, top, width, height)
 let selectionRect = rect(100, 120, 40, 20)

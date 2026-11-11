@@ -3,14 +3,14 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write docs/upgrade-guide/v0.2.1-rc.2/official-bundle-lists/guide.md
 /:
-  en: d6f85fefe3671f5d
-  zh: 2719b3d5ba1b2120
-/import-bundle-lists-from-deepseek-ai-dsh-official-bundles:
-  en: 89f87bcf95ee4262
-  zh: 00bbb48605743bcc
-/import-bundle-lists-from-deepseek-ai-dsh-official-bundles/change:
-  en: 0d8984d9bead43c6
-  zh: 60939a14fcf1ba9a
-/import-bundle-lists-from-deepseek-ai-dsh-official-bundles/migration:
-  en: ef2f3d6258a3b2bb
-  zh: 65a79e9551f8b237
+  en: a8a16b7f0b18c7bc
+  zh: 3f665ebd84cffc49
+/import-bundle-lists-from-agentrans-official-bundles:
+  en: f61aaedd81c5d4af
+  zh: 1b9532ecb443d77d
+/import-bundle-lists-from-agentrans-official-bundles/change:
+  en: e4f799668c34aba9
+  zh: 0cd53f3a82de1335
+/import-bundle-lists-from-agentrans-official-bundles/migration:
+  en: 4f256f13d451c87f
+  zh: abde339841a2ef4d

@@ -5,8 +5,8 @@
  */
 import { createHash } from 'node:crypto'
 import { posix } from 'node:path'
-import { brandString } from '@deepseek-ai/dsh-brand'
-import { DetailFailure, detailImage, joinPath, markdownOf, readPackageDocument, type DetailFiles } from '@deepseek-ai/dsh-plugin-detail'
+import { brandString } from '@agentrans/brand'
+import { DetailFailure, detailImage, joinPath, markdownOf, readPackageDocument, type DetailFiles } from '@agentrans/plugin-detail'
 import hostedGitInfo from 'hosted-git-info'
 import { repositoryFiles, type RepositoryFileOptions, type RepositoryRef } from './detail-files.ts'
 import type { PluginDetail, PluginDetailDocumentId, PluginDetailOrigin } from './types.ts'

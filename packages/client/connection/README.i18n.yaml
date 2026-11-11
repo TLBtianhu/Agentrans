@@ -5,33 +5,33 @@
 /:
   en: 13b131457d03a224
   zh: 6dedd0706d5ffc0a
-/deepseek-ai-dsh-client-connection:
-  en: 142fb403b92c8af8
-  zh: bb52a8ccf7ca4402
-/deepseek-ai-dsh-client-connection/summary:
+/agentrans-client-connection:
+  en: c266b0a5a291b0b1
+  zh: f9b815af7c6973fb
+/agentrans-client-connection/summary:
   en: a83b5e9fd1968062
   zh: ac68628e185a4bff
-/deepseek-ai-dsh-client-connection/table-of-contents:
+/agentrans-client-connection/table-of-contents:
   en: 18792bf2fb4f8030
   zh: 84c63acc7e0099ae
-/deepseek-ai-dsh-client-connection/use-this-package:
+/agentrans-client-connection/use-this-package:
   en: da6810858bf74a86
   zh: d623e510ec74520f
-/deepseek-ai-dsh-client-connection/browser-authentication-and-request-trust:
+/agentrans-client-connection/browser-authentication-and-request-trust:
   en: e2154aa9caa859b4
   zh: 32832efe4dc37c06
-/deepseek-ai-dsh-client-connection/connection-generation:
-  en: d9fe48c025ace7ce
-  zh: 0e23b299fbf25ae6
-/deepseek-ai-dsh-client-connection/model-experience:
+/agentrans-client-connection/connection-generation:
+  en: 49c7474e2f56f5d5
+  zh: fda02154fd6d16a9
+/agentrans-client-connection/model-experience:
   en: 88bbc33fe9ae9df8
   zh: bfbab6d51b4abd40
-/deepseek-ai-dsh-client-connection/model-experience/kv-cache-effect:
+/agentrans-client-connection/model-experience/kv-cache-effect:
   en: ca75c51c89c2c9b0
   zh: de54f3467ef3b9be
-/deepseek-ai-dsh-client-connection/known-limitations-and-deferred-work:
+/agentrans-client-connection/known-limitations-and-deferred-work:
   en: a860aa95302e4f02
   zh: 4df79a08b5fe018e
-/deepseek-ai-dsh-client-connection/known-limitations-and-deferred-work/dev-note:
+/agentrans-client-connection/known-limitations-and-deferred-work/dev-note:
   en: e67f633dc6fe7773
   zh: e88aeb617ffb74ea

@@ -1,10 +1,10 @@
 /** Team state projected incrementally from committed Session events, with a durable-only client view. */
 
 import { z } from 'zod'
-import { brandString } from '@deepseek-ai/dsh-brand'
-import type { ContentBlock } from '@deepseek-ai/dsh-llm'
-import type { SessionEvent, SessionEventMap, SessionId } from '@deepseek-ai/dsh-session'
-import type { ProjectionDefinition } from '@deepseek-ai/dsh-session-projection'
+import { brandString } from '@agentrans/brand'
+import type { ContentBlock } from '@agentrans/llm'
+import type { SessionEvent, SessionEventMap, SessionId } from '@agentrans/session'
+import type { ProjectionDefinition } from '@agentrans/session-projection'
 import type {
   TeamId,
   TeamMemberProjection,

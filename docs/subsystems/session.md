@@ -8,7 +8,7 @@ Source: [`packages/core/session/src/types.ts`](../../packages/core/session/src/t
 
 ## `SessionEventMap` — the event vocabulary
 
-The append-only event types. Merge-extensible: a plugin declares extra event types via declaration merging — e.g. the [compaction seam](compaction.md) adds `compaction/start` / `compaction/summary` / `compaction/end`, and `@deepseek-ai/dsh-hook-protocol` adds log-only `hook/invoked` / `hook/result` records for a hook bridge. Like `compaction/*`, these are NOT `SurfaceEventType`s (no `surfaceOp`). The generated [persistence log event catalog](../persistence-catalog.md) enumerates every member — core and merged — with its payload, surface badge, and declaration site.
+The append-only event types. Merge-extensible: a plugin declares extra event types via declaration merging — e.g. the [compaction seam](compaction.md) adds `compaction/start` / `compaction/summary` / `compaction/end`, and `@agentrans/hook-protocol` adds log-only `hook/invoked` / `hook/result` records for a hook bridge. Like `compaction/*`, these are NOT `SurfaceEventType`s (no `surfaceOp`). The generated [persistence log event catalog](../persistence-catalog.md) enumerates every member — core and merged — with its payload, surface badge, and declaration site.
 
 ```ts type-equiv
 /** A user-role specialization of the shared message representation. */
@@ -758,7 +758,7 @@ A plugin may declaration-merge extra `SessionEventMap` types. These are **log-on
 
 When several events in one plugin-owned family assemble into one Web Client Conversation Node, every start, update, result, resource, or interruption event in that family carries or independently derives the same stable business id. This requirement applies to correlated Node families, not to every Session event; it lets the client group each event without guessing from adjacency or scanning history. See the [Conversation subsystem](conversation.md).
 
-The hook bridges' `hook/invoked` / `hook/result` pairs (from `@deepseek-ai/dsh-hook-protocol`) correlate by `handlerId`. `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, and `Stop` fire inside the loop's open turn, so their `hook/*` records are turn-enclosed by construction. `SessionStart` gets no `hook/*` record because it runs before turn 1; its context remains pending in the inbox until a waking delivery opens a turn.
+The hook bridges' `hook/invoked` / `hook/result` pairs (from `@agentrans/hook-protocol`) correlate by `handlerId`. `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, and `Stop` fire inside the loop's open turn, so their `hook/*` records are turn-enclosed by construction. `SessionStart` gets no `hook/*` record because it runs before turn 1; its context remains pending in the inbox until a waking delivery opens a turn.
 
 ### Plugin records
 
@@ -875,7 +875,7 @@ Host service backing the generated `ctx.remote.session` namespace.
  * @param resolve - synchronous Host validation and model-visible text construction.
  * @returns disposer that withdraws this registration.
  */
-registerPromptContext(kind: string, resolve: (agent: Agent, value: import('@deepseek-ai/dsh-util-values').JsonValue) => readonly TextBlock[]): () => void
+registerPromptContext(kind: string, resolve: (agent: Agent, value: import('@agentrans/util-values').JsonValue) => readonly TextBlock[]): () => void
 
 /**
  * Resolve or resume one ordinary Session for another Host API domain.
@@ -1412,7 +1412,7 @@ Source: [`packages/api/session-controller/src/types.ts`](../../packages/api/sess
 
 #### `session/created` — emit
 
-Read-only creation announcement after store entry. New events reject until every synchronous listener has returned successfully. A synchronous throw vetoes creation and rolls back with a paired disposal; detach requested during dispatch is deferred. A returned-promise rejection is logged but cannot retroactively veto this synchronous boundary. Scope-filtered dispatch (`@deepseek-ai/dsh-scope`): agent-scoped listeners receive only sessions entered through that agent's context.
+Read-only creation announcement after store entry. New events reject until every synchronous listener has returned successfully. A synchronous throw vetoes creation and rolls back with a paired disposal; detach requested during dispatch is deferred. A returned-promise rejection is logged but cannot retroactively veto this synchronous boundary. Scope-filtered dispatch (`@agentrans/scope`): agent-scoped listeners receive only sessions entered through that agent's context.
 
 ```ts cordis-catalog
 /**
@@ -1422,7 +1422,7 @@ Read-only creation announcement after store entry. New events reject until every
  * detach requested during dispatch is deferred.
  * A returned-promise rejection is logged but cannot retroactively veto this
  * synchronous boundary.
- * Scope-filtered dispatch (`@deepseek-ai/dsh-scope`): agent-scoped listeners
+ * Scope-filtered dispatch (`@agentrans/scope`): agent-scoped listeners
  * receive only sessions entered through that agent's context.
  * @param session - the session just entered and announced.
  * @mode emit
@@ -1438,14 +1438,14 @@ Source: [`packages/core/session/src/index.ts`](../../packages/core/session/src/i
 
 #### `session/disposed` — emit
 
-Emitted once when an announced session leaves the store, including publication rollback, but never for an entry whose creation announcement did not begin. Listener failures are logged and contained. Scope-filtered dispatch (`@deepseek-ai/dsh-scope`) reuses the owner scope.
+Emitted once when an announced session leaves the store, including publication rollback, but never for an entry whose creation announcement did not begin. Listener failures are logged and contained. Scope-filtered dispatch (`@agentrans/scope`) reuses the owner scope.
 
 ```ts cordis-catalog
 /**
  * Emitted once when an announced session leaves the store, including
  * publication rollback, but never for an entry whose creation announcement
  * did not begin. Listener failures are logged and contained.
- * Scope-filtered dispatch (`@deepseek-ai/dsh-scope`) reuses the owner scope.
+ * Scope-filtered dispatch (`@agentrans/scope`) reuses the owner scope.
  * @param session - the session that is no longer live in the store.
  * @mode emit
  */
@@ -1460,14 +1460,14 @@ Source: [`packages/core/session/src/index.ts`](../../packages/core/session/src/i
 
 #### `session/event` — emit
 
-Post-commit, fire-and-forget append feed. The listener snapshot resolves before the log push, but callbacks run after it; observer failures are logged and contained without making the committed append fail. Scope-filtered dispatch (`@deepseek-ai/dsh-scope`): agent-scoped listeners receive only events from sessions entered through that agent's context.
+Post-commit, fire-and-forget append feed. The listener snapshot resolves before the log push, but callbacks run after it; observer failures are logged and contained without making the committed append fail. Scope-filtered dispatch (`@agentrans/scope`): agent-scoped listeners receive only events from sessions entered through that agent's context.
 
 ```ts cordis-catalog
 /**
  * Post-commit, fire-and-forget append feed. The listener snapshot resolves
  * before the log push, but callbacks run after it; observer failures are
  * logged and contained without making the committed append fail.
- * Scope-filtered dispatch (`@deepseek-ai/dsh-scope`): agent-scoped listeners
+ * Scope-filtered dispatch (`@agentrans/scope`): agent-scoped listeners
  * receive only events from sessions entered through that agent's context.
  * @param session - the session whose log grew.
  * @param event - the appended event, exactly as recorded.
@@ -1484,13 +1484,13 @@ Source: [`packages/core/session/src/index.ts`](../../packages/core/session/src/i
 
 #### `session/flush` — parallel
 
-Awaited parallel durability checkpoint: every listener runs and the caller awaits all of them, with no waterfall veto. Scope-filtered dispatch (`@deepseek-ai/dsh-scope`) reuses the session's owner scope.
+Awaited parallel durability checkpoint: every listener runs and the caller awaits all of them, with no waterfall veto. Scope-filtered dispatch (`@agentrans/scope`) reuses the session's owner scope.
 
 ```ts cordis-catalog
 /**
  * Awaited parallel durability checkpoint: every listener runs and the
  * caller awaits all of them, with no waterfall veto. Scope-filtered dispatch
- * (`@deepseek-ai/dsh-scope`) reuses the session's owner scope.
+ * (`@agentrans/scope`) reuses the session's owner scope.
  * @param session - the session whose buffered events must reach durable storage.
  * @mode parallel
  */

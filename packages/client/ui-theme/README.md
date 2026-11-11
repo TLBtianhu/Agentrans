@@ -3,7 +3,7 @@ description: "Theme, font-size, and font-family settings for the dsh web client:
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-client-ui-theme
+# @agentrans/client-ui-theme
 
 English | [中文](README.zh.md)
 

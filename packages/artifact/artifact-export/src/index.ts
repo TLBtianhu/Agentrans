@@ -1,21 +1,21 @@
-/** Fixed-input HTML generation with Session-owned result records and immutable file storage. @module @deepseek-ai/dsh-artifact-export */
+/** Fixed-input HTML generation with Session-owned result records and immutable file storage. @module @agentrans/artifact-export */
 import { Buffer } from 'node:buffer'
-import { Context, Service } from '@deepseek-ai/cordis'
-import z from '@deepseek-ai/schemastery'
-import type { Agent } from '@deepseek-ai/dsh-agent'
-import type { Session } from '@deepseek-ai/dsh-session'
-import { ArtifactError, type ArtifactService } from '@deepseek-ai/dsh-artifact'
-import { ParticleRuntimeError } from '@deepseek-ai/dsh-artifact/particle-runtime'
-import { buildSceneAnimationHtml, SCENE_EXPORTER_VERSION } from '@deepseek-ai/dsh-artifact/scene-export'
-import { isAttachmentError } from '@deepseek-ai/dsh-attachment'
-import type { ProjectionDefinition, ProjectionHandle } from '@deepseek-ai/dsh-session-projection'
-import { Remote, RemoteError, TypertRemoteService } from '@deepseek-ai/dsh-typert-protocol'
+import { Context, Service } from '@agentrans/cordis'
+import z from '@agentrans/schemastery'
+import type { Agent } from '@agentrans/agent'
+import type { Session } from '@agentrans/session'
+import { ArtifactError, type ArtifactService } from '@agentrans/artifact'
+import { ParticleRuntimeError } from '@agentrans/artifact/particle-runtime'
+import { buildSceneAnimationHtml, SCENE_EXPORTER_VERSION } from '@agentrans/artifact/scene-export'
+import { isAttachmentError } from '@agentrans/attachment'
+import type { ProjectionDefinition, ProjectionHandle } from '@agentrans/session-projection'
+import { Remote, RemoteError, TypertRemoteService } from '@agentrans/typert-protocol'
 import { exportIdSchema, exportsSchema, recordSchema, requestSchema } from './schema.ts'
 import type { ArtifactExportId, ArtifactHtmlExportFailure, ArtifactHtmlExportInput, ArtifactHtmlExportRecord, ArtifactHtmlExportRequest, ArtifactHtmlExports } from './types.ts'
 
 export type * from './types.ts'
 
-declare module '@deepseek-ai/cordis' {
+declare module '@agentrans/cordis' {
   interface Context {
     /** Fixed-input Scene HTML export requests, files, and their Session-visible history. */
     artifactExports: ArtifactExports

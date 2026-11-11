@@ -6,11 +6,11 @@
  * answers that channel in the test process, so the page under test keeps its real carrier, its
  * real envelopes, and its real polling, while the owner behind it stays the scripted mock.
  *
- * @module @deepseek-ai/dsh-experimental-liveshare/tests/viewer-relay
+ * @module @agentrans/experimental-liveshare/tests/viewer-relay
  */
 
 import { vi } from 'vitest'
-import type { ClientConnectionRpc } from '@deepseek-ai/dsh-client-connection/client'
+import type { ClientConnectionRpc } from '@agentrans/client-connection/client'
 import type { ViewerRequest, ViewerStreamValue } from '../src/viewer-channel.ts'
 
 /** Path the viewer page posts every read to. */

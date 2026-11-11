@@ -1,12 +1,12 @@
 // @vitest-environment jsdom
-import { sessionSnapshot } from '@deepseek-ai/dsh-client-test-runtime'
+import { sessionSnapshot } from '@agentrans/client-test-runtime'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { bindSnapshotSelector, makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
-import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
-import { SessionId } from '@deepseek-ai/dsh-session/types'
-import type { ArtifactId, HtmlArtifactSnapshot } from '@deepseek-ai/dsh-artifact/types'
-import type { ArtifactRuntimeId, ArtifactRuntimeIdentity } from '@deepseek-ai/dsh-artifact-runtime/types'
+import { bindSnapshotSelector, makeTranslate } from '@agentrans/client-test-runtime'
+import { createSnapshotStore } from '@agentrans/client-store'
+import { SessionId } from '@agentrans/session/types'
+import type { ArtifactId, HtmlArtifactSnapshot } from '@agentrans/artifact/types'
+import type { ArtifactRuntimeId, ArtifactRuntimeIdentity } from '@agentrans/artifact-runtime/types'
 import { ArtifactRuntimeOwner, type ArtifactRuntimeSnapshot } from '../src/client/runtime-owner.ts'
 import { ArtifactInteractionOwner, particleRuntimeKey } from '../src/client/particle-runtime-owner.ts'
 import { ArtifactPromptContext } from '../src/client/ArtifactPromptContext.tsx'
@@ -38,7 +38,7 @@ function bench() {
   return { source, channel, open, runtimes, owner, run, release }
 }
 
-function receiveState(b: ReturnType<typeof bench>, state: import('@deepseek-ai/dsh-util-values').JsonValue): void {
+function receiveState(b: ReturnType<typeof bench>, state: import('@agentrans/util-values').JsonValue): void {
   b.runtimes.actions.report(key, b.run, { status: 'ready', capabilities: { state: true, commands: [] } })
   b.runtimes.actions.state(key, b.run, state)
 }

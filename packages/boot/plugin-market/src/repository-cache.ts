@@ -10,9 +10,9 @@ import { existsSync } from 'node:fs'
 import { mkdir, mkdtemp, readdir, rename, rm, stat, utimes } from 'node:fs/promises'
 import { join } from 'node:path'
 import { execa } from 'execa'
-import { withFileLock } from '@deepseek-ai/dsh-atomic-write'
-import { scrubbedParentEnv } from '@deepseek-ai/dsh-subprocess'
-import { DetailFailure, readmeName, type FoundFile } from '@deepseek-ai/dsh-plugin-detail'
+import { withFileLock } from '@agentrans/atomic-write'
+import { scrubbedParentEnv } from '@agentrans/subprocess'
+import { DetailFailure, readmeName, type FoundFile } from '@agentrans/plugin-detail'
 
 /**
  * Git deadlines one operation's lock waits for: an operation runs at most a fetch and a file read that contact the

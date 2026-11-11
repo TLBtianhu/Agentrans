@@ -3,8 +3,8 @@
  * every product icon, so ui-primitives icons render through `<use>` and
  * inherit `currentColor` and CSS variables at each use site.
  */
-import type { Context } from '@deepseek-ai/cordis'
-import { ICON_SYMBOLS, type IconSymbolId } from '@deepseek-ai/dsh-client-ui-primitives'
+import type { Context } from '@agentrans/cordis'
+import { ICON_SYMBOLS, type IconSymbolId } from '@agentrans/client-ui-primitives'
 
 const SVG_NS = 'http://www.w3.org/2000/svg'
 

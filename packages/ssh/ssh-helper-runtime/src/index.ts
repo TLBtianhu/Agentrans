@@ -29,11 +29,11 @@ export async function runSshHelperRuntime(): Promise<void> {
   Reflect.deleteProperty(process.env, 'DSH_SUBPROCESS_RUNNER')
   if (process.env.DSH_PTC_RUNTIME_NODE === '1') {
     Reflect.deleteProperty(process.env, 'DSH_PTC_RUNTIME_NODE')
-    await import('@deepseek-ai/dsh-ptc-runtime-node/process')
+    await import('@agentrans/ptc-runtime-node/process')
   } else if (selection !== undefined) {
-    const { runSelectedSubprocessRunner } = await import('@deepseek-ai/dsh-subprocess-local/runner')
+    const { runSelectedSubprocessRunner } = await import('@agentrans/subprocess-local/runner')
     await runSelectedSubprocessRunner(selection)
   } else {
-    await import('@deepseek-ai/dsh-ssh/helper')
+    await import('@agentrans/ssh/helper')
   }
 }

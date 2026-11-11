@@ -1,9 +1,9 @@
 /** Profile package management and explicit, exact-version compatibility approvals. */
-import { runPluginCommand, runProfilePnpm, setProfileVersionExemption, type PackageOperationOptions } from '@deepseek-ai/dsh-plugin-manager/operations'
+import { runPluginCommand, runProfilePnpm, setProfileVersionExemption, type PackageOperationOptions } from '@agentrans/plugin-manager/operations'
 import { INSTALL_ANCHOR } from './profile-boot.ts'
-import { initProfile, readProfileCompatibility, resolveProfileDir, type ProfileContext } from '@deepseek-ai/dsh-app-boot'
-import { PROFILE_TEMPLATES, DEFAULT_PROFILE_BUNDLES } from '@deepseek-ai/dsh-official-bundles'
-import { withFileLock } from '@deepseek-ai/dsh-atomic-write'
+import { initProfile, readProfileCompatibility, resolveProfileDir, type ProfileContext } from '@agentrans/app-boot'
+import { PROFILE_TEMPLATES, DEFAULT_PROFILE_BUNDLES } from '@agentrans/official-bundles'
+import { withFileLock } from '@agentrans/atomic-write'
 import { existsSync } from 'node:fs'
 import { mkdir } from 'node:fs/promises'
 import { join } from 'node:path'

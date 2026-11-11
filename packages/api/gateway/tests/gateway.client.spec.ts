@@ -1,11 +1,11 @@
 import { queryObjects } from 'node:v8'
-import { RemoteError, typertOwnedValue } from '@deepseek-ai/dsh-typert-protocol'
-import { Context, Service } from '@deepseek-ai/cordis'
-import type { Fiber } from '@deepseek-ai/cordis'
+import { RemoteError, typertOwnedValue } from '@agentrans/typert-protocol'
+import { Context, Service } from '@agentrans/cordis'
+import type { Fiber } from '@agentrans/cordis'
 import { describe, expect, expectTypeOf, it, vi } from 'vitest'
 import { z } from 'zod'
-import { RemoteMock } from '@deepseek-ai/dsh-remote-mock'
-import { openConnectionWebSocket } from '@deepseek-ai/dsh-client-connection/src/client/socket.ts'
+import { RemoteMock } from '@agentrans/remote-mock'
+import { openConnectionWebSocket } from '@agentrans/client-connection/src/client/socket.ts'
 import {
   apply as applyConnection,
   installConnection,
@@ -13,7 +13,7 @@ import {
   type ConnectionGeneration,
   type ConnectionGenerationSource,
   type ConnectionHandle,
-} from '@deepseek-ai/dsh-client-connection/client'
+} from '@agentrans/client-connection/client'
 import type {
   InvocationDescriptor,
   RemoteResult,
@@ -24,8 +24,8 @@ import type {
   TypertLookup,
   TypertRemoteScopeApi,
   TypertRemoteNamespace,
-} from '@deepseek-ai/dsh-typert-protocol'
-import TypertRegistry from '@deepseek-ai/dsh-typert-registry'
+} from '@agentrans/typert-protocol'
+import TypertRegistry from '@agentrans/typert-registry'
 import type { ClientRemote } from '../src/client/index.ts'
 import { apply, inject, isRemoteFailure, RemoteStream } from '../src/client/index.ts'
 import {
@@ -44,7 +44,7 @@ interface FixtureAgent {
   readonly agentId: string
 }
 
-declare module '@deepseek-ai/cordis' {
+declare module '@agentrans/cordis' {
   interface Events {
     /**
      * Test-only forwarded Host event.
@@ -79,7 +79,7 @@ declare module '@deepseek-ai/cordis' {
   }
 }
 
-declare module '@deepseek-ai/dsh-typert-protocol' {
+declare module '@agentrans/typert-protocol' {
   interface TypertRemoteEventSelection extends
     Record<'fixture/changed' | 'fixture/idle' | 'fixture/approval', true> {}
 

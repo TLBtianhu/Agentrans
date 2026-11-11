@@ -1,8 +1,8 @@
 /** The Relay's access statements: adoption, fencing, and what a narrowed snapshot ends. */
 
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import type { ShareAccessStateFrame } from '@deepseek-ai/dsh-experimental-liveshare-protocol'
-import { identityKeyOf } from '@deepseek-ai/dsh-experimental-liveshare-protocol'
+import type { ShareAccessStateFrame } from '@agentrans/experimental-liveshare-protocol'
+import { identityKeyOf } from '@agentrans/experimental-liveshare-protocol'
 import { createRelayAuthority, identityForGrantedSubject, requesterStillAdmitted } from '../src/host/relay-authority.ts'
 import type { OwnerShare } from '../src/host/owner-types.ts'
 

@@ -1,7 +1,7 @@
 import { expect, it, vi } from 'vitest'
-import { agentEvents, type Agent, type PreStepDecision } from '@deepseek-ai/dsh-agent'
-import { ToolCallId } from '@deepseek-ai/dsh-llm'
-import { appendPluginRecord } from '@deepseek-ai/dsh-session'
+import { agentEvents, type Agent, type PreStepDecision } from '@agentrans/agent'
+import { ToolCallId } from '@agentrans/llm'
+import { appendPluginRecord } from '@agentrans/session'
 import ActionCards from '../src/index.ts'
 import { ACTION, callId, fixture } from './fixture.ts'
 

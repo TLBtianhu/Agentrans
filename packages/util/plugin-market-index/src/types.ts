@@ -1,9 +1,9 @@
 /**
  * Validated plugin market index records.
- * @module @deepseek-ai/dsh-plugin-market-index/types
+ * @module @agentrans/plugin-market-index/types
  */
 
-import type { LocalizedText } from '@deepseek-ai/dsh-package-manifest'
+import type { LocalizedText } from '@agentrans/package-manifest'
 
 /** A market-declared category or label: an opaque id's display title. */
 export interface MarketDeclaration {

@@ -2,24 +2,24 @@
  * Shared service mounting, real AgentLoop drivers, and structural Agent stubs
  * for agent-loop tests. Callers retain ownership of their contexts, adapters,
  * optional plugins, agents, and teardown.
- * @module @deepseek-ai/dsh-agent-loop-testkit
+ * @module @agentrans/agent-loop-testkit
  */
 
-import type { Context } from '@deepseek-ai/cordis'
-import AgentRegistry from '@deepseek-ai/dsh-agent'
-import type { Agent, AgentOptions, Inbox, InboxTarget } from '@deepseek-ai/dsh-agent'
-import AgentLoop from '@deepseek-ai/dsh-agent-loop'
-import LlmRuntime from '@deepseek-ai/dsh-llm'
-import SessionStore from '@deepseek-ai/dsh-session'
-import type { SessionHeader, SessionId, UserMessage } from '@deepseek-ai/dsh-session'
-import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
-import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
-import type { Config as SystemPromptConfig } from '@deepseek-ai/dsh-system-prompt'
-import ToolRuntime from '@deepseek-ai/dsh-tools'
-import * as NativeToolExecutor from '@deepseek-ai/dsh-tool-executor-native'
-import * as PtcToolExecutor from '@deepseek-ai/dsh-tool-executor-ptc'
-import FsLocal from '@deepseek-ai/dsh-fs-local'
-import WorkingDirectory from '@deepseek-ai/dsh-working-directory'
+import type { Context } from '@agentrans/cordis'
+import AgentRegistry from '@agentrans/agent'
+import type { Agent, AgentOptions, Inbox, InboxTarget } from '@agentrans/agent'
+import AgentLoop from '@agentrans/agent-loop'
+import LlmRuntime from '@agentrans/llm'
+import SessionStore from '@agentrans/session'
+import type { SessionHeader, SessionId, UserMessage } from '@agentrans/session'
+import SessionProjectionRegistry from '@agentrans/session-projection'
+import SystemPrompt from '@agentrans/system-prompt'
+import type { Config as SystemPromptConfig } from '@agentrans/system-prompt'
+import ToolRuntime from '@agentrans/tools'
+import * as NativeToolExecutor from '@agentrans/tool-executor-native'
+import * as PtcToolExecutor from '@agentrans/tool-executor-ptc'
+import FsLocal from '@agentrans/fs-local'
+import WorkingDirectory from '@agentrans/working-directory'
 
 export { createInboxStub, unsupportedInbox } from './inbox.ts'
 export { unsupportedModel } from './model.ts'

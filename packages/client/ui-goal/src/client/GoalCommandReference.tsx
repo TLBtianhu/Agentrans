@@ -1,6 +1,6 @@
 /** Display-only command references; command execution stays with the original command input. */
-import type { UserTextNodeProps } from '@deepseek-ai/dsh-client-ui-conversation/client'
-import { ReferenceChip } from '@deepseek-ai/dsh-client-ui-primitives'
+import type { UserTextNodeProps } from '@agentrans/client-ui-conversation/client'
+import { ReferenceChip } from '@agentrans/client-ui-primitives'
 
 /**
  * Render one confirmed command token without adding an activation action.

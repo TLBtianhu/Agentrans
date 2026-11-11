@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-subprocess-ssh",
+  "name": "@agentrans/subprocess-ssh",
   "description": "Subprocess and terminal provider over the shared POSIX SSH helper",
   "version": "0.1.0",
   "publishConfig": {
@@ -29,19 +29,19 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-ssh": "workspace:*",
-    "@deepseek-ai/dsh-subprocess": "workspace:*",
-    "@deepseek-ai/dsh-subprocess-local": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/ssh": "workspace:*",
+    "@agentrans/subprocess": "workspace:*",
+    "@agentrans/subprocess-local": "workspace:*"
   },
   "dependencies": {
-    "@deepseek-ai/schemastery": "workspace:~",
+    "@agentrans/schemastery": "workspace:~",
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-ssh": "workspace:*",
-    "@deepseek-ai/dsh-subprocess": "workspace:*",
-    "@deepseek-ai/dsh-subprocess-local": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/ssh": "workspace:*",
+    "@agentrans/subprocess": "workspace:*",
+    "@agentrans/subprocess-local": "workspace:*"
   }
 }

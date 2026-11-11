@@ -1,15 +1,15 @@
 /** Prompt stability of the harness checkout and Web GUI URL across processes, checkouts, and ports. */
 
 import { describe, expect, it, onTestFinished } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
-import type { Agent } from '@deepseek-ai/dsh-agent'
-import { mountAgentLoopTestDependencies, mountAgentLoopTestHarness } from '@deepseek-ai/dsh-agent-loop-testkit'
+import { Context } from '@agentrans/cordis'
+import type { Agent } from '@agentrans/agent'
+import { mountAgentLoopTestDependencies, mountAgentLoopTestHarness } from '@agentrans/agent-loop-testkit'
 import {
   createUserMessage, LlmAdapter,
   type GenerateOptions, type LlmResolvedModelInfo, type StreamChunk, type SystemPromptUpdate,
-} from '@deepseek-ai/dsh-llm'
-import { SessionId, type Session } from '@deepseek-ai/dsh-session'
-import { renderContextSnapshot, renderPrompt } from '@deepseek-ai/dsh-system-prompt'
+} from '@agentrans/llm'
+import { SessionId, type Session } from '@agentrans/session'
+import { renderContextSnapshot, renderPrompt } from '@agentrans/system-prompt'
 import * as HarnessDevContext from '../src/index.ts'
 
 const SOURCE_PROMPT = 'The runtime context names the DeepSeek Harness implementation checkout. The checkout location and current working directory are separate values and may differ; never infer the working directory from the checkout path. Use pwd to determine the current working directory. Use this checkout only to inspect or extend DSH itself.'

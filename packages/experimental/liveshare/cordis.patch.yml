@@ -4,9 +4,9 @@
     # The declaration surface loads first and needs nothing: the share host below waits for a Relay
     # connection, so a surface it provided would appear after the plugins that offer endpoints did.
     - id: liveshare-viewer-declarations
-      name: '@deepseek-ai/dsh-experimental-liveshare/viewer-declarations'
+      name: '@agentrans/experimental-liveshare/viewer-declarations'
     - id: liveshare-share-host
-      name: '@deepseek-ai/dsh-experimental-liveshare'
+      name: '@agentrans/experimental-liveshare'
       config:
         ownerIdentityProvider: !!js process.env.LIVESHARE_OWNER_PROVIDER_ID
         ownerIdentityTenant: !!js process.env.LIVESHARE_OWNER_TENANT_ID

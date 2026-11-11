@@ -1,24 +1,24 @@
-import { Context } from '@deepseek-ai/cordis'
+import { Context } from '@agentrans/cordis'
 import { describe, expect, it, vi } from 'vitest'
-import { AttachmentId, type ImageAttachmentRef } from '@deepseek-ai/dsh-attachment'
-import { LlmAttemptId } from '@deepseek-ai/dsh-llm/brand'
-import type { StreamChunk } from '@deepseek-ai/dsh-llm'
+import { AttachmentId, type ImageAttachmentRef } from '@agentrans/attachment'
+import { LlmAttemptId } from '@agentrans/llm/brand'
+import type { StreamChunk } from '@agentrans/llm'
 import type {
   AssistantLiveChunkEvent, SessionEventLike, SessionEventLikeEntry,
   SessionLiveEventEntry, SessionTransientEventEntry,
-} from '@deepseek-ai/dsh-api-session-controller/client'
-import { SessionSeq } from '@deepseek-ai/dsh-session/types'
-import type { SessionEvent, SessionId } from '@deepseek-ai/dsh-session/types'
-import { ConversationNodeAssembler } from '@deepseek-ai/dsh-client-ui-conversation/client'
+} from '@agentrans/api-session-controller/client'
+import { SessionSeq } from '@agentrans/session/types'
+import type { SessionEvent, SessionId } from '@agentrans/session/types'
+import { ConversationNodeAssembler } from '@agentrans/client-ui-conversation/client'
 import type {
   ConversationContextReader, ConversationLocation, ConversationMatch,
   ConversationNodeContext, ConversationNodeDefinition, ConversationStartMatch,
   ConversationViewDefinition,
-} from '@deepseek-ai/dsh-client-ui-conversation/client'
-import { SlotRegistry } from '@deepseek-ai/dsh-client-ui-renderer/client'
-import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
-import { resolveSlotLabel } from '@deepseek-ai/dsh-client-ui-slots'
-import type { StoredEntry } from '@deepseek-ai/dsh-client-ui-slots'
+} from '@agentrans/client-ui-conversation/client'
+import { SlotRegistry } from '@agentrans/client-ui-renderer/client'
+import { makeTranslate } from '@agentrans/client-test-runtime'
+import { resolveSlotLabel } from '@agentrans/client-ui-slots'
+import type { StoredEntry } from '@agentrans/client-ui-slots'
 import { de, en, es, fr, ja, NS, pt, ru, zh } from '../src/client/locales.ts'
 import type {
   StatsCall, StatsContribution, StatsSnapshot, StatsStepMetrics, StatsStepState, StatsViewNode,

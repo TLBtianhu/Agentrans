@@ -1,18 +1,18 @@
 # Native Cordis inspection alongside the base spawn and workflow capabilities.
 - id: agent-default-model
-  name: '@deepseek-ai/dsh-agent-default-model'
+  name: '@agentrans/agent-default-model'
   config:
     provider: deepseek-official
     model: deepseek-v4-pro
 
 - id: session-persistence-jsonl
-  name: '@deepseek-ai/dsh-session-persistence-jsonl'
+  name: '@agentrans/session-persistence-jsonl'
   config:
     root: !!js dshHomePath('sessions')
     compression: !!js 'process.env.DSH_SNAPSHOT === undefined ? ''zstd'' : ''none'''
 
 - id: agent-instructions
-  name: '@deepseek-ai/dsh-agent-instructions'
+  name: '@agentrans/agent-instructions'
   config:
     maxBytes: 65536
 
@@ -23,7 +23,7 @@
   disabled: true
 
 - id: system-prompt
-  name: '@deepseek-ai/dsh-system-prompt'
+  name: '@agentrans/system-prompt'
   config:
     personaPrefix: |
       You are a coding assistant powered by the {{model}} model.
@@ -32,8 +32,8 @@
 
 - insert:
     - id: cordis-host-runner
-      name: '@deepseek-ai/dsh-cordis-host-runner'
+      name: '@agentrans/cordis-host-runner'
     - id: cordis-inspect-providers
-      name: '@deepseek-ai/dsh-tool-cordis/host'
+      name: '@agentrans/tool-cordis/host'
     - id: tool-cordis
-      name: '@deepseek-ai/dsh-tool-cordis'
+      name: '@agentrans/tool-cordis'

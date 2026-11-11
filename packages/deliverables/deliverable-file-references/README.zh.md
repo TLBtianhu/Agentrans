@@ -3,7 +3,7 @@ description: "为 Web 和 SDK agent 提供共用的文件链接与结果交付�
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-deliverable-file-references
+# @agentrans/deliverable-file-references
 
 [English](README.md) | 中文
 
@@ -29,7 +29,7 @@ Web 和 `sdk` bundle 独立于 `present` 工具挂载本插件。自定义组合
 
 ```yaml
 - id: deliverable-file-references
-  name: '@deepseek-ai/dsh-deliverable-file-references'
+  name: '@agentrans/deliverable-file-references'
 ```
 
 本包没有配置字段。执行文件交付时，需单独挂载 [`dsh-tool-present`](../tool-present/README.zh.md)。禁用本行即可省略这段指导。

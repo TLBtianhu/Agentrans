@@ -12,8 +12,8 @@
   en: a15c7c13f167e5ac
   zh: 63bcc2ef60c2f344
 /agent-note-peer-principals-and-method-level-remote-access-control/decision/scope:
-  en: 86061e5578d06871
-  zh: 08eb605fcd38329d
+  en: 5cdcc98a8cbd6e3d
+  zh: 539eb3c66cb55df0
 /agent-note-peer-principals-and-method-level-remote-access-control/decision/two-layers-principal-and-peer:
   en: 6663ea33561eee82
   zh: 722fd3b8fae0ef90
@@ -27,20 +27,20 @@
   en: a01ac57fc71a84f0
   zh: 3e488ef3da5e4b8c
 /agent-note-peer-principals-and-method-level-remote-access-control/decision/method-level-access-control:
-  en: 725a2d4145c0a75e
-  zh: b98a64532cadeaba
+  en: 5a3cc0a599559143
+  zh: 4baf30352a31ef7b
 /agent-note-peer-principals-and-method-level-remote-access-control/decision/method-level-access-control/correspondence-with-rbac:
   en: a78a2410eb52f777
   zh: a868bf1b0e690c9f
-/agent-note-peer-principals-and-method-level-remote-access-control/decision/method-level-access-control/resources-and-resource-readers-deepseek-ai-dsh-typert-protocol-deepseek-ai-dsh-typert-registry:
-  en: d50ae22978165c57
-  zh: 8c1fcfb7dc2d3367
+/agent-note-peer-principals-and-method-level-remote-access-control/decision/method-level-access-control/resources-and-resource-readers-agentrans-typert-protocol-agentrans-typert-registry:
+  en: 69ed603baa8a2338
+  zh: ffd5a35491c971c0
 /agent-note-peer-principals-and-method-level-remote-access-control/decision/method-level-access-control/endpoint-resources:
   en: 582f5f527ecc58c8
   zh: 4a4b68361de2dcf0
-/agent-note-peer-principals-and-method-level-remote-access-control/decision/method-level-access-control/roles-bindings-and-policies-deepseek-ai-dsh-api-remote-access:
-  en: e57f396239ea9f56
-  zh: ddb26278b1521ceb
+/agent-note-peer-principals-and-method-level-remote-access-control/decision/method-level-access-control/roles-bindings-and-policies-agentrans-api-remote-access:
+  en: 48be55b7c6453637
+  zh: 8525a0aada2419d6
 /agent-note-peer-principals-and-method-level-remote-access-control/decision/method-level-access-control/example-share-viewer:
   en: 3c911f57f0f6ca4b
   zh: 1509781eeda4c922
@@ -57,8 +57,8 @@
   en: a928a63e8c36177c
   zh: c943c1fdc8c4bb45
 /agent-note-peer-principals-and-method-level-remote-access-control/decision/method-level-access-control/client-face:
-  en: 7be28cd7e19e5377
-  zh: 30b5aee957271d6c
+  en: b7dc0444b7fddb3c
+  zh: ad25ca15bafdec0e
 /agent-note-peer-principals-and-method-level-remote-access-control/decision/security-invariants:
   en: 2094587c320b6ccc
   zh: 3a1d2a6b343500f4

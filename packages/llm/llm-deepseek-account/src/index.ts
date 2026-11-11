@@ -1,15 +1,15 @@
 /** Account-token authentication, the account model listing, and version gating for the DeepSeek account route. */
-import type {} from '@deepseek-ai/cordis-plugin-loader'
-import type { Context } from '@deepseek-ai/cordis'
-import { ACCOUNT_QUOTA_EXCEEDED_CODE, LlmError, QUOTA_EXCEEDED_CODE } from '@deepseek-ai/dsh-llm'
-import type {} from '@deepseek-ai/dsh-deepseek-account'
-import { launchEnvironmentOf } from '@deepseek-ai/dsh-launch-environment'
+import type {} from '@agentrans/cordis-plugin-loader'
+import type { Context } from '@agentrans/cordis'
+import { ACCOUNT_QUOTA_EXCEEDED_CODE, LlmError, QUOTA_EXCEEDED_CODE } from '@agentrans/llm'
+import type {} from '@agentrans/deepseek-account'
+import { launchEnvironmentOf } from '@agentrans/launch-environment'
 import {
   DEEPSEEK_CLIENT_COMPATIBILITY,
   catalogModelInfo, createModelListingCache, refuseListedModel, registerDeepSeekProvider, requestModelListing, resolveAdapterOptions,
   resolveListedCatalog,
-} from '@deepseek-ai/dsh-llm-deepseek'
-import type { DeepSeekRequestAuth, ListedCatalog, ListingView, ModelListing, ResolvedDeepSeekOptions } from '@deepseek-ai/dsh-llm-deepseek'
+} from '@agentrans/llm-deepseek'
+import type { DeepSeekRequestAuth, ListedCatalog, ListingView, ModelListing, ResolvedDeepSeekOptions } from '@agentrans/llm-deepseek'
 import { Config, plainAccountOptions, resolveAccountOptions } from './config.ts'
 
 export { Config } from './config.ts'

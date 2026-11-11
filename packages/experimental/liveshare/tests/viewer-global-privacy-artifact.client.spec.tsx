@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 /** Assembled viewer page privacy against the production Owner reader; ordinary Session data uses a scripted Owner. */
-import type { ClientConnectionRpc, ConnectionHandle } from '@deepseek-ai/dsh-client-connection/client'
-import type {} from '@deepseek-ai/dsh-client-locale/client'
-import type {} from '@deepseek-ai/dsh-client-ui-settings/client'
-import type {} from '@deepseek-ai/dsh-client-ui-theme/client'
+import type { ClientConnectionRpc, ConnectionHandle } from '@agentrans/client-connection/client'
+import type {} from '@agentrans/client-locale/client'
+import type {} from '@agentrans/client-ui-settings/client'
+import type {} from '@agentrans/client-ui-theme/client'
 import { act, cleanup, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { describe, expect, it, onTestFinished, vi } from 'vitest'
 import type { PrivacyOwnerModule, PrivacyOwnerReader } from './viewer-privacy-bridge.ts'
@@ -16,7 +16,7 @@ import type { ViewerInputFixture } from './viewer-input-fixture.client.ts'
 import { installViewerRelay } from './viewer-relay.client.ts'
 
 /** The generated contribution is a build artifact; the mount boundary is what this face test covers. */
-vi.mock('@deepseek-ai/dsh-experimental-liveshare/remote', () => ({ default: { package: '@deepseek-ai/dsh-experimental-liveshare', methods: {} } }))
+vi.mock('@agentrans/experimental-liveshare/remote', () => ({ default: { package: '@agentrans/experimental-liveshare', methods: {} } }))
 
 const blockedEndpoints = ['settings/describe', 'credentials/describe', 'agentPresets/list', 'agentPresets/read']
 const sentinels = ['SYNTHETIC_SECRET_NEVER_RETURN', 'private-provider.invalid', '/fixture/private-root', 'private-tenant']

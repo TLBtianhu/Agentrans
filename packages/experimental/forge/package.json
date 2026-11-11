@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-experimental-forge",
+  "name": "@agentrans/experimental-forge",
   "description": "Provider-neutral change request registry with shared status polling",
   "version": "0.1.0",
   "publishConfig": {
@@ -32,14 +32,14 @@
     "directory": "packages/experimental/forge"
   },
   "dependencies": {
-    "@deepseek-ai/schemastery": "workspace:~",
-    "@deepseek-ai/dsh-brand": "workspace:*",
-    "@deepseek-ai/dsh-timeout": "workspace:*"
+    "@agentrans/schemastery": "workspace:~",
+    "@agentrans/brand": "workspace:*",
+    "@agentrans/timeout": "workspace:*"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/cordis": "workspace:~"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/cordis": "workspace:~"
   }
 }

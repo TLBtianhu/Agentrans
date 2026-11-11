@@ -1,7 +1,7 @@
 /** Real CUA prompt registration without native operations in the Script replay. */
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { CuaConfig } from '@deepseek-ai/dsh-cua'
+import { CuaConfig } from '@agentrans/cua'
 
 export const name = 'cua-script-guidance'
 export const inject = ['computerUse', 'tools', 'systemPrompt', 'subprocess', 'agents']

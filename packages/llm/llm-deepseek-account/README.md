@@ -3,7 +3,7 @@ description: "DeepSeek account authentication, model listing, and model gating."
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-llm-deepseek-account
+# @agentrans/llm-deepseek-account
 
 English | [中文](README.zh.md)
 
@@ -41,7 +41,7 @@ An offered model shows the badge its listing entry declares under `client_metada
 
 ```yaml
 - id: llm-deepseek-account
-  name: '@deepseek-ai/dsh-llm-deepseek-account'
+  name: '@agentrans/llm-deepseek-account'
   config:
     reasoningEffort: high
     modelOverrides:

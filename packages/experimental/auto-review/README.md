@@ -3,7 +3,7 @@ description: "Add experimental per-call Auto review to a Web or headless profile
 kind: "package-bundle"
 ---
 
-# @deepseek-ai/dsh-experimental-auto-review
+# @agentrans/experimental-auto-review
 
 English | [中文](README.zh.md)
 
@@ -40,7 +40,7 @@ The CLI initializes the profile when needed and appends this package's declared 
 Remove the layer through the same CLI:
 
 ```sh
-pnpm dsh plugin --profile web remove @deepseek-ai/dsh-experimental-auto-review
+pnpm dsh plugin --profile web remove @agentrans/experimental-auto-review
 ```
 
 <a id="headless-supervision"></a>
@@ -49,7 +49,7 @@ pnpm dsh plugin --profile web remove @deepseek-ai/dsh-experimental-auto-review
 Enable the experimental layer explicitly for the headless profile:
 
 ```sh
-dsh plugin --profile headless add @deepseek-ai/dsh-experimental-auto-review
+dsh plugin --profile headless add @agentrans/experimental-auto-review
 dsh headless --permission-mode auto --approval-policy never --json - < task.txt > run.jsonl
 ```
 

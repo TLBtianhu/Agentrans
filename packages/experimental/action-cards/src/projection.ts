@@ -1,8 +1,8 @@
 /** Recover card proposals from logged `propose_action` calls and decisions from plugin records. */
 import { z } from 'zod'
-import { ToolCallId } from '@deepseek-ai/dsh-llm'
-import { pluginRecordOf, SessionLogOffset } from '@deepseek-ai/dsh-session'
-import type { ProjectionDefinition } from '@deepseek-ai/dsh-session-projection'
+import { ToolCallId } from '@agentrans/llm'
+import { pluginRecordOf, SessionLogOffset } from '@agentrans/session'
+import type { ProjectionDefinition } from '@agentrans/session-projection'
 
 /** Model-facing name of the card tool. */
 export const PROPOSE_ACTION = 'propose_action'

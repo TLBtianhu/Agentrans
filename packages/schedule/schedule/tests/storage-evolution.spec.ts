@@ -2,9 +2,9 @@
 import { mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import type { Context } from '@deepseek-ai/cordis'
-import { RemoteError } from '@deepseek-ai/dsh-typert-protocol'
-import { JsonStorageBackend } from '@deepseek-ai/dsh-storage-json'
+import type { Context } from '@agentrans/cordis'
+import { RemoteError } from '@agentrans/typert-protocol'
+import { JsonStorageBackend } from '@agentrans/storage-json'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import {
   ScheduleId, createAfterScheduleRecord, createAtScheduleRecord, createEveryScheduleRecord,

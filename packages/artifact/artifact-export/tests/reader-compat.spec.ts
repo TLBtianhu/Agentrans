@@ -1,11 +1,11 @@
 /** Required export facts survive supported readers or stop restoration explicitly. */
 import { readFile } from 'node:fs/promises'
 import { describe, expect, it } from 'vitest'
-import { SESSION_FORMAT_VERSION, SessionId } from '@deepseek-ai/dsh-session'
+import { SESSION_FORMAT_VERSION, SessionId } from '@agentrans/session'
 import {
   SessionFormatEventCollector, SessionFormatUnsupportedMigrationError, snapshotSessionFormatJson,
-} from '@deepseek-ai/dsh-session-format'
-import { releasedV4SessionFormatCodec, restoreReleasedV4Artifact } from '@deepseek-ai/dsh-session-format-v3-to-v4'
+} from '@agentrans/session-format'
+import { releasedV4SessionFormatCodec, restoreReleasedV4Artifact } from '@agentrans/session-format-v3-to-v4'
 
 async function storedExport() {
   const record: unknown = JSON.parse(await readFile(new URL('./fixtures/export-record.json', import.meta.url), 'utf8'))

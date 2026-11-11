@@ -15,6 +15,6 @@ description: "SDK 初始化要求外围 profile 注册模型适配器，不再�
 
 ## 迁移
 
-1. 在自定义 profile 的 `cordis.patch.yml` 中启用已有的官方适配器行；缺少时插入 `@deepseek-ai/dsh-llm-deepseek-api-key`。使用其他提供方时，改为装配该提供方的适配器。参见 [SDK 服务器装配](../../../../packages/sdk/server/README.zh.md)。
+1. 在自定义 profile 的 `cordis.patch.yml` 中启用已有的官方适配器行；缺少时插入 `@agentrans/llm-deepseek-api-key`。使用其他提供方时，改为装配该提供方的适配器。参见 [SDK 服务器装配](../../../../packages/sdk/server/README.zh.md)。
 2. 令 `initialize.provider` 和 `initialize.model` 匹配已装配的适配器。所选适配器仍在握手成功前校验模型、推理强度和输出上限。不要用握手安装提供方。
 3. 确认目标 profile 能初始化并完成一次提示词。禁用其适配器后，确认初始化报告缺失路由，且未注册替代适配器。自定义与回放 profile 必须继续使用自己的适配器。无需迁移 Session 数据或协议格式。

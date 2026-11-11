@@ -3,7 +3,7 @@ description: "客户端界面与桌面主进程共同读取的物理按键类型
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-shortcut-protocol
+# @agentrans/shortcut-protocol
 
 [English](README.md) | 中文
 

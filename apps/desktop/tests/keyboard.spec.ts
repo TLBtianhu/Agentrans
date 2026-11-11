@@ -6,11 +6,11 @@ import { join } from 'node:path'
 import { afterEach, expect, it, onTestFinished, vi } from 'vitest'
 import type { BrowserWindow, WebContents, WebFrameMain } from 'electron'
 import type { DesktopShortcutInput, ShortcutBinding, ShortcutCommandId, ShortcutConfigSnapshot,
-  ShortcutDefinition, ShortcutSaveResult } from '@deepseek-ai/dsh-shortcut-protocol'
-import { ShortcutRegistry } from '@deepseek-ai/dsh-client-shortcuts/src/client/registry.ts'
-import { installKeyboard } from '@deepseek-ai/dsh-client-shortcuts/src/client/dom.ts'
-import { installNativeKeyboard } from '@deepseek-ai/dsh-client-shortcuts/src/client/native.ts'
-import type { DesktopBrowserLeaseId, DesktopBrowserReservation } from '@deepseek-ai/dsh-client-ui-sidebar-browser/types'
+  ShortcutDefinition, ShortcutSaveResult } from '@agentrans/shortcut-protocol'
+import { ShortcutRegistry } from '@agentrans/client-shortcuts/src/client/registry.ts'
+import { installKeyboard } from '@agentrans/client-shortcuts/src/client/dom.ts'
+import { installNativeKeyboard } from '@agentrans/client-shortcuts/src/client/native.ts'
+import type { DesktopBrowserLeaseId, DesktopBrowserReservation } from '@agentrans/client-ui-sidebar-browser/types'
 import { DESKTOP_IPC } from '../src/ipc.ts'
 
 const ipc = vi.hoisted(() => ({ handle: vi.fn(), removeHandler: vi.fn() }))

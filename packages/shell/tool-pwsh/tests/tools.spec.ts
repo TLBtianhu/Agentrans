@@ -9,32 +9,32 @@
  * background job wiring, and the UI presenters. Real-pwsh behavior
  * is pinned separately in integration.spec.ts.
  */
-import { executeToolFixture } from '@deepseek-ai/dsh-tool-testkit'
+import { executeToolFixture } from '@agentrans/tool-testkit'
 
-import * as NativeToolExecutor from '@deepseek-ai/dsh-tool-executor-native'
-import { provideWorkingDirectoryFixture } from '@deepseek-ai/dsh-agent-loop-testkit'
+import * as NativeToolExecutor from '@agentrans/tool-executor-native'
+import { provideWorkingDirectoryFixture } from '@agentrans/agent-loop-testkit'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
+import { Context } from '@agentrans/cordis'
 import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve as resolvePath } from 'node:path'
-import { ToolCallId } from '@deepseek-ai/dsh-llm'
-import SystemPrompt, { renderPrompt } from '@deepseek-ai/dsh-system-prompt'
-import ToolRuntime, { TOOL_ABORTED, TOOL_ABORTED_BEFORE_DISPATCH } from '@deepseek-ai/dsh-tools'
-import LocalJobRegistry from '@deepseek-ai/dsh-jobs-local'
-import * as ToolJobs from '@deepseek-ai/dsh-tool-jobs'
-import AgentRegistry from '@deepseek-ai/dsh-agent'
-import type { Agent } from '@deepseek-ai/dsh-agent'
-import { SESSION_FORMAT_VERSION, SessionId, SessionLogOffset, SessionSeq } from '@deepseek-ai/dsh-session'
-import ApprovalService from '@deepseek-ai/dsh-user-approval'
-import type { ApprovalOutcome } from '@deepseek-ai/dsh-user-approval'
-import { ShellExecutor } from '@deepseek-ai/dsh-shell'
-import type { ShellExecRequest, ShellExecSpec, ShellExecution, ShellProcess, ShellRunResult } from '@deepseek-ai/dsh-shell'
-import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
-import SandboxPolicyService from '@deepseek-ai/dsh-sandbox-policy'
-import { escalationHintMarker, sandboxDenialMarker } from '@deepseek-ai/dsh-sandbox'
-import * as ToolPwsh from '@deepseek-ai/dsh-tool-pwsh'
-import * as BashEnvPlugin from '@deepseek-ai/dsh-shell-env'
+import { ToolCallId } from '@agentrans/llm'
+import SystemPrompt, { renderPrompt } from '@agentrans/system-prompt'
+import ToolRuntime, { TOOL_ABORTED, TOOL_ABORTED_BEFORE_DISPATCH } from '@agentrans/tools'
+import LocalJobRegistry from '@agentrans/jobs-local'
+import * as ToolJobs from '@agentrans/tool-jobs'
+import AgentRegistry from '@agentrans/agent'
+import type { Agent } from '@agentrans/agent'
+import { SESSION_FORMAT_VERSION, SessionId, SessionLogOffset, SessionSeq } from '@agentrans/session'
+import ApprovalService from '@agentrans/user-approval'
+import type { ApprovalOutcome } from '@agentrans/user-approval'
+import { ShellExecutor } from '@agentrans/shell'
+import type { ShellExecRequest, ShellExecSpec, ShellExecution, ShellProcess, ShellRunResult } from '@agentrans/shell'
+import SessionProjectionRegistry from '@agentrans/session-projection'
+import SandboxPolicyService from '@agentrans/sandbox-policy'
+import { escalationHintMarker, sandboxDenialMarker } from '@agentrans/sandbox'
+import * as ToolPwsh from '@agentrans/tool-pwsh'
+import * as BashEnvPlugin from '@agentrans/shell-env'
 import { processOutcome } from '../src/background.ts'
 import { renderPwshJobRead, renderPwshResult } from '../src/render.ts'
 
@@ -861,7 +861,7 @@ describe('background execution through the job runtime', () => {
     const { ctx } = await setup() // no LocalJobRegistry / ToolJobs
     const result = await call(ctx, 'pwsh', { command: 'Start-Sleep -Seconds 60', description: 'test command', run_in_background: true })
     expect(result.isError).toBe(true)
-    expect(text(result)).toContain('background jobs unavailable: load @deepseek-ai/dsh-jobs and @deepseek-ai/dsh-tool-jobs')
+    expect(text(result)).toContain('background jobs unavailable: load @agentrans/jobs and @agentrans/tool-jobs')
   })
 
   it('a pre-aborted call is skipped before the process starts', async () => {

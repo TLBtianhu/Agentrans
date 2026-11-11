@@ -1,8 +1,8 @@
 /** Web opening aggregation over one observation and a shared transforming buffer. */
 
-import type { Context } from '@deepseek-ai/cordis'
-import { remoteErrorOf } from '@deepseek-ai/dsh-typert-protocol'
-import type { SessionObservation } from '@deepseek-ai/dsh-session-query'
+import type { Context } from '@agentrans/cordis'
+import { remoteErrorOf } from '@agentrans/typert-protocol'
+import type { SessionObservation } from '@agentrans/session-query'
 import type { HistoryController } from '../history/controller.ts'
 import { addressId, rejectNotFound } from '../history.ts'
 import { EventListener, ListenerBuffer } from '../history/listener.ts'

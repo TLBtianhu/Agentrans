@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
-import type { SceneSpec } from '@deepseek-ai/dsh-artifact/scene'
-import type { ArtifactId } from '@deepseek-ai/dsh-artifact/types'
-import { createParticleState } from '@deepseek-ai/dsh-artifact/particle-runtime'
+import { makeTranslate } from '@agentrans/client-test-runtime'
+import type { SceneSpec } from '@agentrans/artifact/scene'
+import type { ArtifactId } from '@agentrans/artifact/types'
+import { createParticleState } from '@agentrans/artifact/particle-runtime'
 import { SceneNodeView } from '../src/client/SceneNodeView.tsx'
 import { en } from '../src/client/locales.ts'
 

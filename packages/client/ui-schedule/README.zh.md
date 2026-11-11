@@ -3,7 +3,7 @@ description: "基于现有 Web UI 的自动化任务管理和会话提醒入口�
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-client-ui-schedule
+# @agentrans/client-ui-schedule
 
 [English](README.md) | 中文
 

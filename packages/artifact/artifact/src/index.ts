@@ -2,19 +2,19 @@
  * Event-sourced HTML artifacts with compare-and-set updates and user-reviewed
  * action messages. Artifact actions carry text intent only; they never grant
  * filesystem, network, or approval authority.
- * @module @deepseek-ai/dsh-artifact
+ * @module @agentrans/artifact
  */
 
-import { Context, Service } from '@deepseek-ai/cordis'
-import z from '@deepseek-ai/schemastery'
+import { Context, Service } from '@agentrans/cordis'
+import z from '@agentrans/schemastery'
 import { z as zod, type ZodType } from 'zod'
-import type { Agent } from '@deepseek-ai/dsh-agent'
-import { brandString } from '@deepseek-ai/dsh-brand'
-import { createUserMessage, freezeMessage, HarnessError, type UserMessage } from '@deepseek-ai/dsh-llm'
-import { Remote, RemoteError, TypertRemoteService, principalOf } from '@deepseek-ai/dsh-typert-protocol'
-import { assertNever, snapshotJsonValue, type JsonValue } from '@deepseek-ai/dsh-util-values'
-import { SessionInputAdmissionError } from '@deepseek-ai/dsh-session-input'
-import type { ProjectionDefinition, ProjectionHandle } from '@deepseek-ai/dsh-session-projection'
+import type { Agent } from '@agentrans/agent'
+import { brandString } from '@agentrans/brand'
+import { createUserMessage, freezeMessage, HarnessError, type UserMessage } from '@agentrans/llm'
+import { Remote, RemoteError, TypertRemoteService, principalOf } from '@agentrans/typert-protocol'
+import { assertNever, snapshotJsonValue, type JsonValue } from '@agentrans/util-values'
+import { SessionInputAdmissionError } from '@agentrans/session-input'
+import type { ProjectionDefinition, ProjectionHandle } from '@agentrans/session-projection'
 import type {
   ArtifactId, ArtifactComparison, ArtifactPrepareInput, ArtifactRecordResult, ArtifactSnapshot, ArtifactSnapshotBase,
   ArtifactObservationId, ArtifactObservations, SavedParticleObservation,
@@ -30,7 +30,7 @@ import { buildParticleObservationComparison, ParticleObservationComparisonError 
 
 export type * from './types.ts'
 
-declare module '@deepseek-ai/cordis' {
+declare module '@agentrans/cordis' {
   interface Context {
     artifacts: ArtifactService
   }

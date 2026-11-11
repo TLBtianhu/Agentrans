@@ -1,26 +1,26 @@
 /**
  * Session working directories, durable changes, and model context.
- * @module @deepseek-ai/dsh-working-directory
+ * @module @agentrans/working-directory
  */
 
 import { isAbsolute } from 'node:path'
-import { Context, Service } from '@deepseek-ai/cordis'
-import z from '@deepseek-ai/schemastery'
+import { Context, Service } from '@agentrans/cordis'
+import z from '@agentrans/schemastery'
 import { z as zod } from 'zod'
-import type { Agent } from '@deepseek-ai/dsh-agent'
-import type {} from '@deepseek-ai/dsh-fs'
-import { createUserMessage } from '@deepseek-ai/dsh-llm'
-import type { Session } from '@deepseek-ai/dsh-session'
-import type { ProjectionHandle } from '@deepseek-ai/dsh-session-projection'
-import type {} from '@deepseek-ai/dsh-system-prompt'
+import type { Agent } from '@agentrans/agent'
+import type {} from '@agentrans/fs'
+import { createUserMessage } from '@agentrans/llm'
+import type { Session } from '@agentrans/session'
+import type { ProjectionHandle } from '@agentrans/session-projection'
+import type {} from '@agentrans/system-prompt'
 
-declare module '@deepseek-ai/cordis' {
+declare module '@agentrans/cordis' {
   interface Context {
     workingDirectory: WorkingDirectoryService
   }
 }
 
-declare module '@deepseek-ai/dsh-llm' {
+declare module '@agentrans/llm' {
   interface MessageSourceMap {
     /**
      * Committed working-directory transition notices.
@@ -30,7 +30,7 @@ declare module '@deepseek-ai/dsh-llm' {
   }
 }
 
-declare module '@deepseek-ai/dsh-session/types' {
+declare module '@agentrans/session/types' {
   interface SessionEventMap {
     /** Effective working directory; the immutable Session header retains the original project. */
     'working-directory/change': {
@@ -40,7 +40,7 @@ declare module '@deepseek-ai/dsh-session/types' {
   }
 }
 
-declare module '@deepseek-ai/dsh-session-projection/types' {
+declare module '@agentrans/session-projection/types' {
   interface SessionProjectionMap {
     /** Recorded current directory for Session observations, or null when none is recorded. */
     workingDirectory: string | null

@@ -59,7 +59,7 @@ function desktopRelease(): DesktopRelease {
   const version = manifestVersion(join(APP_ROOT, 'package.json'), 'desktop package')
   const dshVersion = manifestVersion(resolve(APP_ROOT, '..', '..', 'package.json'), 'root dsh package')
   if (version !== dshVersion) {
-    throw new Error(`desktop runtime: Electron ${version} must bind the same version of @deepseek-ai/dsh, found ${dshVersion}`)
+    throw new Error(`desktop runtime: Electron ${version} must bind the same version of @agentrans/dsh, found ${dshVersion}`)
   }
   const runtime = JSON.parse(readFileSync(join(RUNTIME_ROOT, 'versions.json'), 'utf8')) as Record<string, unknown>
   return parseDesktopRelease({
@@ -154,7 +154,7 @@ async function main(): Promise<void> {
       })
     })
     writeFileSync(join(DSH_OUTPUT_ROOT, 'package.json'), `${JSON.stringify({
-      name: '@deepseek-ai/dsh-desktop-runtime', private: true, version: release.version, type: 'module',
+      name: '@agentrans/desktop-runtime', private: true, version: release.version, type: 'module',
       dependencies: Object.fromEntries(packageSet.packages.map(entry => [entry.name, entry.version])),
     }, undefined, 2)}\n`)
     for (const file of DESKTOP_HOST_RUNTIME_FILES) {
@@ -162,7 +162,7 @@ async function main(): Promise<void> {
         throw new Error(`desktop runtime: missing private Host file ${file}`)
       }
     }
-    if (!existsSync(join(DSH_OUTPUT_ROOT, 'node_modules', '@deepseek-ai', `libreoffice-kit-${officeEngine}`, 'prebuilds.json'))) {
+    if (!existsSync(join(DSH_OUTPUT_ROOT, 'node_modules', '@agentrans', `libreoffice-kit-${officeEngine}`, 'prebuilds.json'))) {
       throw new Error(`desktop runtime: missing required LibreOffice engine ${officeEngine}`)
     }
     if (process.platform === 'darwin' && process.env.DSH_DESKTOP_UNSIGNED !== '1') {

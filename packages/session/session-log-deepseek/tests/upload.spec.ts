@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, expectTypeOf, it, vi } from 'vitest'
-import { Context, LoggerLevel } from '@deepseek-ai/cordis'
+import { Context, LoggerLevel } from '@agentrans/cordis'
 import SessionStore, {
   SESSION_FORMAT_VERSION,
   Session,
@@ -9,11 +9,11 @@ import SessionStore, {
   type CreateSessionOptions,
   type SessionEvent,
   type SessionHeader,
-} from '@deepseek-ai/dsh-session'
-import { createSessionFormatCatalogWithChildren } from '@deepseek-ai/dsh-session-format-catalog'
-import DeepSeekLlmApiExtensionRegistry from '@deepseek-ai/dsh-deepseek-llm-api-extensions'
-import { createDeveloperMessage, createAssistantMessage, createSystemMessage, createUserMessage } from '@deepseek-ai/dsh-llm'
-import type { JsonValue } from '@deepseek-ai/dsh-util-values'
+} from '@agentrans/session'
+import { createSessionFormatCatalogWithChildren } from '@agentrans/session-format-catalog'
+import DeepSeekLlmApiExtensionRegistry from '@agentrans/deepseek-llm-api-extensions'
+import { createDeveloperMessage, createAssistantMessage, createSystemMessage, createUserMessage } from '@agentrans/llm'
+import type { JsonValue } from '@agentrans/util-values'
 import * as SessionLogDeepSeek from '../src/index.ts'
 import type { DeepSeekSessionLogExtension, DeepSeekSessionLogWireEvent, DeepSeekSessionLogWireSurfaceOp } from '../src/types.ts'
 

@@ -2,30 +2,30 @@
 
 import { hostname } from 'node:os'
 import { resolve } from 'node:path'
-import type { Agent } from '@deepseek-ai/dsh-agent'
-import type {} from '@deepseek-ai/dsh-fs'
-import { Context, Service } from '@deepseek-ai/cordis'
-import z from '@deepseek-ai/schemastery'
-import { deepFreeze, snapshotJsonValue, type JsonValue } from '@deepseek-ai/dsh-util-values'
-import { errorChain, ReasoningEffortId, type MessageSource, type TextBlock } from '@deepseek-ai/dsh-llm'
-import type {} from '@deepseek-ai/dsh-client-file-upload'
-import { canOpenNativePath, nativeFileManager, nativeFileApplications, openNativeFileApplication, openNativeAssociatedPath, revealNativePath } from '@deepseek-ai/dsh-native-command'
-import type { SessionId } from '@deepseek-ai/dsh-session'
-import { SessionSeq } from '@deepseek-ai/dsh-session'
-import { selectBranchResult } from '@deepseek-ai/dsh-session-branch'
-import { admitBranchResult, BranchResultAdmissionBusy, BranchResultAdmissionConflict } from '@deepseek-ai/dsh-session-branch/admission'
-import type { BranchResultSelectionFailure } from '@deepseek-ai/dsh-session-branch/types'
-import type {} from '@deepseek-ai/dsh-session-projection-cache'
-import { SessionQueryError, type SessionObservation } from '@deepseek-ai/dsh-session-query'
-import { Remote, RemoteError, TypertRemoteService, principalOf, remoteErrorOf, type TypertResourceResolveInput } from '@deepseek-ai/dsh-typert-protocol'
-import { canonicalClientTimeZone } from '@deepseek-ai/dsh-util-time'
-import { assertNever } from '@deepseek-ai/dsh-util-values'
-import type {} from '@deepseek-ai/dsh-api-remote-access'
+import type { Agent } from '@agentrans/agent'
+import type {} from '@agentrans/fs'
+import { Context, Service } from '@agentrans/cordis'
+import z from '@agentrans/schemastery'
+import { deepFreeze, snapshotJsonValue, type JsonValue } from '@agentrans/util-values'
+import { errorChain, ReasoningEffortId, type MessageSource, type TextBlock } from '@agentrans/llm'
+import type {} from '@agentrans/client-file-upload'
+import { canOpenNativePath, nativeFileManager, nativeFileApplications, openNativeFileApplication, openNativeAssociatedPath, revealNativePath } from '@agentrans/native-command'
+import type { SessionId } from '@agentrans/session'
+import { SessionSeq } from '@agentrans/session'
+import { selectBranchResult } from '@agentrans/session-branch'
+import { admitBranchResult, BranchResultAdmissionBusy, BranchResultAdmissionConflict } from '@agentrans/session-branch/admission'
+import type { BranchResultSelectionFailure } from '@agentrans/session-branch/types'
+import type {} from '@agentrans/session-projection-cache'
+import { SessionQueryError, type SessionObservation } from '@agentrans/session-query'
+import { Remote, RemoteError, TypertRemoteService, principalOf, remoteErrorOf, type TypertResourceResolveInput } from '@agentrans/typert-protocol'
+import { canonicalClientTimeZone } from '@agentrans/util-time'
+import { assertNever } from '@agentrans/util-values'
+import type {} from '@agentrans/api-remote-access'
 import {
   ApiSessionAgentController,
   type ApiSessionAgentResult,
 } from './agent.ts'
-import type {} from '@deepseek-ai/dsh-session-input'
+import type {} from '@agentrans/session-input'
 import { SessionCommandController, hasPromptContent } from './commands.ts'
 import { SessionControlController } from './control.ts'
 import { HistoryController } from './history/controller.ts'
@@ -79,7 +79,7 @@ export { ApiSessionNotFound } from './agent.ts'
 export { SessionFileReferences } from './file-references.ts'
 export { SessionSkillCatalog } from './skill-catalog.ts'
 
-declare module '@deepseek-ai/cordis' {
+declare module '@agentrans/cordis' {
   interface Context {
     /** Host Session business API and Remote namespace owner. */
     sessionController: SessionController
@@ -199,7 +199,7 @@ export class SessionController extends TypertRemoteService {
   private readonly openFileApplication: typeof openNativeFileApplication
   private readonly revealPath: (path: string, signal: AbortSignal) => Promise<void>
   private readonly canOpenPath: () => boolean
-  private readonly promptContexts = new Map<string, (agent: Agent, value: import('@deepseek-ai/dsh-util-values').JsonValue) => readonly TextBlock[]>()
+  private readonly promptContexts = new Map<string, (agent: Agent, value: import('@agentrans/util-values').JsonValue) => readonly TextBlock[]>()
   private readonly promptContextPolicy: ResolvedConfig
   private readonly listWorkSliceMs: number
   private readonly promotions = new Set<Promise<void>>()
@@ -228,7 +228,7 @@ export class SessionController extends TypertRemoteService {
    * @param resolve - synchronous Host validation and model-visible text construction.
    * @returns disposer that withdraws this registration.
    */
-  registerPromptContext(kind: string, resolve: (agent: Agent, value: import('@deepseek-ai/dsh-util-values').JsonValue) => readonly TextBlock[]): () => void {
+  registerPromptContext(kind: string, resolve: (agent: Agent, value: import('@agentrans/util-values').JsonValue) => readonly TextBlock[]): () => void {
     if (!/^[a-z][a-z0-9._-]{0,79}$/.test(kind)) throw new Error('Invalid prompt context kind')
     if (this.promptContexts.has(kind)) throw new Error(`Prompt context already registered: ${kind}`)
     this.promptContexts.set(kind, resolve)

@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-ptc-runtime-node",
+  "name": "@agentrans/ptc-runtime-node",
   "description": "Node PTC execution with async function, REPL and VM Script evaluators and optional retained state",
   "version": "0.1.0",
   "publishConfig": {
@@ -39,34 +39,34 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-ptc-runtime": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-timeout": "workspace:*",
-    "@deepseek-ai/dsh-fs": "workspace:*",
-    "@deepseek-ai/dsh-subprocess": "workspace:*",
-    "@deepseek-ai/dsh-sandbox": "workspace:*",
-    "@deepseek-ai/dsh-sandbox-policy": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/ptc-runtime": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/timeout": "workspace:*",
+    "@agentrans/fs": "workspace:*",
+    "@agentrans/subprocess": "workspace:*",
+    "@agentrans/sandbox": "workspace:*",
+    "@agentrans/sandbox-policy": "workspace:*"
   },
   "dependencies": {
-    "@deepseek-ai/dsh-util-values": "workspace:*",
-    "@deepseek-ai/schemastery": "workspace:~",
+    "@agentrans/util-values": "workspace:*",
+    "@agentrans/schemastery": "workspace:~",
     "acorn": "^8.18.0",
     "acorn-walk": "^8.3.5",
     "birpc": "4.2.0"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-ptc-runtime": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-timeout": "workspace:*",
-    "@deepseek-ai/dsh-fs": "workspace:*",
-    "@deepseek-ai/dsh-subprocess": "workspace:*",
-    "@deepseek-ai/dsh-sandbox": "workspace:*",
-    "@deepseek-ai/dsh-sandbox-policy": "workspace:*",
-    "@deepseek-ai/dsh-fs-local": "workspace:*",
-    "@deepseek-ai/dsh-subprocess-local": "workspace:*",
-    "@deepseek-ai/dsh-session-projection": "workspace:*",
-    "@deepseek-ai/dsh-sandbox-local": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/ptc-runtime": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/timeout": "workspace:*",
+    "@agentrans/fs": "workspace:*",
+    "@agentrans/subprocess": "workspace:*",
+    "@agentrans/sandbox": "workspace:*",
+    "@agentrans/sandbox-policy": "workspace:*",
+    "@agentrans/fs-local": "workspace:*",
+    "@agentrans/subprocess-local": "workspace:*",
+    "@agentrans/session-projection": "workspace:*",
+    "@agentrans/sandbox-local": "workspace:*"
   }
 }

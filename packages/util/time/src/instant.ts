@@ -10,7 +10,7 @@
  * calendar fields naming a value the calendar does not have. Local wall-clock
  * resolution uses the maintained `Temporal` implementation, so no caller owns
  * offset sampling or DST rules.
- * @module @deepseek-ai/dsh-util-time
+ * @module @agentrans/util-time
  */
 
 import { Temporal } from '@js-temporal/polyfill'

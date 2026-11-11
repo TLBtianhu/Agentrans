@@ -3,7 +3,7 @@ description: "开启可选 macOS Computer Use 及权限页面。"
 kind: "package-bundle"
 ---
 
-# @deepseek-ai/dsh-cua-bundle
+# @agentrans/cua-bundle
 
 [English](README.md) | 中文
 
@@ -24,7 +24,7 @@ kind: "package-bundle"
 <a id="use-this-package"></a>
 ## 使用本包
 
-在 macOS Desktop 的“插件 → 添加插件”中输入 `@deepseek-ai/dsh-cua-bundle`，点击“安装”，再点击“立即启用”。DSH 将与当前运行时版本匹配的官方插件安装到 profile。发布包包含已签名和公证的 helper，用户无需编译工具。源码 Web 和开发 Desktop 链接工作区组合包，启用时准备临时签名的 helper。打开 Computer Use 详情，按需设置 PTC，并为 `DSH Computer Use.app` 授予辅助功能和屏幕录制权限。已安装的组合包关闭后仍可管理。源码 Web 在仓库根目录运行以下命令：
+在 macOS Desktop 的“插件 → 添加插件”中输入 `@agentrans/cua-bundle`，点击“安装”，再点击“立即启用”。DSH 将与当前运行时版本匹配的官方插件安装到 profile。发布包包含已签名和公证的 helper，用户无需编译工具。源码 Web 和开发 Desktop 链接工作区组合包，启用时准备临时签名的 helper。打开 Computer Use 详情，按需设置 PTC，并为 `DSH Computer Use.app` 授予辅助功能和屏幕录制权限。已安装的组合包关闭后仍可管理。源码 Web 在仓库根目录运行以下命令：
 
 ```sh
 pnpm run build

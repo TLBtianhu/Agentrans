@@ -7,9 +7,9 @@
  * invalidation instead of issuing a query per row or header.
  */
 
-import type { HostObservable, SnapshotSelectorHook } from '@deepseek-ai/dsh-client-ui-slots'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import type { ScheduleCatalogEntry } from '@deepseek-ai/dsh-schedule/client'
+import type { HostObservable, SnapshotSelectorHook } from '@agentrans/client-ui-slots'
+import type { SessionId } from '@agentrans/session/types'
+import type { ScheduleCatalogEntry } from '@agentrans/schedule/client'
 import { taskInvolvesSession } from './task-record.ts'
 import type { CatalogSnapshot } from './catalog-source.ts'
 

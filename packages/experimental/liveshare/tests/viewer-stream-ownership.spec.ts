@@ -4,7 +4,7 @@
  * independent, and a replacement on one id must be visible rather than silent.
  */
 
-import type { PeerScope } from '@deepseek-ai/dsh-typert-protocol'
+import type { PeerScope } from '@agentrans/typert-protocol'
 import { describe, expect, it, vi } from 'vitest'
 import { createViewerReadService, type ViewerReadGateway } from '../src/host/viewer-read.ts'
 import { READER, readerConnection, type ReaderConnection } from './viewer-read-peers.ts'

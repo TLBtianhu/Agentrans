@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import type { ArtifactId } from '@deepseek-ai/dsh-artifact/types'
-import type { ArtifactRuntimeCommand, ArtifactRuntimeIdentity, ArtifactRuntimeId, RuntimeReport } from '@deepseek-ai/dsh-artifact-runtime/types'
+import type { ArtifactId } from '@agentrans/artifact/types'
+import type { ArtifactRuntimeCommand, ArtifactRuntimeIdentity, ArtifactRuntimeId, RuntimeReport } from '@agentrans/artifact-runtime/types'
 import { ArtifactRuntimeOwner } from '../src/client/runtime-owner.ts'
 import { runtimeChannel } from './runtime-channel.client.ts'
 

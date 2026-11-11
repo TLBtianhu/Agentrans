@@ -1,13 +1,13 @@
 // @vitest-environment jsdom
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
+import { makeTranslate } from '@agentrans/client-test-runtime'
 import { ArtifactCard } from './runtime-harness.tsx'
 import { createParticleRun, updateParticleRun } from '../src/client/particle-run.ts'
 import { en } from '../src/client/locales.ts'
-import type { ParticleSystemSpec } from '@deepseek-ai/dsh-artifact/scene'
-import type { SceneArtifactSnapshot } from '@deepseek-ai/dsh-artifact/types'
-import * as particleRuntime from '@deepseek-ai/dsh-artifact/particle-runtime'
+import type { ParticleSystemSpec } from '@agentrans/artifact/scene'
+import type { SceneArtifactSnapshot } from '@agentrans/artifact/types'
+import * as particleRuntime from '@agentrans/artifact/particle-runtime'
 import type { ArtifactId, ArtifactPlacement, ArtifactExportCommands, RecordArtifactAction } from '../src/client/protocol.ts'
 
 const t = makeTranslate(en)

@@ -3,12 +3,12 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import {
   Button, IconBranchOutlineRegular, IconCopyOutlineRegular, IconFolderCloseRegular, IconWarningTriangleOutlineRegular, StateDot, Tooltip,
-} from '@deepseek-ai/dsh-client-ui-primitives'
-import type { HostObservable, InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
-import type { RemoteHostFacts } from '@deepseek-ai/dsh-api-remotes/client'
-import type { MergeRequest } from '@deepseek-ai/dsh-experimental-forge/types'
-import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
-import type {} from '@deepseek-ai/dsh-client-ui-sidebar-right/client'
+} from '@agentrans/client-ui-primitives'
+import type { HostObservable, InjectFace, PropsLocale, PropsRuntime } from '@agentrans/client-ui-slots'
+import type { RemoteHostFacts } from '@agentrans/api-remotes/client'
+import type { MergeRequest } from '@agentrans/experimental-forge/types'
+import type {} from '@agentrans/client-ui-conversation/client'
+import type {} from '@agentrans/client-ui-sidebar-right/client'
 import type { ForgePanelChangeRequest, ForgePanelState } from '../types.ts'
 import { changesAddress, type ChangesSource } from './changes-address.ts'
 import { ChangeRequestCard, type ChangeRequestActions } from './ChangeRequestCard.tsx'

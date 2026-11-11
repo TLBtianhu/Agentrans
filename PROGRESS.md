@@ -377,7 +377,7 @@ un-gates（doc-sync 43 → 47）：erify-config-keys（87 行配置与其声明
 - `code-file-icon-artwork.manifest.json` 的 `owner: "DeepSeek Harness product design"`。
 - e2e 录制 fixture 里的上游文案（`apps/web/tests/fixtures/assembled-remote.fixture.json` 等）。
 - `apps/desktop/package.json` 的 `author` 公司名（Hangzhou DeepSeek Artificial Intelligence Co., Ltd.）：fork 的法律归属，可能有意保留。
-- 包名/目录名 `@deepseek-ai/dsh-*`、`deepseek-harness`：内部身份，改名成本高、收益低。
+- 包名/目录名 `@agentrans/*`、`deepseek-harness`：内部身份，改名成本高、收益低。
 
 ## 五、关键操作命令
 

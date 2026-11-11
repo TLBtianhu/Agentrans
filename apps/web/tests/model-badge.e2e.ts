@@ -1,7 +1,7 @@
 /** Catalog badges reach every selector placement through the Host catalog without changing catalog identity. */
 import { fileURLToPath } from 'node:url'
-import { LlmAdapter, type LlmModelBadge, type StreamChunk } from '@deepseek-ai/dsh-llm'
-import { parseModelListing } from '@deepseek-ai/dsh-llm-deepseek'
+import { LlmAdapter, type LlmModelBadge, type StreamChunk } from '@agentrans/llm'
+import { parseModelListing } from '@agentrans/llm-deepseek'
 import { chromium, type Browser, type Page } from 'playwright'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import {

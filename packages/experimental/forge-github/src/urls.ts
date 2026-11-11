@@ -1,6 +1,6 @@
 /** GitHub remote URL and pull request URL parsing, and validation of the parts inlined into requests. */
 
-import type { ChangeRequestRef, ForgeRepository } from '@deepseek-ai/dsh-experimental-forge'
+import type { ChangeRequestRef, ForgeRepository } from '@agentrans/experimental-forge'
 
 /** Characters GitHub permits in owner and repository names. */
 const SEGMENT = /^[A-Za-z0-9_.-]+$/

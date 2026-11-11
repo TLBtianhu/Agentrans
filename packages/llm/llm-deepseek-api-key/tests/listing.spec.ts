@@ -1,7 +1,7 @@
 /** The API-key route serves the official /models listing while its catalog is the built-in one. */
 import { afterEach, expect, it, vi } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
-import LlmRuntime from '@deepseek-ai/dsh-llm'
+import { Context } from '@agentrans/cordis'
+import LlmRuntime from '@agentrans/llm'
 import { liveConfig } from '../../../settings/settings/tests/live-config.ts'
 import * as ApiKey from '../src/index.ts'
 

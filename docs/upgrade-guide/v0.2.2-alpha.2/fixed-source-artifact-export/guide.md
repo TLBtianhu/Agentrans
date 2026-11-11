@@ -16,5 +16,5 @@ Export writes a required `artifact/export` event. Existing Sessions without expo
 ## Migration
 
 1. Upgrade readers before opening Sessions containing exports. Keep the original data when an older reader refuses it.
-2. Custom Web compositions add `@deepseek-ai/dsh-artifact-export` and mount `attachments`, `sessionProjections`, `artifacts`, and Client `fileActions`. Keep attachment storage in the same isolated instance as its Session logs.
+2. Custom Web compositions add `@agentrans/artifact-export` and mount `attachments`, `sessionProjections`, `artifacts`, and Client `fileActions`. Keep attachment storage in the same isolated instance as its Session logs.
 3. Export a saved particle observation, update its source, reload, and download the existing result. Verify the original revision and step. A pending record has no confirmed result; explicitly continue its fixed request. A Web download request does not prove a file was saved.

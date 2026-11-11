@@ -3,7 +3,7 @@ description: "通过 OAR 添加实验性单次编程智能体委派，并允许�
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-experimental-subagent-oar
+# @agentrans/experimental-subagent-oar
 
 [English](README.md) | 中文
 
@@ -29,12 +29,12 @@ kind: "package-reference"
 
 委派前，请先安装并认证原生 Codex 和 Claude Code CLI。DSH Host 必须能访问它们的可执行文件。提供方在接受委派之前不会启动原生会话。
 
-在组合中将此提供方和 `@deepseek-ai/dsh-experimental-tool-subagent-oar` 声明为依赖，然后通过 Profile 补丁添加这些行：
+在组合中将此提供方和 `@agentrans/experimental-tool-subagent-oar` 声明为依赖，然后通过 Profile 补丁添加这些行：
 
 ```yaml
 - insert:
     - id: experimental-subagent-oar-codex
-      name: '@deepseek-ai/dsh-experimental-subagent-oar'
+      name: '@agentrans/experimental-subagent-oar'
       config:
         runtime: codex
         providerName: oar-codex
@@ -42,7 +42,7 @@ kind: "package-reference"
           - -c
           - sandbox_mode="workspace-write"
     - id: experimental-subagent-oar-claude
-      name: '@deepseek-ai/dsh-experimental-subagent-oar'
+      name: '@agentrans/experimental-subagent-oar'
       config:
         runtime: claude
         providerName: oar-claude
@@ -52,7 +52,7 @@ kind: "package-reference"
           - --permission-prompts
           - none
     - id: tool-subagent-oar
-      name: '@deepseek-ai/dsh-experimental-tool-subagent-oar'
+      name: '@agentrans/experimental-tool-subagent-oar'
       config:
         providers:
           codex: oar-codex
@@ -88,7 +88,7 @@ kind: "package-reference"
 
 对于 Claude，请在 `launchArgs` 中显式选择原生权限模式，并保留 `--permission-prompts none` 以便无人值守运行。Claude 实例如果不提供权限模式参数，会继承 OAR 默认的权限绕过。替换示例的参数数组也会替换其中显式设置的权限。
 
-[配置目录](../../../docs/config-catalog.zh.md#deepseek-aidsh-experimental-subagent-oar)定义接受的字段和校验规则。如果子进程需要环境变量中的 API 凭据，必须通过 `env` 提供；原生账户文件仍可通过原生运行时设置访问。
+[配置目录](../../../docs/config-catalog.zh.md#agentransexperimental-subagent-oar)定义接受的字段和校验规则。如果子进程需要环境变量中的 API 凭据，必须通过 `env` 提供；原生账户文件仍可通过原生运行时设置访问。
 
 固定版本的 OAR 默认注册表包含 `antigravity`、`claude`、`codex`、`grok`、`kimi`、`opencode` 和 `pi`。提供方配置接受每个已注册的运行时 id。Codex 和 Claude 有原生 e2e 覆盖。其他运行时需要显式添加提供方和工具映射，且仍未经验证。
 

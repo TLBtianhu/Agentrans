@@ -7,7 +7,7 @@ import type {
   TunnelRequestToken,
   TunnelShareSpec,
   TunnelWorkerEvent,
-} from '@deepseek-ai/dsh-experimental-liveshare-protocol'
+} from '@agentrans/experimental-liveshare-protocol'
 import { TunnelWorker } from '../src/host/tunnel-worker.ts'
 import { FakeTunnelChild } from './tunnel-worker-fake-child.ts'
 

@@ -2,17 +2,17 @@
 import { once } from 'node:events'
 import { createServer } from 'node:http'
 import type { Duplex } from 'node:stream'
-import { Context } from '@deepseek-ai/cordis'
-import { installConnection, type ConnectionHandle } from '@deepseek-ai/dsh-client-connection/client'
-import TypertRegistry from '@deepseek-ai/dsh-typert-registry'
-import type { RemoteResult, RemoteStreamHandle, TypertRemoteNamespace } from '@deepseek-ai/dsh-typert-protocol'
+import { Context } from '@agentrans/cordis'
+import { installConnection, type ConnectionHandle } from '@agentrans/client-connection/client'
+import TypertRegistry from '@agentrans/typert-registry'
+import type { RemoteResult, RemoteStreamHandle, TypertRemoteNamespace } from '@agentrans/typert-protocol'
 import { describe, expect, it, vi } from 'vitest'
 import WebSocket, { WebSocketServer } from 'ws'
 import { z } from 'zod'
 import { apply, inject } from '../src/client/index.ts'
 import { parseRemoteStreamClientMessage } from '../src/stream-protocol.ts'
 
-declare module '@deepseek-ai/dsh-typert-protocol' {
+declare module '@agentrans/typert-protocol' {
   interface TypertRemoteMap {
     'nodeProbe/read': () => Promise<RemoteResult<string>>
     'nodeProbe/watch': () => RemoteStreamHandle<string, never>

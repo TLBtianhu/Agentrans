@@ -4,7 +4,7 @@ import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { expect, it, onTestFinished, vi } from 'vitest'
-import type { SubprocessHandle, SubprocessOutcome, SubprocessSpawnSpec } from '@deepseek-ai/dsh-subprocess'
+import type { SubprocessHandle, SubprocessOutcome, SubprocessSpawnSpec } from '@agentrans/subprocess'
 import { buildNativeExecutable, isSourcePackage, nativeExecutablePath, nativeHostArchitecture, prepareNativeExecutable } from '../src/native-build.ts'
 
 async function publish(directory: string, bytes: Buffer): Promise<string> {
@@ -53,11 +53,11 @@ async function fixture(diagnostics = true) {
 it('recognizes only the repository-owned package location as a source build', async () => {
   const f = await fixture()
   expect(await isSourcePackage(f.spec.packageRoot)).toBe(false)
-  for (const value of [null, 2, {}, { name: 'another-project' }, { name: '@deepseek-ai/dsh-root' }]) {
+  for (const value of [null, 2, {}, { name: 'another-project' }, { name: '@agentrans/root' }]) {
     await writeFile(join(f.root, 'package.json'), JSON.stringify(value))
-    expect(await isSourcePackage(f.spec.packageRoot)).toBe(typeof value === 'object' && value !== null && 'name' in value && value.name === '@deepseek-ai/dsh-root')
+    expect(await isSourcePackage(f.spec.packageRoot)).toBe(typeof value === 'object' && value !== null && 'name' in value && value.name === '@agentrans/root')
   }
-  expect(await isSourcePackage(join(f.root, 'node_modules/@deepseek-ai/dsh-cua'))).toBe(false)
+  expect(await isSourcePackage(join(f.root, 'node_modules/@agentrans/cua'))).toBe(false)
   await writeFile(join(f.root, 'package.json'), '{')
   await expect(isSourcePackage(f.spec.packageRoot)).rejects.toThrow()
 })
@@ -85,7 +85,7 @@ it('returns a bundled executable only after the managed builder exits', async ()
 
 it('checks source builds on activation and maps Intel architecture to the compiler target', async () => {
   const f = await fixture()
-  await writeFile(join(f.root, 'package.json'), '{"name":"@deepseek-ai/dsh-root"}')
+  await writeFile(join(f.root, 'package.json'), '{"name":"@agentrans/root"}')
   const path = await prepareNativeExecutable({ ...f.spec, architecture: 'x64' })
   expect(f.spawn.mock.calls[0]![0].argv).toContain('x86_64')
   expect(path).toContain(join('native', '.build', 'prepared', 'x64'))

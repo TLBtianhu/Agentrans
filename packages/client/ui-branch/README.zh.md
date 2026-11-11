@@ -3,7 +3,7 @@ description: "将普通手动分支中的 durable assistant 结论通过内联�
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-client-ui-branch
+# @agentrans/client-ui-branch
 
 [English](README.md) | 中文
 

@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-api-terminal-controller",
+  "name": "@agentrans/api-terminal-controller",
   "description": "Session-owned interactive terminals with shell discovery, screen recovery and typed Remote control",
   "version": "0.1.0",
   "publishConfig": {
@@ -41,10 +41,10 @@
   "dsh": {
     "client": {
       "inject": [
-        "@deepseek-ai/dsh-api-gateway"
+        "@agentrans/api-gateway"
       ],
       "external": [
-        "@deepseek-ai/dsh-api-gateway/client"
+        "@agentrans/api-gateway/client"
       ],
       "platform": "web"
     }
@@ -55,36 +55,36 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@deepseek-ai/dsh-deque": "workspace:*",
-    "@deepseek-ai/dsh-lazy-require": "workspace:*",
-    "@deepseek-ai/dsh-typert-protocol": "workspace:*",
-    "@deepseek-ai/dsh-util-values": "workspace:*",
-    "@deepseek-ai/schemastery": "workspace:~",
+    "@agentrans/deque": "workspace:*",
+    "@agentrans/lazy-require": "workspace:*",
+    "@agentrans/typert-protocol": "workspace:*",
+    "@agentrans/util-values": "workspace:*",
+    "@agentrans/schemastery": "workspace:~",
     "@xterm/addon-serialize": "^0.14.0",
     "@xterm/headless": "^6.0.0",
     "zod": "4.4.3"
   },
   "peerDependencies": {
-    "@deepseek-ai/dsh-subprocess": "workspace:*",
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/subprocess": "workspace:*",
+    "@agentrans/cordis": "workspace:~"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-agent": "workspace:*",
-    "@deepseek-ai/dsh-api-gateway": "workspace:*",
-    "@deepseek-ai/dsh-brand": "workspace:*",
-    "@deepseek-ai/dsh-client-connection": "workspace:*",
-    "@deepseek-ai/dsh-client-store": "workspace:*",
-    "@deepseek-ai/dsh-fs": "workspace:*",
-    "@deepseek-ai/dsh-remote-mock": "workspace:*",
-    "@deepseek-ai/dsh-sandbox": "workspace:*",
-    "@deepseek-ai/dsh-sandbox-policy": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-session-projection": "workspace:*",
-    "@deepseek-ai/dsh-subprocess": "workspace:*",
-    "@deepseek-ai/dsh-subprocess-local": "workspace:*",
-    "@deepseek-ai/dsh-util-crypto": "workspace:*",
-    "@deepseek-ai/dsh-working-directory": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/agent": "workspace:*",
+    "@agentrans/api-gateway": "workspace:*",
+    "@agentrans/brand": "workspace:*",
+    "@agentrans/client-connection": "workspace:*",
+    "@agentrans/client-store": "workspace:*",
+    "@agentrans/fs": "workspace:*",
+    "@agentrans/remote-mock": "workspace:*",
+    "@agentrans/sandbox": "workspace:*",
+    "@agentrans/sandbox-policy": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/session-projection": "workspace:*",
+    "@agentrans/subprocess": "workspace:*",
+    "@agentrans/subprocess-local": "workspace:*",
+    "@agentrans/util-crypto": "workspace:*",
+    "@agentrans/working-directory": "workspace:*"
   },
   "files": [
     "locale/*.json",

@@ -1,5 +1,5 @@
 /** In-memory duplex carrier for exercising the real browser runtime owner. */
-import type { RuntimeAck } from '@deepseek-ai/dsh-artifact-runtime/types'
+import type { RuntimeAck } from '@agentrans/artifact-runtime/types'
 import type { RuntimeChannel } from '../src/client/runtime-owner.ts'
 
 /** @returns A controllable channel with real asynchronous Host-style acceptance. */

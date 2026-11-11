@@ -187,7 +187,7 @@ export async function publishRelease(familyId: string, directory: string, distTa
     return { tarball, ...packedIdentity(tarball) }
   })
   for (const member of order) {
-    if (member.name !== '@deepseek-ai/dsh-experimental-cua-macos') continue
+    if (member.name !== '@agentrans/experimental-cua-macos') continue
     const commit = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim()
     await verifyCuaHelperTarball(member.tarball, { version: member.version, commit })
   }

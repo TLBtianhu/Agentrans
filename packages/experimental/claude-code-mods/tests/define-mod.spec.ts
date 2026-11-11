@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { Context, type Fiber } from '@deepseek-ai/cordis'
-import AgentRegistry from '@deepseek-ai/dsh-agent'
-import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
-import { provideWorkingDirectoryFixture } from '@deepseek-ai/dsh-agent-loop-testkit'
+import { Context, type Fiber } from '@agentrans/cordis'
+import AgentRegistry from '@agentrans/agent'
+import SessionProjectionRegistry from '@agentrans/session-projection'
+import { provideWorkingDirectoryFixture } from '@agentrans/agent-loop-testkit'
 import ClaudeCodeMods, { defineMod } from '../src/index.ts'
 
 const fibers: Fiber[] = []

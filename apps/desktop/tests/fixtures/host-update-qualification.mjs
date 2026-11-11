@@ -8,7 +8,7 @@ import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { installDesktopUpdateTaskControl } from '../../../desktop-host/lib/types/update-tasks.js'
 import { ready } from './host-update-control.mjs'
-import { parseProductLaunchContext } from '@deepseek-ai/dsh-product-layout/launch-context'
+import { parseProductLaunchContext } from '@agentrans/product-layout/launch-context'
 
 const root = process.argv[2]
 assert.ok(root)
@@ -20,11 +20,11 @@ assert.equal(context.codeRoot, project)
 assert.equal(process.env.DSH_HOME, context.paths.dshHomeDir)
 assert.equal(process.env.DSH_AGENTS_HOME, context.paths.dshAgentsHomeDir)
 const require = createRequire(join(project, 'package.json'))
-const { LlmAdapter, createUserMessage } = await import(pathToFileURL(require.resolve('@deepseek-ai/dsh-llm')).href)
+const { LlmAdapter, createUserMessage } = await import(pathToFileURL(require.resolve('@agentrans/llm')).href)
 const observed = []
-const { runProfile } = await import(pathToFileURL(require.resolve('@deepseek-ai/dsh/profile-boot')).href)
-const { loadLayeredEnv, loadProfileDirectory } = await import(pathToFileURL(require.resolve('@deepseek-ai/dsh-app-boot')).href)
-const installAnchor = require.resolve('@deepseek-ai/dsh/package.json')
+const { runProfile } = await import(pathToFileURL(require.resolve('@agentrans/dsh/profile-boot')).href)
+const { loadLayeredEnv, loadProfileDirectory } = await import(pathToFileURL(require.resolve('@agentrans/app-boot')).href)
+const installAnchor = require.resolve('@agentrans/dsh/package.json')
 const running = await runProfile({ environment: loadLayeredEnv('dsh'), profile: 'desktop',
   resolvedProfile: { profile: loadProfileDirectory('dsh', project, installAnchor), installAnchor },
   patchFiles: [], args: ['--no-open', '--port', '0'] })

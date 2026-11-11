@@ -3,7 +3,7 @@ description: "Retry confirmed Session input without replacing an accepted messag
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-session-input
+# @agentrans/session-input
 
 English | [中文](README.zh.md)
 
@@ -28,7 +28,7 @@ Confirm the same input after an uncertain response without sending it again. Con
 Mount this service beside Session Projection before consumers such as Session Controller. The Web bundle includes it. Headless source creation and legacy Artifact recording do not require its activation; stable Artifact submission explicitly refuses a missing service.
 
 ```yaml
-- name: '@deepseek-ai/dsh-session-input'
+- name: '@agentrans/session-input'
 ```
 
 Ordinary prompts reserve their RPC identity before asynchronous Agent preparation and read acceptance before resolving context or attachments. A domain that already constructs the complete immutable user message uses its stable message id instead. First-admission checks run only when no matching receipt exists, so an accepted retry does not depend on the current source revision.

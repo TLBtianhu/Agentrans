@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 import { JSDOM, VirtualConsole } from 'jsdom'
 import { expect, it, onTestFinished } from 'vitest'
-import type { ParticleSystemSpec } from '@deepseek-ai/dsh-artifact/scene'
-import { createParticleCheckpoint, createParticleState, stepParticleState, type ParticleCheckpoint, type ParticleState } from '@deepseek-ai/dsh-artifact/particle-runtime'
+import type { ParticleSystemSpec } from '@agentrans/artifact/scene'
+import { createParticleCheckpoint, createParticleState, stepParticleState, type ParticleCheckpoint, type ParticleState } from '@agentrans/artifact/particle-runtime'
 import { buildSceneAnimationHtml } from '../src/client/scene-animation.ts'
 
 type RendererExports = typeof import('../src/client/renderers/index.ts')

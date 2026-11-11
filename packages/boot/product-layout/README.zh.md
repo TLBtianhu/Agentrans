@@ -3,7 +3,7 @@ description: "Agentrans 单根目录安装布局、安装清单、打包、运�
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-product-layout
+# @agentrans/product-layout
 
 [English](README.md) | 中文
 

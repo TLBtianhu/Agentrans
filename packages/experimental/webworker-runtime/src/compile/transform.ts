@@ -21,7 +21,7 @@
  * The image packer is this transform's only caller: it lowers every JavaScript
  * entry it packs and records `LOWERING_VERSION` in the image manifest, so the
  * worker wraps those bodies without carrying a compiler of its own.
- * @module @deepseek-ai/dsh-experimental-webworker-runtime/src/compile/transform
+ * @module @agentrans/experimental-webworker-runtime/src/compile/transform
  */
 import { parse, type Identifier, type Literal, type Program } from 'acorn'
 import { analyze } from 'eslint-scope'

@@ -1,10 +1,10 @@
-import { Context } from '@deepseek-ai/cordis'
-import { LocaleRuntime } from '@deepseek-ai/dsh-client-locale/client'
-import { RemoteError, TestRemote } from '@deepseek-ai/dsh-client-test-runtime'
+import { Context } from '@agentrans/cordis'
+import { LocaleRuntime } from '@agentrans/client-locale/client'
+import { RemoteError, TestRemote } from '@agentrans/client-test-runtime'
 import type {
   MarketIndexSummary, MarketListingEntry, MarketQuery, MarketSearchResult, PluginDetail, PluginDetailDocumentId,
-} from '@deepseek-ai/dsh-api-remotes/client'
-import { brandString } from '@deepseek-ai/dsh-brand'
+} from '@agentrans/api-remotes/client'
+import { brandString } from '@agentrans/brand'
 import { describe, expect, it, onTestFinished, vi } from 'vitest'
 import { detailKey, DiscoverController, PAGE_SIZE } from '../src/client/market-store.ts'
 import { INITIAL_QUERY } from '../src/client/presentation.ts'

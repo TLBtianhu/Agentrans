@@ -4,7 +4,7 @@
  * constructed, and bundle patch rows keep their `!!js process.*` expressions, so
  * the configuration bytes stay identical to the Node deployment. Third-party Node
  * packages use the presence of `process.title` to avoid browser-only globals.
- * @module @deepseek-ai/dsh-experimental-webworker-runtime/src/node/globals/process
+ * @module @agentrans/experimental-webworker-runtime/src/node/globals/process
  */
 import { requireActiveModuleLoader } from '../../module-system/module-loader.ts'
 import { processAlive, signalProcess } from '../process-table.ts'

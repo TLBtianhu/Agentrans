@@ -1,10 +1,10 @@
 /** Snapshot provider that awaits cancellation and records any premature process allocation. */
 import { writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import type { Context } from '@deepseek-ai/cordis'
-import { SandboxProvider } from '@deepseek-ai/dsh-sandbox'
-import type { ConfinedArgv, SandboxPolicy } from '@deepseek-ai/dsh-sandbox'
-import LocalSubprocessRuntime from '@deepseek-ai/dsh-subprocess-local'
+import type { Context } from '@agentrans/cordis'
+import { SandboxProvider } from '@agentrans/sandbox'
+import type { ConfinedArgv, SandboxPolicy } from '@agentrans/sandbox'
+import LocalSubprocessRuntime from '@agentrans/subprocess-local'
 
 export const name = 'snapshot-pending-confinement'
 

@@ -9,9 +9,9 @@ import { basename, delimiter, dirname, isAbsolute, join, relative, sep } from 'n
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import ts from 'typescript'
-import { SESSION_FORMAT_VERSION } from '@deepseek-ai/dsh-session'
-import { releasedV0SessionFormatCodec } from '@deepseek-ai/dsh-session-format-v0-to-v1'
-import type { SessionFormatEvent, SessionFormatMigrationContext } from '@deepseek-ai/dsh-session-format'
+import { SESSION_FORMAT_VERSION } from '@agentrans/session'
+import { releasedV0SessionFormatCodec } from '@agentrans/session-format-v0-to-v1'
+import type { SessionFormatEvent, SessionFormatMigrationContext } from '@agentrans/session-format'
 import { assertWorkspaceOutsideTemp, outsideTempWorkspaceParent } from '../../scripts/snapshot-workspace-parent.ts'
 import {
   assertPersistedSessionVersion,
@@ -55,10 +55,10 @@ import {
   type NormalizeContext,
   type SnapshotManifest,
   type WorkspaceSnapshotEntry,
-} from '@deepseek-ai/dsh-session-snapshot'
-import { LOADER_SMOKE_TEST_TIMEOUT_MS, resolveExampleMode, runLoaderSmoke } from '@deepseek-ai/dsh-loader-smoke'
-import { resolvePwshPath } from '@deepseek-ai/dsh-pwsh-local'
-import { parseSessionLog, prepareSessionSnapshotFixtureForComparison } from '@deepseek-ai/dsh-llm-replay'
+} from '@agentrans/session-snapshot'
+import { LOADER_SMOKE_TEST_TIMEOUT_MS, resolveExampleMode, runLoaderSmoke } from '@agentrans/loader-smoke'
+import { resolvePwshPath } from '@agentrans/pwsh-local'
+import { parseSessionLog, prepareSessionSnapshotFixtureForComparison } from '@agentrans/llm-replay'
 
 const repoRoot = fileURLToPath(new URL('../../', import.meta.url))
 const snapshotsRoot = fileURLToPath(new URL('./', import.meta.url))
@@ -1208,7 +1208,7 @@ describe('headless recorded-session snapshots', () => {
         { type: 'system/message', seq: 2, time: 3, data: {
           turn: 1, step: 1,
           message: { role: 'system', content: [{ type: 'text', text: 'fresh system prompt' }],
-            source: { kind: 'plugin', plugin: '@deepseek-ai/dsh-system-prompt' }, id: 'fresh-msg' },
+            source: { kind: 'plugin', plugin: '@agentrans/system-prompt' }, id: 'fresh-msg' },
         }, surfaceOp: 'append' },
         {
           type: 'request/header',

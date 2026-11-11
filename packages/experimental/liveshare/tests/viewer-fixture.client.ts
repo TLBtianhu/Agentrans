@@ -5,7 +5,7 @@
  * A spec names the situation it needs on the served address and the owner reads those switches
  * ({@link fixtureOptionsFromLocation}), so the query stays the one place a spec states its world.
  *
- * @module @deepseek-ai/dsh-experimental-liveshare/tests/viewer-fixture
+ * @module @agentrans/experimental-liveshare/tests/viewer-fixture
  */
 
 import {
@@ -13,10 +13,10 @@ import {
   createSystemMessage,
   createToolResultMessage,
   createUserMessage,
-} from '@deepseek-ai/dsh-llm/message'
-import { brandString } from '@deepseek-ai/dsh-brand'
-import type { RemoteAccessFrame, RemoteAccessGrant } from '@deepseek-ai/dsh-api-remote-access/client'
-import type { MessageId, ReasoningEffortId, ToolCallId } from '@deepseek-ai/dsh-llm/brand'
+} from '@agentrans/llm/message'
+import { brandString } from '@agentrans/brand'
+import type { RemoteAccessFrame, RemoteAccessGrant } from '@agentrans/api-remote-access/client'
+import type { MessageId, ReasoningEffortId, ToolCallId } from '@agentrans/llm/brand'
 import type {
   AssistantMessage,
   ContentBlock,
@@ -25,18 +25,18 @@ import type {
   TokenUsage,
   ToolResultMessage,
   UserMessage,
-} from '@deepseek-ai/dsh-llm'
-import { LlmAttemptId } from '@deepseek-ai/dsh-llm/brand'
+} from '@agentrans/llm'
+import { LlmAttemptId } from '@agentrans/llm/brand'
 import {
   AssistantStreamAccumulator,
   expandAssistantStream,
   type AssistantStreamRecord,
-} from '@deepseek-ai/dsh-llm/assistant-stream'
-import type { AttachmentIdType, ImageAttachmentRef } from '@deepseek-ai/dsh-attachment'
-import type { RetryId } from '@deepseek-ai/dsh-llm-retry/types'
-import type { SessionTitleEventData, SessionTitleProviderId } from '@deepseek-ai/dsh-session-title/types'
-import type {} from '@deepseek-ai/dsh-agent'
-import type {} from '@deepseek-ai/dsh-tool-present/types'
+} from '@agentrans/llm/assistant-stream'
+import type { AttachmentIdType, ImageAttachmentRef } from '@agentrans/attachment'
+import type { RetryId } from '@agentrans/llm-retry/types'
+import type { SessionTitleEventData, SessionTitleProviderId } from '@agentrans/session-title/types'
+import type {} from '@agentrans/agent'
+import type {} from '@agentrans/tool-present/types'
 import type {
   SessionEvent,
   SessionEventMap,
@@ -45,23 +45,23 @@ import type {
   SessionSeqCursor,
   SurfaceEventType,
   SurfaceOp,
-} from '@deepseek-ai/dsh-session/types'
-import { SESSION_FORMAT_VERSION, SessionSeq } from '@deepseek-ai/dsh-session/types'
-import type { JsonValue } from '@deepseek-ai/dsh-util-values'
-import type { TodoItem } from '@deepseek-ai/dsh-tool-todo/client'
+} from '@agentrans/session/types'
+import { SESSION_FORMAT_VERSION, SessionSeq } from '@agentrans/session/types'
+import type { JsonValue } from '@agentrans/util-values'
+import type { TodoItem } from '@agentrans/tool-todo/client'
 // Type-only: the brand constructor is host-side; the fixture casts at its
 // wire-fabrication boundary (the schema layer's one-cast-point posture).
-import type { CommandDefinitionId, CommandId } from '@deepseek-ai/dsh-commands/brand'
-import type { CommandDescriptor, CommandExecution, CommandResult } from '@deepseek-ai/dsh-commands/types'
-import type { CredentialInfo } from '@deepseek-ai/dsh-credentials/types'
-import type { DirectoryListing as FixtureDirectoryListing } from '@deepseek-ai/dsh-host-directory-picker/types'
-import type { SettingsDescribeValue, SettingsNamespaceView } from '@deepseek-ai/dsh-settings/types'
-import { deriveEventMessage, foldSurface } from '@deepseek-ai/dsh-session/surface'
+import type { CommandDefinitionId, CommandId } from '@agentrans/commands/brand'
+import type { CommandDescriptor, CommandExecution, CommandResult } from '@agentrans/commands/types'
+import type { CredentialInfo } from '@agentrans/credentials/types'
+import type { DirectoryListing as FixtureDirectoryListing } from '@agentrans/host-directory-picker/types'
+import type { SettingsDescribeValue, SettingsNamespaceView } from '@agentrans/settings/types'
+import { deriveEventMessage, foldSurface } from '@agentrans/session/surface'
 import type {
   ClientConnectionRpc, ConnectionRpcFailure, ConnectionRpcResult, RpcResult,
-} from '@deepseek-ai/dsh-client-connection/client'
+} from '@agentrans/client-connection/client'
 
-declare module '@deepseek-ai/dsh-llm' {
+declare module '@agentrans/llm' {
   interface MessageSourceMap {
     /** Fixture-authored context injection, namespaced as the v3-to-v4 migration names external producers. */
     'plugin:fixture': { kind: 'plugin:fixture' }
@@ -75,19 +75,19 @@ declare module '@deepseek-ai/dsh-llm' {
  * message source above) and its fabricated log stays a real discriminated
  * {@link SessionEvent} union.
  */
-declare module '@deepseek-ai/dsh-session/types' {
+declare module '@agentrans/session/types' {
   interface SessionEventMap {
     /** Host-only title event uses the title domain's client-safe payload. */
     'session/title': SessionTitleEventData
     /** Host-only approval override, matching the current user-approval declaration. */
     'approval/policy': { policy: 'ask' | 'never'; source?: 'delegation' }
-    /** Mirrors `@deepseek-ai/dsh-permission-presets`'s durable preset intent. */
+    /** Mirrors `@agentrans/permission-presets`'s durable preset intent. */
     'permission/preset': { preset: string }
-    /** Mirrors `@deepseek-ai/dsh-sandbox-policy`'s durable sandbox-mode switch. */
+    /** Mirrors `@agentrans/sandbox-policy`'s durable sandbox-mode switch. */
     'sandbox/mode': { mode: string }
-    /** Mirrors `@deepseek-ai/dsh-plan-mode`'s log-only plan-mode switch. */
+    /** Mirrors `@agentrans/plan-mode`'s log-only plan-mode switch. */
     'plan/mode': { active: boolean }
-    /** Mirrors `@deepseek-ai/dsh-goal`'s durable goal mutation. */
+    /** Mirrors `@agentrans/goal`'s durable goal mutation. */
     'goal/change': FxGoalChange
   }
 }
@@ -2225,9 +2225,9 @@ function createFixtureWorld(options: FixtureOptions): FixtureWorld {
    * roster a GUI journey sees after writing is the text it wrote.
    */
   const fixturePresets = new Map<string, { trust: 'system' | 'user'; content: string }>([
-    ['standard', { trust: 'system', content: "- id: tool-bash\n  name: '@deepseek-ai/dsh-tool-bash'\n" }],
-    ['minimal', { trust: 'system', content: "- id: tool-web-search\n  name: '@deepseek-ai/dsh-tool-web-search'\n" }],
-    ['my-agent', { trust: 'user', content: "- id: tool-read\n  name: '@deepseek-ai/dsh-tool-read'\n" }],
+    ['standard', { trust: 'system', content: "- id: tool-bash\n  name: '@agentrans/tool-bash'\n" }],
+    ['minimal', { trust: 'system', content: "- id: tool-web-search\n  name: '@agentrans/tool-web-search'\n" }],
+    ['my-agent', { trust: 'user', content: "- id: tool-read\n  name: '@agentrans/tool-read'\n" }],
   ])
   let fixtureDefaultPreset = 'standard'
   const nextTurn = new Map<SessionId, number>([[sid('fx-alpha'), 75]])
@@ -2590,9 +2590,9 @@ function createFixtureWorld(options: FixtureOptions): FixtureWorld {
         value: [
           { name: 'compact', description: 'fixture：压缩当前会话上下文' },
           { name: 'echo', description: 'fixture：回显参数', input: { hint: 'text to echo' } },
-          { definitionId: brandString<CommandDefinitionId>('@deepseek-ai/dsh-command-goal'), name: 'goal', description: 'Set or view the goal for a long-running task', input: { hint: '<objective>', attachments: true } },
-          { definitionId: brandString<CommandDefinitionId>('@deepseek-ai/dsh-permission-presets'), name: 'permission', description: 'Switch the permission preset (sandbox mode + approval policy)', input: { hint: '<preset>' } },
-          { definitionId: brandString<CommandDefinitionId>('@deepseek-ai/dsh-plan-mode'), name: 'plan', description: 'Enter or leave plan mode', input: { hint: '[off|message]', attachments: true } },
+          { definitionId: brandString<CommandDefinitionId>('@agentrans/command-goal'), name: 'goal', description: 'Set or view the goal for a long-running task', input: { hint: '<objective>', attachments: true } },
+          { definitionId: brandString<CommandDefinitionId>('@agentrans/permission-presets'), name: 'permission', description: 'Switch the permission preset (sandbox mode + approval policy)', input: { hint: '<preset>' } },
+          { definitionId: brandString<CommandDefinitionId>('@agentrans/plan-mode'), name: 'plan', description: 'Enter or leave plan mode', input: { hint: '[off|message]', attachments: true } },
         ],
       }
     },

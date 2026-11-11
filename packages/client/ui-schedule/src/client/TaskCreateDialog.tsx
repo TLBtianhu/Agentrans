@@ -1,9 +1,9 @@
 /** Manual creation reuses the existing Modal and Rules editor controls. */
 import { useState } from 'react'
 import type { ReactNode } from 'react'
-import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
-import type { ScheduleCatalogEntry, ScheduleCreateRequest } from '@deepseek-ai/dsh-schedule/client'
-import { Button, Modal } from '@deepseek-ai/dsh-client-ui-primitives'
+import type { PropsLocale } from '@agentrans/client-ui-slots'
+import type { ScheduleCatalogEntry, ScheduleCreateRequest } from '@agentrans/schedule/client'
+import { Button, Modal } from '@agentrans/client-ui-primitives'
 import { TaskEditorFields, draftTarget, newTaskDraft, taskDraftValid } from './TaskEditorFields.tsx'
 import type { ProjectChoices } from './TaskEditorFields.tsx'
 import { timingFromDraft } from './editor-timing.ts'

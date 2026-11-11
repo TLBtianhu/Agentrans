@@ -5,8 +5,8 @@
  */
 import { act, cleanup, fireEvent, render, within } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
-import { bindSnapshotSelector, makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
+import { createSnapshotStore } from '@agentrans/client-store'
+import { bindSnapshotSelector, makeTranslate } from '@agentrans/client-test-runtime'
 import { en } from '../src/client/locales.ts'
 import type { PanelSnapshot } from '../src/client/source.ts'
 import { WorktreeProgress } from '../src/client/WorktreeProgress.tsx'

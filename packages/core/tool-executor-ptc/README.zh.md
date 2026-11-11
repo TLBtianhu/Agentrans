@@ -3,7 +3,7 @@ description: "基于程序的工具执行、生成 SDK 与嵌套调用限制。"
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-tool-executor-ptc
+# @agentrans/tool-executor-ptc
 
 [English](README.md) | 中文
 
@@ -28,7 +28,7 @@ kind: "package-reference"
 将此行加入已经挂载 `dsh-tools` 的组合。最近作用域的执行器决定工具行为；同一作用域只允许一个执行器。
 
 ```yaml
-- name: '@deepseek-ai/dsh-tool-executor-ptc'
+- name: '@agentrans/tool-executor-ptc'
   config:
     maxParallelSubCalls: 10
 ```
@@ -37,9 +37,9 @@ kind: "package-reference"
 
 本包将 `ctx.ptcRuntime` 和 `ctx.systemPrompt` 声明为必需注入；带 Agent 的程序要求 `ctx.workingDirectory`。执行器在运行时可用后才激活，并在运行时卸载时撤回。启用 PTC 执行器但未提供运行时会阻止应用启动。已撤回的 PTC 选择不会回退到原生执行。
 
-共享分派事件与 `ptc-mode` 消息来源声明位于 `@deepseek-ai/dsh-tool-executor-ptc/types`；Client 代码通过 `@deepseek-ai/dsh-tool-executor-ptc/client` 导入同一组声明。两个入口都不引入 Host 服务声明。Host 策略扩展通过包主入口的 `import type` 获取 `PtcDispatchLog` 与 `tools/ptc-dispatch-log`，无需挂载执行器。
+共享分派事件与 `ptc-mode` 消息来源声明位于 `@agentrans/tool-executor-ptc/types`；Client 代码通过 `@agentrans/tool-executor-ptc/client` 导入同一组声明。两个入口都不引入 Host 服务声明。Host 策略扩展通过包主入口的 `import type` 获取 `PtcDispatchLog` 与 `tools/ptc-dispatch-log`，无需挂载执行器。
 
-[配置目录](../../../docs/config-catalog.zh.md#deepseek-aidsh-tool-executor-ptc)
+[配置目录](../../../docs/config-catalog.zh.md#agentranstool-executor-ptc)
 
 -----
 
@@ -85,7 +85,7 @@ PTC 执行器公开保留的 `run_code` 传输以及按所加载运行时语言�
 
 #### 模型看到什么
 
-PTC mode 会公开生成的 [`run_code` schema](../../../docs/tool-catalog.zh.md#deepseek-aidsh-tool-executor-ptc)、下方 SDK 说明，以及按所加载运行时语言生成的精确 SDK 块。两种运行时语言都将 `code` 列在 `description` 前；这是呈现顺序，不强制 JSON 成员顺序。REPL 与 Script 运行时共用通用工具描述和 SDK 说明；语法与状态规则由各自的 `executionInstructions` 提供。TypeScript bash 示例对函数体运行时返回值，对 REPL 和 Script 运行时打印输出。说明将生成声明明确标为只能在程序内使用的绑定。当当前 `bash` 参数 schema 接受示例参数时，说明还会给出以 `run_code` 包住 `tools.bash(...)` 的完整调用。`tools:sdk` 段使用 first-party 顺序 5000，并关闭提示词变量插值，使两种运行时语言都原样保留工具描述和 schema 中的 `{{…}}` 文本。在 `ptc` 下，提示词还会带上处于更早 first-party 顺序的 `tools:ptc-only` 规则，让模型先读到「可以调用哪些工具」再读「每个工具做什么」。
+PTC mode 会公开生成的 [`run_code` schema](../../../docs/tool-catalog.zh.md#agentranstool-executor-ptc)、下方 SDK 说明，以及按所加载运行时语言生成的精确 SDK 块。两种运行时语言都将 `code` 列在 `description` 前；这是呈现顺序，不强制 JSON 成员顺序。REPL 与 Script 运行时共用通用工具描述和 SDK 说明；语法与状态规则由各自的 `executionInstructions` 提供。TypeScript bash 示例对函数体运行时返回值，对 REPL 和 Script 运行时打印输出。说明将生成声明明确标为只能在程序内使用的绑定。当当前 `bash` 参数 schema 接受示例参数时，说明还会给出以 `run_code` 包住 `tools.bash(...)` 的完整调用。`tools:sdk` 段使用 first-party 顺序 5000，并关闭提示词变量插值，使两种运行时语言都原样保留工具描述和 schema 中的 `{{…}}` 文本。在 `ptc` 下，提示词还会带上处于更早 first-party 顺序的 `tools:ptc-only` 规则，让模型先读到「可以调用哪些工具」再读「每个工具做什么」。
 
 ##### 带 bash 的 TypeScript PTC mode SDK 说明
 

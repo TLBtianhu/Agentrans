@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-util-file-drag",
+  "name": "@agentrans/util-file-drag",
   "description": "Shared file drag names and native transfer requests",
   "version": "0.1.0",
   "publishConfig": {
@@ -27,11 +27,11 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/cordis": "workspace:~"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-brand": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/brand": "workspace:*"
   },
   "dependencies": {
     "mime": "^4.1.1"

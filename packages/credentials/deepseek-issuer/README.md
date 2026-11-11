@@ -3,7 +3,7 @@ description: "The DeepSeek platform identity in one place: the credential refere
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-deepseek-issuer
+# @agentrans/deepseek-issuer
 
 English | [中文](README.zh.md)
 
@@ -27,8 +27,8 @@ One DeepSeek key authenticates several capability classes, and each class calls 
 A provider that authenticates with the DeepSeek platform imports the credential reference and its endpoint default for the capability class it implements. A settings surface imports the same reference so the card it renders and the provider it configures name one credential.
 
 ```ts
-import { credentialRef } from '@deepseek-ai/dsh-credentials'
-import { DEEPSEEK_API_KEY_REF, DEEPSEEK_ENDPOINTS } from '@deepseek-ai/dsh-deepseek-issuer'
+import { credentialRef } from '@agentrans/credentials'
+import { DEEPSEEK_API_KEY_REF, DEEPSEEK_ENDPOINTS } from '@agentrans/deepseek-issuer'
 
 const credential = credentialRef(DEEPSEEK_API_KEY_REF)
 const baseURL = DEEPSEEK_ENDPOINTS.models.url

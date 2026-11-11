@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-pwsh-sandbox",
+  "name": "@agentrans/pwsh-sandbox",
   "description": "Sandbox-consuming implementation of the DeepSeek Harness PowerShell executor seam (confines every command via ctx.sandbox, reports denial/enforcement result facts)",
   "version": "0.1.0",
   "publishConfig": {
@@ -29,20 +29,20 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@deepseek-ai/dsh-shell": "workspace:*",
-    "@deepseek-ai/dsh-pwsh-local": "workspace:*",
-    "@deepseek-ai/dsh-sandbox": "workspace:*",
-    "@deepseek-ai/dsh-sandbox-policy": "workspace:*",
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/shell": "workspace:*",
+    "@agentrans/pwsh-local": "workspace:*",
+    "@agentrans/sandbox": "workspace:*",
+    "@agentrans/sandbox-policy": "workspace:*",
+    "@agentrans/cordis": "workspace:~"
   },
   "devDependencies": {
-    "@deepseek-ai/dsh-shell": "workspace:*",
-    "@deepseek-ai/dsh-pwsh-local": "workspace:*",
-    "@deepseek-ai/dsh-sandbox": "workspace:*",
-    "@deepseek-ai/dsh-sandbox-local": "workspace:*",
-    "@deepseek-ai/dsh-sandbox-policy": "workspace:*",
-    "@deepseek-ai/dsh-session-projection": "workspace:*",
-    "@deepseek-ai/dsh-subprocess-local": "workspace:*",
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/shell": "workspace:*",
+    "@agentrans/pwsh-local": "workspace:*",
+    "@agentrans/sandbox": "workspace:*",
+    "@agentrans/sandbox-local": "workspace:*",
+    "@agentrans/sandbox-policy": "workspace:*",
+    "@agentrans/session-projection": "workspace:*",
+    "@agentrans/subprocess-local": "workspace:*",
+    "@agentrans/cordis": "workspace:~"
   }
 }

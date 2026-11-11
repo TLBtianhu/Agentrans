@@ -3,11 +3,11 @@ import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { chromium, type Page } from 'playwright'
 import { expect, it, onTestFinished } from 'vitest'
-import type { InboxState } from '@deepseek-ai/dsh-agent/types'
-import type { SessionEvent } from '@deepseek-ai/dsh-session/types'
+import type { InboxState } from '@agentrans/agent/types'
+import type { SessionEvent } from '@agentrans/session/types'
 import {
   parseRemoteStreamClientMessage, parseRemoteStreamServerMessage,
-} from '@deepseek-ai/dsh-api-gateway/stream-protocol'
+} from '@agentrans/api-gateway/stream-protocol'
 import { launchWebScaffold, seedSession, watchConsole, webSnapshotMode } from './scaffold.ts'
 import { newEnglishPage } from './support.ts'
 

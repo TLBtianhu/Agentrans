@@ -6,8 +6,8 @@
 
 import type { ReactNode } from 'react'
 import clsx from 'clsx'
-import { Tooltip } from '@deepseek-ai/dsh-client-ui-primitives'
-import { pathPartsOf } from '@deepseek-ai/dsh-util-workspace-path'
+import { Tooltip } from '@agentrans/client-ui-primitives'
+import { pathPartsOf } from '@agentrans/util-workspace-path'
 import css from './FileLabel.module.css'
 
 /** Characters at the end of a name or directory that stay whole while its start shortens. */

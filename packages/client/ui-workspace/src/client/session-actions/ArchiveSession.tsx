@@ -1,14 +1,14 @@
 /** Archive hover button and confirmation for stopping the Session’s running work. */
 import { useState } from 'react'
-import type { SessionActivity } from '@deepseek-ai/dsh-api-workspace-controller/client'
+import type { SessionActivity } from '@agentrans/api-workspace-controller/client'
 // Type-only: the family keys each provider merges; a key this program did not compile takes the generic line.
-import type {} from '@deepseek-ai/dsh-agent/types'
-import type {} from '@deepseek-ai/dsh-jobs/view'
-import type {} from '@deepseek-ai/dsh-schedule/client'
-import type {} from '@deepseek-ai/dsh-subagent/client'
+import type {} from '@agentrans/agent/types'
+import type {} from '@agentrans/jobs/view'
+import type {} from '@agentrans/schedule/client'
+import type {} from '@agentrans/subagent/client'
 import {
   Button, IconArchiveOutlineRegular, IconUnarchiveOutlineRegular, Modal, Tooltip,
-} from '@deepseek-ai/dsh-client-ui-primitives'
+} from '@agentrans/client-ui-primitives'
 import type {
   ArchiveSessionInjected, SessionArchiveConfirmInjected, SessionArchiveConfirmProps, SessionArchiveConfirmRequest,
   SessionRowActionProps,

@@ -1,6 +1,6 @@
 /** Display-only recognition of exact experiment-context text; this grants no authority. */
-import type { UserTextRule } from '@deepseek-ai/dsh-client-ui-conversation/client'
-import { ARTIFACT_JSON_MAX_DEPTH, ARTIFACT_JSON_MAX_NODES, isBoundedArtifactJson } from '@deepseek-ai/dsh-artifact/runtime-values'
+import type { UserTextRule } from '@agentrans/client-ui-conversation/client'
+import { ARTIFACT_JSON_MAX_DEPTH, ARTIFACT_JSON_MAX_NODES, isBoundedArtifactJson } from '@agentrans/artifact/runtime-values'
 
 /** Exact version-one text spelling emitted by the Host question-context provider. */
 export const QUESTION_CONTEXT_PREFIX = 'The user selected the following experiment context for this question. '
@@ -27,7 +27,7 @@ export interface ProgramContextSummary {
   readonly status: 'ready' | 'error'
 }
 
-declare module '@deepseek-ai/dsh-client-ui-conversation/client' {
+declare module '@agentrans/client-ui-conversation/client' {
   interface UserTextDataMap {
     /** Expandable display of a recognizable experiment-context text block, without verification claims. */
     'artifact-question-context': QuestionContextSummary

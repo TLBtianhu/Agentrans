@@ -4,12 +4,12 @@
 
 - insert:
     - id: tool-str-replace-editor
-      name: '@deepseek-ai/dsh-tool-str-replace-editor'
+      name: '@agentrans/tool-str-replace-editor'
       config:
         maxOutputChars: 16000
 
 - id: llm-deepseek
-  name: '@deepseek-ai/dsh-llm-deepseek-api-key'
+  name: '@agentrans/llm-deepseek-api-key'
   config:
     apiKeyEnv: DEEPSEEK_API_KEY
     streamIdleTimeoutMs: 172800000
@@ -18,131 +18,131 @@
         contextWindow: !!js Number(process.env.DSH_CONTEXT_WINDOW ?? 1000000)
 
 - id: sandbox-policy
-  name: '@deepseek-ai/dsh-sandbox-policy'
+  name: '@agentrans/sandbox-policy'
   config:
     mode: danger-full-access
     workspaceRoot: !!js process.cwd()
 
 - id: approval
-  name: '@deepseek-ai/dsh-user-approval'
+  name: '@agentrans/user-approval'
   config:
     policy: never
 
 - id: permission
-  name: '@deepseek-ai/dsh-permission-presets'
+  name: '@agentrans/permission-presets'
   disabled: true
 
 - id: bash-sandbox
-  name: '@deepseek-ai/dsh-bash-sandbox'
+  name: '@agentrans/bash-sandbox'
   disabled: true
 
 - id: pwsh-sandbox
-  name: '@deepseek-ai/dsh-pwsh-sandbox'
+  name: '@agentrans/pwsh-sandbox'
   disabled: true
 
 - id: fs-sandbox
-  name: '@deepseek-ai/dsh-fs-sandbox'
+  name: '@agentrans/fs-sandbox'
   disabled: true
 
 - id: tool-bash
-  name: '@deepseek-ai/dsh-tool-bash'
+  name: '@agentrans/tool-bash'
   disabled: true
 
 - id: tool-pwsh
-  name: '@deepseek-ai/dsh-tool-pwsh'
+  name: '@agentrans/tool-pwsh'
   disabled: true
 
 - id: agent-instructions
-  name: '@deepseek-ai/dsh-agent-instructions'
+  name: '@agentrans/agent-instructions'
   disabled: true
 
 - id: skill
-  name: '@deepseek-ai/dsh-skill'
+  name: '@agentrans/skill'
   disabled: true
 
 - id: skill-filesystem
-  name: '@deepseek-ai/dsh-skill-filesystem'
+  name: '@agentrans/skill-filesystem'
   disabled: true
 
 - id: tool-skill
-  name: '@deepseek-ai/dsh-tool-skill'
+  name: '@agentrans/tool-skill'
   disabled: true
 
 - id: tool-jobs
-  name: '@deepseek-ai/dsh-tool-jobs'
+  name: '@agentrans/tool-jobs'
   disabled: true
 
 - id: tool-fs
-  name: '@deepseek-ai/dsh-tool-fs'
+  name: '@agentrans/tool-fs'
   disabled: true
 
 - id: tool-fs-search
-  name: '@deepseek-ai/dsh-tool-fs-search'
+  name: '@agentrans/tool-fs-search'
   disabled: true
 
 - id: tool-subagent-control
-  name: '@deepseek-ai/dsh-tool-subagent-control'
+  name: '@agentrans/tool-subagent-control'
   disabled: true
 
 - id: tool-subagent
-  name: '@deepseek-ai/dsh-tool-subagent'
+  name: '@agentrans/tool-subagent'
   disabled: true
 
 - id: tool-subagent-fork
-  name: '@deepseek-ai/dsh-tool-subagent'
+  name: '@agentrans/tool-subagent'
   disabled: true
 
 - id: tool-workflow
-  name: '@deepseek-ai/dsh-tool-workflow'
+  name: '@agentrans/tool-workflow'
   disabled: true
 
 - id: tool-todo
-  name: '@deepseek-ai/dsh-tool-todo'
+  name: '@agentrans/tool-todo'
   disabled: true
 
 - id: tool-goal
-  name: '@deepseek-ai/dsh-tool-goal'
+  name: '@agentrans/tool-goal'
   disabled: true
 
 - id: tool-web
-  name: '@deepseek-ai/dsh-tool-web'
+  name: '@agentrans/tool-web'
   disabled: true
 
 - id: plan-mode
-  name: '@deepseek-ai/dsh-plan-mode'
+  name: '@agentrans/plan-mode'
   disabled: true
 
 - id: system-prompt
-  name: '@deepseek-ai/dsh-system-prompt'
+  name: '@agentrans/system-prompt'
   config:
     includeHarnessIdentity: false
     personaPrefix: !!js process.env.DSH_SYSTEM_PROMPT ?? 'You are a helpful software engineer assistant.'
 
 - id: session-persistence-jsonl
-  name: '@deepseek-ai/dsh-session-persistence-jsonl'
+  name: '@agentrans/session-persistence-jsonl'
   config:
     root: !!js dshHomePath('sessions')
     compression: none
 
 - insert:
     - id: bash-local
-      name: '@deepseek-ai/dsh-bash-local'
+      name: '@agentrans/bash-local'
 
     - id: fs-local
-      name: '@deepseek-ai/dsh-fs-local'
+      name: '@agentrans/fs-local'
       config:
         cwd: !!js process.cwd()
 
     - id: terminal
-      name: '@deepseek-ai/dsh-terminal'
+      name: '@agentrans/terminal'
 
     - id: terminal-bash
-      name: '@deepseek-ai/dsh-terminal-bash'
+      name: '@agentrans/terminal-bash'
       config:
         timeoutMs: 300000
 
     - id: persistent-bash
-      name: '@deepseek-ai/dsh-tool-bash-persistent'
+      name: '@agentrans/tool-bash-persistent'
       config:
         timeoutMs: 300000
         description: |-

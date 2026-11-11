@@ -24,7 +24,7 @@ One general mechanism is needed:
 | Part | Content |
 |---|---|
 | Peer identity | `PeerScope.principal` and `PeerScope.signal`; one Peer implementation `Peer` (renamed from `OperatorPeer`) with an options constructor; removal of the operator concept and every implicit Peer fallback; `connection.browserPeer`, `connection.createPeer()`, and `fetch(request, peer)`; a disposed Peer is always refused with `gateway/peer-disposed`; the `user-rpc` source records `principal?` |
-| Method-level access control | `resources` readers on `@Remote`, `TypertResourceMap` resource kinds, and the `typert.resources` registry (typert-protocol, typert-registry); Gateway resolution of calls and forwarded events to resources; new package `@deepseek-ai/dsh-api-remote-access` (Host and Client faces): RBAC decisions over roles, bindings, and policies through `decide(request)`, list filtering through `allows()`, the first snapshot in the index and the access snapshot stream, and access hooks |
+| Method-level access control | `resources` readers on `@Remote`, `TypertResourceMap` resource kinds, and the `typert.resources` registry (typert-protocol, typert-registry); Gateway resolution of calls and forwarded events to resources; new package `@agentrans/api-remote-access` (Host and Client faces): RBAC decisions over roles, bindings, and policies through `decide(request)`, list filtering through `allows()`, the first snapshot in the index and the access snapshot stream, and access hooks |
 | Documentation | One code-review rule and terminology |
 
 ### Two layers: principal and peer
@@ -48,7 +48,7 @@ The creator owns the principal→peers table; liveshare, for example, keeps one 
 There is one Peer concept and one implementation; the operator concept is removed.
 
 ```text
-// @deepseek-ai/dsh-typert-protocol
+// @agentrans/typert-protocol
 export interface PeerScope {
   readonly id: PeerId
   /** Connection-lifetime registrations; disposed with the Peer. */
@@ -62,7 +62,7 @@ export interface PeerScope {
   dispose(): Promise<void>
 }
 
-// @deepseek-ai/dsh-client-connection
+// @agentrans/client-connection
 export class Peer implements PeerScope {
   constructor(owner: Context, options: { readonly principal: Principal; readonly interactions?: 'answer' | 'none' })
 }
@@ -81,7 +81,7 @@ interface ConnectionFetchHandler {
 }
 bridge(req, res, apiHandler, peer, maxRequestBodyBytes?)
 
-// @deepseek-ai/dsh-api-gateway
+// @agentrans/api-gateway
 interface InvokeRemoteRequest { …; readonly peer: PeerScope }                 // was `peer?`
 wireStream.open(endpoint, payload, uplink, peer: PeerScope, signal)          // was `PeerScope | undefined`
 ```
@@ -98,7 +98,7 @@ wireStream.open(endpoint, payload, uplink, peer: PeerScope, signal)          // 
 ### Identity types
 
 ```text
-// @deepseek-ai/dsh-typert-protocol
+// @agentrans/typert-protocol
 
 /**
  * Merge-extensible caller identities. Each driver declares its own entry.
@@ -131,7 +131,7 @@ The single read point is `this.ctx.invocation.peer.principal`; an owner test is 
 
 ### Method-level access control
 
-Resource types and the `resources` readers of `@Remote` live in `@deepseek-ai/dsh-typert-protocol`; resource kinds live in typert beside lookups and Contexts: `TypertResourceMap` declares the kinds, `typert.resources` holds each kind's default wire field or resolver, and lookups and Host Context adapters declare the resource kind their wire identity names. The Gateway resolves one call or forwarded event to the resources it touches. Decisions, list filtering, and the access snapshot live in the new package `@deepseek-ai/dsh-api-remote-access` (`packages/api/remote-access`), which reads no argument field. The Gateway and domain packages depend on remote-access only for types and inject `remoteAccess`; their only value dependency is `dsh-typert-protocol`, so `package-dependency-policy` gains no remote-access entry. Business packages define and register roles, bindings, and policies; liveshare is the first user. Apart from the built-in `global`, no resource-kind name appears in remote-access or the Gateway, which follows the [`packages/api` carries generic orchestration only](../../../../docs/defensive-patterns/remote-and-api.md) review rule.
+Resource types and the `resources` readers of `@Remote` live in `@agentrans/typert-protocol`; resource kinds live in typert beside lookups and Contexts: `TypertResourceMap` declares the kinds, `typert.resources` holds each kind's default wire field or resolver, and lookups and Host Context adapters declare the resource kind their wire identity names. The Gateway resolves one call or forwarded event to the resources it touches. Decisions, list filtering, and the access snapshot live in the new package `@agentrans/api-remote-access` (`packages/api/remote-access`), which reads no argument field. The Gateway and domain packages depend on remote-access only for types and inject `remoteAccess`; their only value dependency is `dsh-typert-protocol`, so `package-dependency-policy` gains no remote-access entry. Business packages define and register roles, bindings, and policies; liveshare is the first user. Apart from the built-in `global`, no resource-kind name appears in remote-access or the Gateway, which follows the [`packages/api` carries generic orchestration only](../../../../docs/defensive-patterns/remote-and-api.md) review rule.
 
 #### Correspondence with RBAC
 
@@ -156,13 +156,13 @@ Resource types and the `resources` readers of `@Remote` live in `@deepseek-ai/ds
 | No inheritance between resources | `global` is not a parent of other resources: a grant on `global` implies no grant on any Session or Workspace, and a grant on a Workspace implies no grant on its Sessions |
 | A `global` grant is an explicit global grant | A call that resolves to no resource touches `global`. Putting an action in a `global` role lets that principal call it without resource restriction, which is a high-risk grant; once the method is allowed, it can still decide each item inside with `allows(resource)` |
 
-#### Resources and resource readers (`@deepseek-ai/dsh-typert-protocol`, `@deepseek-ai/dsh-typert-registry`)
+#### Resources and resource readers (`@agentrans/typert-protocol`, `@agentrans/typert-registry`)
 
 ```text
 /** Merge-extensible resource kinds: the key is the kind, the value declares its identity type. */
 export interface TypertResourceMap {}
-//   @deepseek-ai/dsh-session/types:   session: TypertResource<SessionId>
-//   @deepseek-ai/dsh-workspace/types: workspace: TypertResource<WorkspaceId>
+//   @agentrans/session/types:   session: TypertResource<SessionId>
+//   @agentrans/workspace/types: workspace: TypertResource<WorkspaceId>
 
 // Runtime registries in typert
 ctx.typert.resources.register(kind, { field } | { resolve }): TypertDisposer
@@ -214,7 +214,7 @@ export function RemoteScope<This extends object, Args extends unknown[], Result>
 | Rule | Content |
 |---|---|
 | Syntax | `@Remote({ name: 'prompt', resources: { session: (request) => request.sessionId } })` when a method must name its resource by hand; `session/page` and `session/follow` instead rely on the registered `session` default resolver; a Context method writes `@RemoteScope('agent')` and gets its Session resource from the Agent Context's `resource: 'session'`, and writes `@RemoteScope('agent', { resources: { workspace: (request) => request.workspaceId } })` when it needs another resource. Most methods write no `resources` and get their resources from automatic resolution |
-| Resource kinds | The lower-level packages that declare the identity types merge the resource kinds: `session: TypertResource<SessionId>` in `@deepseek-ai/dsh-session/types` and `workspace: TypertResource<WorkspaceId>` in `@deepseek-ai/dsh-workspace/types`. session-controller references the commands package, so a merge in session-controller would make commands reference session-controller and form a project-reference cycle. remote-access builds in `global`, which has no id and stays out of `TypertResourceMap`; typert reserves the name, and `typert.resources.register('global', …)` throws |
+| Resource kinds | The lower-level packages that declare the identity types merge the resource kinds: `session: TypertResource<SessionId>` in `@agentrans/session/types` and `workspace: TypertResource<WorkspaceId>` in `@agentrans/workspace/types`. session-controller references the commands package, so a merge in session-controller would make commands reference session-controller and form a project-reference cycle. remote-access builds in `global`, which has no id and stays out of `TypertResourceMap`; typert reserves the name, and `typert.resources.register('global', …)` throws |
 | Default extraction declarations | The owning domain registers either `{ field }` or `{ resolve }`, never both. SessionController registers `resolveSessionResource`; WorkspaceController registers `workspaceId`. Duplicate kinds are rejected. Lookup and Host Context resource declarations remain independent of these defaults |
 | Resolution precedence | Per kind: explicit method reader, then lookup and Host Context identities, then the registered default field or resolver. A field reads the named top-level parameter or the first object argument. A resolver receives validated named `args` and ordered parameter descriptions once before lookup resolution. Defaults return one non-empty string or undefined; arrays are invalid |
 | Argument values | Compiled codecs strip undeclared object fields; SRC fallback checks JSON safety without stripping them. Resolution and dispatch use the same validated values. The Session resolver rejects a request object containing both sessionId and address, even when equal. Lookup and Context identities remain wire values until after authorization |
@@ -257,7 +257,7 @@ A subagent address reads the child transcript, so its resource is the child Sess
 
 Methods that need no non-owner access declare nothing, and a method no role lists is refused. The request fields of subagent `prompt` are `parentSessionId` / `childSessionId`, so automatic resolution finds no Session and resolves it to `global`; it must therefore stay out of every `global` role. `session/search` filters its hits per Session inside the method. `subagents/list` is not a Remote endpoint (`SubagentRuntime.list()` carries no `@Remote`).
 
-#### Roles, bindings, and policies (`@deepseek-ai/dsh-api-remote-access`)
+#### Roles, bindings, and policies (`@agentrans/api-remote-access`)
 
 ```text
 /** Remote endpoint `ns/method`, or `event:<name>` for one forwarded event; endpoint segments never contain `:`. */
@@ -464,18 +464,18 @@ Access hooks judge only by action and resource and never look at call arguments;
 The Client uses framework standard-hook injection and no React context. Components receive hooks only through props and import no remote-access value.
 
 ```text
-// @deepseek-ai/dsh-api-remote-access/client
+// @agentrans/api-remote-access/client
 interface ClientRemoteAccess {            // Client service ctx.remoteAccess
   source(kind: TypertResourceKind, id: string, action: string): HostObservable<boolean>
 }
 GlobalStandardProps.useRemoteAccess: (action: RemoteEndpoint) => boolean                  // remote-access; the global resource
 
-// @deepseek-ai/dsh-client-ui-session (injects remoteAccess)
+// @agentrans/client-ui-session (injects remoteAccess)
 GlobalStandardProps.useSessionAccess: (sessionId: SessionId, action: RemoteEndpoint) => boolean
 SessionStandardProps.useAccess: (action: RemoteEndpoint) => boolean
 SessionMaybeStandardProps.useAccess: (action: RemoteEndpoint) => boolean | undefined
 
-// @deepseek-ai/dsh-client-ui-workspace (injects remoteAccess)
+// @agentrans/client-ui-workspace (injects remoteAccess)
 GlobalStandardProps.useWorkspaceAccess: (workspaceId: WorkspaceId, action: RemoteEndpoint) => boolean
 
 // RemoteEndpoint = Extract<keyof TypertRemoteMap, string>
@@ -492,7 +492,7 @@ GlobalStandardProps.useWorkspaceAccess: (workspaceId: WorkspaceId, action: Remot
 | No fallback | Asking a Session resource about a non-session method (such as `useAccess('session/create')`) reads the decision on that Session resource and never falls back to the `global` answer |
 | No snapshot | True for the owner, also after its stream fails terminally; a non-owner page without an injected baseline, or whose stream fails terminally, answers false, and the terminal failure is reported with its error and the advice to reload; a reconnect keeps the last snapshot; a malformed injected baseline fails the mount; the Host still checks every call. Hooks never issue requests |
 | Example consumers | The ui-workspace Session row menu's fork entry reads `useSessionAccess(sessionId, 'session/fork')` and is not rendered when it is false; the ui-chat turn tail's branch button reads `useAccess('session/fork')` on the Session resource and is not rendered when it is false. Replacing #3854's `clientWritePolicy` stays with #3854 |
-| Tests | `@deepseek-ai/dsh-client-test-runtime` exports `allowAllAccess` props and `allowAllAccessPlugin`; TestClient drops the remote-access row as it drops api-remotes and installs the allow-all service, and SlotTestRuntime installs it before ui-session |
+| Tests | `@agentrans/client-test-runtime` exports `allowAllAccess` props and `allowAllAccessPlugin`; TestClient drops the remote-access row as it drops api-remotes and installs the allow-all service, and SlotTestRuntime installs it before ui-session |
 
 ### Security invariants
 

@@ -2,11 +2,11 @@
 import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { expect, it, vi } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
-import SessionStore, { SessionId, type SessionEvent } from '@deepseek-ai/dsh-session'
-import { createUserMessage } from '@deepseek-ai/dsh-llm'
-import type { ArtifactId, ArtifactObservationId, SceneArtifactSnapshot } from '@deepseek-ai/dsh-artifact/types'
-import { advanceParticleState, createParticleCheckpoint, createParticleState, observeParticleState } from '@deepseek-ai/dsh-artifact/particle-runtime'
+import { Context } from '@agentrans/cordis'
+import SessionStore, { SessionId, type SessionEvent } from '@agentrans/session'
+import { createUserMessage } from '@agentrans/llm'
+import type { ArtifactId, ArtifactObservationId, SceneArtifactSnapshot } from '@agentrans/artifact/types'
+import { advanceParticleState, createParticleCheckpoint, createParticleState, observeParticleState } from '@agentrans/artifact/particle-runtime'
 import { createProcessDeepSeekHarness } from '../src/api.ts'
 
 const expectedPath = fileURLToPath(new URL('./expected/artifact-observation-projection.json', import.meta.url))

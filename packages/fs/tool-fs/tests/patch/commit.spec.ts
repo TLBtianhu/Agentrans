@@ -1,8 +1,8 @@
 /** Sequential commits retain known effects and distinguish unchanged from uncertain failures. */
 import { writeFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
-import { FsError } from '@deepseek-ai/dsh-fs'
-import { LocalFileSystem } from '@deepseek-ai/dsh-fs-local'
+import { FsError } from '@agentrans/fs'
+import { LocalFileSystem } from '@agentrans/fs-local'
 import { expect, it, vi } from 'vitest'
 import { add, move, patch, remove, setup, update } from './harness.ts'
 

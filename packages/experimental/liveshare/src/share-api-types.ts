@@ -3,11 +3,11 @@
  *
  * Every field is the JSON the owner browser already received from the same-origin routes, so the
  * Client face can import this module for the same records instead of restating them.
- * @module @deepseek-ai/dsh-experimental-liveshare/src/share-api-types
+ * @module @agentrans/experimental-liveshare/src/share-api-types
  */
 
-import type { JsonValue } from '@deepseek-ai/dsh-util-values'
-import type {} from '@deepseek-ai/dsh-typert-protocol'
+import type { JsonValue } from '@agentrans/util-values'
+import type {} from '@agentrans/typert-protocol'
 
 /**
  * Whether this host currently holds an owner credential the Relay will accept.
@@ -246,7 +246,7 @@ export interface ShareAudit {
   readonly events: readonly ShareAuditEntryView[]
 }
 
-declare module '@deepseek-ai/dsh-typert-protocol' {
+declare module '@agentrans/typert-protocol' {
   interface RemoteErrorDetailsMap {
     /** No share this host publishes carries the requested id. */
     'liveshareShares/share-not-found': { readonly shareId: string }

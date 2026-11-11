@@ -2,9 +2,9 @@
 
 import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import clsx from 'clsx'
-import { Button, IconEllipsisOutlineRegular, Menu, Tooltip } from '@deepseek-ai/dsh-client-ui-primitives'
-import type { SessionListState, SessionSummary } from '@deepseek-ai/dsh-api-session-controller/client'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
+import { Button, IconEllipsisOutlineRegular, Menu, Tooltip } from '@agentrans/client-ui-primitives'
+import type { SessionListState, SessionSummary } from '@agentrans/api-session-controller/client'
+import type { SessionId } from '@agentrans/session/types'
 import type {
   ConversationSessionHeaderSlotProps, ConversationSessionSlotProps, ConversationViewActionsOwnerProps,
 } from '../contract/slots.ts'

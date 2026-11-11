@@ -11,7 +11,7 @@ import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it, onTestFinished } from 'vitest'
-import type { ShareAccessStateFrame, TunnelShareSpec, TunnelWorkerEvent } from '@deepseek-ai/dsh-experimental-liveshare-protocol'
+import type { ShareAccessStateFrame, TunnelShareSpec, TunnelWorkerEvent } from '@agentrans/experimental-liveshare-protocol'
 import { TunnelWorker } from '../src/host/tunnel-worker.ts'
 import {
   INITIAL_RETRY_BACKOFF,

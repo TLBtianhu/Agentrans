@@ -1,6 +1,6 @@
 /** Native directory reveal contributed to the captured Session's structured menu. */
-import type { Context } from '@deepseek-ai/cordis'
-import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
+import type { Context } from '@agentrans/cordis'
+import type { PropsLocale } from '@agentrans/client-ui-slots'
 import type { OpenInAppController } from './controller.ts'
 import type { OpenInAppToastSource } from './open-toast.tsx'
 

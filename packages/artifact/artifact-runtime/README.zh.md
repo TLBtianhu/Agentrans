@@ -3,7 +3,7 @@ description: "检查源码支持的操作与当前连接的渲染器或程序报
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-artifact-runtime
+# @agentrans/artifact-runtime
 
 [English](README.md) | 中文
 
@@ -25,10 +25,10 @@ kind: "package-reference"
 <a id="use-this-package"></a>
 ## 使用此包
 
-在 Artifact 旁挂载此服务，在提供交互作品的 Agent preset 中挂载 `@deepseek-ai/dsh-artifact-runtime/tool`。Remote 命名空间与 Context 服务键均为 `artifactRuntime`。报告登记显式标识 Session 资源，不解析 Agent、不打开冷 Session、不追加输入或执行作者代码。Web 组合仅允许所有者附加报告流。
+在 Artifact 旁挂载此服务，在提供交互作品的 Agent preset 中挂载 `@agentrans/artifact-runtime/tool`。Remote 命名空间与 Context 服务键均为 `artifactRuntime`。报告登记显式标识 Session 资源，不解析 Agent、不打开冷 Session、不追加输入或执行作者代码。Web 组合仅允许所有者附加报告流。
 
 ```yaml
-- name: '@deepseek-ai/dsh-artifact-runtime'
+- name: '@agentrans/artifact-runtime'
 ```
 
 | Config | 默认值 | 含义 |

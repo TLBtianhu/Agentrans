@@ -3,7 +3,7 @@ description: "通过独立的 Liveshare 服务端分享 DSH 会话，提供已�
 kind: "package-bundle"
 ---
 
-# @deepseek-ai/dsh-experimental-liveshare
+# @agentrans/experimental-liveshare
 
 [English](README.md) | 中文
 
@@ -42,9 +42,9 @@ dsh 安装会把本包作为运行时依赖一起安装，但没有任何随发�
 ```yaml
 - insert:
     - id: liveshare-viewer-declarations
-      name: '@deepseek-ai/dsh-experimental-liveshare/viewer-declarations'
+      name: '@agentrans/experimental-liveshare/viewer-declarations'
     - id: liveshare-share-host
-      name: '@deepseek-ai/dsh-experimental-liveshare'
+      name: '@agentrans/experimental-liveshare'
       config:
         ownerIdentityProvider: <provider-id>
         ownerIdentityTenant: <tenant-id>
@@ -55,7 +55,7 @@ dsh 安装会把本包作为运行时依赖一起安装，但没有任何随发�
 
 把每个 `<...>` 占位符换成部署自己的值：身份 provider、tenant 与 subject 是该部署的 Liveshare 服务端配置使用的值，示例中的都是占位符而非真实身份。环境层同样可用：在 `$DSH_HOME/.env` 里设置 `LIVESHARE_*`，并保留组合包自己的 `!!js process.env.…` 表达式。Liveshare 服务端地址不属于这里的配置：首次使用时由所有者在分享弹窗里填写，见下文的所有者配置。
 
-profile 也可以改为选中组合包：在 `$DSH_HOME/profiles/<profile>/package.json` 的 `dsh.profile.bundles` 里加入 `"@deepseek-ai/dsh-experimental-liveshare"`；卡片可见后，卡片上的开关执行的就是这次写入。
+profile 也可以改为选中组合包：在 `$DSH_HOME/profiles/<profile>/package.json` 的 `dsh.profile.bundles` 里加入 `"@agentrans/experimental-liveshare"`；卡片可见后，卡片上的开关执行的就是这次写入。
 
 两条路线都只在重新组合时生效。profile 的 HMR 行开启时，改动在 profile 被重新读取后应用；没有 HMR 时，等下一次 `dsh` 启动才应用。只要组合包声明的行有一条在运行，它的卡片就会出现在**实验性插件**下，也出现在**更多**页。删除这些条目、把它们置为 disabled，或把组合包从 `dsh.profile.bundles` 移除，都会停止这些行，卡片也随之从两个列表消失。
 

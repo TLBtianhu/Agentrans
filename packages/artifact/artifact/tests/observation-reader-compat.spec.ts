@@ -1,12 +1,12 @@
 /** Required saved-observation facts must survive readers or stop restoration explicitly. */
 import { describe, expect, it } from 'vitest'
-import { brandString } from '@deepseek-ai/dsh-brand'
-import { SESSION_FORMAT_VERSION, Session, SessionId } from '@deepseek-ai/dsh-session'
+import { brandString } from '@agentrans/brand'
+import { SESSION_FORMAT_VERSION, Session, SessionId } from '@agentrans/session'
 import {
   SessionFormatEventCollector, SessionFormatUnsupportedMigrationError, snapshotSessionFormatJson,
   type SessionFormatArtifact, type SessionFormatEvent,
-} from '@deepseek-ai/dsh-session-format'
-import { releasedV4SessionFormatCodec, restoreReleasedV4Artifact } from '@deepseek-ai/dsh-session-format-v3-to-v4'
+} from '@agentrans/session-format'
+import { releasedV4SessionFormatCodec, restoreReleasedV4Artifact } from '@agentrans/session-format-v3-to-v4'
 import {
   advanceParticleState, createParticleCheckpoint, createParticleState, observeParticleState,
 } from '../src/particle-runtime.ts'

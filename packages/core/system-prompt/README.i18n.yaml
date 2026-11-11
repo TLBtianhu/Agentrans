@@ -5,84 +5,84 @@
 /:
   en: 51d99b2500db958f
   zh: 91f2b113ba7989fd
-/deepseek-ai-dsh-system-prompt:
-  en: e1cfb1611662e8ab
-  zh: 5476f22f8ffe923a
-/deepseek-ai-dsh-system-prompt/summary:
+/agentrans-system-prompt:
+  en: 43db6ebdfc464293
+  zh: fedeb6e65c379b27
+/agentrans-system-prompt/summary:
   en: f5cce6867daddbab
   zh: 4a1a47623c198207
-/deepseek-ai-dsh-system-prompt/table-of-contents:
+/agentrans-system-prompt/table-of-contents:
   en: d152484eb41ac6b4
   zh: 09388d293f9be9cb
-/deepseek-ai-dsh-system-prompt/use-this-package:
+/agentrans-system-prompt/use-this-package:
   en: 7bea567207cd7e00
   zh: ffc050b05f07ba7f
-/deepseek-ai-dsh-system-prompt/use-this-package/configure-the-prompt:
-  en: 87e28893e6cf58d7
-  zh: 06f476b38c4d2038
-/deepseek-ai-dsh-system-prompt/use-this-package/contribute-a-prompt-section:
+/agentrans-system-prompt/use-this-package/configure-the-prompt:
+  en: 3fcaccd925a466b8
+  zh: 0c1962ed9cb1be70
+/agentrans-system-prompt/use-this-package/contribute-a-prompt-section:
   en: ef415fcd9e1cf8bb
   zh: 6ad4df288f91bdb1
-/deepseek-ai-dsh-system-prompt/use-this-package/contribute-a-prompt-variable:
+/agentrans-system-prompt/use-this-package/contribute-a-prompt-variable:
   en: b3e4c9b4ced59488
   zh: d80c791e72bd5821
-/deepseek-ai-dsh-system-prompt/use-this-package/contribute-tool-schemas:
+/agentrans-system-prompt/use-this-package/contribute-tool-schemas:
   en: 009ef267dac2f270
   zh: e79c24bff5cd836f
-/deepseek-ai-dsh-system-prompt/use-this-package/suppress-runtime-context:
+/agentrans-system-prompt/use-this-package/suppress-runtime-context:
   en: a664608a3b37f8d7
   zh: d6dd60772f4d72b8
-/deepseek-ai-dsh-system-prompt/understand-the-implementation:
+/agentrans-system-prompt/understand-the-implementation:
   en: ce7e776e9d516bdb
   zh: 59d2751743db7795
-/deepseek-ai-dsh-system-prompt/understand-the-implementation/design-concept:
+/agentrans-system-prompt/understand-the-implementation/design-concept:
   en: c91963b89a866fed
   zh: ef9ef4940145778f
-/deepseek-ai-dsh-system-prompt/understand-the-implementation/source-map:
+/agentrans-system-prompt/understand-the-implementation/source-map:
   en: d9575bcb07a1145b
   zh: 0f1a388780d055b1
-/deepseek-ai-dsh-system-prompt/understand-the-implementation/assembly-and-rendering:
+/agentrans-system-prompt/understand-the-implementation/assembly-and-rendering:
   en: d51940213af9b87f
   zh: f3a2540010624a79
-/deepseek-ai-dsh-system-prompt/understand-the-implementation/scoping:
+/agentrans-system-prompt/understand-the-implementation/scoping:
   en: 1100ab1dfe961631
   zh: c510275c893951b4
-/deepseek-ai-dsh-system-prompt/further-exploration:
+/agentrans-system-prompt/further-exploration:
   en: 108d1b4cca466bc7
   zh: e1275966f83c14f9
-/deepseek-ai-dsh-system-prompt/model-experience:
+/agentrans-system-prompt/model-experience:
   en: 215e7ba838619b7b
   zh: a311da3843709f90
-/deepseek-ai-dsh-system-prompt/model-experience/system-prompt:
+/agentrans-system-prompt/model-experience/system-prompt:
   en: cf78b9dd5596495f
   zh: bd44560f8c2435e8
-/deepseek-ai-dsh-system-prompt/model-experience/system-prompt/what-the-model-sees:
+/agentrans-system-prompt/model-experience/system-prompt/what-the-model-sees:
   en: 622e83de7772dc1f
   zh: 7b3c54f08a317e93
-/deepseek-ai-dsh-system-prompt/model-experience/system-prompt/what-the-model-sees/harness-identity:
+/agentrans-system-prompt/model-experience/system-prompt/what-the-model-sees/harness-identity:
   en: 40effd71cb503319
   zh: 9969356237a4f398
-/deepseek-ai-dsh-system-prompt/model-experience/system-prompt/token-effect:
+/agentrans-system-prompt/model-experience/system-prompt/token-effect:
   en: 29722e212137deaa
   zh: 92cd0f1a16b10315
-/deepseek-ai-dsh-system-prompt/model-experience/system-prompt/kv-cache-effect:
+/agentrans-system-prompt/model-experience/system-prompt/kv-cache-effect:
   en: 52fa5a522891ec6b
   zh: 5c5c18359aaaf3db
-/deepseek-ai-dsh-system-prompt/model-experience/tool-schemas:
+/agentrans-system-prompt/model-experience/tool-schemas:
   en: 3039bc5e7a796b21
   zh: 6b7a9eaf69c9ea53
-/deepseek-ai-dsh-system-prompt/model-experience/tool-schemas/what-the-model-sees:
-  en: b3bf090cda036432
-  zh: 9c4cf3742c8cd88f
-/deepseek-ai-dsh-system-prompt/model-experience/tool-schemas/token-effect:
+/agentrans-system-prompt/model-experience/tool-schemas/what-the-model-sees:
+  en: 618dd2ea8cf9a72b
+  zh: 2f35803901af4ab1
+/agentrans-system-prompt/model-experience/tool-schemas/token-effect:
   en: f3a7d374c55e1720
   zh: 0ee48af678cb875f
-/deepseek-ai-dsh-system-prompt/model-experience/tool-schemas/kv-cache-effect:
+/agentrans-system-prompt/model-experience/tool-schemas/kv-cache-effect:
   en: ebd329e360f0d143
   zh: 9d67fe503a6a095a
-/deepseek-ai-dsh-system-prompt/known-limitations-and-deferred-work:
+/agentrans-system-prompt/known-limitations-and-deferred-work:
   en: 23bb9f59ceb1620c
   zh: be34f1770fa2e027
-/deepseek-ai-dsh-system-prompt/known-limitations-and-deferred-work/dev-note:
+/agentrans-system-prompt/known-limitations-and-deferred-work/dev-note:
   en: e67f633dc6fe7773
   zh: 3bb0c20c93f16f98

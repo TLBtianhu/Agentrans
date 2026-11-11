@@ -1,6 +1,6 @@
 /** Credential-scoped listing cache: first-use waits, background refresh, retention, and disposal. */
 import { afterEach, expect, it, onTestFinished, vi } from 'vitest'
-import { timeoutOf } from '@deepseek-ai/dsh-timeout'
+import { timeoutOf } from '@agentrans/timeout'
 import { ModelListingCache } from '../src/listing-cache.ts'
 import type { ListingSettings } from '../src/listing-config.ts'
 import { LISTING_TIMEOUT } from '../src/listing.ts'

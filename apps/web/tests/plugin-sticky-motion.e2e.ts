@@ -71,7 +71,7 @@ it('preserves both header layouts and follows the scroll position without changi
   try {
     for (const hasTabs of [false, true]) {
       const scaffold = await launchWebScaffold(hasTabs ? {
-        profile: { packages: [], bundles: ['@deepseek-ai/dsh-experimental-plugin-market-bundle'] },
+        profile: { packages: [], bundles: ['@agentrans/experimental-plugin-market-bundle'] },
       } : {})
       try {
         const page = await browser.newPage({ viewport: { width: 1280, height: 480 }, locale: 'en-US' })
@@ -159,7 +159,7 @@ it('preserves both header layouts and follows the scroll position without changi
 
 it('preserves the full header width when the list reserves a scrollbar gutter', async () => {
   const scaffold = await launchWebScaffold({
-    profile: { packages: [], bundles: ['@deepseek-ai/dsh-experimental-plugin-market-bundle'] },
+    profile: { packages: [], bundles: ['@agentrans/experimental-plugin-market-bundle'] },
   })
   try {
     const browser = await chromium.launch()

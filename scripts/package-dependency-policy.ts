@@ -5,43 +5,43 @@ const CLIENT_FACE_INCLUDE: readonly string[] = []
 
 /** Packages exempted from automatic Client/Host treatment despite declaring `dsh.client`. */
 const CLIENT_FACE_EXCLUDE: readonly string[] = [
-  '@deepseek-ai/dsh-api-session-controller',
-  '@deepseek-ai/dsh-api-workspace-controller',
+  '@agentrans/api-session-controller',
+  '@agentrans/api-workspace-controller',
 ]
 
 /** Host-only packages whose peer relays are deliberately flattened. */
 const HOST_DEPENDENCY_PACKAGES: readonly string[] = [
-  '@deepseek-ai/dsh-llm',
-  '@deepseek-ai/dsh-session',
+  '@agentrans/llm',
+  '@agentrans/session',
 ]
 
 /** Required Cordis services whose Host imports are type-only. */
 const REQUIRED_SERVICE_PEERS = {
-  '@deepseek-ai/dsh-api-terminal-controller': ['@deepseek-ai/dsh-subprocess'],
+  '@agentrans/api-terminal-controller': ['@agentrans/subprocess'],
 } as const satisfies Readonly<Record<string, readonly string[]>>
 
 /** Development-only package relationships not represented by source imports. */
 const CONFIGURATION_ONLY_DEV_DEPENDENCIES = {
-  '@deepseek-ai/dsh-client-locale': ['@deepseek-ai/dsh-api-remotes'],
-  '@deepseek-ai/dsh-client-ui-conversation': [
-    '@deepseek-ai/dsh-api-remotes',
-    '@deepseek-ai/dsh-client-ui-workspace',
+  '@agentrans/client-locale': ['@agentrans/api-remotes'],
+  '@agentrans/client-ui-conversation': [
+    '@agentrans/api-remotes',
+    '@agentrans/client-ui-workspace',
   ],
-  '@deepseek-ai/dsh-client-ui-model-selection': ['@deepseek-ai/dsh-client-ui-input-trigger'],
-  '@deepseek-ai/dsh-client-ui-sidebar': ['@deepseek-ai/dsh-client-ui-workspace'],
-  '@deepseek-ai/dsh-client-ui-subagent': ['@deepseek-ai/dsh-client-ui-input-trigger'],
-  '@deepseek-ai/dsh-client-ui-theme': ['@deepseek-ai/dsh-api-remotes'],
-  '@deepseek-ai/dsh-client-ui-tool': ['@deepseek-ai/dsh-api-remotes'],
+  '@agentrans/client-ui-model-selection': ['@agentrans/client-ui-input-trigger'],
+  '@agentrans/client-ui-sidebar': ['@agentrans/client-ui-workspace'],
+  '@agentrans/client-ui-subagent': ['@agentrans/client-ui-input-trigger'],
+  '@agentrans/client-ui-theme': ['@agentrans/api-remotes'],
+  '@agentrans/client-ui-tool': ['@agentrans/api-remotes'],
 } as const satisfies Readonly<Record<string, readonly string[]>>
 
 /** Workspace packages whose complete runtime surface is safe across duplicate installations. */
 const DUPLICATE_SAFE_PACKAGES: readonly string[] = [
-  '@deepseek-ai/dsh-brand',
-  '@deepseek-ai/dsh-lazy-require',
-  '@deepseek-ai/dsh-typert-protocol',
-  '@deepseek-ai/dsh-util-code-language',
-  '@deepseek-ai/dsh-util-crypto',
-  '@deepseek-ai/dsh-util-values',
+  '@agentrans/brand',
+  '@agentrans/lazy-require',
+  '@agentrans/typert-protocol',
+  '@agentrans/util-code-language',
+  '@agentrans/util-crypto',
+  '@agentrans/util-values',
 ]
 
 /**
@@ -51,44 +51,44 @@ const DUPLICATE_SAFE_PACKAGES: readonly string[] = [
  * prominent heading in the pull request description.
  */
 const SAFE_HOST_DEPENDENCY_EXPORTS = {
-  '@deepseek-ai/dsh-atomic-write': ['withFileLock', 'writeFileAtomic'],
-  '@deepseek-ai/dsh-computer-use/brand': ['ComputerUseProviderName'],
-  '@deepseek-ai/dsh-credentials': ['credentialKey'],
-  '@deepseek-ai/dsh-deque': ['Deque'],
+  '@agentrans/atomic-write': ['withFileLock', 'writeFileAtomic'],
+  '@agentrans/computer-use/brand': ['ComputerUseProviderName'],
+  '@agentrans/credentials': ['credentialKey'],
+  '@agentrans/deque': ['Deque'],
   // The Liveshare wire codec and identity helpers are stateless functions over caller-owned values.
-  '@deepseek-ai/dsh-experimental-liveshare-protocol': [
+  '@agentrans/experimental-liveshare-protocol': [
     'LIVESHARE_CAPABILITIES', 'LIVESHARE_PROTOCOL_VERSION', 'parseRelayFrame', 'parseShareAccessState',
     'parseTunnelWorkerCommand', 'parseTunnelWorkerEvent', 'rawText', 'sendFrame', 'unsupportedFrameRefusal',
     'viewerRequestFields', 'identityFromKey', 'identityKeyOf',
   ],
-  '@deepseek-ai/dsh-llm': ['callConfigEquals'],
-  '@deepseek-ai/dsh-session': ['SessionId'],
-  '@deepseek-ai/dsh-session-format': ['sessionFormatLogFilename'],
-  '@deepseek-ai/dsh-storage-domain': ['defineDomain'],
-  '@deepseek-ai/dsh-timeout': ['MAX_TIMER_DELAY_MS'],
-  '@deepseek-ai/schemastery': ['default'],
+  '@agentrans/llm': ['callConfigEquals'],
+  '@agentrans/session': ['SessionId'],
+  '@agentrans/session-format': ['sessionFormatLogFilename'],
+  '@agentrans/storage-domain': ['defineDomain'],
+  '@agentrans/timeout': ['MAX_TIMER_DELAY_MS'],
+  '@agentrans/schemastery': ['default'],
 } as const satisfies HostDependencyExports
 
 /** Runtime exports that require every consumer to resolve the provider's shared peer instance. */
 const PEER_REQUIRED_HOST_EXPORTS = {
   // Profile settings must match the installed Node provider's configuration schema.
-  '@deepseek-ai/dsh-ptc-runtime-node/configuration': ['resolvePersistentExecution'],
+  '@agentrans/ptc-runtime-node/configuration': ['resolvePersistentExecution'],
   // CUA checks UserQuestionError and preserves AttachmentError from image admission.
-  '@deepseek-ai/dsh-attachment': ['admitEncodedImages'],
-  '@deepseek-ai/dsh-user-questions': ['UserQuestionError'],
+  '@agentrans/attachment': ['admitEncodedImages'],
+  '@agentrans/user-questions': ['UserQuestionError'],
   // `instanceof` checks need the translator's own class instance.
-  '@deepseek-ai/dsh-experimental-translator': ['TranslationError'],
+  '@agentrans/experimental-translator': ['TranslationError'],
   // Stateless; a safe classification would turn the forge panel's forge and worktree peers into dependencies.
-  '@deepseek-ai/dsh-experimental-forge': ['changeRequestKey'],
-  '@deepseek-ai/dsh-experimental-worktree': ['generatedWorktreeName'],
+  '@agentrans/experimental-forge': ['changeRequestKey'],
+  '@agentrans/experimental-worktree': ['generatedWorktreeName'],
   // The forge panel matches ctx.fs failures with `instanceof FsError`.
-  '@deepseek-ai/dsh-fs': ['FsError'],
-  '@deepseek-ai/dsh-scope': ['carrierKeyOf', 'createScope', 'scopeOf', 'scopeTarget'],
+  '@agentrans/fs': ['FsError'],
+  '@agentrans/scope': ['carrierKeyOf', 'createScope', 'scopeOf', 'scopeTarget'],
   // appendPluginRecord writes through the Session class's private log; pluginRecordOf is stateless.
-  '@deepseek-ai/dsh-session': ['SESSION_FORMAT_VERSION', 'appendPluginRecord', 'pluginRecordOf'],
-  '@deepseek-ai/dsh-session-persistence': ['SessionPersistenceNotFoundError'],
+  '@agentrans/session': ['SESSION_FORMAT_VERSION', 'appendPluginRecord', 'pluginRecordOf'],
+  '@agentrans/session-persistence': ['SessionPersistenceNotFoundError'],
   // Readers recognize a deadline's TimeoutReason only by `instanceof` against their own copy.
-  '@deepseek-ai/dsh-timeout': ['deadline'],
+  '@agentrans/timeout': ['deadline'],
 } as const satisfies HostDependencyExports
 
 /** Exact import specifier to reviewed runtime exports. */

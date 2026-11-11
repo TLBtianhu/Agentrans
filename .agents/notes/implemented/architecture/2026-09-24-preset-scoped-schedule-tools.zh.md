@@ -6,13 +6,13 @@ Status: implemented
 
 ## Problem
 
-`@deepseek-ai/dsh-schedule` 自己注册 `schedule_create`、`schedule_list`、`schedule_update` 和 `schedule_delete`，在 `agent/created` 监听器中把它们附加到每个 live 根 Agent，唯一的过滤条件是 `ctx.agents.roots()` 的成员资格。该判据不涉及 Agent preset，因此为能力克制而组合的 `minimal` 也携带全部四个 schema，并承担其固定的请求上下文 token 成本。存储、投递和 preset 机制各自都是正确的；可用性决策落在了拥有存储服务的包里。
+`@agentrans/schedule` 自己注册 `schedule_create`、`schedule_list`、`schedule_update` 和 `schedule_delete`，在 `agent/created` 监听器中把它们附加到每个 live 根 Agent，唯一的过滤条件是 `ctx.agents.roots()` 的成员资格。该判据不涉及 Agent preset，因此为能力克制而组合的 `minimal` 也携带全部四个 schema，并承担其固定的请求上下文 token 成本。存储、投递和 preset 机制各自都是正确的；可用性决策落在了拥有存储服务的包里。
 
 ## Decision
 
-`@deepseek-ai/dsh-tool-schedule`（`packages/schedule/tool-schedule`）以 preset 级 Consumer 的身份贡献 `schedule_create`、`schedule_list`、`schedule_view` 和 `schedule_edit`。它声明 `inject = ['tools', 'systemPrompt']`，并在 `ctx.inject(['schedule'], …)` 内注册这些定义和共用授权指令，因此挂载作用域拥有它们，注册会等待同一作用域中的宿主 Schedule 服务。发布版 Web profile 在其 `standard`、`cordis` 和 `ptc` preset 中挂载该行，`minimal` 不挂载。Cordis 的 effect 所有权随挂载卸载而释放这些定义，而始终未解析出 `schedule` 的组合不会注册其中任何一个。[Web bundle](../../../../packages/bundle/web-app/README.zh.md)负责随发行版交付的组合挂载的 `schedule` 与 `ui-schedule` 两行；本记录负责提醒工具的 preset 归属。
+`@agentrans/tool-schedule`（`packages/schedule/tool-schedule`）以 preset 级 Consumer 的身份贡献 `schedule_create`、`schedule_list`、`schedule_view` 和 `schedule_edit`。它声明 `inject = ['tools', 'systemPrompt']`，并在 `ctx.inject(['schedule'], …)` 内注册这些定义和共用授权指令，因此挂载作用域拥有它们，注册会等待同一作用域中的宿主 Schedule 服务。发布版 Web profile 在其 `standard`、`cordis` 和 `ptc` preset 中挂载该行，`minimal` 不挂载。Cordis 的 effect 所有权随挂载卸载而释放这些定义，而始终未解析出 `schedule` 的组合不会注册其中任何一个。[Web bundle](../../../../packages/bundle/web-app/README.zh.md)负责随发行版交付的组合挂载的 `schedule` 与 `ui-schedule` 两行；本记录负责提醒工具的 preset 归属。
 
-`@deepseek-ai/dsh-schedule` 保留 `schedule` 存储域，现写入 v2 并读取 v1，同时保留宿主定时器与串行队列、宿主投递、自动化任务页面的读取来源，以及 `ctx.schedule` 接口。`dsh-tool-schedule` 是该接口面向模型的消费者：它将 RRULE 与目标输入映射为服务请求，从 `exec.agent` 读取操作者与 `this_session` 目的地，并把未声明的失败映射为 `internal_error`，使存储细节不会到达模型。管理按 id 寻址宿主全部任务；仅目标选择接收 Session。
+`@agentrans/schedule` 保留 `schedule` 存储域，现写入 v2 并读取 v1，同时保留宿主定时器与串行队列、宿主投递、自动化任务页面的读取来源，以及 `ctx.schedule` 接口。`dsh-tool-schedule` 是该接口面向模型的消费者：它将 RRULE 与目标输入映射为服务请求，从 `exec.agent` 读取操作者与 `this_session` 目的地，并把未声明的失败映射为 `internal_error`，使存储细节不会到达模型。管理按 id 寻址宿主全部任务；仅目标选择接收 Session。
 
 ## Alternatives considered
 

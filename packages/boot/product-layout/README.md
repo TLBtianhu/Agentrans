@@ -3,7 +3,7 @@ description: "Single-root Agentrans installation layout, manifests, packaging, r
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-product-layout
+# @agentrans/product-layout
 
 English | [中文](README.zh.md)
 

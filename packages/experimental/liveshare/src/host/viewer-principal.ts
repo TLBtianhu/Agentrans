@@ -6,14 +6,14 @@
  * name the reader the same way. The value is persisted in Session logs through `source.principal`, so it carries only the
  * share and the Relay-asserted identity: the triple plus an optional display name for attribution; no credential or avatar.
  *
- * @module @deepseek-ai/dsh-experimental-liveshare/src/host/viewer-principal
+ * @module @agentrans/experimental-liveshare/src/host/viewer-principal
  */
 
-import type { ShareRpcActor } from '@deepseek-ai/dsh-experimental-liveshare-protocol'
-import { identityKeyOf } from '@deepseek-ai/dsh-experimental-liveshare-protocol'
-import type { Principal } from '@deepseek-ai/dsh-typert-protocol'
+import type { ShareRpcActor } from '@agentrans/experimental-liveshare-protocol'
+import { identityKeyOf } from '@agentrans/experimental-liveshare-protocol'
+import type { Principal } from '@agentrans/typert-protocol'
 
-declare module '@deepseek-ai/dsh-typert-protocol' {
+declare module '@agentrans/typert-protocol' {
   interface PrincipalMap {
     /** One reader of one LiveShare share, as the Relay asserted it. */
     'share-viewer': ShareViewerPrincipal

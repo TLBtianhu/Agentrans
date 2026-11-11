@@ -5,7 +5,7 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { DeepSeekHarness } from '@deepseek-ai/dsh-sdk-client'
+import { DeepSeekHarness } from '@agentrans/sdk-client'
 import { describe, expect, it, onTestFinished } from 'vitest'
 
 const dshBin = fileURLToPath(new URL('../../../lib/bin.js', import.meta.url))

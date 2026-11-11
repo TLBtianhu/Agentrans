@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, expect, it, vi } from 'vitest'
 import { recordSceneVideo } from '../src/client/scene-video.ts'
-import type { FunctionPlotSpec } from '@deepseek-ai/dsh-artifact/scene'
+import type { FunctionPlotSpec } from '@agentrans/artifact/scene'
 
 const spec: FunctionPlotSpec = {
   kind: 'function-plot',

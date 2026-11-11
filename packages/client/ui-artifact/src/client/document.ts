@@ -1,5 +1,5 @@
 /** Restricted srcDoc assembly for executable, opaque-origin Artifact previews. */
-import type { ArtifactRuntimeIdentity } from '@deepseek-ai/dsh-artifact-runtime/types'
+import type { ArtifactRuntimeIdentity } from '@agentrans/artifact-runtime/types'
 import { buildArtifactRuntimeBridge } from './runtime-bridge.ts'
 
 /** Network-independent policy; inline code and styles cannot load remote dependencies. */

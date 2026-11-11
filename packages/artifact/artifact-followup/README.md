@@ -3,7 +3,7 @@ description: "Attach explicitly selected particle experiments or program-reporte
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-artifact-followup
+# @agentrans/artifact-followup
 
 English | [中文](README.zh.md)
 
@@ -28,7 +28,7 @@ Attach the exact experiment selected by the user to an ordinary question. The co
 Mount the plugin with Artifact and Session Controller. It registers the `artifact` prompt-context provider; it exposes no separate send operation. Ordinary `session/prompt` authorization and attachment admission remain in force. No filesystem access, additional message source, or new Session event is needed.
 
 ```yaml
-- name: '@deepseek-ai/dsh-artifact-followup'
+- name: '@agentrans/artifact-followup'
 ```
 
 | Config | Default | Meaning |

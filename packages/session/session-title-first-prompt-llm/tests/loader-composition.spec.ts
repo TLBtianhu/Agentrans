@@ -1,20 +1,20 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
-import Loader from '@deepseek-ai/cordis-plugin-loader'
-import Include from '@deepseek-ai/cordis-plugin-include'
+import { Context } from '@agentrans/cordis'
+import Loader from '@agentrans/cordis-plugin-loader'
+import Include from '@agentrans/cordis-plugin-include'
 import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import LlmRuntime, { createUserMessage, LlmAdapter, ReasoningEffortId } from '@deepseek-ai/dsh-llm'
-import type { GenerateOptions, LlmCallConfig, StreamChunk } from '@deepseek-ai/dsh-llm'
-import * as LlmPiAi from '@deepseek-ai/dsh-llm-pi-ai'
-import SessionStore, { SessionId } from '@deepseek-ai/dsh-session'
-import type { Session, SessionSeq } from '@deepseek-ai/dsh-session'
-import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
-import AgentRegistry from '@deepseek-ai/dsh-agent'
-import SessionTitleService from '@deepseek-ai/dsh-session-title'
-import * as providerPlugin from '@deepseek-ai/dsh-session-title-first-prompt-llm'
+import LlmRuntime, { createUserMessage, LlmAdapter, ReasoningEffortId } from '@agentrans/llm'
+import type { GenerateOptions, LlmCallConfig, StreamChunk } from '@agentrans/llm'
+import * as LlmPiAi from '@agentrans/llm-pi-ai'
+import SessionStore, { SessionId } from '@agentrans/session'
+import type { Session, SessionSeq } from '@agentrans/session'
+import SessionProjectionRegistry from '@agentrans/session-projection'
+import AgentRegistry from '@agentrans/agent'
+import SessionTitleService from '@agentrans/session-title'
+import * as providerPlugin from '@agentrans/session-title-first-prompt-llm'
 import { anthropicTextEvents, closeMockServers, mockServer } from '../../../llm/llm-pi-ai/tests/mock-server.ts'
 
 let root: string | undefined
@@ -54,16 +54,16 @@ async function loadComposition(
   root = await mkdtemp(join(tmpdir(), 'dsh-title-loader-'))
   const configPath = join(root, 'cordis.yml')
   await writeFile(configPath, [
-    "- name: '@deepseek-ai/dsh-llm'",
-    "- name: '@deepseek-ai/dsh-session'",
-    "- name: '@deepseek-ai/dsh-session-projection'",
-    "- name: '@deepseek-ai/dsh-agent'",
-    "- name: '@deepseek-ai/dsh-session-title'",
+    "- name: '@agentrans/llm'",
+    "- name: '@agentrans/session'",
+    "- name: '@agentrans/session-projection'",
+    "- name: '@agentrans/agent'",
+    "- name: '@agentrans/session-title'",
     '  config:',
     '    fallbackMaxWords: 5',
     '    fallbackMaxBytes: 40',
     '    maxTitleBytes: 80',
-    "- name: '@deepseek-ai/dsh-session-title-first-prompt-llm'",
+    "- name: '@agentrans/session-title-first-prompt-llm'",
     '  config:',
     '    targetWords: 5',
     '    targetCjkCharacters: 10',
@@ -77,12 +77,12 @@ async function loadComposition(
   await context.plugin(Loader)
   context.loader.builtins.include = Include
   const modules = new Map<string, unknown>([
-    ['@deepseek-ai/dsh-llm', LlmRuntime],
-    ['@deepseek-ai/dsh-session', SessionStore],
-    ['@deepseek-ai/dsh-session-projection', SessionProjectionRegistry],
-    ['@deepseek-ai/dsh-agent', AgentRegistry],
-    ['@deepseek-ai/dsh-session-title', SessionTitleService],
-    ['@deepseek-ai/dsh-session-title-first-prompt-llm', providerPlugin],
+    ['@agentrans/llm', LlmRuntime],
+    ['@agentrans/session', SessionStore],
+    ['@agentrans/session-projection', SessionProjectionRegistry],
+    ['@agentrans/agent', AgentRegistry],
+    ['@agentrans/session-title', SessionTitleService],
+    ['@agentrans/session-title-first-prompt-llm', providerPlugin],
     ...entryModules,
   ])
   context.loader.internal = {
@@ -170,7 +170,7 @@ describe('session-title Loader composition', () => {
       'maxOutputTokens: 64',
       'timeoutMs: 60000',
     ], [
-      "- name: '@deepseek-ai/dsh-llm-pi-ai'",
+      "- name: '@agentrans/llm-pi-ai'",
       '  config:',
       '    providers:',
       '      gateway:',
@@ -183,7 +183,7 @@ describe('session-title Loader composition', () => {
       '            reasoningEfforts: { low: low, high: high, max: max }',
       '            compat:',
       '              forceAdaptiveThinking: true',
-    ], new Map([['@deepseek-ai/dsh-llm-pi-ai', LlmPiAi]]))
+    ], new Map([['@agentrans/llm-pi-ai', LlmPiAi]]))
 
     const { session, messageSeq } = await promptThenRequest(ctx, 'pi-ai-title', {
       provider: 'gateway',

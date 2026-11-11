@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
-import type { Agent } from '@deepseek-ai/dsh-agent'
-import { MessageId } from '@deepseek-ai/dsh-llm'
-import SessionStore, { SessionId, SessionSeq, type SessionEvent } from '@deepseek-ai/dsh-session'
+import { Context } from '@agentrans/cordis'
+import type { Agent } from '@agentrans/agent'
+import { MessageId } from '@agentrans/llm'
+import SessionStore, { SessionId, SessionSeq, type SessionEvent } from '@agentrans/session'
 import { admitBranchResult, BranchResultAdmissionBusy, BranchResultAdmissionConflict } from '../src/admission.ts'
 import type { BranchResultSelection } from '../src/types.ts'
 

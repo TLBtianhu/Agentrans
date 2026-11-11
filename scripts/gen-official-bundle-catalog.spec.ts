@@ -17,12 +17,12 @@ function write(root: string, path: string, content: unknown): void {
   writeFileSync(join(root, path), typeof content === 'string' ? content : `${JSON.stringify(content)}\n`)
 }
 
-function directory(name: string): string { return `packages/subagent/${name.slice('@deepseek-ai/dsh-'.length)}` }
+function directory(name: string): string { return `packages/subagent/${name.slice('@agentrans/'.length)}` }
 
 function fixture(): string {
   const root = mkdtempSync(join(tmpdir(), 'dsh-official-catalog-'))
   roots.push(root)
-  write(root, 'apps/cli/package.json', { name: '@deepseek-ai/dsh' })
+  write(root, 'apps/cli/package.json', { name: '@agentrans/dsh' })
   for (const name of ON_DEMAND_BUNDLES) {
     const dir = directory(name)
     write(root, `${dir}/package.json`, {
@@ -101,8 +101,8 @@ describe('Official bundle catalog generation', () => {
   it.each([false, true])('rejects an on-demand provider in the installed dependency closure (indirect=%s)', (indirect) => {
     const root = fixture()
     const name = ON_DEMAND_BUNDLES[0]!
-    write(root, 'apps/cli/package.json', { name: '@deepseek-ai/dsh', dependencies: { [indirect ? '@deepseek-ai/dsh-layer' : name]: '*' } })
-    if (indirect) write(root, 'packages/bundle/layer/package.json', { name: '@deepseek-ai/dsh-layer', dependencies: { [name]: '*' } })
+    write(root, 'apps/cli/package.json', { name: '@agentrans/dsh', dependencies: { [indirect ? '@agentrans/layer' : name]: '*' } })
+    if (indirect) write(root, 'packages/bundle/layer/package.json', { name: '@agentrans/layer', dependencies: { [name]: '*' } })
     expect(() => generateOfficialBundleCatalog(root)).toThrow('must not be installed by the DSH distribution')
   })
 

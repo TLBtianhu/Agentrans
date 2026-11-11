@@ -1,16 +1,16 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
-import AgentRegistry, { type Agent } from '@deepseek-ai/dsh-agent'
-import { MessageId, type UserMessage } from '@deepseek-ai/dsh-llm'
-import { Session, SessionId, SessionLogOffset, type SessionEvent } from '@deepseek-ai/dsh-session'
-import SessionInputAdmission from '@deepseek-ai/dsh-session-input'
-import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
-import type { PeerId, RemoteInvocation } from '@deepseek-ai/dsh-typert-protocol'
-import { remoteMethods } from '@deepseek-ai/dsh-typert-protocol'
+import { Context } from '@agentrans/cordis'
+import AgentRegistry, { type Agent } from '@agentrans/agent'
+import { MessageId, type UserMessage } from '@agentrans/llm'
+import { Session, SessionId, SessionLogOffset, type SessionEvent } from '@agentrans/session'
+import SessionInputAdmission from '@agentrans/session-input'
+import SessionProjectionRegistry from '@agentrans/session-projection'
+import type { PeerId, RemoteInvocation } from '@agentrans/typert-protocol'
+import { remoteMethods } from '@agentrans/typert-protocol'
 import ArtifactService, { type Config } from '../src/index.ts'
 import type { ArtifactActionRequest, ArtifactId } from '../src/types.ts'
 
-declare module '@deepseek-ai/dsh-typert-protocol' {
+declare module '@agentrans/typert-protocol' {
   interface PrincipalMap {
     /** Non-owner identity exercised by this domain's owner-only Remote. */
     'artifact-test-caller': { readonly kind: 'artifact-test-caller' }

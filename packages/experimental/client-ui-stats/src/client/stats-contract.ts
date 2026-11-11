@@ -1,9 +1,9 @@
 /** Published performance model: per-step metrics, per-turn aggregates, and marker contributions. */
 
-import type { ImageAttachmentRef } from '@deepseek-ai/dsh-attachment'
+import type { ImageAttachmentRef } from '@agentrans/attachment'
 import type {
   ConversationLocation, ConversationViewNode,
-} from '@deepseek-ai/dsh-client-ui-conversation/client'
+} from '@agentrans/client-ui-conversation/client'
 
 /** Outcome of one older-history request. */
 export type LoadOlderResult = 'grew' | 'exhausted' | 'retry'
@@ -303,7 +303,7 @@ export interface StatsSnapshot {
   readonly stepCount: number
 }
 
-declare module '@deepseek-ai/dsh-client-ui-conversation/client' {
+declare module '@agentrans/client-ui-conversation/client' {
   interface ConversationViewSnapshotMap {
     /** Turn and step metrics this target assembles. */
     stats: StatsSnapshot

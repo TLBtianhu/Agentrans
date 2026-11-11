@@ -1,9 +1,9 @@
 /** Existing user-message readers retain the exact context of an ordinary question. */
 import { readFile } from 'node:fs/promises'
 import { expect, it } from 'vitest'
-import { SESSION_FORMAT_VERSION, SessionId } from '@deepseek-ai/dsh-session'
-import { SessionFormatEventCollector, snapshotSessionFormatJson } from '@deepseek-ai/dsh-session-format'
-import { releasedV4SessionFormatCodec, restoreReleasedV4Artifact } from '@deepseek-ai/dsh-session-format-v3-to-v4'
+import { SESSION_FORMAT_VERSION, SessionId } from '@agentrans/session'
+import { SessionFormatEventCollector, snapshotSessionFormatJson } from '@agentrans/session-format'
+import { releasedV4SessionFormatCodec, restoreReleasedV4Artifact } from '@agentrans/session-format-v3-to-v4'
 
 const fixtures = ['question-message', 'program-state-message', 'program-error-message']
 

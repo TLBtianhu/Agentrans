@@ -3,7 +3,7 @@ description: "The shared per-call sandbox policy resolver and current model cont
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-sandbox-policy
+# @agentrans/sandbox-policy
 
 English | [中文](README.zh.md)
 
@@ -36,7 +36,7 @@ Choose it for every composition with confined capabilities (bash, filesystem, te
 Load the package with a default mode; the fail-safe default is `read-only`, and a deployment that wants a workspace-writable agent opts into `workspace-write` explicitly.
 
 ```yaml
-- name: '@deepseek-ai/dsh-sandbox-policy'
+- name: '@agentrans/sandbox-policy'
   config:
     mode: workspace-write
     workspaceRoot: /absolute/path/to/workspace
@@ -50,7 +50,7 @@ Load the package with a default mode; the fail-safe default is `read-only`, and 
 
 For a linked Git worktree, the caller can grant its shared Git directory with `additionalWritableRoots`. The caller selects that directory explicitly; the policy does not inspect Git files or grant a parent checkout. These grants are deployment configuration shared by the composition's sessions, rather than saved Session permissions. Granting the entire Git directory also permits changes to hooks and configuration that a later host Git invocation can execute outside the sandbox; use that grant only for trusted tasks. Use physical absolute directory paths. The enforcing host rejects missing paths, files, and symlinked roots, including a directory replaced by a symlink between calls. Remote grants are validated on the remote host.
 
-The generated [configuration catalog](../../../docs/config-catalog.md#deepseek-aidsh-sandbox-policy) is the exhaustive source for every accepted field and its JSDoc.
+The generated [configuration catalog](../../../docs/config-catalog.md#agentranssandbox-policy) is the exhaustive source for every accepted field and its JSDoc.
 
 ### Switching a session's mode
 

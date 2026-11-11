@@ -10,7 +10,7 @@ DSH 会话跑在你自己的电脑上。同事有时需要在你工作的同时�
 
 所以一次分享要同时解决三件事：一个**同事用浏览器打开就能看的页面**，看到你机器上正在跑的会话，但不需要连到你的机器；一个**对页面能做什么的限制**，从"能读、不能写文件"开始——页面多给一个你没同意的操作就是安全漏洞，不是便利；以及一个**"这是谁分享的"的答案**，因为说不清归属的页面，打开它的人无从信任。
 
-这条 Note 覆盖 owner 自己 DSH 里运行的那一半——分享对话框、背后的 owner 端服务、本包的浏览器端，以及读者打开的页面——以及双方共用的协议包。中间的 Liveshare 服务端是独立的包（`@deepseek-ai/dsh-experimental-liveshare-relay`），单独审查与部署。
+这条 Note 覆盖 owner 自己 DSH 里运行的那一半——分享对话框、背后的 owner 端服务、本包的浏览器端，以及读者打开的页面——以及双方共用的协议包。中间的 Liveshare 服务端是独立的包（`@agentrans/experimental-liveshare-relay`），单独审查与部署。
 
 ## Decision
 
@@ -53,9 +53,9 @@ fork 不是一档。分享自带独立的 `allowsFork` 开关，与档位无关�
 
 Host 的组合包 `enabled` 标志表示 profile 是否选中了这个组合包，这与它的插件是否在运行并不等价：通过 `cordis.patch.yml` 插入组合包的行会让插件运行，而组合包本身仍未选中；因此以 `enabled` 为准的可见性规则会把用户刚刚启用的组合包隐藏起来，使写入文档的启用路径失效。
 
-因此管理器维护一个 `HIDDEN_UNTIL_RUNNING` 组合包名集合——当前只有 `@deepseek-ai/dsh-experimental-liveshare`——集合中的组合包只有在它 patch 声明的行至少有一条在运行时才会被列出（`pkg.rows.some(row => row.enabled)`）。过滤发生在两个列表派生之前，因此在满足条件前，它不会出现在主"实验性插件"组、**更多**页、**内置插件配置**和"已安装插件"组中。该集合是 `PluginManagerPage.tsx` 中的客户端数据；Host 的 `listBundles` 契约、profile 格式和已安装包集合都保持不变。`BundleInfo.rows` 已把每条声明的行与当前承载它的 Loader 条目关联起来，客户端的 `PackageView` 携带该条目是否在运行，因此行状态就是两条启用路径的有效答案：删除这些行、把它们置为 disabled，或取消选中组合包，都会让它们停止运行，卡片随之从两个列表消失。
+因此管理器维护一个 `HIDDEN_UNTIL_RUNNING` 组合包名集合——当前只有 `@agentrans/experimental-liveshare`——集合中的组合包只有在它 patch 声明的行至少有一条在运行时才会被列出（`pkg.rows.some(row => row.enabled)`）。过滤发生在两个列表派生之前，因此在满足条件前，它不会出现在主"实验性插件"组、**更多**页、**内置插件配置**和"已安装插件"组中。该集合是 `PluginManagerPage.tsx` 中的客户端数据；Host 的 `listBundles` 契约、profile 格式和已安装包集合都保持不变。`BundleInfo.rows` 已把每条声明的行与当前承载它的 Loader 条目关联起来，客户端的 `PackageView` 携带该条目是否在运行，因此行状态就是两条启用路径的有效答案：删除这些行、把它们置为 disabled，或取消选中组合包，都会让它们停止运行，卡片随之从两个列表消失。
 
-卡片隐藏期间组合包 ID 仍可按 ID 打开：`openPkg` 会从未过滤的 Host 组合包列表中解析隐藏的组合包，因此 `pluginNavigation.openBundle('@deepseek-ai/dsh-experimental-liveshare')` 仍能渲染其详情。其它按 ID 链接组合包的界面因此继续可用，组合包页也像其它未选中组合包的页面一样列出各行及其关闭状态。
+卡片隐藏期间组合包 ID 仍可按 ID 打开：`openPkg` 会从未过滤的 Host 组合包列表中解析隐藏的组合包，因此 `pluginNavigation.openBundle('@agentrans/experimental-liveshare')` 仍能渲染其详情。其它按 ID 链接组合包的界面因此继续可用，组合包页也像其它未选中组合包的页面一样列出各行及其关闭状态。
 
 ### 分享工作如何限制在授权范围内
 

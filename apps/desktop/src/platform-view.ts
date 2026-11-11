@@ -2,7 +2,7 @@
 import type { EventEmitter } from 'node:events'
 import { createHash, randomUUID } from 'node:crypto'
 import { WebContentsView, session, shell, type Session, type View, type WebFrameMain } from 'electron'
-import type { PlatformSession } from '@deepseek-ai/dsh-deepseek-account'
+import type { PlatformSession } from '@agentrans/deepseek-account'
 import { mergePlatformCookies, platformClientHeaders } from './platform-client-headers.ts'
 import { desktopClientMetadata } from './client-metadata.ts'
 

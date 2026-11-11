@@ -3,13 +3,13 @@
  * of `dsh-tool-bash`'s background adaptation: the terminal
  * outcome the registry records and the pull sources it pumps.
  *
- * @module @deepseek-ai/dsh-tool-pwsh/background
+ * @module @agentrans/tool-pwsh/background
  */
 
-import type { SandboxMode } from '@deepseek-ai/dsh-sandbox'
-import { escalationHintMarker, sandboxDenialMarker } from '@deepseek-ai/dsh-sandbox'
-import type { ShellProcess, ShellSandboxInfo } from '@deepseek-ai/dsh-shell'
-import type { JobChunk, JobHooks, JobOutcome, JobOutputSource } from '@deepseek-ai/dsh-jobs'
+import type { SandboxMode } from '@agentrans/sandbox'
+import { escalationHintMarker, sandboxDenialMarker } from '@agentrans/sandbox'
+import type { ShellProcess, ShellSandboxInfo } from '@agentrans/shell'
+import type { JobChunk, JobHooks, JobOutcome, JobOutputSource } from '@agentrans/jobs'
 
 /* jscpd:ignore-start -- deliberate twin of dsh-tool-bash/background.ts (Agent Note). */
 

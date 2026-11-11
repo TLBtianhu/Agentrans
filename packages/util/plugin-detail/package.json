@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-plugin-detail",
+  "name": "@agentrans/plugin-detail",
   "description": "Plugin detail documents: meta.detail or README selection, image paths, and local and npm CDN file sources",
   "version": "0.1.0",
   "publishConfig": {
@@ -32,9 +32,9 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/cordis": "workspace:~"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/cordis": "workspace:~"
   }
 }

@@ -1,16 +1,16 @@
 // @vitest-environment jsdom
 /** The body registers into the shared card registry with its copy and Remote, and leaves all three on unload. */
 import { act, cleanup, render, screen } from '@testing-library/react'
-import { Context } from '@deepseek-ai/cordis'
-import { LocaleRuntime } from '@deepseek-ai/dsh-client-locale/client'
-import { ToolCallId } from '@deepseek-ai/dsh-llm/brand'
-import { SessionId } from '@deepseek-ai/dsh-session/types'
-import type { ActionCardDescriptor } from '@deepseek-ai/dsh-client-ui-action-cards/client'
-import { FoldedText } from '@deepseek-ai/dsh-client-ui-action-cards/src/client/Card.tsx'
+import { Context } from '@agentrans/cordis'
+import { LocaleRuntime } from '@agentrans/client-locale/client'
+import { ToolCallId } from '@agentrans/llm/brand'
+import { SessionId } from '@agentrans/session/types'
+import type { ActionCardDescriptor } from '@agentrans/client-ui-action-cards/client'
+import { FoldedText } from '@agentrans/client-ui-action-cards/src/client/Card.tsx'
 import { afterEach, expect, it, onTestFinished, vi } from 'vitest'
 import { mountRecommendations, inject } from '../src/client/mount.ts'
 import { apply as hostApply } from '../src/index.ts'
-const apply = (ctx: Context) => mountRecommendations(ctx, { package: '@deepseek-ai/dsh-plugin-recommendations', descriptors: [] })
+const apply = (ctx: Context) => mountRecommendations(ctx, { package: '@agentrans/plugin-recommendations', descriptors: [] })
 
 afterEach(cleanup)
 

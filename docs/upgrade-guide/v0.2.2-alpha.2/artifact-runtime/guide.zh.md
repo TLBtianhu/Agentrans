@@ -11,7 +11,7 @@ description: "HTML 程序通过注入的 Artifact API 声明实际运行支持�
 
 共享 HTML 控制要求双方当前运行都报告 ready 并显式注册已实现的回调。不带作用域的 `artifact-command` 和 `artifact-state` 消息不再建立控制或状态支持。已有 HTML 仍可预览，经过用户确认的 `artifact-action` 路径保持不变。源码创建只确认源码接受，不确认渲染器执行。
 
-使用当前 Artifact Client 的自定义 Web 组合需要在 Artifact 旁挂载 `@deepseek-ai/dsh-artifact-runtime`，并提供其生成的 Remote contribution。Agent preset 可挂载 `/tool` 入口，提供精确修订的 `artifact_runtime` 查询。随产品提供的 Web 组合同时包含两者。不需要 Session 迁移；旧工具结果不会恢复实时就绪。参见[所有权决策](../../../../.agents/notes/implemented/architecture/2026-11-07-artifact-runtime-reports.zh.md)。
+使用当前 Artifact Client 的自定义 Web 组合需要在 Artifact 旁挂载 `@agentrans/artifact-runtime`，并提供其生成的 Remote contribution。Agent preset 可挂载 `/tool` 入口，提供精确修订的 `artifact_runtime` 查询。随产品提供的 Web 组合同时包含两者。不需要 Session 迁移；旧工具结果不会恢复实时就绪。参见[所有权决策](../../../../.agents/notes/implemented/architecture/2026-11-07-artifact-runtime-reports.zh.md)。
 
 运行查询结果新增 `wait` 和 `budget`。可选 `waitMs` 在 Host 上限内等待一次 ready/error 报告；零或缺省仍立即返回快照。读取所有运行与等待结果：超时或空报告列表不表示执行失败或成功。工具限制每轮查询与修复尝试，不自动调度修复。
 

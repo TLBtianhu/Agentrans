@@ -3,7 +3,7 @@ description: "Web \"Open In...\" controls: the Session-header split button launc
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-client-ui-open-in-app
+# @agentrans/client-ui-open-in-app
 
 English | [中文](README.zh.md)
 
@@ -55,7 +55,7 @@ A file menu offers “Open in sidebar” and “Open in floating panel”, which
 <details>
 <summary>Implementation internals — click to expand</summary>
 
-Both directory slots use `OpenInAppAction` with an explicit `absolutePath`. The `conversation.session.header.utilities` registration reads the Session cwd, while `sidebar.right.tab.files.actions` receives the displayed directory from its owner. The plugin registers the `open-in-app` dictionaries as one effect. A page-lifetime controller ([`src/client/controller.ts`](src/client/controller.ts)) owns the once-per-page availability read, the persisted choice snapshot store, and the launch POST; the component receives the shared sources through the inject `hooks` compartment, so every Session header shares one truth. Document-relative route forms and wire payload types come from the host package's browser-safe `@deepseek-ai/dsh-host-open-in-app/shared` subpath. The controller guards in-flight launches and publishes the captured directory and busy state. Adapters resolve native and transport failures to named outcomes; ignored or cancelled requests return a skipped outcome and announce nothing.
+Both directory slots use `OpenInAppAction` with an explicit `absolutePath`. The `conversation.session.header.utilities` registration reads the Session cwd, while `sidebar.right.tab.files.actions` receives the displayed directory from its owner. The plugin registers the `open-in-app` dictionaries as one effect. A page-lifetime controller ([`src/client/controller.ts`](src/client/controller.ts)) owns the once-per-page availability read, the persisted choice snapshot store, and the launch POST; the component receives the shared sources through the inject `hooks` compartment, so every Session header shares one truth. Document-relative route forms and wire payload types come from the host package's browser-safe `@agentrans/host-open-in-app/shared` subpath. The controller guards in-flight launches and publishes the captured directory and busy state. Adapters resolve native and transport failures to named outcomes; ignored or cancelled requests return a skipped outcome and announce nothing.
 
 The directory and file adapters supply application metadata and operations to [`OpenTargetButton`](src/client/OpenTargetButton.tsx), which owns menu ordering, default markers, icons, and sizing. Its injected reporter sends outcomes to one feature-owned `shell.overlay` toast, so switching Sessions or closing the initiating preview cannot discard the result. The file header and empty state share `FileOpenTarget`, while `OpenPathInjected.applications` queries `session.workspacePathApplications` through [`open-path.ts`](src/client/open-path.ts). Opening uses `session.openWorkspacePath`; the Host revalidates an explicitly selected handler before launch. The directory adapter keeps the existing catalog routes. `FileRouteAction` supplies the same control to delivery cards and change review through `deliverables.file.actions` and `deliverables.review.file.actions`; their authenticated routes retain Session file authorization. A failed or unavailable file query therefore needs no platform-specific UI implementation.
 

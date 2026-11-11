@@ -3,7 +3,7 @@ description: "面向 Web GUI 用户与维护者的模型上下文：给出 DeepS
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-harness-dev-context
+# @agentrans/harness-dev-context
 
 [English](README.md) | 中文
 

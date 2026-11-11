@@ -1,10 +1,10 @@
-/** Model-facing inspection of source semantics and currently connected runtime reports. @module @deepseek-ai/dsh-artifact-runtime/tool */
-import type { Context } from '@deepseek-ai/cordis'
-import z from '@deepseek-ai/schemastery'
-import type { Agent, TurnBoundaryProjection } from '@deepseek-ai/dsh-agent'
-import { defineTool, type ToolExecution } from '@deepseek-ai/dsh-tools'
-import type { ArtifactId } from '@deepseek-ai/dsh-artifact/types'
-import { ArtifactError } from '@deepseek-ai/dsh-artifact'
+/** Model-facing inspection of source semantics and currently connected runtime reports. @module @agentrans/artifact-runtime/tool */
+import type { Context } from '@agentrans/cordis'
+import z from '@agentrans/schemastery'
+import type { Agent, TurnBoundaryProjection } from '@agentrans/agent'
+import { defineTool, type ToolExecution } from '@agentrans/tools'
+import type { ArtifactId } from '@agentrans/artifact/types'
+import { ArtifactError } from '@agentrans/artifact'
 import type {} from './index.ts'
 
 /** Stable Loader identity for preset mounting. */

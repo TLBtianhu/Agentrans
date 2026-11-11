@@ -1,6 +1,6 @@
 import { runInNewContext } from 'node:vm'
 import { describe, expect, it } from 'vitest'
-import { snapshotJsonValue } from '@deepseek-ai/dsh-util-values'
+import { snapshotJsonValue } from '@agentrans/util-values'
 import { ARTIFACT_JSON_MAX_DEPTH, ARTIFACT_JSON_MAX_NODES, isBoundedArtifactJson } from '../src/runtime-values.ts'
 
 const valid = (value: unknown) => isBoundedArtifactJson(value, ARTIFACT_JSON_MAX_DEPTH, ARTIFACT_JSON_MAX_NODES)

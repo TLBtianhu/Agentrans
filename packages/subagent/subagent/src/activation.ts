@@ -1,10 +1,10 @@
 /** Execution-period records, capacity slots, child serialization, and local output capture.
- * @module @deepseek-ai/dsh-subagent/activation
+ * @module @agentrans/subagent/activation
  */
 
-import type { Agent, AgentHandle } from '@deepseek-ai/dsh-agent'
-import type { SessionId, SessionLogOffset } from '@deepseek-ai/dsh-session'
-import { assertNever } from '@deepseek-ai/dsh-util-values'
+import type { Agent, AgentHandle } from '@agentrans/agent'
+import type { SessionId, SessionLogOffset } from '@agentrans/session'
+import { assertNever } from '@agentrans/util-values'
 import { finalAssistantOutput } from './assistant-output.ts'
 import { epochStopReason } from './lifecycle.ts'
 import type { ActivationObserver } from './lifecycle.ts'

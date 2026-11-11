@@ -1,16 +1,16 @@
-import { imageOffloadProjection } from '@deepseek-ai/dsh-compaction-image-offload/projection'
+import { imageOffloadProjection } from '@agentrans/compaction-image-offload/projection'
 import { describe, expect, it, onTestFinished } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
+import { Context } from '@agentrans/cordis'
 import {
   LlmRuntime, LlmAdapter, createMessage, createToolResultMessage, createUserMessage, projectFilesToText, ToolCallId,
-} from '@deepseek-ai/dsh-llm'
-import type { GenerateOptions, LlmImageRequestPricing, Message, StreamChunk, TokenUsage, UserMessage } from '@deepseek-ai/dsh-llm'
-import { AttachmentId } from '@deepseek-ai/dsh-attachment'
-import type { FileAttachmentRef, ImageAttachmentRef } from '@deepseek-ai/dsh-attachment'
-import { Session, SessionId, canonicalHeader } from '@deepseek-ai/dsh-session'
-import type { EpochHeader } from '@deepseek-ai/dsh-session'
-import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
-import TokenMeter from '@deepseek-ai/dsh-token-meter'
+} from '@agentrans/llm'
+import type { GenerateOptions, LlmImageRequestPricing, Message, StreamChunk, TokenUsage, UserMessage } from '@agentrans/llm'
+import { AttachmentId } from '@agentrans/attachment'
+import type { FileAttachmentRef, ImageAttachmentRef } from '@agentrans/attachment'
+import { Session, SessionId, canonicalHeader } from '@agentrans/session'
+import type { EpochHeader } from '@agentrans/session'
+import SessionProjectionRegistry from '@agentrans/session-projection'
+import TokenMeter from '@agentrans/token-meter'
 import { estimateContent, estimateMessage } from '../src/estimate.ts'
 
 /** Adapter double declaring fixed per-occurrence image prices for one route. */

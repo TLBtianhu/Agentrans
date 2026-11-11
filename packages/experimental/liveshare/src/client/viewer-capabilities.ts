@@ -6,10 +6,10 @@
  * the page cannot read — or one naming a mode this build does not know — leaves it there rather than
  * assuming more.
  *
- * @module @deepseek-ai/dsh-experimental-liveshare/src/client/viewer-capabilities
+ * @module @agentrans/experimental-liveshare/src/client/viewer-capabilities
  */
 
-import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
+import { createSnapshotStore } from '@agentrans/client-store'
 
 /**
  * What one owner lets a viewer do with a share, as one of two tiers.

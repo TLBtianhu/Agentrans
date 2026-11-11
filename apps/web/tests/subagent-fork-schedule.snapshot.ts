@@ -3,17 +3,17 @@ import { readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { expect, it } from 'vitest'
-import { createUserMessage } from '@deepseek-ai/dsh-llm'
-import { parseSessionLog, prepareSessionSnapshotFixtureForComparison } from '@deepseek-ai/dsh-llm-replay'
-import type { Session } from '@deepseek-ai/dsh-session'
+import { createUserMessage } from '@agentrans/llm'
+import { parseSessionLog, prepareSessionSnapshotFixtureForComparison } from '@agentrans/llm-replay'
+import type { Session } from '@agentrans/session'
 import {
   fixtureContext, normalizeSessionSnapshots, normalizedSystemPrompts, normalizedToolSchemas,
   formatSystemPromptSnapshot, parseToolSchemasSnapshot, redactSessionSnapshotIds, refreshFixtureReplacements,
   scrubSessionSnapshot, stabilizeFixtureMessageIds, stabilizeRefreshLog, tokenizeSessionFixtureCwd,
-} from '@deepseek-ai/dsh-session-snapshot'
-import type {} from '@deepseek-ai/dsh-api-session-controller'
-import type {} from '@deepseek-ai/dsh-schedule'
-import type {} from '@deepseek-ai/dsh-subagent'
+} from '@agentrans/session-snapshot'
+import type {} from '@agentrans/api-session-controller'
+import type {} from '@agentrans/schedule'
+import type {} from '@agentrans/subagent'
 import {
   fixtureUserPrompts, launchWebScaffold, normalizeWebSessionVolatiles, rawSessionLog, readPersistedEvents,
   recordedSessionFixturePath, selectedSessionFixture, webSnapshotMode,

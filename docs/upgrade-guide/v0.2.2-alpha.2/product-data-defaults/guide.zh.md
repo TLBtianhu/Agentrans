@@ -16,5 +16,5 @@ description: "Agentrans 关闭随附 profile 的附加上传，并将 HTTP 归�
 ## 迁移
 
 1. 检查 home patch、profile patch 和命令行 overlay 是否显式启用上述六个插件行，包括独立的 `sdk-minimal` profile。移除覆盖可采用随附默认值。若确需分享，先配置目的地并阅读所属插件的约定；参见[基础组合包](../../../../packages/bundle/base/README.zh.md#included-capabilities)、[极简 SDK 组合包](../../../../packages/bundle/sdk-minimal/README.zh.md)与 [Web 组合包](../../../../packages/bundle/web-app/README.zh.md)。
-2. 使用 `APP_IDENTITY.product` 解析 DeepSeek 模型目录的消费者，改用 `@deepseek-ai/dsh-llm-deepseek` 的 `DEEPSEEK_CLIENT_COMPATIBILITY.key`，适配器兼容检查采用其 `version`。公开 HTTP 归属继续使用 `APP_IDENTITY`。
+2. 使用 `APP_IDENTITY.product` 解析 DeepSeek 模型目录的消费者，改用 `@agentrans/llm-deepseek` 的 `DEEPSEEK_CLIENT_COMPATIBILITY.key`，适配器兼容检查采用其 `version`。公开 HTTP 归属继续使用 `APP_IDENTITY`。
 3. 检查拦截的模型请求：User-Agent 以 `agentrans/` 开头，三个跟踪头均缺席，默认 body 不含 `dsh_session_log` 或 `dsh_plugin_packages`。确认本地反馈仍写入 Session 历史，且不触发 collector 请求。无需迁移 Session 数据。

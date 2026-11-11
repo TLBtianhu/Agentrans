@@ -10,9 +10,9 @@
 import { memo, useMemo } from 'react'
 import type { ReactNode } from 'react'
 import clsx from 'clsx'
-import type { FactoryComponentPropsOf } from '@deepseek-ai/dsh-client-ui-slots'
-import type { ContextMenuTriggerProps } from '@deepseek-ai/dsh-client-ui-context-menu/client'
-import { FileTypeIcon, classifyFileType, IconFolderCloseRegular, IconFolderOpenRegular } from '@deepseek-ai/dsh-client-ui-primitives'
+import type { FactoryComponentPropsOf } from '@agentrans/client-ui-slots'
+import type { ContextMenuTriggerProps } from '@agentrans/client-ui-context-menu/client'
+import { FileTypeIcon, classifyFileType, IconFolderCloseRegular, IconFolderOpenRegular } from '@agentrans/client-ui-primitives'
 import type {} from './locales.ts'
 import css from './FileTree.module.css'
 
@@ -100,7 +100,7 @@ export interface FileTreeInput {
   readonly rowTriggerProps?: ((entry: TreeEntry, kind: 'file' | 'directory') => ContextMenuTriggerProps) | undefined
 }
 
-declare module '@deepseek-ai/dsh-client-ui-slots' {
+declare module '@agentrans/client-ui-slots' {
   interface SlotFactoryMap {
     /** A controlled file tree over caller-supplied entries; the caller decides what a click does. */
     'sidebar.files.tree': {

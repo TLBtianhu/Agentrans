@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 import { act, cleanup, render } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
-import { bindSnapshotSelector } from '@deepseek-ai/dsh-client-test-runtime'
+import { createSnapshotStore } from '@agentrans/client-store'
+import { bindSnapshotSelector } from '@agentrans/client-test-runtime'
 import type { TranscriptViewMode } from '../src/chat-settings.ts'
 import {
   COLLAPSE_TIMINGS, FOLDED_REPLIES, derivePresentationPolicy, presentationPolicyFor,

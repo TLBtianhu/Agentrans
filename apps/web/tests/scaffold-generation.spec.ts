@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { parseSessionLog, prepareSessionSnapshotFixtureForComparison } from '@deepseek-ai/dsh-llm-replay'
+import { parseSessionLog, prepareSessionSnapshotFixtureForComparison } from '@agentrans/llm-replay'
 import {
   assertCorpusReplayFixtureOwner,
   assertFixtureInventory,

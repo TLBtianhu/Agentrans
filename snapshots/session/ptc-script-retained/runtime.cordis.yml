@@ -7,7 +7,7 @@
     - id: approve-temporary-run
       name: './approve-temporary-run.mjs'
     - id: computer-use
-      name: '@deepseek-ai/dsh-computer-use'
+      name: '@agentrans/computer-use'
     - id: cua-script-guidance
       name: './cua-guidance.mjs'
       config:

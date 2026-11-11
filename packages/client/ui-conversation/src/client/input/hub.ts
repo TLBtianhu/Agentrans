@@ -4,25 +4,25 @@
  * catalog subscription. Saved drafts enter the model before the first lookup
  * returns; Session-scope disposal releases the shell and its resources.
  */
-import type {} from '@deepseek-ai/dsh-client-product-analytics/client'
-import type { PlanProjection } from '@deepseek-ai/dsh-plan-mode/types'
-import type { GoalProjection } from '@deepseek-ai/dsh-goal/types'
-import type { Context } from '@deepseek-ai/cordis'
+import type {} from '@agentrans/client-product-analytics/client'
+import type { PlanProjection } from '@agentrans/plan-mode/types'
+import type { GoalProjection } from '@agentrans/goal/types'
+import type { Context } from '@agentrans/cordis'
 import type {
   ISessions, SessionBinding, SessionFace,
-} from '@deepseek-ai/dsh-api-session-controller/client'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import type { TranslateNS } from '@deepseek-ai/dsh-client-locale/client'
-import type { InboxState } from '@deepseek-ai/dsh-agent/types'
-import type { ModelSelectionProjection } from '@deepseek-ai/dsh-agent/types'
-import type { ObservableSnapshot } from '@deepseek-ai/dsh-client-store'
+} from '@agentrans/api-session-controller/client'
+import type { SessionId } from '@agentrans/session/types'
+import type { TranslateNS } from '@agentrans/client-locale/client'
+import type { InboxState } from '@agentrans/agent/types'
+import type { ModelSelectionProjection } from '@agentrans/agent/types'
+import type { ObservableSnapshot } from '@agentrans/client-store'
 import type {
   DraftAttachmentId, DraftAttachmentSerializationResult, DraftInitializationOptions, DraftInitializationResult, InputTriggerController,
   SessionInputResolver, SessionInput, DefaultSubmitOutcome,
 } from '../contract/input.ts'
 import type { ComposerKeyboard } from '../contract/draft-editor.ts'
 import type { ComposerBlocks } from '../contract/composer-blocks.ts'
-import type { PromptContextInput } from '@deepseek-ai/dsh-api-session-controller/types'
+import type { PromptContextInput } from '@agentrans/api-session-controller/types'
 import type { InputSubmitMode } from '../contract/composer-submission.ts'
 import type { PopupDismissFace } from './facade.ts'
 import { SessionInputShell } from './facade.ts'

@@ -1,7 +1,7 @@
 /** The Git transport an installation of a self-hosted repository uses, chosen by probing access before pnpm starts. */
 import { execa } from 'execa'
 import hostedGitInfo from 'hosted-git-info'
-import { scrubbedParentEnv } from '@deepseek-ai/dsh-subprocess'
+import { scrubbedParentEnv } from '@agentrans/subprocess'
 import type { ParsedInstallSpec } from './install-spec.ts'
 
 /** Deadline and cancellation for each read-only access probe. */

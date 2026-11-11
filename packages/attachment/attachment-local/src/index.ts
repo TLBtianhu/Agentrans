@@ -1,9 +1,9 @@
-/** Local durable attachment backend rooted below `DSH_HOME`. @module @deepseek-ai/dsh-attachment-local */
+/** Local durable attachment backend rooted below `DSH_HOME`. @module @agentrans/attachment-local */
 
 import { join } from 'node:path'
-import { Context } from '@deepseek-ai/cordis'
-import z from '@deepseek-ai/schemastery'
-import { AttachmentStore } from '@deepseek-ai/dsh-attachment'
+import { Context } from '@agentrans/cordis'
+import z from '@agentrans/schemastery'
+import { AttachmentStore } from '@agentrans/attachment'
 import type {
   FileAttachmentRef,
   ImageAttachmentLimits,
@@ -14,8 +14,8 @@ import type {
   SaveFileStreamAttachment,
   SaveImageAttachment,
   StoredImageAttachment,
-} from '@deepseek-ai/dsh-attachment'
-import { dshCachePath, resolveDshHome } from '@deepseek-ai/dsh-home-paths'
+} from '@agentrans/attachment'
+import { dshCachePath, resolveDshHome } from '@agentrans/home-paths'
 import type { NormalizationPolicy } from './normalization.ts'
 import { CompressionLimiter, compressionFailure } from './compression-limiter.ts'
 import { commitPreparedImageFile, normalizedImagePath, prepareImageFile, readImageFile, validateImageFile } from './store.ts'

@@ -4,7 +4,7 @@ import { existsSync, mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { expect, it, onTestFinished, vi } from 'vitest'
-import { resolveDevelopmentLaunchContext, resolveProductLaunchContext, serializeProductLaunchContext } from '@deepseek-ai/dsh-product-layout/launch-context'
+import { resolveDevelopmentLaunchContext, resolveProductLaunchContext, serializeProductLaunchContext } from '@agentrans/product-layout/launch-context'
 import { developmentBundleMetadata, developmentLauncher } from '../scripts/development-app.ts'
 import { configureDesktopProduct } from '../src/product-context.ts'
 

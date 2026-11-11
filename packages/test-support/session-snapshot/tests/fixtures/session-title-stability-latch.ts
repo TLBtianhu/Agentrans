@@ -1,10 +1,10 @@
 /** Order the title-stability replay by committed title facts rather than relative model latency. */
 
-import type { Context } from '@deepseek-ai/cordis'
-import type { GenerateOptions, StreamChunk } from '@deepseek-ai/dsh-llm'
-import type { Session, SessionSeq } from '@deepseek-ai/dsh-session'
-import type {} from '@deepseek-ai/dsh-session-title'
-import type {} from '@deepseek-ai/dsh-session-title-llm'
+import type { Context } from '@agentrans/cordis'
+import type { GenerateOptions, StreamChunk } from '@agentrans/llm'
+import type { Session, SessionSeq } from '@agentrans/session'
+import type {} from '@agentrans/session-title'
+import type {} from '@agentrans/session-title-llm'
 
 export const name = 'snapshot-session-title-stability-latch'
 export const inject = ['llm', 'sessions']

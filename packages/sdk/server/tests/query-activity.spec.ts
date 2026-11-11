@@ -1,15 +1,15 @@
 /** Command input completion includes its admitted model activity without changing native handler results. */
-import { Context } from '@deepseek-ai/cordis'
-import AgentLoop from '@deepseek-ai/dsh-agent-loop'
-import { mountAgentLoopTestDependencies } from '@deepseek-ai/dsh-agent-loop-testkit'
-import { AttachmentId, type AttachmentStore } from '@deepseek-ai/dsh-attachment'
-import CommandRuntime, { CommandDefinitionId, type CommandDefinition } from '@deepseek-ai/dsh-commands'
-import GoalService from '@deepseek-ai/dsh-goal'
-import * as GoalDriver from '@deepseek-ai/dsh-goal-round-driver'
-import * as GoalCommand from '@deepseek-ai/dsh-command-goal'
-import PlanMode from '@deepseek-ai/dsh-plan-mode'
-import { createUserMessage, type GenerateOptions, type StreamChunk } from '@deepseek-ai/dsh-llm'
-import { SessionId } from '@deepseek-ai/dsh-session'
+import { Context } from '@agentrans/cordis'
+import AgentLoop from '@agentrans/agent-loop'
+import { mountAgentLoopTestDependencies } from '@agentrans/agent-loop-testkit'
+import { AttachmentId, type AttachmentStore } from '@agentrans/attachment'
+import CommandRuntime, { CommandDefinitionId, type CommandDefinition } from '@agentrans/commands'
+import GoalService from '@agentrans/goal'
+import * as GoalDriver from '@agentrans/goal-round-driver'
+import * as GoalCommand from '@agentrans/command-goal'
+import PlanMode from '@agentrans/plan-mode'
+import { createUserMessage, type GenerateOptions, type StreamChunk } from '@agentrans/llm'
+import { SessionId } from '@agentrans/session'
 import { describe, expect, it, onTestFinished, vi } from 'vitest'
 import { MockAdapter, textResponse } from '../../../core/agent-loop/tests/mock-adapter.ts'
 import { HarnessSdkJsonRpcServer } from '../src/server.ts'
@@ -63,7 +63,7 @@ async function setup(model = new MockAdapter([]), goal = false) {
   const sessionId = SessionId('query-activity')
   const run = (text: string) => server.query({ sessionId, contentBlocks: [{ type: 'text', text }] })
   const register = (handler: CommandDefinition['handler']) => ctx.commands.register({
-    name: 'plan', definitionId: CommandDefinitionId('@deepseek-ai/dsh-plan-mode'), description: 'Plan', handler,
+    name: 'plan', definitionId: CommandDefinitionId('@agentrans/plan-mode'), description: 'Plan', handler,
   })
   return { ctx, server, loop, goals, notices, completed: completed.promise, run, register, sessionId, model }
 }
@@ -411,7 +411,7 @@ describe('SDK query activity completion', () => {
     const entered = Promise.withResolvers<undefined>()
     const release = Promise.withResolvers<undefined>()
     h.ctx.commands.register({
-      name: 'start-goal', definitionId: CommandDefinitionId('@deepseek-ai/dsh-command-goal'), description: 'Start goal',
+      name: 'start-goal', definitionId: CommandDefinitionId('@agentrans/command-goal'), description: 'Start goal',
       handler: async ({ agent }) => {
         h.ctx.goals.create(agent, { objective: 'work' })
         entered.resolve(undefined)

@@ -7,18 +7,18 @@
  * selection belongs to the Session Controller. A second effect seats the theme
  * presenter, which projects ctx.theme snapshots onto document.body.
  */
-import type { Context as ClientContext } from '@deepseek-ai/cordis'
-import type {} from '@deepseek-ai/dsh-client-locale/client'
-import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
-import type {} from '@deepseek-ai/dsh-client-ui-session/client'
-import type {} from '@deepseek-ai/dsh-client-ui-theme/client'
-import type { HostObservable, SnapshotSelectorHook } from '@deepseek-ai/dsh-client-ui-slots'
+import type { Context as ClientContext } from '@agentrans/cordis'
+import type {} from '@agentrans/client-locale/client'
+import type {} from '@agentrans/client-ui-renderer/client'
+import type {} from '@agentrans/client-ui-session/client'
+import type {} from '@agentrans/client-ui-theme/client'
+import type { HostObservable, SnapshotSelectorHook } from '@agentrans/client-ui-slots'
 import type { PanelInfo } from './service.ts'
 import { AppFrame } from './AppFrame.tsx'
 import type { AppFrameInjected } from './AppFrame.tsx'
 import { createLayoutStore } from './stores.ts'
 import { LayoutController } from './service.ts'
-import type { ShortcutCommandId } from '@deepseek-ai/dsh-client-shortcuts/client'
+import type { ShortcutCommandId } from '@agentrans/client-shortcuts/client'
 import { en, ja, es, fr, de, ru, pt, zh } from './shortcut-locales.ts'
 import { ThemePresenter } from './theme-presenter.ts'
 
@@ -33,14 +33,14 @@ export type { ILayout, MainPanelId, PanelInfo } from './service.ts'
 /** Selector hook over root-scoped panel selection. */
 export type UsePanelInfo = SnapshotSelectorHook<PanelInfo>
 
-declare module '@deepseek-ai/cordis' {
+declare module '@agentrans/cordis' {
   interface Context {
     /** The outward face only; the concrete service stays inside this plugin. */
     layout: import('./service.ts').ILayout
   }
 }
 
-declare module '@deepseek-ai/dsh-client-ui-slots' {
+declare module '@agentrans/client-ui-slots' {
   interface LocaleNamespaceMap {
     /** Layout keyboard command labels. */
     'shortcuts.layout': keyof typeof zh

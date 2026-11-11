@@ -5,7 +5,7 @@
  * browser reference. Changing any value here changes a published URL or
  * package-manifest requirement, so the preset, the route, and the gates read
  * it from this one module.
- * @module @deepseek-ai/dsh-client-modules/src/assets
+ * @module @agentrans/client-modules/src/assets
  */
 
 import { createHash } from 'node:crypto'

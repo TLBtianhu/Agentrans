@@ -7,6 +7,7 @@ import type { ViteDevServer } from 'vite'
 import { withMermaid } from 'vitepress-plugin-mermaid'
 import { codeGroupFallbackHead, isolateCodeGroupRadios } from './code-groups.ts'
 import { landingLink, localeCollections, orderedPages, routeLink, sectionSpec, type DocsLocale, type DocsPage, type DocsSidebar } from '../docs.ts'
+import { githubSlug } from '../../scripts/verify-md-links.ts'
 import { docsSourceFiles, emitRawMarkdownPages, llmsTxt, projectDocs } from '../../scripts/project-doc-site.ts'
 import { rawMarkdownMiddleware } from '../raw-markdown.ts'
 
@@ -352,6 +353,8 @@ export default withMermaid({
     ],
   },
   markdown: {
+    // The gates compare fragments with GitHub's slug rules, so the rendered page must use the same.
+    anchor: { slugify: githubSlug },
     config(md) {
       isolateCodeGroupRadios(md)
       const renderText = md.renderer.rules.text

@@ -3,7 +3,7 @@ description: "Official DeepSeek request-extension registry for provider plugins 
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-deepseek-llm-api-extensions
+# @agentrans/deepseek-llm-api-extensions
 
 English | [中文](README.zh.md)
 
@@ -31,12 +31,12 @@ Each provider sees the exact serialized Messages body, the request `AbortSignal`
 
 Request `purpose` is the producer-defined string forwarded by the adapter, or absent for ordinary conversation requests. The registry forwards unfamiliar purposes without choosing field-specific policy.
 
-The registry owns addition and lifecycle, not field semantics. `@deepseek-ai/dsh-session-log-deepseek` owns `dsh_session_log`; `@deepseek-ai/dsh-plugin-package-inventory-deepseek` owns `dsh_plugin_packages`. The provider-neutral LLM seam and `llm-pi-ai` do not consume this registry.
+The registry owns addition and lifecycle, not field semantics. `@agentrans/session-log-deepseek` owns `dsh_session_log`; `@agentrans/plugin-package-inventory-deepseek` owns `dsh_plugin_packages`. The provider-neutral LLM seam and `llm-pi-ai` do not consume this registry.
 
 <a id="model-experience"></a>
 ## Model Experience
 
-Indirectly, through `@deepseek-ai/dsh-llm-deepseek`, which sends registered fields outside the model's `messages`, system prompt, and tool schemas.
+Indirectly, through `@agentrans/llm-deepseek`, which sends registered fields outside the model's `messages`, system prompt, and tool schemas.
 
 #### KV Cache effect
 

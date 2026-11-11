@@ -10,13 +10,13 @@
  */
 import { useCallback, useEffect } from 'react'
 import type { ReactNode } from 'react'
-import type {} from '@deepseek-ai/dsh-client-ui-context-menu/client'
+import type {} from '@agentrans/client-ui-context-menu/client'
 import type {
   InjectFace, PropsLocale, PropsRenderFactories, PropsRenderSlots, PropsRuntime, PropsStore,
-} from '@deepseek-ai/dsh-client-ui-slots'
+} from '@agentrans/client-ui-slots'
 import {
   IconPauseOutlineRegular, IconPlayOutlineRegular, IconRefreshOutlineRegular, PathLabel, Tooltip,
-} from '@deepseek-ai/dsh-client-ui-primitives'
+} from '@agentrans/client-ui-primitives'
 import type { FilesInjected } from './face.ts'
 import type {} from './FileNavigator.tsx'
 import type {} from './locales.ts'

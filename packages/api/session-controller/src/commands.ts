@@ -2,28 +2,28 @@
 
 import { modelAvailable } from './catalog.ts'
 import { randomUUID } from 'node:crypto'
-import type { Context } from '@deepseek-ai/cordis'
-import { brandString } from '@deepseek-ai/dsh-brand'
-import type { Agent, ModelSelection as AgentModelSelection } from '@deepseek-ai/dsh-agent'
-import { AttachmentError } from '@deepseek-ai/dsh-attachment'
+import type { Context } from '@agentrans/cordis'
+import { brandString } from '@agentrans/brand'
+import type { Agent, ModelSelection as AgentModelSelection } from '@agentrans/agent'
+import { AttachmentError } from '@agentrans/attachment'
 import type {
   AttachmentAdmissionPart,
-} from '@deepseek-ai/dsh-attachment'
-import type { FileUploadReceiptId, StagedAttachment } from '@deepseek-ai/dsh-client-file-upload/types'
-import type {} from '@deepseek-ai/dsh-client-file-upload'
+} from '@agentrans/attachment'
+import type { FileUploadReceiptId, StagedAttachment } from '@agentrans/client-file-upload/types'
+import type {} from '@agentrans/client-file-upload'
 import {
   ReasoningEffortId, createUserMessage, freezeMessage,
-} from '@deepseek-ai/dsh-llm'
-import type { MessageSource, TextBlock } from '@deepseek-ai/dsh-llm'
-import { buildForkSeed } from '@deepseek-ai/dsh-session/fork'
-import { SessionLogOffset, SessionSeq } from '@deepseek-ai/dsh-session'
-import type { SessionEvent, SessionHeader, SessionId, UserMessage } from '@deepseek-ai/dsh-session'
-import { SessionQueryError, type SessionObservation } from '@deepseek-ai/dsh-session-query'
-import { SessionTitleInvalidError } from '@deepseek-ai/dsh-session-title'
-import { assertNever } from '@deepseek-ai/dsh-util-values'
-import { SessionInputAdmissionError } from '@deepseek-ai/dsh-session-input'
-import { RemoteError, remoteErrorOf } from '@deepseek-ai/dsh-typert-protocol'
-import type { Workspace } from '@deepseek-ai/dsh-workspace'
+} from '@agentrans/llm'
+import type { MessageSource, TextBlock } from '@agentrans/llm'
+import { buildForkSeed } from '@agentrans/session/fork'
+import { SessionLogOffset, SessionSeq } from '@agentrans/session'
+import type { SessionEvent, SessionHeader, SessionId, UserMessage } from '@agentrans/session'
+import { SessionQueryError, type SessionObservation } from '@agentrans/session-query'
+import { SessionTitleInvalidError } from '@agentrans/session-title'
+import { assertNever } from '@agentrans/util-values'
+import { SessionInputAdmissionError } from '@agentrans/session-input'
+import { RemoteError, remoteErrorOf } from '@agentrans/typert-protocol'
+import type { Workspace } from '@agentrans/workspace'
 import {
   ApiSessionAgentController,
   ApiSessionCwdConflict,

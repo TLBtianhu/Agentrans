@@ -2,16 +2,16 @@
 /** ToolCallTree-owned root/subcall markers and keyed Tool dispatch. */
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { act, cleanup, fireEvent, render } from '@testing-library/react'
-import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
-import { bindDisclosure, useDisclosure } from '@deepseek-ai/dsh-client-ui-chat/src/client/chat/use-disclosure.ts'
-import type { SessionSnapshot } from '@deepseek-ai/dsh-api-session-controller/client'
-import type { ToolCallBlock, ToolResultNode } from '@deepseek-ai/dsh-client-ui-chat/client'
-import { contextMenuHook, makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
-import { zh as commonZh } from '@deepseek-ai/dsh-client-locale/src/locales/zh.ts'
+import { createSnapshotStore } from '@agentrans/client-store'
+import { bindDisclosure, useDisclosure } from '@agentrans/client-ui-chat/src/client/chat/use-disclosure.ts'
+import type { SessionSnapshot } from '@agentrans/api-session-controller/client'
+import type { ToolCallBlock, ToolResultNode } from '@agentrans/client-ui-chat/client'
+import { contextMenuHook, makeTranslate } from '@agentrans/client-test-runtime'
+import { zh as commonZh } from '@agentrans/client-locale/src/locales/zh.ts'
 import type { ToolCallOwnerProps, ToolTreeProps } from '../src/client/contract/slots.ts'
 import { ToolCallTree } from '../src/client/tool/ToolCallTree.tsx'
-import { zh } from '@deepseek-ai/dsh-client-ui-conversation/src/client/locales.ts'
-import { PartialArguments } from '@deepseek-ai/dsh-util-values'
+import { zh } from '@agentrans/client-ui-conversation/src/client/locales.ts'
+import { PartialArguments } from '@agentrans/util-values'
 
 afterEach(cleanup)
 

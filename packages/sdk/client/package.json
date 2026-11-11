@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-sdk-client",
+  "name": "@agentrans/sdk-client",
   "description": "TypeScript client SDK for driving a DeepSeek Harness runtime subprocess over stdio JSON-RPC: the DeepSeekHarness high-level turns API and the lower-level HarnessClient",
   "version": "0.1.0",
   "publishConfig": {
@@ -26,20 +26,20 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@deepseek-ai/dsh": "workspace:*"
+    "@agentrans/dsh": "workspace:*"
   },
   "peerDependencies": {
-    "@deepseek-ai/dsh-llm": "workspace:*",
-    "@deepseek-ai/dsh-sdk-protocol": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/llm": "workspace:*",
+    "@agentrans/sdk-protocol": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/cordis": "workspace:~"
   },
   "devDependencies": {
-    "@deepseek-ai/dsh-artifact": "workspace:*",
-    "@deepseek-ai/dsh-llm": "workspace:*",
-    "@deepseek-ai/dsh-sdk-protocol": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-experimental-translator": "workspace:*"
+    "@agentrans/artifact": "workspace:*",
+    "@agentrans/llm": "workspace:*",
+    "@agentrans/sdk-protocol": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/experimental-translator": "workspace:*"
   }
 }

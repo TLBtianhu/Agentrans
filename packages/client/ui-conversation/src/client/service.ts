@@ -7,32 +7,32 @@
  * through one property read; assignment through the tracker proxy and `#`
  * private fields bypass that rebinding.
  */
-import { Service } from '@deepseek-ai/cordis'
-import type { Context } from '@deepseek-ai/cordis'
-import { randomUUID } from '@deepseek-ai/dsh-util-crypto'
+import { Service } from '@agentrans/cordis'
+import type { Context } from '@agentrans/cordis'
+import { randomUUID } from '@agentrans/util-crypto'
 // Type-only imports: a plugin-to-plugin value import is a bundle purity
 // error, so scope resolution goes through the sessions service (scopeOf
 // method) instead of the standalone helper.
 import type {
   ISessions, PendingSubmissionRetirement, SessionFace,
-} from '@deepseek-ai/dsh-api-session-controller/client'
-import type {} from '@deepseek-ai/dsh-client-file-upload/client'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import type { FileAttachmentRef, ImageMediaType } from '@deepseek-ai/dsh-attachment'
-import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
-import type { SnapshotStore } from '@deepseek-ai/dsh-client-store'
+} from '@agentrans/api-session-controller/client'
+import type {} from '@agentrans/client-file-upload/client'
+import type { SessionId } from '@agentrans/session/types'
+import type { FileAttachmentRef, ImageMediaType } from '@agentrans/attachment'
+import { createSnapshotStore } from '@agentrans/client-store'
+import type { SnapshotStore } from '@agentrans/client-store'
 import type {
   ComposerAttachment, ComposerFileAttachment, ComposerImageAttachment, DraftFileUpload,
 } from './contract/slots.ts'
-import type { QueueAction } from '@deepseek-ai/dsh-api-session-controller/types'
-import type { MessageId } from '@deepseek-ai/dsh-llm/brand'
+import type { QueueAction } from '@agentrans/api-session-controller/types'
+import type { MessageId } from '@agentrans/llm/brand'
 import type { ComposerBlocks } from './contract/composer-blocks.ts'
 import type {
   DraftAttachmentId, DraftAttachmentSerializationResult, SessionInputResolver, SubmitAttachment, DefaultSubmitOutcome,
 } from './contract/input.ts'
-import type { JsonValue } from '@deepseek-ai/dsh-util-values'
-import { snapshotJsonValue, deepFreeze } from '@deepseek-ai/dsh-util-values'
-import type { PromptContextInput } from '@deepseek-ai/dsh-api-session-controller/types'
+import type { JsonValue } from '@agentrans/util-values'
+import { snapshotJsonValue, deepFreeze } from '@agentrans/util-values'
+import type { PromptContextInput } from '@agentrans/api-session-controller/types'
 import type { InputSubmitMode } from './contract/composer-submission.ts'
 
 /**

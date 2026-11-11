@@ -3,16 +3,16 @@
  * `ctx.subagents` that runs each child as a fresh child {@link Agent} on the same cordis
  * context (its own session, own system prompt, zero parent context). The cheapest transport,
  * reusing the agent factory's quiescent teardown.
- * @module @deepseek-ai/dsh-subagent-spawn-in-process
+ * @module @agentrans/subagent-spawn-in-process
  */
 
-import type { Context } from '@deepseek-ai/cordis'
-import z from '@deepseek-ai/schemastery'
+import type { Context } from '@agentrans/cordis'
+import z from '@agentrans/schemastery'
 import type {
   ContinuableCreateSpec,
   SubagentCapabilities,
   SubagentProvider,
-} from '@deepseek-ai/dsh-subagent'
+} from '@agentrans/subagent'
 
 export const name = 'subagent-spawn-in-process'
 // `tools` is deliberately not injected: the child factory already provides it during setup,

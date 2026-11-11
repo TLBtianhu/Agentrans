@@ -3,7 +3,7 @@ description: "为三个导航区域的更多菜单提供插件浏览与创造模
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-client-ui-entry-customization
+# @agentrans/client-ui-entry-customization
 
 [English](README.md) | 中文
 
@@ -26,7 +26,7 @@ kind: "package-reference"
 <a id="use-this-package"></a>
 ## 使用本包
 
-`@deepseek-ai/dsh-web-app` 组合包默认加载本包，无需在插件页开启或由 profile 选择。区域只在其 actions slot 有注册项时显示“更多”按钮，因此卸载本包会移除三个按钮。
+`@agentrans/web-app` 组合包默认加载本包，无需在插件页开启或由 profile 选择。区域只在其 actions slot 有注册项时显示“更多”按钮，因此卸载本包会移除三个按钮。
 
 打开左侧导航入口下方的**更多**、会话 View 标签之后的**更多会话视图**，或右侧栏起始页卡片之后的**更多工具**。左侧栏和起始页菜单仅提供**浏览更多插件**（可用时）与**创建你的插件**。会话菜单在这些操作之前列出收起的 View，并在当前 View 右侧显示勾选标记。所有菜单都不提供 Pin 或排序操作。
 

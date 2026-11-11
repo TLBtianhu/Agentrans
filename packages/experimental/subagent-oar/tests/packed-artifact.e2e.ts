@@ -55,7 +55,7 @@ it.skipIf(!built || process.platform === 'win32')(
     const argvPath = join(root, 'argv.json')
     const script = `
       import assert from 'node:assert/strict'
-      import { Context } from '@deepseek-ai/cordis'
+      import { Context } from '@agentrans/cordis'
       import * as provider from './lib/index.js'
       assert.throws(() => import.meta.resolve('@botiverse/oar'), { code: 'ERR_MODULE_NOT_FOUND' })
       const ctx = new Context()

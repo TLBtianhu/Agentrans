@@ -1,10 +1,10 @@
 /** Quote selection actions and literal UserText excerpts registered by the browser plugin. */
-import type { Context } from '@deepseek-ai/cordis'
-import type {} from '@deepseek-ai/dsh-api-session-controller/client'
-import type {} from '@deepseek-ai/dsh-client-locale/client'
-import type {} from '@deepseek-ai/dsh-client-ui-chat/client'
-import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
-import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
+import type { Context } from '@agentrans/cordis'
+import type {} from '@agentrans/api-session-controller/client'
+import type {} from '@agentrans/client-locale/client'
+import type {} from '@agentrans/client-ui-chat/client'
+import type {} from '@agentrans/client-ui-conversation/client'
+import type {} from '@agentrans/client-ui-renderer/client'
 import { QuoteSelectionAction } from './QuoteSelection.tsx'
 import { QuotedUserText } from './QuotedUserText.tsx'
 import { quoteRule } from './quote-rule.ts'
@@ -12,7 +12,7 @@ import { en, ja, es, fr, de, ru, pt, NS, zh, type MessageQuotesKey } from './loc
 
 export type {} from './quote-rule.ts'
 
-declare module '@deepseek-ai/dsh-client-ui-slots' {
+declare module '@agentrans/client-ui-slots' {
   interface LocaleNamespaceMap {
     /** Quote selection action copy. */
     messageQuotes: MessageQuotesKey

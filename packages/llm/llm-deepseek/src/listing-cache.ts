@@ -1,7 +1,7 @@
 /** Credential-scoped `/models` cache with single-flight loads, background refresh, and last-known-good retention. */
 import { createHash } from 'node:crypto'
-import { deadline, MAX_TIMER_DELAY_MS } from '@deepseek-ai/dsh-timeout'
-import { deepEqualJson } from '@deepseek-ai/dsh-util-values'
+import { deadline, MAX_TIMER_DELAY_MS } from '@agentrans/timeout'
+import { deepEqualJson } from '@agentrans/util-values'
 import type { ListingSettings } from './listing-config.ts'
 import { LISTING_TIMEOUT } from './listing.ts'
 import type { ModelListing } from './listing.ts'

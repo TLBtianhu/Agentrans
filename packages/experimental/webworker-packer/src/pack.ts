@@ -13,7 +13,7 @@
  * This module holds no repository knowledge: paths, globs, and the roster come in as
  * parameters, so the same library packs a different tree by being called
  * differently. Locating those inputs is the CLI's job.
- * @module @deepseek-ai/dsh-experimental-webworker-packer/src/pack
+ * @module @agentrans/experimental-webworker-packer/src/pack
  */
 import { createHash } from 'node:crypto'
 import { existsSync, readFileSync, readdirSync, realpathSync } from 'node:fs'
@@ -26,15 +26,15 @@ import {
   IMAGE_OVERLAY_DIRECTORIES,
   MODULE_PROXIES, MODULE_PROXY_PREFIXES, REPLACED_EXTERNAL_PACKAGES,
   type ImageLazyArchive, type ImageManifest,
-} from '@deepseek-ai/dsh-experimental-webworker-runtime'
+} from '@agentrans/experimental-webworker-runtime'
 import picomatch from 'picomatch'
 import yaml from 'js-yaml'
-import { entryListSchema, type PatchOptions } from '@deepseek-ai/cordis-plugin-include'
-import { PROFILE_PATCH_FILENAME } from '@deepseek-ai/dsh-app-boot'
+import { entryListSchema, type PatchOptions } from '@agentrans/cordis-plugin-include'
+import { PROFILE_PATCH_FILENAME } from '@agentrans/app-boot'
 import { WRAPPER_CONTRACT, type ImageFiles, type TransformOutcome } from './transform-image.ts'
 import { EXCLUDE, EXCLUDE_WORKSPACE, IMAGE_ENTRY_SEEDS, PAGE_ASSETS } from './rules.ts'
 
-export { DEFAULT_ROOT } from '@deepseek-ai/dsh-experimental-webworker-runtime'
+export { DEFAULT_ROOT } from '@agentrans/experimental-webworker-runtime'
 
 /** Image path of the manifest; the layout contract's name, re-exported for callers. */
 export const MANIFEST_PATH: string = IMAGE_MANIFEST_PATH
@@ -439,7 +439,7 @@ function sweepImage(
       // philosophy instead — platform-dispatch branches the worker never
       // evaluates may request node-only modules, and such a request fails loud
       // at require time if it ever runs.
-      const external = importer.startsWith('node_modules/') && !importer.startsWith('node_modules/@deepseek-ai/')
+      const external = importer.startsWith('node_modules/') && !importer.startsWith('node_modules/@agentrans/')
       // A meta-resolve request is a URL mapping, not a load: a missing target
       // is tolerable from any importer — the call throws if it ever runs.
       if (external || entry.meta === true) tolerated.add(`${importer}: "${specifier}"`)
@@ -568,7 +568,7 @@ function materialize(
       // package the consumer is the page (react behind the prebuilt client
       // bundles), so its peer edges never bind the worker. Workspace and
       // vendored packages declare real runtime seams as peers
-      // (@deepseek-ai/cordis is a peerDependency of every harness package),
+      // (@agentrans/cordis is a peerDependency of every harness package),
       // so their peer edges stay on the chain.
       if (field === 'peerDependencies' && !options.workspaces.has(name)) continue
       const dependencies = manifest[field]

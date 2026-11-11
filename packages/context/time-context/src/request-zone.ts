@@ -1,8 +1,8 @@
 /** Browser-zone facts from committed or proposed user-rpc messages and model-facing policy text. */
 
-import { canonicalizeTimeZone } from '@deepseek-ai/dsh-util-time'
-import type { UserMessage } from '@deepseek-ai/dsh-llm'
-import { assertNever } from '@deepseek-ai/dsh-util-values'
+import { canonicalizeTimeZone } from '@agentrans/util-time'
+import type { UserMessage } from '@agentrans/llm'
+import { assertNever } from '@agentrans/util-values'
 
 /** Browser-zone facts for the messages selected while preparing a request. */
 export type BrowserTimeZoneContext =

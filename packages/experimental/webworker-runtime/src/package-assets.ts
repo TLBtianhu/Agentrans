@@ -5,7 +5,7 @@
  * Worker preview cannot request such a URL itself, so the Worker hands it every
  * asset the image holds in one archive and the page maps each reference to a
  * Blob URL before any bundle runs.
- * @module @deepseek-ai/dsh-experimental-webworker-runtime/src/package-assets
+ * @module @agentrans/experimental-webworker-runtime/src/package-assets
  */
 import { join } from './module-system/posix-path.ts'
 import type { MemoryVfs } from './storage/memory.ts'

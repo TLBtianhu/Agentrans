@@ -3,7 +3,7 @@ description: "Enable experimental custom plugin indexes from the plugin manager.
 kind: "package-bundle"
 ---
 
-# @deepseek-ai/dsh-experimental-plugin-market-bundle
+# @agentrans/experimental-plugin-market-bundle
 
 English | [中文](README.zh.md)
 

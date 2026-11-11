@@ -3,7 +3,7 @@ description: "Register code host providers and poll change request status throug
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-experimental-forge
+# @agentrans/experimental-forge
 
 English | [中文](README.zh.md)
 
@@ -28,8 +28,8 @@ Read and act on pull requests and merge requests without coupling consumers to o
 Mount the registry with at least one provider package, such as the GitHub provider.
 
 ```yaml
-- name: '@deepseek-ai/dsh-experimental-forge'
-- name: '@deepseek-ai/dsh-experimental-forge-github'
+- name: '@agentrans/experimental-forge'
+- name: '@agentrans/experimental-forge-github'
 ```
 
 `ctx.forge.register(provider)` is an effect on the calling fiber and returns an async disposer that cancels and drains that registration's calls. Results arriving after cancellation are discarded. One provider serves one forge family; registering a second provider for the same family throws. Registration changes announce `forge/providers-changed`; registering a provider polls its existing watches immediately. `repositoryFromRemote(url)` and `changeRequestFromUrl(url)` ask providers in registration order and return the first match. `changeRequestUrl(ref)`, `findByHead(repository, branch, signal)`, and `readiness(repository, signal)` delegate to the provider of the reference's forge and throw when none is registered; `readiness` reports whether the provider can reach the host with current credentials.
@@ -40,7 +40,7 @@ Mount the registry with at least one provider package, such as the GitHub provid
 
 `fetchChecks(ref, signal)` reads one change request’s complete checks on demand. It has its own `fetchTimeoutMs` deadline and does not occupy the polling batch or publish to its watchers. Failure leaves previously polled snapshots intact. A provider without `fetchChecks` returns `unavailable`. Caller cancellation and provider or service disposal abort the read; disposal waits for it to settle.
 
-`ctx.forge.watch(ref, listener)` is also an effect. The first watcher of a change request polls it at once; `latest(ref)` returns the most recent result. Each forge has at most one polling fetch in flight, and that fetch includes every due change request of the forge. An open change request is polled every `activeIntervalMs` while checks are pending or mergeability is unknown, and every `idleIntervalMs` otherwise. Closed change requests use `idleIntervalMs` to detect reopening; merged requests stop automatic polling. `refresh(ref)` polls a watched change request at once, including after a terminal state; if a fetch is already in flight for its forge, another fetch starts immediately after it settles. A failed read repeats after `activeIntervalMs` doubled for each consecutive failure, up to `maxBackoffMs`, which must be at least `activeIntervalMs`. Unregistering a provider settles its watched change requests as `unavailable`. Polling stops when the last watcher leaves. The [configuration catalog](../../../docs/config-catalog.md#deepseek-aidsh-experimental-forge) lists the defaults.
+`ctx.forge.watch(ref, listener)` is also an effect. The first watcher of a change request polls it at once; `latest(ref)` returns the most recent result. Each forge has at most one polling fetch in flight, and that fetch includes every due change request of the forge. An open change request is polled every `activeIntervalMs` while checks are pending or mergeability is unknown, and every `idleIntervalMs` otherwise. Closed change requests use `idleIntervalMs` to detect reopening; merged requests stop automatic polling. `refresh(ref)` polls a watched change request at once, including after a terminal state; if a fetch is already in flight for its forge, another fetch starts immediately after it settles. A failed read repeats after `activeIntervalMs` doubled for each consecutive failure, up to `maxBackoffMs`, which must be at least `activeIntervalMs`. Unregistering a provider settles its watched change requests as `unavailable`. Polling stops when the last watcher leaves. The [configuration catalog](../../../docs/config-catalog.md#agentransexperimental-forge) lists the defaults.
 
 Reaching `fetchTimeoutMs` aborts the fetch signal with `FORGE_FETCH_TIMEOUT`. Providers must stop their work and settle when the signal aborts; rejected fetches become `unavailable` failures. A provider that ignores cancellation can stall polling and service disposal.
 

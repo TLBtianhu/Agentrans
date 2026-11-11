@@ -4,7 +4,7 @@ import { existsSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join, relative, resolve } from 'node:path'
 import { afterEach, expect, it, vi } from 'vitest'
-import { parseProductLaunchContext, resolvePackagedLaunchContext } from '@deepseek-ai/dsh-product-layout/launch-context'
+import { parseProductLaunchContext, resolvePackagedLaunchContext } from '@agentrans/product-layout/launch-context'
 import { smokeDesktopRuntime } from '../scripts/smoke-runtime.ts'
 import { runtimeFixture } from './runtime-fixture.ts'
 

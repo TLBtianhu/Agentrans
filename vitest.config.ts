@@ -191,7 +191,7 @@ const claudeCodeTestingAliases = {
 // entry, before `vi.mock` can answer it, so the jsdom assembly suites need a resolvable stand-in.
 const liveshareRemoteBuild = fileURLToPath(new URL('./packages/experimental/liveshare/lib/typert.remote-client.js', import.meta.url))
 const generatedRemoteAliases = existsSync(liveshareRemoteBuild) ? {} : {
-  '@deepseek-ai/dsh-experimental-liveshare/remote': fileURLToPath(new URL('./packages/experimental/liveshare/tests/generated-remote-stub.ts', import.meta.url)),
+  '@agentrans/experimental-liveshare/remote': fileURLToPath(new URL('./packages/experimental/liveshare/tests/generated-remote-stub.ts', import.meta.url)),
 }
 const testingAliases = { ...claudeCodeTestingAliases, ...generatedRemoteAliases }
 

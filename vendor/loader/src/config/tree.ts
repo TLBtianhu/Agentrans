@@ -1,5 +1,5 @@
-import { composeError, Context } from '@deepseek-ai/cordis'
-import { isNonNullable, type Dict } from '@deepseek-ai/cosmokit'
+import { composeError, Context } from '@agentrans/cordis'
+import { isNonNullable, type Dict } from '@agentrans/cosmokit'
 import { Entry, type EntryOptions } from './entry.ts'
 import { EntryGroup } from './group.ts'
 import { createResolve } from '../resolve.ts'

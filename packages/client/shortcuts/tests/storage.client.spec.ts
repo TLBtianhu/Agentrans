@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, expect, it, vi } from 'vitest'
 import { webShortcutStorage, SHORTCUT_STORAGE_KEY } from '../src/client/storage.ts'
-import type { ShortcutCommandId, ShortcutConfigSnapshot } from '@deepseek-ai/dsh-shortcut-protocol'
+import type { ShortcutCommandId, ShortcutConfigSnapshot } from '@agentrans/shortcut-protocol'
 
 afterEach(() => { localStorage.clear(); vi.restoreAllMocks() })
 const id = 'shortcuts.open' as ShortcutCommandId

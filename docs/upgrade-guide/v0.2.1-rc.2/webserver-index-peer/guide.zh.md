@@ -8,7 +8,7 @@ description: "WebServer 渲染 index 时需要传入页面所代表的 Peer，`w
 
 ## 变更
 
-`@deepseek-ai/dsh-host-webserver` 中 `ctx.webServer` 的 `renderIndex(html)` 与 `collectIndexInjections()` 不接收 Peer，每个 index 携带的都是 owner 的访问快照。现在它们改为 `renderIndex(html, peer)` 与 `collectIndexInjections(peer)`，`webserver/index-inject` 事件以第二个参数传入同一个 Peer，index 中的 remote-access 快照因此属于该 Peer。调用这两个方法的代码会在编译时报错；只读取表格的监听方不受影响。
+`@agentrans/host-webserver` 中 `ctx.webServer` 的 `renderIndex(html)` 与 `collectIndexInjections()` 不接收 Peer，每个 index 携带的都是 owner 的访问快照。现在它们改为 `renderIndex(html, peer)` 与 `collectIndexInjections(peer)`，`webserver/index-inject` 事件以第二个参数传入同一个 Peer，index 中的 remote-access 快照因此属于该 Peer。调用这两个方法的代码会在编译时报错；只读取表格的监听方不受影响。
 
 ## 迁移
 

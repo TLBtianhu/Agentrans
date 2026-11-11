@@ -1,11 +1,11 @@
 /** Whole-checkpoint Artifact events folded into one stable Chat Node per artifact id. */
-import type { SessionEventLike } from '@deepseek-ai/dsh-api-session-controller/client'
-import type {} from '@deepseek-ai/dsh-artifact/types'
-import type {} from '@deepseek-ai/dsh-client-ui-chat/client'
-import type { ConversationNodeDefinition } from '@deepseek-ai/dsh-client-ui-conversation/client'
+import type { SessionEventLike } from '@agentrans/api-session-controller/client'
+import type {} from '@agentrans/artifact/types'
+import type {} from '@agentrans/client-ui-chat/client'
+import type { ConversationNodeDefinition } from '@agentrans/client-ui-conversation/client'
 import type { ArtifactSnapshot } from './protocol.ts'
 
-declare module '@deepseek-ai/dsh-client-ui-chat/client' {
+declare module '@agentrans/client-ui-chat/client' {
   interface ChatNodeDataMap {
     /** Latest complete HTML Artifact snapshot. */
     artifact: ArtifactSnapshot

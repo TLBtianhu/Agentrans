@@ -5,24 +5,24 @@
  * nothing bypasses the tool registry. Fetch verifies world effects against loopback HTTP; search uses the real Exa provider
  * with only its network boundary stubbed.
  */
-import { executeToolFixture } from '@deepseek-ai/dsh-tool-testkit'
+import { executeToolFixture } from '@agentrans/tool-testkit'
 
-import * as NativeToolExecutor from '@deepseek-ai/dsh-tool-executor-native'
+import * as NativeToolExecutor from '@agentrans/tool-executor-native'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http'
 import { AddressInfo } from 'node:net'
-import { Context } from '@deepseek-ai/cordis'
-import type { Agent } from '@deepseek-ai/dsh-agent'
-import { ToolCallId } from '@deepseek-ai/dsh-llm'
-import { createScope } from '@deepseek-ai/dsh-scope'
-import { SessionId } from '@deepseek-ai/dsh-session'
-import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
-import ToolRuntime, { type ToolExecutionResult } from '@deepseek-ai/dsh-tools'
-import WebRuntime from '@deepseek-ai/dsh-web'
-import * as WebFetchLocal from '@deepseek-ai/dsh-web-fetch-http'
-import * as WebSearchExa from '@deepseek-ai/dsh-web-search-exa'
-import * as ToolWeb from '@deepseek-ai/dsh-tool-web'
-import * as TimeoutPolicy from '@deepseek-ai/dsh-tool-call-timeout-policy'
+import { Context } from '@agentrans/cordis'
+import type { Agent } from '@agentrans/agent'
+import { ToolCallId } from '@agentrans/llm'
+import { createScope } from '@agentrans/scope'
+import { SessionId } from '@agentrans/session'
+import SystemPrompt from '@agentrans/system-prompt'
+import ToolRuntime, { type ToolExecutionResult } from '@agentrans/tools'
+import WebRuntime from '@agentrans/web'
+import * as WebFetchLocal from '@agentrans/web-fetch-http'
+import * as WebSearchExa from '@agentrans/web-search-exa'
+import * as ToolWeb from '@agentrans/tool-web'
+import * as TimeoutPolicy from '@agentrans/tool-call-timeout-policy'
 
 const testToolSignal = new AbortController().signal
 

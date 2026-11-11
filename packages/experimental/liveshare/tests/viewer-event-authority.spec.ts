@@ -2,12 +2,12 @@
  * A viewer's generation stream carries only the Session notifications the `share-viewer` policy
  * allows, never an Owner interaction, and the viewer's Peer cannot settle one.
  */
-import { Context } from '@deepseek-ai/cordis'
-import RemoteAccessService from '@deepseek-ai/dsh-api-remote-access'
-import TypertRegistry from '@deepseek-ai/dsh-typert-registry'
-import TypertGateway from '@deepseek-ai/dsh-api-gateway'
-import { Peer, type ConnectionRpcResult } from '@deepseek-ai/dsh-client-connection'
-import type { PeerScope, TypertResourceReader } from '@deepseek-ai/dsh-typert-protocol'
+import { Context } from '@agentrans/cordis'
+import RemoteAccessService from '@agentrans/api-remote-access'
+import TypertRegistry from '@agentrans/typert-registry'
+import TypertGateway from '@agentrans/api-gateway'
+import { Peer, type ConnectionRpcResult } from '@agentrans/client-connection'
+import type { PeerScope, TypertResourceReader } from '@agentrans/typert-protocol'
 import { describe, expect, it, onTestFinished } from 'vitest'
 import type { ForkRecord } from '../src/host/fork-registry.ts'
 import { createViewerAccessPolicy } from '../src/host/viewer-access-policy.ts'

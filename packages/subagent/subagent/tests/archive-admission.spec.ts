@@ -1,13 +1,13 @@
 import { mountWorkingDirectoryFixture } from './working-directory-fixture.ts'
 import { describe, expect, it, vi } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
-import AgentRegistry from '@deepseek-ai/dsh-agent'
-import type { Agent, AgentCancelCause, AgentStatus, CancelOptions } from '@deepseek-ai/dsh-agent'
-import { unsupportedModel, unsupportedInbox } from '@deepseek-ai/dsh-agent-loop-testkit'
-import SessionStore, { SessionId } from '@deepseek-ai/dsh-session'
-import type { Session } from '@deepseek-ai/dsh-session'
-import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
-import type { SessionActivity } from '@deepseek-ai/dsh-workspace'
+import { Context } from '@agentrans/cordis'
+import AgentRegistry from '@agentrans/agent'
+import type { Agent, AgentCancelCause, AgentStatus, CancelOptions } from '@agentrans/agent'
+import { unsupportedModel, unsupportedInbox } from '@agentrans/agent-loop-testkit'
+import SessionStore, { SessionId } from '@agentrans/session'
+import type { Session } from '@agentrans/session'
+import SessionProjectionRegistry from '@agentrans/session-projection'
+import type { SessionActivity } from '@agentrans/workspace'
 import SubagentRuntime, { SUBAGENT_DESCRIPTOR_VERSION } from '../src/index.ts'
 import { TestSessionQuery } from './test-session-query.ts'
 
@@ -179,7 +179,7 @@ describe('Subagent archive admission: lifetime', () => {
 })
 
 // The runtime knows only its own family; this suite merges a trailing one to observe ordering.
-declare module '@deepseek-ai/dsh-workspace/types' {
+declare module '@agentrans/workspace/types' {
   interface SessionActivityKindMap {
     probe: true
   }

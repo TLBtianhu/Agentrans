@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-experimental-voice-input-bundle",
+  "name": "@agentrans/experimental-voice-input-bundle",
   "description": "Experimental voice input with local SenseVoice; downloads its runtime on first use",
   "version": "0.1.0",
   "icon": "./icon.svg",
@@ -34,17 +34,17 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@deepseek-ai/dsh-experimental-speech-to-text": "workspace:*",
-    "@deepseek-ai/dsh-experimental-speech-to-text-sensevoice": "workspace:*",
-    "@deepseek-ai/dsh-experimental-api-speech-to-text": "workspace:*",
-    "@deepseek-ai/dsh-experimental-client-ui-voice-input": "workspace:*"
+    "@agentrans/experimental-speech-to-text": "workspace:*",
+    "@agentrans/experimental-speech-to-text-sensevoice": "workspace:*",
+    "@agentrans/experimental-api-speech-to-text": "workspace:*",
+    "@agentrans/experimental-client-ui-voice-input": "workspace:*"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~"
+    "@agentrans/cordis": "workspace:~"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/cordis-plugin-include": "workspace:~",
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/cordis-plugin-include": "workspace:~",
     "js-yaml": "^4.3.2"
   },
   "dsh": {

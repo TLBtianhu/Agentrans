@@ -1,6 +1,6 @@
 /**
  * Reads the non-owner caller of the current Remote call.
- * @module @deepseek-ai/dsh-typert-protocol/principal
+ * @module @agentrans/typert-protocol/principal
  */
 
 import type { Principal, RemoteInvocation } from './types.ts'

@@ -2,7 +2,7 @@
 /** Existing Session actions receive the captured owner and one dismissal context. */
 import { cleanup, render } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
-import { SessionId } from '@deepseek-ai/dsh-session/types'
+import { SessionId } from '@agentrans/session/types'
 import type { ComponentProps } from 'react'
 import { SessionMenu } from '../src/client/session-actions/SessionMenu.tsx'
 

@@ -3,7 +3,7 @@ description: "通过 Web 侧边栏或 agent 启停 profile 插件，并安装、
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-plugin-manager
+# @agentrans/plugin-manager
 
 [English](README.md) | 中文
 
@@ -63,7 +63,7 @@ HTTP(S) Git URL 指向 pnpm 没有 HTTPS 到 SSH 回退的主机（即 `hosted-g
 
 注册表按顺序询问。计划从 `options.registry` 开始，否则从配置的 `registry`（`null` 即 pnpm 自身配置指定的那个）开始，并在一个注册表不可达、超时或答复没有这个包或版本（尚未同步的镜像会如此）时继续问 `fallbackRegistries`。配置集合之外的注册表只问它自己，因而私有源永远不会落到公共源；pnpm 自身的注册表只在它指向的地址（每次做计划前经 `pnpm config get registry` 读出）是 npm 官方源或某个备选源时才算集合成员，否则视为私有源只问它自己。pnpm 自身配置已经指向的注册表只问一次。查询以 `--registry` 运行 `pnpm view` 且不带 pnpm 自身的重试，所以死掉的注册表会在 `inspectTimeoutMs` 内报告并转问下一个；pnpm 把拒绝以 JSON 打印在 stdout，读法与 stderr 相同。安装保留 pnpm 的重试设置。`registries()` 把配置集合和 pnpm 指向的地址答复给选择器。[注册表 Agent Note](../../../.agents/notes/implemented/architecture/2026-09-18-plugin-install-registries.zh.md) 拥有理由。
 
-可在浏览器使用的 `@deepseek-ai/dsh-plugin-manager/registry` 入口导出 `OFFICIAL_NPM_REGISTRY` 和 `NPMMIRROR_REGISTRY`，供消费方识别这两个公共注册表。
+可在浏览器使用的 `@agentrans/plugin-manager/registry` 入口导出 `OFFICIAL_NPM_REGISTRY` 和 `NPMMIRROR_REGISTRY`，供消费方识别这两个公共注册表。
 
 `installBundle` 接受调用方生成的 `requestId`，`plugin-manager/install-log` 在其下流式转发每次 pnpm 运行的输出，`plugin-manager/install-state` 通告 `installing`、`cancelling` 与 `applying`；未打印任何输出就失败的 pnpm 运行转发其日志中的诊断，详情面板因而不会为空。每问一个注册表通告一次 `installing`，`attempt` 带上这次的注册表、序号和计划长度。安装沿用查询的计划，从 `options.registry` 开始，以 `--registry` 运行 `pnpm add`，两次尝试之间恢复 profile 文件；换一个注册表能改变的失败才转问下一个，其他失败即停，错误行点名 git 或 tarball spec 自身拉取主机的失败也停，因为没有注册表能替代那台主机；`failedAt` 说明最后一次失败的运行连不上的是二者中的哪一个。`cancelInstall(requestId)` 停止运行，只在 Git 检查或 pnpm 退出且文件恢复后答复 `cancelled`，组合包已在应用时答复 `too-late`，其他 id 答复 `not-running`；安装调用随后报告 `application: 'cancelled'`。失败、被取消或装入了没有组合包 patch 的包的运行，会把 `package.json` 与 `pnpm-lock.yaml` 恢复原样；`packageResult.kind` 按退出方式与输出对最后一次运行分类，`registries` 列出问过的每个注册表，`bundle` 给出完成的运行新增的包，`version` 给出它的清单版本，它可能与 `inspect` 读到的版本不同，例如 pnpm 的 `minimumReleaseAge` 暂缓了最近的发布。`listBundles` 携带每个组合包的一句话简介（包的 `description`）、其 patch 声明的行及其存活条目，以及它覆盖的内置行；它列出 profile 自己的组合包、安装提供的组合包，以及被选中却没有组合包 patch 的名字（作为 `not-bundle` 问题），未选中的普通依赖不列出。启动器的 `OPTIONAL_BUNDLES` 点名的组合包是 `optional`：随安装提供、默认关闭、由用户开启，永不可卸载，也不被任何随附模板选中（[理由](../../../.agents/notes/implemented/process/2026-09-15-shipped-optional-bundles.zh.md)）。每个完成的操作都会发出 `plugin-manager/changed`；在管理器之外应用的一代 patch（HMR 监视到 CLI 或手工编辑后）不发通知，页面要到下一次读取才知道。
 
@@ -131,7 +131,7 @@ service 运行若在 `idleTimeoutMs` 内没有任何捕获输出即被终止，�
 
 `plugin-manager/operation` 事件关联每次服务调用的开始和已观察到的结果；若异常使结果无法构造，则记录结果未知。安装目标仅保留解析出的 registry 包名；启停或移除包的目标必须与包名完全一致，不能含版本范围或首尾空格；插件目标仅保留已知条目 ID。记录的目标不要求已安装；需要读取包文件的操作仍会拒绝不存在的包。版本豁免记录保留已校验的包名和精确豁免版本，而不是当前安装版本。包或运行时任一身份非法时，目标记为 null，版本省略。豁免复用 reason `bundle`、stage `enable` 和豁免的 `enabled` 值；豁免版本与安装版本相同时，记录无法区分豁免变更与 bundle 开关。版本表示加锁前请求时观察到的值或安装解析出的值；非法或过长的元数据被省略，不丢弃操作记录。平台拒绝保留 `unsupported-platform` 错误码。事件不包含原始 spec 和错误文本。订阅者独立执行，不延迟管理操作；同步抛错和异步拒绝都不会阻断后续订阅者或改变结果。直接执行的 CLI 包操作不发送此服务事件。
 
-`@deepseek-ai/dsh-plugin-manager/diagnostic` 入口为 Desktop Host 和壳读取器提供运行 ID、操作记录及仅保留白名单字段的解析器。格式错误或超限记录会被拒绝；读取器报告遗漏和截断。壳仅接受其 Host 已声明运行 ID 对应的记录。诊断消费者负责持久化和传输限额；缺失记录不能说明操作成功。
+`@agentrans/plugin-manager/diagnostic` 入口为 Desktop Host 和壳读取器提供运行 ID、操作记录及仅保留白名单字段的解析器。格式错误或超限记录会被拒绝；读取器报告遗漏和截断。壳仅接受其 Host 已声明运行 ID 对应的记录。诊断消费者负责持久化和传输限额；缺失记录不能说明操作成功。
 
 </details>
 
@@ -152,7 +152,7 @@ service 运行若在 `idleTimeoutMs` 内没有任何捕获输出即被终止，�
 
 #### 模型看到什么
 
-[`plugin_manager` 工具](../../../docs/tool-catalog.zh.md#deepseek-aidsh-plugin-manager) 列出插件条目和组合包，并执行影响整个 profile 的改动。结果包含保存状态变化、应用状态和包管理诊断。未直接应用的变更结果会增加 `nextStep`，这是一句根据应用状态、拒绝代码、包管理器失败类型或重启原因生成的说明，指出模型下一步做什么或告诉用户什么。管理操作不会向 Agent 注入消息。
+[`plugin_manager` 工具](../../../docs/tool-catalog.zh.md#agentransplugin-manager) 列出插件条目和组合包，并执行影响整个 profile 的改动。结果包含保存状态变化、应用状态和包管理诊断。未直接应用的变更结果会增加 `nextStep`，这是一句根据应用状态、拒绝代码、包管理器失败类型或重启原因生成的说明，指出模型下一步做什么或告诉用户什么。管理操作不会向 Agent 注入消息。
 
 #### Token 影响
 

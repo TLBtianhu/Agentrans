@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { Session, SessionId, SessionPreparation } from '@deepseek-ai/dsh-session'
+import { Session, SessionId, SessionPreparation } from '@agentrans/session'
 
 describe('SessionPreparation', () => {
   it('retains the exact Session and releases provider state only once', () => {

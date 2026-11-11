@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-experimental-tool-worktree",
+  "name": "@agentrans/experimental-tool-worktree",
   "description": "Model tool that creates and enters a new Git worktree",
   "version": "0.1.0",
   "publishConfig": {
@@ -33,31 +33,31 @@
     "directory": "packages/experimental/tool-worktree"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/dsh-tools": "workspace:*",
-    "@deepseek-ai/dsh-experimental-worktree": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/tools": "workspace:*",
+    "@agentrans/experimental-worktree": "workspace:*"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:~",
-    "@deepseek-ai/cordis-plugin-include": "workspace:~",
-    "@deepseek-ai/cordis-plugin-loader": "workspace:~",
-    "@deepseek-ai/dsh-agent": "workspace:*",
-    "@deepseek-ai/dsh-agent-loop-testkit": "workspace:*",
-    "@deepseek-ai/dsh-fs-local": "workspace:*",
-    "@deepseek-ai/dsh-llm": "workspace:*",
-    "@deepseek-ai/dsh-sandbox": "workspace:*",
-    "@deepseek-ai/dsh-sandbox-local": "workspace:*",
-    "@deepseek-ai/dsh-sandbox-policy": "workspace:*",
-    "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-session-projection": "workspace:*",
-    "@deepseek-ai/dsh-subprocess-local": "workspace:*",
-    "@deepseek-ai/dsh-system-prompt": "workspace:*",
-    "@deepseek-ai/dsh-tool-executor-native": "workspace:*",
-    "@deepseek-ai/dsh-tool-testkit": "workspace:*",
-    "@deepseek-ai/dsh-tools": "workspace:*",
-    "@deepseek-ai/dsh-working-directory": "workspace:*",
-    "@deepseek-ai/dsh-experimental-worktree": "workspace:*",
-    "@deepseek-ai/dsh-agent-loop": "workspace:*"
+    "@agentrans/cordis": "workspace:~",
+    "@agentrans/cordis-plugin-include": "workspace:~",
+    "@agentrans/cordis-plugin-loader": "workspace:~",
+    "@agentrans/agent": "workspace:*",
+    "@agentrans/agent-loop-testkit": "workspace:*",
+    "@agentrans/fs-local": "workspace:*",
+    "@agentrans/llm": "workspace:*",
+    "@agentrans/sandbox": "workspace:*",
+    "@agentrans/sandbox-local": "workspace:*",
+    "@agentrans/sandbox-policy": "workspace:*",
+    "@agentrans/session": "workspace:*",
+    "@agentrans/session-projection": "workspace:*",
+    "@agentrans/subprocess-local": "workspace:*",
+    "@agentrans/system-prompt": "workspace:*",
+    "@agentrans/tool-executor-native": "workspace:*",
+    "@agentrans/tool-testkit": "workspace:*",
+    "@agentrans/tools": "workspace:*",
+    "@agentrans/working-directory": "workspace:*",
+    "@agentrans/experimental-worktree": "workspace:*",
+    "@agentrans/agent-loop": "workspace:*"
   },
   "icon": "./icon.svg",
   "dsh": {
@@ -66,6 +66,6 @@
     }
   },
   "dependencies": {
-    "@deepseek-ai/dsh-experimental-worktree": "workspace:*"
+    "@agentrans/experimental-worktree": "workspace:*"
   }
 }

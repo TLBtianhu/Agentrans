@@ -3,13 +3,13 @@ description: "面向用户与维护者的提供方无关模型调用服务说明
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-llm
+# @agentrans/llm
 
 [English](README.md) | 中文
 
 ## 概述
 
-使用 `@deepseek-ai/dsh-llm` 可通过已配置的提供方适配器流式调用模型、发现模型，并解析模型能力与调用默认值。调用方必须确保所有模型可见输入都可以从会话日志重建。Loop 构建的请求以深度冻结状态到达，因此扩展与适配器不能改写。每个流只尝试调用提供方一次：提供方特定的转换由对应适配器完成，可选包 `@deepseek-ai/dsh-llm-retry` 负责重跑失败的请求。流始终以终止结果结束，因此调用方可以一致地处理成功、失败与取消。
+使用 `@agentrans/llm` 可通过已配置的提供方适配器流式调用模型、发现模型，并解析模型能力与调用默认值。调用方必须确保所有模型可见输入都可以从会话日志重建。Loop 构建的请求以深度冻结状态到达，因此扩展与适配器不能改写。每个流只尝试调用提供方一次：提供方特定的转换由对应适配器完成，可选包 `@agentrans/llm-retry` 负责重跑失败的请求。流始终以终止结果结束，因此调用方可以一致地处理成功、失败与取消。
 
 ## 目录
 
@@ -38,8 +38,8 @@ kind: "package-reference"
 挂载服务与至少一个适配器，然后在每个请求中按名称选择提供方：
 
 ```yaml
-- name: '@deepseek-ai/dsh-llm'
-- name: '@deepseek-ai/dsh-llm-deepseek-api-key'
+- name: '@agentrans/llm'
+- name: '@agentrans/llm-deepseek-api-key'
   config:
     apiKeyEnv: DEEPSEEK_API_KEY
 ```
@@ -58,7 +58,7 @@ for await (const chunk of ctx.llm.stream({
 
 挂载成功后，`ctx.llm.listProviders()` 会按注册顺序报告已注册路由。
 
-辅助请求的生产方通过扩展 `@deepseek-ai/dsh-llm/types` 中的 `LlmRequestPurposeMap` 声明自己的 `purpose`，每个键映射到 `true`。`GenerateOptions.purpose` 接受已声明的键，普通对话请求则省略它。构造辅助请求前，应导入生产方包或其公开类型。适配器将用途作为模型不可见的传输元数据传递，并在遇到不熟悉的用途时继续处理请求。
+辅助请求的生产方通过扩展 `@agentrans/llm/types` 中的 `LlmRequestPurposeMap` 声明自己的 `purpose`，每个键映射到 `true`。`GenerateOptions.purpose` 接受已声明的键，普通对话请求则省略它。构造辅助请求前，应导入生产方包或其公开类型。适配器将用途作为模型不可见的传输元数据传递，并在遇到不熟悉的用途时继续处理请求。
 
 `GenerateOptions.messages` 接受持久 `Message` 值和仅供请求使用的 `RequestUserInput` 值。仅供请求使用的输入包含 user-role 内容，不含 `id` 或 `source`；Session 写入和 Agent 投递仍然要求持久消息。调用方必须在流结束前保持辅助输入不变。会记录完整请求的调用方（例如会话标题生成）必须使用持久消息。
 
@@ -67,7 +67,7 @@ for await (const chunk of ctx.llm.stream({
 配置函数在适配器默认值物化之前选择控制项。例如，将最低强度选择与显式输出上限组合，再将 `configure(maxTokens)` 作为第三个参数传入：
 
 ```ts
-import type { ConfigureCall } from '@deepseek-ai/dsh-llm'
+import type { ConfigureCall } from '@agentrans/llm'
 
 const leastReasoning: ConfigureCall = (controls, model) => {
   const first = model.reasoning?.efforts[0]
@@ -175,7 +175,7 @@ const configure = (maxTokens: number): ConfigureCall =>
 
 这些限制说明本服务在哪里停止、由其他包或未来工作接续。它们是当前包约束，不是任务积压。
 
-- **本服务不提供重试执行、缓存或速率限制**——提供方注册会存储重试策略，但一次流仍是一次提供方尝试；`@deepseek-ai/dsh-llm-retry` 在持久 agent 步骤边界上执行该策略。
+- **本服务不提供重试执行、缓存或速率限制**——提供方注册会存储重试策略，但一次流仍是一次提供方尝试；`@agentrans/llm-retry` 在持久 agent 步骤边界上执行该策略。
 - **`GenerateOptions` 采样只包含 `temperature`／`maxTokens`／`stop`**——没有 `tool_choice`、`top_p` 或 penalty 字段；有产生方落地时词汇才会增长（见[已删除惰性旋钮](../../../.agents/notes/archived/simplification/2026-07-04-drop-inert-request-knobs.md)）。
 - **变体通常要求实际产生方**——`prefill`、逐工具 `strict`、内容块 `cache` 提示和 `agent` 消息来源变体都没有产生方（见 [Agent Note](../../../.agents/notes/archived/simplification/2026-07-04-prune-producerless-vocabulary-variants.md)）。
 - **`BlockAssembler` 只处理核心块类型**——插件添加块类型的流若从未由 `block-end` 关闭，`blocks()` 会抛出异常。

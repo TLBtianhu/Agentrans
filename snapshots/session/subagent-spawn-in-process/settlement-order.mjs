@@ -4,7 +4,7 @@ export const inject = ['tools', 'agents']
 
 /**
  * Hold the child's first step until the parent has recorded its initial turn end.
- * @param {import('@deepseek-ai/cordis').Context} ctx - Scenario host context.
+ * @param {import('@agentrans/cordis').Context} ctx - Scenario host context.
  */
 export function apply(ctx) {
   const parentFinished = Promise.withResolvers()

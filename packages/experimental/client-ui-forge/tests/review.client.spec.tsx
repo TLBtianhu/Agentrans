@@ -3,7 +3,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { Profiler } from 'react'
 import { act, cleanup, fireEvent, render, within } from '@testing-library/react'
-import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
+import { makeTranslate } from '@agentrans/client-test-runtime'
 import type { ForgeDiffFile } from '../src/types.ts'
 import { formatReviewComment, selectReviewLines, reviewMatches, type ReviewSelection } from '../src/client/review.ts'
 import { ReviewQueue } from '../src/client/review-queue.ts'

@@ -1,6 +1,6 @@
 /**
  * Owner-side Liveshare Web bundle plugin.
- * @module @deepseek-ai/dsh-experimental-liveshare
+ * @module @agentrans/experimental-liveshare
  */
 
 export { apply, name, inject, type Config } from './host/share-host.ts'
@@ -13,7 +13,7 @@ export {
 
 import type { LiveshareShares } from './host/share-remote.ts'
 
-declare module '@deepseek-ai/cordis' {
+declare module '@agentrans/cordis' {
   interface Context {
     /** Owner share management served to the owner page over Typert Remote. */
     liveshareShares: LiveshareShares

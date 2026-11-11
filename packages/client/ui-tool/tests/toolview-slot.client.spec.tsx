@@ -1,26 +1,26 @@
 // @vitest-environment jsdom
-import { apply as applyMenus, inject as injectMenus } from '@deepseek-ai/dsh-client-ui-context-menu/client'
+import { apply as applyMenus, inject as injectMenus } from '@agentrans/client-ui-context-menu/client'
 
-import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
+import { createSnapshotStore } from '@agentrans/client-store'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render } from '@testing-library/react'
-import type { ISession } from '@deepseek-ai/dsh-api-session-controller/client'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import type { WorkspaceId } from '@deepseek-ai/dsh-workspace/types'
+import type { ISession } from '@agentrans/api-session-controller/client'
+import type { SessionId } from '@agentrans/session/types'
+import type { WorkspaceId } from '@agentrans/workspace/types'
 import {
   apply as applyChat, inject as injectChat, type ToolResultNode,
-} from '@deepseek-ai/dsh-client-ui-chat/client'
-import type { PropsRenderSlots } from '@deepseek-ai/dsh-client-ui-slots'
-import { SlotTestRuntime, contextMenuHook, stubConfigForm } from '@deepseek-ai/dsh-client-test-runtime'
+} from '@agentrans/client-ui-chat/client'
+import type { PropsRenderSlots } from '@agentrans/client-ui-slots'
+import { SlotTestRuntime, contextMenuHook, stubConfigForm } from '@agentrans/client-test-runtime'
 import { toolFileInject } from '../src/client/tool/file-menu.ts'
 import { ReadRow } from '../src/client/tool/toolviews/read-row.tsx'
 import { WebRow } from '../src/client/tool/toolviews/web-row.tsx'
-import { useDisclosure } from '@deepseek-ai/dsh-client-ui-chat/src/client/chat/use-disclosure.ts'
-import { LocaleRuntime } from '@deepseek-ai/dsh-client-locale/client'
-import { apply as applyConversation, inject as injectConversation } from '@deepseek-ai/dsh-client-ui-conversation/client'
-import { apply as applyTool, inject as injectTool } from '@deepseek-ai/dsh-client-ui-tool/client'
-import type { ToolCallViewProps } from '@deepseek-ai/dsh-client-ui-tool/client'
-import { PartialArguments } from '@deepseek-ai/dsh-util-values'
+import { useDisclosure } from '@agentrans/client-ui-chat/src/client/chat/use-disclosure.ts'
+import { LocaleRuntime } from '@agentrans/client-locale/client'
+import { apply as applyConversation, inject as injectConversation } from '@agentrans/client-ui-conversation/client'
+import { apply as applyTool, inject as injectTool } from '@agentrans/client-ui-tool/client'
+import type { ToolCallViewProps } from '@agentrans/client-ui-tool/client'
+import { PartialArguments } from '@agentrans/util-values'
 import { toolSessionEvents } from './tool-fixtures.client.ts'
 
 const SID = 's1' as SessionId
@@ -81,7 +81,7 @@ const LAYOUT_CHILDREN = {
  */
 async function bench(nodes: ToolResultNode[]) {
   const runtime = await SlotTestRuntime.create()
-  runtime.ctx.provide('fileDrag', { actions: { prepare: async () => ({ start: () => true, release: () => {} }), reportFailure: () => {} }, read: () => undefined } satisfies import('@deepseek-ai/cordis').Context['fileDrag'])
+  runtime.ctx.provide('fileDrag', { actions: { prepare: async () => ({ start: () => true, release: () => {} }), reportFailure: () => {} }, read: () => undefined } satisfies import('@agentrans/cordis').Context['fileDrag'])
   const openWorkspacePath = vi.fn(async () => ({ ok: true, value: { opened: true } }))
   runtime.remote.provideNamespaces({ session: { openWorkspacePath } })
   runtime.ctx.provide('configForms', { developerTools: { enabled: createSnapshotStore(true) }, get: () => stubConfigForm().scope } as never)
@@ -339,7 +339,7 @@ describe('keyed toolview hole through the real machinery', () => {
 describe('registrant declaration injection', () => {
   it('runs a registrant before ui-tool and waits on the actual toolview declaration', async () => {
     const runtime = await SlotTestRuntime.create()
-    runtime.ctx.provide('fileDrag', { actions: { prepare: async () => ({ start: () => true, release: () => {} }), reportFailure: () => {} }, read: () => undefined } satisfies import('@deepseek-ai/cordis').Context['fileDrag'])
+    runtime.ctx.provide('fileDrag', { actions: { prepare: async () => ({ start: () => true, release: () => {} }), reportFailure: () => {} }, read: () => undefined } satisfies import('@agentrans/cordis').Context['fileDrag'])
     runtime.remote.provideNamespaces({
       session: {
         openWorkspacePath: vi.fn(async () => ({ ok: true, value: { opened: true } })),

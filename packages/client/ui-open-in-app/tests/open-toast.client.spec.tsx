@@ -2,7 +2,7 @@
 /** Mobile handoff feedback and native-open failures rendered outside the initiating panel. */
 import { act, cleanup, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
+import { makeTranslate } from '@agentrans/client-test-runtime'
 import {
   OpenInAppToast,
   type OpenInAppToastProps, type OpenInAppToastState,

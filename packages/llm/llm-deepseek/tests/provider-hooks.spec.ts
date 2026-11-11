@@ -1,7 +1,7 @@
 /** Provider-owned connection readiness and model admission on the shared DeepSeek adapter. */
 import { afterEach, expect, it } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
-import LlmRuntime, { LlmError } from '@deepseek-ai/dsh-llm'
+import { Context } from '@agentrans/cordis'
+import LlmRuntime, { LlmError } from '@agentrans/llm'
 import { DeepSeekAdapter, registerDeepSeekProvider, resolveAdapterOptions } from '../src/index.ts'
 import type { DeepSeekAdapterOptions, DeepSeekCatalogModel } from '../src/index.ts'
 import { options as request, prepareExtensions } from './helpers.ts'

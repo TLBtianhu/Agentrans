@@ -15,14 +15,14 @@ description: "自定义 ApprovalService 组合必须提供 sessionProjections �
 
 ## 迁移
 
-1. 在自定义 `cordis.yml` 中，先挂载 `@deepseek-ai/dsh-session-projection`，再挂载 `@deepseek-ai/dsh-user-approval`。不要向发布的配置重复添加注册表。
+1. 在自定义 `cordis.yml` 中，先挂载 `@agentrans/session-projection`，再挂载 `@agentrans/user-approval`。不要向发布的配置重复添加注册表。
 2. 在直接挂载服务的宿主中，使用 `ctx.plugin(ApprovalService)` 并等待激活完成，再使用 `ctx.approval`。不要用 `new ApprovalService(...)` 直接构造服务；这不会执行 `Service.init`。
 
    ```ts
-   import { Context } from '@deepseek-ai/cordis'
-   import SessionStore from '@deepseek-ai/dsh-session'
-   import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
-   import ApprovalService from '@deepseek-ai/dsh-user-approval'
+   import { Context } from '@agentrans/cordis'
+   import SessionStore from '@agentrans/session'
+   import SessionProjectionRegistry from '@agentrans/session-projection'
+   import ApprovalService from '@agentrans/user-approval'
 
    const ctx = new Context()
    await ctx.plugin(SessionStore)

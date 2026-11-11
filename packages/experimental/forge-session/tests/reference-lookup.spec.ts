@@ -1,17 +1,17 @@
 /** Reference observation through Cordis services without a platform shell or CLI process. */
 
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import type { Context } from '@deepseek-ai/cordis'
-import AgentRegistry from '@deepseek-ai/dsh-agent'
-import AgentLoop from '@deepseek-ai/dsh-agent-loop'
-import LlmRuntime, { ToolCallId } from '@deepseek-ai/dsh-llm'
-import { pluginRecordOf, SessionId } from '@deepseek-ai/dsh-session'
-import ShellExecutor from '@deepseek-ai/dsh-shell'
-import type { ShellExecRequest, ShellExecSpec, ShellExecution, ShellRunResult } from '@deepseek-ai/dsh-shell'
-import * as ShellEnv from '@deepseek-ai/dsh-shell-env'
-import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
-import ToolRuntime from '@deepseek-ai/dsh-tools'
-import type { ToolExecution, ToolExecutionResult, ToolExecutionToken } from '@deepseek-ai/dsh-tools'
+import type { Context } from '@agentrans/cordis'
+import AgentRegistry from '@agentrans/agent'
+import AgentLoop from '@agentrans/agent-loop'
+import LlmRuntime, { ToolCallId } from '@agentrans/llm'
+import { pluginRecordOf, SessionId } from '@agentrans/session'
+import ShellExecutor from '@agentrans/shell'
+import type { ShellExecRequest, ShellExecSpec, ShellExecution, ShellRunResult } from '@agentrans/shell'
+import * as ShellEnv from '@agentrans/shell-env'
+import SystemPrompt from '@agentrans/system-prompt'
+import ToolRuntime from '@agentrans/tools'
+import type { ToolExecution, ToolExecutionResult, ToolExecutionToken } from '@agentrans/tools'
 import { bench, pullUrl } from './fixtures.ts'
 
 const contexts: Context[] = []

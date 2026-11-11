@@ -1,8 +1,8 @@
 /** Mount explicit OAR provider and tool rows over the production headless composition. */
 
 import { fileURLToPath } from 'node:url'
-import type {} from '@deepseek-ai/dsh-subagent'
-import type {} from '@deepseek-ai/dsh-tools'
+import type {} from '@agentrans/subagent'
+import type {} from '@agentrans/tools'
 import { bootProductionProfile } from '../../../../../test-support/loader-smoke/tests/fixtures/production-profile.ts'
 
 let starts = 0

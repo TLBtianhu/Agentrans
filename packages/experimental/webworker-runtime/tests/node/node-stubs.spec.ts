@@ -66,7 +66,7 @@ const CALLED: [string, Record<string, unknown>, readonly string[]][] = [
     create: piCodingAgent.SessionManager.create, open: piCodingAgent.SessionManager.open,
     inMemory: piCodingAgent.SessionManager.inMemory, list: piCodingAgent.SessionManager.list,
   }, ['create', 'open', 'inMemory', 'list']],
-  ['@deepseek-ai/pi-ai', piAi, [
+  ['@agentrans/pi-ai', piAi, [
     'createProvider', 'createModels', 'openAICompletionsApi', 'openAIResponsesApi', 'anthropicMessagesApi',
     'isContextOverflow', 'getSupportedThinkingLevels', 'builtinModels',
   ]],

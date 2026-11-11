@@ -3,7 +3,7 @@ description: "Browser half of optional action cards: the card frame below comple
 kind: "package-reference"
 ---
 
-# @deepseek-ai/dsh-client-ui-action-cards
+# @agentrans/client-ui-action-cards
 
 English | [中文](README.zh.md)
 

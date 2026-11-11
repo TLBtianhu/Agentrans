@@ -3,28 +3,28 @@
  * durable session metadata, the resolved child `AgentOptions`, the delegated
  * policy seed, and the scoped setup used by local activations.
  *
- * @module @deepseek-ai/dsh-subagent/child-agent
+ * @module @agentrans/subagent/child-agent
  */
 
-import type { Context } from '@deepseek-ai/cordis'
-import type { Agent, AgentOptions, CreateAgentOptions } from '@deepseek-ai/dsh-agent'
-import type { SandboxMode } from '@deepseek-ai/dsh-sandbox'
-import type { Session, SessionId } from '@deepseek-ai/dsh-session'
-import type {} from '@deepseek-ai/dsh-system-prompt'
-import type { ToolRestriction } from '@deepseek-ai/dsh-tools'
+import type { Context } from '@agentrans/cordis'
+import type { Agent, AgentOptions, CreateAgentOptions } from '@agentrans/agent'
+import type { SandboxMode } from '@agentrans/sandbox'
+import type { Session, SessionId } from '@agentrans/session'
+import type {} from '@agentrans/system-prompt'
+import type { ToolRestriction } from '@agentrans/tools'
 // Type-only: make `ctx.get('sandboxPolicy')`, `ctx.get('approval')`, and
 // `ctx.get('permissionPresets')` resolve to their services when composed — delegation consumes them
 // opportunistically (the documented `ctx.get` pattern), never as a hard dep —
 // and merge the inherited permission session-event payloads.
-import type {} from '@deepseek-ai/dsh-sandbox-policy'
-import type {} from '@deepseek-ai/dsh-user-approval'
-import type {} from '@deepseek-ai/dsh-permission-presets'
+import type {} from '@agentrans/sandbox-policy'
+import type {} from '@agentrans/user-approval'
+import type {} from '@agentrans/permission-presets'
 // Type-only: make `ctx.get('agentPresets')` resolve to the preset roster when
 // composed — a child inherits its parent's composition opportunistically (the
 // documented `ctx.get` pattern), never as a hard dep. A rosterless deployment
 // keeps its model-facing rows on the host plane, where the child already sees
 // them through the tool registry's global layer.
-import type {} from '@deepseek-ai/dsh-agent-preset-registry'
+import type {} from '@agentrans/agent-preset-registry'
 import { delegationDepthOf } from './depth.ts'
 import { SubagentError } from './error.ts'
 

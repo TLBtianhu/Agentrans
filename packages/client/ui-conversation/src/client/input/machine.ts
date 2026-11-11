@@ -8,7 +8,7 @@
  * only then does the editor clear, and a refusal or failure returns it to
  * editing unchanged.
  */
-import type { PromptContextInput } from '@deepseek-ai/dsh-api-session-controller/types'
+import type { PromptContextInput } from '@agentrans/api-session-controller/types'
 import type { InputSubmitMode, MessageSubmission } from '../contract/composer-submission.ts'
 import type { DraftQuote, Occurrence } from '../contract/draft-editor.ts'
 import type {

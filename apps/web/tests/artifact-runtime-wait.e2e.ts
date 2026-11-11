@@ -4,11 +4,11 @@ import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium, type Browser, type Page } from 'playwright'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import type { Agent } from '@deepseek-ai/dsh-agent'
-import { brandString } from '@deepseek-ai/dsh-brand'
-import type { ArtifactId } from '@deepseek-ai/dsh-artifact/types'
-import type { ArtifactRuntimeInspection } from '@deepseek-ai/dsh-artifact-runtime/types'
-import type { SessionEvent } from '@deepseek-ai/dsh-session'
+import type { Agent } from '@agentrans/agent'
+import { brandString } from '@agentrans/brand'
+import type { ArtifactId } from '@agentrans/artifact/types'
+import type { ArtifactRuntimeInspection } from '@agentrans/artifact-runtime/types'
+import type { SessionEvent } from '@agentrans/session'
 import {
   acknowledgeReloadConnectionLoss, assertFixtureInventory, fixtureUserPrompts, launchWebScaffold,
   watchConsole, webSnapshotMode, type WebScaffold,

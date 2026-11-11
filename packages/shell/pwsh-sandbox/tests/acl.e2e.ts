@@ -12,14 +12,14 @@ import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:
 import { homedir, tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
-import type { SandboxExecutionPolicy } from '@deepseek-ai/dsh-sandbox'
-import { resolvePwshPath } from '@deepseek-ai/dsh-pwsh-local'
-import { LocalSandboxProvider } from '@deepseek-ai/dsh-sandbox-local'
-import { SandboxPolicyService } from '@deepseek-ai/dsh-sandbox-policy'
-import LocalSubprocessRuntime from '@deepseek-ai/dsh-subprocess-local'
+import { Context } from '@agentrans/cordis'
+import type { SandboxExecutionPolicy } from '@agentrans/sandbox'
+import { resolvePwshPath } from '@agentrans/pwsh-local'
+import { LocalSandboxProvider } from '@agentrans/sandbox-local'
+import { SandboxPolicyService } from '@agentrans/sandbox-policy'
+import LocalSubprocessRuntime from '@agentrans/subprocess-local'
 import { SandboxPwshExecutor } from '../src/index.ts'
-import type { ShellExecSpec, ShellExecution, ShellRunResult } from '@deepseek-ai/dsh-shell'
+import type { ShellExecSpec, ShellExecution, ShellRunResult } from '@agentrans/shell'
 
 /** Historical foreground shorthand over the unified execute() seam. */
 async function run(x: { execute(spec: ShellExecSpec): Promise<ShellExecution> }, spec: ShellExecSpec): Promise<ShellRunResult> {

@@ -5,9 +5,9 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import type { AddressInfo } from 'node:net'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import type { AgentHandle } from '@deepseek-ai/dsh-agent'
-import { createUserMessage } from '@deepseek-ai/dsh-llm'
-import { SessionId } from '@deepseek-ai/dsh-session'
+import type { AgentHandle } from '@agentrans/agent'
+import { createUserMessage } from '@agentrans/llm'
+import { SessionId } from '@agentrans/session'
 import { launchWebScaffold, webSnapshotMode, type WebScaffold } from './scaffold.ts'
 
 const MODE = webSnapshotMode()

@@ -4,12 +4,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type {
   NodeKey, RenderEntry,
-} from '@deepseek-ai/dsh-client-ui-conversation/client'
-import type { InboxState } from '@deepseek-ai/dsh-agent/types'
-import type { PendingSubmission } from '@deepseek-ai/dsh-api-session-controller/client'
+} from '@agentrans/client-ui-conversation/client'
+import type { InboxState } from '@agentrans/agent/types'
+import type { PendingSubmission } from '@agentrans/api-session-controller/client'
 import {
   Button, IconChevronDownOutlineRegular, MarkdownDelegateProvider, Modal, type MarkdownMenuTarget,
-} from '@deepseek-ai/dsh-client-ui-primitives'
+} from '@agentrans/client-ui-primitives'
 import { isAtOrOutside } from '../contract/group-tree.ts'
 import type { ChatFlowHookContext, ChatViewSlotProps, OpenFileOptions } from '../contract/slots.ts'
 import type { ChatSnapshot } from '../contract/snapshot.ts'
@@ -17,7 +17,7 @@ import { TurnNavigator } from './TurnNavigator.tsx'
 import { mergeTurnRailItems } from './turn-rail-items.ts'
 import { useTextInteraction } from './text-interaction.ts'
 import { useChatScroll } from './use-chat-scroll.ts'
-import { fileMediaUrl, resolveWorkspacePath, sessionFileAddress } from '@deepseek-ai/dsh-util-workspace-path'
+import { fileMediaUrl, resolveWorkspacePath, sessionFileAddress } from '@agentrans/util-workspace-path'
 import css from './ChatView.module.css'
 
 /** Host/OS refusal text for the file-open dialog; empty throws keep a locale fallback. */

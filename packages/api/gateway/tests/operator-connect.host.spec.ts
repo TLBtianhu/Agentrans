@@ -6,16 +6,16 @@ import { IncomingMessage } from 'node:http'
 import { tmpdir } from 'node:os'
 import { basename, dirname, isAbsolute, join, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { Context } from '@deepseek-ai/cordis'
-import Loader from '@deepseek-ai/cordis-plugin-loader'
-import Include from '@deepseek-ai/cordis-plugin-include'
-import * as Connection from '@deepseek-ai/dsh-client-connection'
-import LocalCredentials from '@deepseek-ai/dsh-credentials-local'
-import WebServer from '@deepseek-ai/dsh-host-webserver'
-import * as FrontendStatic from '@deepseek-ai/dsh-host-frontend-static'
-import TypertRegistry from '@deepseek-ai/dsh-typert-registry'
-import TypertGateway from '@deepseek-ai/dsh-api-gateway'
-import RemoteAccess from '@deepseek-ai/dsh-api-remote-access'
+import { Context } from '@agentrans/cordis'
+import Loader from '@agentrans/cordis-plugin-loader'
+import Include from '@agentrans/cordis-plugin-include'
+import * as Connection from '@agentrans/client-connection'
+import LocalCredentials from '@agentrans/credentials-local'
+import WebServer from '@agentrans/host-webserver'
+import * as FrontendStatic from '@agentrans/host-frontend-static'
+import TypertRegistry from '@agentrans/typert-registry'
+import TypertGateway from '@agentrans/api-gateway'
+import RemoteAccess from '@agentrans/api-remote-access'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import WebSocket from 'ws'
 import { z } from 'zod'
@@ -209,13 +209,13 @@ async function boot(): Promise<Host> {
   await writeFile(distIndex, '<head></head><body>operator fixture</body>')
   const configPath = join(root, 'cordis.yml')
   const rows = [
-    { name: '@deepseek-ai/dsh-credentials-local', config: { path: join(root, '.credentials.yaml'), watch: false } },
-    { name: '@deepseek-ai/dsh-host-webserver', config: { host: '127.0.0.1', port: 0 } },
-    { name: '@deepseek-ai/dsh-client-connection' },
-    { name: '@deepseek-ai/dsh-host-frontend-static', config: { distIndex } },
-    { name: '@deepseek-ai/dsh-typert-registry' },
-    { name: '@deepseek-ai/dsh-api-remote-access' },
-    { name: '@deepseek-ai/dsh-api-gateway' },
+    { name: '@agentrans/credentials-local', config: { path: join(root, '.credentials.yaml'), watch: false } },
+    { name: '@agentrans/host-webserver', config: { host: '127.0.0.1', port: 0 } },
+    { name: '@agentrans/client-connection' },
+    { name: '@agentrans/host-frontend-static', config: { distIndex } },
+    { name: '@agentrans/typert-registry' },
+    { name: '@agentrans/api-remote-access' },
+    { name: '@agentrans/api-gateway' },
     { name: '@fixture/operator-connect' },
   ]
   await writeFile(configPath, rows.map(row => `- ${JSON.stringify({ ...row, name: `cordis:${row.name}` })}`).join('\n') + '\n')
@@ -225,13 +225,13 @@ async function boot(): Promise<Host> {
     await ctx.plugin(Loader)
     Object.assign(ctx.loader.builtins, {
       include: Include,
-      '@deepseek-ai/dsh-credentials-local': LocalCredentials,
-      '@deepseek-ai/dsh-host-webserver': WebServer,
-      '@deepseek-ai/dsh-client-connection': Connection,
-      '@deepseek-ai/dsh-host-frontend-static': FrontendStatic,
-      '@deepseek-ai/dsh-typert-registry': TypertRegistry,
-      '@deepseek-ai/dsh-api-remote-access': RemoteAccess,
-      '@deepseek-ai/dsh-api-gateway': TypertGateway,
+      '@agentrans/credentials-local': LocalCredentials,
+      '@agentrans/host-webserver': WebServer,
+      '@agentrans/client-connection': Connection,
+      '@agentrans/host-frontend-static': FrontendStatic,
+      '@agentrans/typert-registry': TypertRegistry,
+      '@agentrans/api-remote-access': RemoteAccess,
+      '@agentrans/api-gateway': TypertGateway,
       '@fixture/operator-connect': OperatorConnectFixture,
     })
     await ctx.loader.create({ name: 'cordis:include', config: { path: pathToFileURL(configPath).href } })

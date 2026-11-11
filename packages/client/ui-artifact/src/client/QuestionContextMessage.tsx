@@ -1,5 +1,5 @@
 /** Compact experiment text presentation; raw copying and admission stay with their existing owners. */
-import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
+import type { PropsLocale, PropsRuntime } from '@agentrans/client-ui-slots'
 import type {} from './question-context-text.ts'
 import css from './QuestionContextMessage.module.css'
 

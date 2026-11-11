@@ -1,6 +1,6 @@
 /** Repository files through GitHub and GitLab single-file APIs, with the clone fallback. */
 import { afterEach, expect, it, vi } from 'vitest'
-import { DetailFailure } from '@deepseek-ai/dsh-plugin-detail'
+import { DetailFailure } from '@agentrans/plugin-detail'
 import { repositoryFiles, type RepositoryFileOptions } from '../src/detail-files.ts'
 
 const signal = new AbortController().signal

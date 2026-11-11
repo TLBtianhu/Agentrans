@@ -11,7 +11,7 @@ import { createUpdateServer } from './update-server.mjs'
 import { fixture } from './workspace-update-adapters.mjs'
 import { DesktopUpdateHttpExecutor } from '../../lib/types/update-http-executor.js'
 import { desktopUpdateReadyConfirmation, resolveDesktopLocale } from '../../lib/types/locale.js'
-import { parseProductLaunchContext } from '@deepseek-ai/dsh-product-layout/launch-context'
+import { parseProductLaunchContext } from '@agentrans/product-layout/launch-context'
 
 const root = process.env.DSH_WORKSPACE_UPDATE_ROOT
 assert.ok(root)
