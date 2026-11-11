@@ -295,6 +295,10 @@
 
     - id: office-to-pdf
       name: '@agentrans/office-to-pdf'
+      config:
+        # A host running the target under emulation converts far slower than a native one,
+        # so packaging raises this budget through the environment instead of failing the build.
+        timeoutMs: !!js Number(process.env.AGENTRANS_OFFICE_TIMEOUT_MS ?? '') || 60000
 
     # The right Sidebar's document tab: bounded file reads with selectable
     # Markdown, code, HTML, PDF, Office, and plain-text renderers.

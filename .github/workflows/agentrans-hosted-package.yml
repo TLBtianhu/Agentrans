@@ -43,6 +43,8 @@ jobs:
     env:
       AGENTRANS_DESKTOP_UPDATE_CHANNEL: ${{ inputs.channel }}
       AGENTRANS_TELEMETRY_DISABLED: '1'
+      # An emulated target converts far slower than a native one.
+      AGENTRANS_OFFICE_TIMEOUT_MS: '240000'
       TARGET: ${{ inputs.target }}
     steps:
       - uses: actions/checkout@v5
