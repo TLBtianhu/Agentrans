@@ -21,7 +21,7 @@ The invoking directory is the default workspace root. The `web`, `headless`, `sd
 
 ## App arguments
 
-The launcher parses only its own flags and hands everything after them to the booted profile, where any injected app plugin may parse the shared immutable snapshot ([`dsh-cmdline`](../../packages/boot/cmdline/README.md)). The first token the launcher does not recognize starts the app's arguments:
+The launcher parses only its own flags and hands everything after them to the booted profile, where any injected app plugin may parse the shared immutable snapshot ([`@agentrans/cmdline`](../../packages/boot/cmdline/README.md)). The first token the launcher does not recognize starts the app's arguments:
 
 ```sh
 agentrans --profile web --port 8080       # --port belongs to the web app
