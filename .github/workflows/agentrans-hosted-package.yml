@@ -23,9 +23,9 @@ on:
         default: nightly
         required: true
       target:
-        description: '打包目标（mac 同时构建两种 macOS 架构并合并更新元数据）'
+        description: '打包目标（mac = 两种 macOS 架构合并元数据；all = Windows 与 macOS 一并产出，供同一个 Release 使用）'
         type: choice
-        options: [win-x64, mac-arm64, mac-x64, mac]
+        options: [all, win-x64, mac-arm64, mac-x64, mac]
         default: win-x64
         required: true
 
@@ -38,14 +38,20 @@ concurrency:
 
 jobs:
   package:
-    runs-on: ${{ startsWith(inputs.target, 'win') && 'windows-latest' || 'macos-latest' }}
+    # A release attaches every platform from one packaging run, so `all` fans out here rather than
+    # asking the release workflow to merge separate runs.
+    strategy:
+      fail-fast: false
+      matrix:
+        target: ${{ fromJSON(inputs.target == 'all' && '["win-x64","mac"]' || format('["{0}"]', inputs.target)) }}
+    runs-on: ${{ startsWith(matrix.target, 'win') && 'windows-latest' || 'macos-latest' }}
     timeout-minutes: 150
     env:
       AGENTRANS_DESKTOP_UPDATE_CHANNEL: ${{ inputs.channel }}
       AGENTRANS_TELEMETRY_DISABLED: '1'
       # An emulated target converts far slower than a native one.
       AGENTRANS_OFFICE_TIMEOUT_MS: '240000'
-      TARGET: ${{ inputs.target }}
+      TARGET: ${{ matrix.target }}
     steps:
       - uses: actions/checkout@v5
 
@@ -73,7 +79,7 @@ jobs:
       # The preparation starts the packaged application once to prove it runs. An Intel build on an
       # arm64 runner needs Rosetta before that check can pass.
       - name: Install Rosetta for the Intel build
-        if: inputs.target == 'mac-x64' || inputs.target == 'mac'
+        if: matrix.target == 'mac-x64' || matrix.target == 'mac'
         run: sudo softwareupdate --install-rosetta --agree-to-license
 
       # The installer entry packages a prepared tree; this prepares it without producing an
@@ -81,20 +87,20 @@ jobs:
       # The installer entry packages a prepared tree; this prepares it without producing an
       # installer of its own, which is the step the signed lanes get from their full package run.
       - name: Prepare the packaged runtime
-        if: inputs.target != 'mac'
+        if: matrix.target != 'mac'
         shell: pwsh
         run: |
           $script = if ($env:TARGET -eq 'win-x64') { 'package:desktop:win:x64' } else { 'package:desktop:mac:' + ($env:TARGET -replace '^mac-', '') }
           pnpm run $script --unsigned --prepare-only --build-version ${{ inputs.version }}
 
       - name: Build the unsigned application
-        if: inputs.target != 'mac'
-        run: node apps/desktop/scripts/package-agentrans-installer.mjs artifacts/agentrans-installer ${{ inputs.target }}
+        if: matrix.target != 'mac'
+        run: node apps/desktop/scripts/package-agentrans-installer.mjs artifacts/agentrans-installer ${{ matrix.target }}
 
       # One release needs one metadata file per platform, and each macOS architecture produces its
       # own, so both architectures are built here and assembled into a single upload directory.
       - name: Package both macOS architectures
-        if: inputs.target == 'mac'
+        if: matrix.target == 'mac'
         shell: pwsh
         run: |
           pnpm run package:desktop:mac:arm64 --unsigned --prepare-only --build-version ${{ inputs.version }}
@@ -110,7 +116,7 @@ jobs:
       - name: Publish the packaged files for this run
         uses: actions/upload-artifact@v4
         with:
-          name: agentrans-${{ inputs.target }}
+          name: agentrans-${{ matrix.target }}
           path: |
             apps/desktop/artifacts/agentrans-installer/*
             !apps/desktop/artifacts/agentrans-installer/builder-debug.yml
