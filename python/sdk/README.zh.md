@@ -30,13 +30,13 @@ preview = render_images("report.docx", "report-preview", pages=[1])
 
 Python SDK 没有独立的应用入口。它以 `--profile sdk` 启动内置的 `dsh` CLI（命令行界面）；所选 profile 负责 JSON-RPC 服务器、agent（智能体）组合、凭据、持久化、工具和关闭流程。
 
-每次启动都必须显式指定 Harness home。请传入 `dsh_home`，或在子进程环境中提供非空的 `AGENTRANS_HOME`。SDK 刻意不会发现 `~/.dsh`。
+每次启动都必须显式指定 Harness home。请传入 `agentrans_home`，或在子进程环境中提供非空的 `AGENTRANS_HOME`。SDK 刻意不会发现 `~/.dsh`。
 
 ```py
 from deepseek_harness import DeepSeekHarness
 
 with DeepSeekHarness(
-    dsh_home="/absolute/path/to/isolated-dsh-home",
+    agentrans_home="/absolute/path/to/isolated-dsh-home",
     cwd="/absolute/path/to/workspace",
     provider="deepseek-official",
     model="deepseek-v4-flash",
@@ -50,10 +50,10 @@ print(result.final_response)
 
 `DeepSeekHarness` 延迟启动运行时，并在调用 `close()` 或退出上下文管理器前复用该进程。首次 profile 握手通过 `initialize_timeout_seconds` 使用独立的 30 秒默认上限；普通活动在协议响应后仍不设时限；`request_timeout_seconds` 可以限制协议响应的等待。超时诊断会指明所选 profile，并包含保留的运行时诊断。`cwd` 是 agent workspace；`runtime_cwd` 独立选择子进程工作目录。两者都会在启动前转成绝对路径。`provider`、`model`、可选的 `reasoning_effort` 和可选的正整数 `max_tokens` 通过 JSON-RPC 初始化发送。`base_url` 与 `api_key` 会显式覆盖子进程环境中的 `DEEPSEEK_BASE_URL` 与 `DEEPSEEK_API_KEY`。
 
-`harness.resume_session(saved_session_id)` 恢复持久化历史，并返回可调用 `run()` 的 `Session`。请保存原会话 id，并沿用其 `dsh_home` 和工作区。恢复会保留存储的目录、修复最后一个被中断的轮次，且不发送新输入。会话缺失、不可读、不兼容或被占用时会抛出异常，不创建替代会话。`start_session(id)` 只打开惰性句柄，不会请求持久化恢复。此 API 不恢复 shell、浏览器或其他外部进程。
+`harness.resume_session(saved_session_id)` 恢复持久化历史，并返回可调用 `run()` 的 `Session`。请保存原会话 id，并沿用其 `agentrans_home` 和工作区。恢复会保留存储的目录、修复最后一个被中断的轮次，且不发送新输入。会话缺失、不可读、不兼容或被占用时会抛出异常，不创建替代会话。`start_session(id)` 只打开惰性句柄，不会请求持久化恢复。此 API 不恢复 shell、浏览器或其他外部进程。
 
 ```py
-with DeepSeekHarness(dsh_home="/absolute/path/to/saved-home") as harness:
+with DeepSeekHarness(agentrans_home="/absolute/path/to/saved-home") as harness:
     session = harness.resume_session(saved_session_id)
     result = session.run("Continue the task.")
 ```
@@ -89,7 +89,7 @@ with DeepSeekHarness(dsh_home="/absolute/path/to/saved-home") as harness:
 ```py
 from deepseek_harness import ApprovalRequestParams, HarnessClient, HarnessConfig
 
-with HarnessClient(HarnessConfig(dsh_home="/absolute/path/to/dsh-home")) as client:
+with HarnessClient(HarnessConfig(agentrans_home="/absolute/path/to/dsh-home")) as client:
     client.initialize(cwd="/absolute/path/to/workspace", provider="deepseek-official",
                       model="deepseek-v4-flash", approval_requests=True)
     client.session_prompt("main", [{"type": "text", "text": "Run the operation requiring approval."}])
@@ -118,7 +118,7 @@ dsh plugin --profile sdk add file:/absolute/path/to/my-plugin-bundle
 
 ```py
 with DeepSeekHarness(
-    dsh_home="/absolute/path/to/isolated-dsh-home",
+    agentrans_home="/absolute/path/to/isolated-dsh-home",
     profile="sdk",
     patches=("/absolute/path/to/first.patch.yml", "/absolute/path/to/last.patch.yml"),
 ) as harness:

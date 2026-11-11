@@ -52,6 +52,19 @@ function satisfies(runtimeVersion: string, range: string): boolean {
   return range.trim() !== '' && semver.satisfies(runtimeVersion, range, { includePrerelease: true })
 }
 
+/**
+ * Framework packages share the scope but version independently of the harness, so a plugin's
+ * peer range against them is not a harness requirement.
+ */
+const FRAMEWORK_PACKAGE = /^@agentrans\/(?:cordis(?:-|$)|cosmokit$|schemastery$|node-addon-system(?:-|$))/u
+
+/**
+ * @param name - Peer package name from a plugin manifest.
+ * @returns Whether the name is a harness package whose version the runtime owns.
+ */
+function isHarnessPackage(name: string): boolean {
+  return name.startsWith('@agentrans/') && !FRAMEWORK_PACKAGE.test(name)
+}
 function unmetRequirements(fields: Record<string, unknown>, runtimeVersion: string): Record<string, string> {
   const engines = Object.hasOwn(fields, 'engines') ? objectOf(fields.engines, 'Plugin manifest engines') : {}
   if (Object.hasOwn(engines, 'dsh')) {
@@ -66,7 +79,7 @@ function unmetRequirements(fields: Record<string, unknown>, runtimeVersion: stri
     if (typeof range !== 'string') {
       throw new Error(`Plugin manifest peerDependencies[${JSON.stringify(name)}] must be a string`)
     }
-    if (name !== '@agentrans/cli' && !name.startsWith('@agentrans/')) continue
+    if (!isHarnessPackage(name)) continue
     const requirement = ['workspace:^', 'workspace:~', 'workspace:*'].includes(range) ? runtimeVersion : range
     if (!satisfies(runtimeVersion, requirement)) unmet[name] = range
   }

@@ -27,17 +27,17 @@ def main() -> None:
     parser.add_argument("--model", default=os.environ.get("AGENTRANS_MODEL", "deepseek-v4-flash"))
     parser.add_argument("--max-tokens", type=int)
     args = parser.parse_args()
-    if args.dsh_home is None:
+    if args.agentrans_home is None:
         parser.error("--dsh-home or a non-empty AGENTRANS_HOME is required")
 
     workspace = args.workspace.resolve()
-    dsh_home = args.dsh_home.resolve()
+    agentrans_home = args.agentrans_home.resolve()
     with DeepSeekHarness(
         provider=args.provider,
         model=args.model,
         max_tokens=args.max_tokens,
         cwd=str(workspace),
-        dsh_home=str(dsh_home),
+        agentrans_home=str(agentrans_home),
         profile=args.profile,
     ) as harness:
         result = harness.run(args.prompt, session_id=args.session_id)

@@ -30,13 +30,13 @@ The authoring environment is independently optional through `deepseek_harness_ru
 
 The Python SDK has no separate application entrypoint. It launches the bundled `dsh` CLI with `--profile sdk`; the selected profile owns the JSON-RPC server, agent composition, credentials, persistence, tools, and shutdown behavior.
 
-Every launch requires an explicit Harness home. Pass `dsh_home` or provide a non-empty `AGENTRANS_HOME` in the child environment. The SDK deliberately never discovers `~/.dsh`.
+Every launch requires an explicit Harness home. Pass `agentrans_home` or provide a non-empty `AGENTRANS_HOME` in the child environment. The SDK deliberately never discovers `~/.dsh`.
 
 ```py
 from deepseek_harness import DeepSeekHarness
 
 with DeepSeekHarness(
-    dsh_home="/absolute/path/to/isolated-dsh-home",
+    agentrans_home="/absolute/path/to/isolated-dsh-home",
     cwd="/absolute/path/to/workspace",
     provider="deepseek-official",
     model="deepseek-v4-flash",
@@ -50,10 +50,10 @@ print(result.final_response)
 
 `DeepSeekHarness` starts lazily and reuses its runtime until `close()` or context-manager exit. The initial profile handshake has an independent 30-second default bound through `initialize_timeout_seconds`; ordinary activity remains unbounded after its protocol response, whose wait can be limited with `request_timeout_seconds`. A timeout names the selected profile and includes retained runtime diagnostics. `cwd` is the agent workspace; `runtime_cwd` independently selects the subprocess working directory. Both become absolute before launch. `provider`, `model`, optional `reasoning_effort`, and optional positive `max_tokens` are sent during JSON-RPC initialization. `base_url` and `api_key` explicitly override `DEEPSEEK_BASE_URL` and `DEEPSEEK_API_KEY` in the child environment.
 
-`harness.resume_session(saved_session_id)` restores persisted history and returns a `Session` ready for `run()`. Save the original session id and reuse its `dsh_home` and workspace. Restoration preserves the stored directory, repairs an interrupted final turn, and sends no new input. Missing, unreadable, incompatible, or occupied sessions raise without creating a replacement. `start_session(id)` only opens a lazy handle; it does not request persisted restoration. This API does not restore shell, browser, or other external processes.
+`harness.resume_session(saved_session_id)` restores persisted history and returns a `Session` ready for `run()`. Save the original session id and reuse its `agentrans_home` and workspace. Restoration preserves the stored directory, repairs an interrupted final turn, and sends no new input. Missing, unreadable, incompatible, or occupied sessions raise without creating a replacement. `start_session(id)` only opens a lazy handle; it does not request persisted restoration. This API does not restore shell, browser, or other external processes.
 
 ```py
-with DeepSeekHarness(dsh_home="/absolute/path/to/saved-home") as harness:
+with DeepSeekHarness(agentrans_home="/absolute/path/to/saved-home") as harness:
     session = harness.resume_session(saved_session_id)
     result = session.run("Continue the task.")
 ```
@@ -89,7 +89,7 @@ This low-level example receives one approval and rejects it. Use a dedicated req
 ```py
 from deepseek_harness import ApprovalRequestParams, HarnessClient, HarnessConfig
 
-with HarnessClient(HarnessConfig(dsh_home="/absolute/path/to/dsh-home")) as client:
+with HarnessClient(HarnessConfig(agentrans_home="/absolute/path/to/dsh-home")) as client:
     client.initialize(cwd="/absolute/path/to/workspace", provider="deepseek-official",
                       model="deepseek-v4-flash", approval_requests=True)
     client.session_prompt("main", [{"type": "text", "text": "Run the operation requiring approval."}])
@@ -118,7 +118,7 @@ For an invocation-specific change, pass one or more patch files. They become abs
 
 ```py
 with DeepSeekHarness(
-    dsh_home="/absolute/path/to/isolated-dsh-home",
+    agentrans_home="/absolute/path/to/isolated-dsh-home",
     profile="sdk",
     patches=("/absolute/path/to/first.patch.yml", "/absolute/path/to/last.patch.yml"),
 ) as harness:

@@ -136,18 +136,18 @@ describe('product process environment', () => {
   it('replaces all Windows aliases for owned variables without changing unrelated values or the input', async () => {
     const input = await fixture()
     const context = resolveProductLaunchContext({ ...input, purpose: 'verification' })
-    const inherited = { dsh_home: 'upstream', AGENTRANS_HOME: 'other', Dsh_Agents_Home: 'shared', agentrans_launch_context: 'foreign', PATH: 'tools', MODEL_KEY: 'fixture' }
+    const inherited = { agentrans_home: 'upstream', AGENTRANS_HOME: 'other', Agentrans_Agents_Home: 'shared', agentrans_launch_context: 'foreign', PATH: 'tools', MODEL_KEY: 'fixture' }
     const environment = productLaunchEnvironment(context, inherited, 'win32')
     expect(environment).toEqual({ PATH: 'tools', MODEL_KEY: 'fixture', AGENTRANS_HOME: context.paths.dshHomeDir,
       AGENTRANS_AGENTS_HOME: context.paths.dshAgentsHomeDir, [PRODUCT_LAUNCH_CONTEXT_ENV]: serializeProductLaunchContext(context) })
-    expect(inherited.dsh_home).toBe('upstream')
+    expect(inherited.agentrans_home).toBe('upstream')
     expect(inherited.agentrans_launch_context).toBe('foreign')
   })
 
   it('keeps case-sensitive unrelated POSIX names and round-trips only independent roots', async () => {
     const input = await fixture()
     const context = resolveProductLaunchContext({ ...input, purpose: 'development' })
-    expect(productLaunchEnvironment(context, { dsh_home: 'unrelated', AGENTRANS_HOME: 'upstream' }, 'linux').dsh_home).toBe('unrelated')
+    expect(productLaunchEnvironment(context, { agentrans_home: 'unrelated', AGENTRANS_HOME: 'upstream' }, 'linux').agentrans_home).toBe('unrelated')
     const encoded = serializeProductLaunchContext(context)
     expect(Object.keys(JSON.parse(encoded) as Record<string, unknown>).sort()).toEqual(['codeRoot', 'instanceRoot', 'purpose', 'resourcesRoot'])
     expect(parseProductLaunchContext(encoded)).toEqual(context)
@@ -156,7 +156,7 @@ describe('product process environment', () => {
   it('materializes the same instance in place while preserving all unrelated variables', async () => {
     const input = await fixture()
     const context = resolveProductLaunchContext({ ...input, purpose: 'verification' })
-    const environment: NodeJS.ProcessEnv = { dsh_home: 'old', dsh_agents_home: 'shared', agentrans_launch_context: 'foreign', PATH: 'tools', MODEL_KEY: 'fixture' }
+    const environment: NodeJS.ProcessEnv = { agentrans_home: 'old', agentrans_agents_home: 'shared', agentrans_launch_context: 'foreign', PATH: 'tools', MODEL_KEY: 'fixture' }
     const original = environment
     applyProductLaunchEnvironment(context, environment, 'win32')
     expect(environment).toBe(original)

@@ -30,7 +30,7 @@ def main() -> None:
         parser.error("--preset must be non-blank")
 
     with DeepSeekHarness(
-        dsh_home=str(args.dsh_home.resolve()), cwd=str(args.workspace.resolve()),
+        agentrans_home=str(args.agentrans_home.resolve()), cwd=str(args.workspace.resolve()),
         profile="sdk", provider=args.provider, model=args.model,
         env={"AGENTRANS_PERMISSION_MODE": "workspace-write"},
     ) as harness:

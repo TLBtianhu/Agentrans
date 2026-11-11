@@ -85,7 +85,7 @@ describe('plugin compatibility', () => {
   it('ignores unrelated names and dependency fields', () => {
     expect(check({
       '@agentrans/cordis': 'broken', '@agentrans/cordis-plugin-loader': '^99',
-      '@other/dsh': '^99', '@agentrans/dshx': '^99', dsh: '^99',
+      '@other/dsh': '^99', '@example/agentrans-tool': '^99', dsh: '^99',
       constructor: '^99', hasOwnProperty: '^99', ['__proto__']: '^99',
     })).toBeUndefined()
     expect(evaluatePluginCompatibility({ dependencies: { '@agentrans/cli': '^99' } }, {}, runtime)).toBeUndefined()

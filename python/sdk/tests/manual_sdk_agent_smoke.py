@@ -48,8 +48,8 @@ class MockCompletionHandler(BaseHTTPRequestHandler):
 
 
 def run_smoke(repo_root: Path, keep_sessions: bool) -> None:
-    dsh_home = Path(tempfile.mkdtemp(prefix="dsh-sdk-smoke-home-"))
-    session_root = dsh_home / "sessions"
+    agentrans_home = Path(tempfile.mkdtemp(prefix="dsh-sdk-smoke-home-"))
+    session_root = agentrans_home / "sessions"
     runtime_entry = repo_root / "apps/cli/src/bin.ts"
     server = ThreadingHTTPServer(("127.0.0.1", 0), MockCompletionHandler)
     thread = threading.Thread(target=server.serve_forever, name="mock-messages-server", daemon=True)
@@ -57,7 +57,7 @@ def run_smoke(repo_root: Path, keep_sessions: bool) -> None:
     base_url = f"http://127.0.0.1:{server.server_address[1]}"
 
     print(f"repo_root={repo_root}")
-    print(f"dsh_home={dsh_home}")
+    print(f"agentrans_home={agentrans_home}")
     print(f"mock_base_url={base_url}")
 
     try:
@@ -74,7 +74,7 @@ def run_smoke(repo_root: Path, keep_sessions: bool) -> None:
                 "sdk",
             ),
             env={
-                "AGENTRANS_HOME": str(dsh_home),
+                "AGENTRANS_HOME": str(agentrans_home),
                 "AGENTRANS_PERMISSION_MODE": "danger-full-access",
                 "AGENTRANS_TELEMETRY_DISABLED": "1",
                 "DEEPSEEK_BASE_URL": base_url,
@@ -107,9 +107,9 @@ def run_smoke(repo_root: Path, keep_sessions: bool) -> None:
         server.server_close()
 
     if keep_sessions:
-        print(f"kept_dsh_home={dsh_home}")
+        print(f"kept_agentrans_home={agentrans_home}")
     else:
-        shutil.rmtree(dsh_home)
+        shutil.rmtree(agentrans_home)
         print("removed temporary dsh home")
 
 

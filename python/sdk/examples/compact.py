@@ -34,7 +34,7 @@ def main() -> None:
         parser.error("--workspace must contain README.md to provide conversation history")
 
     with DeepSeekHarness(
-        dsh_home=str(args.dsh_home.resolve()),
+        agentrans_home=str(args.agentrans_home.resolve()),
         cwd=str(workspace),
         profile="sdk",
         provider=args.provider,

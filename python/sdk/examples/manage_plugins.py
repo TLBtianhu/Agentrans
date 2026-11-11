@@ -22,7 +22,7 @@ def main() -> None:
     if os.environ.get("AGENTRANS_PRIMARY_RUNTIME") is None:
         download_primary_runtime()
     with ThreadPoolExecutor(max_workers=2) as worker:
-        harness = DeepSeekHarness(dsh_home=str(args.dsh_home.resolve()), cwd=str(args.workspace.resolve()),
+        harness = DeepSeekHarness(agentrans_home=str(args.agentrans_home.resolve()), cwd=str(args.workspace.resolve()),
                                   dsh_bin=None if args.dsh_bin is None else str(args.dsh_bin.resolve()),
                                   approval_requests=True,
                                   env={"AGENTRANS_PERMISSION_MODE": "workspace-write"})
