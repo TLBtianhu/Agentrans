@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-`dsh-tool-pwsh-persistent` 为每个 agent（智能体）提供 `pwsh` 工具，跨调用保留其当前目录、环境变量、函数与后台任务。同一 agent 的命令串行运行，不同 agent 维护相互隔离的 shell 状态。多步 PowerShell 工作应选择本包；若每条命令都应从干净状态开始，请使用 `dsh-tool-pwsh`，需要交互 stdin 时则使用 terminal 工具。请配置支持 pwsh 的后端和单条命令超时；超时或显式 `exit` 会丢弃 shell，因此下次调用从全新状态开始。
+`@agentrans/tool-pwsh-persistent` 为每个 agent（智能体）提供 `pwsh` 工具，跨调用保留其当前目录、环境变量、函数与后台任务。同一 agent 的命令串行运行，不同 agent 维护相互隔离的 shell 状态。多步 PowerShell 工作应选择本包；若每条命令都应从干净状态开始，请使用 `@agentrans/tool-pwsh`，需要交互 stdin 时则使用 terminal 工具。请配置支持 pwsh 的后端和单条命令超时；超时或显式 `exit` 会丢弃 shell，因此下次调用从全新状态开始。
 
 ## 目录
 
@@ -27,15 +27,15 @@ kind: "package-reference"
 
 新 shell 从 Session 的当前工作目录启动。创建后，shell 的目录与环境独立保留，不受后续 Session 目录切换影响。
 
-在 agent 需要在命令之间保持 PowerShell 状态的任何组合中加载本插件——它是 `dsh-tool-pwsh` 的持久对应物，用于依赖跨调用状态的工作。它注册 `pwsh` 工具，需要 `ctx.tools` 与 `ctx.terminals` 服务，并在执行时需要拥有者 agent 会话。
+在 agent 需要在命令之间保持 PowerShell 状态的任何组合中加载本插件——它是 `@agentrans/tool-pwsh` 的持久对应物，用于依赖跨调用状态的工作。它注册 `pwsh` 工具，需要 `ctx.tools` 与 `ctx.terminals` 服务，并在执行时需要拥有者 agent 会话。
 
 ### 何时选择
 
-当工作依赖跨调用 PowerShell 状态时选择持久工具；当每条命令都应从已知、干净的环境开始时选择 `dsh-tool-pwsh`。这里不支持需要交互 stdin 的命令——读取输入的前台子进程会一直阻塞到命令超时，随后重置 shell——因此交互工作属于 terminal 工具。
+当工作依赖跨调用 PowerShell 状态时选择持久工具；当每条命令都应从已知、干净的环境开始时选择 `@agentrans/tool-pwsh`。这里不支持需要交互 stdin 的命令——读取输入的前台子进程会一直阻塞到命令超时，随后重置 shell——因此交互工作属于 terminal 工具。
 
 ### 最小配置
 
-默认的 `shell` 后端通过配置了 `shellDialect: pwsh` 的 `dsh-terminal-bash` 实例启动 PowerShell shell；部署方可以注册其他 pwsh 方言 PTY 后端并按名称选择。
+默认的 `shell` 后端通过配置了 `shellDialect: pwsh` 的 `@agentrans/terminal-bash` 实例启动 PowerShell shell；部署方可以注册其他 pwsh 方言 PTY 后端并按名称选择。
 
 ```yaml
 - name: '@agentrans/terminal'
@@ -74,7 +74,7 @@ kind: "package-reference"
 
 ### 设计理念
 
-- **`dsh-tool-bash-persistent` 的刻意孪生。** 会话注册表、轮询循环与重置约定按设计镜像持久 bash 工具（[pwsh 持久 PTY Agent Note](../../../.agents/notes/archived/architecture/2026-08-11-pwsh-persistent-pty.md)）。
+- **`@agentrans/tool-bash-persistent` 的刻意孪生。** 会话注册表、轮询循环与重置约定按设计镜像持久 bash 工具（[pwsh 持久 PTY Agent Note](../../../.agents/notes/archived/architecture/2026-08-11-pwsh-persistent-pty.md)）。
 - **后端拥有提示符就绪。** shell 的 `prompt` 函数属于后端：它打印 BEL 结尾的 OSC 标记加受控的可打印提示符。后端通过快路径接受已识别的提示符文本，否则使用其自身的就绪检查或静默层级。工具既不安装也不匹配自己的提示符。
 - **滚屏与重启后的就绪。** [Loader 组合测试](tests/loader-composition.spec.ts)检查完整的 send 结算序列，包括大量输出后在同一 shell 上执行的命令，以及 `exit` 后的首条命令。失败时间线会区分 Windows 实际使用的自带 OpenConsole 与未使用的系统 conhost。
 - **PSReadLine 回显靠锚定剥离。** PowerShell 会把提交的输入渲染回流中；标记锚定提取与包装源码剥离移除回显，而跨终端宽度换行的包装可能在部分输出结果中留下部分回显。

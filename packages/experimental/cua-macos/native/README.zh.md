@@ -3,7 +3,7 @@ description: "macOS 原生辅助程序的请求协议、输入语义、共享服
 kind: "package-reference"
 ---
 
-# dsh-cua 原生辅助程序
+# @agentrans/cua 原生辅助程序
 
 [English](README.md) | 中文
 

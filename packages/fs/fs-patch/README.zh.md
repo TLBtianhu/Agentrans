@@ -3,7 +3,7 @@ description: "解析 Codex 风格补丁并将 hunk 应用于文本，不执行�
 kind: "package-library"
 ---
 
-# dsh-fs-patch
+# @agentrans/fs-patch
 
 [English](README.md) | 中文
 

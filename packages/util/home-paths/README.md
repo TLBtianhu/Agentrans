@@ -49,7 +49,7 @@ const agents = resolveAgentsHome()   // configured path, else $AGENTRANS_AGENTS_
 agentsHomeDisplay(agents)            // ~/.agents, or $AGENTRANS_AGENTS_HOME for any configured root
 ```
 
-`resolveAgentsHome` applies the same precedence, blank-value handling, and tilde expansion as `resolveDshHome`. The root is deliberately outside `$AGENTRANS_HOME` because other agent tools share it; `dsh-agent-instructions` reads its user-global `AGENTS.md`, and `dsh-skill-filesystem` scans its `skills/` directory.
+`resolveAgentsHome` applies the same precedence, blank-value handling, and tilde expansion as `resolveDshHome`. The root is deliberately outside `$AGENTRANS_HOME` because other agent tools share it; `@agentrans/agent-instructions` reads its user-global `AGENTS.md`, and `@agentrans/skill-filesystem` scans its `skills/` directory.
 
 ### Displaying a home
 

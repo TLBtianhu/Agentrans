@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-Use `dsh-lsp` to give agents language-server navigation for definitions, references, implementations, and hover documentation. Queries select the configured provider by file extension and return normalized results with structured failures, so backend changes do not alter the navigation request or model-visible response. Navigation is read-only and deliberately excludes generic JSON-RPC access, rename, formatting, diagnostics, and symbol lists. This package must be combined with a provider such as `dsh-lsp-stdio` and the model-facing `dsh-tool-lsp`; alone it provides no navigation.
+Use `@agentrans/lsp` to give agents language-server navigation for definitions, references, implementations, and hover documentation. Queries select the configured provider by file extension and return normalized results with structured failures, so backend changes do not alter the navigation request or model-visible response. Navigation is read-only and deliberately excludes generic JSON-RPC access, rename, formatting, diagnostics, and symbol lists. This package must be combined with a provider such as `@agentrans/lsp-stdio` and the model-facing `@agentrans/tool-lsp`; alone it provides no navigation.
 
 ## Table of Contents
 
@@ -43,7 +43,7 @@ The seam needs a provider and a consumer to do anything. A minimal composition m
 - name: '@agentrans/tool-lsp'
 ```
 
-Server commands, extension mappings, and the filesystem/subprocess pairing are configured in the provider and tool packages; see [dsh-lsp-stdio](../lsp-stdio/README.md) and [dsh-tool-lsp](../tool-lsp/README.md).
+Server commands, extension mappings, and the filesystem/subprocess pairing are configured in the provider and tool packages; see [@agentrans/lsp-stdio](../lsp-stdio/README.md) and [@agentrans/tool-lsp](../tool-lsp/README.md).
 
 ### The four operations
 
@@ -74,7 +74,7 @@ This section explains the design decisions behind the seam and where the code re
 
 ### Design philosophy
 
-- **Capability seam, Service Definition role.** The package owns `ctx.lsp` and the provider registry; providers register capabilities, not tools, and `dsh-tool-lsp` is the only owner of the model-facing surface.
+- **Capability seam, Service Definition role.** The package owns `ctx.lsp` and the provider registry; providers register capabilities, not tools, and `@agentrans/tool-lsp` is the only owner of the model-facing surface.
 - **Atomic registration.** `registerProvider()` validates and conflict-checks everything before mutating: an invalid or conflicting registration publishes nothing, and its disposer releases the id and every extension reservation together.
 - **Order-independent selection.** `query()` routes by the file's final extension, normalized to lowercase leading-dot form; registration and HMR order never change routing. The language id only synchronizes the transient document and never participates in selection.
 - **Closed vocabulary.** The four-operation union is closed — adding an operation is a compile-enforced change across the seam, providers, and the tool. There is no JSON-RPC escape hatch, and every request field is required, so there is no `resolve()` step.
@@ -102,8 +102,8 @@ Registration and disposal run through `ctx.effect()`, so provider routes live an
 Read these pages when the package-level contract is not enough. They move from the shared navigation model to the provider and the tool.
 
 - [LSP navigation subsystem](../../../docs/subsystems/lsp.md) — operations, coordinates, requests and results, and `LspError` codes.
-- [dsh-lsp-stdio](../lsp-stdio/README.md) — the stdio provider that registers against this seam.
-- [dsh-tool-lsp](../tool-lsp/README.md) — the model-facing tool over this seam.
+- [@agentrans/lsp-stdio](../lsp-stdio/README.md) — the stdio provider that registers against this seam.
+- [@agentrans/tool-lsp](../tool-lsp/README.md) — the model-facing tool over this seam.
 - [lsp group map](../README.md) — the three-package family and its related documentation.
 
 -----
@@ -111,11 +111,11 @@ Read these pages when the package-level contract is not enough. They move from t
 <a id="model-experience"></a>
 ## Model Experience
 
-Indirectly, through `dsh-tool-lsp`, which owns the model-facing `lsp` schema, prompt guidance, and rendered results while this registry contributes no prompt or schema itself.
+Indirectly, through `@agentrans/tool-lsp`, which owns the model-facing `lsp` schema, prompt guidance, and rendered results while this registry contributes no prompt or schema itself.
 
 #### KV Cache effect
 
-No direct invalidation; `dsh-tool-lsp` owns request-prefix changes.
+No direct invalidation; `@agentrans/tool-lsp` owns request-prefix changes.
 
 ## Known Limitations and Deferred Work
 

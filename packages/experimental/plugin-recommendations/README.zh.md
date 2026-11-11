@@ -41,7 +41,7 @@ kind: "package-reference"
 <details>
 <summary>实现细节——点击展开</summary>
 
-Host 入口是函数插件。它的 `apply` 通过 `ctx.plugin` 组装内部的 `pluginRecommendations` Remote service；该 service 为卡片读取目录文本，并为本卡片种类启用插件。它不是可单独配置或替换的 YAML 条目，也不会向 `dsh-base` 添加 service。关闭功能会移除它的 skill、卡片种类和 Remote，并等待它拥有的启用操作结束。
+Host 入口是函数插件。它的 `apply` 通过 `ctx.plugin` 组装内部的 `pluginRecommendations` Remote service；该 service 为卡片读取目录文本，并为本卡片种类启用插件。它不是可单独配置或替换的 YAML 条目，也不会向 `@agentrans/base` 添加 service。关闭功能会移除它的 skill、卡片种类和 Remote，并等待它拥有的启用操作结束。
 
 本插件不添加模型工具，也不添加 system prompt 段。它注册 `official-plugins` skill，加载时追加来自 `pluginManager` 的当前可推荐目录。它向共享的[操作卡片服务](../action-cards/README.zh.md)注册 `enable_official_plugin` 种类：skill 为 `official-plugins`，`details` 带插件的 `name`，动作「启用」需要全局 Remote 权限。`propose_action` 工具、卡片投影、「暂不需要」、Remote 操作和状态通知都由共享服务负责。本插件通过 Plugin Manager 启用指定插件，记录 `enabled`、`already-enabled`、`failed` 或 `unconfirmed`。保存的选择要等重启才生效时，决定数据带 `application: restart-required`；变更失败时带插件管理的 `errorCode`，Plugin Manager 拒绝变更但没有给出代码时带 `operation-error`。`unconfirmed` 表示插件重载打断了启用、没有拿到结果。这类卡片在每次操作前（包括「暂不需要」）都会检查 profile，发现插件已开启就记为 `enabled`，不再重试或记为忽略。未处理、失败和未确认的卡片可以记为「暂不需要」。只有已随安装提供、可选、官方、可读取、可写且无错误的插件可以推荐；名字在用户操作时检查，而不是在模型提议时。Remote `describe(sessionId, callId)` 返回卡片对应插件当前的标题、描述和启用状态，或拒绝原因。
 

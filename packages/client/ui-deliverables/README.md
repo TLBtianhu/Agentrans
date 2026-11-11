@@ -95,7 +95,7 @@ Delivery cards and known inline file mentions expose a [context menu](../ui-cont
 
 #### What the model sees
 
-The Web composition mounts the shared [`dsh-deliverable-file-references`](../../deliverables/deliverable-file-references/README.md#model-experience) guidance. This UI package renders the resulting file references and cards.
+The Web composition mounts the shared [`@agentrans/deliverable-file-references`](../../deliverables/deliverable-file-references/README.md#model-experience) guidance. This UI package renders the resulting file references and cards.
 
 #### Token effect
 

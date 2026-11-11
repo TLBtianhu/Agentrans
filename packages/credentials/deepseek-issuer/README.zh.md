@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-一枚 DeepSeek key 可鉴权多个能力类，而每个能力类调用的是不同端点。`dsh-deepseek-issuer` 持有这份共享身份：`DEEPSEEK_API_KEY_REF` 是唯一的默认凭据引用，`DEEPSEEK_CAPABILITIES` 命名该签发方服务的能力类，`DEEPSEEK_ENDPOINTS` 为每个能力类配上端点默认值及其覆盖用环境变量。各 provider 导入这些值而不是各自重述，因此模型路由、搜索 provider 及其设置卡片不会各自漂移出两个不同的默认 key。本模块不发请求、不持有 secret，也没有 Cordis 接口。
+一枚 DeepSeek key 可鉴权多个能力类，而每个能力类调用的是不同端点。`@agentrans/deepseek-issuer` 持有这份共享身份：`DEEPSEEK_API_KEY_REF` 是唯一的默认凭据引用，`DEEPSEEK_CAPABILITIES` 命名该签发方服务的能力类，`DEEPSEEK_ENDPOINTS` 为每个能力类配上端点默认值及其覆盖用环境变量。各 provider 导入这些值而不是各自重述，因此模型路由、搜索 provider 及其设置卡片不会各自漂移出两个不同的默认 key。本模块不发请求、不持有 secret，也没有 Cordis 接口。
 
 ## 目录
 

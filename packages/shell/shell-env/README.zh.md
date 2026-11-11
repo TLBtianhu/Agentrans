@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-`dsh-shell-env` 提供每次模型 shell 调用——bash 或 pwsh——所运行的受信 `AGENTRANS_*` 环境：内置事实如 `AGENTRANS_HOME`、`AGENTRANS_SHELL=1`、agent（智能体）的 `AGENTRANS_SESSION_ID`，以及所启动 profile 的 `AGENTRANS_PROFILE` 与 `AGENTRANS_PROFILE_DIR`。插件作者可以注册自己的事实，带声明键、按每次执行收集，并随插件释放；重复所有权或未声明的运行时键会明确报错，而不是静默覆盖。注册表不会改变模型看到的其他任何内容——shell 工具拥有各自的 schema 与提示词。任何挂载了模型 shell 工具的组合都适合选择它；配置只决定 Harness 主目录。
+`@agentrans/shell-env` 提供每次模型 shell 调用——bash 或 pwsh——所运行的受信 `AGENTRANS_*` 环境：内置事实如 `AGENTRANS_HOME`、`AGENTRANS_SHELL=1`、agent（智能体）的 `AGENTRANS_SESSION_ID`，以及所启动 profile 的 `AGENTRANS_PROFILE` 与 `AGENTRANS_PROFILE_DIR`。插件作者可以注册自己的事实，带声明键、按每次执行收集，并随插件释放；重复所有权或未声明的运行时键会明确报错，而不是静默覆盖。注册表不会改变模型看到的其他任何内容——shell 工具拥有各自的 schema 与提示词。任何挂载了模型 shell 工具的组合都适合选择它；配置只决定 Harness 主目录。
 
 ## 目录
 
@@ -25,7 +25,7 @@ kind: "package-reference"
 <a id="use-this-package"></a>
 ## 使用本包
 
-在任何挂载模型 shell 工具（`dsh-tool-bash` 或 `dsh-tool-pwsh`）的组合中加载本插件：此后每次前台或后台 shell 调用都会运行在新收集的受管环境中，而不是进程继承来的任意 `AGENTRANS_*` 值。
+在任何挂载模型 shell 工具（`@agentrans/tool-bash` 或 `@agentrans/tool-pwsh`）的组合中加载本插件：此后每次前台或后台 shell 调用都会运行在新收集的受管环境中，而不是进程继承来的任意 `AGENTRANS_*` 值。
 
 ### 每次 shell 调用都会收到什么
 
@@ -113,7 +113,7 @@ contributor 必须声明它返回的每个键；返回未声明或非字符串�
 <a id="model-experience"></a>
 ## 模型体验
 
-通过 shell 工具（`dsh-tool-bash`、`dsh-tool-pwsh`）间接产生影响；这些工具把本注册表的受管 `AGENTRANS_*` 事实暴露在每次 shell 工具调用中。
+通过 shell 工具（`@agentrans/tool-bash`、`@agentrans/tool-pwsh`）间接产生影响；这些工具把本注册表的受管 `AGENTRANS_*` 事实暴露在每次 shell 工具调用中。
 
 #### KV Cache 影响
 

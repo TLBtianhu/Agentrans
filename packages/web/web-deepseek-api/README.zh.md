@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-通过 DeepSeek Search 与 Fetch API 搜索和抓取网页：每次操作只发起一次直接请求，无需辅助模型请求。插件注册 `deepseek-search-api` 和 `deepseek-fetch-api`，两者共用一份凭据和一个 API 基础地址，并使用 API key（API 密钥）或已配置的账号集成鉴权。Search 返回标题、URL、可用的 snippet 与 summary 以及可用的发布时间；Fetch 返回页面 Markdown。Messages 搜索仍由 [dsh-web-search-deepseek](../web-search-deepseek/README.zh.md) 提供；面向模型的工具由 `dsh-tool-web` 提供。
+通过 DeepSeek Search 与 Fetch API 搜索和抓取网页：每次操作只发起一次直接请求，无需辅助模型请求。插件注册 `deepseek-search-api` 和 `deepseek-fetch-api`，两者共用一份凭据和一个 API 基础地址，并使用 API key（API 密钥）或已配置的账号集成鉴权。Search 返回标题、URL、可用的 snippet 与 summary 以及可用的发布时间；Fetch 返回页面 Markdown。Messages 搜索仍由 [@agentrans/web-search-deepseek](../web-search-deepseek/README.zh.md) 提供；面向模型的工具由 `@agentrans/tool-web` 提供。
 
 ## 目录
 
@@ -24,7 +24,7 @@ kind: "package-reference"
 <a id="use-this-package"></a>
 ## 使用此包
 
-将插件与 `dsh-web` 一起挂载，并选择它的提供者。内置配置挂载此插件，同时选择 Messages 搜索和本地 HTTP 抓取。在**插件 > 内置插件配置 > 网页搜索**中开启**启用新版 Web 搜索 API**并保存，会同时选择此包的两个提供者；关闭后恢复内置选择。保存的选择从下一次操作开始生效。
+将插件与 `@agentrans/web` 一起挂载，并选择它的提供者。内置配置挂载此插件，同时选择 Messages 搜索和本地 HTTP 抓取。在**插件 > 内置插件配置 > 网页搜索**中开启**启用新版 Web 搜索 API**并保存，会同时选择此包的两个提供者；关闭后恢复内置选择。保存的选择从下一次操作开始生效。
 
 ```yaml
 - name: '@agentrans/web'
@@ -54,11 +54,11 @@ kind: "package-reference"
 
 使用 `deepseek-account` 路由的会话向账号服务请求已授权用于解析后端点的令牌，并通过 `x-dsh-auth-token` 发送；2026-10-16 公网 Search 与 Fetch 路由已接受该令牌。其他情况下，`apiKeyEnv` 引用凭据引用通过 `ctx.credentials` 解析，该服务缺省时使用启动环境。API 密钥使用 `Authorization: Bearer`。凭据解析和端点选择使用同一份设置快照。
 
-每个提供者的 `state()` 回答模型请求将发起的操作为何能或不能认证，不论模型路由：该请求的路由是 `deepseek-account` 且 `ctx.deepseekAccount` 为 API 基础地址解析出令牌，或 `ctx.credentials.describe` 报告 `apiKeyEnv` 引用已配置（没有该服务时，启动环境必须包含它）。账号令牌或凭据存储读取失败时回答 false。这两个提供者被选中时，[`dsh-tool-web`](../tool-web/README.zh.md#search-readiness) 会从它们回答 false 的每个请求中撤下 `web_search` 与 `web_fetch` 及其提示词指引。只检查是否存在：错误的密钥仍算就绪，并使每次调用失败。
+每个提供者的 `state()` 回答模型请求将发起的操作为何能或不能认证，不论模型路由：该请求的路由是 `deepseek-account` 且 `ctx.deepseekAccount` 为 API 基础地址解析出令牌，或 `ctx.credentials.describe` 报告 `apiKeyEnv` 引用已配置（没有该服务时，启动环境必须包含它）。账号令牌或凭据存储读取失败时回答 false。这两个提供者被选中时，[`@agentrans/tool-web`](../tool-web/README.zh.md#search-readiness) 会从它们回答 false 的每个请求中撤下 `web_search` 与 `web_fetch` 及其提示词指引。只检查是否存在：错误的密钥仍算就绪，并使每次调用失败。
 
 ### 结果与失败
 
-Search API 接收 `query`、`count`（配置的结果数，或请求中更小的 `maxResults`）、`need_content: false`，以及在 `sendOriginalQuestion` 未关闭时的 `ori_question`：发起会话中最近一条用户提示的文本，空白折叠后截取至 128 个字符。在会话之外或没有此类提示的搜索不发送该字段。提供者将 `results[].snippet` 映射为展示用摘录，将 `results[].summary` 映射为面向模型的摘录，并将可为 null 的 `date` 映射为可选的 `publishedAt`；`dsh-tool-web` 限制每条摘要的长度。空结果数组表示成功。Fetch 发送 `url`，以文本正文返回原始 Markdown，并报告 HTTP 状态 200，因为目标没有可用内容时 API 会返回错误状态。返回 URL 为请求 URL：API 不报告重定向后的最终 URL。
+Search API 接收 `query`、`count`（配置的结果数，或请求中更小的 `maxResults`）、`need_content: false`，以及在 `sendOriginalQuestion` 未关闭时的 `ori_question`：发起会话中最近一条用户提示的文本，空白折叠后截取至 128 个字符。在会话之外或没有此类提示的搜索不发送该字段。提供者将 `results[].snippet` 映射为展示用摘录，将 `results[].summary` 映射为面向模型的摘录，并将可为 null 的 `date` 映射为可选的 `publishedAt`；`@agentrans/tool-web` 限制每条摘要的长度。空结果数组表示成功。Fetch 发送 `url`，以文本正文返回原始 Markdown，并报告 HTTP 状态 200，因为目标没有可用内容时 API 会返回错误状态。返回 URL 为请求 URL：API 不报告重定向后的最终 URL。
 
 `baseURL` 为空白或无法解析时，两个提供者都不可用；`count` 不在 1 至 50 之间时，Search 不可用。凭据缺失以 `WEB_PROVIDER_CREDENTIAL_MISSING` 失败；取消使用 `WEB_ABORTED`；传输、HTTP 和响应格式错误使用 `WEB_PROVIDER_ERROR`。重定向在联系目标前即被拒绝。Fetch API 的非成功状态表示抓取失败，不代表目标页面的状态。账号鉴权的 HTTP 401 响应提供重新登录指引；其他请求失败指出端点及 `baseURL` 设置字段。不会自动重试或回退至其他提供者。
 
@@ -99,7 +99,7 @@ Search API 接收 `query`、`count`（配置的结果数，或请求中更小的
 
 #### 模型看到什么
 
-这两个提供者被选中时，其中一个未就绪的会话请求既不包含对应工具（`web_search` 或 `web_fetch`）的 schema，也不包含该工具的提示词指引；该效果由 [`dsh-tool-web`](../tool-web/README.zh.md#search-readiness) 负责。
+这两个提供者被选中时，其中一个未就绪的会话请求既不包含对应工具（`web_search` 或 `web_fetch`）的 schema，也不包含该工具的提示词指引；该效果由 [`@agentrans/tool-web`](../tool-web/README.zh.md#search-readiness) 负责。
 
 #### Token 影响
 
@@ -107,7 +107,7 @@ Search API 接收 `query`、`count`（配置的结果数，或请求中更小的
 
 #### KV Cache 影响
 
-重新提供或移除 Web 工具会按 [`dsh-tool-web`](../tool-web/README.zh.md#search-readiness) 所述改变声明的工具。
+重新提供或移除 Web 工具会按 [`@agentrans/tool-web`](../tool-web/README.zh.md#search-readiness) 所述改变声明的工具。
 
 ## 已知限制与待办工作
 

@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-使用 `dsh-web` 搜索 web 或抓取 URL，而无需让调用方依赖特定厂商。它为每项操作选择可用后端，并为调用方提供一致的取消、错误和结果上限。在调用 `ctx.web.search()` 或 `ctx.web.fetch()` 的插件或工具中选择它；已交付的 `dsh-tool-web` 工具会为你加载它。搜索或抓取需要已配置且可用的提供方，因为本包自身不发起网络请求。
+使用 `@agentrans/web` 搜索 web 或抓取 URL，而无需让调用方依赖特定厂商。它为每项操作选择可用后端，并为调用方提供一致的取消、错误和结果上限。在调用 `ctx.web.search()` 或 `ctx.web.fetch()` 的插件或工具中选择它；已交付的 `@agentrans/tool-web` 工具会为你加载它。搜索或抓取需要已配置且可用的提供方，因为本包自身不发起网络请求。
 
 ## 目录
 
@@ -25,11 +25,11 @@ kind: "package-reference"
 <a id="use-this-package"></a>
 ## 使用本包
 
-需要 web 访问的组合会加载 `dsh-web` 服务并挂载至少一个后端——搜索提供方和／或抓取提供方——插件或工具作者随后直接调用 `ctx.web.search()` 与 `ctx.web.fetch()`。服务会为每次调用解析后端，因此除非调用方配置了提供方 id，否则它们看不到提供方 id。
+需要 web 访问的组合会加载 `@agentrans/web` 服务并挂载至少一个后端——搜索提供方和／或抓取提供方——插件或工具作者随后直接调用 `ctx.web.search()` 与 `ctx.web.fetch()`。服务会为每次调用解析后端，因此除非调用方配置了提供方 id，否则它们看不到提供方 id。
 
 ### 何时选择
 
-当插件或工具必须搜索或抓取、又不希望硬编码厂商时选择本服务；只使用已交付的 `web_search`／`web_fetch` 工具的组合会通过 `dsh-tool-web` 自动加载本服务。当组合从不访问 web 时，你不需要它。服务本身不增加任何网络访问能力：没有至少一个可用提供方时，每次调用都会以结构化 `WebError` 失败。
+当插件或工具必须搜索或抓取、又不希望硬编码厂商时选择本服务；只使用已交付的 `web_search`／`web_fetch` 工具的组合会通过 `@agentrans/tool-web` 自动加载本服务。当组合从不访问 web 时，你不需要它。服务本身不增加任何网络访问能力：没有至少一个可用提供方时，每次调用都会以结构化 `WebError` 失败。
 
 ### 最小配置
 
@@ -80,7 +80,7 @@ const page = await ctx.web.fetch({ url: 'https://example.com' })
 <a id="search-readiness"></a>
 ### 搜索与抓取就绪
 
-`searchReady(llmProvider?)` 与 `fetchReady(llmProvider?)` 询问 `search()` 或 `fetch()` 会选中的提供方：为该对话路由上的模型请求发起的操作是否有可发送的凭据；[`dsh-tool-web`](../tool-web/README.zh.md#search-readiness) 据此决定每个模型步骤是否准入 `web_search` 与 `web_fetch`。提供方通过可选的 `state(llmProvider)` 回答，它是只检查配置的判断，必须不发起网络调用，返回 `ready`、`missing`、`invalid`、`unentitled` 或 `unreachable` 之一；未声明 `state()` 的提供方视为就绪。`searchCapabilityState(llmProvider?)` 与 `fetchCapabilityState(llmProvider?)` 返回该值，供界面说明该修什么，两个 `*Ready` 方法正是它的布尔投影。选择失败时两者都回答就绪，因为对应操作会把该失败报告为结构化 `WebError`。就绪判断从不改变选中哪个提供方。
+`searchReady(llmProvider?)` 与 `fetchReady(llmProvider?)` 询问 `search()` 或 `fetch()` 会选中的提供方：为该对话路由上的模型请求发起的操作是否有可发送的凭据；[`@agentrans/tool-web`](../tool-web/README.zh.md#search-readiness) 据此决定每个模型步骤是否准入 `web_search` 与 `web_fetch`。提供方通过可选的 `state(llmProvider)` 回答，它是只检查配置的判断，必须不发起网络调用，返回 `ready`、`missing`、`invalid`、`unentitled` 或 `unreachable` 之一；未声明 `state()` 的提供方视为就绪。`searchCapabilityState(llmProvider?)` 与 `fetchCapabilityState(llmProvider?)` 返回该值，供界面说明该修什么，两个 `*Ready` 方法正是它的布尔投影。选择失败时两者都回答就绪，因为对应操作会把该失败报告为结构化 `WebError`。就绪判断从不改变选中哪个提供方。
 
 ```text
 // false only when the selected provider cannot authenticate this route's operations:
@@ -136,18 +136,18 @@ const fetchOffered = await ctx.web.fetchReady('deepseek-official')
 
 - [web 子系统](../../../docs/subsystems/web.zh.md)——穷尽式的搜索／抓取请求与结果、提供方可用性与错误码。
 - [web 包映射](../README.zh.md)——六包家族与各角色。
-- [dsh-tool-web](../tool-web/README.zh.md)——构建于本服务之上的面向模型 `web_search` 与 `web_fetch` 工具。
-- [dsh-web-fetch-http](../web-fetch-http/README.zh.md)——已交付的匿名 HTTP(S) 抓取后端。
+- [@agentrans/tool-web](../tool-web/README.zh.md)——构建于本服务之上的面向模型 `web_search` 与 `web_fetch` 工具。
+- [@agentrans/web-fetch-http](../web-fetch-http/README.zh.md)——已交付的匿名 HTTP(S) 抓取后端。
 - [生成配置目录](../../../docs/config-catalog.zh.md#agentransweb)——每个受支持配置字段及其源声明。
 - [web 能力 seam 决策](../../../.agents/notes/implemented/architecture/2026-06-24-web-capability-seam.zh.md)——搜索与抓取为何共用一项提供方选择服务。
-- [搜索就绪决策](../../../.agents/notes/implemented/architecture/2026-09-27-web-search-offered-by-provider-readiness.zh.md)——seam 为何为 `dsh-tool-web` 按路由回答搜索与抓取就绪。
+- [搜索就绪决策](../../../.agents/notes/implemented/architecture/2026-09-27-web-search-offered-by-provider-readiness.zh.md)——seam 为何为 `@agentrans/tool-web` 按路由回答搜索与抓取就绪。
 
 -----
 
 <a id="model-experience"></a>
 ## 模型体验
 
-间接地，通过 `dsh-tool-web`：该工具把 seam 规范化的搜索结果与抓取正文渲染给模型，并且不让 `searchReady()` 或 `fetchReady()` 回答 false 的模型步骤准入 `web_search` 或 `web_fetch`，而本服务不贡献任何提示词或 schema。
+间接地，通过 `@agentrans/tool-web`：该工具把 seam 规范化的搜索结果与抓取正文渲染给模型，并且不让 `searchReady()` 或 `fetchReady()` 回答 false 的模型步骤准入 `web_search` 或 `web_fetch`，而本服务不贡献任何提示词或 schema。
 
 #### KV Cache 影响
 

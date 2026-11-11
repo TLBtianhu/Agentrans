@@ -9,8 +9,8 @@
   en: d067c527c02e7249
   zh: 089e67b4a730fb2e
 /agentrans-web-search-deepseek/summary:
-  en: 6b1267e732370877
-  zh: 64460aba0564cb44
+  en: 300c1e0e1ef7a12b
+  zh: 40c9d3ec955d536a
 /agentrans-web-search-deepseek/table-of-contents:
   en: d152484eb41ac6b4
   zh: 09388d293f9be9cb
@@ -24,8 +24,8 @@
   en: 1e6d06d55d2d48bc
   zh: 68f130d3ed616076
 /agentrans-web-search-deepseek/use-this-package/authentication:
-  en: 04ef48acfd91eee3
-  zh: 9430301c27c0ad84
+  en: 9d0d1438a432fffc
+  zh: cd21d064c741c011
 /agentrans-web-search-deepseek/use-this-package/what-a-search-returns:
   en: e30442c90365357b
   zh: 9c9e2f1182963a8a
@@ -48,8 +48,8 @@
   en: 680050aabc531e42
   zh: a2b8cda5aeed18c7
 /agentrans-web-search-deepseek/further-exploration:
-  en: 51cecc5ec1796607
-  zh: 3684f11f116fb9c3
+  en: 0a77e126c52cec69
+  zh: b7e532a861960a42
 /agentrans-web-search-deepseek/model-experience:
   en: 215e7ba838619b7b
   zh: a311da3843709f90
@@ -69,8 +69,8 @@
   en: 666f5753c99783ab
   zh: b44328e99bcc45c9
 /agentrans-web-search-deepseek/model-experience/conversation-tool-result-indirectly/what-the-model-sees:
-  en: 0764d19c9b82aa98
-  zh: 88b0ba22ef64225b
+  en: 497c609d6b016088
+  zh: cd4465f6ce9a10d3
 /agentrans-web-search-deepseek/model-experience/conversation-tool-result-indirectly/token-effect:
   en: 01ec43a9b616139d
   zh: 0a5b7c28fde34bcf
@@ -81,20 +81,20 @@
   en: ddcce72a4a4e0def
   zh: 338aa339f5708d7d
 /agentrans-web-search-deepseek/model-experience/conversation-tool-list-indirectly/what-the-model-sees:
-  en: f4630a1af1a7ba32
-  zh: 98b9699676acc8d3
+  en: c603ae9e8efe74c3
+  zh: 6599048a0c5f6298
 /agentrans-web-search-deepseek/model-experience/conversation-tool-list-indirectly/token-effect:
   en: fc3904d8f90cc055
   zh: 60f82b8a3b894e7a
 /agentrans-web-search-deepseek/model-experience/conversation-tool-list-indirectly/kv-cache-effect:
-  en: 1d836a33dfa97fcf
-  zh: 2593ccf2a5716b02
+  en: 30689788407db0e7
+  zh: a41aedb1d18d6cc2
 /agentrans-web-search-deepseek/known-limitations-and-deferred-work:
-  en: 1cb15cc5e9b1967d
-  zh: 64f1d93e94bbc9c3
+  en: 67fcd6ee269a2eda
+  zh: 9457b868778c21c9
 /agentrans-web-search-deepseek/known-limitations-and-deferred-work/dev-note:
   en: 7f775cc79dbce94b
   zh: 12b8f68f9e7c48ca
 /agentrans-web-search-deepseek/known-limitations-and-deferred-work/dev-note/dedicated-retrieval-endpoint:
-  en: 2a0437bd17a5a8a4
-  zh: 4032f3feb2388f6e
+  en: 0f49e5ff6080f47d
+  zh: 1a9695ec5e7e5a5d

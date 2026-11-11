@@ -56,7 +56,7 @@ Web GUI 的 goal 界面同时显示持久 goal 状态及当前的进程本地激
 
 当 goal 界面不够用时阅读以下页面。它们从浏览器条带进入 goal 领域与它所填充的 slot。
 
-- [dsh-goal](../../goal/goal/README.zh.md)——本界面读取并变更的 goal 领域、投影与 `/goal` 命令。
+- [@agentrans/goal](../../goal/goal/README.zh.md)——本界面读取并变更的 goal 领域、投影与 `/goal` 命令。
 - [ui-conversation](../ui-conversation/README.zh.md)——声明 `conversation.input.dock` slot 并拥有 composer。
 - [客户端包映射](../README.zh.md)——相邻的浏览器 UI 包。
 

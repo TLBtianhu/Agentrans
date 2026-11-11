@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-`dsh-headless` runs one dsh task from the command line and prints the final answer, then exits — no GUI, no server, no browser. Type `agentrans --profile headless "run the tests"` and the agent handles it with the same model, tools, and safety defaults as every other surface. It suits scripts, CI, and one-off jobs: it opens no ports and leaves nothing running behind. It also offers a JSON event stream (`--json`) and `--session-id` to resume a conversation. Exit code 0 means the task completed; 1 means it aborted or errored. The boundary: one task per invocation, no interactive follow-up.
+`@agentrans/headless` runs one dsh task from the command line and prints the final answer, then exits — no GUI, no server, no browser. Type `agentrans --profile headless "run the tests"` and the agent handles it with the same model, tools, and safety defaults as every other surface. It suits scripts, CI, and one-off jobs: it opens no ports and leaves nothing running behind. It also offers a JSON event stream (`--json`) and `--session-id` to resume a conversation. Exit code 0 means the task completed; 1 means it aborted or errored. The boundary: one task per invocation, no interactive follow-up.
 
 ## Table of Contents
 
@@ -105,7 +105,7 @@ For model-reviewed full-access execution, explicitly enable [Auto review for hea
 
 ### When to use it
 
-Use headless for scripted or automated dsh runs — CI steps, batch jobs, quick answers from a terminal. Avoid it when you need a multi-turn interactive session or a GUI; the browser surface ([dsh-web-app](../web-app/README.md)) serves that. The process stays alive only for the run, opens no listening port, and exits on its own, so it fits pipelines that wait on the process. When a supervisor needs progress rather than just the answer, `--json` gives it the event stream and `--session-id` lets a later invocation continue the same conversation.
+Use headless for scripted or automated dsh runs — CI steps, batch jobs, quick answers from a terminal. Avoid it when you need a multi-turn interactive session or a GUI; the browser surface ([@agentrans/web-app](../web-app/README.md)) serves that. The process stays alive only for the run, opens no listening port, and exits on its own, so it fits pipelines that wait on the process. When a supervisor needs progress rather than just the answer, `--json` gives it the event stream and `--session-id` lets a later invocation continue the same conversation.
 
 ### Help and task errors
 
@@ -127,7 +127,7 @@ The runner awaits the complete application (`ctx.get('loader')?.await()`) so the
 
 ### Patch surface over base
 
-The patch rides over `dsh-base`: it inherits the projection cache and shared PTC runtime, sets the coding persona prefix and separate cwd suffix on the base `system-prompt` row, inherits native tool execution and accepts a [PTC overlay](../../../apps/cli/config/examples/ptc.yml), disables the shared HMR row, and mounts the startup provider and the runner. The cache checkpoints each persisted one-shot session for later consumers; its durability barrier flushes each covered log prefix before publishing the cache row and may split otherwise coalesced JSONL runs. The startup provider ([`src/startup.ts`](src/startup.ts)) injects `ctx.cmdlineArgs` ([`dsh-cmdline`](../../boot/cmdline/README.md)), reads the task and invocation options, prints the app's `--help`, and provides `headlessStartup`; the runner reads its task, Session identity, and output mode from lazy config. It reads the explicit CLI permission preset and approval policy directly from `headlessStartup`, with runner config as the default. The sandbox-policy row also waits for this service, retaining the base mode and workspace defaults while receiving the explicit directory grants.
+The patch rides over `@agentrans/base`: it inherits the projection cache and shared PTC runtime, sets the coding persona prefix and separate cwd suffix on the base `system-prompt` row, inherits native tool execution and accepts a [PTC overlay](../../../apps/cli/config/examples/ptc.yml), disables the shared HMR row, and mounts the startup provider and the runner. The cache checkpoints each persisted one-shot session for later consumers; its durability barrier flushes each covered log prefix before publishing the cache row and may split otherwise coalesced JSONL runs. The startup provider ([`src/startup.ts`](src/startup.ts)) injects `ctx.cmdlineArgs` ([`@agentrans/cmdline`](../../boot/cmdline/README.md)), reads the task and invocation options, prints the app's `--help`, and provides `headlessStartup`; the runner reads its task, Session identity, and output mode from lazy config. It reads the explicit CLI permission preset and approval policy directly from `headlessStartup`, with runner config as the default. The sandbox-policy row also waits for this service, retaining the base mode and workspace defaults while receiving the explicit directory grants.
 
 ### Exit mapping
 
@@ -140,7 +140,7 @@ A completed final `turn/end` exits 0; any other outcome — aborted, error, or n
 | [`src/index.ts`](src/index.ts) | The `headless-runner` plugin: run flow, session resolution, output contract, exit mapping |
 | [`src/startup.ts`](src/startup.ts) | The `headless-startup` provider: task input, Session identity, permission options, and output selection |
 | [`src/json-stream.ts`](src/json-stream.ts) | The `--json` projection: event vocabulary, commit-point emission, string bounding |
-| [`cordis.patch.yml`](cordis.patch.yml) | The one-shot patch over `dsh-base` |
+| [`cordis.patch.yml`](cordis.patch.yml) | The one-shot patch over `@agentrans/base` |
 | [`tests/headless.spec.ts`](tests/headless.spec.ts) | Run flow, aggregation, flush, session adoption, and exit mapping |
 | [`tests/json-stream.spec.ts`](tests/json-stream.spec.ts) | Projection ordering, commit-point emission, bounding, and disposal |
 | [`tests/startup.spec.ts`](tests/startup.spec.ts) | Command-line parsing over a real Loader tree |
@@ -155,9 +155,9 @@ A completed final `turn/end` exits 0; any other outcome — aborted, error, or n
 Read these pages when you want to go deeper into the shared core, the sibling GUI, or the command-line handoff.
 
 - [Bundle package map](../README.md) — the surfaces built on the same core.
-- [dsh-base](../base/README.md) — the shared core headless runs on.
-- [dsh-web-app](../web-app/README.md) — the interactive browser sibling for multi-turn work.
-- [dsh-cmdline](../../boot/cmdline/README.md) — how the launcher hands the command line to the app.
+- [@agentrans/base](../base/README.md) — the shared core headless runs on.
+- [@agentrans/web-app](../web-app/README.md) — the interactive browser sibling for multi-turn work.
+- [@agentrans/cmdline](../../boot/cmdline/README.md) — how the launcher hands the command line to the app.
 - [Generated configuration catalog](../../../docs/config-catalog.md#agentransheadless) — every accepted config field and its source declaration.
 
 -----

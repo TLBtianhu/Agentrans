@@ -25,7 +25,7 @@ kind: "package-reference"
 <a id="use-this-package"></a>
 ## 使用本包
 
-将此行加入已经挂载 `dsh-tools` 的组合。最近作用域的执行器决定工具行为；同一作用域只允许一个执行器。
+将此行加入已经挂载 `@agentrans/tools` 的组合。最近作用域的执行器决定工具行为；同一作用域只允许一个执行器。
 
 ```yaml
 - name: '@agentrans/tool-executor-native'

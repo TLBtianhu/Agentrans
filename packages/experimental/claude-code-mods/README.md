@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-Run [Claude Code mods](https://code.claude.com/docs/en/plugins/mods/overview) inside agent runs: wrap a mod's `register(on, options)` with `defineMod`, mount it as a plugin after this bridge, and its hooks guard tool calls, rewrite prompts, add commands and tools, read session facts, and draw a band above the prompt through the same `$`, `e`, `next` chain. The bridge requires `dsh-working-directory` and `dsh-agent`, and each `$` call rides a composed harness service. It is an alpha interface-compatibility demonstration: an unserved event is reported at load, an unserved `$` member fails naming the gap, and [the compatibility page](../../../docs/subsystems/claude-code-mods.md) lists every difference.
+Run [Claude Code mods](https://code.claude.com/docs/en/plugins/mods/overview) inside agent runs: wrap a mod's `register(on, options)` with `defineMod`, mount it as a plugin after this bridge, and its hooks guard tool calls, rewrite prompts, add commands and tools, read session facts, and draw a band above the prompt through the same `$`, `e`, `next` chain. The bridge requires `@agentrans/working-directory` and `@agentrans/agent`, and each `$` call rides a composed harness service. It is an alpha interface-compatibility demonstration: an unserved event is reported at load, an unserved `$` member fails naming the gap, and [the compatibility page](../../../docs/subsystems/claude-code-mods.md) lists every difference.
 
 ## Table of Contents
 
@@ -150,7 +150,7 @@ The bridge cancels detached calls when its fiber begins unloading, before depend
 - [Claude Code mods reference](https://code.claude.com/docs/en/plugins/mods/reference) — the events, methods, and limits this bridge mirrors.
 - [The Web band](../client-ui-claude-code-mods/README.md) — the Client package that draws `ui.render` trees in the input dock.
 - [Experimental packages](../README.md) — publication policy and dependency isolation.
-- [Claude Code hook bridge](../hooks-claude-code/README.md) — the settings-hook bridge; a plugin's `hooks.json` settings hooks need `dsh-hooks-claude-code`.
+- [Claude Code hook bridge](../hooks-claude-code/README.md) — the settings-hook bridge; a plugin's `hooks.json` settings hooks need `@agentrans/hooks-claude-code`.
 - [Tool execution pipeline](../../../docs/tool-execution-pipeline.md) — the waterfalls `tool.call` runs around.
 - [Human commands](../../interaction/commands/README.md) — the registry `$.command.register` lands on.
 

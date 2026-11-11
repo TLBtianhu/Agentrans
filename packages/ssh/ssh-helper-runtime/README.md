@@ -44,7 +44,7 @@ The builder requires Node 24, a C/C++ compiler and the development headers from 
 
 Outputs live under `dist-exe/ssh-helper/`. Each `dsh-ssh-helper-<version>-<platform>-<arch>.tar.gz` has a companion `.sha256` file. The archive contains `dsh-ssh-helper`, `native/system/`, licenses and `manifest.json`; macOS also includes `dsh-ssh-helper-spawn-helper`. The manifest records the source commit, whether the source tree was dirty, embedded Node version, protocol and every payload file’s digest and permissions.
 
-Verify the archive checksum, then extract the whole directory into a versioned runtime location outside the project and replaced temporary mounts. Keep the native resources beside the executable. The installation can be read-only; the helper user needs a writable temporary/cache location. Configure [`dsh-ssh`](../ssh/README.md) with `launch: { kind: "executable" }`, the absolute `helper` path and the executable’s SHA-256 from the manifest. The client obtains the embedded PTC invocation through `ctx.ssh.ptcLaunch`.
+Verify the archive checksum, then extract the whole directory into a versioned runtime location outside the project and replaced temporary mounts. Keep the native resources beside the executable. The installation can be read-only; the helper user needs a writable temporary/cache location. Configure [`@agentrans/ssh`](../ssh/README.md) with `launch: { kind: "executable" }`, the absolute `helper` path and the executable’s SHA-256 from the manifest. The client obtains the embedded PTC invocation through `ctx.ssh.ptcLaunch`.
 
 ### Verification and publication
 

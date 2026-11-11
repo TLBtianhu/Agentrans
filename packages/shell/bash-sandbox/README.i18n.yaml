@@ -9,17 +9,17 @@
   en: 110bc3ed6a75c1bd
   zh: ef501b10d1af58ad
 /agentrans-bash-sandbox/summary:
-  en: 37a0fcab18f972c0
-  zh: f7b4222e646e7050
+  en: 7fe223c587626390
+  zh: 11027d0183d7a56d
 /agentrans-bash-sandbox/table-of-contents:
   en: d152484eb41ac6b4
   zh: 09388d293f9be9cb
 /agentrans-bash-sandbox/use-this-package:
-  en: bd59d09bee36362c
-  zh: 7086c8268e7517d5
+  en: 13a4fa6f8f461eb7
+  zh: 3e81ac0a2305c033
 /agentrans-bash-sandbox/use-this-package/when-to-choose-it:
-  en: af387f23325c1435
-  zh: 7a160aca5edd657e
+  en: 9617e6da817159a9
+  zh: cc5fa064c0f69860
 /agentrans-bash-sandbox/use-this-package/modes-and-file-effects:
   en: bc096fe6f8eb54cd
   zh: 1a3e3122ca40b0e5
@@ -36,8 +36,8 @@
   en: 05e2abe4a25886fd
   zh: 9240b331c45ac81e
 /agentrans-bash-sandbox/understand-the-implementation/design-concept:
-  en: e1b1ac62e94ce535
-  zh: 5fa7a0353fbf777d
+  en: c4a49861369a9928
+  zh: 867087584aa6ab2b
 /agentrans-bash-sandbox/understand-the-implementation/source-map:
   en: 8963005b41bfc3c6
   zh: 7df1436563c10a19
@@ -57,11 +57,11 @@
   en: 8e3df84fdcaeee60
   zh: 25ad519340c6c232
 /agentrans-bash-sandbox/model-experience/bash-tool-schema-indirectly/what-the-model-sees:
-  en: b75c770fd9f18cdb
-  zh: e5951c8f347746ef
+  en: 3ee137b2acc86184
+  zh: 8aaa6661bbda9d35
 /agentrans-bash-sandbox/model-experience/bash-tool-schema-indirectly/token-effect:
-  en: 2278530f1f9e93b2
-  zh: 86e2a20746ce3f3c
+  en: b89325314f055bb0
+  zh: 577b94265bf74e67
 /agentrans-bash-sandbox/model-experience/bash-tool-schema-indirectly/kv-cache-effect:
   en: d25d46a61dc2b0c1
   zh: e1deea6d70be4691

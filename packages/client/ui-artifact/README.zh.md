@@ -117,7 +117,7 @@ Conversation Definition 把每条 `artifact/upsert` 都视为可独立初始化�
 <a id="further-exploration"></a>
 ## 延伸阅读
 
-- [dsh-artifact](../../artifact/artifact/README.zh.md)——负责持久快照、操作准入和 Host Remote 方法。
+- [@agentrans/artifact](../../artifact/artifact/README.zh.md)——负责持久快照、操作准入和 Host Remote 方法。
 - [Conversation 装配](../../../docs/subsystems/conversation.zh.md)——定义 checkpoint 回放与稳定 Node 身份。
 - [Web Client Slots](../../../docs/subsystems/slots.zh.md)——定义 Session 作用域 injection 和 keyed renderer。
 - [HTML 文档预览](../ui-sidebar-documentpreview/README.zh.md)——提供相邻的不透明 iframe 隔离范式。

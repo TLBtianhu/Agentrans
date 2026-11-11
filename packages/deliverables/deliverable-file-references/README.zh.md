@@ -32,7 +32,7 @@ Web 和 `sdk` bundle 独立于 `present` 工具挂载本插件。自定义组合
   name: '@agentrans/deliverable-file-references'
 ```
 
-本包没有配置字段。执行文件交付时，需单独挂载 [`dsh-tool-present`](../tool-present/README.zh.md)。禁用本行即可省略这段指导。
+本包没有配置字段。执行文件交付时，需单独挂载 [`@agentrans/tool-present`](../tool-present/README.zh.md)。禁用本行即可省略这段指导。
 
 -----
 

@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-`dsh-experimental-agent-team` 为一个会话提供 Lead、具名 teammate、直接消息和持久共享任务板。发送使用目标 agent（智能体）的 inbox，并可冷恢复已存储的 teammate。Team 保留 roster 与任务状态，消息持久化遵循目标 Agent 的常规策略。挂载 `dsh-experimental-tool-agent-team` 可提供模型工具。本包为实验性功能，需要持久会话存储。
+`@agentrans/experimental-agent-team` 为一个会话提供 Lead、具名 teammate、直接消息和持久共享任务板。发送使用目标 agent（智能体）的 inbox，并可冷恢复已存储的 teammate。Team 保留 roster 与任务状态，消息持久化遵循目标 Agent 的常规策略。挂载 `@agentrans/experimental-tool-agent-team` 可提供模型工具。本包为实验性功能，需要持久会话存储。
 
 ## 目录
 

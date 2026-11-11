@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-`dsh-session-title-all-prompts-llm` 作为可选的 `ctx.sessionTitle` 提供方，通过 `ctx.llm` 总结所有符合条件的用户消息。它注册 `all-prompts` 节奏，并在每条新用户提示词后启动新修订，使用预置历史与子会话提示词。较新的修订会中止并取代旧工作，即使提供方忽略取消，也无法提交陈旧输出。它同时拥有初始生成提示词与修订提示词，只与首消息提供方共享 `dsh-session-title-llm` 的[执行模块](../../session/session-title-llm/README.zh.md)。本文优先介绍自动行为与配置；实现是建立在该执行器之上的小型提供方策略。
+`@agentrans/session-title-all-prompts-llm` 作为可选的 `ctx.sessionTitle` 提供方，通过 `ctx.llm` 总结所有符合条件的用户消息。它注册 `all-prompts` 节奏，并在每条新用户提示词后启动新修订，使用预置历史与子会话提示词。较新的修订会中止并取代旧工作，即使提供方忽略取消，也无法提交陈旧输出。它同时拥有初始生成提示词与修订提示词，只与首消息提供方共享 `@agentrans/session-title-llm` 的[执行模块](../../session/session-title-llm/README.zh.md)。本文优先介绍自动行为与配置；实现是建立在该执行器之上的小型提供方策略。
 
 ## 目录
 

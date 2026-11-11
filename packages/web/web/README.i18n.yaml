@@ -9,17 +9,17 @@
   en: f9d3048397a0603f
   zh: ef090d96d6766a4c
 /agentrans-web/summary:
-  en: 1b5907fc6e19e082
-  zh: 7e9ec25da5405e31
+  en: d474dfcd842f55e9
+  zh: ab127832f218ed9d
 /agentrans-web/table-of-contents:
   en: d152484eb41ac6b4
   zh: 09388d293f9be9cb
 /agentrans-web/use-this-package:
-  en: 785a97708cc9181c
-  zh: 0d39ff291d483102
+  en: f88e948b78c98136
+  zh: c719bb997c2b1137
 /agentrans-web/use-this-package/when-to-choose-it:
-  en: 557a8a3f2dfebae4
-  zh: 3c85382484e4b717
+  en: 9f1d42464502657d
+  zh: 09f6026903236062
 /agentrans-web/use-this-package/minimal-configuration:
   en: 9c2629411cce0ed5
   zh: aa12b46bea83ae7f
@@ -30,8 +30,8 @@
   en: ae79ba193456b380
   zh: dfc1003554d88aa3
 /agentrans-web/use-this-package/search-and-fetch-readiness:
-  en: b9ea1ff35dc42cbb
-  zh: 178da26cffccc3c9
+  en: d2c64f1274cc1792
+  zh: 8a67356e523b13d2
 /agentrans-web/use-this-package/failures-and-recovery:
   en: d8d09ed3839f6474
   zh: 7164d902f333592a
@@ -51,11 +51,11 @@
   en: d5cd4851d81892e6
   zh: 18266b0bc8b1d1ae
 /agentrans-web/further-exploration:
-  en: cbfdba205d21abcb
-  zh: 4b2bc339eba7e075
+  en: 993e902d57987494
+  zh: ab5ae8e6afd16094
 /agentrans-web/model-experience:
-  en: cbc7053cba173085
-  zh: 73828c1f1ec82d50
+  en: 4894e2553bf1e7e1
+  zh: fde285fef3453639
 /agentrans-web/model-experience/kv-cache-effect:
   en: 40294c1c31b74824
   zh: d75d48f485447a74

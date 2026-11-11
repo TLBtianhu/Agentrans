@@ -9,14 +9,14 @@
   en: 2598bb86ddc6d633
   zh: c024dcc2e1d7017f
 /agentrans-fs-observation-policy/summary:
-  en: e74517566c1827b2
-  zh: 803c6ddf5cbd3842
+  en: 772290042ab30a07
+  zh: 8f3d17c866c1eb21
 /agentrans-fs-observation-policy/table-of-contents:
   en: d152484eb41ac6b4
   zh: 09388d293f9be9cb
 /agentrans-fs-observation-policy/use-this-package:
-  en: e45098c59fc9b3ba
-  zh: 2a12cf800bca1ef6
+  en: f9708b6fa1207643
+  zh: 2b75ee7de3c150cc
 /agentrans-fs-observation-policy/use-this-package/minimal-composition:
   en: d85e3b814b43768e
   zh: 89d3672dbb2f6d30
@@ -30,8 +30,8 @@
   en: 612e69f76edc8795
   zh: 55edab9956941616
 /agentrans-fs-observation-policy/understand-the-implementation/design-concept:
-  en: 54eef802ac087112
-  zh: f30b2ed5dbc268ac
+  en: fd3ebdc1652386ab
+  zh: cad8581363a6eb54
 /agentrans-fs-observation-policy/understand-the-implementation/source-map:
   en: b9833b0ab790a500
   zh: ba7c3108c61e1727
@@ -45,8 +45,8 @@
   en: 02a1e3e7707706fb
   zh: eff587af0445d032
 /agentrans-fs-observation-policy/further-exploration:
-  en: c89ef001db3d1efe
-  zh: 382165321299c86c
+  en: 462b5ee2d553e959
+  zh: a618d2b1bcd0967d
 /agentrans-fs-observation-policy/model-experience:
   en: 215e7ba838619b7b
   zh: a311da3843709f90
@@ -54,8 +54,8 @@
   en: ee1f02dc1bb69955
   zh: 9ba9205a9b15d132
 /agentrans-fs-observation-policy/model-experience/filesystem-tool-outcome/what-the-model-sees:
-  en: d4ec7d7b302845c8
-  zh: 6e412aa23798524e
+  en: 7aef75e56e25815d
+  zh: b751ffacfd858393
 /agentrans-fs-observation-policy/model-experience/filesystem-tool-outcome/token-effect:
   en: 425ccc7dafa6218d
   zh: d2c1a29955a60e3d

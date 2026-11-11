@@ -93,7 +93,7 @@ agent（智能体）可以通过该内置提供方加载官方「powered by dsh�
 <a id="model-experience"></a>
 ## 模型体验
 
-通过 `dsh-tool-skill` 间接影响模型；该包会把该提供方的目录条目和所选 skill 的正文渲染给模型。
+通过 `@agentrans/tool-skill` 间接影响模型；该包会把该提供方的目录条目和所选 skill 的正文渲染给模型。
 
 #### KV Cache 影响
 

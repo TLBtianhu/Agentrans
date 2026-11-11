@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-`dsh-cmdline` lets an app parse its own flags, `--help`, and errors from the arguments left unchanged after launcher flags. Parsed values can override configuration defaults without rewriting configuration. The app can also request process exit through the launcher's shutdown path. Use this package for app bins with their own command-line interface. It adds no prompt, schema, or model-visible content.
+`@agentrans/cmdline` lets an app parse its own flags, `--help`, and errors from the arguments left unchanged after launcher flags. Parsed values can override configuration defaults without rewriting configuration. The app can also request process exit through the launcher's shutdown path. Use this package for app bins with their own command-line interface. It adds no prompt, schema, or model-visible content.
 
 ## Table of Contents
 
@@ -107,9 +107,9 @@ The parse path is one small family with two owners: `provideCmdline` freezes the
 
 Read these pages when the package-level contract is not enough. They move from the handoff mechanism to the apps that consume it.
 
-- [dsh-app-boot](../app-boot/README.md) — the boot sequence that provides these launcher values.
-- [dsh-web-app bundle](../../bundle/web-app/README.md) — an app that owns the Web flag family through this package.
-- [dsh-headless bundle](../../bundle/headless/README.md) — the one-shot runner that reads its task from the command line.
+- [@agentrans/app-boot](../app-boot/README.md) — the boot sequence that provides these launcher values.
+- [@agentrans/web-app bundle](../../bundle/web-app/README.md) — an app that owns the Web flag family through this package.
+- [@agentrans/headless bundle](../../bundle/headless/README.md) — the one-shot runner that reads its task from the command line.
 
 -----
 

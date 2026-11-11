@@ -3,7 +3,7 @@ description: "为拥有时间行为的调用方提供严格时刻与时区解析
 kind: "package-library"
 ---
 
-# dsh-util-time
+# @agentrans/util-time
 
 [English](README.md) | 中文
 
@@ -29,7 +29,7 @@ kind: "package-library"
 
 它是**库，不是服务也不是插件**：无 `ctx`、不注册任何东西、不持有状态。
 
-在接收时区或墙钟选择器的那个边界上调用它，让值在进入任何持久物之前先过一遍。`dsh-api-session-controller` 与 `dsh-subagent` 通过 `canonicalClientTimeZone` 接收调用方所报时区；`dsh-time-context` 通过 `canonicalizeTimeZone` 接收某一轮请求所报时区，并拒绝别名而不是把它改写；`dsh-schedule` 通过严格解析器读取绝对选择器与墙钟选择器，通过 `resolveLocalInstant` 解析本地目标，并使用共享的 `Cron` / `RRule` 重复规则值；`dsh-session-format-v0-to-v1` 通过 `fourDigitYearEpoch` 校验持久记录里的调度时刻，同时保留它自己的已发布日志错误。`dsh-time-context` 通过 `Duration` 读取其耗时读数，并保留它注入那一行的措辞。Schedule 保留记录类型、相对间隔、每日/每周策略和投递限制。库可用于宿主和浏览器代码，无需 Cordis 服务。
+在接收时区或墙钟选择器的那个边界上调用它，让值在进入任何持久物之前先过一遍。`@agentrans/api-session-controller` 与 `@agentrans/subagent` 通过 `canonicalClientTimeZone` 接收调用方所报时区；`@agentrans/time-context` 通过 `canonicalizeTimeZone` 接收某一轮请求所报时区，并拒绝别名而不是把它改写；`@agentrans/schedule` 通过严格解析器读取绝对选择器与墙钟选择器，通过 `resolveLocalInstant` 解析本地目标，并使用共享的 `Cron` / `RRule` 重复规则值；`@agentrans/session-format-v0-to-v1` 通过 `fourDigitYearEpoch` 校验持久记录里的调度时刻，同时保留它自己的已发布日志错误。`@agentrans/time-context` 通过 `Duration` 读取其耗时读数，并保留它注入那一行的措辞。Schedule 保留记录类型、相对间隔、每日/每周策略和投递限制。库可用于宿主和浏览器代码，无需 Cordis 服务。
 
 
 ### 入口
@@ -95,7 +95,7 @@ Duration.fromMilliseconds(1_500).decompose() // { days: 0, hours: 0, minutes: 0,
 <a id="model-experience"></a>
 ## 模型体验
 
-间接影响，取决于把规范时区或已提交 UTC 时刻记到持久记录上的那些消费方：`dsh-time-context` 据时区渲染本轮模型可见的时区指令与时间戳，`dsh-schedule` 据已提交时刻渲染其模型可见的调度文本。
+间接影响，取决于把规范时区或已提交 UTC 时刻记到持久记录上的那些消费方：`@agentrans/time-context` 据时区渲染本轮模型可见的时区指令与时间戳，`@agentrans/schedule` 据已提交时刻渲染其模型可见的调度文本。
 
 #### KV Cache 影响
 
@@ -109,7 +109,7 @@ Duration.fromMilliseconds(1_500).decompose() // { days: 0, hours: 0, minutes: 0,
 - **重复计算有界**——[Schedule 参考](../../../docs/subsystems/schedule.zh.md#recurrence-rules)列出共享表达式子集。解析成功返回冻结的 `rule`，提供 `expression`、`timeZone`、`next(after)` 和 `resolve(scheduledAt, acceptedAt)`；求值保留已提交发生时点并合并错过的时点。拒绝原因是 `syntax`、`time_zone`、`density` 或 `range`；无效决策时间抛出 `RangeError`。方法不读取墙钟或启动定时器。
 - **`Duration` 没有日历单位**——一天恰好是 24 小时，月没有固定长度；需要本地日历天的调用方从时区推导。
 - **`Duration` 只发布消费方会调用的部分**——`fromMilliseconds` 与 `decompose()`；某个换算、某个算术运算或 `zero` 恒等元都随第一个需要它的调用方落地，公开契约跟着调用方长，而不是长在它前面。
-- **以秒为单位的跨度仍在自行相乘**——`dsh-schedule` 的间隔与延迟字段、DeepSeek 文件存储的刷新余量都是以秒为单位的跨度，用 `* 1_000` 换算；它们都还没迁移到本库，而以秒表示的纪元不是跨度，不得构造成跨度。
+- **以秒为单位的跨度仍在自行相乘**——`@agentrans/schedule` 的间隔与延迟字段、DeepSeek 文件存储的刷新余量都是以秒为单位的跨度，用 `* 1_000` 换算；它们都还没迁移到本库，而以秒表示的纪元不是跨度，不得构造成跨度。
 - **根入口加载重复计算依赖**——导入它会解析 `@js-temporal/polyfill` 和 `rrule`，只需要时区或跨度的消费方也一样。浏览器消费方必须在打包时计入这些依赖。
 
 <a id="dev-note"></a>

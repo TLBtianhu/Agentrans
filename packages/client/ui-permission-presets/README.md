@@ -58,7 +58,7 @@ The General row reads the explicitly exposed `permission` Settings descriptor th
 
 Read these pages when the permission surface is not enough. They move from the browser surfaces to the host policy and the command shell.
 
-- [dsh-permission-presets](../../interaction/permission-presets/README.md) — the host-side permission preset policy these surfaces write.
+- [@agentrans/permission-presets](../../interaction/permission-presets/README.md) — the host-side permission preset policy these surfaces write.
 - [ui-commands](../ui-commands/README.md) — the popupSelect shell the `/permission` decoration registers into.
 - [ui-conversation](../ui-conversation/README.md) — the composer seat that joins this shared catalog with the Session's current value.
 - [Client package map](../README.md) — adjacent browser UI packages.

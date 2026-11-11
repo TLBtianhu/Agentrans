@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-`dsh-app-boot` is the shared Loader boot library behind `agentrans` profiles, including the CLI packaged by the Python runtime wheel. It loads environment layers, composes profile bundles and patches, boots every plugin, and returns the running app or identifies the failed plugin and cause. Product applications use the `agentrans` launcher instead of publishing separate bins; direct-config helpers remain only for lower-level embedders and tests. You can preview the effective configuration before booting, configure HMR through profile YAML, and let a terminal-owning app restore its terminal before a fatal exit.
+`@agentrans/app-boot` is the shared Loader boot library behind `agentrans` profiles, including the CLI packaged by the Python runtime wheel. It loads environment layers, composes profile bundles and patches, boots every plugin, and returns the running app or identifies the failed plugin and cause. Product applications use the `agentrans` launcher instead of publishing separate bins; direct-config helpers remain only for lower-level embedders and tests. You can preview the effective configuration before booting, configure HMR through profile YAML, and let a terminal-owning app restore its terminal before a fatal exit.
 
 ## Table of Contents
 
@@ -175,9 +175,9 @@ Read these pages when the package-level contract is not enough. They move from t
 
 - [Cordis primer](../../../docs/cordis-primer.md) — Loader, `!!js` config expressions, and include/group semantics.
 - [dsh app](../../../apps/cli/README.md) — the `agentrans` bin that consumes these helpers.
-- [dsh-cmdline](../cmdline/README.md) — the launcher-to-app command-line handoff the bins use.
+- [@agentrans/cmdline](../cmdline/README.md) — the launcher-to-app command-line handoff the bins use.
 - [Profile bundles](../../bundle/README.md) — installable patch layers composed into `agentrans --profile`.
-- [dsh-home-paths](../../util/home-paths/README.md) — the Harness-home resolver (`resolveDshHome`).
+- [@agentrans/home-paths](../../util/home-paths/README.md) — the Harness-home resolver (`resolveDshHome`).
 - [Configuration source ownership](../../../.agents/notes/implemented/architecture/2026-08-04-configuration-source-ownership.md) — why a discovered file may not decide bootstrap behavior.
 - [Profile plugin bundles](../../../.agents/notes/implemented/architecture/2026-08-05-profile-plugin-bundles.md) — the profile and bundle composition design.
 - [User-patch HMR tests](tests/user-patches.spec.ts) — ownership of live-patch behavior and native filesystem delivery.

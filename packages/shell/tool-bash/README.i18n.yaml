@@ -9,14 +9,14 @@
   en: 9652bed6816e5f0c
   zh: 4e9a0647bac07e05
 /agentrans-tool-bash/summary:
-  en: 8c8327748d2e34b2
-  zh: 81be107c41aaa956
+  en: e1824e5305ebdebb
+  zh: 52c4f90a916c038f
 /agentrans-tool-bash/table-of-contents:
   en: d152484eb41ac6b4
   zh: 09388d293f9be9cb
 /agentrans-tool-bash/use-this-package:
-  en: b38c1a304e18185c
-  zh: 05275ff8d127c9c0
+  en: b3abfac80e492074
+  zh: fdc697cbcec3477a
 /agentrans-tool-bash/use-this-package/minimal-configuration:
   en: 32c844abbeec80b2
   zh: 3923ff2e4fba1f14
@@ -24,14 +24,14 @@
   en: 7610fa7c373e339a
   zh: e3001ca072f53734
 /agentrans-tool-bash/use-this-package/running-long-commands-in-the-background:
-  en: a5eecea7bb7a75e8
-  zh: fae7f08e0e11594e
+  en: 999badea8d179c17
+  zh: 9cdfce974b595266
 /agentrans-tool-bash/use-this-package/foreground-commands-as-jobs:
   en: d6da2d08afdca324
   zh: 606b7b1da7447874
 /agentrans-tool-bash/use-this-package/sandboxed-execution-and-escalation:
-  en: 472beeb895ca46cf
-  zh: ba110c9f62f7d5b8
+  en: f1f5f2d783b70f98
+  zh: c2d48700a21f7999
 /agentrans-tool-bash/use-this-package/what-can-go-wrong:
   en: 60fb6349a9048726
   zh: db55193cb1a69358
@@ -48,8 +48,8 @@
   en: 56dae7757fab0a79
   zh: 7930235dc0490c73
 /agentrans-tool-bash/understand-the-implementation/rendering-story:
-  en: 167c045d6a6278cc
-  zh: 3f17ee8d31e0bbad
+  en: e84f500d12f80cff
+  zh: 79a540cd77fca18f
 /agentrans-tool-bash/further-exploration:
   en: c54c0f4fd658f531
   zh: eaa44e199c668404
@@ -87,8 +87,8 @@
   en: d83f1f25a3719c54
   zh: 445ca808e28dc936
 /agentrans-tool-bash/model-experience/foreground-result/what-the-model-sees:
-  en: 1cf435133078b803
-  zh: 3e7eb766a62b7e77
+  en: 7e1253f353769fa6
+  zh: d47c21fb8d5d99af
 /agentrans-tool-bash/model-experience/foreground-result/token-effect:
   en: b2018adbda15b8a7
   zh: 79521073a45c7f80
@@ -99,8 +99,8 @@
   en: 38ce70c1818a5694
   zh: ed3ad10f12ed1b8e
 /agentrans-tool-bash/model-experience/background-job-context-and-results/what-the-model-sees:
-  en: b2586ae30256dda7
-  zh: 03000224da9a68d1
+  en: b393165d61f822dc
+  zh: 56842dd3fae1602c
 /agentrans-tool-bash/model-experience/background-job-context-and-results/token-effect:
   en: 3a0d2d43640158d6
   zh: 45ae711aedaa1d41

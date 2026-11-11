@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-`dsh-sdk-jsonrpc-server` 让进程外客户端通过 stdio JSON-RPC 打开会话、排入提示词并接收事件与状态转换。外围 Loader profile 提供 agent、模型适配器、持久化、工具和启动器退出回调。Stdout 只承载协议帧。SDK 持有的工作停稳后，关闭路径刷新响应并请求启动器退出；启动器负责清理 profile 和完成进程退出。EOF 与信号也使用同一个应用所有者。
+`@agentrans/sdk-jsonrpc-server` 让进程外客户端通过 stdio JSON-RPC 打开会话、排入提示词并接收事件与状态转换。外围 Loader profile 提供 agent、模型适配器、持久化、工具和启动器退出回调。Stdout 只承载协议帧。SDK 持有的工作停稳后，关闭路径刷新响应并请求启动器退出；启动器负责清理 profile 和完成进程退出。EOF 与信号也使用同一个应用所有者。
 
 ## 目录
 
@@ -100,7 +100,7 @@ Stdout 只承载 JSON-RPC 帧，客户端可以逐字节解析；诊断信息应
 
 ### 设计理念
 
-本插件是轻量的展示适配器：[`HarnessSdkJsonRpcServer`](src/server.ts) 负责协议方法与通知，传输与具名协议类型来自 `dsh-sdk-protocol`，与客户端 SDK 共享。它订阅会话、agent 与 subagent 生命周期事件，并把它们作为协议通知转发；只有当服务在生命周期建立快照时记录的 `local` 标志为 true 时才转发 subagent 完成事件——提供方名称、子级 id 与持久化谱系均不能证明本地性。 `subagent.started` 要求 `origin: subagent` 和直接创建者 ID；普通 fork（包括保留父 ID 的历史会话）不产生此通知。
+本插件是轻量的展示适配器：[`HarnessSdkJsonRpcServer`](src/server.ts) 负责协议方法与通知，传输与具名协议类型来自 `@agentrans/sdk-protocol`，与客户端 SDK 共享。它订阅会话、agent 与 subagent 生命周期事件，并把它们作为协议通知转发；只有当服务在生命周期建立快照时记录的 `local` 标志为 true 时才转发 subagent 完成事件——提供方名称、子级 id 与持久化谱系均不能证明本地性。 `subagent.started` 要求 `origin: subagent` 和直接创建者 ID；普通 fork（包括保留父 ID 的历史会话）不产生此通知。
 
 ### 源码地图
 

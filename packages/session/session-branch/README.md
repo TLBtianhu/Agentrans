@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-Use `dsh-session-branch` for the domain rules of a first-class manual Session branch. The root entry selects visible text from a child-owned durable `assistant/message`, constructs a fresh parent-local `user/message` with a `branch-result` source, and finds an earlier return of the same result without I/O. The Host-only `/admission` entry shares maintenance serialization, content conflict checks and durability across return providers. Neither entry invokes a model.
+Use `@agentrans/session-branch` for the domain rules of a first-class manual Session branch. The root entry selects visible text from a child-owned durable `assistant/message`, constructs a fresh parent-local `user/message` with a `branch-result` source, and finds an earlier return of the same result without I/O. The Host-only `/admission` entry shares maintenance serialization, content conflict checks and durability across return providers. Neither entry invokes a model.
 
 ## Table of Contents
 

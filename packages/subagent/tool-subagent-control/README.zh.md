@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-`dsh-tool-subagent-control` 让 agent 向子智能体发消息、中断子智能体、列出可继续子级。一个插件实例为多个委派后端共享的作用域注册全部三个工具。父级与可继续子级继承相同的消息定义和顺序。工具存在不选择委派生命周期。
+`@agentrans/tool-subagent-control` 让 agent 向子智能体发消息、中断子智能体、列出可继续子级。一个插件实例为多个委派后端共享的作用域注册全部三个工具。父级与可继续子级继承相同的消息定义和顺序。工具存在不选择委派生命周期。
 
 ## 目录
 
@@ -93,7 +93,7 @@ kind: "package-reference"
 当包级约定不够用时阅读以下页面；它们从工具 schema 进入其背后的继续执行服务。
 
 - [Subagent 子系统](../../../docs/subsystems/subagent.zh.md)——可继续子级、Activation、inbox、中断与后续消息权限。
-- [dsh-tool-subagent](../tool-subagent/README.zh.md)——启动可继续子级的委派工具。
+- [@agentrans/tool-subagent](../tool-subagent/README.zh.md)——启动可继续子级的委派工具。
 - [生成工具目录](../../../docs/tool-catalog.zh.md#agentranstool-subagent-control)——工具 schema。
 
 -----

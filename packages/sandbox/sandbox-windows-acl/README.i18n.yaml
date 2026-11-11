@@ -9,8 +9,8 @@
   en: f05f84ab2ffcfd3c
   zh: d8fe7d76e6258dac
 /agentrans-sandbox-windows-acl/summary:
-  en: 777921135c23ee55
-  zh: 7c726cc63995d443
+  en: 05da3d7f24eda023
+  zh: 7b9a772da65d9cb7
 /agentrans-sandbox-windows-acl/table-of-contents:
   en: d152484eb41ac6b4
   zh: 09388d293f9be9cb
@@ -27,20 +27,20 @@
   en: 289e65bddf20dd79
   zh: 7ff72ed64c4b4d1c
 /agentrans-sandbox-windows-acl/use-this-package/failures-and-recovery:
-  en: 7fc0707debb1e67c
-  zh: e3b5529bf82f868e
+  en: 803a6e690f7bb708
+  zh: 3e7345a69ccdffd0
 /agentrans-sandbox-windows-acl/understand-the-implementation:
   en: c2cde86c85c2c619
   zh: a29a114e591f9d3f
 /agentrans-sandbox-windows-acl/understand-the-implementation/mechanism:
-  en: a37ea37f2d527693
-  zh: 749b5a263d0e1534
+  en: 54102fe493a3dbfd
+  zh: 661c2d6a04ee218d
 /agentrans-sandbox-windows-acl/understand-the-implementation/modes-and-token-lists:
   en: 9c8d9af84f9abd99
   zh: 1c82b355aa5f210f
 /agentrans-sandbox-windows-acl/understand-the-implementation/the-confinement-runner:
-  en: 0847de0e53e50061
-  zh: 90fa3dcaf080c3be
+  en: 415b8345b36d3979
+  zh: 22086ca2fdc8f4ff
 /agentrans-sandbox-windows-acl/understand-the-implementation/verified-boundaries:
   en: ad02570eae90037f
   zh: fd78c2318de18dda
@@ -51,8 +51,8 @@
   en: 7850da9522bf984b
   zh: a9f2273a85bafcf9
 /agentrans-sandbox-windows-acl/model-experience:
-  en: bbb19594a2c2e4d4
-  zh: 075a65d9b9182aad
+  en: 3d293473260754db
+  zh: 83ac43d7fdebcf36
 /agentrans-sandbox-windows-acl/model-experience/kv-cache-effect:
   en: 817eb1b7de13872e
   zh: 06fe175e41e7459b

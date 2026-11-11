@@ -44,7 +44,7 @@ pnpm exec tsx scripts/build-exe-for-ssh-helper.ts
 
 产物位于 `dist-exe/ssh-helper/`。每个 `dsh-ssh-helper-<version>-<platform>-<arch>.tar.gz` 都有配套的 `.sha256` 文件。压缩包包含 `dsh-ssh-helper`、`native/system/`、许可证和 `manifest.json`，macOS 还包含 `dsh-ssh-helper-spawn-helper`。清单记录源码提交、源码树是否存在未提交修改、内嵌 Node 版本、协议，以及每个产物文件的摘要和权限。
 
-验证压缩包摘要后，将整个目录解压到项目及被替换的临时挂载之外的版本化运行时位置。原生资源须与可执行文件保持相对位置。安装目录可以只读，但 helper 用户需要可写的临时／缓存位置。为 [`dsh-ssh`](../ssh/README.zh.md) 配置 `launch: { kind: "executable" }`、绝对 `helper` 路径，以及清单中可执行文件的 SHA-256。客户端通过 `ctx.ssh.ptcLaunch` 获取内嵌 PTC 启动方式。
+验证压缩包摘要后，将整个目录解压到项目及被替换的临时挂载之外的版本化运行时位置。原生资源须与可执行文件保持相对位置。安装目录可以只读，但 helper 用户需要可写的临时／缓存位置。为 [`@agentrans/ssh`](../ssh/README.zh.md) 配置 `launch: { kind: "executable" }`、绝对 `helper` 路径，以及清单中可执行文件的 SHA-256。客户端通过 `ctx.ssh.ptcLaunch` 获取内嵌 PTC 启动方式。
 
 ### 验证与发布
 

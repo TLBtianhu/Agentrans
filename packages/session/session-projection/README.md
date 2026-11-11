@@ -166,7 +166,7 @@ These limits define where the projection registry needs care at scale. They are 
 - **Only a key-subset read omits keys; a tail page still carries every client-visible key and there is no lazy per-value request** — a summary omits exactly the keys whose `SessionProjectionMap` entry carries `SessionProjectionSummaryExcluded<T>` and whose registration declares `wire.summary: false`. The opt-out is per key, not per value: no read defers one large value.
 - **The unit table is process-wide, so key presence is not a per-session capability signal** — a key registered by any agent preset appears in every session's snapshot; a client must read the value rather than treat an absent key as absence of the feature.
 - **Eager drive touches every unit per event** — cheap by construction (whole-value rule and state/view reference gates), but a hot path would justify per-unit event-type prefilters.
-- **Registry cells live in memory only** — a restart rebuilds by folding the log on first touch; compositions that mount `dsh-session-projection-cache` seed that fold from persisted rows instead.
+- **Registry cells live in memory only** — a restart rebuilds by folding the log on first touch; compositions that mount `@agentrans/session-projection-cache` seed that fold from persisted rows instead.
 - **Synchronous unit discipline is only partially mechanical** — `wire.viewSchema.parse` rejects a Promise-returning view, but an `apply` that blocks or reads torn non-session state is a review concern.
 
 <a id="dev-note"></a>

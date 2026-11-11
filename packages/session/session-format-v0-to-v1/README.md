@@ -27,7 +27,7 @@ This package restores released v0 Session JSONL by decoding each physical row an
 
 ### When to use it
 
-Persistence obtains this edge through `dsh-session-format-catalog`; feature compositions do not mount it. Import it directly only when assembling or testing the static released-format catalog.
+Persistence obtains this edge through `@agentrans/session-format-catalog`; feature compositions do not mount it. Import it directly only when assembling or testing the static released-format catalog.
 
 ### Entry point
 

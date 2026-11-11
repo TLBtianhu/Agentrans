@@ -9,7 +9,7 @@ kind: "package-library"
 
 ## 概述
 
-`dsh-lazy-require` 会让 CommonJS 兼容的 Host 依赖保持未加载状态，直到首次实际操作。解析仍以消费方 package 为基准，同一进程 realm 会复用一次成功加载的模块值。
+`@agentrans/lazy-require` 会让 CommonJS 兼容的 Host 依赖保持未加载状态，直到首次实际操作。解析仍以消费方 package 为基准，同一进程 realm 会复用一次成功加载的模块值。
 
 ## 目录
 

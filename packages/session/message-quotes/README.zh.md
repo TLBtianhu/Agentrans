@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-`dsh-message-quotes` 在 Client 注册引用控件和转录渲染。消息保留普通 Markdown 文本，无需 quote 元数据或 content 索引。
+`@agentrans/message-quotes` 在 Client 注册引用控件和转录渲染。消息保留普通 Markdown 文本，无需 quote 元数据或 content 索引。
 
 ## 目录
 

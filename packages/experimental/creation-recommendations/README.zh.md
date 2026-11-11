@@ -61,7 +61,7 @@ kind: "package-reference"
 <details>
 <summary>实现细节 — 点击展开</summary>
 
-Host 入口是注入 `actionCards` 的普通函数插件；它不提供自己的 service 或 Remote，也不向 `dsh-base` 增加任何内容。关闭功能插件时移除它的 Skill 和卡片种类，并清理其负责的 Creator 任务。
+Host 入口是注入 `actionCards` 的普通函数插件；它不提供自己的 service 或 Remote，也不向 `@agentrans/base` 增加任何内容。关闭功能插件时移除它的 Skill 和卡片种类，并清理其负责的 Creator 任务。
 
 插件向共享的[操作卡片服务](../action-cards/README.zh.md)注册 `create_personalized_page` 种类：`personalized-pages` Skill、含 `slot` 和可选 `initialContent` 的 `details`，以及创建、保留、撤销、取消和恢复五个操作。该服务负责 `propose_action` 工具、卡片投影、“暂不需要”、Remote 操作和状态通知。本插件处理其余操作，记录的决定数据包含位置、手写位置、预留包名和最近一次安装结果；状态通知报告其中除包名以外的字段。每次操作之前，插件的 `reconcile` 会对照已安装的配置档案检查中断或结果不明的创建；之后，尚未开始的卡片，以及已取消、失败、中断或结果不明的创建，都可以记录“暂不需要”。
 

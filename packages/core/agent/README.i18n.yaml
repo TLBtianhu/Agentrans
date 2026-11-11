@@ -9,20 +9,20 @@
   en: 2c4ac1350a026680
   zh: b971d65c16bd03e3
 /agentrans-agent/summary:
-  en: 717e7d19a6f72e56
-  zh: 152c18689fe4f377
+  en: aa5e6cf9cf7dbb51
+  zh: 7548f99ecc730f1d
 /agentrans-agent/table-of-contents:
   en: d152484eb41ac6b4
   zh: 09388d293f9be9cb
 /agentrans-agent/use-this-package:
-  en: 7d1ae2375bd4fbfc
-  zh: b6b4b2e943174cb2
+  en: 2532bc84dd761b85
+  zh: 947721bdc404d557
 /agentrans-agent/use-this-package/create-or-resume-an-agent:
   en: 26d49c76bce41e30
   zh: 9710f54e24b190d1
 /agentrans-agent/use-this-package/select-a-model:
-  en: 85b0ff72a187110f
-  zh: 3f61c1568d27b8bc
+  en: bcceda90e15c421c
+  zh: 0a0a04b5a8a6e9a4
 /agentrans-agent/use-this-package/drive-an-agent-s-conversation:
   en: 71e258897e2e7d73
   zh: abf0991012faa17e
@@ -36,14 +36,14 @@
   en: ce7e776e9d516bdb
   zh: 59d2751743db7795
 /agentrans-agent/understand-the-implementation/design-concept:
-  en: 7c850051d2857bfa
-  zh: 4cab817553114e15
+  en: c056d517f1d0b648
+  zh: 59ea64fae404f3e9
 /agentrans-agent/understand-the-implementation/step-admission:
   en: c5ebf07dbc1a883f
   zh: 847735016e1727a3
 /agentrans-agent/understand-the-implementation/durable-inbox:
-  en: 8f3fe9303468d735
-  zh: 52162010ae1ed29e
+  en: 7ae045b4c7cf6272
+  zh: cf6ceff4d38d3831
 /agentrans-agent/understand-the-implementation/durable-model-selection:
   en: 692ec951bbb16b33
   zh: 5a650805ae8943c3

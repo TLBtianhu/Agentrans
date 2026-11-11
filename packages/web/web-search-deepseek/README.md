@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-With `dsh-web-search-deepseek`, the harness searches the web through DeepSeek's native search using the DeepSeek account sign-in or an existing `DEEPSEEK_API_KEY`. Choose it when a deployment wants DeepSeek native search and accepts that one search costs a full model turn in latency and tokens; the DeepSeek Search and Fetch APIs in [dsh-web-deepseek-api](../web-deepseek-api/README.md) retrieve without one. Results come from DeepSeek's structured search blocks, never from reply text. It is not ready for a model request without a credential, so `dsh-tool-web` withholds `web_search` from that request; a call that still arrives, or a response without a search-result block, fails with a structured error.
+With `@agentrans/web-search-deepseek`, the harness searches the web through DeepSeek's native search using the DeepSeek account sign-in or an existing `DEEPSEEK_API_KEY`. Choose it when a deployment wants DeepSeek native search and accepts that one search costs a full model turn in latency and tokens; the DeepSeek Search and Fetch APIs in [@agentrans/web-deepseek-api](../web-deepseek-api/README.md) retrieve without one. Results come from DeepSeek's structured search blocks, never from reply text. It is not ready for a model request without a credential, so `@agentrans/tool-web` withholds `web_search` from that request; a call that still arrives, or a response without a search-result block, fails with a structured error.
 
 ## Table of Contents
 
@@ -61,7 +61,7 @@ Plugin configuration exposes only `apiKeyEnv`, and a configuration that still ca
 
 A search authenticates with the DeepSeek account when the latest `request/context` event of the initiating Session names the `deepseek-account` provider route and `ctx.deepseekAccount` resolves a token for the search endpoint. The account service resolves one only while signed in and only for its deployment-configured inference origin, `https://api.deepseek.com` by default. That search sends only `x-dsh-auth-token`, even when an API key is configured. Every other search, including a call without an initiating Session and a search whose endpoint has another origin, sends the API key as both `x-api-key` and `Authorization: Bearer`. An HTTP 401 response to an account-authenticated search fails as `WEB_PROVIDER_ERROR` with sign-in guidance instead of endpoint guidance, and leaves the account signed in.
 
-The provider's `state()` answers why the search a model request would make can or cannot authenticate, on any model route: the request's route is `deepseek-account` and `ctx.deepseekAccount` resolves a token for the configured search endpoint, or `ctx.credentials.describe` reports the `apiKeyEnv` reference configured (without that service, the process environment must carry it). It checks them in the order a search resolves them, and a failed account-token or credential-store read answers false, because the search fails on that read instead of trying the next credential. While this provider is the selected search provider, [`dsh-tool-web`](../tool-web/README.md#search-readiness) withholds `web_search` and its prompt guidance from each request for which it answers false. Only presence is checked: a wrong key, or an endpoint that does not serve the native `web_search_20250305` server tool, counts as ready and fails each call. A call that still arrives resolves credentials when it runs.
+The provider's `state()` answers why the search a model request would make can or cannot authenticate, on any model route: the request's route is `deepseek-account` and `ctx.deepseekAccount` resolves a token for the configured search endpoint, or `ctx.credentials.describe` reports the `apiKeyEnv` reference configured (without that service, the process environment must carry it). It checks them in the order a search resolves them, and a failed account-token or credential-store read answers false, because the search fails on that read instead of trying the next credential. While this provider is the selected search provider, [`@agentrans/tool-web`](../tool-web/README.md#search-readiness) withholds `web_search` and its prompt guidance from each request for which it answers false. Only presence is checked: a wrong key, or an endpoint that does not serve the native `web_search_20250305` server tool, counts as ready and fails each call. A call that still arrives resolves credentials when it runs.
 
 ### What a search returns
 
@@ -117,11 +117,11 @@ Read these pages when the package-level contract is not enough. They move from t
 
 - [Web subsystem](../../../docs/subsystems/web.md) — the exhaustive search request/result vocabulary and error codes.
 - [Web package map](../README.md) — the seven-package family and each role.
-- [dsh-web](../web/README.md) — the web service this provider registers into.
-- [dsh-tool-web](../tool-web/README.md) — the model-facing `web_search` tool that renders this provider's sources.
+- [@agentrans/web](../web/README.md) — the web service this provider registers into.
+- [@agentrans/tool-web](../tool-web/README.md) — the model-facing `web_search` tool that renders this provider's sources.
 - [Generated configuration catalog](../../../docs/config-catalog.md#agentransweb-search-deepseek) — every accepted config field and its source declaration.
 - [Web capability seam decision](../../../.agents/notes/implemented/architecture/2026-06-24-web-capability-seam.md) — why search and fetch share one provider-selection service.
-- [Search readiness decision](../../../.agents/notes/implemented/architecture/2026-09-27-web-search-offered-by-provider-readiness.md) — why this provider reports readiness while `dsh-tool-web` withholds `web_search`.
+- [Search readiness decision](../../../.agents/notes/implemented/architecture/2026-09-27-web-search-offered-by-provider-readiness.md) — why this provider reports readiness while `@agentrans/tool-web` withholds `web_search`.
 
 -----
 
@@ -146,7 +146,7 @@ Independent of the conversation request cache. The auxiliary instruction and nat
 
 #### What the model sees
 
-Through `dsh-tool-web`, the conversation model sees deduplicated URLs, titles, dates, and citation snippets from structured search blocks; provider prose is not trusted as an answer. This provider's exact failures include the actionable missing-credential message, which also names DeepSeek Account sign-in, `DeepSeek search credential resolution failed: <error>`, and `DeepSeek search aborted`. An HTTP 401 to an account-authenticated search appends an instruction to guide the user to sign in to DeepSeek again. Other request, HTTP, native-search, and response-body failures append the resolved endpoint and the conditional configuration instruction described above. The consumer owns the error wrapper.
+Through `@agentrans/tool-web`, the conversation model sees deduplicated URLs, titles, dates, and citation snippets from structured search blocks; provider prose is not trusted as an answer. This provider's exact failures include the actionable missing-credential message, which also names DeepSeek Account sign-in, `DeepSeek search credential resolution failed: <error>`, and `DeepSeek search aborted`. An HTTP 401 to an account-authenticated search appends an instruction to guide the user to sign in to DeepSeek again. Other request, HTTP, native-search, and response-body failures append the resolved endpoint and the conditional configuration instruction described above. The consumer owns the error wrapper.
 
 #### Token effect
 
@@ -160,7 +160,7 @@ Append-only; newly visible content follows the reusable request prefix and does 
 
 #### What the model sees
 
-While this provider is selected, a conversation request for which it is not ready carries neither the `web_search` schema nor its prompt guidance; [`dsh-tool-web`](../tool-web/README.md#search-readiness) owns that effect.
+While this provider is selected, a conversation request for which it is not ready carries neither the `web_search` schema nor its prompt guidance; [`@agentrans/tool-web`](../tool-web/README.md#search-readiness) owns that effect.
 
 #### Token effect
 
@@ -168,7 +168,7 @@ Withholding removes the `web_search` schema and its prompt guidance from the req
 
 #### KV Cache effect
 
-A returning or removed `web_search` changes the declared tools as [`dsh-tool-web`](../tool-web/README.md#search-readiness) describes.
+A returning or removed `web_search` changes the declared tools as [`@agentrans/tool-web`](../tool-web/README.md#search-readiness) describes.
 
 ## Known Limitations and Deferred Work
 
@@ -177,7 +177,7 @@ A returning or removed `web_search` changes the declared tools as [`dsh-tool-web
 
 These limits define when the provider is expensive or incomplete. They are current package constraints.
 
-- **One search costs a full Messages model turn** — latency plus generated tokens, with up to `maxUses` server-side searches; [dsh-web-deepseek-api](../web-deepseek-api/README.md) uses the dedicated Search API instead.
+- **One search costs a full Messages model turn** — latency plus generated tokens, with up to `maxUses` server-side searches; [@agentrans/web-deepseek-api](../web-deepseek-api/README.md) uses the dedicated Search API instead.
 - **Provider selection cannot see a missing key** — the synchronous availability check can establish that a resolver exists but cannot query an asynchronous credential store, so `ctx.web` still selects a keyless provider and a direct search fails with `WEB_PROVIDER_CREDENTIAL_MISSING`; the asynchronous `ready()` affects only which model requests are offered `web_search`.
 - **Readiness checks presence, not validity** — a wrong key, or an endpoint without the native `web_search_20250305` server tool, counts as ready, so `web_search` stays offered and each call fails with a structured error.
 - **Search does not follow the chat endpoint** — when the official route chats through a gateway, search still sends its key to the configured search endpoint, the official one by default, and fails unless that endpoint accepts the key.
@@ -194,6 +194,6 @@ This Dev Note is working context for maintainers: open questions and undecided d
 
 #### Dedicated retrieval endpoint
 
-DeepSeek's Search and Fetch APIs, which avoid the full model turn, live in [dsh-web-deepseek-api](../web-deepseek-api/README.md) and are selected by the Web search settings switch; this provider stays the default until the Search API launch is announced.
+DeepSeek's Search and Fetch APIs, which avoid the full model turn, live in [@agentrans/web-deepseek-api](../web-deepseek-api/README.md) and are selected by the Web search settings switch; this provider stays the default until the Search API launch is announced.
 
 </details>

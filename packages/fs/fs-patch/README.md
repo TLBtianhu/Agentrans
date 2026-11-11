@@ -3,7 +3,7 @@ description: "Parse Codex-style patches and apply hunks to text without filesyst
 kind: "package-library"
 ---
 
-# dsh-fs-patch
+# @agentrans/fs-patch
 
 English | [中文](README.zh.md)
 

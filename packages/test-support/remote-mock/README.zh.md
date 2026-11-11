@@ -9,7 +9,7 @@ kind: "package-library"
 
 ## 概述
 
-`dsh-remote-mock` 让测试通过 `mock.remote.<namespace>.<method>`，使用原生 Vitest mock 方法配置 Host 响应。同一组函数应答直接调用与真实 Connection 流量；可复用的表提供默认响应，显式声明的流支持测试驱动的推帧与取消。缺少响应时调用失败，`assertNoUnmatched()` 会在收尾时再次报告。本包无需业务 Host 即可在 Node 或浏览器页面中运行，不导入 DOM、React 或 Node 模块，只从 `devDependencies` 消费。
+`@agentrans/remote-mock` 让测试通过 `mock.remote.<namespace>.<method>`，使用原生 Vitest mock 方法配置 Host 响应。同一组函数应答直接调用与真实 Connection 流量；可复用的表提供默认响应，显式声明的流支持测试驱动的推帧与取消。缺少响应时调用失败，`assertNoUnmatched()` 会在收尾时再次报告。本包无需业务 Host 即可在 Node 或浏览器页面中运行，不导入 DOM、React 或 Node 模块，只从 `devDependencies` 消费。
 
 ## 目录
 

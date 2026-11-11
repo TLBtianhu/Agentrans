@@ -5,21 +5,21 @@
 /:
   en: e8d97ffa99a57ab7
   zh: 2d7247c47412c30a
-/dsh-util-workspace-path:
-  en: 328c592b68c88e44
-  zh: 7a2f03def21b86fe
-/dsh-util-workspace-path/summary:
+/agentrans-util-workspace-path:
+  en: ac612a63e109cc08
+  zh: 82142e8e618bd0a1
+/agentrans-util-workspace-path/summary:
   en: ffdecddc9c4957ad
   zh: 33cf84892aa5e669
-/dsh-util-workspace-path/table-of-contents:
+/agentrans-util-workspace-path/table-of-contents:
   en: e8236aa6cbcb7dca
   zh: 500e57982344c0fa
-/dsh-util-workspace-path/file-addresses:
+/agentrans-util-workspace-path/file-addresses:
   en: fa695bca8bd534e0
   zh: d8feffb4794adfcd
-/dsh-util-workspace-path/known-limitations-and-deferred-work:
+/agentrans-util-workspace-path/known-limitations-and-deferred-work:
   en: 1e6d448f4f0030c4
   zh: c050dd5e470fe47b
-/dsh-util-workspace-path/known-limitations-and-deferred-work/dev-note:
+/agentrans-util-workspace-path/known-limitations-and-deferred-work/dev-note:
   en: e67f633dc6fe7773
   zh: e88aeb617ffb74ea

@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-This package provides the browser surface of the open-in-app feature. A Session-header split button opens the current session's workspace directory (the summary's `cwd`) in the remembered application, and its chevron lists every catalog application the host probed as installed; availability, icons, and launches come from the host routes of [`dsh-host-open-in-app`](../../host/open-in-app/README.md), so mount the two packages together. In the right Sidebar's document preview, an "Open" split button and an empty-state button open the previewed file in its default application or show its location, through the Session Remote. A host without the capability renders none of these controls.
+This package provides the browser surface of the open-in-app feature. A Session-header split button opens the current session's workspace directory (the summary's `cwd`) in the remembered application, and its chevron lists every catalog application the host probed as installed; availability, icons, and launches come from the host routes of [`@agentrans/host-open-in-app`](../../host/open-in-app/README.md), so mount the two packages together. In the right Sidebar's document preview, an "Open" split button and an empty-state button open the previewed file in its default application or show its location, through the Session Remote. A host without the capability renders none of these controls.
 
 ## Table of Contents
 
@@ -25,7 +25,7 @@ This package provides the browser surface of the open-in-app feature. A Session-
 <a id="use-this-package"></a>
 ## Use this package
 
-Mount this plugin in the Web composition beside [`dsh-host-open-in-app`](../../host/open-in-app/README.md); the pair composes the whole feature in two cordis.yml rows and this row takes no config. The Session header grows an "Open In..." split button whenever the host probed at least one installed catalog application and the session has a known workspace directory. The document preview of [`ui-sidebar-documentpreview`](../ui-sidebar-documentpreview/README.md) grows its file controls whenever the Host reports a desktop through the Session Remote's `session.canOpenWorkspacePath`; removing this row removes every control at once.
+Mount this plugin in the Web composition beside [`@agentrans/host-open-in-app`](../../host/open-in-app/README.md); the pair composes the whole feature in two cordis.yml rows and this row takes no config. The Session header grows an "Open In..." split button whenever the host probed at least one installed catalog application and the session has a known workspace directory. The document preview of [`ui-sidebar-documentpreview`](../ui-sidebar-documentpreview/README.md) grows its file controls whenever the Host reports a desktop through the Session Remote's `session.canOpenWorkspacePath`; removing this row removes every control at once.
 
 ### What to expect
 
@@ -66,8 +66,8 @@ The directory and file adapters supply application metadata and operations to [`
 <a id="further-exploration"></a>
 ## Further Exploration
 
-- [dsh-host-open-in-app](../../host/open-in-app/README.md) — the host routes serving availability, icons, and launches, and the catalog behind them.
-- [dsh-session-log-export](../../session-query/session-log-export/README.md) — the sibling Session-header action.
+- [@agentrans/host-open-in-app](../../host/open-in-app/README.md) — the host routes serving availability, icons, and launches, and the catalog behind them.
+- [@agentrans/session-log-export](../../session-query/session-log-export/README.md) — the sibling Session-header action.
 - [ui-sidebar-documentpreview](../ui-sidebar-documentpreview/README.md) — the document preview declaring the header and empty-state child slots the file controls occupy.
 - [ui-deliverables](../ui-deliverables/README.md) — the delivery cards, which still open declared files through their own routes.
 - [Web client architecture](../../../docs/subsystems/web-client.md) — how browser plugin rows load and register slots.
@@ -89,7 +89,7 @@ The Host verifies the path through the composed filesystem before opening or rev
 
 <a id="known-limitations-and-deferred-work"></a>
 
-- **The dictionaries gate the menu.** A host catalog extension without a matching `app.<id>` entry in both dictionaries stays invisible instead of showing a raw id; extending the catalog means extending [`dsh-host-open-in-app`](../../host/open-in-app/README.md) and this package's locales together.
+- **The dictionaries gate the menu.** A host catalog extension without a matching `app.<id>` entry in both dictionaries stays invisible instead of showing a raw id; extending the catalog means extending [`@agentrans/host-open-in-app`](../../host/open-in-app/README.md) and this package's locales together.
 - **Availability is read once per page.** An application installed while the page is open appears after a reload (and, host-side, after a host restart); the desktop answer behind the file controls is read once per page as well.
 - **One reveal label for every platform.** The Session Remote reports whether a desktop exists, not which file manager it runs, so the menu says "Show file location" rather than naming Finder or File Explorer as the delivery cards do.
 - **The delivery cards keep their own opener.** [`ui-deliverables`](../ui-deliverables/README.md) still opens declared files through its own Session-and-event routes; folding those cards onto the file controls here remains deferred.

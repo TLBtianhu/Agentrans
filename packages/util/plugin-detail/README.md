@@ -3,7 +3,7 @@ description: "Plugin detail document selection without state: the meta.detail or
 kind: "package-library"
 ---
 
-# dsh-plugin-detail
+# @agentrans/plugin-detail
 
 English | [中文](README.zh.md)
 

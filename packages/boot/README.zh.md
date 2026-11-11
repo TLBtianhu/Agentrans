@@ -35,8 +35,8 @@ boot 组负责启动 profile 应用并管理其已安装组合。`app-boot` 解�
 
 - [dsh 应用](../../apps/cli/README.zh.md)——在其启动序列中使用这些 helper 的 `agentrans` bin。
 - [Profile 组合包](../bundle/README.zh.md)——可由 `agentrans --profile` 组合挂载的可安装 patch 层。
-- [dsh-home-paths](../util/home-paths/README.zh.md)——两个包都依赖的 harness home 解析器。
-- [dsh-cmdline](cmdline/README.zh.md)——flag 家族如何由应用持有而非启动器。
+- [@agentrans/home-paths](../util/home-paths/README.zh.md)——两个包都依赖的 harness home 解析器。
+- [@agentrans/cmdline](cmdline/README.zh.md)——flag 家族如何由应用持有而非启动器。
 
 - [Profile 管理](../../docs/subsystems/boot.zh.md)——服务方法与结果记录。
 

@@ -5,42 +5,42 @@
 /:
   en: 505fd12717a89948
   zh: 2ad120714356f61b
-/dsh-plugin-detail:
-  en: 9ef51ea35aa9ea60
-  zh: 341593614dac3945
-/dsh-plugin-detail/summary:
+/agentrans-plugin-detail:
+  en: a74898843658a468
+  zh: cbff44dc39f53240
+/agentrans-plugin-detail/summary:
   en: 9a5bdafd69ed0208
   zh: d436f289724bab19
-/dsh-plugin-detail/table-of-contents:
+/agentrans-plugin-detail/table-of-contents:
   en: cd2a60a905c978d6
   zh: cc71d387d0cbd442
-/dsh-plugin-detail/use-this-package:
+/agentrans-plugin-detail/use-this-package:
   en: ccdf3fdf80317f76
   zh: 023b893b30d1dd5b
-/dsh-plugin-detail/use-this-package/document-order:
+/agentrans-plugin-detail/use-this-package/document-order:
   en: fe28217d182b9174
   zh: 0a0b4a61ee4009eb
-/dsh-plugin-detail/use-this-package/images:
+/agentrans-plugin-detail/use-this-package/images:
   en: abeb7bb1f7695e5e
   zh: 59b87c9abea17dfb
-/dsh-plugin-detail/use-this-package/file-sources:
+/agentrans-plugin-detail/use-this-package/file-sources:
   en: 9542401a7d104851
   zh: 99f80d2960b77bc8
-/dsh-plugin-detail/use-this-package/image-responses:
+/agentrans-plugin-detail/use-this-package/image-responses:
   en: d6e7da207ee7f2fb
   zh: c7b6acaa4d2839a2
-/dsh-plugin-detail/api:
+/agentrans-plugin-detail/api:
   en: 628c5e4f27ab3f8f
   zh: ff9571034d8389d3
-/dsh-plugin-detail/model-experience:
+/agentrans-plugin-detail/model-experience:
   en: 60eeeeff73bf48b4
   zh: cf3e6e1885719d6a
-/dsh-plugin-detail/model-experience/kv-cache-effect:
+/agentrans-plugin-detail/model-experience/kv-cache-effect:
   en: 4f0eadf94828e66e
   zh: 4f8a6ec170ebbfb6
-/dsh-plugin-detail/known-limitations-and-deferred-work:
+/agentrans-plugin-detail/known-limitations-and-deferred-work:
   en: 5d8abfbb06761f7f
   zh: 8515079f96e513bf
-/dsh-plugin-detail/known-limitations-and-deferred-work/dev-note:
+/agentrans-plugin-detail/known-limitations-and-deferred-work/dev-note:
   en: e67f633dc6fe7773
   zh: 3bb0c20c93f16f98

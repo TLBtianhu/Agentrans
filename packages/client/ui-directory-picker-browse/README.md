@@ -25,7 +25,7 @@ This package provides the in-app directory-browsing surface for the Web GUI: a S
 <a id="use-this-package"></a>
 ## Use this package
 
-Mount this plugin alongside `ui-workspace` and the host backend [`dsh-host-directory-picker-browse`](../../host/directory-picker-browse/README.md); one cordis.yml row then composes the whole browse picking interaction. When a workspace flow opens a directory request, the user sees the in-app dialog: a header with the path breadcrumb and an editable path zone, then a single full-width level until a row is selected, after which the row splits into level and children columns.
+Mount this plugin alongside `ui-workspace` and the host backend [`@agentrans/host-directory-picker-browse`](../../host/directory-picker-browse/README.md); one cordis.yml row then composes the whole browse picking interaction. When a workspace flow opens a directory request, the user sees the in-app dialog: a header with the path breadcrumb and an editable path zone, then a single full-width level until a row is selected, after which the row splits into level and children columns.
 
 ### Navigating and creating
 
@@ -52,7 +52,7 @@ The New folder and Cancel actions use the shared [Button](../ui-primitives/READM
 
 Read these pages when the picking surface is not enough. They move from the browser half to the host backend and the slots it fills.
 
-- [dsh-host-directory-picker-browse](../../host/directory-picker-browse/README.md) — the directory-listing backend this surface drives.
+- [@agentrans/host-directory-picker-browse](../../host/directory-picker-browse/README.md) — the directory-listing backend this surface drives.
 - [ui-workspace](../ui-workspace/README.md) — declares the directory-flow slots and owns the picking conversation.
 - [ui-directory-picker-native](../ui-directory-picker-native/README.md) — the native OS-chooser alternative for local deployments.
 - [Web client architecture](../../../docs/subsystems/web-client.md) — how browser plugin rows load and register slots.

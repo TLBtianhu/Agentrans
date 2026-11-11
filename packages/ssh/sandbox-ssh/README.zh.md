@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-`dsh-sandbox-ssh` 为 SSH 子进程提供方启动的进程提供 `ctx.sandbox`。远端主机选择其已安装的本地沙箱后端，并在远端执行每次调用的策略。Bash 与 Node 获得同一后端的执行完整性等级、拒绝特征及运行器失败分类。
+`@agentrans/sandbox-ssh` 为 SSH 子进程提供方启动的进程提供 `ctx.sandbox`。远端主机选择其已安装的本地沙箱后端，并在远端执行每次调用的策略。Bash 与 Node 获得同一后端的执行完整性等级、拒绝特征及运行器失败分类。
 
 ## 目录
 

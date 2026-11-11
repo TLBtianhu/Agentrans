@@ -9,23 +9,23 @@
   en: 7b1b5ed5459b1881
   zh: ca19b7465b8d6132
 /agentrans-tool-pwsh/summary:
-  en: d9aef58264075f8c
-  zh: b389c9bb84df2bea
+  en: 666baa01f42d1da7
+  zh: be40501449eb01ea
 /agentrans-tool-pwsh/table-of-contents:
   en: d152484eb41ac6b4
   zh: 09388d293f9be9cb
 /agentrans-tool-pwsh/use-this-package:
-  en: 873b8b99a2018ed7
-  zh: c4481ffd20168071
+  en: c3f5f0dffdf074cf
+  zh: 313bda78432413c9
 /agentrans-tool-pwsh/use-this-package/when-to-choose-it:
-  en: d274c33ae8a646f8
-  zh: 99e3e64e61735e50
+  en: e997760e1ec02cdf
+  zh: f2aa719b81c0ac7a
 /agentrans-tool-pwsh/use-this-package/minimal-configuration:
   en: f4625166160d7f0f
   zh: eba3a08e72d268a2
 /agentrans-tool-pwsh/use-this-package/running-a-command:
-  en: 80195c9b61b29737
-  zh: 0a187f3f52814b90
+  en: fb214d9431346c1a
+  zh: 177bfc344b3b415c
 /agentrans-tool-pwsh/use-this-package/foreground-commands-as-jobs:
   en: e2ac7a741c287b92
   zh: a9e95c0a84671f45
@@ -39,14 +39,14 @@
   en: 165313776a851b51
   zh: 828f48807036aff0
 /agentrans-tool-pwsh/understand-the-implementation/design-philosophy:
-  en: 86a8ad5203f7e239
-  zh: 056c0d6d6ca5f36a
+  en: 925b876775c0123f
+  zh: fba784ddcfbf64f2
 /agentrans-tool-pwsh/understand-the-implementation/source-map:
   en: aa2adb29a0f27fcd
   zh: 612829167064acd1
 /agentrans-tool-pwsh/understand-the-implementation/rendering-and-exit-markers:
-  en: facd01af9a403fec
-  zh: 7a943dac19a01c39
+  en: 0af74634b54beeb9
+  zh: 55ee53dc5612bcdc
 /agentrans-tool-pwsh/further-exploration:
   en: 40a09a71e8fdfada
   zh: 2a6903b3bfb0e9e0

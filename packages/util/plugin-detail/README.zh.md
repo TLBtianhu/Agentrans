@@ -3,7 +3,7 @@ description: "无状态的插件详细介绍文档选择：meta.detail 或 READM
 kind: "package-library"
 ---
 
-# dsh-plugin-detail
+# @agentrans/plugin-detail
 
 [English](README.md) | 中文
 

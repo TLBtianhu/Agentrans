@@ -93,10 +93,10 @@ The file is a bare UUID line named by `ANONYMOUS_USER_ID_FILE_NAME`, validated a
 Read these pages when the package-level contract is not enough. They move from the identity group map to the home-path resolution this package builds on and the features that use the id.
 
 - [identity group map](../README.md) — the sibling packages and group scope.
-- [dsh-home-paths](../../util/home-paths/README.md) — owns `$AGENTRANS_HOME` and `~/.agentrans` resolution.
-- [dsh-session-telemetry-otel](../../session/session-telemetry-otel/README.md) — reports the id as the OTel Resource `user.id`.
-- [dsh-command-feedback](../../feedback/command-feedback/README.md) — embeds the id in the feedback acknowledgement.
-- [dsh-llm-deepseek](../../llm/llm-deepseek/README.md) — sends `x-deepseek-harness-user-id` on provider requests.
+- [@agentrans/home-paths](../../util/home-paths/README.md) — owns `$AGENTRANS_HOME` and `~/.agentrans` resolution.
+- [@agentrans/session-telemetry-otel](../../session/session-telemetry-otel/README.md) — reports the id as the OTel Resource `user.id`.
+- [@agentrans/command-feedback](../../feedback/command-feedback/README.md) — embeds the id in the feedback acknowledgement.
+- [@agentrans/llm-deepseek](../../llm/llm-deepseek/README.md) — sends `x-deepseek-harness-user-id` on provider requests.
 - [Session telemetry subsystem](../../../docs/subsystems/session-telemetry.md) — the telemetry seam and its backend contract.
 
 -----
@@ -120,7 +120,7 @@ These limits describe when the id is a poor fit or needs special attention. They
 - **No recovery after deletion** — losing the file mints a new anonymous identity by design; recovery would require stable derivation material that weakens anonymity.
 - **Best-effort concurrency** — a reader landing in the narrow interval between a concurrent process's exclusive create and completed write can use a different in-memory UUID for that run; later launches converge on the persisted value.
 - **No cross-home identity** — different `$AGENTRANS_HOME` values cannot be correlated.
-- **Configured DeepSeek gateways receive the id** — `dsh-llm-deepseek` sends the stable header to its resolved `baseURL`, including deployment overrides, independently of telemetry sharing mode.
+- **Configured DeepSeek gateways receive the id** — `@agentrans/llm-deepseek` sends the stable header to its resolved `baseURL`, including deployment overrides, independently of telemetry sharing mode.
 - **Deleting the file does not reset the current process** — memoization keeps the run's id until the next launch.
 
 <a id="dev-note"></a>

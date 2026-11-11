@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-使用 `dsh-tool-schedule`，可通过 `schedule_create`、`schedule_list`、`schedule_view` 与 `schedule_edit` 让 agent（智能体）创建、列出、查看、更新和删除宿主定时任务。定时任务在其重复规则的每个发生时点把指令投递到一个目标 Session。本包把四个工具注册进挂载它的 preset 或 Agent 作用域；`minimal` 不获得。任务属于宿主：这些工具按 id 读取和改变任意任务，只有投递目标指定 Session。存储、调度与投递由宿主 `@agentrans/schedule` 服务负责。失败时返回一个结构化错误码。
+使用 `@agentrans/tool-schedule`，可通过 `schedule_create`、`schedule_list`、`schedule_view` 与 `schedule_edit` 让 agent（智能体）创建、列出、查看、更新和删除宿主定时任务。定时任务在其重复规则的每个发生时点把指令投递到一个目标 Session。本包把四个工具注册进挂载它的 preset 或 Agent 作用域；`minimal` 不获得。任务属于宿主：这些工具按 id 读取和改变任意任务，只有投递目标指定 Session。存储、调度与投递由宿主 `@agentrans/schedule` 服务负责。失败时返回一个结构化错误码。
 
 ## 目录
 

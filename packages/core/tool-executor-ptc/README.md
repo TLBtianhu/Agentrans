@@ -25,7 +25,7 @@ Use this executor when models should call tools through `run_code` programs. Mou
 <a id="use-this-package"></a>
 ## Use this package
 
-Add this row to a composition with `dsh-tools` mounted. The nearest scoped executor selects tool behavior; one scope permits only one executor.
+Add this row to a composition with `@agentrans/tools` mounted. The nearest scoped executor selects tool behavior; one scope permits only one executor.
 
 ```yaml
 - name: '@agentrans/tool-executor-ptc'

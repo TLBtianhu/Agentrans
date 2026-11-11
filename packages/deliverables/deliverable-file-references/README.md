@@ -32,7 +32,7 @@ The Web and `sdk` bundles mount this plugin independently of the `present` tool.
   name: '@agentrans/deliverable-file-references'
 ```
 
-There are no configuration fields. Mount [`dsh-tool-present`](../tool-present/README.md) separately to execute file deliveries. Disable this row to omit its guidance.
+There are no configuration fields. Mount [`@agentrans/tool-present`](../tool-present/README.md) separately to execute file deliveries. Disable this row to omit its guidance.
 
 -----
 

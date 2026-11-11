@@ -93,7 +93,7 @@ Read these pages when the package-level contract is not enough. They move from t
 <a id="model-experience"></a>
 ## Model Experience
 
-Indirectly, through `dsh-tool-skill`, which renders the provider's catalog entry and the selected skill body to the model.
+Indirectly, through `@agentrans/tool-skill`, which renders the provider's catalog entry and the selected skill body to the model.
 
 #### KV Cache effect
 

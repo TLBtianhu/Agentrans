@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-`dsh-session-branch` 提供手动 Session 分支的领域规则。根入口从子分支自有的 durable `assistant/message` 选择可见文本，构造带 `branch-result` 来源的父级本地 `user/message`，并查询同一结论是否已经回流，不执行 I/O。Host 专用的 `/admission` 入口让不同回流提供方共用 maintenance 串行化、内容冲突校验和持久化。两个入口都不调用模型。
+`@agentrans/session-branch` 提供手动 Session 分支的领域规则。根入口从子分支自有的 durable `assistant/message` 选择可见文本，构造带 `branch-result` 来源的父级本地 `user/message`，并查询同一结论是否已经回流，不执行 I/O。Host 专用的 `/admission` 入口让不同回流提供方共用 maintenance 串行化、内容冲突校验和持久化。两个入口都不调用模型。
 
 ## 目录
 

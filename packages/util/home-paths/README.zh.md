@@ -49,7 +49,7 @@ const agents = resolveAgentsHome()   // configured path, else $AGENTRANS_AGENTS_
 agentsHomeDisplay(agents)            // ~/.agents, or $AGENTRANS_AGENTS_HOME for any configured root
 ```
 
-`resolveAgentsHome` 采用与 `resolveDshHome` 相同的优先级、空白值处理与波浪号展开。该根目录刻意位于 `$AGENTRANS_HOME` 之外，因为其他 agent 工具也会共享它：`dsh-agent-instructions` 读取其中的用户全局 `AGENTS.md`，`dsh-skill-filesystem` 扫描其中的 `skills/` 目录。
+`resolveAgentsHome` 采用与 `resolveDshHome` 相同的优先级、空白值处理与波浪号展开。该根目录刻意位于 `$AGENTRANS_HOME` 之外，因为其他 agent 工具也会共享它：`@agentrans/agent-instructions` 读取其中的用户全局 `AGENTS.md`，`@agentrans/skill-filesystem` 扫描其中的 `skills/` 目录。
 
 ### 展示主目录
 

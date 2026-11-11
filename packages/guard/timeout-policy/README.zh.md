@@ -39,7 +39,7 @@ kind: "package-reference"
 - name: '@agentrans/tool-call-timeout-policy'
 ```
 
-限时在配置工具的位置设置。例如，`dsh-tool-web` 的 `fetchTimeoutMs`／`searchTimeoutMs` 设置（默认 30,000 ms）把限时放到 `web_fetch` 与 `web_search` 上。没有限时的工具——随附的 `bash`、`read`、`write`、`edit`——绝不会被切断。生成的[配置目录](../../../docs/config-catalog.zh.md#agentranstool-web)列出会产生限时的工具设置。
+限时在配置工具的位置设置。例如，`@agentrans/tool-web` 的 `fetchTimeoutMs`／`searchTimeoutMs` 设置（默认 30,000 ms）把限时放到 `web_fetch` 与 `web_search` 上。没有限时的工具——随附的 `bash`、`read`、`write`、`edit`——绝不会被切断。生成的[配置目录](../../../docs/config-catalog.zh.md#agentranstool-web)列出会产生限时的工具设置。
 
 ### 你会得到什么
 
@@ -59,7 +59,7 @@ kind: "package-reference"
 
 包装层建立在四项承诺之上：
 
-- **强制执行归属，而非库。** `dsh-timeout` 负责时序与分类（`deadline`、`timeoutOf`）；本插件负责 `tools/execute` 上的单次调用接线；各能力负责终止。该拆分记录在[超时截止时间库 Agent Note](../../../.agents/notes/implemented/architecture/2026-07-06-timeout-deadline-library.zh.md) 中。
+- **强制执行归属，而非库。** `@agentrans/timeout` 负责时序与分类（`deadline`、`timeoutOf`）；本插件负责 `tools/execute` 上的单次调用接线；各能力负责终止。该拆分记录在[超时截止时间库 Agent Note](../../../.agents/notes/implemented/architecture/2026-07-06-timeout-deadline-library.zh.md) 中。
 - **工具声明自己的预算。** `timeoutMs` 位于工具的 `ToolDefinition` 上，从注册表读取（`ctx.tools.get(exec.name, exec.agent)?.timeoutMs`），因此不可能拼错工具名，未声明工具原样委派。
 - **作用域分类。** `TOOL_TIMEOUT` 同时用作内部 `deadline` 分类码与结构化错误 `code`；把 `timeoutOf` 限定到它，可避免嵌套的外层截止时间（先触发的另一包装层计时器）被误读为本插件的超时——它读作普通的上游取消。
 - **先交换信号，再恢复。** Cordis `next()` 忽略传入参数，因此包装层原地修改共享 `exec`：分发时把派生的截止时间信号换到 `exec` 上，并在 `finally` 中恢复调用方信号，使 `tools/post-execute` 监听器永远看不到本插件可能已中止的信号。
@@ -89,7 +89,7 @@ kind: "package-reference"
 
 - [工具子系统参考](../../../docs/subsystems/tools.zh.md)——本包装层挂钩的 `tools/execute` waterfall（瀑布式事件）与决策形态。
 - [超时截止时间库 Agent Note](../../../.agents/notes/implemented/architecture/2026-07-06-timeout-deadline-library.zh.md)——时序／终止拆分以及截止时间为何只通知。
-- [生成配置目录](../../../docs/config-catalog.zh.md#agentranstool-web)——策略所执行的 `dsh-tool-web` 的 `fetchTimeoutMs`／`searchTimeoutMs` 预算。
+- [生成配置目录](../../../docs/config-catalog.zh.md#agentranstool-web)——策略所执行的 `@agentrans/tool-web` 的 `fetchTimeoutMs`／`searchTimeoutMs` 预算。
 - [guard 组映射](../README.zh.md)——同组的 guard 包与循环卫生家族。
 
 -----

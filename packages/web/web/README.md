@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-Use `dsh-web` to search the web or fetch a URL without tying callers to a specific vendor. It selects a usable backend for each operation and gives callers consistent cancellation, errors, and result limits. Choose it for plugins or tools that call `ctx.web.search()` or `ctx.web.fetch()`; the shipped `dsh-tool-web` tools load it for you. A search or fetch requires a configured, usable provider because this package does not make network requests on its own.
+Use `@agentrans/web` to search the web or fetch a URL without tying callers to a specific vendor. It selects a usable backend for each operation and gives callers consistent cancellation, errors, and result limits. Choose it for plugins or tools that call `ctx.web.search()` or `ctx.web.fetch()`; the shipped `@agentrans/tool-web` tools load it for you. A search or fetch requires a configured, usable provider because this package does not make network requests on its own.
 
 ## Table of Contents
 
@@ -25,11 +25,11 @@ Use `dsh-web` to search the web or fetch a URL without tying callers to a specif
 <a id="use-this-package"></a>
 ## Use this package
 
-A composition that needs web access loads the `dsh-web` service and mounts at least one backend — a search provider and/or a fetch provider — and plugin or tool authors then call `ctx.web.search()` and `ctx.web.fetch()` directly. The service resolves the backend for each call, so callers never see provider ids unless they configured one.
+A composition that needs web access loads the `@agentrans/web` service and mounts at least one backend — a search provider and/or a fetch provider — and plugin or tool authors then call `ctx.web.search()` and `ctx.web.fetch()` directly. The service resolves the backend for each call, so callers never see provider ids unless they configured one.
 
 ### When to choose it
 
-Choose the service when a plugin or tool must search or fetch without hard-coding a vendor; a deployment that only uses the shipped `web_search`/`web_fetch` tools gets it for free through `dsh-tool-web`. You do not need it when the composition never reaches the web. The service adds no network access of its own: without at least one usable provider, every call fails with a structured `WebError`.
+Choose the service when a plugin or tool must search or fetch without hard-coding a vendor; a deployment that only uses the shipped `web_search`/`web_fetch` tools gets it for free through `@agentrans/tool-web`. You do not need it when the composition never reaches the web. The service adds no network access of its own: without at least one usable provider, every call fails with a structured `WebError`.
 
 ### Minimal configuration
 
@@ -80,7 +80,7 @@ A provider's availability is a cheap local check — for example whether its API
 <a id="search-readiness"></a>
 ### Search and fetch readiness
 
-`searchReady(llmProvider?)` and `fetchReady(llmProvider?)` ask the provider that `search()` or `fetch()` would select whether an operation made for a model request on that chat route has a credential to send; [`dsh-tool-web`](../tool-web/README.md#search-readiness) uses the answers to decide whether each model step admits `web_search` and `web_fetch`. A provider answers through its optional `state(llmProvider)`, a configuration-only check that must make no network calls and returns one of `ready`, `missing`, `invalid`, `unentitled`, or `unreachable`; a provider that declares no `state()` counts as ready. `searchCapabilityState(llmProvider?)` and `fetchCapabilityState(llmProvider?)` return that value so a surface can say what to fix, and the two `*Ready` methods are exactly its boolean projection. When selection fails, both answer ready, because the operation reports that failure as a structured `WebError`. Readiness never changes which provider is selected.
+`searchReady(llmProvider?)` and `fetchReady(llmProvider?)` ask the provider that `search()` or `fetch()` would select whether an operation made for a model request on that chat route has a credential to send; [`@agentrans/tool-web`](../tool-web/README.md#search-readiness) uses the answers to decide whether each model step admits `web_search` and `web_fetch`. A provider answers through its optional `state(llmProvider)`, a configuration-only check that must make no network calls and returns one of `ready`, `missing`, `invalid`, `unentitled`, or `unreachable`; a provider that declares no `state()` counts as ready. `searchCapabilityState(llmProvider?)` and `fetchCapabilityState(llmProvider?)` return that value so a surface can say what to fix, and the two `*Ready` methods are exactly its boolean projection. When selection fails, both answer ready, because the operation reports that failure as a structured `WebError`. Readiness never changes which provider is selected.
 
 ```text
 // false only when the selected provider cannot authenticate this route's operations:
@@ -136,18 +136,18 @@ Read these pages when the package-level contract is not enough. They move from t
 
 - [Web subsystem](../../../docs/subsystems/web.md) — the exhaustive search/fetch requests and results, provider availability, and error codes.
 - [Web package map](../README.md) — the six-package family and each role.
-- [dsh-tool-web](../tool-web/README.md) — the model-facing `web_search` and `web_fetch` tools over this service.
-- [dsh-web-fetch-http](../web-fetch-http/README.md) — the shipped anonymous HTTP(S) fetch backend.
+- [@agentrans/tool-web](../tool-web/README.md) — the model-facing `web_search` and `web_fetch` tools over this service.
+- [@agentrans/web-fetch-http](../web-fetch-http/README.md) — the shipped anonymous HTTP(S) fetch backend.
 - [Generated configuration catalog](../../../docs/config-catalog.md#agentransweb) — every accepted config field and its source declaration.
 - [Web capability seam decision](../../../.agents/notes/implemented/architecture/2026-06-24-web-capability-seam.md) — why search and fetch share one provider-selection service.
-- [Search readiness decision](../../../.agents/notes/implemented/architecture/2026-09-27-web-search-offered-by-provider-readiness.md) — why the seam answers per-route search and fetch readiness for `dsh-tool-web`.
+- [Search readiness decision](../../../.agents/notes/implemented/architecture/2026-09-27-web-search-offered-by-provider-readiness.md) — why the seam answers per-route search and fetch readiness for `@agentrans/tool-web`.
 
 -----
 
 <a id="model-experience"></a>
 ## Model Experience
 
-Indirectly, through `dsh-tool-web`, which renders the seam's normalized search results and fetch bodies to the model and does not admit `web_search` or `web_fetch` to model steps for which `searchReady()` or `fetchReady()` answers false, while this service contributes no prompt or schema.
+Indirectly, through `@agentrans/tool-web`, which renders the seam's normalized search results and fetch bodies to the model and does not admit `web_search` or `web_fetch` to model steps for which `searchReady()` or `fetchReady()` answers false, while this service contributes no prompt or schema.
 
 #### KV Cache effect
 

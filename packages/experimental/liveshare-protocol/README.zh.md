@@ -9,7 +9,7 @@ kind: "package-library"
 
 ## 概述
 
-`dsh-experimental-liveshare-protocol` 让 Liveshare owner bundle 与 Relay 共用同一份必须一致的定义：owner/worker 的 IPC 帧、Relay 不解析只转发的 gateway 帧、Relay 放进被服务页面的查看页载体脚本，以及与 provider 无关的身份契约及其回环 mock 实现。它让 owner bundle 与 Relay 共享这些定义而不必互相依赖，Relay 也不会加载 owner 侧代码。它依赖无状态的 `dsh-brand` 类型库，并把 `cordis` 声明为 peer。
+`@agentrans/experimental-liveshare-protocol` 让 Liveshare owner bundle 与 Relay 共用同一份必须一致的定义：owner/worker 的 IPC 帧、Relay 不解析只转发的 gateway 帧、Relay 放进被服务页面的查看页载体脚本，以及与 provider 无关的身份契约及其回环 mock 实现。它让 owner bundle 与 Relay 共享这些定义而不必互相依赖，Relay 也不会加载 owner 侧代码。它依赖无状态的 `@agentrans/brand` 类型库，并把 `cordis` 声明为 peer。
 
 ## 目录
 

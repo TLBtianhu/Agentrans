@@ -9,7 +9,7 @@ kind: "package-library"
 
 ## 概述
 
-`dsh-chunked-list` 让调用方追加值并保留早期列表版本，无需复制整个集合。调用方可以按插入顺序迭代所有值，并使用自己的值 schema 校验 JSON 检查点。subagent 目录用它保存不可变的 projection state。
+`@agentrans/chunked-list` 让调用方追加值并保留早期列表版本，无需复制整个集合。调用方可以按插入顺序迭代所有值，并使用自己的值 schema 校验 JSON 检查点。subagent 目录用它保存不可变的 projection state。
 
 ## 目录
 

@@ -18,8 +18,8 @@
   en: b8fbcecd62f6cad0
   zh: d6eb81611ef0f3c5
 /agentrans-llm/use-this-package/when-to-choose-it:
-  en: c3ecb5a1421f27db
-  zh: 4bbd3c0e513845e1
+  en: 20a77e67cdf33eb3
+  zh: 7ec8d4d48da7ee66
 /agentrans-llm/use-this-package/minimal-composition:
   en: 6081765a351e0c3a
   zh: f104efa8ad72bd17
@@ -27,8 +27,8 @@
   en: dc61eb86585f6e0d
   zh: 9c0d6b240dfd2cda
 /agentrans-llm/use-this-package/failures-and-recovery:
-  en: 311d8c92447b7094
-  zh: 68cf5cb1c3853cc1
+  en: d8e73fccf8c37d0b
+  zh: 543e916e7ee9c181
 /agentrans-llm/understand-the-implementation:
   en: 9630d7e26193a512
   zh: 94222c2a487c4b8c
@@ -39,8 +39,8 @@
   en: ae1618577f4e8364
   zh: a6e8ab1563c08dfb
 /agentrans-llm/understand-the-implementation/main-flow:
-  en: c95d4947745e39bb
-  zh: ec37b969f27629e2
+  en: f80f27f4bab8108d
+  zh: 94efb250556f7851
 /agentrans-llm/understand-the-implementation/invariants:
   en: 0163a050239248e5
   zh: 885c95bedcbe2ff4
@@ -54,11 +54,11 @@
   en: a81634136baef72f
   zh: b92dda883986b0e1
 /agentrans-llm/known-limitations-and-deferred-work:
-  en: e75dbef7b86f90db
-  zh: ac17a3bc004d40e8
+  en: 89d7297ca554cabf
+  zh: 548e221974bf61ea
 /agentrans-llm/known-limitations-and-deferred-work/dev-note:
   en: ecbc333b88e14d88
   zh: 77c725d92efd8646
 /agentrans-llm/known-limitations-and-deferred-work/dev-note/open-items:
-  en: 6b1a7e903e13ee21
-  zh: bb62f2b1cc484bd5
+  en: 83f062b37e503929
+  zh: 01d23faecbaf92cf

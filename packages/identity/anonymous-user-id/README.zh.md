@@ -93,10 +93,10 @@ const userId = getOrCreateAnonymousUserId() // stable for the process lifetime
 当包级约定不够用时阅读以下页面。它们从 identity 组映射逐步进入本包所依赖的 home 路径解析，以及使用该 id 的功能。
 
 - [identity 组映射](../README.zh.md)——兄弟包与组范围。
-- [dsh-home-paths](../../util/home-paths/README.zh.md)——负责 `$AGENTRANS_HOME` 与 `~/.agentrans` 的解析。
-- [dsh-session-telemetry-otel](../../session/session-telemetry-otel/README.zh.md)——将该 id 作为 OTel Resource `user.id` 上报。
-- [dsh-command-feedback](../../feedback/command-feedback/README.zh.md)——将 id 嵌入反馈确认。
-- [dsh-llm-deepseek](../../llm/llm-deepseek/README.zh.md)——在提供方请求中发送 `x-deepseek-harness-user-id`。
+- [@agentrans/home-paths](../../util/home-paths/README.zh.md)——负责 `$AGENTRANS_HOME` 与 `~/.agentrans` 的解析。
+- [@agentrans/session-telemetry-otel](../../session/session-telemetry-otel/README.zh.md)——将该 id 作为 OTel Resource `user.id` 上报。
+- [@agentrans/command-feedback](../../feedback/command-feedback/README.zh.md)——将 id 嵌入反馈确认。
+- [@agentrans/llm-deepseek](../../llm/llm-deepseek/README.zh.md)——在提供方请求中发送 `x-deepseek-harness-user-id`。
 - [会话遥测子系统](../../../docs/subsystems/session-telemetry.zh.md)——遥测 seam 及其后端约定。
 
 -----
@@ -120,7 +120,7 @@ const userId = getOrCreateAnonymousUserId() // stable for the process lifetime
 - **删除后无法恢复**——文件丢失后会按设计生成新的匿名身份；恢复需要稳定的派生材料，这会削弱匿名性。
 - **Best-effort 并发**——如果读取方恰好落在并发进程完成独占创建但尚未写完的狭窄时间窗内，本次运行可能使用不同的内存 UUID；后续启动会收敛到已持久化的值。
 - **没有跨 home 身份**——不同 `$AGENTRANS_HOME` 值之间无法关联。
-- **已配置的 DeepSeek 网关会收到该 id**——`dsh-llm-deepseek` 会把稳定标头发送至解析后的 `baseURL`（包括部署覆盖），且不受遥测共享模式影响。
+- **已配置的 DeepSeek 网关会收到该 id**——`@agentrans/llm-deepseek` 会把稳定标头发送至解析后的 `baseURL`（包括部署覆盖），且不受遥测共享模式影响。
 - **删除文件不会重置当前进程**——记忆化会让本次运行的 id 一直保留到下次启动。
 
 <a id="dev-note"></a>

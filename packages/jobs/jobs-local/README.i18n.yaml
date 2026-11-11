@@ -9,14 +9,14 @@
   en: ff81f79a31c68a19
   zh: 923fc98050c79014
 /agentrans-jobs-local/summary:
-  en: b76227a7ed290b11
-  zh: 866fd04f48303a89
+  en: 38871c354dff2e58
+  zh: 209b1efda3ab6ddf
 /agentrans-jobs-local/table-of-contents:
   en: d152484eb41ac6b4
   zh: 09388d293f9be9cb
 /agentrans-jobs-local/use-this-package:
-  en: e0e242161dda0c28
-  zh: 30c058b5a3d1cc56
+  en: b4f37997257dcb45
+  zh: e1302fab777057e2
 /agentrans-jobs-local/use-this-package/when-to-choose-it:
   en: 17479310883edc0a
   zh: f1cea41c704dabe2
@@ -33,8 +33,8 @@
   en: ae926795d8aaa88f
   zh: 0e6ec0265eefccf7
 /agentrans-jobs-local/use-this-package/what-can-go-wrong:
-  en: e1f4511c458dff3b
-  zh: bea247c2a365a646
+  en: 59c49a618e7d85c6
+  zh: 617ed8f0d6b704cf
 /agentrans-jobs-local/understand-the-implementation:
   en: f782557ca8da3138
   zh: e8f0082b9692cacc
@@ -48,8 +48,8 @@
   en: 2c53e11a60965985
   zh: 63adc1628c71e62e
 /agentrans-jobs-local/understand-the-implementation/admission-and-settlement:
-  en: b9634939c81b46cb
-  zh: a18f90caf7c61e87
+  en: d04bdc776b35a771
+  zh: 796506f5fdb02b8b
 /agentrans-jobs-local/understand-the-implementation/teardown:
   en: 49e8bd5e2c1f6ffd
   zh: ad3e1aa712fd59b3
@@ -57,8 +57,8 @@
   en: bb0334d20bfb0b5f
   zh: 1b02ec08f9618bef
 /agentrans-jobs-local/model-experience:
-  en: 873ef364fc8d6f2f
-  zh: 4d0bb38a9c9639c0
+  en: f19b6349833b4cb2
+  zh: b5c6a1fe2cc71c8f
 /agentrans-jobs-local/model-experience/kv-cache-effect:
   en: e290ccc9b3c92c08
   zh: d75d48f485447a74

@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-`dsh-session-title-first-prompt-llm` 作为可选的 `ctx.sessionTitle` 提供方，通过 `ctx.llm` 总结第一条符合条件的用户消息。它注册 `first-prompt` 节奏，只在全新非 fork 会话首次创建回退时自动运行，并把结果归因于该消息的确切 seq。自动失败会保留回退，之后只能通过 `ctx.sessionTitle.refresh()` 重试。它拥有自己的系统指令、JSON 封装与输出解析；只与全消息提供方共享 `dsh-session-title-llm` 的[执行模块](../session-title-llm/README.zh.md)。自动行为与配置优先；实现是建立在该执行器之上的小型提供方策略。
+`@agentrans/session-title-first-prompt-llm` 作为可选的 `ctx.sessionTitle` 提供方，通过 `ctx.llm` 总结第一条符合条件的用户消息。它注册 `first-prompt` 节奏，只在全新非 fork 会话首次创建回退时自动运行，并把结果归因于该消息的确切 seq。自动失败会保留回退，之后只能通过 `ctx.sessionTitle.refresh()` 重试。它拥有自己的系统指令、JSON 封装与输出解析；只与全消息提供方共享 `@agentrans/session-title-llm` 的[执行模块](../session-title-llm/README.zh.md)。自动行为与配置优先；实现是建立在该执行器之上的小型提供方策略。
 
 ## 目录
 

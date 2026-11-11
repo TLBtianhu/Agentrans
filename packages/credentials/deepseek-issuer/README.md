@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-One DeepSeek key authenticates several capability classes, and each class calls a different endpoint. `dsh-deepseek-issuer` owns that shared identity: `DEEPSEEK_API_KEY_REF` is the single default credential reference, `DEEPSEEK_CAPABILITIES` names the classes the issuer serves, and `DEEPSEEK_ENDPOINTS` pairs each class with its endpoint default and the environment variable that overrides it. Providers import these values instead of restating them, so the model route, the search provider and its settings card cannot drift into two different default keys. The module performs no request, holds no secret, and has no Cordis surface.
+One DeepSeek key authenticates several capability classes, and each class calls a different endpoint. `@agentrans/deepseek-issuer` owns that shared identity: `DEEPSEEK_API_KEY_REF` is the single default credential reference, `DEEPSEEK_CAPABILITIES` names the classes the issuer serves, and `DEEPSEEK_ENDPOINTS` pairs each class with its endpoint default and the environment variable that overrides it. Providers import these values instead of restating them, so the model route, the search provider and its settings card cannot drift into two different default keys. The module performs no request, holds no secret, and has no Cordis surface.
 
 ## Table of Contents
 

@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-`dsh-sdk-jsonrpc-server` lets out-of-process clients open sessions, queue prompts, and receive events and status transitions over stdio JSON-RPC. The surrounding Loader profile supplies agents, model adapters, persistence, tools, and the launcher exit callback. Stdout carries protocol frames only. After SDK-owned work drains, shutdown flushes its response and requests launcher exit; the launcher disposes the profile and completes the process. EOF and signals use that same application owner.
+`@agentrans/sdk-jsonrpc-server` lets out-of-process clients open sessions, queue prompts, and receive events and status transitions over stdio JSON-RPC. The surrounding Loader profile supplies agents, model adapters, persistence, tools, and the launcher exit callback. Stdout carries protocol frames only. After SDK-owned work drains, shutdown flushes its response and requests launcher exit; the launcher disposes the profile and completes the process. EOF and signals use that same application owner.
 
 ## Table of Contents
 
@@ -100,7 +100,7 @@ This section explains the design behind the serving plugin; the observable behav
 
 ### Design concept
 
-The plugin is a thin presentation adapter: [`HarnessSdkJsonRpcServer`](src/server.ts) owns the protocol methods and notifications, while the transport and the named wire types come from `dsh-sdk-protocol`, shared with the client SDKs. It subscribes to session, agent, and subagent lifecycle events and forwards them as wire notifications. `subagent.started` requires `origin: subagent` and a direct creator id; ordinary forks, including historical ones with a parent id, produce no such notification; subagent completions are forwarded only when the service-snapshotted lifecycle `local` flag is true — provider names, child ids, and durable lineage never establish locality.
+The plugin is a thin presentation adapter: [`HarnessSdkJsonRpcServer`](src/server.ts) owns the protocol methods and notifications, while the transport and the named wire types come from `@agentrans/sdk-protocol`, shared with the client SDKs. It subscribes to session, agent, and subagent lifecycle events and forwards them as wire notifications. `subagent.started` requires `origin: subagent` and a direct creator id; ordinary forks, including historical ones with a parent id, produce no such notification; subagent completions are forwarded only when the service-snapshotted lifecycle `local` flag is true — provider names, child ids, and durable lineage never establish locality.
 
 ### Source map
 

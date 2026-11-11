@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-`dsh-shell-env` provides the trusted `AGENTRANS_*` environment that every model shell call — bash or pwsh — runs with: built-in facts such as `AGENTRANS_HOME`, `AGENTRANS_SHELL=1`, the agent's `AGENTRANS_SESSION_ID`, and the launched profile's `AGENTRANS_PROFILE` and `AGENTRANS_PROFILE_DIR`. Plugin authors can register their own facts with declared keys, collected per execution and disposed with their plugin; duplicate ownership or undeclared runtime keys fail loudly instead of silently overwriting. The registry changes nothing else the model sees — the shell tools own their own schemas and prompts. Choose it in any composition that mounts a model shell tool; configuration only picks the Harness home directory.
+`@agentrans/shell-env` provides the trusted `AGENTRANS_*` environment that every model shell call — bash or pwsh — runs with: built-in facts such as `AGENTRANS_HOME`, `AGENTRANS_SHELL=1`, the agent's `AGENTRANS_SESSION_ID`, and the launched profile's `AGENTRANS_PROFILE` and `AGENTRANS_PROFILE_DIR`. Plugin authors can register their own facts with declared keys, collected per execution and disposed with their plugin; duplicate ownership or undeclared runtime keys fail loudly instead of silently overwriting. The registry changes nothing else the model sees — the shell tools own their own schemas and prompts. Choose it in any composition that mounts a model shell tool; configuration only picks the Harness home directory.
 
 ## Table of Contents
 
@@ -25,7 +25,7 @@ English | [中文](README.zh.md)
 <a id="use-this-package"></a>
 ## Use this package
 
-Load this plugin in any composition that mounts a model shell tool (`dsh-tool-bash` or `dsh-tool-pwsh`): each foreground or background shell call then runs with a freshly collected managed environment instead of whatever `AGENTRANS_*` values the process inherited.
+Load this plugin in any composition that mounts a model shell tool (`@agentrans/tool-bash` or `@agentrans/tool-pwsh`): each foreground or background shell call then runs with a freshly collected managed environment instead of whatever `AGENTRANS_*` values the process inherited.
 
 ### What every shell call receives
 
@@ -113,7 +113,7 @@ Read these pages when the package-level contract is not enough. They move from t
 <a id="model-experience"></a>
 ## Model Experience
 
-Indirectly, through the shell tools (`dsh-tool-bash`, `dsh-tool-pwsh`), which expose this registry's managed `AGENTRANS_*` facts in every shell-tool call.
+Indirectly, through the shell tools (`@agentrans/tool-bash`, `@agentrans/tool-pwsh`), which expose this registry's managed `AGENTRANS_*` facts in every shell-tool call.
 
 #### KV Cache effect
 

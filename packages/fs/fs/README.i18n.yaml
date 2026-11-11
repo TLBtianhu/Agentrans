@@ -9,14 +9,14 @@
   en: 7b65f1e6ea689b74
   zh: cdc3104e6a686633
 /agentrans-fs/summary:
-  en: ac24e6ad53b50d3f
-  zh: b2489c715e5cf711
+  en: 7972ee1725d85f2c
+  zh: 0fcc38596c47cff7
 /agentrans-fs/table-of-contents:
   en: d152484eb41ac6b4
   zh: 09388d293f9be9cb
 /agentrans-fs/use-this-package:
-  en: 130aa12ccf7a1752
-  zh: 22d69bb7b5793fc9
+  en: c672e19f0deef292
+  zh: d37c20e7e83c1926
 /agentrans-fs/use-this-package/choosing-and-mounting-a-backend:
   en: 8e2f904a21ba4dfb
   zh: 76d9ce7503c84a5c
@@ -27,8 +27,8 @@
   en: 7e13d669ecc96d59
   zh: b5fe7ae65812d926
 /agentrans-fs/understand-the-implementation/design-philosophy:
-  en: 955232f787df6d64
-  zh: ab572b040ab3554e
+  en: 441ae22deab7ee47
+  zh: c1ad83e1cf541e88
 /agentrans-fs/understand-the-implementation/source-map:
   en: 9507d7d9259fc89e
   zh: aa500435e02e6de3
@@ -45,8 +45,8 @@
   en: faca30b042b7f72d
   zh: e436ca4c5bbfd3e4
 /agentrans-fs/model-experience:
-  en: 8ef3a43a11a7e187
-  zh: 0fee346e68f6e2ac
+  en: c9839fe29fe715fc
+  zh: 9eeae8363b0c4ca2
 /agentrans-fs/model-experience/kv-cache-effect:
   en: 40294c1c31b74824
   zh: 0857e9b4dd363e0a

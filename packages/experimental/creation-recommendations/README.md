@@ -61,7 +61,7 @@ The next naturally occurring model request receives the latest unreported status
 <details>
 <summary>Implementation internals — click to expand</summary>
 
-The Host entry is a function plugin that injects `actionCards`; it provides no service or Remote of its own and adds nothing to `dsh-base`. Disabling the feature removes its skill and card kind and drains its owned Creator work.
+The Host entry is a function plugin that injects `actionCards`; it provides no service or Remote of its own and adds nothing to `@agentrans/base`. Disabling the feature removes its skill and card kind and drains its owned Creator work.
 
 The plugin registers the `create_personalized_page` kind with the shared [action card service](../action-cards/README.md): the `personalized-pages` skill, `details` with `slot` and optional `initialContent`, and the verbs Create, Keep, Undo, Cancel and Restore. The service owns the `propose_action` tool, the card projection, Not now, the Remote action and the status notice. This plugin handles the other verbs and records decisions whose data carries the location, any written placement, the reserved package name and the latest installation outcome; the status notice reports all but the package name. The plugin's `reconcile` checks interrupted or uncertain runs against the installed profile before every action; Not now is then recorded for an unstarted card and for cancelled, failed, interrupted or unconfirmed runs.
 

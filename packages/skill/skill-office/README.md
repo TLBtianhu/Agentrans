@@ -26,7 +26,7 @@ The catalog lists the Office router and six authoring or operation skills. Full 
 <a id="use-this-package"></a>
 ## Use this package
 
-Mount the skill provider beside the skill registry and `dsh-tool-skill`. The provider supplies skill instructions; operation skills append absolute interpreter and CLI paths when loaded.
+Mount the skill provider beside the skill registry and `@agentrans/tool-skill`. The provider supplies skill instructions; operation skills append absolute interpreter and CLI paths when loaded.
 
 ```yaml
 - name: '@agentrans/skill-office'
@@ -113,7 +113,7 @@ The provider registers no tools or activation projection. Loaded skill results r
 <a id="model-experience"></a>
 ## Model Experience
 
-Indirectly, through `dsh-tool-skill`, which renders the initial Office summary and returns routing or selected subskill instructions from `skill(name)`.
+Indirectly, through `@agentrans/tool-skill`, which renders the initial Office summary and returns routing or selected subskill instructions from `skill(name)`.
 
 #### KV Cache effect
 

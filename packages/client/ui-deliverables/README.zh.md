@@ -95,7 +95,7 @@ Node 半部提供经过身份验证的原生文件打开；共用指导由[模�
 
 #### 模型看到的内容
 
-Web 组合挂载共用的 [`dsh-deliverable-file-references`](../../deliverables/deliverable-file-references/README.zh.md#model-experience) 指导。本 UI 包渲染相应的文件引用和卡片。
+Web 组合挂载共用的 [`@agentrans/deliverable-file-references`](../../deliverables/deliverable-file-references/README.zh.md#model-experience) 指导。本 UI 包渲染相应的文件引用和卡片。
 
 #### Token 影响
 

@@ -9,7 +9,7 @@ kind: "package-bundle"
 
 ## 概述
 
-`dsh-headless` 从命令行运行一个 dsh 任务并打印最终答案，然后退出——没有 GUI、没有服务器、没有浏览器。输入 `agentrans --profile headless "run the tests"`，agent（智能体）会以与所有其他表层相同的模型、工具与安全默认值完成该任务。它非常适合脚本、CI 与一次性任务：进程不打开任何端口，也不会留下任何后台运行的东西。监督进程还可以通过按行 JSON 事件流（`--json`）驱动它，并用该事件流报告的标识（`--session-id`）在同一段对话上继续唤醒。退出码告诉你结果——任务完成时为 0，中止或出错时为 1。主要边界：每次调用只运行一个任务，没有交互式后续。
+`@agentrans/headless` 从命令行运行一个 dsh 任务并打印最终答案，然后退出——没有 GUI、没有服务器、没有浏览器。输入 `agentrans --profile headless "run the tests"`，agent（智能体）会以与所有其他表层相同的模型、工具与安全默认值完成该任务。它非常适合脚本、CI 与一次性任务：进程不打开任何端口，也不会留下任何后台运行的东西。监督进程还可以通过按行 JSON 事件流（`--json`）驱动它，并用该事件流报告的标识（`--session-id`）在同一段对话上继续唤醒。退出码告诉你结果——任务完成时为 0，中止或出错时为 1。主要边界：每次调用只运行一个任务，没有交互式后续。
 
 ## 目录
 
@@ -105,7 +105,7 @@ dsh headless --permission-mode workspace-write --add-dir "$git_dir" --json - < t
 
 ### 何时使用
 
-在脚本化或自动化的 dsh 运行中使用 headless——CI 步骤、批处理任务、从终端快速获取答案。当需要多轮交互会话或 GUI 时请避免它；浏览器表层（[dsh-web-app](../web-app/README.zh.md)）负责这类场景。进程只为本次运行而存活，不打开监听端口，并且自行退出，因此适合等待进程结束的流水线。当监督进程需要进度而不只是答案时，`--json` 提供事件流，`--session-id` 则让后续调用继续同一段对话。
+在脚本化或自动化的 dsh 运行中使用 headless——CI 步骤、批处理任务、从终端快速获取答案。当需要多轮交互会话或 GUI 时请避免它；浏览器表层（[@agentrans/web-app](../web-app/README.zh.md)）负责这类场景。进程只为本次运行而存活，不打开监听端口，并且自行退出，因此适合等待进程结束的流水线。当监督进程需要进度而不只是答案时，`--json` 提供事件流，`--session-id` 则让后续调用继续同一段对话。
 
 ### 帮助与任务错误
 
@@ -127,7 +127,7 @@ runner 等待整个应用结算（`ctx.get('loader')?.await()`），确保已组
 
 ### 基于 base 的 patch 内容
 
-patch 叠加在 `dsh-base` 之上：继承投影缓存与共享 PTC 运行时，在基础 `system-prompt` 行上设置编码 persona 前缀与独立的 cwd 后缀，继承原生工具执行，并支持 [PTC overlay](../../../apps/cli/config/examples/ptc.yml)，禁用共享的 HMR（热模块替换）行，并挂载启动提供方与 runner。缓存为每个已持久化的一次性会话写入检查点，供后续消费方使用；其持久性屏障会在发布缓存行前 flush 所覆盖的日志前缀，因此可能拆分原本会合并的 JSONL 连续段。启动提供方（[`src/startup.ts`](src/startup.ts)）注入 `ctx.cmdlineArgs`（[`dsh-cmdline`](../../boot/cmdline/README.zh.md)），读取任务和调用选项、打印应用自己的 `--help`，并提供 `headlessStartup`；runner 从延迟配置读取任务、Session 标识与输出模式。它直接从 `headlessStartup` 读取显式 CLI 权限预设与审批策略，以 runner 配置作为默认值。sandbox-policy 行也等待此服务，在保留基础模式和工作区默认值的同时接收显式目录授权。
+patch 叠加在 `@agentrans/base` 之上：继承投影缓存与共享 PTC 运行时，在基础 `system-prompt` 行上设置编码 persona 前缀与独立的 cwd 后缀，继承原生工具执行，并支持 [PTC overlay](../../../apps/cli/config/examples/ptc.yml)，禁用共享的 HMR（热模块替换）行，并挂载启动提供方与 runner。缓存为每个已持久化的一次性会话写入检查点，供后续消费方使用；其持久性屏障会在发布缓存行前 flush 所覆盖的日志前缀，因此可能拆分原本会合并的 JSONL 连续段。启动提供方（[`src/startup.ts`](src/startup.ts)）注入 `ctx.cmdlineArgs`（[`@agentrans/cmdline`](../../boot/cmdline/README.zh.md)），读取任务和调用选项、打印应用自己的 `--help`，并提供 `headlessStartup`；runner 从延迟配置读取任务、Session 标识与输出模式。它直接从 `headlessStartup` 读取显式 CLI 权限预设与审批策略，以 runner 配置作为默认值。sandbox-policy 行也等待此服务，在保留基础模式和工作区默认值的同时接收显式目录授权。
 
 ### 退出映射
 
@@ -140,7 +140,7 @@ patch 叠加在 `dsh-base` 之上：继承投影缓存与共享 PTC 运行时，
 | [`src/index.ts`](src/index.ts) | `headless-runner` 插件：运行流程、Session 解析、输出约定、退出映射 |
 | [`src/startup.ts`](src/startup.ts) | `headless-startup` 提供方：任务输入、Session 标识、权限选项与输出选择 |
 | [`src/json-stream.ts`](src/json-stream.ts) | `--json` 投影：事件词汇、提交点发射、字符串限长 |
-| [`cordis.patch.yml`](cordis.patch.yml) | 叠加在 `dsh-base` 之上的一次性 patch |
+| [`cordis.patch.yml`](cordis.patch.yml) | 叠加在 `@agentrans/base` 之上的一次性 patch |
 | [`tests/headless.spec.ts`](tests/headless.spec.ts) | 运行流程、汇总、flush、Session 沿用与退出映射 |
 | [`tests/json-stream.spec.ts`](tests/json-stream.spec.ts) | 投影顺序、提交点发射、限长与释放 |
 | [`tests/startup.spec.ts`](tests/startup.spec.ts) | 在真实 Loader 树上的命令行解析 |
@@ -155,9 +155,9 @@ patch 叠加在 `dsh-base` 之上：继承投影缓存与共享 PTC 运行时，
 当你想深入了解共享核心、同级 GUI 或命令行交接时，阅读以下页面。
 
 - [组合包索引](../README.zh.md)——基于同一核心构建的表层。
-- [dsh-base](../base/README.zh.md)——headless 运行其上的共享核心。
-- [dsh-web-app](../web-app/README.zh.md)——用于多轮工作的同级交互式浏览器入口。
-- [dsh-cmdline](../../boot/cmdline/README.zh.md)——启动器如何把命令行交给应用。
+- [@agentrans/base](../base/README.zh.md)——headless 运行其上的共享核心。
+- [@agentrans/web-app](../web-app/README.zh.md)——用于多轮工作的同级交互式浏览器入口。
+- [@agentrans/cmdline](../../boot/cmdline/README.zh.md)——启动器如何把命令行交给应用。
 - [生成配置目录](../../../docs/config-catalog.zh.md#agentransheadless)——每个受支持配置字段及其源声明。
 
 -----

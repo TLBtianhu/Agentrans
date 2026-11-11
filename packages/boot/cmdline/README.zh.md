@@ -9,7 +9,7 @@ kind: "package-library"
 
 ## 概述
 
-`dsh-cmdline` 让应用从启动器 flag 之后原样留下的参数中解析自己的 flag、`--help` 与错误。解析值可以覆盖配置默认值，而无需改写配置。应用还可以通过启动器的关停路径请求进程退出。适用于拥有自有命令行界面的应用 bin。它不增加提示词、schema 或模型可见内容。
+`@agentrans/cmdline` 让应用从启动器 flag 之后原样留下的参数中解析自己的 flag、`--help` 与错误。解析值可以覆盖配置默认值，而无需改写配置。应用还可以通过启动器的关停路径请求进程退出。适用于拥有自有命令行界面的应用 bin。它不增加提示词、schema 或模型可见内容。
 
 ## 目录
 
@@ -107,9 +107,9 @@ kind: "package-library"
 
 当包级约定不够用时阅读以下页面。它们从交接机制逐步进入消费它的应用。
 
-- [dsh-app-boot](../app-boot/README.zh.md)——提供这些启动器值的启动序列。
-- [dsh-web-app 组合包](../../bundle/web-app/README.zh.md)——通过此包持有 Web flag 家族的应用。
-- [dsh-headless 组合包](../../bundle/headless/README.zh.md)——从命令行读取任务的一次性 runner。
+- [@agentrans/app-boot](../app-boot/README.zh.md)——提供这些启动器值的启动序列。
+- [@agentrans/web-app 组合包](../../bundle/web-app/README.zh.md)——通过此包持有 Web flag 家族的应用。
+- [@agentrans/headless 组合包](../../bundle/headless/README.zh.md)——从命令行读取任务的一次性 runner。
 
 -----
 

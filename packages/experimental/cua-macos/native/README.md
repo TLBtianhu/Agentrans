@@ -3,7 +3,7 @@ description: "Native macOS helper protocol, input semantics, shared-service life
 kind: "package-reference"
 ---
 
-# dsh-cua native helper
+# @agentrans/cua native helper
 
 English | [中文](README.zh.md)
 

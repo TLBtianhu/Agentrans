@@ -3,7 +3,7 @@ description: "Strict instant and zone parsing, millisecond spans, and bounded Cr
 kind: "package-library"
 ---
 
-# dsh-util-time
+# @agentrans/util-time
 
 English | [中文](README.zh.md)
 
@@ -29,7 +29,7 @@ Shared time vocabulary for instant, zone, elapsed-time, and recurrence boundarie
 
 It is a **library, not a service or plugin**: no `ctx`, registers nothing, holds no state.
 
-Call it at the boundary that receives the zone or the wall-clock selector, before the value reaches anything durable. `dsh-api-session-controller` and `dsh-subagent` admit a caller-reported zone through `canonicalClientTimeZone`; `dsh-time-context` admits the zone a request turn reports through `canonicalizeTimeZone` and refuses an alias rather than rewriting it; `dsh-schedule` reads absolute and wall-clock selectors through the strict parsers, resolves local targets through `resolveLocalInstant`, and uses the shared `Cron` / `RRule` recurrence values; `dsh-session-format-v0-to-v1` validates a stored schedule instant through `fourDigitYearEpoch` while keeping its own released-log error. `dsh-time-context` reads its elapsed reading through `Duration` and keeps the wording of the line it injects. Schedule retains its record types, relative intervals, daily/weekly policy, and delivery limits. The library works in Host and browser code without a Cordis service.
+Call it at the boundary that receives the zone or the wall-clock selector, before the value reaches anything durable. `@agentrans/api-session-controller` and `@agentrans/subagent` admit a caller-reported zone through `canonicalClientTimeZone`; `@agentrans/time-context` admits the zone a request turn reports through `canonicalizeTimeZone` and refuses an alias rather than rewriting it; `@agentrans/schedule` reads absolute and wall-clock selectors through the strict parsers, resolves local targets through `resolveLocalInstant`, and uses the shared `Cron` / `RRule` recurrence values; `@agentrans/session-format-v0-to-v1` validates a stored schedule instant through `fourDigitYearEpoch` while keeping its own released-log error. `@agentrans/time-context` reads its elapsed reading through `Duration` and keeps the wording of the line it injects. Schedule retains its record types, relative intervals, daily/weekly policy, and delivery limits. The library works in Host and browser code without a Cordis service.
 
 
 ### Entry point
@@ -95,7 +95,7 @@ Both recurrence values validate committed `scheduledAt` values with `fourDigitYe
 <a id="model-experience"></a>
 ## Model Experience
 
-Indirectly, through the consumers that store a canonical zone or a committed UTC instant on durable records: `dsh-time-context` renders the turn's model-visible zone instruction and timestamp from the zone, and `dsh-schedule` renders its model-visible scheduler text from the committed instant.
+Indirectly, through the consumers that store a canonical zone or a committed UTC instant on durable records: `@agentrans/time-context` renders the turn's model-visible zone instruction and timestamp from the zone, and `@agentrans/schedule` renders its model-visible scheduler text from the committed instant.
 
 #### KV Cache effect
 
@@ -109,7 +109,7 @@ None of its own. The consumer that injects a zone- or schedule-derived line into
 - **Recurrence is bounded** — the [Schedule reference](../../../docs/subsystems/schedule.md#recurrence-rules) lists shared expression profiles. A successful parse returns a frozen `rule` with `expression`, `timeZone`, `next(after)`, and `resolve(scheduledAt, acceptedAt)`; resolution preserves a committed occurrence and coalesces missed ones. Refusals carry `syntax`, `time_zone`, `density`, or `range`; invalid decision times throw `RangeError`. No method reads the wall clock or starts a timer.
 - **`Duration` has no calendar units** — a day is exactly 24 hours and a month has no fixed length, so a caller that needs local calendar days derives them from the zone.
 - **`Duration` publishes only what a consumer calls** — `fromMilliseconds` and `decompose()`; a conversion, an arithmetic operation, or a `zero` identity lands with the caller that needs it, so the published contract grows with a caller rather than ahead of one.
-- **Seconds-unit spans still multiply** — `dsh-schedule`'s interval and delay fields and the DeepSeek file store's refresh margin are second-valued spans converted with `* 1_000`; none has moved onto this library, and an epoch expressed in seconds is not a span and must not be built into one.
+- **Seconds-unit spans still multiply** — `@agentrans/schedule`'s interval and delay fields and the DeepSeek file store's refresh margin are second-valued spans converted with `* 1_000`; none has moved onto this library, and an epoch expressed in seconds is not a span and must not be built into one.
 - **The root entry loads recurrence dependencies** — importing it resolves both `@js-temporal/polyfill` and `rrule`, including for a consumer that only needs a zone or span. Browser consumers must account for those dependencies in their bundle.
 
 <a id="dev-note"></a>

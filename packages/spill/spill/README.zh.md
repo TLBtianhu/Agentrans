@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-`dsh-spill` 让插件和工具通过公开的 `ctx.spillStore` API 保存超大文本，并取得不透明定位信息、精确字节数与取回指引。当完整结果必须保持可取回、同时又不能填满模型上下文时选择它。配置 `agentrans-spill-local` 可获得本地持久化；当超大工具结果应变为有界预览时，再添加 `agentrans-spill-policy`。该 API 不提供保留、替换、取回或搜索操作。存储故障会使保存操作拒绝，由调用方决定保留内联内容还是让操作失败。
+`@agentrans/spill` 让插件和工具通过公开的 `ctx.spillStore` API 保存超大文本，并取得不透明定位信息、精确字节数与取回指引。当完整结果必须保持可取回、同时又不能填满模型上下文时选择它。配置 `agentrans-spill-local` 可获得本地持久化；当超大工具结果应变为有界预览时，再添加 `agentrans-spill-policy`。该 API 不提供保留、替换、取回或搜索操作。存储故障会使保存操作拒绝，由调用方决定保留内联内容还是让操作失败。
 
 ## 目录
 
@@ -25,7 +25,7 @@ kind: "package-reference"
 <a id="use-this-package"></a>
 ## 使用本包
 
-保存 spill 产物的组合需要挂载一个后端——仅本包本身不存储任何内容。`agentrans-spill-policy` 决定工具结果何时 spill；`dsh-session-reference` 直接保存截断后的会话引用 transcript（文本记录），不需要该策略。调用方使用 `ctx.spillStore.saveText()` 并明确指定归属；可选消费方通过 `ctx.get("spillStore")` 获取后端。
+保存 spill 产物的组合需要挂载一个后端——仅本包本身不存储任何内容。`agentrans-spill-policy` 决定工具结果何时 spill；`@agentrans/session-reference` 直接保存截断后的会话引用 transcript（文本记录），不需要该策略。调用方使用 `ctx.spillStore.saveText()` 并明确指定归属；可选消费方通过 `ctx.get("spillStore")` 获取后端。
 
 ### 何时选择
 
@@ -111,7 +111,7 @@ const ref = await ctx.spillStore.saveText({
 - [spill 包映射](../README.zh.md)——三包家族与各自职责。
 - [agentrans-spill-local](../spill-local/README.zh.md)——已交付的本地文件系统后端。
 - [agentrans-spill-policy](../spill-policy/README.zh.md)——决定最终结果何时过大的策略。
-- [dsh-output-retention](../../util/output-retention/README.zh.md)——策略背后的预览机制。
+- [@agentrans/output-retention](../../util/output-retention/README.zh.md)——策略背后的预览机制。
 - [工具输出 spill 决策](../../../.agents/notes/implemented/architecture/2026-07-08-tool-output-spill-files.zh.md)——能力边界与设计依据。
 
 -----

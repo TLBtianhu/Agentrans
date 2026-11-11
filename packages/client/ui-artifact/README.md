@@ -117,7 +117,7 @@ A revision change remounts the revision-specific preview, retiring its listener,
 <a id="further-exploration"></a>
 ## Further Exploration
 
-- [dsh-artifact](../../artifact/artifact/README.md) — owns durable snapshots, action admission, and the Host Remote method.
+- [@agentrans/artifact](../../artifact/artifact/README.md) — owns durable snapshots, action admission, and the Host Remote method.
 - [Conversation assembly](../../../docs/subsystems/conversation.md) — defines checkpoint replay and stable Node identity.
 - [Web Client Slots](../../../docs/subsystems/slots.md) — defines Session-scoped injection and keyed renderers.
 - [HTML document preview](../ui-sidebar-documentpreview/README.md) — provides the adjacent opaque-iframe isolation patterns.

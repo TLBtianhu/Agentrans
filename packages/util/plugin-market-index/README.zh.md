@@ -3,13 +3,13 @@ description: "供 DSH 读取器和索引生成器使用的插件市场索引格�
 kind: "package-library"
 ---
 
-# dsh-plugin-market-index
+# @agentrans/plugin-market-index
 
 [English](README.md) | 中文
 
 ## 概述
 
-插件市场索引格式 1 的校验器，没有运行时依赖。插件市场索引是一份 JSON 文件，列出可安装的 DSH 组合包（bundle）及其展示元数据。[格式 Agent Note](../../../.agents/notes/implemented/feature/2026-10-02-plugin-market-index-format.zh.md) 定义该文档；本包是其可执行的规则集。DSH 的 [`dsh-plugin-market`](../../boot/plugin-market/README.zh.md) 用它读取索引，索引生成器在发布前用它校验输出。
+插件市场索引格式 1 的校验器，没有运行时依赖。插件市场索引是一份 JSON 文件，列出可安装的 DSH 组合包（bundle）及其展示元数据。[格式 Agent Note](../../../.agents/notes/implemented/feature/2026-10-02-plugin-market-index-format.zh.md) 定义该文档；本包是其可执行的规则集。DSH 的 [`@agentrans/plugin-market`](../../boot/plugin-market/README.zh.md) 用它读取索引，索引生成器在发布前用它校验输出。
 
 ## 目录
 
@@ -50,7 +50,7 @@ import { MarketIndexError, marketInstallTarget, parseMarketIndex } from '@agentr
 <a id="model-experience"></a>
 ## 模型体验
 
-间接存在：通过 `dsh-plugin-market`，其 `plugin_market` 工具把经过校验的插件返回给模型。
+间接存在：通过 `@agentrans/plugin-market`，其 `plugin_market` 工具把经过校验的插件返回给模型。
 
 #### KV Cache 影响
 

@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-`pluginMarket` 读取用户配置的插件索引，用 [`dsh-plugin-market-index`](../../util/plugin-market-index/README.zh.md) 校验，并为每个条目标注 profile 中的安装状态、DSH 兼容性以及安装它所需的精确参数。它还为发现区的条目页面读取每个索引条目的详细介绍，即一份带图片的 Markdown 文档。Web 的[发现标签页](../../client/ui-plugin-market/README.zh.md)和 `plugin_market` agent 工具通过它读取；安装本身经由 [`pluginManager.installBundle`](../plugin-manager/README.zh.md) 进行。格式及其理由见[索引格式 Agent Note](../../../.agents/notes/implemented/feature/2026-10-02-plugin-market-index-format.zh.md)；Host 与 Web 的设计见[发现 Agent Note](../../../.agents/notes/implemented/feature/2026-10-02-plugin-market-discover.zh.md)。
+`pluginMarket` 读取用户配置的插件索引，用 [`@agentrans/plugin-market-index`](../../util/plugin-market-index/README.zh.md) 校验，并为每个条目标注 profile 中的安装状态、DSH 兼容性以及安装它所需的精确参数。它还为发现区的条目页面读取每个索引条目的详细介绍，即一份带图片的 Markdown 文档。Web 的[发现标签页](../../client/ui-plugin-market/README.zh.md)和 `plugin_market` agent 工具通过它读取；安装本身经由 [`pluginManager.installBundle`](../plugin-manager/README.zh.md) 进行。格式及其理由见[索引格式 Agent Note](../../../.agents/notes/implemented/feature/2026-10-02-plugin-market-index-format.zh.md)；Host 与 Web 的设计见[发现 Agent Note](../../../.agents/notes/implemented/feature/2026-10-02-plugin-market-discover.zh.md)。
 
 ## 目录
 
@@ -96,7 +96,7 @@ Host 使用进程的 `fetch` 获取，因此配置的出站代理生效，并拒
 
 兼容性按版本计算：使用 `evaluatePluginCompatibility`，传入该版本的 `engines.agentrans` 和 profile 的版本豁免，与安装时执行的检查相同。插件的默认版本是其不带先行版本号的最高兼容版本；插件完全没有此类版本时，使用其最高兼容的先行版本；没有兼容版本的插件没有默认版本。安装状态按包名根据 `pluginManager.listBundles()` 计算，以默认版本为准，没有默认版本时以最高版本为准：`not-installed`（包括当前 profile 尚未安装的按需目录条目）；版本相同时为 `installed`；该版本更高时为 `update-available`；已安装版本未知、不是有效的 SemVer 或更高时为 `different-version`；DSH 安装随附的组合包（bundle）为 `provided`。
 
-条目详细介绍的读取共用服务拥有的一个读取器；文档选择和 npm 文件 CDN 来自 [`dsh-plugin-detail`](../../util/plugin-detail/README.zh.md)。每个部分克隆是 `detailCacheDir` 下的一个裸仓库，以其 URL 的哈希命名，先在暂存目录中初始化，再重命名到目标位置，并使用 `--depth 1 --filter=blob:none` 获取，因此只下载提交和树对象；读取文件时 Git 才下载其内容。命令运行时不继承除 ssh 程序之外的 `GIT_*` 变量，禁用 hook、文件系统监视器、子模块递归，以及 https、http 和 ssh 之外的所有传输协议，且不创建工作树。Git 下载期间每 200 毫秒检查一次目录大小；单条命令执行期间增长超过 `detailRepositoryMaxBytes` 时停止 Git，且输出保留文件末尾的换行字节。文件内容超过本次读取的限制时，读取即停止；浏览器放弃请求时，图片读取仍会完成，因此离开页面不会中断克隆。`refs/dsh/` 下的 ref 记录每个已获取的提交，因此不会在没有大小检查的情况下延迟获取提交。对同一仓库的操作逐个执行，共享 `detailCacheDir` 的多个进程（例如同一 profile 上的 Web 和 Desktop）之间也是如此，由仓库旁的一个锁文件实现；淘汰只在这些操作结束后删除该仓库，并在每次获取和每次文件读取后执行 `detailCacheMaxBytes` 总量限制；正在使用的仓库单独超过该总量时，淘汰最后删除它，并等到其操作结束后再删除；除文件超过本次读取的限制外，任何原因导致操作失败或被取消时，都删除该仓库，使下一次读取从新的克隆开始。淘汰时还会删除存在时间超过 `detailGitTimeoutMs` 的暂存目录。销毁时停止 Git 并等待其退出。
+条目详细介绍的读取共用服务拥有的一个读取器；文档选择和 npm 文件 CDN 来自 [`@agentrans/plugin-detail`](../../util/plugin-detail/README.zh.md)。每个部分克隆是 `detailCacheDir` 下的一个裸仓库，以其 URL 的哈希命名，先在暂存目录中初始化，再重命名到目标位置，并使用 `--depth 1 --filter=blob:none` 获取，因此只下载提交和树对象；读取文件时 Git 才下载其内容。命令运行时不继承除 ssh 程序之外的 `GIT_*` 变量，禁用 hook、文件系统监视器、子模块递归，以及 https、http 和 ssh 之外的所有传输协议，且不创建工作树。Git 下载期间每 200 毫秒检查一次目录大小；单条命令执行期间增长超过 `detailRepositoryMaxBytes` 时停止 Git，且输出保留文件末尾的换行字节。文件内容超过本次读取的限制时，读取即停止；浏览器放弃请求时，图片读取仍会完成，因此离开页面不会中断克隆。`refs/dsh/` 下的 ref 记录每个已获取的提交，因此不会在没有大小检查的情况下延迟获取提交。对同一仓库的操作逐个执行，共享 `detailCacheDir` 的多个进程（例如同一 profile 上的 Web 和 Desktop）之间也是如此，由仓库旁的一个锁文件实现；淘汰只在这些操作结束后删除该仓库，并在每次获取和每次文件读取后执行 `detailCacheMaxBytes` 总量限制；正在使用的仓库单独超过该总量时，淘汰最后删除它，并等到其操作结束后再删除；除文件超过本次读取的限制外，任何原因导致操作失败或被取消时，都删除该仓库，使下一次读取从新的克隆开始。淘汰时还会删除存在时间超过 `detailGitTimeoutMs` 的暂存目录。销毁时停止 Git 并等待其退出。
 
 `marketInstallTarget` 构建安装参数：npm 为 `name@version` 加该版本的 registry，Git 为 `git+<url>.git#<commit>`，包位于子目录时追加 `&path:/<path>`。
 
