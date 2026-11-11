@@ -47,5 +47,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Signs every artifact; a release without this key is refused, not published unsigned.
-          AGENTRANS_UPDATE_SIGNING_KEY: ${{ secrets.AGENTRANS_UPDATE_SIGNING_KEY }}
+          # The repository still stores this key under its pre-rename name; keep publishing while
+          # the new name is being set, then drop the fallback.
+          AGENTRANS_UPDATE_SIGNING_KEY: ${{ secrets.AGENTRANS_UPDATE_SIGNING_KEY || secrets.DSH_UPDATE_SIGNING_KEY }}
         run: node --import tsx apps/desktop/scripts/publish-github-release.ts .desktop-assets "${{ inputs.version }}" "${{ inputs.channel }}"
