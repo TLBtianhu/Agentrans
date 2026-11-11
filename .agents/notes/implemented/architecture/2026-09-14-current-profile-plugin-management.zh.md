@@ -10,7 +10,7 @@ Web 和 Agent 控件需要修改运行中的 profile，同时避免另建包安�
 
 ## 决策
 
-[插件管理器](../../../../packages/boot/plugin-manager/README.zh.md)与 `dsh plugin` 调用同一套异步包操作。launcher 通过纯数据 `ctx.profileContext` 提供 profile 与解析位置、启动时组合包和调用级 overlay。共享函数组合当前文件；该接口不包含回调或修改方法。CLI 与 service 修改持有 profile manifest 的写锁；[DSH HMR](../../../../packages/boot/hmr/README.zh.md) 通过同一队列串行执行模块替换、Include 刷新、profile 重新组合与管理器配置变更。HMR 在自身初始化时注册 profile 监听，等待应用就绪后再处理编辑。manifest 通知只比较有序组合包列表；仅依赖字段变化不会触发配置重载。最终 YAML 组合决定是否运行 HMR，启动器不安装回退实例。pnpm 在 `hmr.runExclusive()` 外执行；只有配置变更和 Loader 更新进入该队列。HMR 不获取包操作写锁，因此安装不会阻塞其他由文件变化触发的配置更新。每次重载重新读取 manifest、组合包层与用户 patch，同时保留调用级 overlay 的优先级。
+[插件管理器](../../../../packages/boot/plugin-manager/README.zh.md)与 `agentrans plugin` 调用同一套异步包操作。launcher 通过纯数据 `ctx.profileContext` 提供 profile 与解析位置、启动时组合包和调用级 overlay。共享函数组合当前文件；该接口不包含回调或修改方法。CLI 与 service 修改持有 profile manifest 的写锁；[DSH HMR](../../../../packages/boot/hmr/README.zh.md) 通过同一队列串行执行模块替换、Include 刷新、profile 重新组合与管理器配置变更。HMR 在自身初始化时注册 profile 监听，等待应用就绪后再处理编辑。manifest 通知只比较有序组合包列表；仅依赖字段变化不会触发配置重载。最终 YAML 组合决定是否运行 HMR，启动器不安装回退实例。pnpm 在 `hmr.runExclusive()` 外执行；只有配置变更和 Loader 更新进入该队列。HMR 不获取包操作写锁，因此安装不会阻塞其他由文件变化触发的配置更新。每次重载重新读取 manifest、组合包层与用户 patch，同时保留调用级 overlay 的优先级。
 
 配置监听默认使用 Chokidar 写入稳定检测。普通变化处理器会丢弃 50 ms 内的第二个事件，因此激活后立即再次写入可能让之前的组合包继续运行。稳定后交付事件会观察最终文件；文件驱动的更新承担稳定等待，直接管理器事务则不需要。回归测试通过 Chokidar 的真实规范化路径交付连续变化，验证两个状态均被应用。
 

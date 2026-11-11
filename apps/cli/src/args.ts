@@ -57,8 +57,15 @@ interface PluginInvocation {
   args: string[]
 }
 
+/** Move data an earlier release kept at the retired home onto the current one. */
+interface HomeInvocation {
+  mode: 'home'
+  /** The only action: move the retired home, or report why it cannot be moved. */
+  action: 'adopt'
+}
+
 /** The resolved `dsh` invocation. Help, version, and errors exit inside {@link parseDshArgs}. */
-export type DshInvocation = ProfileInvocation | DumpConfigInvocation | DumpConfigSchemaInvocation | PluginInvocation
+export type DshInvocation = ProfileInvocation | DumpConfigInvocation | DumpConfigSchemaInvocation | PluginInvocation | HomeInvocation
 
 /** Launcher flags for profile boot and configuration dumps. */
 interface BootOptions {
@@ -89,14 +96,14 @@ function rejectElectronProfile(program: Command, profile: string): void {
 /** The launcher's own help text; each app prints its own. */
 const HELP_EXAMPLES = `
 Examples:
-  agentrans web                                   boot the web profile (same as: dsh --profile web)
-  dsh rescue --from-default-profile web
+  agentrans web                                   boot the web profile (same as: agentrans --profile web)
+  agentrans rescue --from-default-profile web
                                             recreate rescue from the shipped web template, then boot it
-  dsh headless "run the tests"              answer one task, print the result, and exit
-  dsh tui --patch ./extra.yml               boot a custom profile with one extra overlay
-  dsh tui --resume <session>                arguments after the launcher flags reach the app
+  agentrans headless "run the tests"              answer one task, print the result, and exit
+  agentrans tui --patch ./extra.yml               boot a custom profile with one extra overlay
+  agentrans tui --resume <session>                arguments after the launcher flags reach the app
   agentrans web --help                            the web app's own flags and help
-  dsh plugin --profile tui add <package>    install a plugin into the tui profile
+  agentrans plugin --profile tui add <package>    install a plugin into the tui profile
 `
 
 /**
@@ -152,7 +159,7 @@ export function parseDshArgs(argv: readonly string[], version: string, manageDes
   program
     .name('agentrans')
     .version(version, '-V, --version', 'output the version number')
-    .usage('[--profile] <name> [options] [app-args...]\n       dsh plugin --profile <name> <pnpm-args...>')
+    .usage('[--profile] <name> [options] [app-args...]\n       agentrans plugin --profile <name> <pnpm-args...>')
     .description('agentrans: boot a Agentrans profile — an ordered stack of plugin-bundle patch layers under your own overrides.')
     .addHelpText('after', HELP_EXAMPLES)
     .exitOverride()
@@ -164,7 +171,7 @@ export function parseDshArgs(argv: readonly string[], version: string, manageDes
     .allowUnknownOption()
     .passThroughOptions()
     .enablePositionalOptions()
-    .argument('[args...]', 'arguments for the booted profile\'s app (see: dsh --profile <name> --help)')
+    .argument('[args...]', 'arguments for the booted profile\'s app (see: agentrans --profile <name> --help)')
     .option('--profile <name>', 'the profile under $AGENTRANS_HOME/profiles to boot', selectProfile)
     .option('--from-default-profile <name>', 'replace a custom profile with a fresh copy of a shipped profile template')
     .option('--patch <path>', 'extra patch-list overlay applied after the profile layer (repeatable)', collect)
@@ -202,8 +209,19 @@ export function parseDshArgs(argv: readonly string[], version: string, manageDes
       })
   }
 
+  if (first === 'home') {
+    const home = program.command('home').description('move data an earlier release kept at ~/.dsh onto the current home')
+    home
+      .helpOption('-h, --help', 'show this help')
+      .command('adopt')
+      .description('rename ~/.dsh to the current home; refuses when either side is already in use')
+      .action(() => {
+        resolved = { mode: 'home', action: 'adopt' }
+      })
+  }
+
   try {
-    const expanded = first !== undefined && !first.startsWith('-') && first !== 'plugin'
+    const expanded = first !== undefined && !first.startsWith('-') && first !== 'plugin' && first !== 'home'
       ? ['--profile', ...argv]
       : argv
     program.parse(expanded, { from: 'user' })

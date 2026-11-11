@@ -57,7 +57,7 @@ Replace every `<...>` placeholder with the deployment's own value: the identity 
 
 The profile can select the bundle instead of patching it: add `"@agentrans/experimental-liveshare"` to `agentrans.profile.bundles` in `$AGENTRANS_HOME/profiles/<profile>/package.json`, which is the write the card's switch performs once the card is listed.
 
-Either route takes effect only on a recomposition. With the profile's HMR row enabled, the change applies when the profile is re-read; without it, the next `dsh` start applies it. Once at least one row the bundle declares runs, its card appears under **Experimental plugins** and on the **More** page. Removing the entries, disabling them, or removing the bundle from `agentrans.profile.bundles` stops those rows and the card leaves both lists again.
+Either route takes effect only on a recomposition. With the profile's HMR row enabled, the change applies when the profile is re-read; without it, the next `agentrans` start applies it. Once at least one row the bundle declares runs, its card appears under **Experimental plugins** and on the **More** page. Removing the entries, disabling them, or removing the bundle from `agentrans.profile.bundles` stops those rows and the card leaves both lists again.
 
 ### Owner configuration
 

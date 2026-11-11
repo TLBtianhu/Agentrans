@@ -17,6 +17,6 @@ Loading a profile removes `@agentrans/experimental-schedule-bundle` from its `ag
 
 ## Migration
 
-1. Start `dsh` once with each affected profile; no manual edit is needed. A profile directory that another tool writes must drop the entry from `agentrans.profile.bundles` itself.
+1. Start `agentrans` once with each affected profile; no manual edit is needed. A profile directory that another tool writes must drop the entry from `agentrans.profile.bundles` itself.
 2. Keep overrides on `schedule` and `ui-schedule` in `cordis.patch.yml` or a `--patch` overlay; the Web composition carries those rows. A top-level override on `time-context` no longer matches a row, because the clock row belongs to the presets ([time-context](../../../../packages/context/time-context/README.md)); delete it.
 3. Confirm: `agentrans.profile.bundles` no longer lists the bundle, the Plugins page shows no failed Automation tasks entry, and the sidebar shows Automation tasks with the previously stored reminders.

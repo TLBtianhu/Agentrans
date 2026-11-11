@@ -25,7 +25,7 @@ kind: "package-reference"
 <a id="use-this-package"></a>
 ## 使用本包
 
-当运行时必须服务 SDK 客户端时挂载本插件：把它加入组合了 agent 服务的 `cordis.yml`，启动运行时，客户端即可通过 stdio 连接。外围应用提供 `appExit`；随附的 `dsh` profile 会在挂载配置树前提供它。
+当运行时必须服务 SDK 客户端时挂载本插件：把它加入组合了 agent 服务的 `cordis.yml`，启动运行时，客户端即可通过 stdio 连接。外围应用提供 `appExit`；随附的 `agentrans` profile 会在挂载配置树前提供它。
 
 将 `initialize.approvalRequests` 设为 `true`，即可把内部审批作为服务端到客户端的 `approval/request` 请求发送。桥接通过 `agents.isOwnedBy()` 运行时归属识别 SDK 拥有的 Agent 及其仍在运行的进程内后代，持久化的 `parentSession` 历史关系不决定审批归属；其他 Agent，以及未提供该标志的客户端，继续使用已组合的应答链。审批服务仍在分发前执行 `never` 策略，并记录询问与决定的审计事件。桥接仅接受 `allowed-once`、`rejected` 或 `cancelled`；无效响应、客户端错误或传输断开会产生审批服务的拒绝放行结果 `unavailable`。请求取消时释放待处理的协议等待项；shutdown 在等待 Agent 结束前释放所有此类等待项。迟到响应不能授权已放弃的操作。载荷见[协议](../protocol/README.zh.md)，客户端处理见 [Python 示例](../../../python/sdk/README.zh.md#client-approvals)。
 

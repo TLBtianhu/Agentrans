@@ -11,12 +11,15 @@ import {
   canonicalizeWatchPath,
   defaultAgentsHome,
   defaultDshHome,
+  detectRetiredHome,
   dshCachePath,
   dshHomeDisplay,
   dshHomePath,
   expandHomePath,
   resolveAgentsHome,
   resolveDshHome,
+  retiredDshHome,
+  RETIRED_AGENTRANS_HOME_DISPLAY,
 } from '@agentrans/home-paths'
 
 afterEach(() => {
@@ -131,5 +134,40 @@ describe('dsh path helpers', () => {
     } finally {
       await rm(root, { recursive: true, force: true })
     }
+  })
+})
+
+describe('detectRetiredHome', () => {
+  const present = () => true
+  const absent = () => false
+  const home = '/home/u/.agentrans'
+  const retired = '/home/u/.dsh'
+
+  it('reports a retired home that still holds data while the current home is absent', () => {
+    expect(detectRetiredHome({ env: {}, home, retired, exists: path => path === retired, entries: () => 3 }))
+      .toEqual({ path: retired, display: RETIRED_AGENTRANS_HOME_DISPLAY })
+  })
+
+  it('stays quiet once the current home exists', () => {
+    expect(detectRetiredHome({ env: {}, home, retired, exists: present, entries: () => 3 })).toBeUndefined()
+  })
+
+  it('stays quiet when the user pointed the home somewhere', () => {
+    expect(detectRetiredHome({
+      env: { AGENTRANS_HOME: '/data/home' }, home, retired, exists: path => path === retired, entries: () => 3,
+    })).toBeUndefined()
+  })
+
+  it('stays quiet for an empty or missing retired home', () => {
+    expect(detectRetiredHome({ env: {}, home, retired, exists: path => path === retired, entries: () => 0 })).toBeUndefined()
+    expect(detectRetiredHome({ env: {}, home, retired, exists: absent, entries: () => 3 })).toBeUndefined()
+  })
+
+  it('stays quiet when both names resolve to the same directory', () => {
+    expect(detectRetiredHome({ env: {}, home: retired, retired, exists: present, entries: () => 3 })).toBeUndefined()
+  })
+
+  it('resolves the retired path under the operating-system home', () => {
+    expect(retiredDshHome()).toBe(join(homedir(), '.dsh'))
   })
 })

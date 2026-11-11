@@ -1,5 +1,5 @@
 ---
-description: "The browser GUI for dsh: interactive chat, model and settings management, and session history, for users running the dsh web surface."
+description: "The browser GUI for dsh: interactive chat, model and settings management, and session history, for users running the agentrans web surface."
 kind: "package-bundle"
 ---
 

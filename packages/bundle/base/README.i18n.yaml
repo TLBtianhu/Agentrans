@@ -3,8 +3,8 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/bundle/base/README.md
 /:
-  en: 21c1b63e74134d34
-  zh: 78c69828d5930a86
+  en: a20ac815130a9a9d
+  zh: a5b7aca8b94f6249
 /agentrans-base:
   en: c6e118f50fb74930
   zh: 55c28084c473e567
@@ -18,8 +18,8 @@
   en: 4c0d7045f95ff79c
   zh: 456bb24bd1d35db1
 /agentrans-base/use-this-package/a-minimal-custom-profile:
-  en: df1735161d4b8100
-  zh: 01e2e580f9b2e1b2
+  en: 66649593c1c4ffd3
+  zh: 8801095820085a93
 /agentrans-base/use-this-package/what-you-get:
   en: f86010c2bc7a7143
   zh: 5f872ecfde1eb92d

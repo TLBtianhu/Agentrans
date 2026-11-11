@@ -9,7 +9,7 @@ English | [中文](guide.zh.md)
 
 ## Change
 
-Python runtime wheels omit the Office sidecar and authoring interpreters and libraries. SDK startup does not download them. Office operations require an explicit download; the authoring environment and conversion engine can be selected independently. The SDK still packages the normal `dsh` CLI and requires no system Node.js.
+Python runtime wheels omit the Office sidecar and authoring interpreters and libraries. SDK startup does not download them. Office operations require an explicit download; the authoring environment and conversion engine can be selected independently. The SDK still packages the normal `agentrans` CLI and requires no system Node.js.
 
 ## Migration
 

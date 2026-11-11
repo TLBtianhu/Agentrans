@@ -30,16 +30,16 @@ English | [中文](README.zh.md)
 Add the package to an initialized profile, then run a task that asks the Lead to delegate work:
 
 ```sh
-dsh plugin --profile headless add @agentrans/experimental-agent-team-profile
+agentrans plugin --profile headless add @agentrans/experimental-agent-team-profile
 agentrans --profile headless "Use Agent Teams to split this task between two teammates, wait, and summarize."
 ```
 
-The profile must already contain `@agentrans/base`, whose Subagent services and provider rows this layer consumes. Removing the package with `dsh plugin --profile <name> remove @agentrans/experimental-agent-team-profile` removes the bundle from the profile's ordered layer list.
+The profile must already contain `@agentrans/base`, whose Subagent services and provider rows this layer consumes. Removing the package with `agentrans plugin --profile <name> remove @agentrans/experimental-agent-team-profile` removes the bundle from the profile's ordered layer list.
 
 Enable Agent Teams on the Web or Desktop Plugins page to activate both tools and UI. For a CLI Web profile, use:
 
 ```sh
-dsh plugin --profile web add @agentrans/experimental-agent-team-profile
+agentrans plugin --profile web add @agentrans/experimental-agent-team-profile
 ```
 
 In an existing profile’s `package.json`, keep `@agentrans/experimental-agent-team-profile` in `agentrans.profile.bundles` and remove the separate `@agentrans/experimental-agent-team-web-profile` entry. User patches targeting `ui-agent-team` still apply.

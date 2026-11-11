@@ -2,7 +2,7 @@
 
 English | [中文](README.zh.md)
 
-Runnable Python SDK examples over the sole application launcher, `dsh`. The Python client owns JSON-RPC stdio; the selected profile owns the agent composition, persistence, execution policy, and plugins.
+Runnable Python SDK examples over the sole application launcher, `agentrans`. The Python client owns JSON-RPC stdio; the selected profile owns the agent composition, persistence, execution policy, and plugins.
 
 ## Run the minimal agent
 
@@ -97,15 +97,15 @@ python python/sdk/examples/manage_plugins.py \
   "Install and enable the bundle at /absolute/path/to/my-plugin-bundle."
 ```
 
-The current process keeps its original plugins. After a `restart-required` result, rerun the example with the same home to use the saved configuration. Removing a bundle still used by the running startup composition requires stopping that runtime and using `dsh plugin`.
+The current process keeps its original plugins. After a `restart-required` result, rerun the example with the same home to use the saved configuration. Removing a bundle still used by the running startup composition requires stopping that runtime and using `agentrans plugin`.
 
 ## Add plugins
 
-Use the runtime wheel's `dsh` command against the same explicit home for persistent profile changes:
+Use the runtime wheel's `agentrans` command against the same explicit home for persistent profile changes:
 
 ```sh
 export AGENTRANS_HOME=/absolute/path/to/example-dsh-home
-dsh plugin --profile sdk-minimal add file:/absolute/path/to/my-plugin-bundle
+agentrans plugin --profile sdk-minimal add file:/absolute/path/to/my-plugin-bundle
 ```
 
 Use `sdk-minimal` in that command to extend this example, or `sdk` to extend the full base-backed SDK profile. The Python call can also pass additional absolute patch paths in `patches=(...)`; later files win. A selected profile must retain `@agentrans/sdk-app` or another JSON-RPC server row. The example accepts no complete Cordis file or arbitrary process argv.

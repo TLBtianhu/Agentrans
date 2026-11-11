@@ -2,7 +2,7 @@
 
 English | [中文](python-sdk.zh.md)
 
-This tutorial installs the published Python SDK, runs the shipped standalone minimal profile, and shows how to customize the same `dsh` profile from your own program.
+This tutorial installs the published Python SDK, runs the shipped standalone minimal profile, and shows how to customize the same `agentrans` profile from your own program.
 
 ## Prerequisites
 
@@ -39,7 +39,7 @@ python -m pip install deepseek-harness-sdk
 
 :::
 
-The installation includes a matching native runtime wheel and the `dsh` command. Normal SDK execution needs no system Node.js. Repository contributors who build the artifacts should use the [Python contributor workflow](../../../python/development.md).
+The installation includes a matching native runtime wheel and the `agentrans` command. Normal SDK execution needs no system Node.js. Repository contributors who build the artifacts should use the [Python contributor workflow](../../../python/development.md).
 
 ## Run the checked-in example
 
@@ -122,7 +122,7 @@ The SDK starts the bundled `agentrans --profile sdk-minimal` process lazily and 
 
 ## Install or define plugins
 
-Use `dsh plugin` for dependencies and bundle layers that should persist in this home:
+Use `agentrans plugin` for dependencies and bundle layers that should persist in this home:
 
 <div>
 <a id="linux-and-macos-3"></a>
@@ -134,13 +134,13 @@ Use `dsh plugin` for dependencies and bundle layers that should persist in this 
 ```sh [Linux/macOS]
 export AGENTRANS_HOME=/absolute/path/to/example-dsh-home
 agentrans --profile sdk-minimal --dump-default-config >/dev/null
-dsh plugin --profile sdk-minimal add file:/absolute/path/to/my-plugin-bundle
+agentrans plugin --profile sdk-minimal add file:/absolute/path/to/my-plugin-bundle
 ```
 
 ```powershell [Windows PowerShell]
 $env:AGENTRANS_HOME = "C:\work\example-dsh-home"
 agentrans --profile sdk-minimal --dump-default-config | Out-Null
-dsh plugin --profile sdk-minimal add file:C:/work/my-plugin-bundle
+agentrans plugin --profile sdk-minimal add file:C:/work/my-plugin-bundle
 ```
 
 :::

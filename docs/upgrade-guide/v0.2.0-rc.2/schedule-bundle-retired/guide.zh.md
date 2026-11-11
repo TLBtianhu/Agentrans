@@ -17,6 +17,6 @@ description: "“自动化任务”可选 bundle 已移除；Web 组合自行挂
 
 ## 迁移
 
-1. 用每个受影响的 profile 启动一次 `dsh`，无需手动编辑。由其他工具写入的 profile 目录需要自行从 `agentrans.profile.bundles` 删除该条目。
+1. 用每个受影响的 profile 启动一次 `agentrans`，无需手动编辑。由其他工具写入的 profile 目录需要自行从 `agentrans.profile.bundles` 删除该条目。
 2. 保留 `cordis.patch.yml` 或 `--patch` overlay 中针对 `schedule` 和 `ui-schedule` 的覆盖项；Web 组合包含这两行。顶层针对 `time-context` 的覆盖项不再匹配任何行，因为时钟行属于 preset（[time-context](../../../../packages/context/time-context/README.zh.md)）；请删除它。
 3. 确认：`agentrans.profile.bundles` 不再列出该 bundle，插件管理页不再显示异常的“自动化任务”条目，且侧栏显示“自动化任务”并列出之前存储的提醒。

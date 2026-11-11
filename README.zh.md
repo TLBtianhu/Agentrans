@@ -25,7 +25,7 @@ Agent + Trans：一个通用编程 Agent 工作台，把解释转化为可执行
 
 编译产物只是产生分发物的中间结果，不是用户数据根。开发运行使用独立数据根，绝不复用上游 DSH profile。不要把本源码目录安装或运行覆盖到已有 DSH 上。
 
-源码的 `dsh`、`start:web` 和 `dev:web` 命令会在源码树外初始化独立的 worktree 开发实例。`AGENTRANS_DEV_ROOT` 可显式选择空目录或已有开发标识的根目录；继承的 Harness home 变量不决定产品状态路径。已有未标识数据会被拒绝，不做迁移。
+源码的 `agentrans`、`start:web` 和 `dev:web` 命令会在源码树外初始化独立的 worktree 开发实例。`AGENTRANS_DEV_ROOT` 可显式选择空目录或已有开发标识的根目录；继承的 Harness home 变量不决定产品状态路径。已有未标识数据会被拒绝，不做迁移。
 
 ```powershell
 pnpm install

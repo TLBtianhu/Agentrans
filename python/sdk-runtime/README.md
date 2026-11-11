@@ -2,7 +2,7 @@
 
 English | [中文](README.zh.md)
 
-Platform runtime wheel for the DeepSeek Harness Python SDK. It packages the normal `dsh` CLI and its closed Node dependency tree into a native executable, so SDK use requires no system Node.js. This package publishes wheels only.
+Platform runtime wheel for the DeepSeek Harness Python SDK. It packages the normal `agentrans` CLI and its closed Node dependency tree into a native executable, so SDK use requires no system Node.js. This package publishes wheels only.
 
 ## Installed commands and artifacts
 
@@ -38,7 +38,7 @@ Office operation skills invoke the configured Node and Kit CLI through the profi
 
 Repository builds also materialize a dev-only `runtime/node/` carrier. It runs `node runtime/node/runtime-bootstrap.mjs` on system Node 24.9 or newer. It is never selected automatically and is excluded from wheels and sdists.
 
-Both carriers execute the same `dsh` grammar and shipped profiles, including the standalone `sdk-minimal` tree and the full `web` profile with its frontend assets. The private `dsh-python-runtime-closure` manifest defines the packaged dependency closure; there is no Python-specific Node application or checked-in default `cordis.yml`.
+Both carriers execute the same `agentrans` grammar and shipped profiles, including the standalone `sdk-minimal` tree and the full `web` profile with its frontend assets. The private `dsh-python-runtime-closure` manifest defines the packaged dependency closure; there is no Python-specific Node application or checked-in default `cordis.yml`.
 
 ## Python module API
 
@@ -48,17 +48,17 @@ Both carriers execute the same `dsh` grammar and shipped profiles, including the
 - `download_office() -> Path` explicitly downloads or reuses the Office sidecar and its standalone Node.
 - `download_primary_runtime() -> Path` explicitly downloads or reuses the authoring environment.
 - `resolve_office_launch_args() -> tuple[str, str]` locates the installed Node and Kit CLI without downloading; missing resources raise `FileNotFoundError` with the download instruction.
-- `main()` implements the installed `dsh` console command and rejects an absent or blank `AGENTRANS_HOME`. On Windows it waits for the bundled process with inherited standard streams and forwards its exit status; on POSIX it replaces the Python process.
+- `main()` implements the installed `agentrans` console command and rejects an absent or blank `AGENTRANS_HOME`. On Windows it waits for the bundled process with inherited standard streams and forwards its exit status; on POSIX it replaces the Python process.
 
 Unsupported platforms and missing executables or sidecars raise `FileNotFoundError` with the build and installation routes. Unknown runtime modes raise `ValueError`.
 
 ## Packaged profile resolution
 
-`dsh` initializes shipped profiles under the explicit home, composes their bundle patches, and loads bundled plugins from the executable's virtual filesystem. Runtime resolution uses an in-memory generation instead of disk symlinks or proxy packages. Fallback imports use recorded declaring-package paths, including paths inside the executable's virtual filesystem, so built-in rows and external plugin peers share the bundled Cordis/module instance. Native shared libraries and Windows ConPTY addons are packaged with native addons, while ripgrep and the macOS PTY helper remain executable sidecars.
+`agentrans` initializes shipped profiles under the explicit home, composes their bundle patches, and loads bundled plugins from the executable's virtual filesystem. Runtime resolution uses an in-memory generation instead of disk symlinks or proxy packages. Fallback imports use recorded declaring-package paths, including paths inside the executable's virtual filesystem, so built-in rows and external plugin peers share the bundled Cordis/module instance. Native shared libraries and Windows ConPTY addons are packaged with native addons, while ripgrep and the macOS PTY helper remain executable sidecars.
 
 Python and the packaged bootstrap share the resource layout: `<cache>/<identity>/office/`, `node/bin/node[.exe]`, and `node_modules/@deepseek-ai/libreoffice-kit/lib/cli.js`. Automatic Office cache discovery requires the `complete` marker to match the manifest identity; an explicit `AGENTRANS_OFFICE_SIDECAR` requires the Node and CLI files. The Python bootstrap resolves the Office kit from its explicitly downloaded or selected sidecar so native helpers and URL Workers use real filesystem paths. The same resource preparation implementation serves repository builds and explicit Python downloads. The kit owns document operations; the Office smoke retrieves CLI paths from the loaded skill and executes capabilities and DOCX conversion with an empty PATH.
 
-External profile management uses `dsh plugin --profile <name> ...`. After explicit `download_primary_runtime()` preparation, the packaged launcher supplies the selected payload's standalone Node and pnpm to this command and the SDK `plugin_manager` tool. It prepends the standalone Node directory only in package-operation subprocesses, including build scripts; ordinary tools retain their original `PATH`. `AGENTRANS_PRIMARY_RUNTIME` overrides the cached selection, and an empty value disables it. A malformed or incomplete selected payload fails startup rather than silently selecting system pnpm. Without a selected Node/pnpm payload, package operations use `pnpm` on `PATH` or explicit `plugin-manager.pnpmCommand`. Downloads never start implicitly. Ordinary SDK/profile execution and listing/toggling existing plugins do not require pnpm. Every model-facing management action still requires full access or a client approval responder; saved changes affect the shared SDK profile on subsequent launches.
+External profile management uses `agentrans plugin --profile <name> ...`. After explicit `download_primary_runtime()` preparation, the packaged launcher supplies the selected payload's standalone Node and pnpm to this command and the SDK `plugin_manager` tool. It prepends the standalone Node directory only in package-operation subprocesses, including build scripts; ordinary tools retain their original `PATH`. `AGENTRANS_PRIMARY_RUNTIME` overrides the cached selection, and an empty value disables it. A malformed or incomplete selected payload fails startup rather than silently selecting system pnpm. Without a selected Node/pnpm payload, package operations use `pnpm` on `PATH` or explicit `plugin-manager.pnpmCommand`. Downloads never start implicitly. Ordinary SDK/profile execution and listing/toggling existing plugins do not require pnpm. Every model-facing management action still requires full access or a client approval responder; saved changes affect the shared SDK profile on subsequent launches.
 
 ## Build and distribution
 

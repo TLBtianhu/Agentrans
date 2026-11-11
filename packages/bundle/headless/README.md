@@ -36,7 +36,7 @@ agentrans --profile headless "run the tests"
 The agent works through the task, streams each non-empty provider reasoning delta to stderr under a `dsh: reasoning:` heading, then prints the final answer on stdout and exits. Consecutive reasoning deltas stay in one section, and the runner closes that section before later output when the provider supplied no trailing newline. A successful run without reasoning keeps stderr empty; a failure exits 1 and prints `dsh: <code>: <message>` to stderr. The task comes from the positional argument, or from stdin when the argument is omitted or is a lone `-`; a blank positional argument or an empty pipe is rejected before anything runs. A positional task is used as-is and stdin is not read, so put the whole prompt in the pipe when you want piped input; a piped task is sent verbatim, its trailing newline included.
 
 ```sh
-{ echo "Summarize these changes:"; git diff --stat; } | dsh --profile headless
+{ echo "Summarize these changes:"; git diff --stat; } | agentrans --profile headless
 ```
 
 The task and run options use these settings:
@@ -176,13 +176,13 @@ The runner adds nothing to the request prefix; it only drives one user message t
 <a id="known-limitations-and-deferred-work"></a>
 
 
-These limits tell you when headless does not fit and what it needs from the `dsh` launcher. They are current package constraints, not a general CLI comparison or a task backlog.
+These limits tell you when headless does not fit and what it needs from the `agentrans` launcher. They are current package constraints, not a general CLI comparison or a task backlog.
 
 - **One task per run** — after the task is answered the process exits; there is no interactive follow-up, so split multi-step work into separate runs.
 - **Final background-job settlement may be absent from persisted history** — process teardown can end Session routing or close its writer before an owned job settles, including normal completion and signal shutdown; the [job lifecycle contract](../../../docs/subsystems/jobs.md#session-lifecycle-records) defines how consumers retain incomplete intervals.
 - **Custom startup** — compositions that disable `headless-startup` must [configure the policy directly](../../../docs/upgrade-guide/v0.2.1-rc.2/headless-policy-composition/guide.md).
 - **Windows extra roots** — the ACL backend rejects subprocess calls with extra roots when a tool executes; it does not stop the model request. Filesystem tools enforce the grants independently. See [platform limits](../../sandbox/sandbox-local/README.md).
-- **Runs through the `dsh` launcher** — starting the headless profile another way fails at startup, because only the launcher can request the process exit.
+- **Runs through the `agentrans` launcher** — starting the headless profile another way fails at startup, because only the launcher can request the process exit.
 - **No pre-token heartbeat** — in default mode stderr stays silent until the provider emits a non-empty reasoning delta; a delayed first token exposes no earlier progress signal.
 - **Reasoning enters stderr logs** — in default mode, redirection and supervisors may retain substantially more and potentially sensitive model output; route stderr to a controlled sink when needed.
 - **Default stdout carries only the final answer** — a run without an assistant message prints an empty stdout line and exits 1; intermediate tool output is not printed unless you opt into `--json`.

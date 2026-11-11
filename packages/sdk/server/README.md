@@ -25,7 +25,7 @@ English | [中文](README.zh.md)
 <a id="use-this-package"></a>
 ## Use this package
 
-Mount this plugin when a runtime must serve SDK clients: add it to a `cordis.yml` that composes the agent service, boot the runtime, and clients connect over stdio. The surrounding application supplies `appExit`; the shipped `dsh` profiles provide it before mounting the tree.
+Mount this plugin when a runtime must serve SDK clients: add it to a `cordis.yml` that composes the agent service, boot the runtime, and clients connect over stdio. The surrounding application supplies `appExit`; the shipped `agentrans` profiles provide it before mounting the tree.
 
 Set `initialize.approvalRequests` to `true` to send internal approvals as server-to-client `approval/request` calls. The bridge handles SDK-owned Agents and their live in-process descendants, following `agents.isOwnedBy()` runtime ownership rather than persisted `parentSession` lineage; unrelated Agents and clients that omit the flag continue through the composed answerer chain. The approval service still applies `never` policy before dispatch and records the ask/decision audit pair. The bridge accepts only `allowed-once`, `rejected`, or `cancelled`; an invalid response, client error, or transport loss yields the service's fail-closed `unavailable` outcome. Request cancellation abandons the pending wire waiter; shutdown abandons all such waiters before draining Agents. Late replies cannot grant an abandoned operation. See the [protocol](../protocol/README.md) for the payload and the [Python example](../../../python/sdk/README.md#client-approvals) for client handling.
 

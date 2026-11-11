@@ -9,7 +9,7 @@ English | [中文](guide.zh.md)
 
 ## Change
 
-`viewProfilePackage(dir, spec, options)` from `@agentrans/plugin-manager/operations` used to print a fixed field list: `name`, `version`, `description`, and `dsh`. `PackageViewOptions` now requires `fields`, the manifest or registry fields `pnpm view` prints, so the same lookup reads version lists and per-version peers. Code that calls `viewProfilePackage` directly no longer type-checks without `fields`, and a JavaScript caller that omits it runs `pnpm view` with no fields.
+`viewProfilePackage(dir, spec, options)` from `@agentrans/plugin-manager/operations` used to print a fixed field list: `name`, `version`, `description`, and `agentrans`. `PackageViewOptions` now requires `fields`, the manifest or registry fields `pnpm view` prints, so the same lookup reads version lists and per-version peers. Code that calls `viewProfilePackage` directly no longer type-checks without `fields`, and a JavaScript caller that omits it runs `pnpm view` with no fields.
 
 ## Migration
 

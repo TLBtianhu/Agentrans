@@ -36,7 +36,7 @@ agentrans --profile sdk-minimal
 
 该 profile 默认禁用 `session-log-deepseek` 和 `plugin-package-inventory-deepseek`。正常模型请求使用显式装配的 DeepSeek 适配器，不贡献 Session 日志或插件清单字段。若确需分享其中一项，在 profile 或本次启动的 patch 中用 `disabled: false` 启用对应行，并检查该插件的配置；参见 [Session 日志分享](../../session/session-log-deepseek/README.zh.md)与[插件包清单](../../llm/plugin-package-inventory-deepseek/README.zh.md)。
 
-使用 `dsh plugin --profile sdk-minimal` 管理持久外部依赖。Profile、home 与有序 `--patch` 文件可以替换完整默认配置树中的配置项，或在该配置树上方插入 bundle。随附模板只在启动时应用 patch。
+使用 `agentrans plugin --profile sdk-minimal` 管理持久外部依赖。Profile、home 与有序 `--patch` 文件可以替换完整默认配置树中的配置项，或在该配置树上方插入 bundle。随附模板只在启动时应用 patch。
 
 该 profile 只挂载一套持久 shell：Linux 和 macOS 使用 Bash，Windows 使用 PowerShell。两套配置都使用 300 秒超时与一个 agent 自有终端；另一平台的配置项保持禁用。
 

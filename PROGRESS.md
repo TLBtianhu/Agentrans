@@ -15,7 +15,7 @@
 三项改名全部落地，每阶段都过了门禁并在托管 runner 上验证：
 
 - **npm scope**：`@deepseek-ai/dsh-*` → `@agentrans/*`，含 vendor 内的 Cordis 一层与门禁里硬编码的 scope 断言。
-- **命令**：`dsh` → `agentrans`（`@agentrans/cli` 包、bin、启动器、185 处调用与文档）。
+- **命令**：`agentrans` → `agentrans`（`@agentrans/cli` 包、bin、启动器、185 处调用与文档）。
 - **环境变量**：`DSH_*` → `AGENTRANS_*`（1260 文件、5414 处），默认 home `~/.dsh` → `~/.agentrans`。
 - 仍保留上游 scope 的只有被消费的依赖：`@deepseek-ai/libreoffice-kit*` 与 `@deepseek-ai/node-addon-system*`——它们是上游发布的包，不能改名。
 
@@ -322,7 +322,7 @@ un-gates（doc-sync 43 → 47）：erify-config-keys（87 行配置与其声明
 
 - 本轮修改尚未提交、打包或发布；下面的 0.1.0 Release 信息仍指此前发布物，不能当作已包含这些修复。
 - 新增轻量 `product-layout/launch-context`：显式区分 development、verification、user，由 code/resources/instance 三个根一次派生 DSH、Electron、缓存、日志、崩溃转储、导出和更新日志等路径。源码产品入口、Desktop、打包 CLI、Host 和验收启动使用同一契约。
-- 默认开发状态位于源码树外的 `<源码父目录>/.dev-data/agentrans/dev/<worktree标识>`；只允许 `AGENTRANS_DEV_ROOT` 显式覆盖。启动不再继承上游 `AGENTRANS_HOME`、`AGENTRANS_AGENTS_HOME` 或旧 Electron userData，普通启动不自动注册 `dsh` 协议。
+- 默认开发状态位于源码树外的 `<源码父目录>/.dev-data/agentrans/dev/<worktree标识>`；只允许 `AGENTRANS_DEV_ROOT` 显式覆盖。启动不再继承上游 `AGENTRANS_HOME`、`AGENTRANS_AGENTS_HOME` 或旧 Electron userData，普通启动不自动注册 `agentrans` 协议。
 - 开发与验收实例首次使用必须为空，并写入用途标识；拒绝未标识非空目录、用途不匹配、安装负载、状态与代码重叠、路径中的 symlink/junction 和非目录。验收上下文必须绑定当前负载。已有用户安装不增加迁移流程。
 - Windows 打包 GUI/CLI 共用安装根。macOS 源码开发支持自定义根和 Finder 冷启动；macOS 普通用户包尚无单根布局适配，启动前明确拒绝，不能声称已支持。
 - 独立 Scene HTML 导出转义脚本内 JSON，并使用 DOM 文本节点显示模型标签；恶意标签不会变成脚本或图片。

@@ -9,7 +9,7 @@ description: "@agentrans/plugin-manager/operations 的 viewProfilePackage 需要
 
 ## 变更
 
-`@agentrans/plugin-manager/operations` 的 `viewProfilePackage(dir, spec, options)` 原先打印固定的字段列表：`name`、`version`、`description` 与 `dsh`。`PackageViewOptions` 现在要求 `fields`，即 `pnpm view` 打印的清单或注册表字段，使同一查询可以读取版本列表和各版本的 peer。直接调用 `viewProfilePackage` 的代码缺少 `fields` 时无法通过类型检查，省略它的 JavaScript 调用方会让 `pnpm view` 不带字段运行。
+`@agentrans/plugin-manager/operations` 的 `viewProfilePackage(dir, spec, options)` 原先打印固定的字段列表：`name`、`version`、`description` 与 `agentrans`。`PackageViewOptions` 现在要求 `fields`，即 `pnpm view` 打印的清单或注册表字段，使同一查询可以读取版本列表和各版本的 peer。直接调用 `viewProfilePackage` 的代码缺少 `fields` 时无法通过类型检查，省略它的 JavaScript 调用方会让 `pnpm view` 不带字段运行。
 
 ## 迁移
 

@@ -2,7 +2,7 @@
 
 [English](README.md) | 中文
 
-基于唯一应用启动器 `dsh` 的可运行 Python SDK 示例。Python 客户端负责 JSON-RPC stdio；所选 profile 负责 agent（智能体）组合、持久化、执行策略与插件。
+基于唯一应用启动器 `agentrans` 的可运行 Python SDK 示例。Python 客户端负责 JSON-RPC stdio；所选 profile 负责 agent（智能体）组合、持久化、执行策略与插件。
 
 ## 运行极简 agent
 
@@ -97,15 +97,15 @@ python python/sdk/examples/manage_plugins.py \
   "Install and enable the bundle at /absolute/path/to/my-plugin-bundle."
 ```
 
-当前进程保留原有插件。收到 `restart-required` 后，使用相同 home 重新运行示例以加载已保存的配置。删除仍被当前启动组合使用的组合包，需要先停止该运行时，再使用 `dsh plugin`。
+当前进程保留原有插件。收到 `restart-required` 后，使用相同 home 重新运行示例以加载已保存的配置。删除仍被当前启动组合使用的组合包，需要先停止该运行时，再使用 `agentrans plugin`。
 
 ## 添加插件
 
-对同一个显式 home 使用运行时 wheel 包提供的 `dsh` 命令，以进行持久 profile 变更：
+对同一个显式 home 使用运行时 wheel 包提供的 `agentrans` 命令，以进行持久 profile 变更：
 
 ```sh
 export AGENTRANS_HOME=/absolute/path/to/example-dsh-home
-dsh plugin --profile sdk-minimal add file:/absolute/path/to/my-plugin-bundle
+agentrans plugin --profile sdk-minimal add file:/absolute/path/to/my-plugin-bundle
 ```
 
 在该命令中使用 `sdk-minimal` 可扩展本示例，使用 `sdk` 则扩展基于完整 base 的 SDK profile。Python 调用也可以在 `patches=(...)` 中传入更多绝对 patch 路径；后面的文件优先。所选 profile 必须保留 `@agentrans/sdk-app` 或另一个 JSON-RPC server 配置项。该示例不接受完整 Cordis 文件或任意进程 argv。

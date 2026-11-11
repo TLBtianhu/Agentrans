@@ -55,7 +55,7 @@ export NO_PROXY=internal.example.com,.corp.example.com,registry.local
 export NODE_EXTRA_CA_CERTS=/path/to/corporate-ca.pem
 ```
 
-Node 只在进程启动时读取该变量，所以要在运行 `dsh` 之前导出。
+Node 只在进程启动时读取该变量，所以要在运行 `agentrans` 之前导出。
 
 **DSH 替你运行的工具遵循同一个代理。** bash 工具里的命令、`git`、`gh`，以及作为子进程启动的 MCP 服务器都会继承这些变量。Node 子程序使用自己安装的运行时：Node 22.21+ 和 Node 24+ 遵循这些变量；更旧的运行时会直连。如果你的某个代理变量是 DSH 拒绝的值——比如 SOCKS URL——基于 Node 的工具同样直连而不是起不来，`curl` 与 `git` 则仍会读取那个值。
 

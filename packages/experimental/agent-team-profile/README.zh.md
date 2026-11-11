@@ -30,16 +30,16 @@ kind: "package-bundle"
 将本包添加到已初始化的 profile，然后运行一个要求 Lead 委派工作的任务：
 
 ```sh
-dsh plugin --profile headless add @agentrans/experimental-agent-team-profile
+agentrans plugin --profile headless add @agentrans/experimental-agent-team-profile
 agentrans --profile headless "Use Agent Teams to split this task between two teammates, wait, and summarize."
 ```
 
-profile 必须已经包含 `@agentrans/base`，本层会使用其中的 Subagent 服务与提供方配置行。执行 `dsh plugin --profile <name> remove @agentrans/experimental-agent-team-profile` 移除本包时，bundle 也会从 profile 的有序层列表中移除。
+profile 必须已经包含 `@agentrans/base`，本层会使用其中的 Subagent 服务与提供方配置行。执行 `agentrans plugin --profile <name> remove @agentrans/experimental-agent-team-profile` 移除本包时，bundle 也会从 profile 的有序层列表中移除。
 
 在 Web 或 Desktop 的插件页开启「智能体团队」，即可同时启用工具与界面。CLI 的 Web profile 也可使用以下命令：
 
 ```sh
-dsh plugin --profile web add @agentrans/experimental-agent-team-profile
+agentrans plugin --profile web add @agentrans/experimental-agent-team-profile
 ```
 
 已有 profile 的 `package.json` 中，`agentrans.profile.bundles` 应只保留 `@agentrans/experimental-agent-team-profile`，删除独立的 `@agentrans/experimental-agent-team-web-profile` 条目。用户 patch 中的 `ui-agent-team` 配置仍然有效。

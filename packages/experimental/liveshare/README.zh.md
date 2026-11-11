@@ -57,7 +57,7 @@ dsh 安装会把本包作为运行时依赖一起安装，但没有任何随发�
 
 profile 也可以改为选中组合包：在 `$AGENTRANS_HOME/profiles/<profile>/package.json` 的 `agentrans.profile.bundles` 里加入 `"@agentrans/experimental-liveshare"`；卡片可见后，卡片上的开关执行的就是这次写入。
 
-两条路线都只在重新组合时生效。profile 的 HMR 行开启时，改动在 profile 被重新读取后应用；没有 HMR 时，等下一次 `dsh` 启动才应用。只要组合包声明的行有一条在运行，它的卡片就会出现在**实验性插件**下，也出现在**更多**页。删除这些条目、把它们置为 disabled，或把组合包从 `agentrans.profile.bundles` 移除，都会停止这些行，卡片也随之从两个列表消失。
+两条路线都只在重新组合时生效。profile 的 HMR 行开启时，改动在 profile 被重新读取后应用；没有 HMR 时，等下一次 `agentrans` 启动才应用。只要组合包声明的行有一条在运行，它的卡片就会出现在**实验性插件**下，也出现在**更多**页。删除这些条目、把它们置为 disabled，或把组合包从 `agentrans.profile.bundles` 移除，都会停止这些行，卡片也随之从两个列表消失。
 
 ### 所有者配置
 

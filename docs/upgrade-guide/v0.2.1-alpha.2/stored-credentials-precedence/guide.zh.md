@@ -15,7 +15,7 @@ description: "挂载存储时，已保存凭据现在优先于环境后备；随
 
 随附的 `headless` profile 则禁用凭据存储、authorization 和 DeepSeek account 提供方。它依次使用启动环境、项目 `.env` 和 Harness home `.env`，并保持 `.credentials.yaml` 原样。已保存 API 密钥和登录凭据默认不再为 headless 任务提供认证。Web、SDK 和 ACP 保留存储。
 
-如果某个 harness home 在 `refs` 下存储了值，而启动 `dsh` 的进程导出了同名变量，你就会受到影响。挂载了这类 home 的容器也包括在内。请求现在使用存储的密钥，而不是导出的密钥。以全新 harness home 启动、没有 `.credentials.yaml` 的 CI 作业或容器不受影响。[存储凭据优先级](../../../../.agents/notes/implemented/architecture/2026-10-09-stored-credential-precedence.zh.md) Agent Note 记录了原因。
+如果某个 harness home 在 `refs` 下存储了值，而启动 `agentrans` 的进程导出了同名变量，你就会受到影响。挂载了这类 home 的容器也包括在内。请求现在使用存储的密钥，而不是导出的密钥。以全新 harness home 启动、没有 `.credentials.yaml` 的 CI 作业或容器不受影响。[存储凭据优先级](../../../../.agents/notes/implemented/architecture/2026-10-09-stored-credential-precedence.zh.md) Agent Note 记录了原因。
 
 ## 迁移
 

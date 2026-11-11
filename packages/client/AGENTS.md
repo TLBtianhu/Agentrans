@@ -1,6 +1,6 @@
 # AGENTS.md — Web client stack
 
-Rules for `packages/client/*` (the browser side of the dsh web GUI) plus its build entry `apps/web`. They supplement the repo-wide [conventions](../../AGENTS.md#conventions) and the [package rules](../README.md). Read the current [Web Client architecture](../../docs/subsystems/web-client.md), [Slots reference](../../docs/subsystems/slots.md), and [Conversation reference](../../docs/subsystems/conversation.md) before changing the corresponding layer.
+Rules for `packages/client/*` (the browser side of the agentrans web GUI) plus its build entry `apps/web`. They supplement the repo-wide [conventions](../../AGENTS.md#conventions) and the [package rules](../README.md). Read the current [Web Client architecture](../../docs/subsystems/web-client.md), [Slots reference](../../docs/subsystems/slots.md), and [Conversation reference](../../docs/subsystems/conversation.md) before changing the corresponding layer.
 
 Packages here are named with the directory prefix: `@agentrans/client-<name>`.
 

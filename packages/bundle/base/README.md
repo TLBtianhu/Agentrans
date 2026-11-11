@@ -1,5 +1,5 @@
 ---
-description: "The shared dsh core: model access, tools, durable sessions, and safety defaults for every dsh --profile surface, for users composing or customizing a profile."
+description: "The shared dsh core: model access, tools, durable sessions, and safety defaults for every agentrans --profile surface, for users composing or customizing a profile."
 kind: "package-bundle"
 ---
 
@@ -43,7 +43,7 @@ To build a profile on the shared core, create a profile with a `package.json` th
 }
 ```
 
-Run `agentrans --profile my-profile "your task"` and you get a working agent with model access, tools, persistence, and the default permission policy. The shipped `web`, `headless`, `sdk`, and `acp` profiles are created for you on first use. To add more bundles, run `dsh plugin --profile <name> add <package>`; in-box bundles resolve from the dsh installation. The profile contract is documented in the [app-boot profile section](../../boot/app-boot/README.md).
+Run `agentrans --profile my-profile "your task"` and you get a working agent with model access, tools, persistence, and the default permission policy. The shipped `web`, `headless`, `sdk`, and `acp` profiles are created for you on first use. To add more bundles, run `agentrans plugin --profile <name> add <package>`; in-box bundles resolve from the dsh installation. The profile contract is documented in the [app-boot profile section](../../boot/app-boot/README.md).
 
 <a id="included-capabilities"></a>
 ### What you get

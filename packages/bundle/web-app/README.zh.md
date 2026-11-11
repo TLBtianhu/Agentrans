@@ -1,5 +1,5 @@
 ---
-description: "dsh 的浏览器 GUI：交互式聊天、模型与设置管理、会话历史，供运行 dsh web 表层的用户使用。"
+description: "dsh 的浏览器 GUI：交互式聊天、模型与设置管理、会话历史，供运行 agentrans web 表层的用户使用。"
 kind: "package-bundle"
 ---
 

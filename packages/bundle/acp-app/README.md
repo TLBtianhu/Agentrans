@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-The automation-only ACP stdio application as a `dsh` profile bundle over [`dsh-base`](../base/README.md). It inherits the base's disabled module-HMR policy; its patch sets the coding-agent persona and default model route, mounts an app-owned zero-option command provider, and starts [`dsh-acp`](../../acp/acp/README.md) only after that provider accepts the invocation. `agentrans --profile acp --help` therefore writes help and exits without claiming stdin or stdout.
+The automation-only ACP stdio application as a `agentrans` profile bundle over [`dsh-base`](../base/README.md). It inherits the base's disabled module-HMR policy; its patch sets the coding-agent persona and default model route, mounts an app-owned zero-option command provider, and starts [`dsh-acp`](../../acp/acp/README.md) only after that provider accepts the invocation. `agentrans --profile acp --help` therefore writes help and exits without claiming stdin or stdout.
 
 ## Table of Contents
 

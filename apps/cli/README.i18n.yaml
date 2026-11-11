@@ -3,17 +3,17 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write apps/cli/README.md
 /agentrans-cli:
-  en: 3ad38ada3c343475
-  zh: 44cf833224908c48
+  en: bd3dd96be47342c9
+  zh: 931b62fcb9df6482
 /agentrans-cli/entry-modes:
-  en: 28b02500855b483b
-  zh: 093534341f2d426e
+  en: 4a5d83c34e45fd50
+  zh: a5da5ecd09ec7fa0
 /agentrans-cli/app-arguments:
   en: cc03e6b75206661b
   zh: 99e41f4143198352
 /agentrans-cli/profiles:
-  en: 6c9f3a3ad1c4e27f
-  zh: 4d4d1eb7e81f8b55
+  en: 11d9167e086fd8f8
+  zh: df95ea9fab73fa30
 /agentrans-cli/optional-overlays:
   en: 3a40ddc44e55f79c
   zh: 8d3949132e1ef93c

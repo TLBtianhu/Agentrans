@@ -2,7 +2,7 @@
 
 [English](python-sdk.md) | 中文
 
-本教程安装已发布的 Python SDK，运行随附的独立极简 profile，并说明如何从自己的程序自定义同一个 `dsh` profile。
+本教程安装已发布的 Python SDK，运行随附的独立极简 profile，并说明如何从自己的程序自定义同一个 `agentrans` profile。
 
 ## 前置条件
 
@@ -39,7 +39,7 @@ python -m pip install deepseek-harness-sdk
 
 :::
 
-安装内容包含匹配的原生运行时 wheel 与 `dsh` 命令。普通 SDK 运行不需要系统 Node.js。需要构建产物的仓库贡献者应使用 [Python 贡献者工作流](../../../python/development.zh.md)。
+安装内容包含匹配的原生运行时 wheel 与 `agentrans` 命令。普通 SDK 运行不需要系统 Node.js。需要构建产物的仓库贡献者应使用 [Python 贡献者工作流](../../../python/development.zh.md)。
 
 ## 运行检入示例
 
@@ -122,7 +122,7 @@ SDK 会延迟启动内置的 `agentrans --profile sdk-minimal` 进程，并复�
 
 ## 安装或定义插件
 
-需要在该 home 中持久保存依赖与 bundle 层时，使用 `dsh plugin`：
+需要在该 home 中持久保存依赖与 bundle 层时，使用 `agentrans plugin`：
 
 <div>
 <a id="linux-与-macos-3"></a>
@@ -134,13 +134,13 @@ SDK 会延迟启动内置的 `agentrans --profile sdk-minimal` 进程，并复�
 ```sh [Linux/macOS]
 export AGENTRANS_HOME=/absolute/path/to/example-dsh-home
 agentrans --profile sdk-minimal --dump-default-config >/dev/null
-dsh plugin --profile sdk-minimal add file:/absolute/path/to/my-plugin-bundle
+agentrans plugin --profile sdk-minimal add file:/absolute/path/to/my-plugin-bundle
 ```
 
 ```powershell [Windows PowerShell]
 $env:AGENTRANS_HOME = "C:\work\example-dsh-home"
 agentrans --profile sdk-minimal --dump-default-config | Out-Null
-dsh plugin --profile sdk-minimal add file:C:/work/my-plugin-bundle
+agentrans plugin --profile sdk-minimal add file:C:/work/my-plugin-bundle
 ```
 
 :::

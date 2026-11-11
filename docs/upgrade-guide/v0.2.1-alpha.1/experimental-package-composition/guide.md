@@ -15,7 +15,7 @@ Package ownership and naming follow the [experimental package policy](../../../.
 
 ## Migration
 
-1. Install any packages missing from the target profile together with their required peers. Profiles disable automatic peer installation. For example, run `dsh plugin --profile web add @agentrans/hooks-claude-code @agentrans/hook-protocol`. The Codex bridge needs the same protocol peer; the GitHub adapter needs `@agentrans/webhook` alongside `@agentrans/webhook-github`.
+1. Install any packages missing from the target profile together with their required peers. Profiles disable automatic peer installation. For example, run `agentrans plugin --profile web add @agentrans/hooks-claude-code @agentrans/hook-protocol`. The Codex bridge needs the same protocol peer; the GitHub adapter needs `@agentrans/webhook` alongside `@agentrans/webhook-github`.
 2. Select an available bundle before overriding its rows. For a capability composed manually, replace an override of a removed row with a complete insertion. Add preset-local tools inside that preset's `config.plugins`, including the services they require. A Host badge insertion is:
 
    ```yaml

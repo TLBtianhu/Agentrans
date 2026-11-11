@@ -18,4 +18,4 @@ description: "插件兼容性检查先读 engines.agentrans，再读 DSH peerDep
 1. 如果包声明了 `engines.agentrans`，让该范围覆盖包支持的所有 DSH 版本，因为 DSH peer 范围不再放宽或收窄它。删除 `engines.agentrans` 可保留基于 peer 的检查。
 2. 将 `engines.agentrans` 中的 `workspace:` 值替换为语义化版本范围。
 3. 从 `IncompatiblePlugin` 和 `PluginCompatibility` 读取 `requirements`，不再读取 `peers`。
-4. 用 `dsh plugin --profile <profile> add <package@version>` 或插件管理器安装该包确认迁移：不匹配时，拒绝信息会列出 `engines.agentrans` 或对应 peer 包。
+4. 用 `agentrans plugin --profile <profile> add <package@version>` 或插件管理器安装该包确认迁移：不匹配时，拒绝信息会列出 `engines.agentrans` 或对应 peer 包。

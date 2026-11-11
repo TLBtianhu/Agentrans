@@ -9,7 +9,7 @@ English | [中文](guide.zh.md)
 
 ## Change
 
-`@agentrans/app-boot` no longer exports `PROFILE_TEMPLATES`, `ProfileTemplate`, `DEFAULT_PROFILE_BUNDLES`, `OPTIONAL_BUNDLES`, `ON_DEMAND_BUNDLES`, `OFFICIAL_ON_DEMAND_CATALOG`, or `OfficialBundleCatalogEntry`. The new published package `@agentrans/official-bundles` exports them with unchanged values and types. Code that imports any of these names from `@agentrans/app-boot` fails to compile or load. The `dsh` launcher, profiles, and bundle selection behave as before.
+`@agentrans/app-boot` no longer exports `PROFILE_TEMPLATES`, `ProfileTemplate`, `DEFAULT_PROFILE_BUNDLES`, `OPTIONAL_BUNDLES`, `ON_DEMAND_BUNDLES`, `OFFICIAL_ON_DEMAND_CATALOG`, or `OfficialBundleCatalogEntry`. The new published package `@agentrans/official-bundles` exports them with unchanged values and types. Code that imports any of these names from `@agentrans/app-boot` fails to compile or load. The `agentrans` launcher, profiles, and bundle selection behave as before.
 
 ## Migration
 

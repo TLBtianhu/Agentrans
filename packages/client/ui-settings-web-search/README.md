@@ -1,5 +1,5 @@
 ---
-description: "The DeepSeek web-search settings page on the dsh web client's Plugins page: the Search and Fetch API switch, the API key, endpoint, and per-search limit."
+description: "The DeepSeek web-search settings page on the agentrans web client's Plugins page: the Search and Fetch API switch, the API key, endpoint, and per-search limit."
 kind: "package-reference"
 ---
 

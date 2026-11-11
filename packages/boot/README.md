@@ -33,7 +33,7 @@ The boot group launches profile applications and manages their installed composi
 <a id="related-documentation"></a>
 ## Related documentation
 
-- [dsh app](../../apps/cli/README.md) — the `dsh` bin that consumes these helpers for its boot sequence.
+- [dsh app](../../apps/cli/README.md) — the `agentrans` bin that consumes these helpers for its boot sequence.
 - [Profile bundles](../bundle/README.md) — installable patch layers that `agentrans --profile` compositions mount.
 - [dsh-home-paths](../util/home-paths/README.md) — the harness-home resolver both packages build on.
 - [dsh-cmdline](cmdline/README.md) — how an app owns its flag family instead of the launcher.

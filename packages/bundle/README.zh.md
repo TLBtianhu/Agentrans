@@ -29,12 +29,12 @@ kind: "package-group"
 | [`sdk-app`](sdk-app/README.zh.md) | 基于 base 的 SDK JSON-RPC stdio 应用 | 挂载 SDK 服务器 |
 | [`sdk-minimal`](sdk-minimal/README.zh.md) | 不使用 base 或 Web 的独立极简 SDK 应用 | —（完整 patch 树） |
 
-内置组合包从 dsh 安装目录解析；树外（out-of-tree）组合包通过 `dsh plugin --profile <name> add <package>` 安装进 profile。
+内置组合包从 dsh 安装目录解析；树外（out-of-tree）组合包通过 `agentrans plugin --profile <name> add <package>` 安装进 profile。
 
 <a id="related-documentation"></a>
 ## 相关文档
 
-- [dsh 应用](../../apps/cli/README.zh.md)——启动 profile 的 `dsh` 命令。
+- [dsh 应用](../../apps/cli/README.zh.md)——启动 profile 的 `agentrans` 命令。
 - [app-boot](../boot/app-boot/README.zh.md)——profile 如何解析、分层与定制。
 - [Profile 插件组合包设计笔记](../../.agents/notes/implemented/architecture/2026-08-05-profile-plugin-bundles.zh.md)——profile 与组合包的组合设计。
 - [生成组合图](../../apps/cli/composition.md)——每个随发行版交付的 profile 使用的确切组合。

@@ -25,7 +25,7 @@ printf '%s\n' "$AGENTRANS_GITHUB_WEBHOOK_SECRET"
 Install both experimental packages into the Web profile first. Profiles do not install peers automatically; the GitHub adapter needs the webhook runtime explicitly:
 
 ```sh
-dsh plugin --profile web add @agentrans/webhook @agentrans/webhook-github
+agentrans plugin --profile web add @agentrans/webhook @agentrans/webhook-github
 export AGENTRANS_GITHUB_REVIEW_WORKSPACE=/path/to/deepseek-harness
 agentrans web --patch "${AGENTRANS_HOME:-$HOME/.dsh}/profiles/web/node_modules/@agentrans/webhook-github/examples/github-review/cordis.yml"
 ```

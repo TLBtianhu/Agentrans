@@ -3,8 +3,8 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/bundle/web-app/README.md
 /:
-  en: af2e4e5296596e8f
-  zh: 70c0b5ac93209d00
+  en: c3a71f38ff5a4019
+  zh: 9ccfd4c1e273a1cb
 /agentrans-web-app:
   en: cdbc4b78c84d1def
   zh: 9885cf0827b1b266

@@ -59,7 +59,7 @@ Declare this provider and `@agentrans/experimental-tool-subagent-oar` as depende
           claude: oar-claude
 ```
 
-Launch the completed composition through a `dsh` profile. The example assigns each provider a distinct name and fixes its native permission arguments before the model can delegate work.
+Launch the completed composition through a `agentrans` profile. The example assigns each provider a distinct name and fixes its native permission arguments before the model can delegate work.
 
 ### What you get
 

@@ -36,7 +36,7 @@ agentrans --profile sdk-minimal
 
 The profile disables `session-log-deepseek` and `plugin-package-inventory-deepseek` by default. Normal model requests use the explicit DeepSeek adapter without contributing Session-log or plugin-inventory fields. To share either intentionally, enable its row with `disabled: false` in a profile or invocation patch and review that plugin's configuration; see [Session-log sharing](../../session/session-log-deepseek/README.md) and [plugin package inventory](../../llm/plugin-package-inventory-deepseek/README.md).
 
-Use `dsh plugin --profile sdk-minimal` to manage persistent external dependencies. Profile, home, and ordered `--patch` files can replace rows or insert bundles above the complete default tree. The shipped template applies patches only at startup.
+Use `agentrans plugin --profile sdk-minimal` to manage persistent external dependencies. Profile, home, and ordered `--patch` files can replace rows or insert bundles above the complete default tree. The shipped template applies patches only at startup.
 
 The profile mounts exactly one persistent shell stack: Bash on Linux and macOS, or PowerShell on Windows. Both stacks use a 300-second timeout and one owner-scoped terminal; the other platform's rows remain disabled.
 

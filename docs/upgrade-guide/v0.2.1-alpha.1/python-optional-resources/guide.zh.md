@@ -9,7 +9,7 @@ description: "Python 运行时 wheel 的 Office 转换与内置创作环境需�
 
 ## 变更
 
-Python 运行时 wheel 不包含 Office sidecar、创作解释器和库。SDK 启动不会下载这些资源。Office 操作需要显式下载；创作环境和转换引擎可以独立选择。SDK 仍打包常规 `dsh` CLI，无需系统 Node.js。
+Python 运行时 wheel 不包含 Office sidecar、创作解释器和库。SDK 启动不会下载这些资源。Office 操作需要显式下载；创作环境和转换引擎可以独立选择。SDK 仍打包常规 `agentrans` CLI，无需系统 Node.js。
 
 ## 迁移
 

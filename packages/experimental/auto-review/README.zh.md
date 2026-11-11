@@ -49,7 +49,7 @@ pnpm agentrans plugin --profile web remove @agentrans/experimental-auto-review
 为 headless profile 显式启用实验层：
 
 ```sh
-dsh plugin --profile headless add @agentrans/experimental-auto-review
+agentrans plugin --profile headless add @agentrans/experimental-auto-review
 dsh headless --permission-mode auto --approval-policy never --json - < task.txt > run.jsonl
 ```
 

@@ -25,7 +25,7 @@ The shipped replay scenarios exercise these flows through the real Web compositi
 
 Build output is an intermediate for producing distributions, not a user home. Development runs use isolated data roots and never reuse the upstream DSH profile. Do not install or run this checkout over an existing DSH installation.
 
-The source `dsh`, `start:web`, and `dev:web` commands initialize a per-worktree development instance outside the source tree. `AGENTRANS_DEV_ROOT` may select an explicit empty or already marked development root; inherited Harness home variables do not select product state. Existing unmarked data is rejected rather than migrated.
+The source `agentrans`, `start:web`, and `dev:web` commands initialize a per-worktree development instance outside the source tree. `AGENTRANS_DEV_ROOT` may select an explicit empty or already marked development root; inherited Harness home variables do not select product state. Existing unmarked data is rejected rather than migrated.
 
 ```powershell
 pnpm install

@@ -49,7 +49,7 @@ pnpm agentrans plugin --profile web remove @agentrans/experimental-auto-review
 Enable the experimental layer explicitly for the headless profile:
 
 ```sh
-dsh plugin --profile headless add @agentrans/experimental-auto-review
+agentrans plugin --profile headless add @agentrans/experimental-auto-review
 dsh headless --permission-mode auto --approval-policy never --json - < task.txt > run.jsonl
 ```
 

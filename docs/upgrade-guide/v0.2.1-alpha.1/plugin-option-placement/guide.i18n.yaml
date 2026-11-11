@@ -3,14 +3,14 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write docs/upgrade-guide/v0.2.1-alpha.1/plugin-option-placement/guide.md
 /:
-  en: 3f9b48b2230ec6e4
-  zh: c1aad0e9121d46a4
-/dsh-plugin-option-placement:
-  en: 3d717a2b7e9087d3
-  zh: e6004d015e6a4829
-/dsh-plugin-option-placement/change:
-  en: 15fe8cf74db0ba53
-  zh: c6ea1056aa7a6f77
-/dsh-plugin-option-placement/migration:
-  en: b7239597ebc4d970
-  zh: fa45f851cf1f3af1
+  en: 41f0ee48ce5b9d51
+  zh: a7ba755a44d8d1f5
+/agentrans-plugin-option-placement:
+  en: cf3a8adf99f2d127
+  zh: 05b5bb6dd2598166
+/agentrans-plugin-option-placement/change:
+  en: 24b4c9468ffe40ac
+  zh: 60f326016c3f42dc
+/agentrans-plugin-option-placement/migration:
+  en: 7e2a73cc82c72499
+  zh: 91da6a7bf2daafa6

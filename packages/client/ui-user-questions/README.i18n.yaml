@@ -3,7 +3,7 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/client/ui-user-questions/README.md
 /:
-  en: 50286bfa65e45456
+  en: 7c81b72994cf5252
   zh: 2347492bb65bd1b4
 /agentrans-client-ui-user-questions:
   en: 572216dacc1b7568
