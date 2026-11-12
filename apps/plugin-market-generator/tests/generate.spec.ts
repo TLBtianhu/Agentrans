@@ -162,9 +162,9 @@ it('lists every bundle version from the registry document that is neither deprec
   expect(warnings).toEqual(expect.arrayContaining([
     'dsh-a: dsh-a@1.3.0 skipped: DSH range "workspace:>=1" is not a valid SemVer range',
     'dsh-a@2.0.0-rc.1: locale file locale/x_y.json ignored: its name is not a language id',
-    'plain-lib: no published version that is neither deprecated nor private declares dsh.bundle',
-    'dsh-private: no published version that is neither deprecated nor private declares dsh.bundle',
-    'dsh-unpublished: no published version that is neither deprecated nor private declares dsh.bundle',
+    'plain-lib: no published version that is neither deprecated nor private declares agentrans.bundle',
+    'dsh-private: no published version that is neither deprecated nor private declares agentrans.bundle',
+    'dsh-unpublished: no published version that is neither deprecated nor private declares agentrans.bundle',
   ]))
 
   // Unchanged version lists come from the cache; a failing source keeps its last result for the same registry only.

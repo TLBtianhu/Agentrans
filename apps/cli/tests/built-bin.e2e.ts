@@ -1125,7 +1125,7 @@ describe.skipIf(!existsSync(dshBin))('dsh BUILT bin (node lib/bin.js, no tsx)', 
         'plugin', '--profile', 'alias', 'add', `bundle-alias@file:${bundle}`, `file:${library}`,
       ], { AGENTRANS_HOME: home }, home)
       expect(added.code).toBe(0)
-      expect(added.stderr).toContain('ordinary-library declares no dsh.bundle — installed as a plain dependency, not a profile layer')
+      expect(added.stderr).toContain('ordinary-library declares no agentrans.bundle — installed as a plain dependency, not a profile layer')
       const manifestPath = join(home, 'profiles', 'alias', 'package.json')
       const installed = JSON.parse(readFileSync(manifestPath, 'utf8')) as {
         dependencies: Record<string, string>
@@ -1137,7 +1137,7 @@ describe.skipIf(!existsSync(dshBin))('dsh BUILT bin (node lib/bin.js, no tsx)', 
       writeFileSync(manifestPath, JSON.stringify(installed))
       const refreshed = await runBuiltBin(['plugin', '--profile', 'alias', 'root'], { AGENTRANS_HOME: home }, home)
       expect(refreshed.code).toBe(0)
-      expect(refreshed.stderr).not.toContain('declares no dsh.bundle')
+      expect(refreshed.stderr).not.toContain('declares no agentrans.bundle')
       const active = JSON.parse(readFileSync(manifestPath, 'utf8')) as { agentrans: { profile: { bundles: string[] } } }
       expect(active.agentrans.profile.bundles).toEqual(['@agentrans/base'])
       const removed = await runBuiltBin(['plugin', '--profile', 'alias', 'remove', 'bundle-alias'], { AGENTRANS_HOME: home }, home)
@@ -1172,7 +1172,7 @@ describe.skipIf(!existsSync(dshBin))('dsh BUILT bin (node lib/bin.js, no tsx)', 
       expect(first.code).toBe(0)
       let manifest = JSON.parse(readFileSync(join(profileDir, 'package.json'), 'utf8')) as { agentrans: { profile: { bundles: string[] } } }
       expect(manifest.agentrans.profile.bundles).toEqual(['@agentrans/base'])
-      // v2: the installed package now declares dsh.bundle (an update landed).
+      // v2: the installed package now declares agentrans.bundle (an update landed).
       writeFileSync(join(installed, 'package.json'), JSON.stringify({
         name: 'late-bundle', version: '2.0.0', agentrans: { bundle: { patch: './cordis.patch.yml' } },
       }))

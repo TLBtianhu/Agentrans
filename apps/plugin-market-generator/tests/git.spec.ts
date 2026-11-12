@@ -163,8 +163,8 @@ it('reads a root package, reports repositories without a public one, and refuses
     name: 'dsh-root', title: 'dsh-root', versions: [{ version: '1.0.0', publishTimestamp: 1790000200, source: { type: 'git', url: REPOSITORY, commit } }],
   }], []])
   expect(warnings).toEqual([
-    `${REPOSITORY}: ${REPOSITORY}: no HEAD commit`, expect.stringContaining('not allowed') as string, `${REPOSITORY}: no package declares dsh.bundle`,
-    `${REPOSITORY}: package.json has no name`, `${REPOSITORY}: every package that declares dsh.bundle is private`,
+    `${REPOSITORY}: ${REPOSITORY}: no HEAD commit`, expect.stringContaining('not allowed') as string, `${REPOSITORY}: no package declares agentrans.bundle`,
+    `${REPOSITORY}: package.json has no name`, `${REPOSITORY}: every package that declares agentrans.bundle is private`,
   ])
 })
 

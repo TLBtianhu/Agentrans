@@ -470,7 +470,7 @@ it('projects each bundle\'s default GUI listing without changing its selection, 
   manifest.agentrans.bundle.listedByDefault = 'hidden'
   writeFileSync(path, JSON.stringify(manifest))
   expect((await manager.listBundles()).find(row => row.name === 'extra')).toMatchObject({ enabled: true,
-    error: { diagnostic: 'dsh.bundle.listedByDefault must be a boolean' } })
+    error: { diagnostic: 'agentrans.bundle.listedByDefault must be a boolean' } })
 })
 
 it('names where each installed bundle comes from as a spec pnpm installs', async () => {
@@ -1298,11 +1298,11 @@ it('reads what a spec names before installing it', async () => {
   expect(await manager.inspect('dsh-x')).toEqual({
     status: 'accepted', kind: 'registry', name: 'dsh-x', version: '1.4.2', description: 'A sidebar.', bundle: true, registry: null,
   })
-  expect(view).toHaveBeenCalledWith(dir, 'dsh-x', { command: 'pnpm-test', fields: ['name', 'version', 'description', 'dsh'], timeoutMs: 1000, registry: null })
+  expect(view).toHaveBeenCalledWith(dir, 'dsh-x', { command: 'pnpm-test', fields: ['name', 'version', 'description', 'agentrans', 'dsh'], timeoutMs: 1000, registry: null })
   const signal = AbortSignal.abort()
   answers(JSON.stringify([{ name: 'dsh-lib', version: '1.0.0', agentrans: { bundle: {} } }, { name: 'dsh-lib', version: '1.1.0', dsh: null }]))
-  expect(await manager.inspect('dsh-lib@^1', undefined, signal)).toEqual({ status: 'refused', problem: 'not-a-bundle', reason: 'dsh-lib declares no dsh.bundle', registries: [null] })
-  expect(view).toHaveBeenLastCalledWith(dir, 'dsh-lib@^1', { command: 'pnpm-test', fields: ['name', 'version', 'description', 'dsh'], timeoutMs: 1000, signal, registry: null })
+  expect(await manager.inspect('dsh-lib@^1', undefined, signal)).toEqual({ status: 'refused', problem: 'not-a-bundle', reason: 'dsh-lib declares no agentrans.bundle', registries: [null] })
+  expect(view).toHaveBeenLastCalledWith(dir, 'dsh-lib@^1', { command: 'pnpm-test', fields: ['name', 'version', 'description', 'agentrans', 'dsh'], timeoutMs: 1000, signal, registry: null })
   // An answer that names no package keeps the name the spec gave; colour escapes around the JSON are dropped.
   answers('\x1b[36m' + JSON.stringify({ version: '0.0.1', description: '', agentrans: { bundle: { patch: './p.yml' } } }) + '\x1b[39m\n')
   expect(await manager.inspect('dsh-bare')).toEqual({ status: 'accepted', kind: 'registry', name: 'dsh-bare', version: '0.0.1', bundle: true, registry: null })
@@ -1346,7 +1346,7 @@ it('reads what a spec names before installing it', async () => {
   writeFileSync(join(local, 'package.json'), '{"version":"1.0.0"}')
   expect(await manager.inspect(local)).toEqual({ status: 'refused', problem: 'not-a-package', reason: 'the package.json names no package' })
   writeFileSync(join(local, 'package.json'), JSON.stringify({ name: 'dsh-local', version: '0.1.0', description: 'Local.' }))
-  expect(await manager.inspect(local)).toEqual({ status: 'refused', problem: 'not-a-bundle', reason: 'dsh-local declares no dsh.bundle' })
+  expect(await manager.inspect(local)).toEqual({ status: 'refused', problem: 'not-a-bundle', reason: 'dsh-local declares no agentrans.bundle' })
   writeFileSync(join(local, 'package.json'), JSON.stringify({ name: 'dsh-local', version: '0.1.0', description: 'Local.', agentrans: { bundle: { patch: './p.yml' } } }))
   expect(await manager.inspect(`file:${local}`)).toEqual({ status: 'accepted', kind: 'path', name: 'dsh-local', version: '0.1.0', description: 'Local.', bundle: true, registry: null })
   writeFileSync(join(local, 'package.json'), JSON.stringify({ name: 'core', agentrans: { bundle: { patch: './p.yml' } } }))
@@ -1538,7 +1538,7 @@ it('asks the registries in turn while one is unreachable or stale, and names the
   expect(await manager.inspect('dsh-x')).toEqual({ status: 'accepted', kind: 'registry', name: 'dsh-x', version: '1.0.0', bundle: true, registry: MIRROR })
   expect(asked(0)).toEqual([null, MIRROR])
   expect(read).toHaveBeenCalledWith(dir, { command: 'pnpm', timeoutMs: 1000 })
-  expect(view).toHaveBeenLastCalledWith(expect.any(String), 'dsh-x', { command: 'pnpm', fields: ['name', 'version', 'description', 'dsh'], timeoutMs: 1000, registry: MIRROR })
+  expect(view).toHaveBeenLastCalledWith(expect.any(String), 'dsh-x', { command: 'pnpm', fields: ['name', 'version', 'description', 'agentrans', 'dsh'], timeoutMs: 1000, registry: MIRROR })
   // pnpm prints a refusal as JSON on stdout with nothing on stderr: it is read the same way, and the reason is its message.
   view.mockResolvedValueOnce({ exitCode: 1, stdout: '{\n  "error": {\n    "code": "ERR_PNPM_META_FETCH_FAIL",\n    "message": "GET https://registry.npmjs.org/dsh-x: fetch failed"\n  }\n}\n', stderr: '', timedOut: false })
   answers(manifest)
@@ -2053,7 +2053,7 @@ it('lists newer registry versions with tags, times, deprecation, bundle declarat
   expect(view.mock.calls.map(call => call[1])).toEqual(expect.arrayContaining(['extra', 'extra@2.0.0', 'extra@1.2.0', 'extra@1.2.0-beta.1']))
   expect(view).toHaveBeenCalledTimes(4)
   expect(view).toHaveBeenCalledWith(dir, 'extra', expect.objectContaining({ fields: ['versions', 'time', 'dist-tags'], timeoutMs: 1000 }))
-  expect(view).toHaveBeenCalledWith(dir, 'extra@1.2.0', expect.objectContaining({ fields: ['name', 'version', 'engines', 'peerDependencies', 'deprecated', 'dsh'], registry: null }))
+  expect(view).toHaveBeenCalledWith(dir, 'extra@1.2.0', expect.objectContaining({ fields: ['name', 'version', 'engines', 'peerDependencies', 'deprecated', 'agentrans', 'dsh'], registry: null }))
 })
 
 it('lists versions from the next registry while one is unreachable, and refuses what no registry answered', async () => {

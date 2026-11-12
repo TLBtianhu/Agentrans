@@ -114,7 +114,7 @@ describe('bundleRoster on a scratch installation', () => {
     expect(linked.roster(['@t/base', '@t/linked'])).toEqual(['@t/theme'])
   })
 
-  it('applies the layers in order and keeps enabled browser rows once, with their dsh.client declaration', () => {
+  it('applies the layers in order and keeps enabled browser rows once, with their agentrans.client declaration', () => {
     scratch.web('@t/a', { inject: ['@t/b'], immediately: true })
     scratch.web('@t/b')
     scratch.web('@t/c')
@@ -162,7 +162,7 @@ describe('bundleRoster on a scratch installation', () => {
     expect(scratch.roster(['@t/base'])).toEqual(['@t/a', '@t/c'])
   })
 
-  it('concatenates a dsh.bundle.patch list in order', () => {
+  it('concatenates a agentrans.bundle.patch list in order', () => {
     scratch.web('@t/listed')
     scratch.pkg('@t/list', { agentrans: { bundle: { patch: ['./first.yml', './second.yml'] } } }, {
       'first.yml': '- insert:\n    - id: listed\n      name: \'@t/listed\'\n      disabled: true\n',
@@ -292,9 +292,9 @@ describe('bundleRoster on a scratch installation', () => {
   it('fails loud on a bundle that does not resolve, declares no patch, or whose patch is not a list', () => {
     expect(() => scratch.roster(['@t/missing'])).toThrow('cannot resolve bundle @t/missing from')
     scratch.pkg('@t/no-patch', { agentrans: {} })
-    expect(() => scratch.roster(['@t/no-patch'])).toThrow('bundle @t/no-patch declares no dsh.bundle.patch file list in')
+    expect(() => scratch.roster(['@t/no-patch'])).toThrow('bundle @t/no-patch declares no agentrans.bundle.patch file list in')
     scratch.pkg('@t/bad-patch-list', { agentrans: { bundle: { patch: [1] } } })
-    expect(() => scratch.roster(['@t/bad-patch-list'])).toThrow('bundle @t/bad-patch-list declares no dsh.bundle.patch file list in')
+    expect(() => scratch.roster(['@t/bad-patch-list'])).toThrow('bundle @t/bad-patch-list declares no agentrans.bundle.patch file list in')
     scratch.bundle('@t/not-a-list', 'insert: []\n')
     expect(() => scratch.roster(['@t/not-a-list'])).toThrow('must be a top-level list of patches')
   })

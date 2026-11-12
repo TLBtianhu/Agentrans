@@ -17,7 +17,7 @@ const ERROR_STEPS: Record<ManagementError['code'], string> = {
   'invalid-spec': 'Retry with an npm package name, a git URL, a tarball URL, or an absolute local directory.',
   'already-installed': 'The package is already installed; to install another version, call remove_bundle first, then install_bundle again.',
   'ambiguous-install': 'The dependency change named no single package; call list_bundles to see what was installed.',
-  'not-bundle': 'The package declares no dsh.bundle and cannot be managed as a plugin; install a DSH plugin bundle instead.',
+  'not-bundle': 'The package declares no agentrans.bundle and cannot be managed as a plugin; install a DSH plugin bundle instead.',
   'not-removable': 'Call list_bundles; only bundles marked removable can be removed.',
   'stop-profile': 'This profile runs without HMR; tell the user to stop DSH and run `dsh plugin --profile <profile> remove <bundle>`.',
   'bundle-in-use': 'Call list_plugins, disable the entries from other layers that still use this bundle, then retry.',

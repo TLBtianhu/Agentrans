@@ -1,6 +1,6 @@
 /**
- * Node half of the client module system (`dsh.client` dual-face package): scans
- * the host Loader's entries for packages declaring `dsh.client`, composes the
+ * Node half of the client module system (`agentrans.client` dual-face package): scans
+ * the host Loader's entries for packages declaring `agentrans.client`, composes the
  * `window.__AGENTRANS_BOOT__` entry graph (wire single source: {@link WebBootEntry}
  * in `./client/manifest.ts`) in module-graph order, serves one-or-more-plugin
  * combo scripts plus their source maps, package-local chunks, and the
@@ -40,7 +40,7 @@ import type { Context } from '@agentrans/cordis'
 import type { Entry } from '@agentrans/cordis-plugin-loader'
 import type { IndexInjection } from '@agentrans/host-webserver'
 import { PACKAGE_ASSET_SEGMENT, packageAssetMediaType } from './assets.ts'
-import { exactPackageSpecifier, parseDshClient, stripClientSuffix } from './client/manifest.ts'
+import { exactPackageSpecifier, parseAgentransClient, stripClientSuffix } from './client/manifest.ts'
 import type { WebBootBatch, WebBootBatchPhase, WebBootEntry, WebBootGraph, WebBootRelease } from './client/manifest.ts'
 
 export { stripClientSuffix } from './client/manifest.ts'
@@ -569,7 +569,7 @@ export function orderByModuleGraph(entries: readonly WebBootEntry[]): WebBootEnt
       if (dependency === entry) {
         throw new Error(
           `client-modules: "${entry.id}" requests module "${name}" that it answers itself `
-          + '— a row must not declare its own package in dsh.client.external',
+          + '— a row must not declare its own package in agentrans.client.external',
         )
       }
       if (dependency !== undefined) visit(dependency)
@@ -637,7 +637,7 @@ window.__ModuleLoader__={
 }
 
 /**
- * The web plugin table service: incremental `dsh.client` scan + wire composition
+ * The web plugin table service: incremental `agentrans.client` scan + wire composition
  * + bundle and package-asset route + index injection rows. Construction runs
  * the activation scan synchronously — a malformed declaration or missing bundle among the
  * already-loaded entries aggregates into one loud throw (FAILED fiber; the
@@ -901,14 +901,14 @@ export class ClientModuleRegistry extends Service {
       throw new Error(`client-modules: ${packageName} declares the retired "dsh" manifest field; declare agentrans.client instead`)
     }
     const agentrans = pkg.agentrans
-    const decl = parseDshClient(
+    const decl = parseAgentransClient(
       packageName,
       agentrans !== null && typeof agentrans === 'object' ? (agentrans as Record<string, unknown>).client : undefined,
     )
     if (decl === undefined || decl.platform !== 'web') return null
     const clientRel = clientExportOf(packageName, pkg.exports)
     if (clientRel === undefined) {
-      throw new Error(`client-modules: ${packageName} declares dsh.client but exports no "./client" bundle`)
+      throw new Error(`client-modules: ${packageName} declares agentrans.client but exports no "./client" bundle`)
     }
     const meta: PkgMeta = {
       clientPath: join(dirname(pkgPath), clientRel),

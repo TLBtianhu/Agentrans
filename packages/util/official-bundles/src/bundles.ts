@@ -45,7 +45,7 @@ export const DEFAULT_PROFILE_BUNDLES: readonly string[] = ['@agentrans/base']
 
 /**
  * The bundles the dsh installation ships for a person to switch on: each a
- * runtime dependency of the installation that declares `dsh.bundle.patch`,
+ * runtime dependency of the installation that declares `agentrans.bundle.patch`,
  * an `icon`, and `./locale/*.json` display metadata, selected by no shipped
  * template, and offered switched off by the plugin manager except persistent
  * terminals, which have no page switch

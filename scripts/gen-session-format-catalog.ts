@@ -89,7 +89,7 @@ export function collectSessionFormatMigrations(
     const manifest = readJson(resolve(scanRoot, rel))
     const metadata = manifest.agentrans?.sessionFormatMigration
     if (metadata === undefined) {
-      throw new Error(`gen-session-format-catalog: ${rel} lacks dsh.sessionFormatMigration`)
+      throw new Error(`gen-session-format-catalog: ${rel} lacks agentrans.sessionFormatMigration`)
     }
     const allowed: ReadonlySet<string> = new Set<keyof SessionFormatMigrationDeclaration>([
       'from', 'to', 'export', 'migration', 'sourceCodec', 'targetCodec',

@@ -93,7 +93,7 @@ if (import.meta.main) {
  * A browser plugin must declare the browser half it ships.
  *
  * The browser roster is discovered by scanning composed packages for a
- * `dsh.client` block, and the node half of a surface plugin is an empty
+ * `agentrans.client` block, and the node half of a surface plugin is an empty
  * `apply`. A `packages/client` package that exports `./client` without that
  * block therefore composes, activates, and contributes nothing — its bundle is
  * never served and no error is raised anywhere. The mismatch is invisible in
@@ -101,7 +101,7 @@ if (import.meta.main) {
  * this group is checked: a Host package's `./client` export is the typed wire
  * face its browser consumers import, not a plugin the roster serves.
  * @returns one violation per client package whose `./client` export and
- * `dsh.client` declaration disagree.
+ * `agentrans.client` declaration disagree.
  */
 function validateClientHalvesDeclared(): string[] {
   return globSync('packages/client/*/package.json', { cwd: root }).flatMap((manifestPath) => {
@@ -113,8 +113,8 @@ function validateClientHalvesDeclared(): string[] {
     const declaresClient = manifest.agentrans?.client !== undefined
     if (shipsClient === declaresClient) return []
     return [shipsClient
-      ? `${manifestPath}: exports "./client" but declares no dsh.client, so its browser half is never served`
-      : `${manifestPath}: declares dsh.client but exports no "./client" entry to serve`]
+      ? `${manifestPath}: exports "./client" but declares no agentrans.client, so its browser half is never served`
+      : `${manifestPath}: declares agentrans.client but exports no "./client" entry to serve`]
   })
 }
 

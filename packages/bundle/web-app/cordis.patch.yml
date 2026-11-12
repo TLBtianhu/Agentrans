@@ -31,7 +31,7 @@
 
 # ── web-only host rows, the transport layer, and the browser roster ─────────
 
-# `dsh.client` rows are the browser roster the modules node half scans into
+# `agentrans.client` rows are the browser roster the modules node half scans into
 # window.__AGENTRANS_BOOT__; the modules row is simultaneously a host row.
 - insert:
     - id: desktop-product-telemetry
@@ -227,7 +227,7 @@
     - id: client-hmr
       name: '@agentrans/client-hmr'
 
-    # ── browser plugin roster (dsh.client rows; node halves are layer-2 hosts) ──
+    # ── browser plugin roster (agentrans.client rows; node halves are layer-2 hosts) ──
 
     # Dual-face: the node half scans this tree, composes window.__AGENTRANS_BOOT__,
     # and serves /plugins/<id>/client.js; the browser half is the module table
@@ -609,7 +609,7 @@
 
 # The preset selection registry. The shipped preset declarations follow as
 # separate patch files under `presets/`, listed after this file in
-# `package.json` `dsh.bundle.patch`.
+# `package.json` `agentrans.bundle.patch`.
 - insert:
     - id: agent-preset-registry
       name: '@agentrans/agent-preset-registry'

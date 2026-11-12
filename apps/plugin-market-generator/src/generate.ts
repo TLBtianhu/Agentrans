@@ -169,7 +169,7 @@ async function readNpm(source: Extract<Source, { kind: 'npm' }>, options: Genera
   })
   const highest = entryOf(source.name, releases).versions[0]?.version
   if (highest === undefined) {
-    warn('no published version that is neither deprecated nor private declares dsh.bundle')
+    warn('no published version that is neither deprecated nor private declares agentrans.bundle')
     return []
   }
   const file = cache.file('npm', options.registry, options.inlineIconBytes, source.name, releases.map(release => release.version.version).sort())
@@ -287,7 +287,7 @@ async function readGit(source: Extract<Source, { kind: 'git' }>, options: Genera
 /** Names of the bundle packages on the default branch that are not private, by package directory. */
 async function headPackages(files: PackageFiles, warn: (message: string) => void): Promise<{ path: string; name: string }[]> {
   const paths = await findBundlePackages(files, warn)
-  if (paths.length === 0) warn('no package declares dsh.bundle')
+  if (paths.length === 0) warn('no package declares agentrans.bundle')
   const packages: { path: string; name: string }[] = []
   let privates = 0
   for (const path of paths) {
@@ -296,7 +296,7 @@ async function headPackages(files: PackageFiles, warn: (message: string) => void
     else if (typeof manifest?.name === 'string') packages.push({ path, name: manifest.name })
     else warn(`${posix.join(path, 'package.json')} has no name`)
   }
-  if (privates > 0 && privates === paths.length) warn('every package that declares dsh.bundle is private')
+  if (privates > 0 && privates === paths.length) warn('every package that declares agentrans.bundle is private')
   return packages
 }
 

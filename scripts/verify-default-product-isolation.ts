@@ -92,7 +92,7 @@ export function verifyDefaultProductIsolation(root: string): ProductIsolationRes
     }
     const manifest = packages.get(name)?.manifest
     if (manifest?.agentrans?.bundle?.patch === undefined) {
-      failures.push(`${PROFILE_SOURCE}: optional bundle ${name} must declare dsh.bundle.patch`)
+      failures.push(`${PROFILE_SOURCE}: optional bundle ${name} must declare agentrans.bundle.patch`)
     }
     if (typeof manifest?.icon !== 'string' && manifest?.exports?.['./icon'] == null) {
       failures.push(`${PROFILE_SOURCE}: optional bundle ${name} must declare icon or export ./icon`)
@@ -244,7 +244,7 @@ export function verifyDefaultProductIsolation(root: string): ProductIsolationRes
     for (const name of selection.packages) {
       reference(name, PROFILE_SOURCE)
       if (packages.get(name)?.manifest.agentrans?.bundle?.patch === undefined) {
-        failures.push(`${PROFILE_SOURCE}: default bundle ${name} must declare dsh.bundle.patch`)
+        failures.push(`${PROFILE_SOURCE}: default bundle ${name} must declare agentrans.bundle.patch`)
       }
       if (optionalBundles.has(name)) failures.push(`${PROFILE_SOURCE}: optional bundle ${name} must not be a default bundle`)
     }

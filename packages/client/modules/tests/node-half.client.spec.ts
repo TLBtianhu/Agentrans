@@ -1333,7 +1333,7 @@ describe('shared module declarations', () => {
     const packageName = '@fixture/external-not-array'
     writeBuiltPackage(packageName, { external: 'react' })
     expect(() => construct([packageName]))
-      .toThrow(`client-modules: ${packageName} dsh.client.external must be a string array`)
+      .toThrow(`client-modules: ${packageName} agentrans.client.external must be a string array`)
   })
 })
 

@@ -323,7 +323,7 @@ describe('loadProfile', () => {
     expect(bare.layers).toEqual([])
   })
 
-  it('applies a dsh.bundle.patch list in order, anchoring inserted paths beside each file', () => {
+  it('applies a agentrans.bundle.patch list in order, anchoring inserted paths beside each file', () => {
     const anchor = stageInstallation({ 'multi': { patch: '[]\n' }, 'broken': { patch: '[]\n' } })
     const bundleDir = join(anchor, '..', 'node_modules', 'multi')
     mkdirSync(join(bundleDir, 'layers'), { recursive: true })
@@ -350,7 +350,7 @@ describe('loadProfile', () => {
       { id: 'b', name: pathToFileURL(join(bundleDir, 'layers', 'local.js')).href },
     ])
     expect(profile.skippedBundles).toEqual([
-      { packageName: 'broken', reason: 'Error: dsh.bundle.patch must be a file path or a list of file paths' },
+      { packageName: 'broken', reason: 'Error: agentrans.bundle.patch must be a file path or a list of file paths' },
     ])
   })
 

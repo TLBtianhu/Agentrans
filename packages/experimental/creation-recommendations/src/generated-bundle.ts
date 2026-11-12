@@ -11,7 +11,7 @@ const RUNTIME_EXTENSIONS = ['.js', '.mjs', '.cjs']
  * @param directory - Host-reserved output directory.
  * @param name - Host-reserved package name.
  * @returns after package identity, insert-only rows, built entries, the built `./client` entry of a package declaring
- * `dsh.client`, and portable links have been checked; does not execute code.
+ * `agentrans.client`, and portable links have been checked; does not execute code.
  */
 export async function validateGeneratedBundle(directory: string, name: string): Promise<void> {
   const manifestPath = await containedFile(directory, 'package.json')
@@ -42,7 +42,7 @@ export async function validateGeneratedBundle(directory: string, name: string): 
     const entry = await containedFile(directory, target)
     if (!(await lstat(entry)).isFile()) throw new Error(`The runtime entry for ${row.name} must be a built file.`)
   }
-  // The client module system loads `exports["./client"]` for every package declaring `dsh.client`.
+  // The client module system loads `exports["./client"]` for every package declaring `agentrans.client`.
   if (manifest.agentrans.client !== undefined && !(await isBuiltFile(directory, exportedEntry(manifest, name + '/client')))) {
     throw new Error('Build and export the "./client" entry before installation.')
   }

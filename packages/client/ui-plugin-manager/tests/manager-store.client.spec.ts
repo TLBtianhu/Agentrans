@@ -683,7 +683,7 @@ describe('PluginManagerController', () => {
       listBundles: vi.fn(() => Promise.resolve(ok([BUNDLE, shipped]))),
       inspect: vi.fn()
         .mockResolvedValueOnce(ok({ status: 'refused', problem: 'not-found', reason: 'E404', registries: [null, MIRROR] }))
-        .mockResolvedValueOnce(ok({ status: 'refused', problem: 'not-a-bundle', reason: 'plain declares no dsh.bundle' }))
+        .mockResolvedValueOnce(ok({ status: 'refused', problem: 'not-a-bundle', reason: 'plain declares no agentrans.bundle' }))
         .mockResolvedValueOnce(refused('gateway/internal', 'offline')),
     })
     await controller.load()
@@ -705,7 +705,7 @@ describe('PluginManagerController', () => {
     expect(plugins.installBundle).not.toHaveBeenCalled()
     face.editInstallSpec('plain')
     face.runInstall()
-    await vi.waitFor(() => { expect(state().install.inputError).toEqual({ problem: 'not-a-bundle', reason: 'plain declares no dsh.bundle' }) })
+    await vi.waitFor(() => { expect(state().install.inputError).toEqual({ problem: 'not-a-bundle', reason: 'plain declares no agentrans.bundle' }) })
     // A refused answer, rather than a refused spec, reads as unknown with the transport's words.
     face.editInstallSpec('x')
     face.runInstall()

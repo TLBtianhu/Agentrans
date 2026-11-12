@@ -5,7 +5,9 @@ import semver from 'semver'
 export const VERSION_LIST_FIELDS = ['versions', 'time', 'dist-tags'] as const
 
 /** The fields read for one version: what decides whether it can replace an installed bundle. */
-export const VERSION_FIELDS = ['name', 'version', 'engines', 'peerDependencies', 'deprecated', 'dsh'] as const
+// A version published before the rename declares its bundle under `dsh`; both names describe immutable
+// published metadata, so the reader accepts either.
+export const VERSION_FIELDS = ['name', 'version', 'engines', 'peerDependencies', 'deprecated', 'agentrans', 'dsh'] as const
 
 /** One published version newer than the installed one, before its own manifest is read. */
 export interface PublishedVersion {
@@ -65,7 +67,7 @@ export function newerVersions(answer: unknown, installed: string): PublishedVers
  */
 export function versionFacts(answer: unknown, name: string, version: string): VersionFacts {
   const fields = recordOf(answer) ?? {}
-  const dsh = recordOf(fields.dsh)
+  const metadata = recordOf(fields.agentrans) ?? recordOf(fields.dsh)
   const deprecated = fields.deprecated
   return {
     manifest: {
@@ -74,7 +76,7 @@ export function versionFacts(answer: unknown, name: string, version: string): Ve
       ...Object.hasOwn(fields, 'engines') ? { engines: fields.engines } : {},
       ...Object.hasOwn(fields, 'peerDependencies') ? { peerDependencies: fields.peerDependencies } : {},
     },
-    bundle: recordOf(dsh?.bundle) !== undefined,
+    bundle: recordOf(metadata?.bundle) !== undefined,
     ...typeof deprecated === 'string' && deprecated !== '' ? { deprecated } : {},
   }
 }

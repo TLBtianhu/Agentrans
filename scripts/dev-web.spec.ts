@@ -140,7 +140,7 @@ it('samples one local environment at startup without validating watcher outputs'
   }
 })
 
-it('discovers dsh.client packages with sibling roles', async () => {
+it('discovers agentrans.client packages with sibling roles', async () => {
   const root = await mkdtemp(join(tmpdir(), 'dsh-dev-web-discovery-'))
   try {
     const current = join(root, 'packages', 'client', 'current')

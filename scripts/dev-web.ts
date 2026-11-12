@@ -128,7 +128,7 @@ export function parseDevWebArguments(argv: readonly string[]): DevWebArguments {
 
 /**
  * Discover the watch workspace by declaration: every packages/<group>/<name>
- * whose package.json carries `dsh.client` with platform "web" is a client
+ * whose package.json carries `agentrans.client` with platform "web" is a client
  * plugin bundle emitter. Scanned once at startup — a package added while
  * watching means restarting this script.
  * @param root - repository root containing the grouped package directories.
@@ -148,7 +148,7 @@ export function discoverPluginDirs(root = repoRoot): string[] {
 /**
  * Discover the statically linked library packages: the other half of the same
  * partition {@link discoverPluginDirs} takes. A package that builds through the
- * client preset without declaring `dsh.client` has no loader-delivered browser
+ * client preset without declaring `agentrans.client` has no loader-delivered browser
  * half, so the compile shell links its `lib/index.js` instead — and an edit to
  * its source reaches the browser only once that bundle is rewritten. Deriving
  * the set from the build preset rather than a hand list keeps it correct when
@@ -386,7 +386,7 @@ if (isMain) {
   const pluginDirs = discoverPluginDirs()
   const libraryDirs = discoverLibraryDirs()
   if (pluginDirs.length === 0) {
-    console.error('dev-web: no dsh.client (platform "web") packages found under packages/')
+    console.error('dev-web: no agentrans.client (platform "web") packages found under packages/')
     process.exit(1)
   }
   if (libraryDirs.length === 0) {
@@ -434,7 +434,7 @@ if (isMain) {
       ], false)
     }
     console.log(
-      `dev-web: watching ${String(pluginDirs.length)} dsh.client plugin packages`
+      `dev-web: watching ${String(pluginDirs.length)} agentrans.client plugin packages`
       + ` and ${String(libraryDirs.length)} statically linked library packages`
       + (options.pollInterval !== undefined ? ` (polling ${String(options.pollInterval)}ms)` : '')
       + `, plus tsc -b ${CLIENT_TYPE_PROGRAM} and the ${SHELL_PACKAGE} dist build`

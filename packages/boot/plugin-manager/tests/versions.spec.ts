@@ -8,6 +8,7 @@ it('reads one version\'s manifest, keeping the asked identity when the answer om
     manifest: { name: 'x', version: '1.0.0', engines: { agentrans: '>=1' }, peerDependencies: { a: '1' } }, bundle: true, deprecated: 'old',
   })
   expect(versionFacts({ agentrans: { bundle: 'no' }, deprecated: '' }, 'y', '2.0.0')).toEqual({ manifest: { name: 'y', version: '2.0.0' }, bundle: false })
+  expect(versionFacts({ agentrans: bundle }, 'y', '2.0.0')).toEqual({ manifest: { name: 'y', version: '2.0.0' }, bundle: true })
   expect(versionFacts('scalar', 'y', '2.0.0')).toEqual({ manifest: { name: 'y', version: '2.0.0' }, bundle: false })
 })
 

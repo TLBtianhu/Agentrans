@@ -1,9 +1,9 @@
 /**
  * The browser roster of a `agentrans --profile`, read from its bundle patch files
- * the way the launcher composes them: each bundle's `dsh.bundle.patch` file list is
+ * the way the launcher composes them: each bundle's `agentrans.bundle.patch` file list is
  * parsed with the include plugin's YAML dialect (`entryListSchema`) and
  * composed by its `applyEntryPatches`; every enabled row whose package
- * declares `dsh.client.platform === 'web'` becomes a roster row carrying that
+ * declares `agentrans.client.platform === 'web'` becomes a roster row carrying that
  * declaration's `inject` and `immediately`; rows nested in Loader groups count
  * like the Loader counts them, a disabled group disabling every row beneath
  * it. A patch that matches nothing
@@ -19,7 +19,7 @@ import { basename, dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { evaluate, isJsExpr, type EntryOptions } from '@agentrans/cordis-plugin-loader'
 import { applyEntryPatches, entryListSchema, type PatchOptions } from '@agentrans/cordis-plugin-include'
-import { exactPackageSpecifier, parseDshClient } from '@agentrans/client-modules/client'
+import { exactPackageSpecifier, parseAgentransClient } from '@agentrans/client-modules/client'
 import * as yaml from 'js-yaml'
 import { ClientRoster, type ClientRosterRow } from './roster.ts'
 
@@ -75,7 +75,7 @@ export function bundleRoster(
     if (manifest.name !== name) {
       throw new Error(`client-test-runtime: ${manifestPath} names ${JSON.stringify(manifest.name)}, expected ${name}`)
     }
-    const declaration = parseDshClient(name, manifest.agentrans?.client)
+    const declaration = parseAgentransClient(name, manifest.agentrans?.client)
     if (declaration === undefined || declaration.platform !== 'web') continue
     if (disabled.some(value => value !== undefined && value !== null && typeof value !== 'boolean'
       && !(disabledContext !== undefined && isJsExpr(value)))) {
@@ -92,7 +92,7 @@ function readLayer(bundle: string, anchor: string): BundleLayer {
   const declared = readManifest(manifestPath).agentrans?.bundle?.patch
   const files = typeof declared === 'string' ? [declared] : declared
   if (!Array.isArray(files) || !files.every(file => typeof file === 'string')) {
-    throw new Error(`client-test-runtime: bundle ${bundle} declares no dsh.bundle.patch file list in ${manifestPath}`)
+    throw new Error(`client-test-runtime: bundle ${bundle} declares no agentrans.bundle.patch file list in ${manifestPath}`)
   }
   const patches = files.flatMap((patch) => {
     const file = join(dirname(manifestPath), patch)

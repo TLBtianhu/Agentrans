@@ -156,7 +156,7 @@ function bundlePatches(repoRoot: string, bundle: string): PatchOptions[] {
   const declaration = (JSON.parse(readFileSync(join(directory, 'package.json'), 'utf8')) as {
     agentrans?: { bundle?: Parameters<typeof bundlePatchPaths>[1] }
   }).agentrans?.bundle
-  if (declaration === undefined) throw new Error(`vfs image: bundle ${bundle} declares no dsh.bundle`)
+  if (declaration === undefined) throw new Error(`vfs image: bundle ${bundle} declares no agentrans.bundle`)
   return bundlePatchPaths(directory, declaration).flatMap(file => loadOverlayPatches(BIN_NAME, file))
 }
 

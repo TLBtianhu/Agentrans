@@ -966,7 +966,7 @@ export const SERVICE_ROLES: ServiceRole[] = [
     title: 'Client plugin graph host',
     mode: 'core',
     consumers: ['client-hmr'],
-    note: 'Composes the __AGENTRANS_BOOT__ entry graph from an incremental dsh.client scan, serves plugin bundles, and notifies rebuilt/graph-changed subscribers.',
+    note: 'Composes the __AGENTRANS_BOOT__ entry graph from an incremental agentrans.client scan, serves plugin bundles, and notifies rebuilt/graph-changed subscribers.',
   },
   {
     key: 'workflowEngine',
@@ -1189,7 +1189,7 @@ function bundleLayers(name: string): BundleLayer[] {
     }
     if (manifest.name !== name) continue
     const patch = manifest.agentrans?.bundle?.patch
-    if (patch === undefined) throw new Error(`${manifestPath}: ${name} must declare dsh.bundle.patch`)
+    if (patch === undefined) throw new Error(`${manifestPath}: ${name} must declare agentrans.bundle.patch`)
     const directory = manifestPath.replace(/\/package\.json$/, '')
     return (Array.isArray(patch) ? patch : [patch]).map((entry) => {
       const layer = `${directory}/${entry.replace(/^\.\//, '')}`

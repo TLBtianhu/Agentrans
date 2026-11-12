@@ -170,7 +170,7 @@ describe('default product isolation', () => {
       + `export const OPTIONAL_BUNDLES = ['${experimental}']\n`)
     const failures = verifyDefaultProductIsolation(root).failures.join('\n')
     expect(failures).toContain(`optional bundle ${experimental} must be a runtime dependency of apps/cli`)
-    expect(failures).toContain(`optional bundle ${experimental} must declare dsh.bundle.patch`)
+    expect(failures).toContain(`optional bundle ${experimental} must declare agentrans.bundle.patch`)
     expect(failures).toContain(`optional bundle ${experimental} must declare icon or export ./icon`)
     expect(failures).toContain(`optional bundle ${experimental} must export ./locale/*.json display metadata`)
 

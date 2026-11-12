@@ -5,7 +5,7 @@
 
 export type {
   DshBundleManifest,
-  DshClientManifest,
+  AgentransClientManifest,
   DshEnginesManifest,
   DshManifest,
   DshPackageManifest,

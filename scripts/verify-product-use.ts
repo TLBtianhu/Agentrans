@@ -195,7 +195,7 @@ export function verifyProductUse(
   for (const name of PROFILES) if (!isRecord(templates[name])) failures.push(`${PROFILE_SOURCE}: missing shipped ${name} profile`)
   const layers = (names: readonly string[], reach: Reachability): PatchOptions[][] => names.flatMap((name) => {
     const pkg = packages.get(name)
-    if (pkg?.bundle === undefined) { failures.push(`${PROFILE_SOURCE}: ${name} must declare dsh.bundle.patch`); return [] }
+    if (pkg?.bundle === undefined) { failures.push(`${PROFILE_SOURCE}: ${name} must declare agentrans.bundle.patch`); return [] }
     reach.packages.add(pkg.directory)
     return [bundlePatchPaths(resolve(root, pkg.directory), pkg.bundle).flatMap((path) => {
       configs.add(path)

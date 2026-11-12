@@ -1,9 +1,9 @@
 /** Explicit exceptions and Host packages for the published dependency policy. */
 
-/** Packages treated as Client/Host packages without declaring `dsh.client`. */
+/** Packages treated as Client/Host packages without declaring `agentrans.client`. */
 const CLIENT_FACE_INCLUDE: readonly string[] = []
 
-/** Packages exempted from automatic Client/Host treatment despite declaring `dsh.client`. */
+/** Packages exempted from automatic Client/Host treatment despite declaring `agentrans.client`. */
 const CLIENT_FACE_EXCLUDE: readonly string[] = [
   '@agentrans/api-session-controller',
   '@agentrans/api-workspace-controller',

@@ -239,7 +239,7 @@ describe('product package use', () => {
     const root = fixture()
     pkg(root, candidateDir, candidate)
     profiles(root, [], [candidate])
-    expect(failures(root, declarations())).toContain(`${candidate} must declare dsh.bundle.patch`)
+    expect(failures(root, declarations())).toContain(`${candidate} must declare agentrans.bundle.patch`)
   })
 
   it('rejects a missing workspace source mapping instead of consulting built exports', () => {

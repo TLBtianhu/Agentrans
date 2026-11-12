@@ -257,7 +257,7 @@ describe('package dependency scope', () => {
     expect(PACKAGE_DEPENDENCY_POLICY.peerRequiredHostExports['@agentrans/timeout']).toEqual(['deadline'])
   })
 
-  it('discovers the Client directory, dsh.client declarations, and configured Host packages', () => {
+  it('discovers the Client directory, agentrans.client declarations, and configured Host packages', () => {
     const packages = [
       pkg('@f/static', 'packages/client/static/package.json'),
       pkg('@f/dynamic-client', 'packages/client/dynamic/package.json', { agentrans: { client: {} } }),
@@ -300,7 +300,7 @@ describe('package dependency scope', () => {
       expect.stringContaining('clientFaceInclude redundantly names automatically discovered package @f/dual'),
       expect.stringContaining('@f/host appears in both clientFaceInclude and clientFaceExclude'),
       expect.stringContaining('clientFaceExclude cannot exempt packages/client package @f/client'),
-      expect.stringContaining('clientFaceExclude names @f/host, which declares no dsh.client entry'),
+      expect.stringContaining('clientFaceExclude names @f/host, which declares no agentrans.client entry'),
       expect.stringContaining('hostPackages redundantly names Client-faced package @f/dual'),
       expect.stringContaining('clientFaceInclude names unknown package @f/missing'),
     ]))

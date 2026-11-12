@@ -54,7 +54,7 @@ export type ProfileManifest = Partial<DshPackageManifest>
 export function bundlePatchFiles(bundle: DshBundleManifest): string[] {
   const declared = typeof bundle.patch === 'string' ? [bundle.patch] : bundle.patch
   if (!Array.isArray(declared) || !declared.every(file => typeof file === 'string')) {
-    throw new Error('dsh.bundle.patch must be a file path or a list of file paths')
+    throw new Error('agentrans.bundle.patch must be a file path or a list of file paths')
   }
   return declared
 }
@@ -692,7 +692,7 @@ export function loadProfileDirectory(
       const bundleManifest = readProfileManifest(binName, packageDir)
       const bundle = bundleManifest.agentrans?.bundle
       if (bundle === undefined) {
-        throw new Error(`${binName}: profile bundle ${JSON.stringify(packageName)} declares no dsh.bundle in its package.json`)
+        throw new Error(`${binName}: profile bundle ${JSON.stringify(packageName)} declares no agentrans.bundle in its package.json`)
       }
       assertBundlePlatform(bundle.platforms, process.platform)
       // A bundle is not a plugin row, so row admission never reads its own dsh requirements.

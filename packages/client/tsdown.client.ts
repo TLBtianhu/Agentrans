@@ -428,11 +428,11 @@ function productionExternals(manifest: PackageManifest): readonly RegExp[] {
 }
 
 /**
- * Module-table specifiers one `dsh.client` declaration requests. Matching is
+ * Module-table specifiers one `agentrans.client` declaration requests. Matching is
  * exact, never normalized: a package declares the specifier its own code
  * imports, and the loader keys static entries the same way.
  * @param subject - package name, used in diagnostics.
- * @param declaration - the package's `dsh.client` object.
+ * @param declaration - the package's `agentrans.client` object.
  * @returns the requested specifiers, empty when the package declares none.
  * @throws {Error} when `external` is not a string array.
  */
@@ -440,14 +440,14 @@ export function requestedExternals(
   subject: string,
   declaration: { readonly external?: unknown },
 ): ReadonlySet<string> {
-  return new Set(optionalStringArray(subject, 'dsh.client.external', declaration.external) ?? [])
+  return new Set(optionalStringArray(subject, 'agentrans.client.external', declaration.external) ?? [])
 }
 
 /**
  * Module-table specifiers one package requests. The shell baseline is implicit
- * for every dynamic bundle; `dsh.client.external` only adds package-specific
+ * for every dynamic bundle; `agentrans.client.external` only adds package-specific
  * dynamic rows or subpaths.
- * @param manifest - the package's own manifest, whose `dsh.client` declaration adds requests.
+ * @param manifest - the package's own manifest, whose `agentrans.client` declaration adds requests.
  * @returns the baseline plus the package's explicit requests.
  */
 function clientExternals(manifest: PackageManifest): ReadonlySet<string> {
@@ -848,7 +848,7 @@ function clientConfig(
         if (VENDORED_LIBRARY.test(source)) return null // vendored library: inline, no shared identity
         if (INLINE_SAFE.test(source) || GENERATED_REMOTE.test(source)) return null // wire contribution: inline is the point
         throw new Error(
-          `client bundle purity: "${source}" is not in the default client externals or ${id}'s dsh.client.external, an inline-safe wire layer, or a generated /remote contribution — `
+          `client bundle purity: "${source}" is not in the default client externals or ${id}'s agentrans.client.external, an inline-safe wire layer, or a generated /remote contribution — `
           + 'cross-plugin value imports are forbidden; declare a non-default module request or collaborate through cordis services '
           + '(type-only imports are erased and never reach this gate)',
         )

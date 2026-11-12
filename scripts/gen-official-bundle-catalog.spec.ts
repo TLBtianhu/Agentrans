@@ -95,7 +95,7 @@ describe('Official bundle catalog generation', () => {
   it.each([[], ['macos'], 'darwin'].map(platforms => ({ platforms })))('rejects invalid package platform metadata $platforms', ({ platforms }) => {
     const root = fixture()
     updateManifest(root, ON_DEMAND_BUNDLES[0]!, { agentrans: { bundle: { patch: './cordis.patch.yml', platforms } } })
-    expect(() => generateOfficialBundleCatalog(root)).toThrow('dsh.bundle.platforms')
+    expect(() => generateOfficialBundleCatalog(root)).toThrow('agentrans.bundle.platforms')
   })
 
   it.each([false, true])('rejects an on-demand provider in the installed dependency closure (indirect=%s)', (indirect) => {

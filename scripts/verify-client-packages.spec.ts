@@ -174,7 +174,7 @@ describe('package modes', () => {
     }))
     expect(found).toHaveLength(2)
     expect(found.join('\n')).toContain('does not use the staticLinked preset')
-    expect(found.join('\n')).toContain('has no dynamic dsh.client row')
+    expect(found.join('\n')).toContain('has no dynamic agentrans.client row')
   })
 
   it('requires every preloaded external to have a parser preload row', () => {
@@ -225,7 +225,7 @@ describe('module requests', () => {
     expect(collectClientPackageViolations(facts([], {
       declarations: [gateway, stale, live],
     }))).toEqual([
-      stale.manifest + ': dsh.client.external "@agentrans/api-gateway/client"'
+      stale.manifest + ': agentrans.client.external "@agentrans/api-gateway/client"'
       + ' has no runtime import or re-export in production source; remove the stale declaration',
     ])
   })
@@ -244,7 +244,7 @@ describe('module requests', () => {
       },
     }), manifest: 'packages/api/session-controller/package.json' }
     expect(collectClientPackageViolations(facts([], { declarations: [gateway, subject] }))).toEqual([
-      subject.manifest + ': dsh.client.external "@agentrans/api-gateway/client"'
+      subject.manifest + ': agentrans.client.external "@agentrans/api-gateway/client"'
       + ' has no runtime import or re-export in production source; remove the stale declaration',
     ])
   })
@@ -255,7 +255,7 @@ describe('module requests', () => {
       declarations: [ui],
       platformModules: ['react'],
     }))).toEqual([
-      ui.manifest + ': dsh.client.external repeats baseline module "react"; remove the explicit declaration',
+      ui.manifest + ': agentrans.client.external repeats baseline module "react"; remove the explicit declaration',
     ])
   })
 
@@ -266,8 +266,8 @@ describe('module requests', () => {
     })
     const found = collectClientPackageViolations(facts([], { declarations: [ui] }))
     expect(found).toHaveLength(6)
-    expect(found.join('\n')).toContain('dsh.client.external contains an empty value')
-    expect(found.join('\n')).toContain('dsh.client.inject contains an empty value')
+    expect(found.join('\n')).toContain('agentrans.client.external contains an empty value')
+    expect(found.join('\n')).toContain('agentrans.client.inject contains an empty value')
     expect(found.join('\n')).toContain('names its own row')
     expect(found.join('\n')).toContain('has no supplier')
   })
@@ -287,7 +287,7 @@ describe('module requests', () => {
     }), manifest: 'packages/api/b/package.json' }
     const found = collectClientPackageViolations(facts([], { declarations: [a, b] }))
     expect(found).toHaveLength(1)
-    expect(found[0]).toContain('synchronous dsh.client.external cycle')
+    expect(found[0]).toContain('synchronous agentrans.client.external cycle')
   })
 })
 
@@ -426,7 +426,7 @@ describe('package assets', () => {
   ] as const)('rejects the asset export on %s', (_label, fields) => {
     const ui = declaration('ui', { ...fields, assetExport: './lib/assets/*', assetReferences: [art] })
     expect(collectClientPackageViolations(facts([], { declarations: [ui] }))).toEqual([
-      ui.manifest + ': ' + ui.name + ' declares exports["./assets/*"] without a dsh.client row for platform "web";'
+      ui.manifest + ': ' + ui.name + ' declares exports["./assets/*"] without a agentrans.client row for platform "web";'
       + ' only dynamic Web Client packages publish package assets',
     ])
   })
@@ -467,8 +467,8 @@ describe('manifest declarations', () => {
     const result = readClientDeclarations(root)
     expect(result.declarations).toHaveLength(2)
     expect(result.malformed).toEqual([
-      'packages/g/a/package.json: @f/a dsh.client.external must be a string array',
-      'packages/g/a/package.json: @f/a dsh.client.inject must be a string array',
+      'packages/g/a/package.json: @f/a agentrans.client.external must be a string array',
+      'packages/g/a/package.json: @f/a agentrans.client.inject must be a string array',
     ])
   })
 

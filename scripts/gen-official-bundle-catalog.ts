@@ -34,7 +34,7 @@ export function generateOfficialBundleCatalog(root: string, names: readonly stri
     }
     if (manifests.has(manifest.name)) throw new Error(`duplicate workspace package ${manifest.name}`)
     const listedByDefault = manifest.agentrans?.bundle?.listedByDefault
-    if (listedByDefault !== undefined && typeof listedByDefault !== 'boolean') throw new Error(`${manifest.name}: dsh.bundle.listedByDefault must be a boolean`)
+    if (listedByDefault !== undefined && typeof listedByDefault !== 'boolean') throw new Error(`${manifest.name}: agentrans.bundle.listedByDefault must be a boolean`)
     const runtime = ['dependencies', 'optionalDependencies', 'peerDependencies'] as const
     manifests.set(manifest.name, { path, private: manifest.private === true, bundle: manifest.agentrans?.bundle?.patch !== undefined,
       ...manifest.agentrans?.bundle?.platforms === undefined ? {} : { platforms: manifest.agentrans.bundle.platforms },

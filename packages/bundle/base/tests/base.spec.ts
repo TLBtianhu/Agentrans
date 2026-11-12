@@ -1,5 +1,5 @@
 /**
- * The bundle's substance is its patch file: the `dsh.bundle.patch` manifest
+ * The bundle's substance is its patch file: the `agentrans.bundle.patch` manifest
  * field must name a real, parseable patch list.
  */
 
@@ -12,7 +12,7 @@ import { entryListSchema } from '@agentrans/cordis-plugin-include'
 import { evaluate } from '@agentrans/cordis-plugin-loader'
 
 describe('dsh-base bundle', () => {
-  it('declares a parseable patch list through the dsh.bundle.patch manifest field', () => {
+  it('declares a parseable patch list through the agentrans.bundle.patch manifest field', () => {
     const root = fileURLToPath(new URL('..', import.meta.url))
     const manifest = JSON.parse(
       readFileSync(resolve(root, 'package.json'), 'utf8'),

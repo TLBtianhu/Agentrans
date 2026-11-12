@@ -1,7 +1,7 @@
 /**
  * Deliverables plugin, node half. Serves authenticated native opens of declared files. The browser
  * half ships via exports["./client"], discovered through the package.json
- * dsh.client declaration.
+ * agentrans.client declaration.
  */
 
 import type { Context } from '@agentrans/cordis'

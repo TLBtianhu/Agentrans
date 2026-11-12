@@ -102,7 +102,7 @@ async function reconcile(before: ProfileManifest, dir: string, anchor: string, o
     const metadata = bundleManifest(name, dir, anchor)
     const declared = metadata?.agentrans?.bundle
     if (declared === undefined) {
-      options.onOutput?.(`dsh: warning: ${name} declares no dsh.bundle — installed as a plain dependency, not a profile layer\n`, 'stderr')
+      options.onOutput?.(`dsh: warning: ${name} declares no agentrans.bundle — installed as a plain dependency, not a profile layer\n`, 'stderr')
       continue
     }
     try { assertBundlePlatform(declared.platforms, process.platform) } catch (error) {

@@ -81,7 +81,7 @@ function resolveClientExport(packagePath: string, pkg: ClientPackageManifest): s
   const declared = pkg.exports?.['./client']
   const relative = typeof declared === 'string' ? declared : declared?.default
   if (relative === undefined) {
-    throw new Error(`assembled boot: ${pkg.name ?? packagePath} declares dsh.client without a ./client export`)
+    throw new Error(`assembled boot: ${pkg.name ?? packagePath} declares agentrans.client without a ./client export`)
   }
   return resolve(dirname(packagePath), relative)
 }

@@ -42,7 +42,7 @@ export interface DshManifest {
   /** Profile metadata consumed by the profile launcher. */
   profile?: DshProfileManifest
   /** Client module loading and build metadata. */
-  client?: DshClientManifest
+  client?: AgentransClientManifest
 }
 
 /** Literal text or translations indexed by lowercase language id, with a required English fallback. */
@@ -94,7 +94,7 @@ export interface DshProfileManifest {
 }
 
 /** Client module declaration read by client-modules and the client build. */
-export interface DshClientManifest {
+export interface AgentransClientManifest {
   /** Client platform identifier; the Web consumer selects `web`. */
   platform: string
   /** Informational package-name dependencies, not Cordis service injection. */

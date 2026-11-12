@@ -526,7 +526,7 @@ describe('client bundle module requests', () => {
 
   it('rejects a malformed declaration instead of reading past it', () => {
     expect(() => requestedExternals('@agentrans/client-fixture', { external: 'react' }))
-      .toThrow(/dsh\.client\.external must be a string array/)
+      .toThrow(/agentrans\.client\.external must be a string array/)
   })
 })
 

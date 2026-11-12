@@ -97,8 +97,8 @@ const REGISTRY_URL = /^https?:\/\/\S+$/
 /** The profile files an installation writes and a failed or cancelled one restores. */
 const RESTORED_FILES = ['package.json', 'pnpm-lock.yaml'] as const
 
-/** The manifest fields an inspection reads for a registry spec. */
-const INSPECT_FIELDS = ['name', 'version', 'description', 'dsh'] as const
+/** The manifest fields an inspection reads for a registry spec; both metadata names cover versions published before the rename. */
+const INSPECT_FIELDS = ['name', 'version', 'description', 'agentrans', 'dsh'] as const
 
 /** pnpm's colour escapes, which a JSON answer may be wrapped in. */
 const ANSI_SEQUENCE = /\x1b\[[0-9;]*m/g
@@ -551,7 +551,7 @@ export class PluginManager extends TypertRemoteService {
         version = info.version
         const listedByDefault = info.agentrans?.bundle?.listedByDefault
         if (listedByDefault !== undefined) {
-          if (typeof listedByDefault !== 'boolean') throw new Error('dsh.bundle.listedByDefault must be a boolean')
+          if (typeof listedByDefault !== 'boolean') throw new Error('agentrans.bundle.listedByDefault must be a boolean')
           listing = { listedByDefault }
         }
         const compatibility = evaluatePluginCompatibility(info, exemptions)
@@ -634,7 +634,7 @@ export class PluginManager extends TypertRemoteService {
         const inspection = inspectionOf('path', read, registry)
         if (inspection.name === undefined) return refused('not-a-package', 'the package.json names no package')
         if (known.has(inspection.name)) return refused('already-installed', `${inspection.name} is already installed`)
-        if (!inspection.bundle) return refused('not-a-bundle', `${inspection.name} declares no dsh.bundle`)
+        if (!inspection.bundle) return refused('not-a-bundle', `${inspection.name} declares no agentrans.bundle`)
         return inspection
       }
       case 'registry': {
@@ -647,7 +647,7 @@ export class PluginManager extends TypertRemoteService {
         if (typeof latest !== 'object' || latest === null) return { status: 'refused', problem: 'unknown', reason: 'pnpm view answered no package', registries }
         const inspection = inspectionOf('registry', latest, asked.registry)
         const named = inspection.name === undefined ? { ...inspection, name: parsed.name } : inspection
-        if (!named.bundle) return { status: 'refused', problem: 'not-a-bundle', reason: `${named.name} declares no dsh.bundle`, registries }
+        if (!named.bundle) return { status: 'refused', problem: 'not-a-bundle', reason: `${named.name} declares no agentrans.bundle`, registries }
         return named
       }
     }
