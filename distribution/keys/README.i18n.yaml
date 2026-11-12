@@ -3,5 +3,5 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write distribution/keys/README.md
 /agentrans-update-signing-public-key:
-  en: e997be21dc8fef67
-  zh: ba1dda17466964c1
+  en: 402381d4d6fa083f
+  zh: 395f5b75a426dc51

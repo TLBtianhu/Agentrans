@@ -18,6 +18,7 @@ Status: implemented
 - 公钥是 [update-signing-key.ts](../../../../apps/desktop/src/update-signing-key.ts) 中的常量。私钥只存在于发布环境，即仓库 secret `AGENTRANS_UPDATE_SIGNING_KEY`。
 - 缺少该密钥时发布拒绝执行，因为未签名的版本会在任何信任该公钥的地方安装。签名缺失或不匹配会以可见失败结束下载；另一种选择是安装无人担保的字节。
 - 签名地址由更新器已解析出的 Release tag 与 electron-builder 写入 `app-update.yml` 的 feed 坐标推导，因此信任锚与下载来自同一个 Release。
+- 同一个密钥对也支撑 [distribution/keys](../../../../distribution/keys/README.zh.md)：安装器与 `verifyReleaseManifest()` 读取的那份 PEM 原样承载本公钥，因此同一把私钥既为产物签名，也为发布清单签名；两份公钥一旦不一致，`apps/desktop/tests/update-signing-key.spec.ts` 会失败。
 
 [update-signature.ts](../../../../apps/desktop/src/update-signature.ts) 负责签名、校验与文件摘要；[update-verification.ts](../../../../apps/desktop/src/update-verification.ts) 负责坐标、地址构造以及哪些产物必须校验；[update-coordinator.ts](../../../../apps/desktop/src/update-coordinator.ts) 在下载操作内部执行校验，因此未通过校验的更新永远不会进入就绪状态。
 

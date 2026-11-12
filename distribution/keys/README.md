@@ -3,11 +3,13 @@
 English | [中文](README.zh.md)
 
 - **Algorithm:** Ed25519.
-- **Fingerprint:** `ed25519-sha256-7ce3dd65bdcf9dafc651b6a68744fdf05d0d3628002fcef0a1c3fa5b4d2044a6`.
+- **Fingerprint:** `ed25519-sha256-2bcda9bdc718f573c07f182185378da63ca29cc0c167049d67183c93c283b080`.
 - **Public key:** `agentrans-update-ed25519-public.pem`.
 
-This public key verifies Agentrans update manifests and release artifacts through `verifyReleaseManifest()` in `product-layout`. It is not a Windows Authenticode or EV certificate and does not establish Windows SmartScreen trust.
+This file carries the single trust root for Agentrans releases. The key the application pins in `apps/desktop/src/update-signing-key.ts` for its own updates is the same key this PEM holds for `verifyReleaseManifest()` in `product-layout`, so one keypair signs both the artifacts the application verifies and the release manifests the installer reads. `apps/desktop/tests/update-signing-key.spec.ts` fails when the two public copies drift apart.
 
-The matching private key is machine-owned outside the repository. Never commit it, print it, place it in fixtures, or copy it into build output. Release signing must use the machine-owned key and record the fingerprint above; verification uses only this public key.
+The matching private key lives only in the release environment, as the `AGENTRANS_UPDATE_SIGNING_KEY` secret that the publish workflow passes to the signing step (the repository still stores that secret under its pre-rename name, `DSH_UPDATE_SIGNING_KEY`, and the workflow reads either). Never commit it, print it, place it in fixtures, or copy it into build output.
 
-A production key-rotation procedure is not implemented yet. Before rotation is needed, publish a transition process that lets an older updater verify a package carrying the successor public key.
+This key is not a Windows Authenticode or EV certificate and establishes no SmartScreen trust: an unsigned build still warns on install and on first open.
+
+Rotating the key means publishing one build that carries the successor public key before the secret changes, because an installed build trusts only the key that shipped inside it.

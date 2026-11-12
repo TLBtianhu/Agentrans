@@ -32,7 +32,7 @@
 
 Windows 注册后端使用 HKCU 写入卸载项和开始菜单快捷方式，支持注册、验证和删除，不需要管理员权限；真实临时注册项 smoke 已通过。
 
-更新签名公钥位于 [distribution/keys](distribution/keys/README.md)，算法为 Ed25519。私钥只保存在仓库之外的当前用户受限目录，绝不进入源码、构建产物、fixture 或日志。`signReleaseManifest()` 用本机私钥签署规范化清单，`verifyReleaseManifest()` 在安装前检查 keyId、签名和实际文件字节，任何篡改都拒绝安装。该密钥用于更新清单和发布物验签，不替代 Windows Authenticode/EV 证书。
+更新签名公钥位于 [distribution/keys](distribution/keys/README.md)，算法为 Ed25519，与应用在 `apps/desktop/src/update-signing-key.ts` 中固定的公钥是同一把——一个密钥对同时覆盖应用更新验签与 `verifyReleaseManifest()` 的清单验签。私钥只存在于发布环境（`AGENTRANS_UPDATE_SIGNING_KEY`，仓库当前以改名前的 `DSH_UPDATE_SIGNING_KEY` 保存），绝不进入源码、构建产物、fixture 或日志。`verifyReleaseManifest()` 在安装前检查 keyId、签名和实际文件字节，任何篡改都拒绝安装。该密钥不替代 Windows Authenticode/EV 证书。
 
 `installSignedRelease()` 先验签，再在根目录内解包并安装，安装版随后执行 Windows 注册。验签失败不复制文件，注册失败保留已安装结果和注册错误；真实签名压缩包与真实 Windows 注册 smoke 已通过。
 

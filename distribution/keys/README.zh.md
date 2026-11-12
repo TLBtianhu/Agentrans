@@ -3,11 +3,13 @@
 [English](README.md) | 中文
 
 - **算法：** Ed25519。
-- **指纹：** `ed25519-sha256-7ce3dd65bdcf9dafc651b6a68744fdf05d0d3628002fcef0a1c3fa5b4d2044a6`。
+- **指纹：** `ed25519-sha256-2bcda9bdc718f573c07f182185378da63ca29cc0c167049d67183c93c283b080`。
 - **公钥文件：** `agentrans-update-ed25519-public.pem`。
 
-此公钥通过 `product-layout` 的 `verifyReleaseManifest()` 验证 Agentrans 更新清单和发布物。它不是 Windows Authenticode 或 EV 证书，也不代表 Windows SmartScreen 信任。
+本文件承载 Agentrans 发布物的唯一信任根。应用在 `apps/desktop/src/update-signing-key.ts` 中为自己更新所固定的公钥，与本 PEM 中供 `product-layout` 的 `verifyReleaseManifest()` 使用的公钥是同一把；因此同一个密钥对既为应用验签的产物签名，也为安装器读取的发布清单签名。两份公钥一旦出现差异，`apps/desktop/tests/update-signing-key.spec.ts` 会失败。
 
-匹配的私钥由本机在仓库之外保管。不得提交、打印、放入 fixture 或复制到构建输出。发布签名必须使用本机保管的私钥并记录上述指纹；验签只使用此公钥。
+匹配的私钥只存在于发布环境，即发布工作流传给签名步骤的 `AGENTRANS_UPDATE_SIGNING_KEY` 密钥（仓库目前仍以改名前的 `DSH_UPDATE_SIGNING_KEY` 名称保存它，工作流两个名称都读）。不得提交、打印、放入 fixture 或复制到构建输出。
 
-正式密钥轮换流程尚未实现。需要轮换前，必须提供过渡流程，让旧版更新器能够验证携带后继公钥的包。
+此公钥不是 Windows Authenticode 或 EV 证书，也不建立 SmartScreen 信任：未签名的构建在安装和首次打开时仍会给出系统警告。
+
+轮换密钥意味着先发布一个携带后继公钥的构建，再更换密钥；已安装的构建只信任随它一起发布的公钥。

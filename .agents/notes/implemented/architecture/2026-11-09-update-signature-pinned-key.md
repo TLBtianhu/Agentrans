@@ -18,6 +18,7 @@ Each published artifact carries a detached Ed25519 signature, and an installed b
 - The public key is a constant in [update-signing-key.ts](../../../../apps/desktop/src/update-signing-key.ts). The private key exists only in the release environment as the `AGENTRANS_UPDATE_SIGNING_KEY` repository secret.
 - Publishing refuses to run without that key, because an unsigned release installs anywhere the key is trusted. A missing or mismatched signature ends the download with a visible failure; the alternative is installing bytes nobody vouched for.
 - The signature URL derives from the release tag the updater already resolved and the feed coordinates electron-builder embedded in `app-update.yml`, so the trust anchor and the download come from one release.
+- The same keypair backs [distribution/keys](../../../../distribution/keys/README.md): the installer and `verifyReleaseManifest()` read that PEM, which carries this public key unchanged, so one private key signs both the artifact signatures and release manifests, and `apps/desktop/tests/update-signing-key.spec.ts` fails if the two public copies drift.
 
 [update-signature.ts](../../../../apps/desktop/src/update-signature.ts) owns signing, verification, and the file digest; [update-verification.ts](../../../../apps/desktop/src/update-verification.ts) owns coordinates, URL construction, and which artifacts must verify; [update-coordinator.ts](../../../../apps/desktop/src/update-coordinator.ts) runs it inside the download operation, so an unverified update never reaches the ready state.
 
