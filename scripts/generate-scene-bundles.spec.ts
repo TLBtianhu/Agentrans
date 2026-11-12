@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it, onTestFinished } from 'vitest'
-import { generateSceneBundles, watchSceneBundles } from './generate-scene-bundles.ts'
+import { generateSceneBundles, staleSceneBundles, unbuiltSceneBundles, watchSceneBundles } from './generate-scene-bundles.ts'
 import { StageSupervisor } from './dev-web.ts'
 import { compileReferencedProjects } from './compile-referenced-projects.ts'
 
@@ -79,6 +79,16 @@ describe('scene export program generation', () => {
       await expect.poll(() => readFileSync(renderer, 'utf8'), { timeout: 10_000 }).toContain('after')
     } finally { await watcher.dispose() }
     expect(await watcher.exited).toBe(0)
+  })
+
+  it('reports stale generated programs without writing and leaves absent ones to the build', () => {
+    const { root, artifact } = fixture()
+    expect(staleSceneBundles(root)).toEqual([])
+    generateSceneBundles(root)
+    expect(staleSceneBundles(root)).toEqual([])
+    expect(unbuiltSceneBundles(root)).toEqual([])
+    writeFileSync(join(artifact, 'scene-expr.generated.js'), 'stale\n')
+    expect(staleSceneBundles(root)).toEqual([join(artifact, 'scene-expr.generated.js')])
   })
 
   it('stops both source watchers after a generation error', async () => {
