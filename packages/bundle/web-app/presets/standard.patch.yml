@@ -126,7 +126,7 @@
             name: '@agentrans/artifact/tool'
           - id: scene
             name: '@agentrans/artifact/scene-tool'
-          - id: artifact-runtime
+          - id: artifact-runtime-tool
             name: '@agentrans/artifact-runtime/tool'
           - id: tool-plugin-manager
             name: '@agentrans/plugin-manager/tools'
