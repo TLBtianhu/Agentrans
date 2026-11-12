@@ -24,6 +24,20 @@
 
 判据：**无法触发的门禁不能出现在"已验证"的叙述里**。`sandbox.yml` 声称的真实内核隔离证明在当前仓库从未运行过，引用时必须说明。重定向触发器要同时改 `scripts/ci-workflow.spec.ts` 里对应的 `refs/heads/master` 断言，不能只改一边。
 
+## 已完成：审查驱动修复批次（2026-11-12）
+
+按 `C:\agent制作\ARCHITECTURE-REVIEW.md` 逐条核验后落地，自 `Drop the compatibility layers nothing needs` 之后共 16 个提交，全部已推送。细节与判据见工作区 `MEMORY.md` 第 52、53 节；验证证据见 `.dev-data/qa/2026-11-12-incident-recovery-and-review/`。
+
+- **产物门禁**：`build:check` 新增 `verify-build-artifacts`（按清单声明校验运行时入口 + client 构建记录）。此前它全绿而 382 个 `lib/index.js` 全缺。
+- **改名回归**：client 插件表读错清单键（整张 Web 客户端插件表为空，P0）、vendor 区间规则在 rescope 后失效（门禁 231 项红）、跨 plane 重复 row id、`bundle-overrides` spec 的 base 包查找过期，均已修复。
+- **名字对齐**：`dsh.client`→`agentrans.client`、`dsh.bundle`→`agentrans.bundle`（159 文件、15 组配对重录）；签名密钥文档不再声称存在兜底。
+- **夹具/快照过期**：plugin-manager 7 例与 registry 1 例（已安装清单写退役字段、请求旧包名）、typert 快照 40 行偏移。
+- **审查第 2.1 条（CAS）**：`prepare` 建立写预约、`commit` 复核后继修订号、`discard` 释放；重叠更新以 `ARTIFACT_BUSY` 在工具执行期失败，不再静默覆盖。
+- **审查第 2.2 条（双写入路径）**：删除 `@Remote record`，只保留 `submitAction` 准入路径（+25/−223）。
+- **审查第 8/9/10/12 条**：CI 触发面审计与 5 个 inactive 标注、`verify-claude-mirror`（4 个逐字节镜像）、scene 生成物 `--check`。
+
+门禁口径：`build:check` 3/3、`doc-sync` 48/48、artifact+ui-artifact 654、plugin-manager+registry+typert 515、`verify-package-dependencies` 96 包、`verify-cordis-config` 314 文件。既有红（非本轮引入）：`voice-input` e2e、`workspace-management` hover（空标题会话按设计不可复制）、`verify-product-use` 3 个休眠账号包待决定。
+
 ## 进行中：把文档里的 dsh 清干净（2026-11-11）
 
 已改：默认 home 从 `~/.dsh` 改为 `~/.agentrans`（38 个 md + 7 个源文件 JSDoc + 重新生成的配置目录）；产品措辞 19 个文件；用户指南包名 11 个文件；514 篇包 README；72 篇应用/贡献者指南。
