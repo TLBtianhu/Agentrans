@@ -897,10 +897,13 @@ export class ClientModuleRegistry extends Service {
     }
     const { packageName, path: pkgPath } = located
     const pkg = JSON.parse(readFileSync(pkgPath, 'utf8')) as Record<string, unknown>
-    const dsh = pkg.dsh
+    if (pkg.dsh !== undefined) {
+      throw new Error(`client-modules: ${packageName} declares the retired "dsh" manifest field; declare agentrans.client instead`)
+    }
+    const agentrans = pkg.agentrans
     const decl = parseDshClient(
       packageName,
-      dsh !== null && typeof dsh === 'object' ? (dsh as Record<string, unknown>).client : undefined,
+      agentrans !== null && typeof agentrans === 'object' ? (agentrans as Record<string, unknown>).client : undefined,
     )
     if (decl === undefined || decl.platform !== 'web') return null
     const clientRel = clientExportOf(packageName, pkg.exports)

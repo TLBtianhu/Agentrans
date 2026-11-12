@@ -519,6 +519,18 @@ describe('client bundle activation', () => {
     expect(service.graph().entries.map(entry => entry.id)).toEqual([packageName])
   })
 
+  it('rejects a manifest that keeps the retired dsh field instead of ignoring its row', () => {
+    const packageName = '@fixture/retired-field'
+    const clientPath = writePackage(packageName, { dsh: { client: { platform: 'web' } } })
+    const hostPath = join(dirname(clientPath), 'index.js')
+    mkdirSync(dirname(hostPath), { recursive: true })
+    writeFileSync(hostPath, 'export default {}\n')
+    writeFileSync(clientPath, 'module.exports = {}\n')
+
+    expect(() => construct([pathToFileURL(hostPath).href]).graph())
+      .toThrow('declares the retired "dsh" manifest field; declare agentrans.client instead')
+  })
+
   it.each(['relative', 'absolute'] as const)(
     'finds the owning manifest through the %s-path fallback without Node loader internals',
     (kind) => {
