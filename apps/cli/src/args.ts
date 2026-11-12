@@ -57,15 +57,8 @@ interface PluginInvocation {
   args: string[]
 }
 
-/** Move data an earlier release kept at the retired home onto the current one. */
-interface HomeInvocation {
-  mode: 'home'
-  /** The only action: move the retired home, or report why it cannot be moved. */
-  action: 'adopt'
-}
-
 /** The resolved `dsh` invocation. Help, version, and errors exit inside {@link parseDshArgs}. */
-export type DshInvocation = ProfileInvocation | DumpConfigInvocation | DumpConfigSchemaInvocation | PluginInvocation | HomeInvocation
+export type DshInvocation = ProfileInvocation | DumpConfigInvocation | DumpConfigSchemaInvocation | PluginInvocation
 
 /** Launcher flags for profile boot and configuration dumps. */
 interface BootOptions {
@@ -209,19 +202,8 @@ export function parseDshArgs(argv: readonly string[], version: string, manageDes
       })
   }
 
-  if (first === 'home') {
-    const home = program.command('home').description('move data an earlier release kept at ~/.dsh onto the current home')
-    home
-      .helpOption('-h, --help', 'show this help')
-      .command('adopt')
-      .description('rename ~/.dsh to the current home; refuses when either side is already in use')
-      .action(() => {
-        resolved = { mode: 'home', action: 'adopt' }
-      })
-  }
-
   try {
-    const expanded = first !== undefined && !first.startsWith('-') && first !== 'plugin' && first !== 'home'
+    const expanded = first !== undefined && !first.startsWith('-') && first !== 'plugin'
       ? ['--profile', ...argv]
       : argv
     program.parse(expanded, { from: 'user' })

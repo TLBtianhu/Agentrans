@@ -3,7 +3,7 @@
 English | [中文](README.zh.md)
 
 - **Algorithm:** Ed25519.
-- **Fingerprint:** `ed25519-sha256-2bcda9bdc718f573c07f182185378da63ca29cc0c167049d67183c93c283b080`.
+- **Fingerprint:** `ed25519-sha256-098885a5447f876f616ecd3cbdb156737cc6f4c00601958b1c78088842a81753`.
 - **Public key:** `agentrans-update-ed25519-public.pem`.
 
 This file carries the single trust root for Agentrans releases. The key the application pins in `apps/desktop/src/update-signing-key.ts` for its own updates is the same key this PEM holds for `verifyReleaseManifest()` in `product-layout`, so one keypair signs both the artifacts the application verifies and the release manifests the installer reads. `apps/desktop/tests/update-signing-key.spec.ts` fails when the two public copies drift apart.

@@ -3,14 +3,14 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write docs/upgrade-guide/v0.1.0/identity-rename/guide.md
 /:
-  en: 019f24a4aadef8c2
-  zh: 2300889d829ed847
+  en: f14863a4e5b6968d
+  zh: 768442bf0779b7e8
 /the-product-takes-its-own-name:
   en: 920276f11afc6b17
-  zh: 9dc87e0949c8136a
+  zh: 9b9e80c18fef5e3f
 /the-product-takes-its-own-name/change:
-  en: 580dd29a9f7b3e64
-  zh: 5001c5f727f5980c
+  en: ba289e612537a72a
+  zh: 42fb9558570cbd81
 /the-product-takes-its-own-name/migration:
-  en: 64459b4934ffc73d
-  zh: cb92b1771e6aa73f
+  en: 61af95e90ed92326
+  zh: 7e43e2e910a6ba46

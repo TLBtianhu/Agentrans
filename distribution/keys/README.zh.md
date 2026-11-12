@@ -3,7 +3,7 @@
 [English](README.md) | 中文
 
 - **算法：** Ed25519。
-- **指纹：** `ed25519-sha256-2bcda9bdc718f573c07f182185378da63ca29cc0c167049d67183c93c283b080`。
+- **指纹：** `ed25519-sha256-098885a5447f876f616ecd3cbdb156737cc6f4c00601958b1c78088842a81753`。
 - **公钥文件：** `agentrans-update-ed25519-public.pem`。
 
 本文件承载 Agentrans 发布物的唯一信任根。应用在 `apps/desktop/src/update-signing-key.ts` 中为自己更新所固定的公钥，与本 PEM 中供 `product-layout` 的 `verifyReleaseManifest()` 使用的公钥是同一把；因此同一个密钥对既为应用验签的产物签名，也为安装器读取的发布清单签名。两份公钥一旦出现差异，`apps/desktop/tests/update-signing-key.spec.ts` 会失败。

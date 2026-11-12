@@ -4,22 +4,12 @@
  * @module @agentrans/home-paths
  */
 
-import { existsSync, readdirSync } from 'node:fs'
 import { opendir, realpath } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { basename, dirname, join, resolve } from 'node:path'
 
 /** Directory name for the default Agentrans home under the OS home. */
 export const AGENTRANS_HOME_DIR_NAME = '.agentrans'
-
-/**
- * Directory name this home used before the product took its own name. A release around the
- * rename still wrote here, so an upgrade has to tell the user that their data is elsewhere.
- */
-export const RETIRED_AGENTRANS_HOME_DIR_NAME = '.dsh'
-
-/** Stable user-facing display form for the retired home. */
-export const RETIRED_AGENTRANS_HOME_DISPLAY = `~/${RETIRED_AGENTRANS_HOME_DIR_NAME}`
 
 /** Stable user-facing display form for the default Agentrans home. */
 export const DEFAULT_AGENTRANS_HOME_DISPLAY = `~/${AGENTRANS_HOME_DIR_NAME}`
@@ -87,53 +77,6 @@ export function defaultDshHome(): string {
  */
 export function defaultAgentsHome(): string {
   return join(homedir(), AGENTS_HOME_DIR_NAME)
-}
-
-/**
- * Resolve the retired default home this product wrote before it took its own name.
- * @returns the absolute retired home path.
- */
-export function retiredDshHome(): string {
-  return join(homedir(), RETIRED_AGENTRANS_HOME_DIR_NAME)
-}
-
-/** What a startup check found in the retired home. */
-export interface RetiredHomeFinding {
-  /** Absolute path of the retired home. */
-  readonly path: string
-  /** Symbolic label for user-facing messages. */
-  readonly display: string
-}
-
-/**
- * Report a retired home that still holds data while the current home does not exist yet.
- *
- * The check answers one narrow question — would this start silently look like a fresh
- * installation to someone whose data sits at the previous path — so it stays quiet when the
- * user pointed `$AGENTRANS_HOME` somewhere, when the current home already exists, and when the
- * retired directory is absent or empty.
- * @param options - overwritable seams for tests and callers that already resolved a root.
- * @returns the retired home to report, or undefined when this start needs no notice.
- */
-export function detectRetiredHome(options: {
-  env?: Record<string, string | undefined>
-  home?: string
-  retired?: string
-  exists?: (path: string) => boolean
-  entries?: (path: string) => number
-} = {}): RetiredHomeFinding | undefined {
-  const env = options.env ?? process.env
-  const configured = env[AGENTRANS_HOME_ENV]
-  if (configured !== undefined && configured.trim().length > 0) return undefined
-  const home = options.home ?? defaultDshHome()
-  const retired = options.retired ?? retiredDshHome()
-  if (resolve(home) === resolve(retired)) return undefined
-  const exists = options.exists ?? existsSync
-  if (exists(home)) return undefined
-  if (!exists(retired)) return undefined
-  const entries = options.entries ?? countEntries
-  if (entries(retired) === 0) return undefined
-  return { path: retired, display: RETIRED_AGENTRANS_HOME_DISPLAY }
 }
 
 /**
@@ -251,13 +194,4 @@ export function dshHomeDisplay(resolvedHome: string): string {
  */
 export function agentsHomeDisplay(resolvedHome: string): string {
   return rootDisplay(resolvedHome, defaultAgentsHome(), DEFAULT_AGENTS_HOME_DISPLAY, AGENTS_HOME_ENV)
-}
-
-/**
- * Count the entries directly inside a directory.
- * @param path - directory to read.
- * @returns the number of entries it holds.
- */
-function countEntries(path: string): number {
-  return readdirSync(path).length
 }

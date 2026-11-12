@@ -31,10 +31,6 @@ export async function runCli(options: RunCliOptions = {}): Promise<void> {
   switch (invocation.mode) {
     case 'profile': {
       const { runProfile } = await import('./profile-boot.ts')
-      const { startupHomeNotice } = await import('./home.ts')
-      // An upgrade must not look like a fresh installation; say where the old data sits.
-      const notice = startupHomeNotice()
-      if (notice !== undefined) console.warn(notice)
       try {
         await runProfile({
           environment: loadLayeredEnv('dsh'),
@@ -71,21 +67,7 @@ export async function runCli(options: RunCliOptions = {}): Promise<void> {
       await runDumpConfigSchema(invocation.profile, invocation.patches, invocation.fromDefaultProfile)
       break
     }
-    case 'home': {
-      const { adoptRetiredHome } = await import('./home.ts')
-      const result = adoptRetiredHome()
-      if (result.status === 'refused') {
-        const reasons = {
-          'no-retired-home': `no home at ${result.from}`,
-          'home-exists': `${result.to} already exists; resolve the two homes yourself`,
-          'not-a-directory': `${result.from} is not a directory`,
-        }
-        console.error(`agentrans: nothing moved: ${reasons[result.reason]}`)
-        process.exit(1)
-      }
-      console.log(`agentrans: moved ${result.from} to ${result.to}`)
-      break
-    }
+
     default:
       invocation satisfies never
       throw new Error(`agentrans: unhandled invocation mode ${JSON.stringify(invocation)}`)

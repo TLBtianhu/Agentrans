@@ -5,4 +5,4 @@
  * trusts this constant, so a release nobody signed with the matching key cannot
  * install. Rotating the key means publishing a build that carries the next one.
  */
-export const UPDATE_SIGNING_PUBLIC_KEY = 'MCowBQYDK2VwAyEA4F11J5B1PTRhx/0psxDOsJRhdWs8VK3Y+MYCHR806g0='
+export const UPDATE_SIGNING_PUBLIC_KEY = 'MCowBQYDK2VwAyEArSmBQGbcCemFUfS0XWtRmuPnXpj0qblaG7VpJqbSQTo='

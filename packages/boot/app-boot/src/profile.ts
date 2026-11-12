@@ -28,7 +28,6 @@ import type { EntryOptions } from '@agentrans/cordis-plugin-loader'
 import { applyEntryPatches, type PatchOptions } from '@agentrans/cordis-plugin-include'
 import { resolveDshHome } from '@agentrans/home-paths'
 import type { DshBundleManifest, DshPackageManifest } from '@agentrans/package-manifest'
-import { normalizeRetiredKeys } from './retired-keys.ts'
 import { INSTALLATION_OWNED_PROFILE_TUPLES, PROFILE_TEMPLATES, RETIRED_BUNDLES } from '@agentrans/official-bundles'
 import { assertBundlePlatform } from './bundle-platform.ts'
 import { evaluatePluginCompatibility, pluginCompatibilityWarning } from './plugin-compatibility.ts'
@@ -306,7 +305,7 @@ function pointsInto(link: string, root: string): boolean {
 
 /** Read one package manifest while traversing a dependency graph. */
 function readPackageManifest(anchor: string): ProfileManifest {
-  return normalizeRetiredKeys(JSON.parse(readFileSync(anchor, 'utf8')) as ProfileManifest, anchor)
+  return JSON.parse(readFileSync(anchor, 'utf8')) as ProfileManifest
 }
 
 /** Return dependency names that may be imported by a loader-visible plugin. */
@@ -559,7 +558,7 @@ export function readProfileManifest(binName: string, dir: string): ProfileManife
   if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
     throw new Error(`${binName}: profile manifest ${path} must hold a JSON object`)
   }
-  return normalizeRetiredKeys(parsed, path)
+  return parsed
 }
 
 /**
