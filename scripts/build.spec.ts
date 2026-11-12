@@ -97,13 +97,14 @@ describe('repository build steps', () => {
     expect(gates.find(gate => gate.id === 'host-src')?.needs).toContain('scene-programs')
   })
 
-  it('checks both aggregate programs without artifact predecessors', () => {
+  it('checks both aggregate programs and the build artifacts without artifact predecessors', () => {
     const gates = buildGates(root, 'check')
-    expect(graph(gates)).toEqual({ 'host-check': [], 'client-check': [] })
-    expect(gates.map(gate => gate.args.slice(-2))).toEqual([
+    expect(graph(gates)).toEqual({ 'host-check': [], 'client-check': [], 'artifacts': [] })
+    expect(gates.filter(gate => gate.id.endsWith('-check')).map(gate => gate.args.slice(-2))).toEqual([
       ['-p', 'tsconfig.host.json'],
       ['-p', 'tsconfig.client.json'],
     ])
+    expect(gates.find(gate => gate.id === 'artifacts')?.args.at(-1)).toBe(resolve(root, 'scripts/verify-build-artifacts.ts'))
   })
 
   it('starts each aggregate check after its own package compilation in the complete build', () => {

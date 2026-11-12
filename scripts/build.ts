@@ -2,8 +2,9 @@
  * Build repository artifacts, type-check the aggregate test and script programs, or both.
  *
  * `--scope artifacts` emits every artifact and binds the client outputs to their public environment;
- * `--scope check` type-checks only the Host and Client aggregate programs against the package
- * declarations already on disk; the default runs both step sets as one dependency graph, so the
+ * `--scope check` type-checks the Host and Client aggregate programs against the package
+ * declarations already on disk and verifies the declared runtime artifacts and client build record;
+ * the default runs both step sets as one dependency graph, so the
  * aggregate checks overlap the remaining artifact steps. `--scope typecheck` (`pnpm run typecheck`)
  * generates Typert declarations before package compilation, then type-checks every package project
  * and both aggregate programs without bundling.
@@ -11,6 +12,7 @@
 
 import { rmSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { parseArgs } from 'node:util'
 import {
   CLIENT_BUILD_RECORD_PATH,
@@ -117,6 +119,19 @@ export function buildGates(
         env,
       })
     }
+  }
+  if (scope === 'check') {
+    // Aggregate checks read declarations only, so they cannot report a tree whose runtime bundles or client
+    // build record were removed; this gate owns that fact and names the rebuild command.
+    gates.push({
+      id: 'artifacts',
+      label: 'build artifacts',
+      displayCommand: 'tsx scripts/verify-build-artifacts.ts',
+      command: process.execPath,
+      args: ['--import', import.meta.resolve('tsx/esm'), fileURLToPath(new URL('verify-build-artifacts.ts', import.meta.url))],
+      needs: [],
+      env,
+    })
   }
   if (serial) {
     return gates.map((gate, index) => {
