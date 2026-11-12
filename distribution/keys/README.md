@@ -8,7 +8,7 @@ English | [中文](README.zh.md)
 
 This file carries the single trust root for Agentrans releases. The key the application pins in `apps/desktop/src/update-signing-key.ts` for its own updates is the same key this PEM holds for `verifyReleaseManifest()` in `product-layout`, so one keypair signs both the artifacts the application verifies and the release manifests the installer reads. `apps/desktop/tests/update-signing-key.spec.ts` fails when the two public copies drift apart.
 
-The matching private key lives only in the release environment, as the `AGENTRANS_UPDATE_SIGNING_KEY` secret that the publish workflow passes to the signing step (the repository still stores that secret under its pre-rename name, `DSH_UPDATE_SIGNING_KEY`, and the workflow reads either). Never commit it, print it, place it in fixtures, or copy it into build output.
+The matching private key lives only in the release environment, as the `AGENTRANS_UPDATE_SIGNING_KEY` secret that the publish workflow passes to the signing step. Never commit it, print it, place it in fixtures, or copy it into build output.
 
 This key is not a Windows Authenticode or EV certificate and establishes no SmartScreen trust: an unsigned build still warns on install and on first open.
 

@@ -34,7 +34,7 @@
 - 打包运行 [43071046158](https://github.com/TLBtianhu/Agentrans/actions/runs/43071046158) 成功（20 分钟），发布运行 [43076622437](https://github.com/TLBtianhu/Agentrans/actions/runs/43076622437) 成功。
 - Release `v0.1.0`：21 个资产，稳定版（非草稿、非预发布）。
 - 校验：`latest.yml` 与 `latest-mac.yml` **各只有一份**；两者 `version: 0.1.0`；`latest-mac.yml` 的 `files` 同时列出 `mac-arm64` 与 `mac-x64` 的 zip。
-- 发布签名密钥在仓库里仍叫 `DSH_UPDATE_SIGNING_KEY`，工作流现在读新名并以旧名兜底；新密钥建好后删掉兜底。
+- 发布签名密钥的仓库 secret 必须叫 `AGENTRANS_UPDATE_SIGNING_KEY`：工作流只读这一个名字，改名前的兜底已随兼容层一起删除；发布时缺该 secret 会拒绝签名而不是静默产出未签名资产。
 - `docs/cli-help` 的 `dsh` 残留已修：生成器改为从 `apps/cli/package.json` 的 bin 名取命令名，四个 bundle 应用（acp/headless/sdk/web）也改为 `agentrans --profile …`。
 ## 已完成：与上游身份彻底分离（2026-11-11）
 
