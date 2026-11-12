@@ -355,12 +355,12 @@ describe('registry HTTP', () => {
     const url = await servingRun({
       destination, artifacts: [artifact], workspaceNames: ['@scope/local', '@agentrans/private-thing'],
     })
-    const owned = await fetch(`${url}@deepseek-ai%2fdsh-private-thing`)
+    const owned = await fetch(`${url}@agentrans%2fprivate-thing`)
     expect(owned.status).toBe(404)
     const refusal = await owned.json() as { reason?: string }
     expect(refusal.reason ?? '').toContain('repository-owned')
     // A repository-owned name that is not even in the closure must never reach npm.
-    expect((await fetch(`${url}@deepseek-ai%2fdsh-private-thing/1.0.0`)).status).toBe(404)
+    expect((await fetch(`${url}@agentrans%2fprivate-thing/1.0.0`)).status).toBe(404)
 
     const external = await fetch(`${url}@anthropic-ai%2fclaude-agent-sdk`, { redirect: 'manual' })
     expect(external.status).toBe(302)

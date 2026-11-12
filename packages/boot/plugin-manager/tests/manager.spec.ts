@@ -2023,14 +2023,14 @@ function extraRegistry(spec: string, fields: readonly string[]): object {
     }
   }
   const version = spec.slice('extra@'.length)
-  if (version === '2.0.0') return { name: 'extra', version, peerDependencies: { '@agentrans/cli': '>=999.0.0' }, dsh: BUNDLE }
-  if (version === '1.1.0') return { name: 'extra', version, deprecated: 'use 1.2.0', dsh: BUNDLE }
+  if (version === '2.0.0') return { name: 'extra', version, peerDependencies: { '@agentrans/cli': '>=999.0.0' }, agentrans: BUNDLE }
+  if (version === '1.1.0') return { name: 'extra', version, deprecated: 'use 1.2.0', agentrans: BUNDLE }
   if (version === '1.2.0-beta.1') return { name: 'extra', version }
   // An own `engines.agentrans` decides compatibility alone, so its unmet peer range does not make this version incompatible.
   if (version === '1.2.0') {
-    return { name: 'extra', version, engines: { agentrans: '>=0.0.0-0' }, peerDependencies: { '@agentrans/cli': '>=999.0.0' }, dsh: BUNDLE }
+    return { name: 'extra', version, engines: { agentrans: '>=0.0.0-0' }, peerDependencies: { '@agentrans/cli': '>=999.0.0' }, agentrans: BUNDLE }
   }
-  return { name: 'extra', version, dsh: BUNDLE }
+  return { name: 'extra', version, agentrans: BUNDLE }
 }
 
 it('lists newer registry versions with tags, times, deprecation, bundle declaration, and DSH compatibility', async () => {
@@ -2100,7 +2100,7 @@ it('refuses to list versions of a package not installed from a registry', async 
   aliased.dependencies = { ...aliased.dependencies, linked: 'npm:other-plugin@1.0.0' }
   writeFileSync(join(dir, 'package.json'), JSON.stringify(aliased))
   expect(await manager.listVersions('linked')).toEqual(refusal('linked is not installed from a registry under its own name'))
-  writeFileSync(join(dir, 'node_modules', 'extra', 'package.json'), JSON.stringify({ name: 'extra', version: 'nightly', dsh: BUNDLE }))
+  writeFileSync(join(dir, 'node_modules', 'extra', 'package.json'), JSON.stringify({ name: 'extra', version: 'nightly', agentrans: BUNDLE }))
   expect(await manager.listVersions('extra')).toEqual(refusal('extra declares no semver version'))
   // A bundle carrying plugin management cannot be removed, so it is not offered for an update.
   writeFileSync(join(dir, 'node_modules', 'extra', 'cordis.patch.yml'), JSON.stringify([{ insert: [{ id: 'pm', name: '@agentrans/plugin-manager' }] }]))
@@ -2122,7 +2122,7 @@ function extraPnpm(dir: string, bundle: (name: string, rows: unknown[]) => void,
     } else {
       const version = spec.slice('extra@'.length)
       bundle('extra', [{ id: 'managed', name: './plugin.mjs' }])
-      writeFileSync(join(dir, 'node_modules', 'extra', 'package.json'), JSON.stringify({ name: 'extra', version, dsh: BUNDLE }))
+      writeFileSync(join(dir, 'node_modules', 'extra', 'package.json'), JSON.stringify({ name: 'extra', version, agentrans: BUNDLE }))
       manifest.dependencies = { ...manifest.dependencies, extra: version }
     }
     writeFileSync(join(dir, 'package.json'), JSON.stringify(manifest))
@@ -2231,7 +2231,7 @@ it('reports a reinstallation that fails too, leaving the package uninstalled', a
 it('refuses an update before changing anything when the target is not a newer compatible bundle', async () => {
   const { manager, dir, bundle } = await fixture()
   viewAnswers((spec, fields) => spec === 'extra@3.0.0' ? { exitCode: 1, stdout: '', stderr: 'ERR_PNPM_NO_MATCHING_VERSION  No matching version found for extra@3.0.0', timedOut: false }
-    : spec === 'extra@1.5.0' ? { name: 'extra', version: '1.5.0', peerDependencies: { '@agentrans/cli': 7 }, dsh: BUNDLE }
+    : spec === 'extra@1.5.0' ? { name: 'extra', version: '1.5.0', peerDependencies: { '@agentrans/cli': 7 }, agentrans: BUNDLE }
       : extraRegistry(spec, fields))
   const pnpm = extraPnpm(dir, bundle)
   const before = readFileSync(join(dir, 'package.json'), 'utf8')
