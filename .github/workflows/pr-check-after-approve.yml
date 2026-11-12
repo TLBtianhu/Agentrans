@@ -1,3 +1,9 @@
+# Inactive in this repository: this workflow triggers only on `master`, while the default branch is
+# `main`. It is kept as the upstream design record. Activate it by retargeting the trigger together
+# with the matching assertions in `scripts/ci-workflow.spec.ts`, not by editing one side alone.
+# It also depends on the upstream `deepseek-harness/deepseek-harness-check` action and repository
+# variables this fork does not configure, so retargeting alone would still not run a working check.
+
 name: Policy
 on:
   pull_request_target:

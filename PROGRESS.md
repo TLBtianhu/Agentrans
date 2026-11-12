@@ -14,6 +14,16 @@
 
 - **没有外部用户，不做向下兼容。** 破坏性改名直接改：不写弃用读取路径、不写迁移命令、不为已装旧版保留旧键或旧密钥。代价是一次性重装，不是兼容层。
 - 仍然保留的旧名只有三类：`dsh-app://` 协议、`app.asar/dsh` 归档内目录、`.agents/skills/dsh-*` 技能 ID。其余一律用 Agentrans 之名。
+## CI 触发面（2026-11-12 只读审计）
+
+默认分支是 `main`；从上游继承的 CI 参考仍写在 `master` 上，因此按分支解析时不会触发。逐文件解析每个 workflow 的 `on:` 后：
+
+- **会跑**：`ci.yml`、`ci-windows.yml`、`ci-python.yml`、`expected-filenames.yml`、`e2e.yml`（`push` 含 main+master、PR、定时）、`build-preview-cloudflare.yml`、`issue-lifecycle.yml`、`issue-policy.yml`、`weighted-approval.yml`、`weighted-approval-review-event.yml`，以及手动入口 `agentrans-hosted-package.yml`、`desktop-release.yml`。
+- **不会跑**（仅 `master` 触发，文件头部已标注 inactive）：`ci-master.yml`、`sandbox.yml`、`pr-check-after-approve.yml`、`pr-check-on-base-branch.yml`、`pr-check-on-head-branch.yml`。三个 `pr-check-*` 还依赖上游 `deepseek-harness/deepseek-harness-check` action 与本仓库未配置的仓库变量。
+- **部分失效**：`release.yml`、`release-vendor.yml`、`node-addon-system.yml` 的 `push: master` 不触发，PR 触发部分是活的；三者仍调用上游 action，PR 上是否变红取决于该 action 的可达性。
+
+判据：**无法触发的门禁不能出现在"已验证"的叙述里**。`sandbox.yml` 声称的真实内核隔离证明在当前仓库从未运行过，引用时必须说明。重定向触发器要同时改 `scripts/ci-workflow.spec.ts` 里对应的 `refs/heads/master` 断言，不能只改一边。
+
 ## 进行中：把文档里的 dsh 清干净（2026-11-11）
 
 已改：默认 home 从 `~/.dsh` 改为 `~/.agentrans`（38 个 md + 7 个源文件 JSDoc + 重新生成的配置目录）；产品措辞 19 个文件；用户指南包名 11 个文件；514 篇包 README；72 篇应用/贡献者指南。

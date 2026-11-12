@@ -1,3 +1,9 @@
+# Inactive in this repository: this workflow triggers only on `master`, while the default branch is
+# `main`. It is kept as the upstream design record. Activate it by retargeting the trigger together
+# with the matching assertions in `scripts/ci-workflow.spec.ts`, not by editing one side alone.
+# The tarballs it installs come from the upstream release workflow, so a retarget also needs a
+# decision about which Agentrans release supplies the Landlock launcher.
+
 # Sandbox CI: the keyless real-kernel confinement proofs, plus the darwin
 # unit-parity job (unit-darwin) that needs the matrix's macOS image. This
 # master-only reference stays outside the pull-request verdict; rationale lives in
