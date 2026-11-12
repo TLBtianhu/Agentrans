@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-`@agentrans/client-modules` turns a plugin package's `dsh.client` declaration into a loadable browser bundle: the host half scans enabled Loader entries and composes the boot graph, an available Web carrier serves each bundle over `/plugins`, and a shell-owned carrier dispatches the same exact bundle responses through `fetchBundle()`. The browser half loads those bundles lazily on demand. Plugin bundles execute lazily — running a bundle only registers a factory, and module side effects run at materialization — so nothing runs until a plugin is first used. Everything here is browser-kernel machinery; the model never sees it.
+`@agentrans/client-modules` turns a plugin package's `agentrans.client` declaration into a loadable browser bundle: the host half scans enabled Loader entries and composes the boot graph, an available Web carrier serves each bundle over `/plugins`, and a shell-owned carrier dispatches the same exact bundle responses through `fetchBundle()`. The browser half loads those bundles lazily on demand. Plugin bundles execute lazily — running a bundle only registers a factory, and module side effects run at materialization — so nothing runs until a plugin is first used. Everything here is browser-kernel machinery; the model never sees it.
 
 ## Table of Contents
 
@@ -25,13 +25,13 @@ English | [中文](README.zh.md)
 <a id="use-this-package"></a>
 ## Use this package
 
-Use [`DshClientManifest`](../../util/package-manifest/README.md) for the declaration type. Client-modules validates the JSON and owns the normalized boot graph.
+Use [`AgentransClientManifest`](../../util/package-manifest/README.md) for the declaration type. Client-modules validates the JSON and owns the normalized boot graph.
 
-Use it when you compose or build a browser client plugin: the package turns a package's `dsh.client` declaration into a loadable browser bundle with no per-plugin wiring. It activates with the web composition; the shell boots it before any plugin runs.
+Use it when you compose or build a browser client plugin: the package turns a package's `agentrans.client` declaration into a loadable browser bundle with no per-plugin wiring. It activates with the web composition; the shell boots it before any plugin runs.
 
 ### Declaring a client plugin
 
-A browser plugin package declares `dsh.client` in its `package.json` with `platform: 'web'`, exports a `./client` bundle, and lists any non-baseline module requests under `dsh.client.external`. The host half turns each declaration into a served bundle under `/plugins`, ordered so dynamic providers load before their consumers.
+A browser plugin package declares `agentrans.client` in its `package.json` with `platform: 'web'`, exports a `./client` bundle, and lists any non-baseline module requests under `agentrans.client.external`. The host half turns each declaration into a served bundle under `/plugins`, ordered so dynamic providers load before their consumers.
 
 <a id="package-assets"></a>
 ### Package assets
@@ -52,7 +52,7 @@ Every graph carries the Host release identity as `release`: this package's `vers
 
 ### Sharing modules
 
-The shell seeds a frozen module table ([`PLATFORM_MODULES`](../web/README.md#the-shared-module-table)); every dynamic bundle resolves its externals against exactly that baseline. `dsh.client.external` adds only exact non-baseline requests, each answered by the dynamic package row it names or an exact static-table key. Type-only imports are erased and create no request. Composition rejects malformed requests, missing suppliers, self-requests, and synchronous request cycles.
+The shell seeds a frozen module table ([`PLATFORM_MODULES`](../web/README.md#the-shared-module-table)); every dynamic bundle resolves its externals against exactly that baseline. `agentrans.client.external` adds only exact non-baseline requests, each answered by the dynamic package row it names or an exact static-table key. Type-only imports are erased and create no request. Composition rejects malformed requests, missing suppliers, self-requests, and synchronous request cycles.
 
 ### Build requirements
 
@@ -78,7 +78,7 @@ Executing a plugin bundle only registers its factory; every module-body side eff
 
 ### Incremental composition
 
-The Node half reconciles packages by Loader entry name. Every `internal/plugin` emission marks the fiber's entry name dirty. Each nonempty flush, including the synchronous activation flush, traverses all Loader entries once to build a temporary index by entry name, then looks up the pending names for reconciliation. Package resolution must not synchronously add or remove Loader entries during that reconciliation. A pending name absent from the index is reconciled with an empty entry list to remove unloaded sources; all same-name entries remain available for source deduplication and conflict checks. The activation pass seeds the same pending names and flushes synchronously, so initial activation and steady state share one implementation. Each reconciliation reads the package manifest and the bundle metadata again, so an entry that restarts after its package was reinstalled, upgraded, or moved publishes its current `dsh.client` declaration and client export; a reconciliation that finds the same manifest and bundle metadata publishes nothing and reads no bundle bytes, and an unchanged bundle keeps its revision, so the browser keeps the loaded plugin. The resolved manifest package name identifies the browser module. Distinct active Loader sources resolving to one package name are rejected; removing the conflict promotes the remaining source without requiring its fiber to restart. A bundle rebuilt without an entry restart reaches the graph through `rebuilt()` (the HMR hook).
+The Node half reconciles packages by Loader entry name. Every `internal/plugin` emission marks the fiber's entry name dirty. Each nonempty flush, including the synchronous activation flush, traverses all Loader entries once to build a temporary index by entry name, then looks up the pending names for reconciliation. Package resolution must not synchronously add or remove Loader entries during that reconciliation. A pending name absent from the index is reconciled with an empty entry list to remove unloaded sources; all same-name entries remain available for source deduplication and conflict checks. The activation pass seeds the same pending names and flushes synchronously, so initial activation and steady state share one implementation. Each reconciliation reads the package manifest and the bundle metadata again, so an entry that restarts after its package was reinstalled, upgraded, or moved publishes its current `agentrans.client` declaration and client export; a reconciliation that finds the same manifest and bundle metadata publishes nothing and reads no bundle bytes, and an unchanged bundle keeps its revision, so the browser keeps the loaded plugin. The resolved manifest package name identifies the browser module. Distinct active Loader sources resolving to one package name are rejected; removing the conflict promotes the remaining source without requiring its fiber to restart. A bundle rebuilt without an entry restart reaches the graph through `rebuilt()` (the HMR hook).
 
 If Loader enumeration fails during a flush, the registry consumes the failed batch without changing package state or the published graph. Activation reports the failure through its composition error; steady state logs a warning. Another entry notification is required to retry that name.
 
@@ -104,7 +104,7 @@ The host contributes structured index rows that inject, into `<head>`: the `wind
 | [`src/client/system.ts`](src/client/system.ts) | `ClientModuleSystem`: load/materialize/invalidate machinery |
 | [`src/client/entries.ts`](src/client/entries.ts) | Page entry reconciliation, retries and code replacement |
 | [`src/client/entry-lifecycle.ts`](src/client/entry-lifecycle.ts) | Loader fiber teardown through the registry and owned-style cleanup |
-| [`src/client/manifest.ts`](src/client/manifest.ts) | Wire types, boot-manifest parsing, and the `dsh.client` declaration parser |
+| [`src/client/manifest.ts`](src/client/manifest.ts) | Wire types, boot-manifest parsing, and the `agentrans.client` declaration parser |
 
 </details>
 
@@ -118,7 +118,7 @@ Read these when the module contract is not enough: the subsystem reference, the 
 - [Client modules subsystem](../../../docs/subsystems/client-modules.md) — the web plugin table, `WebBootGraph` wire, and the bundle route.
 - [Web boot kernel](../web/README.md) — the shell that creates the module system and boots the plugin tree.
 - [Client HMR driver](../hmr/README.md) — the reload chain that drives `invalidate`/`prefetch` on rebuilt bundles.
-- [Client authoring rules](../AGENTS.md#shared-modules-and-the-module-graph) — the shared-module baseline and `dsh.client.external` semantics.
+- [Client authoring rules](../AGENTS.md#shared-modules-and-the-module-graph) — the shared-module baseline and `agentrans.client.external` semantics.
 - [Client group map](../README.md) — the browser half this package belongs to.
 
 -----

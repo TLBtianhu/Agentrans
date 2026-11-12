@@ -32,7 +32,7 @@ kind: "package-library"
 
 ### 可选与已退役组合包
 
-`OPTIONAL_BUNDLES` 列出安装随附、供用户开启的组合包。每一项都必须是 `agentrans` 应用的运行时依赖，并声明 `dsh.bundle.patch`、图标和 `./locale/*.json` 显示元信息，且不能被任何模板选中；[`verify-default-product-isolation`](../../../scripts/verify-default-product-isolation.ts) 检查这些规则。[插件管理器](../../boot/plugin-manager/README.zh.md#use-this-package)把这些组合包报告为 `optional`。`RETIRED_BUNDLES` 列出安装不再携带的组合包；app-boot 在加载 profile 时将它们从该 profile 的组合包列表中移除。
+`OPTIONAL_BUNDLES` 列出安装随附、供用户开启的组合包。每一项都必须是 `agentrans` 应用的运行时依赖，并声明 `agentrans.bundle.patch`、图标和 `./locale/*.json` 显示元信息，且不能被任何模板选中；[`verify-default-product-isolation`](../../../scripts/verify-default-product-isolation.ts) 检查这些规则。[插件管理器](../../boot/plugin-manager/README.zh.md#use-this-package)把这些组合包报告为 `optional`。`RETIRED_BUNDLES` 列出安装不再携带的组合包；app-boot 在加载 profile 时将它们从该 profile 的组合包列表中移除。
 
 <a id="plugin-manager-lists"></a>
 ### 插件管理器列表
@@ -41,7 +41,7 @@ kind: "package-library"
 
 ### 按需组合包
 
-`ON_DEMAND_BUNDLES` 列出只在请求时安装的官方公开包。`OFFICIAL_ON_DEMAND_CATALOG` 内嵌这些包自己持有的本地化元信息、图标和可选的 `dsh.bundle.platforms` 声明，用于离线发现与安装前的 Host 平台检查；`pnpm gen-official-bundle-catalog` 显式更新生成内容，`verify-official-bundle-catalog` 检查资源完整性与时效；构建使用已提交的目录，不导入提供方代码。目录不包含安装目标：插件管理器根据运行中的版本和安装推导目标，并使用普通的组合包安装器。[产品使用检查](../../../scripts/verify-product-use.ts)针对 Web 组合随附选择和按需选择，不执行提供方。 目录也保留 `listedByDefault`，使默认隐藏的组合包在用户显式安装或启用前保持隐藏。
+`ON_DEMAND_BUNDLES` 列出只在请求时安装的官方公开包。`OFFICIAL_ON_DEMAND_CATALOG` 内嵌这些包自己持有的本地化元信息、图标和可选的 `agentrans.bundle.platforms` 声明，用于离线发现与安装前的 Host 平台检查；`pnpm gen-official-bundle-catalog` 显式更新生成内容，`verify-official-bundle-catalog` 检查资源完整性与时效；构建使用已提交的目录，不导入提供方代码。目录不包含安装目标：插件管理器根据运行中的版本和安装推导目标，并使用普通的组合包安装器。[产品使用检查](../../../scripts/verify-product-use.ts)针对 Web 组合随附选择和按需选择，不执行提供方。 目录也保留 `listedByDefault`，使默认隐藏的组合包在用户显式安装或启用前保持隐藏。
 
 -----
 

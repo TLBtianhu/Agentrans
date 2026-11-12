@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-Use `DshPackageManifest` for package metadata, `DshManifest` for the public fields under `agentrans`, and member types such as `DshClientManifest` for one domain. Each reader owns JSON parsing, validation, and default resolution.
+Use `DshPackageManifest` for package metadata, `DshManifest` for the public fields under `agentrans`, and member types such as `AgentransClientManifest` for one domain. Each reader owns JSON parsing, validation, and default resolution.
 
 ## Table of Contents
 
@@ -28,9 +28,9 @@ Use `DshPackageManifest` for package metadata, `DshManifest` for the public fiel
 Import from the package root. Use a development dependency when only checking your own source; use a production dependency if your published declarations reference these types.
 
 ```ts
-import type { DshClientManifest, DshPackageManifest } from '@agentrans/package-manifest'
+import type { AgentransClientManifest, DshPackageManifest } from '@agentrans/package-manifest'
 
-const client: DshClientManifest = { platform: 'web' }
+const client: AgentransClientManifest = { platform: 'web' }
 const manifest: DshPackageManifest = {
   name: 'example-dsh-plugin',
   version: '1.0.0',
@@ -52,7 +52,7 @@ The following metadata fields are optional. Omitting them leaves the format vers
 | Field | Meaning |
 |---|---|
 | `Agentrans.manifestVersion` | Manifest format identifier; the declared format is `1`, independent of the npm package version and Session format version. |
-| `dsh.bundle.platforms` | Optional nonempty list of Node Host platform names, such as `["darwin"]`; omission allows every operating system. The launcher and plugin manager enforce it before composing or selecting the bundle. |
+| `agentrans.bundle.platforms` | Optional nonempty list of Node Host platform names, such as `["darwin"]`; omission allows every operating system. The launcher and plugin manager enforce it before composing or selecting the bundle. |
 | `engines.agentrans` | Author-declared compatible DSH versions as a SemVer range, including exact prerelease versions. This field sits beside `engines.node` and `engines.npm`; an engines object may omit `agentrans`. |
 
 `LocalizedText` carries literal text or a language map with a required English fallback. `PluginLocalizedMeta` carries optional display title, description, an image data URL resolved from a package root's `package.json.icon` or an exported `<specifier>/icon`, and metadata diagnostics for installed plugins. [App boot](../../boot/app-boot/README.md) reads these values; this package only supplies their types.

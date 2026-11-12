@@ -44,7 +44,7 @@ Web 和 Desktop 的数学公式渲染要求支持 WOFF2。[Web 构建](../../../
 <a id="the-shared-module-table"></a>
 ### 共享模块表
 
-`PLATFORM_MODULES`（位于 `src/platform.ts`）列出外壳预置的共享模块——React、Cordis、Zod（`zod`）、TanStack Virtual（`@tanstack/react-virtual`）、零依赖 `util-values` 库与静态 UI 库——并与 `PRELOADED_CLIENT_EXTERNALS`（parser 预载的运行时行）一起定义每个动态 bundle 解析所依据的隐式 external 基座。`dsh.client.external` 只添加基座之外的精确请求；参见[共享模块与模块图](../AGENTS.md#shared-modules-and-the-module-graph)。
+`PLATFORM_MODULES`（位于 `src/platform.ts`）列出外壳预置的共享模块——React、Cordis、Zod（`zod`）、TanStack Virtual（`@tanstack/react-virtual`）、零依赖 `util-values` 库与静态 UI 库——并与 `PRELOADED_CLIENT_EXTERNALS`（parser 预载的运行时行）一起定义每个动态 bundle 解析所依据的隐式 external 基座。`agentrans.client.external` 只添加基座之外的精确请求；参见[共享模块与模块图](../AGENTS.md#shared-modules-and-the-module-graph)。
 
 同一页面中的内置浏览器插件和已安装的浏览器插件获得相同的模块实例。外壳提供本包 `package.json` 声明的依赖版本，模块表不会为每个插件协商版本。使用这些模块的外部插件必须以提供所需模块标识符和 API 的宿主为目标，并在构建客户端 bundle 时将相应导入保留为 external。内联依赖仍归各自 bundle 私有；Host 代码与 Worker 单独解析其依赖。
 
@@ -105,7 +105,7 @@ Web 和 Desktop 的数学公式渲染要求支持 WOFF2。[Web 构建](../../../
 - [客户端模块系统](../modules/README.zh.md)——本内核消费的惰性模块表与启动图。
 - [UI 渲染器](../ui-renderer/README.zh.md)——接收挂载点并把 slot 数据绑定到 React。
 - [客户端模块子系统](../../../docs/subsystems/client-modules.zh.md)——web 插件表、启动图协议与 bundle 路由。
-- [客户端编写规则](../AGENTS.md#shared-modules-and-the-module-graph)——共享模块基座与 `dsh.client.external` 语义。
+- [客户端编写规则](../AGENTS.md#shared-modules-and-the-module-graph)——共享模块基座与 `agentrans.client.external` 语义。
 - [客户端组地图](../README.zh.md)——本包所属的浏览器半侧。
 
 -----

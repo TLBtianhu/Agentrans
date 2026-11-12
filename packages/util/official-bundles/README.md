@@ -32,7 +32,7 @@ Edit this package when the installation's bundle selection or the plugin manager
 
 ### Optional and retired bundles
 
-`OPTIONAL_BUNDLES` names the bundles the installation ships for a person to switch on. Each must be a runtime dependency of the `agentrans` app that declares `dsh.bundle.patch`, an icon, and `./locale/*.json` display metadata, and no template may select it; [`verify-default-product-isolation`](../../../scripts/verify-default-product-isolation.ts) checks these rules. The [plugin manager](../../boot/plugin-manager/README.md#use-this-package) reports these bundles as `optional`. `RETIRED_BUNDLES` names bundles the installation no longer carries; app-boot removes them from a profile's bundle list when it loads the profile.
+`OPTIONAL_BUNDLES` names the bundles the installation ships for a person to switch on. Each must be a runtime dependency of the `agentrans` app that declares `agentrans.bundle.patch`, an icon, and `./locale/*.json` display metadata, and no template may select it; [`verify-default-product-isolation`](../../../scripts/verify-default-product-isolation.ts) checks these rules. The [plugin manager](../../boot/plugin-manager/README.md#use-this-package) reports these bundles as `optional`. `RETIRED_BUNDLES` names bundles the installation no longer carries; app-boot removes them from a profile's bundle list when it loads the profile.
 
 <a id="plugin-manager-lists"></a>
 ### Plugin manager lists
@@ -41,7 +41,7 @@ Edit this package when the installation's bundle selection or the plugin manager
 
 ### On-demand bundles
 
-`ON_DEMAND_BUNDLES` names the public Official packages installed only on request. `OFFICIAL_ON_DEMAND_CATALOG` embeds their package-owned localized metadata, icons, and optional `dsh.bundle.platforms` declarations for offline discovery and Host platform checks before installation; `pnpm gen-official-bundle-catalog` explicitly updates generated content, and `verify-official-bundle-catalog` checks resource completeness and freshness; builds consume the committed catalog without importing provider code. The catalog contains no install target: the plugin manager derives it from the running version and installation and uses the ordinary bundle installer. The [product-use check](../../../scripts/verify-product-use.ts) composes shipped and on-demand selections against Web without executing providers. The catalog also preserves `listedByDefault` so a default-hidden bundle stays hidden until explicitly installed or enabled.
+`ON_DEMAND_BUNDLES` names the public Official packages installed only on request. `OFFICIAL_ON_DEMAND_CATALOG` embeds their package-owned localized metadata, icons, and optional `agentrans.bundle.platforms` declarations for offline discovery and Host platform checks before installation; `pnpm gen-official-bundle-catalog` explicitly updates generated content, and `verify-official-bundle-catalog` checks resource completeness and freshness; builds consume the committed catalog without importing provider code. The catalog contains no install target: the plugin manager derives it from the running version and installation and uses the ordinary bundle installer. The [product-use check](../../../scripts/verify-product-use.ts) composes shipped and on-demand selections against Web without executing providers. The catalog also preserves `listedByDefault` so a default-hidden bundle stays hidden until explicitly installed or enabled.
 
 -----
 

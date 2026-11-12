@@ -47,7 +47,7 @@ const ctx = await boot('dsh', resolveConfigPath(argv[2], process.env.AGENTRANS_S
 
 Profile 与组合包的声明类型从 [`@agentrans/package-manifest`](../../util/package-manifest/README.zh.md) 导入。App-boot 将 `DshPackageManifest` 适配为包身份可选的 `ProfileManifest`，因为本地 profile 无需发布版本。App-boot 负责 profile 加载、JSON 校验和解析后的运行时数据。
 
-profile 是同一套 dsh 安装提供不同应用界面的方式：`web`、`headless`、`acp`、`sdk` 与 `sdk-minimal` 从同一 launcher 启动不同组合。profile 位于 `$AGENTRANS_HOME/profiles/<name>`，由可安装组合包和自身 `cordis.patch.yml` 组成。组合包的 `dsh.bundle.patch` 指定一个 patch 文件或一个有序的文件列表；`bundlePatchFiles` 校验该声明，`bundlePatchPaths` 把它解析为绝对路径；该层按此顺序拼接各文件的 patch 列表。YAML 组合决定是否启用 HMR。随产品交付的 `web` 模板实时重载，其他随附模板只在启动时应用 patch。`sdk-minimal` 只列出自身的独立组合包，其他模板保留 base 加模式的组合包栈。`agentrans --profile <name> --from-default-profile <template>` 从一个随附模板，在非内置名称处创建或替换自定义 profile；`agentrans plugin` 则初始化以 base 为基础的 profile，并管理其中安装的组合包。组合包解析、manifest 读取或 patch 加载失败时会跳过该组合包，不改变其选择状态；加载结果在 `skippedBundles` 中列出每个被跳过的组合包，启动器每次启动时通过 `reportSkippedBundles` 输出一次。其余组合包保持原顺序；profile 和用户 patch 错误仍会导致启动失败。跳过组合包不保证剩余组合能够提供所需服务。由应用持有的 npm 项目（例如 Electron 保留的 Desktop profile）通过 `loadProfileDirectory` 加载已经初始化的目录，而不会将它暴露给 CLI profile 查找。
+profile 是同一套 dsh 安装提供不同应用界面的方式：`web`、`headless`、`acp`、`sdk` 与 `sdk-minimal` 从同一 launcher 启动不同组合。profile 位于 `$AGENTRANS_HOME/profiles/<name>`，由可安装组合包和自身 `cordis.patch.yml` 组成。组合包的 `agentrans.bundle.patch` 指定一个 patch 文件或一个有序的文件列表；`bundlePatchFiles` 校验该声明，`bundlePatchPaths` 把它解析为绝对路径；该层按此顺序拼接各文件的 patch 列表。YAML 组合决定是否启用 HMR。随产品交付的 `web` 模板实时重载，其他随附模板只在启动时应用 patch。`sdk-minimal` 只列出自身的独立组合包，其他模板保留 base 加模式的组合包栈。`agentrans --profile <name> --from-default-profile <template>` 从一个随附模板，在非内置名称处创建或替换自定义 profile；`agentrans plugin` 则初始化以 base 为基础的 profile，并管理其中安装的组合包。组合包解析、manifest 读取或 patch 加载失败时会跳过该组合包，不改变其选择状态；加载结果在 `skippedBundles` 中列出每个被跳过的组合包，启动器每次启动时通过 `reportSkippedBundles` 输出一次。其余组合包保持原顺序；profile 和用户 patch 错误仍会导致启动失败。跳过组合包不保证剩余组合能够提供所需服务。由应用持有的 npm 项目（例如 Electron 保留的 Desktop profile）通过 `loadProfileDirectory` 加载已经初始化的目录，而不会将它暴露给 CLI profile 查找。
 
 profile 导入插件前，DSH 会将其声明的 DSH 版本要求与 `getDshRuntimeVersion()` 返回的唯一运行时版本比较。清单声明了 `engines.agentrans` 时，只由该范围决定，忽略 `peerDependencies`。否则 `peerDependencies` 中对 `@agentrans/cli` 和 `@agentrans/*` 的每个范围都必须匹配，源码工作区的 `workspace:^`、`workspace:~` 和 `workspace:*` peer 指向同一个运行时。预发布版本参与范围匹配。两者都未声明时不施加版本约束；空范围或无效范围视为不兼容，`engines.agentrans` 中的 `workspace:` 值也属于无效范围。`engines` 不是对象或 `engines.agentrans` 不是字符串时，清单视为格式错误。拒绝结果会列出未满足的要求，键为 `engines.agentrans` 或 peer 包名。这些检查不是防范恶意包代码的沙箱。
 
@@ -55,7 +55,7 @@ profile 导入插件前，DSH 会将其声明的 DSH 版本要求与 `getDshRunt
 
 精确版本豁免保存在 profile 自己的 `compatibility.json` 中，而不是 `package.json`，因此写豁免不会触及依赖清单、组合包列表或 Cordis patch 文件。它把精确的 `package-name@version` 键映射到精确 DSH 运行时版本列表；插件升级和 DSH 升级都不继承授权。文件缺失表示没有豁免。文件损坏绝不会阻止 profile 启动：读取器接受的记录仍然生效，每条被拒绝的记录会与插件拒绝信息一起输出到 stderr，此后该文件被视为只读，因此授予或撤销会拒绝执行并要求用户手工修复，而不是覆盖用户的内容。[插件管理器](../plugin-manager/README.zh.md#version-compatibility-and-exemptions)负责每次变更所需的授权、撤销与风险确认。`validatePluginVersionExemption(packageVersion, runtimeVersion)` 校验规范的精确身份而不授予权限；身份非法时抛出错误。
 
-组合包可以用 `dsh.bundle.platforms` 声明非空的 Node Host 平台名称列表，例如 `["darwin"]`。启动器在读取组合包 patch 前验证此声明。Host 不受支持时会跳过整个配置层，保留已保存的选择，并通过 `skippedBundles` 报告原因；其他配置层继续生效。省略此字段时允许所有平台。值必须是 Node 平台名，`macos` 等别名无效。浏览器所在机器的平台不决定 Host 是否受支持。
+组合包可以用 `agentrans.bundle.platforms` 声明非空的 Node Host 平台名称列表，例如 `["darwin"]`。启动器在读取组合包 patch 前验证此声明。Host 不受支持时会跳过整个配置层，保留已保存的选择，并通过 `skippedBundles` 报告原因；其他配置层继续生效。省略此字段时允许所有平台。值必须是 Node 平台名，`macos` 等别名无效。浏览器所在机器的平台不决定 Host 是否受支持。
 
 你的机器本地偏好同样位于 harness home 中：
 

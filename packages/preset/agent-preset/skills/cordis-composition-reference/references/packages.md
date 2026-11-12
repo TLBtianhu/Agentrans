@@ -72,7 +72,7 @@ Every package below exports a Cordis plugin that a bundle patch can name in a Lo
 | `@agentrans/client-file-upload` | no | Agent-scoped browser file upload, streaming intake, and staged receipt service |
 | `@agentrans/client-hmr` | yes | Web client graph synchronization and rebuilt-bundle reload transport |
 | `@agentrans/client-locale` | no | Locale plugin: Host-backed preference, extensible language catalog, browser fallback, and typed built-in dictionaries |
-| `@agentrans/client-modules` | no | Client module system, dual-face: node half composes the __AGENTRANS_BOOT__ entry graph (incremental dsh.client scan, bundle route, index tap, webPlugins service); browser half is the lazy-CJS module table the vendored cordis Loader consumes as its internal seam |
+| `@agentrans/client-modules` | no | Client module system, dual-face: node half composes the __AGENTRANS_BOOT__ entry graph (incremental agentrans.client scan, bundle route, index tap, webPlugins service); browser half is the lazy-CJS module table the vendored cordis Loader consumes as its internal seam |
 | `@agentrans/client-product-analytics` | yes | Desktop product event collection and authenticated Host reporting |
 | `@agentrans/client-resources` | no | Unified client resource model: protocol-registered providers turn URL addresses into live values, consumed through the useResource global standard hook |
 | `@agentrans/client-shortcuts` | yes | Application keyboard command registry and physical-key routing |

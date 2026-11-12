@@ -2,7 +2,7 @@
 
 English | [中文](client-modules.zh.md)
 
-The web plugin table: the Node half of the client module system in [@agentrans/client-modules](../../packages/client/modules), provided as `ctx.clientModules` (`ClientModuleRegistry`). It scans the host Loader's entries for packages declaring `dsh.client`, composes the `window.__AGENTRANS_BOOT__` entry graph, serves versioned one-or-more-resource combo scripts under `/plugins`, and answers every index-injection collection with the boot protocol rows — the four faces of one service. It is an optional capability of the web GUI stack, not part of the agent-loop spine, and it is a consumer of [@agentrans/host-webserver](../../packages/host/webserver): the carrier described in [web-server.md](web-server.md) supplies the prefix route and the `webserver/index-inject` event this service answers. The same package's browser half (`ctx.modules`, the lazy-CJS module table that fetches and materializes these bundles) is kernel machinery documented in the [package README](../../packages/client/modules/README.md), not here.
+The web plugin table: the Node half of the client module system in [@agentrans/client-modules](../../packages/client/modules), provided as `ctx.clientModules` (`ClientModuleRegistry`). It scans the host Loader's entries for packages declaring `agentrans.client`, composes the `window.__AGENTRANS_BOOT__` entry graph, serves versioned one-or-more-resource combo scripts under `/plugins`, and answers every index-injection collection with the boot protocol rows — the four faces of one service. It is an optional capability of the web GUI stack, not part of the agent-loop spine, and it is a consumer of [@agentrans/host-webserver](../../packages/host/webserver): the carrier described in [web-server.md](web-server.md) supplies the prefix route and the `webserver/index-inject` event this service answers. The same package's browser half (`ctx.modules`, the lazy-CJS module table that fetches and materializes these bundles) is kernel machinery documented in the [package README](../../packages/client/modules/README.md), not here.
 
 Source: [`packages/client/modules/src/client/manifest.ts`](../../packages/client/modules/src/client/manifest.ts)
 
@@ -91,7 +91,7 @@ Initial publication and HMR derive each row's `rev` from the entry's mtime, ctim
 
 ## The scan
 
-A package joins the table by declaring `dsh.client` (`platform: 'web'`, optional `inject` edges, optional `immediately`) in its package.json and exporting its built bundle at `exports["./client"]`. Each live row resolves from its own Loader specifier and owning-tree `baseUrl`, through the same `loader.internal.resolveSync` implementation that imports its Host face when available. The nearest owning package manifest supplies the browser module id, so relative source and built overlays retain the package identity. Distinct active Loader sources resolving to one package name fail composition; after one source unloads, the surviving source supplies the row without a fiber restart.
+A package joins the table by declaring `agentrans.client` (`platform: 'web'`, optional `inject` edges, optional `immediately`) in its package.json and exporting its built bundle at `exports["./client"]`. Each live row resolves from its own Loader specifier and owning-tree `baseUrl`, through the same `loader.internal.resolveSync` implementation that imports its Host face when available. The nearest owning package manifest supplies the browser module id, so relative source and built overlays retain the package identity. Distinct active Loader sources resolving to one package name fail composition; after one source unloads, the surviving source supplies the row without a fiber restart.
 
 Package reconciliation is incremental by Loader entry name. Every Cordis `internal/plugin` emission (fiber construction or disposal) marks the fiber's entry name dirty. Each nonempty flush enumerates all Loader entries once and indexes them by name at flush start; pending names use their indexed entries, including all same-name sources, and missing names use an empty list to remove unloaded sources. Package resolution must not synchronously add or remove Loader entries during reconciliation. Activation seeds all current names and flushes synchronously; later notifications queue a microtask flush.
 
@@ -135,7 +135,7 @@ Generated from source by `scripts/gen-cordis-catalog.ts` (verified fresh by `pnp
 
 ### `ctx.clientModules` — `ClientModuleRegistry`
 
-The web plugin table service: incremental `dsh.client` scan + wire composition + bundle and package-asset route + index injection rows. Construction runs the activation scan synchronously — a malformed declaration or missing bundle among the already-loaded entries aggregates into one loud throw (FAILED fiber; the boot activation audit reports it).
+The web plugin table service: incremental `agentrans.client` scan + wire composition + bundle and package-asset route + index injection rows. Construction runs the activation scan synchronously — a malformed declaration or missing bundle among the already-loaded entries aggregates into one loud throw (FAILED fiber; the boot activation audit reports it).
 
 ```ts cordis-catalog
 /**

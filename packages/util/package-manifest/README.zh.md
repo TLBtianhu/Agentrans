@@ -9,7 +9,7 @@ kind: "package-library"
 
 ## 概述
 
-使用 `DshPackageManifest` 描述包元数据、`DshManifest` 描述 `agentrans` 下的公共字段，以及 `DshClientManifest` 等成员类型描述单个领域。各读取方负责 JSON 解析、校验和默认值解析。
+使用 `DshPackageManifest` 描述包元数据、`DshManifest` 描述 `agentrans` 下的公共字段，以及 `AgentransClientManifest` 等成员类型描述单个领域。各读取方负责 JSON 解析、校验和默认值解析。
 
 ## 目录
 
@@ -28,9 +28,9 @@ kind: "package-library"
 从包根导入类型。仅检查自己的源码时使用开发依赖；若发布的声明文件引用这些类型，则使用生产依赖。
 
 ```ts
-import type { DshClientManifest, DshPackageManifest } from '@agentrans/package-manifest'
+import type { AgentransClientManifest, DshPackageManifest } from '@agentrans/package-manifest'
 
-const client: DshClientManifest = { platform: 'web' }
+const client: AgentransClientManifest = { platform: 'web' }
 const manifest: DshPackageManifest = {
   name: 'example-dsh-plugin',
   version: '1.0.0',
@@ -52,7 +52,7 @@ const manifest: DshPackageManifest = {
 | 字段 | 含义 |
 |---|---|
 | `Agentrans.manifestVersion` | manifest（元数据清单）格式标识；声明的格式为 `1`，独立于 npm 包版本和 Session 格式版本。 |
-| `dsh.bundle.platforms` | 可选的非空 Node Host 平台名称列表，例如 `["darwin"]`；省略时允许所有操作系统。启动器和插件管理器在组合或选择该组合包前检查此字段。 |
+| `agentrans.bundle.platforms` | 可选的非空 Node Host 平台名称列表，例如 `["darwin"]`；省略时允许所有操作系统。启动器和插件管理器在组合或选择该组合包前检查此字段。 |
 | `engines.agentrans` | 作者声明的兼容 DSH 版本，使用 SemVer 范围，也可填写精确的预发布版本。此字段与 `engines.node`、`engines.npm` 并列；engines 对象可省略 `agentrans`。 |
 
 `LocalizedText` 携带字面文本或带必需英文回退值的语言映射。`PluginLocalizedMeta` 携带已安装插件的可选展示标题、描述、从包根 `package.json.icon` 或导出的 `<标识>/icon` 解析的图片 data URL，以及元信息诊断。[App boot](../../boot/app-boot/README.zh.md) 读取这些值；本包只提供其类型。
