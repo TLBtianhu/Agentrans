@@ -20,8 +20,7 @@ describe('bundle override verification', () => {
 
   it('resolves every workspace bundle to its patch layers', () => {
     const layers = bundlePatchLayers()
-    const base = [...layers].find(([name]) => name.endsWith('-bundle-base') || name.endsWith('-base'))
-    expect(base?.[1].length).toBeGreaterThan(0)
+    expect(layers.get('@agentrans/base')?.length).toBeGreaterThan(0)
   })
 
   it('accepts the shipped profiles', () => {
