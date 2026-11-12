@@ -37,12 +37,20 @@ import {
 
 const GATE = 'verify-package-dependencies'
 const CORDIS = '@agentrans/cordis'
+const REPOSITORY_ROOT = resolve(import.meta.dirname, '..')
+/** Vendored packages share the workspace scope, so ownership comes from `vendor/`, and only they keep the tilde range. */
+const VENDORED_PACKAGES: ReadonlySet<string> = new Set(
+  globSync(['vendor/*/package.json'], { cwd: REPOSITORY_ROOT })
+    .map(path => (JSON.parse(readFileSync(join(REPOSITORY_ROOT, path), 'utf8')) as { name?: string }).name)
+    .filter((name): name is string => name !== undefined),
+)
 /**
- * Type packages declared only in the root devDependencies. Each package-local pnpm link is one more
- * location that TypeScript scans when it computes module specifiers for every JSX file.
+ * Range one workspace dependency must declare.
+ * @param name - Dependency package name.
+ * @returns `workspace:~` for vendored and native packages, `workspace:*` for published workspace packages.
  */
 function workspaceRange(name: string): 'workspace:*' | 'workspace:~' {
-  return name === '@agentrans/cli' || name.startsWith('@agentrans/') ? 'workspace:*' : 'workspace:~'
+  return name.startsWith('@agentrans/') && !VENDORED_PACKAGES.has(name) ? 'workspace:*' : 'workspace:~'
 }
 const RELEASE_MANIFEST_GLOB = 'packages/!(experimental)/*/package.json'
 /** Every package group, experimental included, follows the same published dependency policy. */
@@ -930,6 +938,8 @@ export function collectRootTypePackageViolations(
   packages: readonly WorkspacePackageManifest[],
 ): string[] {
   const violations: string[] = []
+  // Each package-local pnpm link is one more location TypeScript scans when it computes module specifiers
+  // for every JSX file, so these type packages stay in the root devDependencies only.
   for (const name of ROOT_TYPE_PACKAGES) {
     if (rootManifest.devDependencies?.[name] === undefined) {
       violations.push(`package.json: devDependencies must declare ${name} for every workspace package`)
