@@ -24,7 +24,7 @@ Artifact 是带版本号、由代码生成的交互解释对象。持久真源�
 
 ## 修改与操作语义
 
-`artifact` 工具创建或更新快照。创建拒绝已存在 id；更新要求 `baseRevision` 等于当前修订号。只有最终工具结果成功才提交。失败、取消、过期修订和 post-execute 阻断都不提交。
+`artifact` 工具创建或更新快照。创建拒绝已存在 id；更新要求 `baseRevision` 等于当前修订号。只有最终工具结果成功才提交。已准备的快照会占用该 Artifact 直到提交或被丢弃，因此重叠的更新以 `ARTIFACT_BUSY` 失败而不会覆盖日志；不再紧随已提交修订号的提交会被拒绝。失败、取消、过期修订和 post-execute 阻断都不提交。
 
 `record` 只接受精确 live root Agent 和当前修订对应的操作。它校验操作名和完整 UTF-8 消息大小，再创建 `source.kind = 'artifact-action'` 的普通 `UserMessage`。唯一文本块装有有界 JSON，包含 `kind: 'artifact_action'`、id、修订号、操作和 payload。`wake` 选择 `agent.steer` 或 `agent.inject`。
 
@@ -268,18 +268,26 @@ resolveSceneSource(agent: Agent, selection: ArtifactExportSourceSelection): Arti
  * @param agent - Agent whose Session supplies the current artifact revision.
  * @param input - Complete new values and, for update, the observed base revision.
  * @returns The snapshot to commit after the enclosing operation succeeds.
- * @throws {ArtifactError} `ARTIFACT_EXISTS`, `ARTIFACT_NOT_FOUND`, `STALE_REVISION`,
+ * @throws {ArtifactError} `ARTIFACT_BUSY`, `ARTIFACT_EXISTS`, `ARTIFACT_NOT_FOUND`, `STALE_REVISION`,
  * `BAD_SOURCE`, or `BAD_INPUT`; no Session event is appended.
  */
 prepare(agent: Agent, input: ArtifactPrepareInput): ArtifactSnapshot
 
 /**
- * Append one validated complete snapshot and perform no other operation.
+ * Append one validated complete snapshot only when it still follows the committed revision.
  * @param agent - Agent owning the Session log.
  * @param snapshot - Prepared complete artifact value.
- * @throws {ArtifactError} when the snapshot violates the same persistent validation as `prepare`.
+ * @throws {ArtifactError} `STALE_REVISION` when the log moved past the prepared base, or when the
+ * snapshot violates the same persistent validation as `prepare`; no Session event is appended.
  */
 commit(agent: Agent, snapshot: ArtifactSnapshot): void
+
+/**
+ * Release one prepared snapshot without writing it, so a failed or aborted operation does not block later updates.
+ * @param agent - Agent whose Session owns the artifact.
+ * @param artifactId - Artifact identity of the discarded preparation.
+ */
+discard(agent: Agent, artifactId: ArtifactId): void
 
 /**
  * Save a named particle observation without adding input or waking the Agent.

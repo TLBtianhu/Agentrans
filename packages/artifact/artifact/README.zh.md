@@ -25,7 +25,7 @@ kind: "package-reference"
 <a id="use-this-package"></a>
 ## 使用
 
-以 `@agentrans/artifact` 挂载服务，以 `@agentrans/artifact/tool` 挂载 HTML 工具，以 `@agentrans/artifact/scene-tool` 挂载 SceneSpec 工具。服务依赖 Session Projection，并在同步读取前等待注册完成。它负责校验、读取当前修订号和提交 Session；每个工具先准备快照，只有最终工具结果成功才提交。SceneSpec 使用版本化 SceneCatalog 和安全表达式解析器校验，不使用 `eval`。
+以 `@agentrans/artifact` 挂载服务，以 `@agentrans/artifact/tool` 挂载 HTML 工具，以 `@agentrans/artifact/scene-tool` 挂载 SceneSpec 工具。服务依赖 Session Projection，并在同步读取前等待注册完成。它负责校验、读取当前修订号和提交 Session；每个工具先准备快照，只有最终工具结果成功才提交；失败或中止的调用改为丢弃这次准备。SceneSpec 使用版本化 SceneCatalog 和安全表达式解析器校验，不使用 `eval`。
 
 | 配置 | 默认值 | 含义 |
 |---|---|---|
@@ -33,7 +33,7 @@ kind: "package-reference"
 | `maxActionBytes` | `16384` | 完整编码操作消息的 UTF-8 字节上限 |
 | `maxSavedObservationsPerArtifact` | `32` | 命名观察数量上限；超出后拒绝新增保存 |
 
-创建从修订号 1 开始。更新必须提供 `baseRevision`，且只有等于当前持久化修订号才成功。每条 `artifact/upsert` 都携带完整 `ArtifactSnapshot`，不是增量。
+创建从修订号 1 开始。更新必须提供 `baseRevision`，且只有等于当前持久化修订号才成功。已准备的快照会占用该 Artifact 直到提交或被丢弃：同一 Artifact 的第二次 `prepare` 以 `ARTIFACT_BUSY` 失败，`commit` 只在快照仍紧随已提交修订号时追加（否则 `STALE_REVISION`）。每条 `artifact/upsert` 都携带完整 `ArtifactSnapshot`，不是增量。
 
 -----
 

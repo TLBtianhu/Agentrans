@@ -91,7 +91,12 @@ export function apply(ctx: Context): void {
         ...args.comparison === undefined ? {} : { comparison: args.comparison },
         ...args.baseRevision === undefined ? {} : { baseRevision: args.baseRevision },
       })
-      exec.signal.throwIfAborted()
+      try {
+        exec.signal.throwIfAborted()
+      } catch (error) {
+        artifacts.discard(exec.agent, snapshot.artifactId)
+        throw error
+      }
       pending.set(exec, { agent: exec.agent, snapshot })
       return Promise.resolve({
         sceneId: snapshot.artifactId,
@@ -105,7 +110,17 @@ export function apply(ctx: Context): void {
   ctx.on('tools/result', (exec, result) => {
     const prepared = pending.get(exec)
     pending.delete(exec)
-    if (prepared === undefined || result.isError) return
-    artifacts.commit(prepared.agent, prepared.snapshot)
+    if (prepared === undefined) return
+    if (result.isError) {
+      artifacts.discard(prepared.agent, prepared.snapshot.artifactId)
+      return
+    }
+    try {
+      artifacts.commit(prepared.agent, prepared.snapshot)
+    } catch (error) {
+      // The result already named a revision, so a snapshot that can no longer follow the log is a
+      // contract violation for the host log rather than a user-facing failure.
+      ctx.logger.error(error)
+    }
   })
 }

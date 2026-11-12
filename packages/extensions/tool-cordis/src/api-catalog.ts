@@ -552,13 +552,18 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         description: 'Validate and normalize one complete create or update without committing it.',
         parameters: [{ name: 'agent', description: 'Agent whose Session supplies the current artifact revision.' }, { name: 'input', description: 'Complete new values and, for update, the observed base revision.' }],
         returns: 'The snapshot to commit after the enclosing operation succeeds.',
-        throws: ['{ArtifactError} `ARTIFACT_EXISTS`, `ARTIFACT_NOT_FOUND`, `STALE_REVISION`, `BAD_SOURCE`, or `BAD_INPUT`; no Session event is appended.'],
+        throws: ['{ArtifactError} `ARTIFACT_BUSY`, `ARTIFACT_EXISTS`, `ARTIFACT_NOT_FOUND`, `STALE_REVISION`, `BAD_SOURCE`, or `BAD_INPUT`; no Session event is appended.'],
       },
       {
         signature: 'commit(agent: Agent, snapshot: ArtifactSnapshot): void',
-        description: 'Append one validated complete snapshot and perform no other operation.',
+        description: 'Append one validated complete snapshot only when it still follows the committed revision.',
         parameters: [{ name: 'agent', description: 'Agent owning the Session log.' }, { name: 'snapshot', description: 'Prepared complete artifact value.' }],
-        throws: ['{ArtifactError} when the snapshot violates the same persistent validation as `prepare`.'],
+        throws: ['{ArtifactError} `STALE_REVISION` when the log moved past the prepared base, or when the snapshot violates the same persistent validation as `prepare`; no Session event is appended.'],
+      },
+      {
+        signature: 'discard(agent: Agent, artifactId: ArtifactId): void',
+        description: 'Release one prepared snapshot without writing it, so a failed or aborted operation does not block later updates.',
+        parameters: [{ name: 'agent', description: 'Agent whose Session owns the artifact.' }, { name: 'artifactId', description: 'Artifact identity of the discarded preparation.' }],
       },
       {
         signature: '@Remote saveObservation( agent: Agent, artifactId: ArtifactId, revision: number, observationId: ArtifactObservationId, label: string, checkpoint: ParticleCheckpoint, ): SavedParticleObservation',

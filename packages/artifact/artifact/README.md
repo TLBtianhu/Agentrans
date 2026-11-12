@@ -25,7 +25,7 @@ This package owns durable HTML and SceneSpec Artifacts: complete snapshots with 
 <a id="use-this-package"></a>
 ## Use this package
 
-Mount the service as `@agentrans/artifact`, the HTML tool as `@agentrans/artifact/tool`, and the SceneSpec tool as `@agentrans/artifact/scene-tool`. The service requires Session Projection and awaits registration before synchronous reads. It owns validation, current-revision lookup, and Session commits. Each tool prepares a snapshot but commits it only after its authoritative successful tool result. SceneSpec validation uses the versioned SceneCatalog and a safe expression parser, never `eval`.
+Mount the service as `@agentrans/artifact`, the HTML tool as `@agentrans/artifact/tool`, and the SceneSpec tool as `@agentrans/artifact/scene-tool`. The service requires Session Projection and awaits registration before synchronous reads. It owns validation, current-revision lookup, and Session commits. Each tool prepares a snapshot but commits it only after its authoritative successful tool result; a failed or aborted call discards the preparation instead. SceneSpec validation uses the versioned SceneCatalog and a safe expression parser, never `eval`.
 
 | Config | Default | Meaning |
 |---|---|---|
@@ -33,7 +33,7 @@ Mount the service as `@agentrans/artifact`, the HTML tool as `@agentrans/artifac
 | `maxActionBytes` | `16384` | Maximum UTF-8 bytes of the complete encoded action message |
 | `maxSavedObservationsPerArtifact` | `32` | Maximum named observations; additional saves are rejected |
 
-A create starts at revision 1. An update supplies `baseRevision` and succeeds only when it equals the current durable revision. Every `artifact/upsert` contains the complete `ArtifactSnapshot`, never a delta.
+A create starts at revision 1. An update supplies `baseRevision` and succeeds only when it equals the current durable revision. A prepared snapshot reserves the Artifact until it commits or is discarded, so a second `prepare` for the same Artifact fails with `ARTIFACT_BUSY`, and `commit` appends only while the snapshot still follows the committed revision (`STALE_REVISION` otherwise). Every `artifact/upsert` contains the complete `ArtifactSnapshot`, never a delta.
 
 -----
 

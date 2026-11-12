@@ -74,7 +74,12 @@ export function apply(ctx: Context): void {
     execute(args, exec): Promise<ArtifactToolResult> {
       if (exec.agent === undefined) throw new ArtifactError('artifact requires an agent Session', 'BAD_INPUT')
       const snapshot = artifacts.prepare(exec.agent, args)
-      exec.signal.throwIfAborted()
+      try {
+        exec.signal.throwIfAborted()
+      } catch (error) {
+        artifacts.discard(exec.agent, snapshot.artifactId)
+        throw error
+      }
       pending.set(exec, { agent: exec.agent, snapshot })
       return Promise.resolve({
         artifactId: snapshot.artifactId,
@@ -87,7 +92,17 @@ export function apply(ctx: Context): void {
   ctx.on('tools/result', (exec, result) => {
     const prepared = pending.get(exec)
     pending.delete(exec)
-    if (prepared === undefined || result.isError) return
-    artifacts.commit(prepared.agent, prepared.snapshot)
+    if (prepared === undefined) return
+    if (result.isError) {
+      artifacts.discard(prepared.agent, prepared.snapshot.artifactId)
+      return
+    }
+    try {
+      artifacts.commit(prepared.agent, prepared.snapshot)
+    } catch (error) {
+      // The result already named a revision, so a snapshot that can no longer follow the log is a
+      // contract violation for the host log rather than a user-facing failure.
+      ctx.logger.error(error)
+    }
   })
 }

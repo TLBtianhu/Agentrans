@@ -138,6 +138,27 @@ describe('ArtifactService prepare and commit', () => {
     }))).toThrow(expect.objectContaining({ code: 'BAD_INPUT' }))
   })
 
+  it('keeps one writer per artifact between prepare and commit', async () => {
+    const { agent, service } = await setup()
+    const created = service.prepare(agent, createInput())
+    service.commit(agent, created)
+    const first = service.prepare(agent, {
+      ...createInput(), action: 'update', baseRevision: 1, title: 'First', source: '<p>first</p>',
+    })
+    expect(() => service.prepare(agent, {
+      ...createInput(), action: 'update', baseRevision: 1, title: 'Second', source: '<p>second</p>',
+    })).toThrow(expect.objectContaining({ code: 'ARTIFACT_BUSY' }))
+    service.commit(agent, first)
+    expect(upserts(agent).map(snapshot => snapshot.title)).toEqual(['Demo', 'First'])
+    // A snapshot names the revision it wrote; appending it twice must not overwrite the log silently.
+    expect(() => service.commit(agent, first)).toThrow(expect.objectContaining({ code: 'STALE_REVISION' }))
+    expect(upserts(agent)).toHaveLength(2)
+    const next = service.prepare(agent, { ...createInput(), action: 'update', baseRevision: 2, title: 'Next', source: '<p>next</p>' })
+    expect(next.revision).toBe(3)
+    service.commit(agent, next)
+    expect(upserts(agent)).toHaveLength(3)
+  })
+
   it('rejects duplicate ids, missing updates, and stale base revisions without committing', async () => {
     const { agent, service } = await setup()
     service.commit(agent, service.prepare(agent, createInput()))
@@ -341,7 +362,9 @@ describe('artifact resource limits and configuration', () => {
   it('refuses to advance beyond the maximum safe revision', async () => {
     const { agent, service } = await setup()
     const created = service.prepare(agent, createInput())
-    service.commit(agent, { ...created, revision: Number.MAX_SAFE_INTEGER })
+    // Seed the log directly: no supported prepare/commit pair can reach the maximum revision.
+    agent.session.append('artifact/upsert', { ...created, revision: Number.MAX_SAFE_INTEGER })
+    service.discard(agent, created.artifactId)
     expect(() => service.prepare(agent, {
       ...createInput(), action: 'update', baseRevision: Number.MAX_SAFE_INTEGER,
     })).toThrow(expect.objectContaining({ code: 'BAD_INPUT' }))

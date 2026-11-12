@@ -391,6 +391,8 @@ export class ArtifactService extends TypertRemoteService {
   private readonly maxSourceBytes: number
   private readonly maxActionBytes: number
   private readonly maxSavedObservationsPerArtifact: number
+  /** Artifacts with a prepared snapshot that has not been committed or discarded yet, per Session. */
+  private readonly writers = new WeakMap<Agent['session'], Map<ArtifactId, symbol>>()
   private projection!: ProjectionHandle<ArtifactState>
 
   constructor(ctx: Context, config: Config = {}) {
@@ -467,7 +469,7 @@ export class ArtifactService extends TypertRemoteService {
    * @param agent - Agent whose Session supplies the current artifact revision.
    * @param input - Complete new values and, for update, the observed base revision.
    * @returns The snapshot to commit after the enclosing operation succeeds.
-   * @throws {ArtifactError} `ARTIFACT_EXISTS`, `ARTIFACT_NOT_FOUND`, `STALE_REVISION`,
+   * @throws {ArtifactError} `ARTIFACT_BUSY`, `ARTIFACT_EXISTS`, `ARTIFACT_NOT_FOUND`, `STALE_REVISION`,
    * `BAD_SOURCE`, or `BAD_INPUT`; no Session event is appended.
    */
   prepare(agent: Agent, input: ArtifactPrepareInput): ArtifactSnapshot {
@@ -477,50 +479,93 @@ export class ArtifactService extends TypertRemoteService {
       return badInput('action must be create or update')
     }
     const artifactId = artifactIdOf(input.artifactId)
-    const current = this.current(agent, artifactId)
-    let revision: number
-    if (action === 'create') {
-      if (input.baseRevision !== undefined) return badInput('create does not accept baseRevision')
-      if (current !== undefined) {
-        throw new ArtifactError(`artifact "${artifactId}" already exists`, 'ARTIFACT_EXISTS')
-      }
-      revision = 1
-    } else {
-      if (current === undefined) {
-        throw new ArtifactError(`artifact "${artifactId}" does not exist`, 'ARTIFACT_NOT_FOUND')
-      }
-      const baseRevision = revisionOf(input.baseRevision, 'baseRevision')
-      if (baseRevision !== current.revision) {
-        throw new ArtifactError(
-          `artifact "${artifactId}" is at revision ${current.revision}, not ${baseRevision}`,
-          'STALE_REVISION',
-        )
-      }
-      if (current.revision === Number.MAX_SAFE_INTEGER) {
-        return badInput('artifact revision cannot exceed the maximum safe integer')
-      }
-      revision = current.revision + 1
+    const writers = this.writersOf(agent)
+    if (writers.has(artifactId)) {
+      throw new ArtifactError(
+        `artifact "${artifactId}" already has a prepared snapshot awaiting commit`,
+        'ARTIFACT_BUSY',
+      )
     }
-    return snapshotOf({
-      artifactId,
-      revision,
-      format: input.format ?? 'html',
-      title: input.title,
-      source: input.source,
-      spec: input.spec,
-      presentation: input.presentation,
-      comparison: input.comparison,
-    }, this.maxSourceBytes)
+    writers.set(artifactId, Symbol(artifactId))
+    try {
+      const current = this.current(agent, artifactId)
+      let revision: number
+      if (action === 'create') {
+        if (input.baseRevision !== undefined) return badInput('create does not accept baseRevision')
+        if (current !== undefined) {
+          throw new ArtifactError(`artifact "${artifactId}" already exists`, 'ARTIFACT_EXISTS')
+        }
+        revision = 1
+      } else {
+        if (current === undefined) {
+          throw new ArtifactError(`artifact "${artifactId}" does not exist`, 'ARTIFACT_NOT_FOUND')
+        }
+        const baseRevision = revisionOf(input.baseRevision, 'baseRevision')
+        if (baseRevision !== current.revision) {
+          throw new ArtifactError(
+            `artifact "${artifactId}" is at revision ${current.revision}, not ${baseRevision}`,
+            'STALE_REVISION',
+          )
+        }
+        if (current.revision === Number.MAX_SAFE_INTEGER) {
+          return badInput('artifact revision cannot exceed the maximum safe integer')
+        }
+        revision = current.revision + 1
+      }
+      return snapshotOf({
+        artifactId,
+        revision,
+        format: input.format ?? 'html',
+        title: input.title,
+        source: input.source,
+        spec: input.spec,
+        presentation: input.presentation,
+        comparison: input.comparison,
+      }, this.maxSourceBytes)
+    } catch (error) {
+      writers.delete(artifactId)
+      throw error
+    }
   }
 
   /**
-   * Append one validated complete snapshot and perform no other operation.
+   * Append one validated complete snapshot only when it still follows the committed revision.
    * @param agent - Agent owning the Session log.
    * @param snapshot - Prepared complete artifact value.
-   * @throws {ArtifactError} when the snapshot violates the same persistent validation as `prepare`.
+   * @throws {ArtifactError} `STALE_REVISION` when the log moved past the prepared base, or when the
+   * snapshot violates the same persistent validation as `prepare`; no Session event is appended.
    */
   commit(agent: Agent, snapshot: ArtifactSnapshot): void {
+    const writers = this.writersOf(agent)
+    const current = this.current(agent, snapshot.artifactId)
+    if (current === undefined ? snapshot.revision !== 1 : snapshot.revision !== current.revision + 1) {
+      writers.delete(snapshot.artifactId)
+      throw new ArtifactError(
+        current === undefined
+          ? `artifact "${snapshot.artifactId}" has no committed revision to follow ${snapshot.revision}`
+          : `artifact "${snapshot.artifactId}" is at revision ${current.revision}; ${snapshot.revision} cannot follow it`,
+        'STALE_REVISION',
+      )
+    }
+    writers.delete(snapshot.artifactId)
     agent.session.append('artifact/upsert', snapshotOf(snapshot, this.maxSourceBytes))
+  }
+
+  /**
+   * Release one prepared snapshot without writing it, so a failed or aborted operation does not block later updates.
+   * @param agent - Agent whose Session owns the artifact.
+   * @param artifactId - Artifact identity of the discarded preparation.
+   */
+  discard(agent: Agent, artifactId: ArtifactId): void {
+    this.writersOf(agent).delete(artifactId)
+  }
+
+  private writersOf(agent: Agent): Map<ArtifactId, symbol> {
+    const existing = this.writers.get(agent.session)
+    if (existing !== undefined) return existing
+    const created = new Map<ArtifactId, symbol>()
+    this.writers.set(agent.session, created)
+    return created
   }
 
   private assertLiveRoot(agent: Agent): void {

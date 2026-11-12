@@ -24,7 +24,7 @@ Every `artifact/upsert` Session event carries a complete snapshot. Later events 
 
 ## Mutation and action semantics
 
-The `artifact` tool creates or updates a snapshot. Creation rejects an existing id; update requires the current revision as `baseRevision`. The snapshot commits only after the authoritative tool result succeeds. Failures, cancellation, stale revisions, and post-execute blocks do not commit.
+The `artifact` tool creates or updates a snapshot. Creation rejects an existing id; update requires the current revision as `baseRevision`. The snapshot commits only after the authoritative tool result succeeds. A prepared snapshot holds the Artifact until it commits or is discarded, so overlapping updates fail with `ARTIFACT_BUSY` instead of overwriting the log, and a commit that no longer follows the committed revision is refused. Failures, cancellation, stale revisions, and post-execute blocks do not commit.
 
 `record` accepts an action only for the exact live root Agent and current revision. It validates the action name and complete UTF-8 message size, then creates an ordinary `UserMessage` with `source.kind = 'artifact-action'`. Its single text block contains bounded JSON with `kind: 'artifact_action'`, the id, revision, action, and payload. `wake` selects `agent.steer` or `agent.inject`.
 
@@ -268,18 +268,26 @@ resolveSceneSource(agent: Agent, selection: ArtifactExportSourceSelection): Arti
  * @param agent - Agent whose Session supplies the current artifact revision.
  * @param input - Complete new values and, for update, the observed base revision.
  * @returns The snapshot to commit after the enclosing operation succeeds.
- * @throws {ArtifactError} `ARTIFACT_EXISTS`, `ARTIFACT_NOT_FOUND`, `STALE_REVISION`,
+ * @throws {ArtifactError} `ARTIFACT_BUSY`, `ARTIFACT_EXISTS`, `ARTIFACT_NOT_FOUND`, `STALE_REVISION`,
  * `BAD_SOURCE`, or `BAD_INPUT`; no Session event is appended.
  */
 prepare(agent: Agent, input: ArtifactPrepareInput): ArtifactSnapshot
 
 /**
- * Append one validated complete snapshot and perform no other operation.
+ * Append one validated complete snapshot only when it still follows the committed revision.
  * @param agent - Agent owning the Session log.
  * @param snapshot - Prepared complete artifact value.
- * @throws {ArtifactError} when the snapshot violates the same persistent validation as `prepare`.
+ * @throws {ArtifactError} `STALE_REVISION` when the log moved past the prepared base, or when the
+ * snapshot violates the same persistent validation as `prepare`; no Session event is appended.
  */
 commit(agent: Agent, snapshot: ArtifactSnapshot): void
+
+/**
+ * Release one prepared snapshot without writing it, so a failed or aborted operation does not block later updates.
+ * @param agent - Agent whose Session owns the artifact.
+ * @param artifactId - Artifact identity of the discarded preparation.
+ */
+discard(agent: Agent, artifactId: ArtifactId): void
 
 /**
  * Save a named particle observation without adding input or waking the Agent.
