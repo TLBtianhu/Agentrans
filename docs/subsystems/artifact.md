@@ -26,9 +26,9 @@ Every `artifact/upsert` Session event carries a complete snapshot. Later events 
 
 The `artifact` tool creates or updates a snapshot. Creation rejects an existing id; update requires the current revision as `baseRevision`. The snapshot commits only after the authoritative tool result succeeds. A prepared snapshot holds the Artifact until it commits or is discarded, so overlapping updates fail with `ARTIFACT_BUSY` instead of overwriting the log, and a commit that no longer follows the committed revision is refused. Failures, cancellation, stale revisions, and post-execute blocks do not commit.
 
-`record` accepts an action only for the exact live root Agent and current revision. It validates the action name and complete UTF-8 message size, then creates an ordinary `UserMessage` with `source.kind = 'artifact-action'`. Its single text block contains bounded JSON with `kind: 'artifact_action'`, the id, revision, action, and payload. `wake` selects `agent.steer` or `agent.inject`.
+An admitted action creates one ordinary `UserMessage` with `source.kind = 'artifact-action'`. Its single text block contains bounded JSON with `kind: 'artifact_action'`, the id, revision, action, and payload, and `wake` selects `agent.steer` or `agent.inject`. The message is input, never an authorization: validation covers the action name and the complete UTF-8 message size, and the revision must still be current when the action is admitted.
 
-`submitAction` accepts an `ArtifactActionRequest` containing a Client-owned `MessageId`, the complete original action fields and `wake`. The optional [shared input admission service](../../packages/session/session-input/README.md) freezes in-flight requests and deduplicates accepted own-Session message identities. Equal retries return the original acknowledgment without waking the Agent; changed content conflicts. The service checks the exact live root Agent and owner principal before admission. Accepted retries survive source changes, queue cancellation and replay. Legacy `record` mints a new identity on every call and has no safe-retry guarantee.
+`submitAction` accepts an `ArtifactActionRequest` containing a Client-owned `MessageId`, the complete original action fields and `wake`. The optional [shared input admission service](../../packages/session/session-input/README.md) freezes in-flight requests and deduplicates accepted own-Session message identities. Equal retries return the original acknowledgment without waking the Agent; changed content conflicts. The service checks the exact live root Agent and owner principal before admission. Accepted retries survive source changes, queue cancellation and replay.
 
 Artifact actions are user intent, not authority. They cannot approve a tool, read a file, open a socket, or bypass policy. The action payload is not a new LLM content block or Session event type. Revision- and runtime-bound local messages carry declared state and acknowledged commands. These messages do not wake the Agent; only the confirmed `comparison.completed` action includes both independent states.
 
@@ -327,21 +327,6 @@ discard(agent: Agent, artifactId: ArtifactId): void
  * @throws {ArtifactError} For invalid references, group or caller. An admission failure may have committed input; retry the same pair.
  */
 @Remote confirmObservationComparison( agent: Agent, group: string, controlRef: SavedParticleObservationRef, variantRef: SavedParticleObservationRef, wake: boolean, ): ArtifactObservationComparisonResult
-
-/**
- * Encode one user-reviewed artifact intent as a single-text-block UserMessage.
- * The message is input, never an authorization to perform the named action.
- * @param agent - Exact live root Agent owning the artifact Session.
- * @param artifactId - Existing artifact identity.
- * @param revision - Current artifact revision reviewed by the user.
- * @param action - Trimmed 1-64 character action name matching `[A-Za-z][A-Za-z0-9._-]*`.
- * @param payload - Lossless JSON payload included in the bounded text message.
- * @param wake - `false` injects without waking; `true` steers the Agent.
- * @returns Acceptance and the revision carried by the message.
- * @throws {ArtifactError} for a non-root caller, unknown or stale artifact,
- * invalid action/payload, or an oversized complete message; no message is routed on validation failure.
- */
-@Remote record( agent: Agent, artifactId: ArtifactId, revision: number, action: string, payload: JsonValue, wake: boolean, ): ArtifactRecordResult
 
 /**
  * Admit one identified user action, or acknowledge the exact message accepted earlier in this Session.

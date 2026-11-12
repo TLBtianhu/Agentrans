@@ -207,6 +207,11 @@ describe('identified Artifact action admission', () => {
     expect(h.agent.steer).toHaveBeenCalledOnce()
   })
 
+  it('keeps the default action limit when only the source limit is configured', async () => {
+    const h = await setup({ maxSourceBytes: 1024 })
+    await expect(h.service.submitAction(h.agent, request())).resolves.toEqual({ accepted: true, revision: 1 })
+  })
+
   it.each(['', 'x'.repeat(129)])('rejects an invalid wire message identity', async (requestId) => {
     const h = await setup()
     await expect(h.service.submitAction(h.agent, request({ requestId: MessageId(requestId) })))
@@ -245,13 +250,12 @@ describe('identified Artifact action admission', () => {
     expect(child.steer).not.toHaveBeenCalled()
   })
 
-  it('keeps legacy source and record operations available without the new admission service', async () => {
+  it('refuses an action when the admission service is not mounted', async () => {
     const h = await setup({}, false)
     await expect(h.service.submitAction(h.agent, request())).rejects.toMatchObject({
       code: 'artifact/action-unavailable', details: { reason: 'SERVICE_UNAVAILABLE' },
     })
-    expect(h.service.record(h.agent, id, 1, 'inspect', { count: 2 }, false)).toEqual({ accepted: true, revision: 1 })
-    expect(h.agent.inject).toHaveBeenCalledOnce()
+    expect(h.agent.inject).not.toHaveBeenCalled()
     expect(h.service.currentSnapshot(h.agent, id)?.revision).toBe(1)
   })
 

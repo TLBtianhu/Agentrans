@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-本包负责持久化 HTML 和 SceneSpec Artifact：以稳定 id、compare-and-set 修订号和语义呈现方式保存完整快照，并提供模型侧 `artifact` 和 `scene` 工具。稳定 Remote `submitAction` 和旧 `record` 把用户确认的操作转换为文本 `UserMessage`；操作不授予文件、网络或批准权限。
+本包负责持久化 HTML 和 SceneSpec Artifact：以稳定 id、compare-and-set 修订号和语义呈现方式保存完整快照，并提供模型侧 `artifact` 和 `scene` 工具。稳定 Remote `submitAction` 把用户确认的操作转换为文本 `UserMessage`；操作不授予文件、网络或批准权限。
 
 ## 目录
 
@@ -44,7 +44,7 @@ Artifact 可以向父页面发送 `{ kind: 'artifact-action', artifactId, revisi
 
 `submitAction(agent, request)` 接受可信 Client 生成的 `requestId` 与完整冻结操作，该 id 成为既有用户消息 id，来源类型和完整操作文本保持原义。[Session 输入](../../session/session-input/README.zh.md)先检查原接受事实，再检查当前修订和大小。相同已接受重试不再次发送，源码替换或队列取消后也是如此；同一 id 的来源/内容冲突会被拒绝。发送方式只在首次接受时生效，不在后续重试时改变。必须保留准确的冻结载荷，包括其编码文本顺序。
 
-稳定提交要求 Session 输入服务和准确的实时根 Agent；Remote 调用要求所有者 principal，请求不能提供调用者归属。明确拒绝、身份冲突、服务不可用与分发未确认分别报告。旧同步 `record` 仍可供旧调用方使用，但每次创建新身份，不提供安全重试。源码创建和旧调用不激活 Session 输入服务。
+稳定提交要求 Session 输入服务和准确的实时根 Agent；Remote 调用要求所有者 principal，请求不能提供调用者归属。明确拒绝、身份冲突、服务不可用与分发未确认分别报告。源码创建不激活 Session 输入服务；所有操作提交都走准入路径。
 
 Scene 快照使用 `format: 'scene'` 和完整的 `spec`。目录校验函数图、流程图、粒子系统、时间轴、网络图和地图。非法表达式、参数范围和引用会在提交前被拒绝。
 

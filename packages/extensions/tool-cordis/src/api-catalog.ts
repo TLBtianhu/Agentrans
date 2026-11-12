@@ -587,13 +587,6 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         throws: ['{RemoteError} `artifact/comparison-rejected` for incompatible, missing or oversized observations; no input is added.', '{ArtifactError} For invalid references, group or caller. An admission failure may have committed input; retry the same pair.'],
       },
       {
-        signature: '@Remote record( agent: Agent, artifactId: ArtifactId, revision: number, action: string, payload: JsonValue, wake: boolean, ): ArtifactRecordResult',
-        description: 'Encode one user-reviewed artifact intent as a single-text-block UserMessage. The message is input, never an authorization to perform the named action.',
-        parameters: [{ name: 'agent', description: 'Exact live root Agent owning the artifact Session.' }, { name: 'artifactId', description: 'Existing artifact identity.' }, { name: 'revision', description: 'Current artifact revision reviewed by the user.' }, { name: 'action', description: 'Trimmed 1-64 character action name matching `[A-Za-z][A-Za-z0-9._-]*`.' }, { name: 'payload', description: 'Lossless JSON payload included in the bounded text message.' }, { name: 'wake', description: '`false` injects without waking; `true` steers the Agent.' }],
-        returns: 'Acceptance and the revision carried by the message.',
-        throws: ['{ArtifactError} for a non-root caller, unknown or stale artifact, invalid action/payload, or an oversized complete message; no message is routed on validation failure.'],
-      },
-      {
         signature: '@Remote async submitAction(agent: Agent, request: ArtifactActionRequest): Promise<ArtifactRecordResult>',
         description: 'Admit one identified user action, or acknowledge the exact message accepted earlier in this Session.',
         parameters: [{ name: 'agent', description: 'Exact live root Agent owning the action and receipt.' }, { name: 'request', description: 'Original request identity, reviewed source, action, payload and first-admission delivery policy.' }],

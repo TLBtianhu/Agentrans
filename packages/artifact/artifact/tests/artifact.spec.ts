@@ -8,8 +8,6 @@ import SystemPrompt from '@agentrans/system-prompt'
 import * as NativeToolExecutor from '@agentrans/tool-executor-native'
 import { executeModelToolFixture, executeToolFixture } from '@agentrans/tool-testkit'
 import ToolRuntime from '@agentrans/tools'
-import { remoteMethods } from '@agentrans/typert-protocol'
-import type { JsonValue } from '@agentrans/util-values'
 import ArtifactService, { ArtifactError, type Config } from '../src/index.ts'
 import * as ArtifactTool from '../src/tool.ts'
 import type { ArtifactPrepareInput, ArtifactSnapshot } from '../src/types.ts'
@@ -67,22 +65,11 @@ function mutation(value: unknown): ArtifactPrepareInput {
   return value as ArtifactPrepareInput
 }
 
-function json(value: unknown): JsonValue {
-  return value as JsonValue
-}
 
 function upserts(agent: Agent): ArtifactSnapshot[] {
   return agent.session.snapshotEvents().filter(event => event.type === 'artifact/upsert').map(event => event.data)
 }
 
-function actionText(agent: RoutedAgent, wake: boolean): string {
-  const calls = wake ? agent.steer.mock.calls : agent.inject.mock.calls
-  const message = calls[0]?.[0]
-  expect(message?.content).toHaveLength(1)
-  const block = message?.content[0]
-  if (block?.type !== 'text') throw new Error('expected one artifact-action text block')
-  return block.text
-}
 
 describe('ArtifactService prepare and commit', () => {
   it('reads independent current source values from the prepared Session without reading its log', async () => {
@@ -237,102 +224,6 @@ describe('ArtifactService prepare and commit', () => {
   })
 })
 
-describe('ArtifactService record', () => {
-  it('exposes the Remote method and routes reviewed JSON intent without granting side effects', async () => {
-    const { agent, service } = await setup()
-    expect(remoteMethods(service)).toContainEqual({ method: 'record', invocation: { kind: 'direct' } })
-    service.commit(agent, service.prepare(agent, createInput()))
-    expect(service.record(agent, 'demo' as ArtifactSnapshot['artifactId'], 1, '  file.delete  ', { path: '/not-read' }, false))
-      .toEqual({ accepted: true, revision: 1 })
-    expect(agent.inject).toHaveBeenCalledOnce()
-    expect(agent.steer).not.toHaveBeenCalled()
-    const message = agent.inject.mock.calls[0]?.[0]
-    expect(message?.source).toEqual({ kind: 'artifact-action', artifactId: 'demo', revision: 1 })
-    expect(JSON.parse(actionText(agent, false))).toEqual({
-      kind: 'artifact_action', artifactId: 'demo', revision: 1, action: 'file.delete', payload: { path: '/not-read' },
-    })
-  })
-
-  it('uses steer when wake is true', async () => {
-    const { agent, service } = await setup()
-    service.commit(agent, service.prepare(agent, createInput()))
-    service.record(agent, 'demo' as ArtifactSnapshot['artifactId'], 1, 'refresh', [1, { ok: true }], true)
-    expect(agent.steer).toHaveBeenCalledOnce()
-    expect(agent.inject).not.toHaveBeenCalled()
-    expect(JSON.parse(actionText(agent, true))).toMatchObject({ action: 'refresh' })
-  })
-
-  it('rejects unknown and stale revisions before routing', async () => {
-    const { agent, service } = await setup()
-    service.commit(agent, service.prepare(agent, createInput()))
-    expect(() => service.record(agent, 'missing' as ArtifactSnapshot['artifactId'], 1, 'go', null, false))
-      .toThrow(expect.objectContaining({ code: 'ARTIFACT_NOT_FOUND' }))
-    expect(() => service.record(agent, 'demo' as ArtifactSnapshot['artifactId'], 2, 'go', null, false))
-      .toThrow(expect.objectContaining({ code: 'STALE_REVISION' }))
-    expect(agent.inject).not.toHaveBeenCalled()
-  })
-
-  it.each([
-    '', '   ', '1start', 'white space', 'slash/name', 'a'.repeat(65),
-  ])('rejects invalid action name %j', async (action) => {
-    const { agent, service } = await setup()
-    service.commit(agent, service.prepare(agent, createInput()))
-    expect(() => service.record(agent, 'demo' as ArtifactSnapshot['artifactId'], 1, action, null, false))
-      .toThrow(expect.objectContaining({ code: 'BAD_INPUT' }))
-    expect(agent.inject).not.toHaveBeenCalled()
-  })
-
-  it.each([
-    undefined, () => 'no', Number.NaN, Number.POSITIVE_INFINITY, -0, 1n, new Date(),
-  ])('rejects a non-JSON payload %#', async (payload) => {
-    const { agent, service } = await setup()
-    service.commit(agent, service.prepare(agent, createInput()))
-    expect(() => service.record(agent, 'demo' as ArtifactSnapshot['artifactId'], 1, 'go', json(payload), false))
-      .toThrow(expect.objectContaining({ code: 'BAD_INPUT' }))
-  })
-
-  it('rejects a non-string action before normalization', async () => {
-    const { agent, service } = await setup()
-    service.commit(agent, service.prepare(agent, createInput()))
-    expect(() => service.record(agent, 'demo' as ArtifactSnapshot['artifactId'], 1, 7 as never, null, false))
-      .toThrow(expect.objectContaining({ code: 'BAD_INPUT' }))
-    expect(agent.inject).not.toHaveBeenCalled()
-  })
-
-  it('rejects cyclic payloads and non-boolean wake values', async () => {
-    const { agent, service } = await setup()
-    service.commit(agent, service.prepare(agent, createInput()))
-    const cyclic: { self?: unknown } = {}
-    cyclic.self = cyclic
-    expect(() => service.record(agent, 'demo' as ArtifactSnapshot['artifactId'], 1, 'go', json(cyclic), false))
-      .toThrow(expect.objectContaining({ code: 'BAD_INPUT' }))
-    expect(() => service.record(agent, 'demo' as ArtifactSnapshot['artifactId'], 1, 'go', null, json('yes') as boolean))
-      .toThrow(expect.objectContaining({ code: 'BAD_INPUT' }))
-  })
-
-  it('requires the exact live root Agent', async () => {
-    const { ctx, agent, service } = await setup()
-    service.commit(agent, service.prepare(agent, createInput()))
-    const detached = makeAgent(ctx, 'detached-artifact')
-    expect(() => service.record(detached, 'demo' as ArtifactSnapshot['artifactId'], 1, 'go', null, false))
-      .toThrow(expect.objectContaining({ code: 'CALLER_NOT_LIVE_ROOT' }))
-    const child = makeAgent(ctx, 'child-artifact', agent.session.snapshotEvents())
-    ctx.agents.enter(child, agent)
-    expect(() => service.record(child, 'demo' as ArtifactSnapshot['artifactId'], 1, 'go', null, false))
-      .toThrow(expect.objectContaining({ code: 'CALLER_NOT_LIVE_ROOT' }))
-  })
-
-  it('fails loud when the Agent registry is absent', async () => {
-    const { agent } = await setup()
-    const isolated = new Context()
-    contexts.push(isolated)
-    await isolated.plugin(SessionProjectionRegistry)
-    await isolated.plugin(ArtifactService)
-    expect(() => isolated.artifacts.record(agent, 'demo' as ArtifactSnapshot['artifactId'], 1, 'go', null, false))
-      .toThrow(expect.objectContaining({ code: 'AGENT_REGISTRY_UNAVAILABLE' }))
-  })
-})
-
 describe('artifact resource limits and configuration', () => {
   it('applies UTF-8 source limits at the exact boundary', async () => {
     const source = '<p>é</p>'
@@ -347,18 +238,6 @@ describe('artifact resource limits and configuration', () => {
     })).toThrow(expect.objectContaining({ code: 'BAD_SOURCE' }))
   })
 
-  it('bounds the complete wrapped action JSON, including multibyte payload text', async () => {
-    const id = 'demo' as ArtifactSnapshot['artifactId']
-    const payload = { note: 'é' }
-    const text = JSON.stringify({ kind: 'artifact_action', artifactId: id, revision: 1, action: 'go', payload })
-    const { agent, service } = await setup({ maxActionBytes: Buffer.byteLength(text, 'utf8') })
-    service.commit(agent, service.prepare(agent, createInput()))
-    expect(service.record(agent, id, 1, 'go', payload, false)).toEqual({ accepted: true, revision: 1 })
-    expect(() => service.record(agent, id, 1, 'go', { note: 'éé' }, false))
-      .toThrow(expect.objectContaining({ code: 'ACTION_TOO_LARGE' }))
-    expect(agent.inject).toHaveBeenCalledOnce()
-  })
-
   it('refuses to advance beyond the maximum safe revision', async () => {
     const { agent, service } = await setup()
     const created = service.prepare(agent, createInput())
@@ -368,13 +247,6 @@ describe('artifact resource limits and configuration', () => {
     expect(() => service.prepare(agent, {
       ...createInput(), action: 'update', baseRevision: Number.MAX_SAFE_INTEGER,
     })).toThrow(expect.objectContaining({ code: 'BAD_INPUT' }))
-  })
-
-  it('retains the action limit default when only the source limit is configured', async () => {
-    const { agent, service } = await setup({ maxSourceBytes: 1024 })
-    service.commit(agent, service.prepare(agent, createInput()))
-    expect(service.record(agent, 'demo' as ArtifactSnapshot['artifactId'], 1, 'go', null, false))
-      .toEqual({ accepted: true, revision: 1 })
   })
 
   it('validates schema defaults and direct-composition limits', async () => {

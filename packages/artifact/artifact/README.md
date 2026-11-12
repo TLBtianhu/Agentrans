@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-This package owns durable HTML and SceneSpec Artifacts: complete snapshots with a stable id, compare-and-set revisions, semantic presentation, and model-facing `artifact` and `scene` tools. Its stable Remote `submitAction` and legacy `record` convert user-confirmed actions into text `UserMessage`s; actions never grant filesystem, network, or approval authority.
+This package owns durable HTML and SceneSpec Artifacts: complete snapshots with a stable id, compare-and-set revisions, semantic presentation, and model-facing `artifact` and `scene` tools. Its stable Remote `submitAction` converts user-confirmed actions into text `UserMessage`s; actions never grant filesystem, network, or approval authority.
 
 ## Table of Contents
 
@@ -44,7 +44,7 @@ An Artifact can post `{ kind: 'artifact-action', artifactId, revision, action, p
 
 `submitAction(agent, request)` accepts a trusted Client-minted `requestId` with the complete frozen action. That id becomes the existing user message id; source kind and complete action text retain their existing meanings. [Session input](../../session/session-input/README.md) checks the original acceptance before current revision and size checks. Identical accepted retries do not send again, even after source replacement or queue cancellation; conflicting source/content under the same id is rejected. Delivery mode applies only at first acceptance, not on a later retry. The exact frozen payload must be retained, including its encoded text order.
 
-Stable submission requires Session input and the exact live root Agent. Remote calls require the owner principal; the request cannot supply caller attribution. Known refusal, identity conflict, service unavailability and unconfirmed dispatch are distinct. The synchronous `record` method remains available to legacy callers, creates a fresh identity each time and does not provide safe retry. Source creation and legacy use do not activate Session input.
+Stable submission requires Session input and the exact live root Agent. Remote calls require the owner principal; the request cannot supply caller attribution. Known refusal, identity conflict, service unavailability and unconfirmed dispatch are distinct. Source creation does not activate Session input; every action submission goes through the admitted path.
 
 Scene snapshots use `format: 'scene'` and a complete `spec`. The catalog validates function plots, flowcharts, particle systems, timelines, network graphs, and maps. Invalid expressions, parameter ranges, and references are rejected before commit.
 

@@ -12,7 +12,7 @@ import type { Agent } from '@agentrans/agent'
 import { brandString } from '@agentrans/brand'
 import { createUserMessage, freezeMessage, HarnessError, type UserMessage } from '@agentrans/llm'
 import { Remote, RemoteError, TypertRemoteService, principalOf } from '@agentrans/typert-protocol'
-import { assertNever, snapshotJsonValue, type JsonValue } from '@agentrans/util-values'
+import { assertNever, snapshotJsonValue } from '@agentrans/util-values'
 import { SessionInputAdmissionError } from '@agentrans/session-input'
 import type { ProjectionDefinition, ProjectionHandle } from '@agentrans/session-projection'
 import type {
@@ -699,44 +699,6 @@ export class ArtifactService extends TypertRemoteService {
       throw new RemoteError('artifact/comparison-rejected', error.message, { reason: 'ACTION_TOO_LARGE' }, { cause: error })
     }
     return { accepted: true, comparison }
-  }
-
-  /**
-   * Encode one user-reviewed artifact intent as a single-text-block UserMessage.
-   * The message is input, never an authorization to perform the named action.
-   * @param agent - Exact live root Agent owning the artifact Session.
-   * @param artifactId - Existing artifact identity.
-   * @param revision - Current artifact revision reviewed by the user.
-   * @param action - Trimmed 1-64 character action name matching `[A-Za-z][A-Za-z0-9._-]*`.
-   * @param payload - Lossless JSON payload included in the bounded text message.
-   * @param wake - `false` injects without waking; `true` steers the Agent.
-   * @returns Acceptance and the revision carried by the message.
-   * @throws {ArtifactError} for a non-root caller, unknown or stale artifact,
-   * invalid action/payload, or an oversized complete message; no message is routed on validation failure.
-   */
-  @Remote
-  record(
-    agent: Agent,
-    artifactId: ArtifactId,
-    revision: number,
-    action: string,
-    payload: JsonValue,
-    wake: boolean,
-  ): ArtifactRecordResult {
-    this.assertLiveRoot(agent)
-    const id = artifactIdOf(artifactId)
-    const expectedRevision = revisionOf(revision)
-    const current = this.current(agent, id)
-    if (current === undefined) {
-      throw new ArtifactError(`artifact "${id}" does not exist`, 'ARTIFACT_NOT_FOUND')
-    }
-    if (current.revision !== expectedRevision) {
-      throw new ArtifactError(
-        `artifact "${id}" is at revision ${current.revision}, not ${expectedRevision}`,
-        'STALE_REVISION',
-      )
-    }
-    return this.admitAction(agent, id, expectedRevision, action, payload, wake)
   }
 
   /**

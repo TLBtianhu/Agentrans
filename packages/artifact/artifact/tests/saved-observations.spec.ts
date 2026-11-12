@@ -210,8 +210,9 @@ describe('saved particle observations', () => {
       action: 'physics.inspected', revision: 1,
       payload: { observationId: 'a', label: 'A', runtimeVersion: 1, stepCount: 6, ...saved.values },
     })
-    expect(() => second.service.record(second.agent, id, 1, 'physics.inspected', null, false))
-      .toThrow(expect.objectContaining({ code: 'STALE_REVISION' }))
+    expect(() => second.service.prepare(second.agent, {
+      action: 'update', artifactId: id, baseRevision: 1, title: 'A', source: '<p>a</p>', presentation: 'inline',
+    })).toThrow(expect.objectContaining({ code: 'STALE_REVISION' }))
   })
 
   it('matches full replay when a cached projection is restored and a saved-list suffix is applied', async () => {

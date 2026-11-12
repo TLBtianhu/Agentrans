@@ -26,9 +26,9 @@ Artifact 是带版本号、由代码生成的交互解释对象。持久真源�
 
 `artifact` 工具创建或更新快照。创建拒绝已存在 id；更新要求 `baseRevision` 等于当前修订号。只有最终工具结果成功才提交。已准备的快照会占用该 Artifact 直到提交或被丢弃，因此重叠的更新以 `ARTIFACT_BUSY` 失败而不会覆盖日志；不再紧随已提交修订号的提交会被拒绝。失败、取消、过期修订和 post-execute 阻断都不提交。
 
-`record` 只接受精确 live root Agent 和当前修订对应的操作。它校验操作名和完整 UTF-8 消息大小，再创建 `source.kind = 'artifact-action'` 的普通 `UserMessage`。唯一文本块装有有界 JSON，包含 `kind: 'artifact_action'`、id、修订号、操作和 payload。`wake` 选择 `agent.steer` 或 `agent.inject`。
+被准入的操作会创建一条 `source.kind = 'artifact-action'` 的普通 `UserMessage`。唯一文本块装有有界 JSON，包含 `kind: 'artifact_action'`、id、修订号、操作和 payload，`wake` 选择 `agent.steer` 或 `agent.inject`。消息只是输入，绝不构成授权：校验覆盖操作名与完整 UTF-8 消息大小，且受理时修订号必须仍是当前值。
 
-`submitAction` 接受 `ArtifactActionRequest`，其中包含 Client 拥有的 `MessageId`、完整原操作字段与 `wake`。可选的[共用输入准入服务](../../packages/session/session-input/README.zh.md)冻结处理中请求，并按本 Session 自有消息身份对已接受输入去重。相同重试返回原确认，不唤醒 Agent；内容改变则冲突。服务在准入前检查精确 live root Agent 与所有者 principal。已接受请求在源码变化、队列取消和回放后仍可重试。旧 `record` 每次生成新身份，不保证安全重试。
+`submitAction` 接受 `ArtifactActionRequest`，其中包含 Client 拥有的 `MessageId`、完整原操作字段与 `wake`。可选的[共用输入准入服务](../../packages/session/session-input/README.zh.md)冻结处理中请求，并按本 Session 自有消息身份对已接受输入去重。相同重试返回原确认，不唤醒 Agent；内容改变则冲突。服务在准入前检查精确 live root Agent 与所有者 principal。已接受请求在源码变化、队列取消和回放后仍可重试。
 
 Artifact 操作是用户意图，不是权限。它不能批准工具、读取文件、打开 socket 或绕过政策。payload 不是新的 LLM 内容块，也不是新的 Session 事件类型。本地消息绑定修订和运行身份，传递已声明的状态与经过确认的命令。这些消息不会唤醒 Agent；只有用户确认的 `comparison.completed` 操作包含两侧独立状态。
 
@@ -327,21 +327,6 @@ discard(agent: Agent, artifactId: ArtifactId): void
  * @throws {ArtifactError} For invalid references, group or caller. An admission failure may have committed input; retry the same pair.
  */
 @Remote confirmObservationComparison( agent: Agent, group: string, controlRef: SavedParticleObservationRef, variantRef: SavedParticleObservationRef, wake: boolean, ): ArtifactObservationComparisonResult
-
-/**
- * Encode one user-reviewed artifact intent as a single-text-block UserMessage.
- * The message is input, never an authorization to perform the named action.
- * @param agent - Exact live root Agent owning the artifact Session.
- * @param artifactId - Existing artifact identity.
- * @param revision - Current artifact revision reviewed by the user.
- * @param action - Trimmed 1-64 character action name matching `[A-Za-z][A-Za-z0-9._-]*`.
- * @param payload - Lossless JSON payload included in the bounded text message.
- * @param wake - `false` injects without waking; `true` steers the Agent.
- * @returns Acceptance and the revision carried by the message.
- * @throws {ArtifactError} for a non-root caller, unknown or stale artifact,
- * invalid action/payload, or an oversized complete message; no message is routed on validation failure.
- */
-@Remote record( agent: Agent, artifactId: ArtifactId, revision: number, action: string, payload: JsonValue, wake: boolean, ): ArtifactRecordResult
 
 /**
  * Admit one identified user action, or acknowledge the exact message accepted earlier in this Session.
