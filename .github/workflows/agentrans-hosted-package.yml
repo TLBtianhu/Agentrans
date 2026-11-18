@@ -1,20 +1,20 @@
 name: Package Agentrans · hosted
-run-name: Verify Windows installer test package
+run-name: Verify Windows cross-version differential update
 
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version of the retained Windows installer'
+        description: 'Version of the retained Windows successor'
         type: string
         required: true
       channel:
-        description: 'Channel of the retained Windows installer'
+        description: 'Channel of the retained Windows successor'
         type: choice
         options: [nightly, latest]
         required: true
       target:
-        description: 'Target of the retained Windows installer'
+        description: 'Target of the retained Windows successor'
         type: choice
         options: [all, win-x64, mac-arm64, mac-x64, mac]
         required: true
@@ -24,9 +24,9 @@ permissions:
   contents: read
 
 jobs:
-  windows-install:
+  windows-upgrade:
     runs-on: windows-latest
-    timeout-minutes: 18
+    timeout-minutes: 25
     env:
       AGENTRANS_TELEMETRY_DISABLED: '1'
       AGENTRANS_DESKTOP_UPDATE_CHECK_INTERVAL_MS: '3600000'
@@ -37,7 +37,7 @@ jobs:
       - uses: actions/setup-node@v7.0.0
         with:
           node-version: '24'
-      - name: Download and verify the retained installer
+      - name: Download the verified old and new packages
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -46,29 +46,61 @@ jobs:
           QA_TARGET: ${{ inputs.target }}
         run: |
           $PSNativeCommandUseErrorActionPreference = $true
-          if ($env:QA_VERSION -ne '0.1.0-test.20261118.1' -or $env:QA_CHANNEL -ne 'nightly' -or $env:QA_TARGET -ne 'win-x64') {
-            throw 'This check accepts the exact retained Windows test package'
+          if ($env:QA_VERSION -ne '0.1.0-test.20261118.2' -or $env:QA_CHANNEL -ne 'nightly' -or $env:QA_TARGET -ne 'win-x64') {
+            throw 'This check accepts only the selected successor test build'
           }
-          $run = gh api repos/TLBtianhu/Agentrans/actions/runs/44268972216 | ConvertFrom-Json
-          if ($run.conclusion -ne 'success' -or $run.head_sha -ne '91fd8f2eb17467438fe8dd3e1d088a38457fdd15') {
-            throw 'Retained package source does not match its verified build'
+          $repo = 'TLBtianhu/Agentrans'
+          $inputsRoot = Join-Path $env:RUNNER_TEMP 'agentrans-upgrade-inputs'
+          New-Item -Path $inputsRoot -ItemType Directory | Out-Null
+          $versions = @(
+            @{ Run='44268972216'; Commit='91fd8f2eb17467438fe8dd3e1d088a38457fdd15'; Title='Package Agentrans · all · nightly · 0.1.0-test.20261118.1'; Directory='old' },
+            @{ Run='44305836454'; Commit='a9a0c575429f1682756ce12916c7da82b523a134'; Title='Package Agentrans · win-x64 · nightly · 0.1.0-test.20261118.2'; Directory='new' }
+          )
+          foreach ($version in $versions) {
+            $run = gh api "repos/$repo/actions/runs/$($version.Run)" | ConvertFrom-Json
+            if ($run.conclusion -ne 'success' -or $run.head_sha -ne $version.Commit -or $run.display_title -ne $version.Title) {
+              throw 'Retained artifacts do not match the successful packaging runs'
+            }
+            gh run download $version.Run --repo $repo --name agentrans-win-x64 --dir (Join-Path $inputsRoot $version.Directory)
           }
-          $download = Join-Path $env:RUNNER_TEMP 'agentrans-existing-package'
-          gh run download 44268972216 --repo TLBtianhu/Agentrans --name agentrans-win-x64 --dir $download
-          $installer = Join-Path $download 'agentrans-0.1.0-test.20261118.1-win-x64-unsigned.exe'
-          $sha = (Get-FileHash -Algorithm SHA256 -LiteralPath $installer).Hash.ToLowerInvariant()
-          if ($sha -ne '89ecc5ce9d75f67bb691cba7ce15b69288f93fe4ca6934746cd732b14b8a164c') {
-            throw 'Retained installer digest changed'
+          $old = Join-Path $inputsRoot 'old/agentrans-0.1.0-test.20261118.1-win-x64-unsigned.exe'
+          $new = Join-Path $inputsRoot 'new/agentrans-0.1.0-test.20261118.2-win-x64-unsigned.exe'
+          if ((Get-FileHash -LiteralPath $old -Algorithm SHA256).Hash -ine '89ecc5ce9d75f67bb691cba7ce15b69288f93fe4ca6934746cd732b14b8a164c') {
+            throw 'The retained baseline installer digest changed'
           }
-          Add-Content -LiteralPath $env:GITHUB_ENV -Value "VERIFIED_INSTALLER=$installer"
-          "Verified installer SHA-256 $sha"
-      - name: Install and qualify in the disposable runner
+          foreach ($path in @("$old.blockmap", "$new.blockmap", (Join-Path $inputsRoot 'new/test.yml'))) {
+            if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { throw 'Required blockmap or update feed is absent' }
+          }
+          "New installer SHA-256 $((Get-FileHash -LiteralPath $new -Algorithm SHA256).Hash.ToLowerInvariant())"
+          Add-Content -LiteralPath $env:GITHUB_ENV -Value @("QA_OLD_EXE=$old","QA_NEW_EXE=$new","QA_INPUTS_ROOT=$inputsRoot")
+      - name: Sign the newer installer for local verification
         shell: pwsh
-        run: node scripts/verify-existing-windows-install.mjs "$env:VERIFIED_INSTALLER" (Join-Path $env:RUNNER_TEMP 'agentrans-installed-qa')
-      - name: Retain the test report
+        env:
+          AGENTRANS_UPDATE_SIGNING_KEY: ${{ secrets.AGENTRANS_UPDATE_SIGNING_KEY }}
+        run: |
+          $PSNativeCommandUseErrorActionPreference = $true
+          $source = @'
+          import assert from 'node:assert/strict'
+          import { createPublicKey } from 'node:crypto'
+          import { writeFile } from 'node:fs/promises'
+          import { publicKeyFromBase64, privateKeyFromBase64, signFileDigest } from './apps/desktop/src/update-signature.ts'
+          import { UPDATE_SIGNING_PUBLIC_KEY } from './apps/desktop/src/update-signing-key.ts'
+          assert.ok(process.env.AGENTRANS_UPDATE_SIGNING_KEY, 'Expected the repository update-signing key')
+          const privateKey = privateKeyFromBase64(process.env.AGENTRANS_UPDATE_SIGNING_KEY)
+          const publicKey = publicKeyFromBase64(UPDATE_SIGNING_PUBLIC_KEY)
+          assert.ok(createPublicKey(privateKey).equals(publicKey), 'The signing key must match the installed updater key')
+          const installer = process.env.QA_NEW_EXE
+          const signature = await signFileDigest(installer, privateKey)
+          await writeFile(installer + '.sig', signature, { flag: 'wx' })
+          '@
+          node --input-type=module -e $source
+      - name: Verify the true installed update using the local feed
+        shell: pwsh
+        run: pwsh -NoLogo -NoProfile -File scripts/run-windows-upgrade-qa.ps1
+      - name: Retain the verification report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: windows-existing-package-qa
-          path: ${{ runner.temp }}/agentrans-installed-qa/result.json
+          name: windows-cross-version-upgrade-qa
+          path: ${{ runner.temp }}/agentrans-upgrade-qa/result.json
           if-no-files-found: warn
