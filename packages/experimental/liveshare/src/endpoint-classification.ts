@@ -93,7 +93,6 @@ export const VIEWER_ENDPOINT_CLASSES = {
   'session/selectModel': 'owner-only', // owner selects a Session model
   'session/updateQueue': 'owner-only', // owner edits queued input
   'session/returnBranchResult': 'owner-only', // owner confirms which child conclusion enters the parent
-  'artifacts/record': 'owner-only', // owner confirms Artifact intent before it reaches the Agent
   'artifacts/submitAction': 'owner-only', // owner confirms an immutable identity-bound Artifact input
   'artifacts/saveObservation': 'owner-only', // owner retains a named observation in Session history
   'artifacts/sendObservation': 'owner-only', // owner confirms a saved observation before Agent admission
