@@ -22,9 +22,9 @@ const root = resolve(rootArgument)
 assert.equal(dirname(root).toLowerCase(), temporaryParent.toLowerCase(), 'QA root must be directly under RUNNER_TEMP')
 assert.match(root, /[\\/]agentrans-(?:installed|upgrade)-qa(?:-[a-z0-9-]+)?$/iu)
 const manifest = JSON.parse((await readFile(manifestArgument, 'utf8')).replace(/^\uFEFF/u, ''))
-const oldVersion = '0.1.0-test.20261118.1'
-const newVersion = '0.1.0-test.20261118.2'
-const retainedOldHash = '89ecc5ce9d75f67bb691cba7ce15b69288f93fe4ca6934746cd732b14b8a164c'
+const oldVersion = '0.1.0-test.20261118.2'
+const newVersion = '0.1.0-test.20261118.3'
+const retainedOldHash = '9a7df6518051669fc32fb425985459393deda67504be7ff4a8518f20e792f680'
 for (const name of ['oldExe', 'newExe', 'oldBlockMap', 'newBlockMap', 'newYaml', 'newSignature', 'httpsKey', 'httpsCert', 'rootCa']) {
   assert.ok(isAbsolute(manifest[name]), `Manifest field ${name} must be an absolute path`)
   assert.ok((await stat(manifest[name])).isFile(), `Manifest field ${name} must be a file`)
@@ -407,7 +407,9 @@ try {
     if (error.code !== 'EEXIST') throw error
   }
   assert.equal(await sha256(cached), oldHash, 'The old installer cache must contain the verified original bytes')
-  assert.equal((await lookup('github.com', { family: 4 })).address, '127.0.0.1', 'GitHub must resolve to the disposable runner HTTPS feed')
+  for (const hostname of ['github.com', 'api.github.com']) {
+    assert.equal((await lookup(hostname, { family: 4 })).address, '127.0.0.1', `${hostname} must resolve to the disposable runner HTTPS feed`)
+  }
   feed = await startUpgradeFeed({
     tls: { key: await readFile(manifest.httpsKey), cert: await readFile(manifest.httpsCert) },
     oldInstallerPath: installer, newInstallerPath: manifest.newExe, metadataPath: manifest.newYaml,
@@ -452,10 +454,16 @@ try {
   currentStage = 'verify-session-after-upgrade'
   await closeAutomaticRestart(automaticRestart)
   automaticRestart = undefined
+  const releaseCatalogRequestsBeforeRelaunch = feed.snapshot().releaseCatalogRequests
   const reopened = await launch(false)
   await verifySession(reopened, created.sessionId, title)
   assert.ok((await updateEvents(reopened.owned.process.pid)).some(event => event.event === 'started' && event.version === newVersion))
   await record(currentStage, { sameSessionAndTitle: true, runningVersion: newVersion, inspectedWithFreshDebugger: true })
+  currentStage = 'verify-successor-release-catalog'
+  await poll(reopened.owned, () => {
+    if (feed.snapshot().releaseCatalogRequests > releaseCatalogRequestsBeforeRelaunch) return true
+  }, 'successor updater request to the local releases API', 30000)
+  await record(currentStage, { localReleaseCatalog: true })
   await stopApp(reopened)
   currentStage = 'verify-differential-transfer'
   report.feed = feedSummary()

@@ -8,8 +8,9 @@ import { pipeline } from 'node:stream'
 
 const repository = '/TLBtianhu/Agentrans'
 const releases = `${repository}/releases`
-const oldVersion = '0.1.0-test.20261118.1'
-const newVersion = '0.1.0-test.20261118.2'
+const releaseCatalog = `/repos${releases}`
+const oldVersion = '0.1.0-test.20261118.2'
+const newVersion = '0.1.0-test.20261118.3'
 const fileName = version => `agentrans-${version}-win-x64-unsigned.exe`
 const assetPath = (version, name) => `${releases}/download/v${version}/${name}`
 
@@ -68,6 +69,10 @@ export async function startUpgradeFeed({
   const entry = `<entry><title>Agentrans ${newVersion}</title><link href="https://github.com${releases}/tag/v${newVersion}"/>`
     + '<content type="html">Isolated Windows upgrade qualification</content></entry>'
   const feed = Buffer.from(`<?xml version="1.0" encoding="UTF-8"?><feed xmlns="http://www.w3.org/2005/Atom">${entry}</feed>`)
+  const catalog = Buffer.from(JSON.stringify([{
+    tag_name: `v${newVersion}`, draft: false, prerelease: true,
+    name: `Agentrans ${newVersion}`, body: 'Isolated Windows upgrade qualification',
+  }]))
   const assets = new Map([
     [`${releases}.atom`, { kind: 'feed', type: 'application/atom+xml; charset=utf-8', body: feed }],
     [assetPath(newVersion, 'test.yml'), { kind: 'metadata', type: 'application/yaml; charset=utf-8', body: metadata }],
@@ -79,12 +84,17 @@ export async function startUpgradeFeed({
   const installerPath = assetPath(newVersion, fileName(newVersion))
   const server = createServer(tls, (request, response) => {
     const hostHeader = request.headers.host?.toLowerCase() ?? ''
+    const portSuffix = `:${server.address().port}`
+    const isGitHub = hostHeader === 'github.com' || hostHeader === `github.com${portSuffix}`
+    const isApi = hostHeader === 'api.github.com' || hostHeader === `api.github.com${portSuffix}`
     // Query strings are not retained in evidence, and paths never become filesystem paths.
-    const path = request.url?.split('?', 1)[0] ?? ''
-    const asset = assets.get(path)
-    const isInstaller = path === installerPath
+    const [path, query] = (request.url ?? '').split('?', 2)
+    const asset = isGitHub ? assets.get(path) : undefined
+    const isInstaller = isGitHub && path === installerPath
+    const isCatalog = isApi && path === releaseCatalog
     const report = { method: request.method, path, kind: asset?.kind ?? (isInstaller ? 'installer' : 'unrecognized'),
       range: request.headers.range ?? null, status: 0, bytes: 0, completed: false }
+    if (isCatalog) report.kind = 'release-catalog'
     requests.push(report)
     response.once('finish', () => { report.completed = true })
     const send = (status, headers, body) => {
@@ -93,12 +103,21 @@ export async function startUpgradeFeed({
       response.writeHead(status, { 'Content-Length': body.length, 'Cache-Control': 'no-store', ...headers })
       response.end(request.method === 'HEAD' ? undefined : body)
     }
-    if (hostHeader !== 'github.com' && hostHeader !== `github.com:${server.address().port}`) {
+    if (!isGitHub && !isApi) {
       send(421, {}, Buffer.alloc(0))
       return
     }
     if (request.method !== 'GET' && request.method !== 'HEAD') {
       send(405, { Allow: 'GET, HEAD' }, Buffer.alloc(0))
+      return
+    }
+    if (isCatalog) {
+      const parameters = new URLSearchParams(query)
+      if (parameters.get('page') === '1' && parameters.get('per_page') === '100') {
+        send(200, { 'Content-Type': 'application/json; charset=utf-8' }, catalog)
+      } else {
+        send(404, {}, Buffer.alloc(0))
+      }
       return
     }
     if (asset) {
@@ -147,7 +166,8 @@ export async function startUpgradeFeed({
       const oldBlockmapRequests = count('old-blockmap')
       const newBlockmapRequests = count('new-blockmap')
       return { installerSize, rangeRequests: ranges.length, rangeBytes, fullInstallerRequests, oldBlockmapRequests, newBlockmapRequests,
-        signatureRequests: count('signature'), requests: requests.map(request => ({ ...request })),
+        signatureRequests: count('signature'), releaseCatalogRequests: count('release-catalog'),
+        requests: requests.map(request => ({ ...request })),
         differentialObserved: oldBlockmapRequests > 0 && newBlockmapRequests > 0 && rangeBytes > 0
           && rangeBytes < installerSize && fullInstallerRequests === 0,
       }

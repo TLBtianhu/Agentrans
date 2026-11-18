@@ -1,5 +1,5 @@
 name: Package Agentrans · hosted
-run-name: Verify Windows cross-version differential update
+run-name: Verify Windows candidate differential update
 
 on:
   workflow_dispatch:
@@ -46,26 +46,29 @@ jobs:
           QA_TARGET: ${{ inputs.target }}
         run: |
           $PSNativeCommandUseErrorActionPreference = $true
-          if ($env:QA_VERSION -ne '0.1.0-test.20261118.2' -or $env:QA_CHANNEL -ne 'nightly' -or $env:QA_TARGET -ne 'win-x64') {
+          if ($env:QA_VERSION -ne '0.1.0-test.20261118.3' -or $env:QA_CHANNEL -ne 'nightly' -or $env:QA_TARGET -ne 'win-x64') {
             throw 'This check accepts only the selected successor test build'
           }
           $repo = 'TLBtianhu/Agentrans'
           $inputsRoot = Join-Path $env:RUNNER_TEMP 'agentrans-upgrade-inputs'
           New-Item -Path $inputsRoot -ItemType Directory | Out-Null
           $versions = @(
-            @{ Run='44268972216'; Commit='91fd8f2eb17467438fe8dd3e1d088a38457fdd15'; Title='Package Agentrans · all · nightly · 0.1.0-test.20261118.1'; Directory='old' },
-            @{ Run='44305836454'; Commit='a9a0c575429f1682756ce12916c7da82b523a134'; Title='Package Agentrans · win-x64 · nightly · 0.1.0-test.20261118.2'; Directory='new' }
+            @{ Run='44305836454'; Commit='a9a0c575429f1682756ce12916c7da82b523a134'; Title='Package Agentrans · win-x64 · nightly · 0.1.0-test.20261118.2'; Directory='old' },
+            @{ Run='44321192711'; Commit='5e1154e1dcdb0d23f84fdb4d5e8f252dfcbf884b'; Title='Package Agentrans · win-x64 · nightly · 0.1.0-test.20261118.3'; Directory='new' }
           )
           foreach ($version in $versions) {
+            if ($version.Run -notmatch '^\d+$' -or $version.Commit -notmatch '^[a-f0-9]{40}$') {
+              throw 'Pin the successful build run and its full commit SHA before verifying this candidate'
+            }
             $run = gh api "repos/$repo/actions/runs/$($version.Run)" | ConvertFrom-Json
             if ($run.conclusion -ne 'success' -or $run.head_sha -ne $version.Commit -or $run.display_title -ne $version.Title) {
               throw 'Retained artifacts do not match the successful packaging runs'
             }
             gh run download $version.Run --repo $repo --name agentrans-win-x64 --dir (Join-Path $inputsRoot $version.Directory)
           }
-          $old = Join-Path $inputsRoot 'old/agentrans-0.1.0-test.20261118.1-win-x64-unsigned.exe'
-          $new = Join-Path $inputsRoot 'new/agentrans-0.1.0-test.20261118.2-win-x64-unsigned.exe'
-          if ((Get-FileHash -LiteralPath $old -Algorithm SHA256).Hash -ine '89ecc5ce9d75f67bb691cba7ce15b69288f93fe4ca6934746cd732b14b8a164c') {
+          $old = Join-Path $inputsRoot 'old/agentrans-0.1.0-test.20261118.2-win-x64-unsigned.exe'
+          $new = Join-Path $inputsRoot 'new/agentrans-0.1.0-test.20261118.3-win-x64-unsigned.exe'
+          if ((Get-FileHash -LiteralPath $old -Algorithm SHA256).Hash -ine '9a7df6518051669fc32fb425985459393deda67504be7ff4a8518f20e792f680') {
             throw 'The retained baseline installer digest changed'
           }
           foreach ($path in @("$old.blockmap", "$new.blockmap", (Join-Path $inputsRoot 'new/test.yml'))) {
@@ -81,16 +84,19 @@ jobs:
           $PSNativeCommandUseErrorActionPreference = $true
           $source = @'
           import assert from 'node:assert/strict'
-          import { createPublicKey } from 'node:crypto'
+          import { createHash, createPublicKey } from 'node:crypto'
           import { writeFile } from 'node:fs/promises'
-          import { publicKeyFromBase64, privateKeyFromBase64, signFileDigest } from './apps/desktop/src/update-signature.ts'
+          import { publicKeyFromBase64, privateKeyFromBase64, signFileDigest, verifyFileDigest } from './apps/desktop/src/update-signature.ts'
           import { UPDATE_SIGNING_PUBLIC_KEY } from './apps/desktop/src/update-signing-key.ts'
           assert.ok(process.env.AGENTRANS_UPDATE_SIGNING_KEY, 'Expected the repository update-signing key')
           const privateKey = privateKeyFromBase64(process.env.AGENTRANS_UPDATE_SIGNING_KEY)
           const publicKey = publicKeyFromBase64(UPDATE_SIGNING_PUBLIC_KEY)
+          const fingerprint = createHash('sha256').update(publicKey.export({ format: 'der', type: 'spki' })).digest('hex')
+          assert.equal(fingerprint, '098885a5447f876f616ecd3cbdb156737cc6f4c00601958b1c78088842a81753', 'Candidate must retain the .2 updater verification key')
           assert.ok(createPublicKey(privateKey).equals(publicKey), 'The signing key must match the installed updater key')
           const installer = process.env.QA_NEW_EXE
           const signature = await signFileDigest(installer, privateKey)
+          assert.ok(await verifyFileDigest(installer, signature, publicKey), 'The generated signature must verify against the retained installer')
           await writeFile(installer + '.sig', signature, { flag: 'wx' })
           '@
           node --input-type=module -e $source

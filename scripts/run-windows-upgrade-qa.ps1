@@ -19,8 +19,8 @@ if (-not (Test-Path -LiteralPath $openssl -PathType Leaf)) {
   throw 'OpenSSL is required to generate the isolated HTTPS test certificates'
 }
 
-$oldExe = Join-Path $inputs 'old/agentrans-0.1.0-test.20261118.1-win-x64-unsigned.exe'
-$newExe = Join-Path $inputs 'new/agentrans-0.1.0-test.20261118.2-win-x64-unsigned.exe'
+$oldExe = Join-Path $inputs 'old/agentrans-0.1.0-test.20261118.2-win-x64-unsigned.exe'
+$newExe = Join-Path $inputs 'new/agentrans-0.1.0-test.20261118.3-win-x64-unsigned.exe'
 if ([IO.Path]::GetFullPath($env:QA_OLD_EXE) -ine [IO.Path]::GetFullPath($oldExe) -or
     [IO.Path]::GetFullPath($env:QA_NEW_EXE) -ine [IO.Path]::GetFullPath($newExe)) {
   throw 'Expected the exact retained Agentrans installers'
@@ -38,7 +38,7 @@ $serverExtensions = Join-Path $certificates 'server.ext'
 basicConstraints=critical,CA:FALSE
 keyUsage=critical,digitalSignature,keyEncipherment
 extendedKeyUsage=serverAuth
-subjectAltName=DNS:github.com
+subjectAltName=DNS:github.com,DNS:api.github.com
 '@)
 & $openssl genrsa -out $rootKey 2048
 $caArgs = @('req', '-x509', '-new', '-key', $rootKey, '-sha256', '-days', '2', '-subj', "/CN=Agentrans Windows QA $env:GITHUB_RUN_ID", '-out', $rootCa,
@@ -48,7 +48,10 @@ $caArgs = @('req', '-x509', '-new', '-key', $rootKey, '-sha256', '-days', '2', '
 & $openssl genrsa -out $serverKey 2048
 & $openssl req -new -key $serverKey -subj '/CN=github.com' -out $serverCsr
 & $openssl x509 -req -in $serverCsr -CA $rootCa -CAkey $rootKey -CAcreateserial -out $serverCert -days 2 -sha256 -extfile $serverExtensions
-& $openssl verify -CAfile $rootCa -verify_hostname github.com $serverCert
+$feedHosts = @('github.com', 'api.github.com')
+foreach ($feedHost in $feedHosts) {
+  & $openssl verify -CAfile $rootCa -verify_hostname $feedHost $serverCert
+}
 
 $configuration = [ordered]@{
   oldExe = $oldExe
@@ -65,7 +68,7 @@ $manifest = Join-Path $inputs 'manifest.json'
 $configuration | ConvertTo-Json | Set-Content -LiteralPath $manifest -Encoding utf8NoBOM
 $hostsPath = Join-Path $env:SystemRoot 'System32/drivers/etc/hosts'
 $originalHosts = [IO.File]::ReadAllBytes($hostsPath)
-if ([Text.Encoding]::ASCII.GetString($originalHosts) -match '(?im)^[^#\r\n]+\bgithub\.com(?=\s|$)') {
+if ([Text.Encoding]::ASCII.GetString($originalHosts) -match '(?im)^[^#\r\n]+[ \t](?:api\.)?github\.com(?=[ \t#]|\r?$)') {
   throw 'The clean runner already has a GitHub hosts override'
 }
 $certificate = [Security.Cryptography.X509Certificates.X509Certificate2]::new($rootDer)
@@ -77,12 +80,21 @@ try {
   $rootStore.Add($certificate)
   $trusted = $true
   Write-Output 'Trusted the isolated CA in the disposable runner'
-  $route = [Text.Encoding]::ASCII.GetBytes([Environment]::NewLine + '127.0.0.1 github.com # Agentrans Windows update fixture' + [Environment]::NewLine)
+  $routeLines = $feedHosts | ForEach-Object { "127.0.0.1 $_ # Agentrans Windows update fixture" }
+  $newline = [Environment]::NewLine
+  $route = [Text.Encoding]::ASCII.GetBytes($newline + ($routeLines -join $newline) + $newline)
   $hostsChanged = $true
   [IO.File]::WriteAllBytes($hostsPath, [byte[]]($originalHosts + $route))
   ipconfig.exe /flushdns | Out-Null
-  node --input-type=module -e "import {lookup} from 'node:dns/promises'; const result = await lookup('github.com'); if (result.address !== '127.0.0.1') throw Error('Loopback GitHub route is not active')"
-  Write-Output 'Verified the GitHub loopback route'
+  $checkRoutes = @'
+import { lookup } from 'node:dns/promises'
+for (const host of process.argv.slice(1)) {
+  const { address } = await lookup(host, { family: 4 })
+  if (address !== '127.0.0.1') throw Error(`Loopback route for ${host} is not active`)
+}
+'@
+  node --input-type=module -e $checkRoutes -- @feedHosts
+  Write-Output 'Verified the GitHub web and API loopback routes'
   node scripts/verify-upgrade.mjs $manifest (Join-Path $runnerTemp 'agentrans-upgrade-qa')
 } finally {
   try {
