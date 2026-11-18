@@ -399,8 +399,14 @@ try {
   currentStage = 'prepare-local-update-feed'
   const cacheDir = await updaterCache()
   const cached = join(cacheDir, 'installer.exe')
-  await copyFile(installer, cached, constants.COPYFILE_EXCL)
-  assert.equal(await sha256(cached), oldHash)
+  let oldInstallerCacheSeeded = false
+  try {
+    await copyFile(installer, cached, constants.COPYFILE_EXCL)
+    oldInstallerCacheSeeded = true
+  } catch (error) {
+    if (error.code !== 'EEXIST') throw error
+  }
+  assert.equal(await sha256(cached), oldHash, 'The old installer cache must contain the verified original bytes')
   assert.equal((await lookup('github.com', { family: 4 })).address, '127.0.0.1', 'GitHub must resolve to the disposable runner HTTPS feed')
   feed = await startUpgradeFeed({
     tls: { key: await readFile(manifest.httpsKey), cert: await readFile(manifest.httpsCert) },
@@ -408,7 +414,7 @@ try {
     signaturePath: manifest.newSignature, oldBlockMapPath: manifest.oldBlockMap, newBlockMapPath: manifest.newBlockMap,
     port: manifest.port ?? 443,
   })
-  await record(currentStage, { oldInstallerCacheSeeded: true, localTls: true })
+  await record(currentStage, { oldInstallerCacheSeeded, existingInstallerCacheVerified: !oldInstallerCacheSeeded, localTls: true })
   currentStage = 'first-launch'
   const application = await launch(true)
   await record(currentStage, { welcome: true, workspace: true, pid: application.owned.process.pid })
