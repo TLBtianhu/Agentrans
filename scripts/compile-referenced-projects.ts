@@ -154,18 +154,17 @@ function compilerStep(
   }
 }
 
-// Typert reads workspace packages only from source (generate-typert.ts
-// rejects build outputs), so it needs no compiled package. It runs under tsx's
-// ESM hook rather than through `pnpm exec`, whose startup would lengthen the
-// critical path before package compilation.
-function typertStep(): LibraryStep {
+// Typert reads workspace packages from source, including the generated Scene
+// programs imported by Artifact exports. Write those modules before Typert
+// takes its TypeScript program snapshot.
+function typertStep(needs: readonly LibraryStepId[]): LibraryStep {
   return {
     id: 'host-typert',
     label: 'Host Typert',
     displayCommand: 'tsx scripts/generate-typert.ts',
     command: process.execPath,
     args: ['--import', import.meta.resolve('tsx/esm'), fileURLToPath(new URL('generate-typert.ts', import.meta.url))],
-    needs: [],
+    needs,
   }
 }
 
@@ -187,10 +186,11 @@ function pnpmStep(id: LibraryStepId, label: string, args: readonly string[], nee
  */
 export function libraryBuildSteps(root: string, faces: 'host' | 'all', mode: CompilationMode = 'checked'): LibraryStep[] {
   const scenes = sceneSteps(root, [])
+  const sceneIds = scenes.map(step => step.id)
   const host: LibraryStep[] = [
-    typertStep(),
     ...scenes,
-    compilerStep(root, 'host', mode, ['host-typert', ...scenes.map(step => step.id)]),
+    typertStep(sceneIds),
+    compilerStep(root, 'host', mode, ['host-typert', ...sceneIds]),
     pnpmStep('host-bundle', 'Host bundle', ['exec', 'tsdown', '--config-loader', 'native', '--env.AGENTRANS_BUILD_FACE', 'host'], ['host-src']),
   ]
   if (faces === 'host') return host
@@ -213,7 +213,8 @@ export function libraryBuildSteps(root: string, faces: 'host' | 'all', mode: Com
  */
 export function contractSteps(root: string, faces: 'host' | 'all'): LibraryStep[] {
   const scenes = sceneSteps(root, [])
-  const host = [typertStep(), ...scenes, compilerStep(root, 'host', 'checked', ['host-typert', ...scenes.map(step => step.id)])]
+  const sceneIds = scenes.map(step => step.id)
+  const host = [...scenes, typertStep(sceneIds), compilerStep(root, 'host', 'checked', ['host-typert', ...sceneIds])]
   if (faces === 'host') return host
   return [...host, compilerStep(root, 'client', 'checked', ['host-src'])]
 }
@@ -251,7 +252,7 @@ export function buildLibraryArtifacts(root: string, hostOnly: boolean, mode: Com
 }
 
 /**
- * Generate Typert declarations from source, then compile Host package projects.
+ * Generate Scene programs and Typert declarations, then compile Host package projects.
  * @param root - Repository root containing the compiler configuration and source contributors.
  * @returns a promise that settles after generation and compilation exit.
  * @throws the first failed step's error; dependent compilation does not start after generation fails.
