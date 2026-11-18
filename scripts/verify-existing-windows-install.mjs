@@ -226,7 +226,7 @@ async function stopApp(application) {
 async function verifySession(application, sessionId, title) {
   return poll(application.owned, async () => {
     const state = await call(application.workspace, 'session/list', { _request: {} })
-    const matches = state.items.filter(item => item.sessionId === sessionId && item.title === title)
+    const matches = state.items.filter(item => item.sessionId === sessionId && item.projections?.values?.title === title)
     if (matches.length === 1) return true
   }, 'durable session identity and title')
 }
