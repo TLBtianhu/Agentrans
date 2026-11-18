@@ -14,7 +14,8 @@
 /* A docked or floating pane is narrow, so the controls move under the plot
    rather than squeezing it. */
 .workspace[data-placement='beside'],
-.workspace[data-placement='pip'] {
+.workspace[data-placement='pip'],
+.workspace[data-read-only] {
   grid-template-columns: minmax(0, 1fr);
 }
 
@@ -35,7 +36,8 @@
 }
 
 .workspace[data-placement='beside'] .stage,
-.workspace[data-placement='pip'] .stage {
+.workspace[data-placement='pip'] .stage,
+.workspace[data-read-only] .stage {
   padding-right: 0;
   padding-bottom: 12px;
 }
@@ -93,11 +95,110 @@
   touch-action: none;
 }
 
+.particleChart {
+  object-fit: contain;
+}
+
+.workspace[data-read-only] .chart {
+  cursor: default;
+  touch-action: auto;
+}
+
+.workspace[data-baseline] .chart {
+  cursor: grab;
+}
+
+.workspace[data-baseline] .chart:active {
+  cursor: grabbing;
+}
+
+.questionReview {
+  display: grid;
+  grid-column: 1 / -1;
+  gap: 8px;
+  min-width: 0;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 0.5px solid var(--dsw-alias-border-l2);
+  overflow-wrap: anywhere;
+  font: var(--dsw-font-xs-13);
+  font-variant-numeric: tabular-nums;
+}
+
+.questionReview :is(p, dl, dd), .sourceParameters, .sourceParameters dd { margin: 0; }
+.questionReview dl, .sourceParameters { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+.questionReview dl > div, .sourceParameters > div { display: flex; flex-wrap: wrap; gap: 4px; min-width: 0; }
+
+.sourceParameters {
+  overflow-wrap: anywhere;
+  font: var(--dsw-font-xs-13);
+  font-variant-numeric: tabular-nums;
+}
+
+.particleReadings {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  overflow-wrap: anywhere;
+  list-style: none;
+  font: var(--dsw-font-xs-13);
+}
+
+.particleReadings li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  min-width: 0;
+}
+
+.particleReadingsDetails {
+  font: var(--dsw-font-xs-13);
+}
+
+.particleReadingsDetails > summary {
+  margin-bottom: 4px;
+  cursor: pointer;
+}
+
 .readout {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
   min-width: 0;
+}
+
+.workspace[data-baseline] .readout {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.baselineComparison {
+  display: grid;
+  gap: 6px;
+  padding-block-start: 8px;
+  border-block-start: 0.5px solid var(--dsw-alias-border-l2);
+  font: var(--dsw-font-xs-13);
+}
+
+.baselineComparison dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.baselineComparison dt {
+  color: var(--dsw-alias-label-tertiary);
+  font: var(--dsw-font-xxxs-11);
+  overflow-wrap: anywhere;
+}
+
+.baselineComparison dd {
+  margin: 0;
+  font: var(--dsw-font-xs-strong-13);
+  font-family: var(--ds-font-family-code);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
 }
 
 .readoutItem {
@@ -122,6 +223,11 @@
   font-variant-numeric: tabular-nums;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.workspace[data-read-only] .readoutValue {
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .panel {

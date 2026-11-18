@@ -4,11 +4,14 @@ import AgentRegistry, { type Agent } from '@agentrans/agent'
 import { ToolCallId, type UserMessage } from '@agentrans/llm'
 import { Session, SessionId, type SessionEvent } from '@agentrans/session'
 import SessionProjectionRegistry from '@agentrans/session-projection'
+import SkillRegistry from '@agentrans/skill'
 import SystemPrompt from '@agentrans/system-prompt'
 import * as NativeToolExecutor from '@agentrans/tool-executor-native'
 import { executeModelToolFixture, executeToolFixture } from '@agentrans/tool-testkit'
 import ToolRuntime from '@agentrans/tools'
 import ArtifactService, { ArtifactError, type Config } from '../src/index.ts'
+import * as SceneTool from '../src/scene-tool.ts'
+import type { SceneSpec } from '../src/scene.ts'
 import * as ArtifactTool from '../src/tool.ts'
 import type { ArtifactPrepareInput, ArtifactSnapshot } from '../src/types.ts'
 
@@ -138,7 +141,7 @@ describe('ArtifactService prepare and commit', () => {
     service.commit(agent, first)
     expect(upserts(agent).map(snapshot => snapshot.title)).toEqual(['Demo', 'First'])
     // A snapshot names the revision it wrote; appending it twice must not overwrite the log silently.
-    expect(() => service.commit(agent, first)).toThrow(expect.objectContaining({ code: 'STALE_REVISION' }))
+    expect(() => { service.commit(agent, first) }).toThrow(expect.objectContaining({ code: 'STALE_REVISION' }))
     expect(upserts(agent)).toHaveLength(2)
     const next = service.prepare(agent, { ...createInput(), action: 'update', baseRevision: 2, title: 'Next', source: '<p>next</p>' })
     expect(next.revision).toBe(3)
@@ -267,6 +270,102 @@ describe('artifact resource limits and configuration', () => {
 })
 
 describe('artifact tool', () => {
+  it('loads the single bundled design template on demand and removes it with the tool', async () => {
+    const { ctx, toolFiber } = await setup()
+    await ctx.plugin(SkillRegistry)
+    const catalog = await ctx.skills.list()
+    expect(catalog).toMatchObject([{ name: 'artifact-design', source: 'bundled', provider: 'artifact-design' }])
+    expect(catalog[0]?.description).toContain('parameter explorer')
+    const skill = await ctx.skills.get('artifact-design')
+    expect(skill?.content.match(/^## .*\.html$/gm)).toEqual(['## parameter-explorer.html'])
+    expect(skill?.content).toContain('<!doctype html>')
+    expect(skill?.content).toContain('data-artifact-template="parameter-explorer"')
+    expect(Buffer.byteLength(skill!.content, 'utf8')).toBeLessThan(8192)
+
+    await toolFiber.dispose()
+    expect(await ctx.skills.list()).toEqual([])
+  })
+
+  it('contributes experiment choice to the system prompt while the scene tool is mounted', async () => {
+    const { ctx } = await setup()
+    const fiber = ctx.plugin(SceneTool)
+    await fiber
+    const { sections, tools } = await ctx.systemPrompt.assemble()
+    const guidance = sections.find(section => section.name === 'artifact:interactive-explanations')?.text
+    expect(guidance).toContain('For explanations, answer directly in text when that is sufficient.')
+    expect(guidance).toContain('A derivative at one point is a text answer.')
+    expect(guidance).toContain('try different inputs or step through a process to verify an outcome')
+    expect(guidance).toContain('use the native scene tool directly.')
+    expect(guidance).toContain('even if the user did not ask for a visualization.')
+    expect(guidance).toContain('Use function-plot to vary a mathematical coefficient')
+    expect(guidance).toContain('Use particle-system to step motion')
+    expect(guidance).toContain('Use workspace discovery, file tools, or shell commands only for requests about workspace content or implementation.')
+    const scene = tools.find(tool => tool.name === 'scene')?.description
+    expect(scene).toContain('sceneId with the current revision as baseRevision.')
+    expect(scene).toContain('When validation fails, use the diagnostic to correct the SceneSpec and retry the scene.')
+    const artifact = tools.find(tool => tool.name === 'artifact')?.description
+    expect(artifact).toContain('Use scene for supported experiments')
+    expect(artifact).toContain('returns {kind:"bfs-checkpoint",current,queue,visited}')
+    expect(artifact).toContain('Use the complete four-field object for the initial state and every step.')
+    expect(artifact).toContain('ready({state:readCheckpoint,restore:{kind:"bfs-checkpoint",apply:restoreCheckpoint}})')
+    expect(artifact).toContain('After every BFS step, redraw the current node, queue, and visited nodes, '
+      + 'then call window.artifactRuntime.reportState(readCheckpoint()).')
+    expect(artifact).toContain('returns {kind:"half-adder-checkpoint",a,b,sum:a^b,carry:a&b}')
+    expect(artifact).toContain('initial state and every update')
+    expect(artifact).toContain('ready({state:readCheckpoint,restore:{kind:"half-adder-checkpoint",apply:restoreCheckpoint}})')
+    expect(artifact).toContain('After every A or B change, update the displayed outputs and call window.artifactRuntime.reportState(readCheckpoint()).')
+
+    await fiber.dispose()
+    expect((await ctx.systemPrompt.assemble()).sections.some(section => section.name === 'artifact:interactive-explanations')).toBe(false)
+  })
+
+  it('admits both advertised experiment examples and defaults their nested kind from the tool argument', async () => {
+    const { ctx, agent } = await setup()
+    await ctx.plugin(SceneTool)
+    const { tools } = await ctx.systemPrompt.assemble()
+    const parameters = tools.find(tool => tool.name === 'scene')?.parameters as
+      { properties: { spec: { description: string } } }
+    const examples = Array.from(parameters.properties.spec.description.matchAll(/example: (\{.*\})$/gm),
+      match => JSON.parse(match[1]!) as SceneSpec)
+    expect(examples.map(example => example.kind)).toEqual(['function-plot', 'particle-system'])
+
+    for (const { kind, ...spec } of examples) {
+      const result = await executeModelToolFixture(ctx, {
+        callId: ToolCallId(`scene-example-${kind}`), name: 'scene', signal: new AbortController().signal, agent,
+        arguments: { action: 'create', kind, sceneId: kind, title: kind, spec, presentation: 'inline' },
+      })
+      expect(result.isError).toBe(false)
+      expect(result.value).toMatchObject({ kind, sceneId: kind, revision: 1 })
+    }
+    expect(upserts(agent)).toMatchObject(examples.map(spec => ({ format: 'scene', spec })))
+
+    const conflicting = await executeModelToolFixture(ctx, {
+      callId: ToolCallId('scene-example-conflict'), name: 'scene', signal: new AbortController().signal, agent,
+      arguments: { action: 'create', kind: 'particle-system', sceneId: 'conflict', title: 'Conflict', spec: examples[0], presentation: 'inline' },
+    })
+    expect(conflicting.isError).toBe(true)
+    expect(JSON.stringify(conflicting.content)).toContain('/kind: spec.kind must match the outer kind particle-system')
+    expect(upserts(agent)).toHaveLength(2)
+  })
+
+  it('returns an actionable scene tool error for repeated function IDs without committing a revision', async () => {
+    const { ctx, agent } = await setup()
+    await ctx.plugin(SceneTool)
+    const result = await executeModelToolFixture(ctx, {
+      callId: ToolCallId('scene-duplicate-function-id'), name: 'scene', signal: new AbortController().signal, agent,
+      arguments: {
+        action: 'create', kind: 'function-plot', sceneId: 'two-curves', title: 'Two curves', presentation: 'inline',
+        spec: {
+          functions: [{ id: 'curve', expression: 'x' }, { id: 'curve', expression: 'x^2' }], parameters: {},
+          viewport: { x: [-3, 3], y: [-2, 5] }, trace: { x: 2, derivative: true, integral: false },
+        },
+      },
+    })
+    expect(result.isError).toBe(true)
+    expect(JSON.stringify(result.content)).toContain('/functions/1/id: must be unique within the plot')
+    expect(upserts(agent)).toEqual([])
+  })
+
   it('commits only the compact result fields and never repeats source', async () => {
     const { agent, execute } = await setup()
     const created = await execute(createInput())

@@ -2,12 +2,14 @@
 import type { Context } from '@agentrans/cordis'
 import z from '@agentrans/schemastery'
 import type { Agent } from '@agentrans/agent'
+import type {} from '@agentrans/system-prompt'
 import { defineTool, type ToolExecution } from '@agentrans/tools'
 import { ArtifactError } from './index.ts'
+import type { FunctionPlotSpec, ParticleSystemSpec } from './scene.ts'
 import type { ArtifactSnapshot } from './types.ts'
 
 export const name = 'scene'
-export const inject = ['tools']
+export const inject = ['tools', 'systemPrompt']
 /** Empty SceneSpec tool configuration; validation and limits belong to ArtifactService. */
 export type Config = Record<never, never>
 export const Config: z<Config> = z.object({})
@@ -25,6 +27,32 @@ interface SceneToolResult {
   readonly presentation: 'inline' | 'focus'
 }
 
+const INTERACTIVE_EXPLANATION_GUIDANCE = 'For explanations, answer directly in text when that is sufficient. '
+  + 'For a definition or a calculation with fixed inputs, give the result and reasoning in text. A derivative at one point is a text answer. '
+  + 'When the user needs to try different inputs or step through a process to verify an outcome and a native scene supports the interaction, use the native scene tool directly. '
+  + 'Use function-plot to vary a mathematical coefficient and compare slopes or values. Use particle-system to step motion and inspect its '
+  + 'current position and velocity. The particle scene already provides step, play, reset and numeric readings. '
+  + 'When a single native scene supports the requested interaction, keep it as the only experiment. '
+  + 'Offer the experiment in the reply even if the user did not ask for a visualization. Give them one concrete thing to try or observe. '
+  + 'Keep self-contained explanations in chat. Use workspace discovery, file tools, or shell commands only for requests '
+  + 'about workspace content or implementation.'
+
+const FUNCTION_PLOT_EXAMPLE = {
+  kind: 'function-plot',
+  functions: [{ id: 'wave', label: 'a sin(x)', expression: 'a*sin(x)' }],
+  parameters: { a: { value: 1, min: 0.5, max: 2, step: 0.25 } },
+  viewport: { x: [-4, 4], y: [-3, 3] },
+  trace: { x: 0, derivative: true, integral: false },
+} satisfies FunctionPlotSpec
+
+const PARTICLE_SYSTEM_EXAMPLE = {
+  kind: 'particle-system',
+  particles: [{ id: 'dot', x: 0, y: 2, vx: 1, vy: 0, mass: 1 }],
+  gravity: { x: 0, y: -2 },
+  timeStep: 0.05,
+  trails: true,
+} satisfies ParticleSystemSpec
+
 /**
  * Register the SceneSpec tool and commit only an authoritative successful result.
  * @param ctx - Plugin context carrying the ArtifactService and tool registry.
@@ -34,13 +62,21 @@ export function apply(ctx: Context): void {
   const artifacts = ctx.get('artifacts')
   if (artifacts === undefined) throw new ArtifactError('scene tool requires the Host ArtifactService', 'ARTIFACT_SERVICE_UNAVAILABLE')
   const pending = new WeakMap<ToolExecution, PendingScene>()
+  ctx.systemPrompt.section({
+    name: 'artifact:interactive-explanations',
+    order: ctx.systemPrompt.getSectionOrder('TOOL_SCENE'),
+    text: ({ scope, toolSet }) => ctx.tools.get('scene', scope, toolSet) === undefined ? '' : INTERACTIVE_EXPLANATION_GUIDANCE,
+  })
   ctx.tools.register(defineTool({
     name: 'scene',
-    description: 'Create or update a declarative interactive scene. Use SceneSpec JSON, not HTML. '
-      + 'For function-plot, provide functions, parameters, viewport, and trace. For flowchart, provide nodes, edges, and an optional path. The host validates the spec before committing it. '
+    description: 'Create or update a declarative interactive scene. '
+      + 'Use confirmed readings when answering a follow-up. If the user asks to change or extend the same experiment, update its existing '
+      + 'sceneId with the current revision as baseRevision. Explain the readings directly when the experiment needs no change. '
+      + 'Use the matching spec example as a template for its fields and adapt the values to the question. '
+      + 'When validation fails, use the diagnostic to correct the SceneSpec and retry the scene. '
+      + 'For flowchart, provide nodes, edges, and an optional path. '
       + 'Optional style for flowchart, function-plot, particle-system, timeline, and network-graph: editorial (default), transit-map, blueprint, math-proof-lecture, or particles. '
-      + 'Interactive explanations default to this scene tool, not to workspace files; only write a workspace file when the user explicitly asks for a standalone HTML file or program. '
-      + 'Follow the artifact-design style reference for the visual idiom appropriate to the content. '
+      + 'Use inline presentation for explanations in chat. Write a workspace file for an explanation only if the user requests a standalone file or program. '
       + 'Two Scenes may share one comparison group with independent control and variant roles. '
       + 'A successful result confirms validated source, not a running renderer. When artifact_runtime is available, '
       + 'inspect the returned scene id and exact revision for current readiness or error reports before claiming it runs.',
@@ -51,7 +87,11 @@ export function apply(ctx: Context): void {
       title: { type: 'string', required: true, description: 'Display title, 1-120 characters after trimming.' },
       spec: {
         type: 'object', additionalProperties: true, required: true,
-        description: 'Complete SceneSpec JSON for the selected kind. The host validates fields, expressions, and parameter bounds.',
+        description: 'Complete SceneSpec JSON. An omitted spec.kind defaults to the outer kind. An explicit spec.kind must match it. '
+          + 'Function entries require id. Parameters are keyed by name. Each viewport axis is [min,max]. '
+          + 'Use the exact boolean field names shown for trace and trails.\n'
+          + `Function plot example: ${JSON.stringify(FUNCTION_PLOT_EXAMPLE)}\n`
+          + `Particle system example: ${JSON.stringify(PARTICLE_SYSTEM_EXAMPLE)}`,
       },
       presentation: { type: 'string', required: true, enum: ['inline', 'focus'], description: 'Request inline placement or focused presentation.' },
       comparison: {
@@ -81,11 +121,14 @@ export function apply(ctx: Context): void {
       if (exec.agent === undefined) throw new ArtifactError('scene requires an agent Session', 'BAD_INPUT')
       const kind: string = args.kind
       if (kind !== 'function-plot' && kind !== 'flowchart' && kind !== 'particle-system' && kind !== 'timeline' && kind !== 'network-graph' && kind !== 'map') throw new ArtifactError(`unsupported scene kind: ${kind}`, 'BAD_SCENE_SPEC')
+      if (Object.hasOwn(args.spec, 'kind') && Reflect.get(args.spec, 'kind') !== kind) {
+        throw new ArtifactError(`/kind: spec.kind must match the outer kind ${kind}`, 'BAD_SCENE_SPEC')
+      }
       const snapshot = artifacts.prepare(exec.agent, {
         action: args.action,
         artifactId: args.sceneId,
         title: args.title,
-        spec: args.spec as never,
+        spec: { ...args.spec, kind } as never,
         presentation: args.presentation,
         format: 'scene',
         ...args.comparison === undefined ? {} : { comparison: args.comparison },
@@ -102,7 +145,7 @@ export function apply(ctx: Context): void {
         sceneId: snapshot.artifactId,
         revision: snapshot.revision,
         title: snapshot.title,
-        kind: snapshot.format === 'scene' ? snapshot.spec.kind : 'function-plot',
+        kind,
         presentation: snapshot.presentation,
       })
     },

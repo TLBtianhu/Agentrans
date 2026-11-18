@@ -167,7 +167,21 @@ describe('share reader access policy', () => {
   it.each(['view', 'write'] as const)('keeps Artifact writes, exports and runtime reports owner-only for %s readers', async (mode) => {
     const { decide, grants } = await fixture({ mode })
     for (const action of ['artifacts/submitAction', 'artifacts/saveObservation', 'artifacts/sendObservation', 'artifacts/confirmObservationComparison',
-      'artifactBranchResults/returnResult', 'artifactExports/create', 'artifactExports/read', 'artifactRuntime/attach'] as const) {
+      'artifactBranchResults/returnResult', 'artifactBranchResults/continuePlot', 'artifactBranchResults/continueParticle',
+      'artifactBranchResults/exportReturnedPlot', 'artifactBranchResults/exportReturnedParticle',
+      'artifactBranchResults/exportSentPlot', 'artifactBranchResults/exportSentParticle',
+      'artifactBranchResults/exportReturnedBfs', 'artifactBranchResults/exportReturnedHalfAdder', 'artifactBranchResults/exportSentBfs',
+      'artifactBranchResults/exportSentHalfAdder',
+      'artifactBranchResults/recalculateCsv', 'artifactBranchResults/lockCsv',
+      'artifactBranchResults/csvFilterOptions', 'artifactBranchResults/csvParticipatingRows',
+      'artifactBranchResults/csvReturnedParticipatingRows', 'artifactBranchResults/csvQuestionParticipatingRows',
+      'artifactBranchResults/compareCsvQuestionToReturn', 'artifactBranchResults/compareCsvReturns',
+      'artifactBranchResults/saveCsvComparisonDraft', 'artifactBranchResults/readCsvComparisonDraft', 'artifactBranchResults/clearCsvComparisonDraft',
+      'artifactBranchResults/bindCsvComparisonDraftRequest', 'artifactBranchResults/checkCsvComparisonDraftRequest',
+      'artifactBranchResults/reviewSentCsvComparison', 'artifactBranchResults/exportSentCsvComparison',
+      'artifactBranchResults/reviewCsvComparisonExplanation',
+      'artifactBranchResults/exportSentCsvComparisonJson', 'artifactBranchResults/importCsvComparison',
+      'artifactExports/create', 'artifactExports/read', 'artifactRuntime/attach'] as const) {
       for (const resource of [GLOBAL, session('source'), session('own-child')]) {
         expect(decide(action, resource, CALL)).toEqual(deny('liveshare/read-only'))
       }

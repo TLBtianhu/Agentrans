@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useLayoutEffect } from 'react'
 import type { ConversationSessionSlotProps } from '../contract/slots.ts'
 import { conversationPhase } from '../contract/snapshot.ts'
 import { resolveActiveView } from '../view-selection.ts'
@@ -12,7 +12,7 @@ import css from './ConversationRoot.module.css'
  */
 export function DefaultConversationViews({
   view, useSession, useConversation, useConversationViews, inputActions, useStore, actions,
-  renderSlot, bindDraftPersistence, openView, useInspectCall,
+  renderSlot, bindDraftPersistence, bindOpenView, openView, useInspectCall,
 }: ConversationSessionSlotProps) {
   const tabs = useConversationViews(value => value)
   const inspectCall = useInspectCall(value => value)
@@ -21,6 +21,11 @@ export function DefaultConversationViews({
   const session = useSession(s => s)
   const conversation = useConversation(s => s)
   const viewRequest = useStore(s => s.viewRequest ?? null)
+
+  useLayoutEffect(() => {
+    bindOpenView?.(openView)
+    return () => { bindOpenView?.(undefined) }
+  }, [bindOpenView, openView])
 
   useEffect(() => {
     const unbindDraftPersistence = bindDraftPersistence(actions.setDraft)

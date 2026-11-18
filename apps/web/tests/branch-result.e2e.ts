@@ -56,17 +56,22 @@ describe.skipIf(MODE === 'record')('web e2e: confirmed branch result', () => {
     if (parentAgent === undefined) throw new Error('Parent Session is not live')
     const parentSession = parentAgent.session
 
+    await page.getByText('Parent conclusion', { exact: true }).waitFor({ state: 'visible' })
     await page.getByRole('button', { name: 'Branch into a new conversation', exact: true }).last().click()
     await expect.poll(() => scaffold.ctx.agents.roots().some(agent => agent.session.header.parentSession === parentId)).toBe(true)
+    const childAgent = scaffold.ctx.agents.roots().find(agent => agent.session.header.parentSession === parentId)
+    if (childAgent === undefined) throw new Error('Child Session is not live')
+    await page.locator(`[data-row-key="session:${childAgent.id}"][aria-selected="true"]`).waitFor({ state: 'visible' })
+    const childConversation = page.locator(`[data-conversation-session="${childAgent.id}"]`)
+    await childConversation.getByText('Parent conclusion', { exact: true }).waitFor({ state: 'visible' })
 
     const childTurn = scaffold.whenTurnSettled()
     const childPrompts = fixtureUserPrompts(await readFile(CHILD_FIXTURE, 'utf8'))
-    await input.fill(childPrompts.at(-1)!)
-    await input.press('Enter')
+    const childInput = childConversation.locator('[data-composer-input][contenteditable="true"]')
+    await childInput.fill(childPrompts.at(-1)!)
+    await childInput.press('Enter')
     const childId = await childTurn
-    expect(childId).not.toBe(parentId)
-    const childAgent = scaffold.ctx.agents.get(childId)
-    if (childAgent === undefined) throw new Error('Child Session is not live')
+    expect(childId).toBe(childAgent.id)
     await page.getByText('Child conclusion', { exact: true }).waitFor({ state: 'visible' })
 
     await page.getByRole('button', { name: 'Return to parent branch', exact: true }).last().click()

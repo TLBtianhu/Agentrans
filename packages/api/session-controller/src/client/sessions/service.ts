@@ -1,11 +1,11 @@
 /** Client catalog and source-labelled ownership of exact Session generations. */
 import type { Context, Fiber } from '@agentrans/cordis'
 import type { SubagentAddress } from '@agentrans/subagent/client'
-import { SessionSeq, type SessionId } from '@agentrans/session/types'
+import { SessionSeq, type SessionId, type SessionInquiry } from '@agentrans/session/types'
 import { workspaceTitleOf } from '@agentrans/util-workspace-path'
 import type { WorkspaceId } from '@agentrans/workspace/types'
 import { SESSION_SEARCH_RESULT_LIMIT } from '../../types.ts'
-import type { SessionBranchResultRequest, SessionBranchResultValue } from '../../types.ts'
+import type { SessionBranchResultRequest, SessionBranchResultValue, SessionRequestId } from '../../types.ts'
 import type { SessionProjectionSummaryValues } from '@agentrans/session-projection/types'
 import {
   createSnapshotStore, notifySubscribers, type ObservableSnapshot, type SnapshotStore,
@@ -33,6 +33,8 @@ export interface SessionSummary {
   displayTitle: string
   cwd?: string
   parentId?: SessionId
+  /** Exact assistant passage selected in the direct parent. */
+  inquiry?: SessionInquiry
   /** Coarse durable origin for navigation filtering; not a continuation capability. */
   origin?: 'subagent'
   /** Format classification supplied by the Host list, when available. */
@@ -474,6 +476,8 @@ export class ClientSessions implements ISessions {
   async fork(opts: {
     sessionId: SessionId
     atSeq?: number
+    inquiry?: SessionInquiry
+    requestId?: SessionRequestId
     increaseTitle?: boolean
     onCreated?: (childId: SessionId) => void
     allowMigration?: boolean
@@ -484,6 +488,8 @@ export class ClientSessions implements ISessions {
     const result = await this.manager.fork({
       sessionId: opts.sessionId,
       ...(opts.atSeq === undefined ? {} : { atSeq: SessionSeq(opts.atSeq) }),
+      ...(opts.inquiry === undefined ? {} : { inquiry: opts.inquiry }),
+      ...(opts.requestId === undefined ? {} : { requestId: opts.requestId }),
       ...(opts.allowMigration === undefined ? {} : { allowMigration: opts.allowMigration }),
     })
     if (!result.ok) throw new SessionForkError(result.error, opts.sessionId)
@@ -666,6 +672,7 @@ export class ClientSessions implements ISessions {
         ...(entry.title !== undefined ? { title: entry.title } : {}),
         ...(entry.cwd !== undefined ? { cwd: entry.cwd } : {}),
         ...(entry.parentSessionId !== undefined ? { parentId: entry.parentSessionId } : {}),
+        ...(entry.inquiry === undefined ? {} : { inquiry: entry.inquiry }),
         ...(entry.origin !== undefined ? { origin: entry.origin } : {}),
       }
     }

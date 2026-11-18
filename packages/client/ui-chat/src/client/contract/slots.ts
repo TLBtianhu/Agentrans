@@ -73,6 +73,16 @@ export interface AssistantDetailsOwnerProps {
   readonly messageId: MessageId
   readonly seq: number
   readonly text: string
+  /** Owning loaded Turn, when available to scope related inputs. */
+  readonly turn: number | undefined
+  /** Request an exact position in a Conversation View. */
+  readonly openView?: UserTextInput['openView']
+}
+
+/** Complete identity of one inquiry branch and its parent Conversation navigation. */
+export interface InquiryActionsOwnerProps {
+  readonly branchSessionId: SessionId
+  readonly openView?: UserTextInput['openView']
 }
 
 /** Stable quota failure codes retained in the Session log; both raise the frame-wide notice. */
@@ -247,6 +257,7 @@ export interface ChatNodeOwnerProps {
   groupPart?: string
   cwd?: string | undefined
   openFile: (path: string, options?: OpenFileOptions) => void
+  openView?: UserTextInput['openView']
   inspectCall: ((callId: ToolCallId) => void) | undefined
   forkAt: (seq: number) => void
   /** Session-authorized image loader supplied by the Chat view. */
@@ -272,7 +283,7 @@ export interface UserContentData {
 
 /** Public content rendering input; reference renderers own their injected actions. */
 export interface UserContentInput extends Pick<ChatNodeOwnerProps, 'loadImage'>,
-  Pick<UserTextInput, 'interactive' | 'ellipsis'> {
+  Pick<UserTextInput, 'interactive' | 'ellipsis' | 'messageRef' | 'openView'> {
   readonly content: UserContentData
   /** Transform inputs passed unchanged to UserText, separate from summary and rendering props. */
   readonly facts: Readonly<Partial<UserTextFacts>>
@@ -329,6 +340,9 @@ export interface PerformanceUsageInjected {
 
 /** Business callbacks injected into the Chat view. */
 export interface ChatViewInjected {
+  /** Open the child of one inquiry request using its exact selection and retry identity. */
+  forkInquiry: (selection: import('../chat/text-selection.ts').AssistantInquirySelection,
+    requestId: import('@agentrans/api-session-controller/types').SessionRequestId) => Promise<void>
   /** File preparation and failure callbacks owned by the file-drag plugin. */
   readonly fileDrag: FileDragActions
   /** Resolve the reference against this Session and its current path base when the gesture begins. */
@@ -375,7 +389,7 @@ export type ChatFlowDataInjected = Pick<ChatViewInjected, 'keyedHooks'> & {
 
 /** Ordered rows and reconciled local echoes rendered inside one Chat viewport. */
 export interface ChatFlowOwnerProps extends Pick<ChatNodeOwnerProps,
-  'cwd' | 'openFile' | 'inspectCall' | 'forkAt' | 'loadImage'> {
+  'cwd' | 'openFile' | 'openView' | 'inspectCall' | 'forkAt' | 'loadImage'> {
   readonly entries: readonly RenderEntry[]
   readonly pendingInputs: readonly (PendingSubmission | InboxState['next-step'][number])[]
   readonly lastInputTurn: number | undefined
@@ -500,6 +514,8 @@ declare module '@agentrans/client-ui-slots' {
     'conversation.chat.assistant-actions': { kind: 'list'; scope: 'session'; owner: AssistantActionOwnerProps }
     /** Message-level detail and confirmation entries below one durable assistant row. */
     'conversation.chat.assistant.details': { kind: 'list'; scope: 'session'; owner: AssistantDetailsOwnerProps }
+    /** Ordered actions for one inquiry branch shown beneath its source answer. */
+    'conversation.chat.inquiry.actions': { kind: 'list'; scope: 'session'; owner: InquiryActionsOwnerProps }
     /**
      * Frame-wide quota notice chain. The Chat-owned host in `shell.overlay`
      * offers the one live notice; the first entry whose selector claims its

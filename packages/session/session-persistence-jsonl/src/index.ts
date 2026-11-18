@@ -34,7 +34,7 @@ import {
 } from '@agentrans/session-persistence'
 import { JsonlBackendTracker, JsonlSessionHandle, type StorageHandleState } from './storage.ts'
 import { SessionWriteLease } from './lease.ts'
-import { SESSION_FORMAT_VERSION, SessionId as makeSessionId, SessionLogOffset } from '@agentrans/session'
+import { isSessionInquiry, SESSION_FORMAT_VERSION, SessionId as makeSessionId, SessionLogOffset } from '@agentrans/session'
 import type { SessionEvent, SessionId, SessionHeader, SessionLogOffset as SessionLogOffsetType } from '@agentrans/session'
 import {
   assertNoRetiredHeaderFields, encodeSegment, eventLines, generationLogFilename, generationLogPath, logPath, logSuffix,
@@ -1235,6 +1235,7 @@ class JsonlSessionPersistence extends SessionPersistence {
     readonly createdAt: number
     readonly cwd?: string
     readonly parentSession?: string
+    readonly inquiry?: unknown
     readonly isSeeded: boolean
     readonly origin?: 'subagent'
     readonly delegationDepth: number
@@ -1244,6 +1245,10 @@ class JsonlSessionPersistence extends SessionPersistence {
     if (header.version !== SESSION_FORMAT_VERSION) {
       throw new Error(`format catalog returned non-current logical header v${header.version}`)
     }
+    const { inquiry } = header
+    if (inquiry !== undefined && !isSessionInquiry(inquiry)) {
+      throw new Error('format catalog returned an invalid inquiry passage')
+    }
     return {
       version: SESSION_FORMAT_VERSION,
       id: makeSessionId(header.id),
@@ -1252,6 +1257,7 @@ class JsonlSessionPersistence extends SessionPersistence {
       ...(header.parentSession === undefined
         ? {}
         : { parentSession: makeSessionId(header.parentSession) }),
+      ...(inquiry === undefined ? {} : { inquiry }),
       isSeeded: header.isSeeded,
       ...(header.origin === undefined ? {} : { origin: header.origin }),
       delegationDepth: header.delegationDepth,

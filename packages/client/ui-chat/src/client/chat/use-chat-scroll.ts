@@ -34,6 +34,7 @@ interface ChatScrollState extends ChatReadingState {
   readonly navigateToTurn: ChatNavigation['navigateToTurn']
   readonly loadEarlier: ChatNavigation['loadEarlier']
   readonly returnToBottom: () => void
+  readonly revealMessageControl: (row: HTMLElement, target: HTMLElement | Range) => boolean
   readonly motion: FlowMotionRows
 }
 
@@ -178,10 +179,21 @@ export function useChatScroll(input: ChatScrollInput): ChatScrollState {
     reading.followTail()
   }, [navigation, reading, cancelPendingFollow])
 
+  const revealMessageControl = useCallback((row: HTMLElement, target: HTMLElement | Range): boolean => {
+    cancelPendingFollow()
+    navigation.cancel()
+    const landing = viewport.scrollToMessageControl(row, target)
+    if (landing === null) return false
+    reading.acceptNavigation(landing)
+    reading.pauseFollowing()
+    return true
+  }, [viewport, navigation, reading, cancelPendingFollow])
+
   return {
     listRef, columnRef, ...state, busyTurn, motion: viewport.motion,
     navigateToTurn: navigation.navigateToTurn,
     loadEarlier: navigation.loadEarlier,
     returnToBottom,
+    revealMessageControl,
   }
 }

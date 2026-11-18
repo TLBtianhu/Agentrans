@@ -138,6 +138,8 @@ interface SessionLocation {
 
 Per-session metadata travels **separately** from the event log: the header carries format version, cwd, and the `isSeeded` lineage bit, while body-bearing storage values carry the exact inherited cut beside it. Neither belongs to `SessionEventMap` or reaches `deriveMessages()`. The logical header is attached through `session.header`; the Session exposes its cut as `inheritedEventCount`.
 
+The optional `inquiry` field records the selected assistant passage in the direct parent of an ordinary inquiry branch.
+
 Source: [`packages/core/session/src/types.ts`](../../packages/core/session/src/types.ts)
 
 ```ts type-equiv
@@ -161,6 +163,8 @@ interface SessionHeader {
    * Presence alone does not classify a Session as a subagent; use `origin` for that distinction.
    */
   readonly parentSession?: SessionId
+  /** Selected passage in the direct parent of an ordinary inquiry branch. */
+  readonly inquiry?: SessionInquiry
   /**
    * Whether this Session contains a fork-inherited event prefix. The exact prefix
    * length is Session state rather than ordinary header metadata.
@@ -195,6 +199,8 @@ A backend refuses a log it cannot faithfully interpret with `SessionFormatUnsupp
 
 Creating a `Session` through the store takes a `seed` (initial replay or fork history), an optional exact `inheritedEventCount`, and `meta` (the storage-level fields the store folds into a `SessionHeader`). The store fills in `version`/`id` and defaults `createdAt`; the caller may supply the validated absolute `cwd`, `parentSession` lineage, `isSeeded` lineage bit, optional coarse `origin`, `delegationDepth`, `agentPreset`, and an existing `createdAt`. A seeded creation requires an explicit seed equal to its inherited prefix and an exact cut; the constructor appends the child-owned tagged end-seed marker at that cut before setup adds child-owned events. `origin: 'subagent'` lets product navigation hide duplicate child rows; it does not prove that a descriptor is valid or that the child can resume.
 
+For an ordinary inquiry branch, `meta.inquiry` carries the selected passage into the child header.
+
 ```ts type-equiv
 /**
  * Options for creating a {@link Session} via the store. `seed` replays/forks
@@ -217,6 +223,7 @@ interface CreateSessionOptions {
   readonly meta?: {
     readonly cwd?: string
     readonly parentSession?: SessionId
+    readonly inquiry?: SessionInquiry
     readonly createdAt?: number
     readonly isSeeded?: boolean
     readonly origin?: 'subagent'

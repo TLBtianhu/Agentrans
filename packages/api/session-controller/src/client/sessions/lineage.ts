@@ -2,7 +2,7 @@
 // The input order is authoritative; lineage only makes each child adjacent to its parent.
 // Orphaned lineage degrades to root level; cycles fail soft and emit as roots.
 
-import type { SessionId } from '@agentrans/session/types'
+import type { SessionId, SessionInquiry } from '@agentrans/session/types'
 import type { SessionProjectionSummaryValues } from '@agentrans/session-projection/types'
 import type { SessionSummary } from '../../types.ts'
 
@@ -30,6 +30,7 @@ export interface SessionListEntry {
    */
   blank: boolean
   parentSessionId?: SessionId
+  inquiry?: SessionInquiry
   /** Coarse durable origin for navigation filtering; not a continuation capability. */
   origin?: 'subagent'
   /** Format classification supplied by the Host list. */

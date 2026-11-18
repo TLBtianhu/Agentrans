@@ -1,6 +1,6 @@
 /** Durable fixed-input HTML export vocabulary. @module @agentrans/artifact-export/types */
 import type { Branded } from '@agentrans/brand'
-import type { ArtifactExportSource, ArtifactExportSourceSelection } from '@agentrans/artifact/types'
+import type { ArtifactExportSource, ArtifactExportSourceSelection, ArtifactPlotContinuation } from '@agentrans/artifact/types'
 import type { FileAttachmentRef } from '@agentrans/attachment/types'
 import type { SessionId } from '@agentrans/session/types'
 import type { SessionProjectionSummaryExcluded } from '@agentrans/session-projection/types'
@@ -19,8 +19,9 @@ export interface ArtifactHtmlExportRequest {
 export interface ArtifactHtmlExportInput extends ArtifactExportSource {
   /** Original Session that admitted this export; inherited records keep this identity. */
   readonly sessionId: SessionId
-  readonly exporterVersion: 1
-  readonly parameters: 'source-defaults' | 'particle-checkpoint'
+  readonly exporterVersion: 1 | 2
+  readonly parameters: 'source-defaults' | 'particle-checkpoint' | 'function-plot-baseline'
+  readonly functionPlotBaseline?: ArtifactPlotContinuation['baseline']
 }
 
 /** Terminal generation failures; failed exports retain their immutable input and identity. */

@@ -2,9 +2,11 @@
 
 import type { Branded } from '@agentrans/brand'
 import type { MessageId } from '@agentrans/llm'
+import type { SessionId, SessionSeq } from '@agentrans/session/types'
 import type { JsonValue } from '@agentrans/util-values'
-import type { SceneSpec } from './scene.ts'
+import type { CsvBarChartSpec, SceneSpec } from './scene.ts'
 import type { ParticleCheckpoint, ParticleObservation } from './particle-runtime.ts'
+import type { FunctionAnalysis } from './renderers/function-analysis.ts'
 import type { SessionProjectionSummaryExcluded } from '@agentrans/session-projection/types'
 
 /** Stable identity of one artifact within a Session. */
@@ -46,10 +48,49 @@ export interface HtmlArtifactSnapshot extends ArtifactSnapshotBase {
   readonly source: string
 }
 
+interface ArtifactContinuationSource {
+  readonly sessionId: SessionId
+  readonly eventSeq: SessionSeq
+  readonly messageId: MessageId
+  readonly artifactId: ArtifactId
+  readonly revision: number
+}
+
+/** Exact returned function-plot evidence that seeds an editable child experiment. */
+export interface ArtifactPlotContinuation {
+  readonly source: ArtifactContinuationSource
+  readonly baseline: {
+    readonly functionId: string
+    readonly x: number
+    readonly parameters: Readonly<Record<string, number>>
+    readonly values: FunctionAnalysis
+  }
+}
+
+/** Exact returned particle evidence that seeds an editable child experiment. */
+export interface ArtifactParticleContinuation {
+  readonly source: ArtifactContinuationSource
+  readonly baseline: {
+    readonly checkpoint: ParticleCheckpoint
+  }
+}
+
+/** Source evidence and the exact group confirmed for a parent-local CSV analysis. */
+export interface ArtifactCsvContinuation {
+  readonly source: ArtifactContinuationSource
+  readonly groupKey: string
+}
+
 /** Complete declarative SceneSpec snapshot. */
 export interface SceneArtifactSnapshot extends ArtifactSnapshotBase {
   readonly format: 'scene'
   readonly spec: SceneSpec
+  /** Fixed original conditions on the first revision of a standalone continued function plot. */
+  readonly continuation?: ArtifactPlotContinuation
+  /** Fixed original checkpoint on the first revision of a standalone continued particle system. */
+  readonly particleContinuation?: ArtifactParticleContinuation
+  /** Confirmed CSV continuation stored for a subsequent question. */
+  readonly csvContinuation?: ArtifactCsvContinuation
 }
 
 /** Complete durable value carried by every artifact update. */
@@ -73,6 +114,7 @@ export interface SavedParticleObservationRef {
 /** Host-resolved source selection for one immutable HTML export. */
 export type ArtifactExportSourceSelection =
   | { readonly kind: 'current'; readonly artifactId: ArtifactId; readonly revision: number; readonly checkpoint?: ParticleCheckpoint }
+  | { readonly kind: 'revision'; readonly artifactId: ArtifactId; readonly revision: number }
   | { readonly kind: 'observation'; readonly artifactId: ArtifactId; readonly observationId: ArtifactObservationId }
 
 /** Complete original Scene source and validated replay conditions for an export. */
@@ -137,6 +179,11 @@ export interface ArtifactPrepareInput {
   readonly spec?: SceneSpec
   /** Required for update; must equal the current durable revision. */
   readonly baseRevision?: number
+}
+
+/** Compare-and-set preparation of a Host-calculated, inline CSV chart. */
+export interface CsvBarChartPrepareInput extends Pick<ArtifactPrepareInput, 'action' | 'artifactId' | 'title' | 'baseRevision'> {
+  readonly spec: CsvBarChartSpec
 }
 
 /** Compact tool result which does not repeat the HTML source. */

@@ -1,5 +1,5 @@
 /**
- * Composer blocks: the one way another plugin stops a session's input.
+ * Composer blocks let plugins hold editing or submission in a session.
  *
  * The composer cannot read the plugins that would know — the dependency runs
  * ui-model-selection → ui-conversation, never back — so a blocker pushes here and the
@@ -19,6 +19,7 @@ import type { ComposerBlock, ComposerBlocks } from '../contract/composer-blocks.
 /** The per-session composer-block registry (one instance per plugin fiber). */
 export class ComposerBlockRegistry implements ComposerBlocks {
   private readonly stores = new Map<SessionId, SnapshotStore<ComposerBlock | undefined>>()
+  private readonly submissions = new Map<SessionId, { sources: Set<string>; store: SnapshotStore<boolean> }>()
 
   /** @inheritdoc */
   set(sessionId: SessionId, block: ComposerBlock | undefined): void {
@@ -38,7 +39,29 @@ export class ComposerBlockRegistry implements ComposerBlocks {
   }
 
   /** @inheritdoc */
+  setSubmission(sessionId: SessionId, source: string, blocked: boolean): void {
+    const entry = this.submissionEntry(sessionId)
+    if (blocked) entry.sources.add(source)
+    else entry.sources.delete(source)
+    entry.store.set(entry.sources.size > 0)
+  }
+
+  /** @inheritdoc */
+  submissionFor(sessionId: SessionId): SnapshotStore<boolean> {
+    return this.submissionEntry(sessionId).store
+  }
+
+  /** @inheritdoc */
   forget(sessionId: SessionId): void {
     this.stores.delete(sessionId)
+    this.submissions.delete(sessionId)
+  }
+
+  private submissionEntry(sessionId: SessionId): { sources: Set<string>; store: SnapshotStore<boolean> } {
+    const existing = this.submissions.get(sessionId)
+    if (existing !== undefined) return existing
+    const created = { sources: new Set<string>(), store: createSnapshotStore(false) }
+    this.submissions.set(sessionId, created)
+    return created
   }
 }

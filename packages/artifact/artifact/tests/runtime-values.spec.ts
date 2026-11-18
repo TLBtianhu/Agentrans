@@ -1,7 +1,10 @@
 import { runInNewContext } from 'node:vm'
 import { describe, expect, it } from 'vitest'
 import { snapshotJsonValue } from '@agentrans/util-values'
-import { ARTIFACT_JSON_MAX_DEPTH, ARTIFACT_JSON_MAX_NODES, isBoundedArtifactJson } from '../src/runtime-values.ts'
+import {
+  ARTIFACT_JSON_MAX_DEPTH, ARTIFACT_JSON_MAX_NODES, isArtifactBfsCheckpoint, isArtifactHalfAdderCheckpoint,
+  isArtifactHtmlCheckpoint, isBoundedArtifactJson,
+} from '../src/runtime-values.ts'
 
 const valid = (value: unknown) => isBoundedArtifactJson(value, ARTIFACT_JSON_MAX_DEPTH, ARTIFACT_JSON_MAX_NODES)
 
@@ -68,5 +71,34 @@ describe('bounded Artifact JSON', () => {
     const foreign: unknown = runInNewContext(`(${isBoundedArtifactJson.toString()})({values:[1,true,null]},32,2048)`)
     expect(foreign).toBe(true)
     expect(runInNewContext(`(${isBoundedArtifactJson.toString()})({values:[-0]},32,2048)`)).toBe(false)
+  })
+})
+
+describe('BFS checkpoint shape', () => {
+  it('accepts the ordered traversal data when serialized into a sandbox', () => {
+    const state = { kind: 'bfs-checkpoint', current: 'B', queue: ['D', 'C'], visited: ['A', 'B'] }
+    expect(runInNewContext(`(${isArtifactBfsCheckpoint.toString()})(${JSON.stringify(state)})`)).toBe(true)
+    expect(isArtifactBfsCheckpoint({ ...state, current: null, queue: [], visited: [] })).toBe(true)
+  })
+
+  it('rejects incomplete, ambiguous and oversized traversal states', () => {
+    const state = { kind: 'bfs-checkpoint', current: 'B', queue: ['D', 'C'], visited: ['A', 'B'] }
+    for (const invalid of [{ ...state, current: 'C' }, { ...state, queue: ['D', 'D'] }, { ...state, visited: ['B', 'B'] },
+      { ...state, queue: ['node X'] }, { ...state, queue: ['x'.repeat(33)] },
+      { ...state, queue: Array.from({ length: 65 }, (_, index) => `node${index}`) }, { ...state, extras: [] }]) {
+      expect(isArtifactBfsCheckpoint(invalid)).toBe(false)
+    }
+  })
+})
+
+describe('half-adder checkpoint', () => {
+  it.each([[0, 0, 0, 0], [0, 1, 1, 0], [1, 0, 1, 0], [1, 1, 0, 1]])('accepts truth table row %i %i', (a, b, sum, carry) => {
+    const state = { kind: 'half-adder-checkpoint', a, b, sum, carry }
+    expect(isArtifactHtmlCheckpoint(state)).toBe(true)
+    expect(runInNewContext(`(${isArtifactHalfAdderCheckpoint.toString()})(${JSON.stringify(state)})`)).toBe(true)
+    expect(isArtifactHtmlCheckpoint({ ...state, carry: 1 - carry })).toBe(false)
+    expect(isArtifactHtmlCheckpoint({ ...state, sum: 1 - sum })).toBe(false)
+    expect(isArtifactHtmlCheckpoint({ ...state, a: String(a) })).toBe(false)
+    expect(isArtifactHtmlCheckpoint({ ...state, extra: 0 })).toBe(false)
   })
 })

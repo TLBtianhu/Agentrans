@@ -8,6 +8,7 @@ import { gt, valid } from 'semver'
 import type { DesktopUpdateState } from './ipc.ts'
 import { DesktopUpdateHttpExecutor } from './update-http-executor.ts'
 import { DesktopUpdatePreparationError } from './update-error.ts'
+import { configureDesktopGitHubUpdateFeed } from './update-github-provider.ts'
 import type { DownloadedUpdateVerification } from './update-verification.ts'
 import { createGitHubUpdateVerification } from './update-verification.ts'
 import { UPDATE_SIGNING_PUBLIC_KEY } from './update-signing-key.ts'
@@ -21,6 +22,7 @@ export class DesktopUpdateCoordinator {
   private releaseTag: string | undefined
   private downloaded = false
   private disposed = false
+  private feedConfigured = false
   private checkOperation: Promise<DesktopUpdateState> | undefined
   private downloadOperation: Promise<DesktopUpdateState> | undefined
   private installOperation: Promise<DesktopUpdateState> | undefined
@@ -76,8 +78,7 @@ export class DesktopUpdateCoordinator {
     }
     this.updater.autoDownload = false
     this.updater.autoInstallOnAppQuit = false
-    // The channel selects which releases are eligible, not which metadata file is read:
-    // electron-updater derives that file from the candidate version's prerelease id.
+    // Keep platform policy aligned with the installed channel, including injected updaters.
     this.updater.allowPrerelease = channel === 'nightly'
     // Selecting a channel can enable downgrade in electron-updater.
     this.updater.allowDowngrade = false
@@ -197,11 +198,18 @@ export class DesktopUpdateCoordinator {
     try {
       this.assertLive()
       if (!this.enabled()) throw new Error('desktop update: this application has no packaged update source')
+      if (this.updater === autoUpdater && !this.feedConfigured) {
+        await configureDesktopGitHubUpdateFeed(this.updater, this.channel, process.resourcesPath)
+        this.assertLive()
+        this.feedConfigured = true
+      }
       const result = await this.updater.checkForUpdates()
       if (result === null) throw new Error('desktop update: no check result was returned')
       const version = result.updateInfo.version
       if (valid(version) === null) throw new Error('desktop update: feed version is invalid')
-      if (this.channel === 'latest' && version.includes('-')) throw new Error('desktop update: latest feed contains a prerelease')
+      if (result.isUpdateAvailable && this.channel === 'latest' && version.includes('-')) {
+        throw new Error('desktop update: latest feed contains a prerelease')
+      }
       this.candidate = result.isUpdateAvailable && gt(version, this.currentVersion()) ? version : undefined
       // The GitHub provider adds the resolved release tag at runtime; its public type omits it.
       this.releaseTag = this.candidate === undefined ? undefined : (result.updateInfo as UpdateInfo & { tag?: string }).tag

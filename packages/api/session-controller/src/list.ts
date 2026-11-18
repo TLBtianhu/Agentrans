@@ -5,7 +5,7 @@ import { scheduler } from 'node:timers/promises'
 import type { Context } from '@agentrans/cordis'
 import type {} from '@agentrans/agent-preset-registry'
 import type { ImageAttachmentLimits } from '@agentrans/attachment'
-import type { Session, SessionEvent, SessionHeader, SessionId } from '@agentrans/session'
+import type { Session, SessionEvent, SessionHeader, SessionId, SessionInquiry } from '@agentrans/session'
 import type { ProjectionSnapshot } from '@agentrans/session-projection'
 import type {} from '@agentrans/session-projection-cache'
 import { SessionQueryError, type SessionRecord, type SessionSearchCursor } from '@agentrans/session-query'
@@ -363,11 +363,13 @@ function updatedAt(header: SessionHeader, metadata: SessionListMetadata | undefi
 
 function listFields(header: SessionHeader): {
   readonly parentSessionId?: SessionId
+  readonly inquiry?: SessionInquiry
   readonly origin?: 'subagent'
   readonly cwd?: string
 } {
   return {
     ...(header.parentSession === undefined ? {} : { parentSessionId: header.parentSession }),
+    ...(header.inquiry === undefined ? {} : { inquiry: header.inquiry }),
     ...(header.origin === undefined ? {} : { origin: header.origin }),
     ...(header.cwd === undefined ? {} : { cwd: header.cwd }),
   }

@@ -1,5 +1,6 @@
 /** Finite function samples and numerical analysis shared by previews and exported animations. */
-import { ExpressionDomainError, evaluateExpression, type ExpressionNode } from '@agentrans/util-values'
+import { ExpressionDomainError, evaluateExpression, parseExpression, type ExpressionNode } from '@agentrans/util-values'
+import type { FunctionPlotSpec } from '../scene.ts'
 
 /** Readings unavailable in the real-number domain are represented by null, including in confirmed JSON. */
 export interface FunctionAnalysis {
@@ -77,4 +78,25 @@ export function analyzeFunction(node: ExpressionNode, parameters: Readonly<Recor
     derivative: differentiateFunction(node, parameters, x),
     integral: integrateFunction(node, parameters, x),
   }
+}
+
+/**
+ * Validate and analyze a selected function and parameter set from a specific Scene revision.
+ * @param spec - Validated function-plot source.
+ * @param conditions - Selected function id, trace position and complete parameter values.
+ * @returns Recomputed readings, or undefined when the selection does not belong to the source.
+ */
+export function analyzeFunctionPlotSelection(
+  spec: FunctionPlotSpec,
+  conditions: { readonly functionId: string; readonly x: number; readonly parameters: Readonly<Record<string, number>> },
+): FunctionAnalysis | undefined {
+  const { functionId, x, parameters } = conditions
+  const fn = spec.functions.find(entry => entry.id === functionId)
+  const entries = Object.entries(spec.parameters)
+  if (fn === undefined || !Number.isFinite(x) || entries.length !== Object.keys(parameters).length) return undefined
+  for (const [key, { min, max }] of entries) {
+    const value = Object.hasOwn(parameters, key) ? parameters[key] : undefined
+    if (value === undefined || !Number.isFinite(value) || value < min || value > max) return undefined
+  }
+  return analyzeFunction(parseExpression(fn.expression, entries.map(([key]) => key)), parameters, x)
 }

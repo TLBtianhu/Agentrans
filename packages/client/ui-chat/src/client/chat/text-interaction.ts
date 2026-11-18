@@ -1,8 +1,8 @@
 /** Area-local text gestures, action ownership, dismissal, and content-relative placement. */
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { RefObject } from 'react'
-import { readTextSelection, selectedText } from './text-selection.ts'
-import type { TextSelection } from './text-selection.ts'
+import { readTextSelection, selectedAssistantInquiry, selectedText } from './text-selection.ts'
+import type { AssistantInquirySelection, TextSelection } from './text-selection.ts'
 
 import type {
   TextInteractionGesture, TextInteractionSurface, TextInteractionTrigger,
@@ -10,7 +10,8 @@ import type {
 
 /** Current area-owned surface and its actions. */
 export interface TextInteractionBinding extends Omit<TextInteractionSurface, 'trigger'> {
-  readonly active: { readonly id: string; readonly trigger: TextInteractionTrigger } | null
+  readonly active: { readonly id: string | null; readonly trigger: TextInteractionTrigger; readonly inquiry: boolean } | null
+  readonly readInquiry: () => AssistantInquirySelection | null
 }
 
 interface Target {
@@ -84,12 +85,14 @@ function visibleBounds(root: HTMLElement, source: HTMLElement, view: Window): Bo
  * @param surfaceRef - absolute surface inside that element; only the selected Slot consumer is mounted.
  * @param dispatchInteraction - framework-injected plugin gesture dispatch.
  * @param registeredIds - live registered owners used to dismiss removed plugins.
+ * @param allowInquiry - whether the view may fork a Session from selected answer text.
  * @returns current owner and area-local selection actions.
  */
 export function useTextInteraction(
   rootRef: RefObject<HTMLElement>, surfaceRef: RefObject<HTMLElement>,
   dispatchInteraction: (gesture: TextInteractionGesture) => string | null,
   registeredIds: readonly string[],
+  allowInquiry = false,
 ): TextInteractionBinding {
   const target = useRef<Target | null>(null)
   const [active, setActive] = useState<TextInteractionBinding['active']>(null)
@@ -98,13 +101,19 @@ export function useTextInteraction(
     if (surfaceRef.current !== null) surfaceRef.current.style.visibility = 'hidden'
     setActive(null)
   }, [surfaceRef])
-  useEffect(dismiss, [registeredIds, dispatchInteraction, dismiss])
+  useEffect(dismiss, [registeredIds, dispatchInteraction, allowInquiry, dismiss])
   const readText = useCallback(() => {
     const root = rootRef.current
     const current = target.current
     if (root === null || current === null || !available(root, current)) return null
     return current.selection === null ? null : selectedText(current.selection)
   }, [rootRef])
+  const readInquiry = useCallback(() => {
+    const root = rootRef.current
+    const current = target.current
+    if (!allowInquiry || root === null || current?.selection == null || !available(root, current)) return null
+    return selectedAssistantInquiry(current.selection)
+  }, [rootRef, allowInquiry])
   const clearSelection = useCallback(() => { rootRef.current?.ownerDocument.getSelection()?.removeAllRanges() }, [rootRef])
 
   const place = useCallback(() => {
@@ -176,9 +185,11 @@ export function useTextInteraction(
         readText: () => next.text,
         preventDefault: () => { event.preventDefault() },
       })
-      if (id === null) return
+      const inquiry = allowInquiry && trigger === 'selection' && next.selection !== null
+        && selectedAssistantInquiry(next.selection) !== null
+      if (id === null && !inquiry) return
       target.current = next
-      setActive({ id, trigger })
+      setActive({ id, trigger, inquiry })
     }
     const updateSelection = (event: Event): void => {
       if (pointerSelecting || keyboardSelecting) { selectionChangedDuringGesture = true; return }
@@ -266,7 +277,7 @@ export function useTextInteraction(
       view.removeEventListener('blur', cancel)
       if (frame !== undefined) view.cancelAnimationFrame(frame)
     }
-  }, [dismiss, place, rootRef, surfaceRef, dispatchInteraction])
+  }, [dismiss, place, rootRef, surfaceRef, dispatchInteraction, allowInquiry])
   useEffect(() => {
     const root = rootRef.current
     const surface = surfaceRef.current
@@ -294,5 +305,5 @@ export function useTextInteraction(
       if (frame !== undefined) view.cancelAnimationFrame(frame)
     }
   }, [active, place, rootRef, surfaceRef])
-  return { active, dismiss, readText, clearSelection }
+  return { active, dismiss, readText, clearSelection, readInquiry }
 }

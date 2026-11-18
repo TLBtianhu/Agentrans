@@ -241,13 +241,17 @@ it('reads a saved observation after card remount and only sends it through the e
   const b = saved('B', 9)
   const p = props()
   const controls = { ...p.observationControls!, observations: [a, b] }
+  const firstObservation = () => {
+    const observations = within(screen.getByRole('region', { name: 'Saved observations' }))
+    return within(observations.getAllByRole('listitem')[0]!)
+  }
   const view = render(<ArtifactCard {...p} observationControls={controls} />)
-  fireEvent.click(within(screen.getAllByRole('listitem')[0]!).getByRole('button', { name: 'Restore' }))
+  fireEvent.click(firstObservation().getByRole('button', { name: 'Restore' }))
   expect(currentStep()).toBe('6')
   view.unmount()
   render(<ArtifactCard {...p} observationControls={controls} />)
   expect(currentStep()).toBe('0')
-  const first = within(screen.getAllByRole('listitem')[0]!)
+  const first = firstObservation()
   fireEvent.click(first.getByRole('button', { name: 'Restore' }))
   expect(currentStep()).toBe('6')
   expect(controls.send).not.toHaveBeenCalled()

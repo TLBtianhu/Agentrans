@@ -22,6 +22,10 @@
       "types": "./lib/types/tool.d.ts",
       "default": "./lib/tool.js"
     },
+    "./attachment-csv-tool": {
+      "types": "./lib/types/attachment-csv-tool.d.ts",
+      "default": "./lib/attachment-csv-tool.js"
+    },
     "./scene": {
       "types": "./lib/types/scene.d.ts",
       "default": "./lib/scene.js"
@@ -72,6 +76,7 @@
   "files": [
     "lib/index.js",
     "lib/tool.js",
+    "lib/attachment-csv-tool.js",
     "lib/scene.js",
     "lib/particle-runtime.js",
     "lib/capabilities.js",
@@ -80,6 +85,8 @@
     "lib/scene-export.js",
     "lib/scene-renderers.js",
     "lib/scene-tool.js",
+    "skills/artifact-design/SKILL.md",
+    "skills/artifact-design/parameter-explorer.html",
     "lib/types/**/*.js",
     "lib/types/**/*.d.ts",
     "lib/typert.host.js",
@@ -90,16 +97,21 @@
   "license": "MIT",
   "dependencies": {
     "@agentrans/schemastery": "workspace:~",
+    "papaparse": "5.7.0",
+    "yaml": "^2.4.2",
     "zod": "4.4.3"
   },
   "peerDependencies": {
     "@agentrans/cordis": "workspace:~",
     "@agentrans/agent": "workspace:*",
+    "@agentrans/attachment": "workspace:*",
     "@agentrans/brand": "workspace:*",
     "@agentrans/llm": "workspace:*",
     "@agentrans/session": "workspace:*",
     "@agentrans/session-input": "workspace:*",
     "@agentrans/session-projection": "workspace:*",
+    "@agentrans/skill": "workspace:*",
+    "@agentrans/system-prompt": "workspace:*",
     "@agentrans/tools": "workspace:*",
     "@agentrans/typert-protocol": "workspace:*",
     "@agentrans/util-values": "workspace:*"
@@ -107,6 +119,7 @@
   "devDependencies": {
     "@agentrans/cordis": "workspace:~",
     "@agentrans/agent": "workspace:*",
+    "@agentrans/attachment": "workspace:*",
     "@agentrans/brand": "workspace:*",
     "@agentrans/llm": "workspace:*",
     "@agentrans/session": "workspace:*",
@@ -114,11 +127,13 @@
     "@agentrans/session-format-v3-to-v4": "workspace:*",
     "@agentrans/session-input": "workspace:*",
     "@agentrans/session-projection": "workspace:*",
+    "@agentrans/skill": "workspace:*",
     "@agentrans/system-prompt": "workspace:*",
     "@agentrans/tool-executor-native": "workspace:*",
     "@agentrans/tool-testkit": "workspace:*",
     "@agentrans/tools": "workspace:*",
     "@agentrans/typert-protocol": "workspace:*",
-    "@agentrans/util-values": "workspace:*"
+    "@agentrans/util-values": "workspace:*",
+    "@types/papaparse": "^5.3.16"
   }
 }

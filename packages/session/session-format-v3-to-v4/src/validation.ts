@@ -19,7 +19,7 @@ import { assertV4ToolResultMessage } from './tool-role.ts'
 export function assertReleasedV4Header(header: unknown): void {
   if (!isSessionFormatJsonObject(header) || header['version'] !== 4) throw new SessionFormatError('expected format v4 header')
   const required = ['version', 'id', 'createdAt', 'isSeeded', 'delegationDepth']
-  const allowed = new Set([...required, 'cwd', 'parentSession', 'origin', 'agentPreset'])
+  const allowed = new Set([...required, 'cwd', 'parentSession', 'inquiry', 'origin', 'agentPreset'])
   const missing = required.find(key => !Object.hasOwn(header, key))
   const unexpected = Object.keys(header).find(key => !allowed.has(key))
   if (missing !== undefined) throw new SessionFormatError(`format v4 header lacks required field ${missing}`)
@@ -38,6 +38,21 @@ export function assertReleasedV4Header(header: unknown): void {
   }
   if (header.origin !== undefined && header.origin !== 'subagent') {
     throw new SessionFormatError('format v4 header origin must be "subagent"')
+  }
+  const inquiry = header.inquiry
+  if (inquiry === undefined) return
+  if (!header.isSeeded || header.origin !== undefined || !header.parentSession
+    || !isSessionFormatJsonObject(inquiry) || Object.keys(inquiry).length !== 5
+    || typeof inquiry.messageId !== 'string' || inquiry.messageId.length === 0) {
+    throw new SessionFormatError('format v4 header inquiry requires an ordinary seeded child and exact message address')
+  }
+  sessionFormatCount(inquiry.messageSeq, 'format v4 inquiry messageSeq')
+  const start = sessionFormatCount(inquiry.start, 'format v4 inquiry start')
+  const end = sessionFormatCount(inquiry.end, 'format v4 inquiry end')
+  const { excerpt } = inquiry
+  if (end <= start || typeof excerpt !== 'string' || excerpt.length !== end - start || excerpt.length > 512
+    || excerpt.trim().length === 0 || /[\uD800-\uDFFF]/u.test(excerpt)) {
+    throw new SessionFormatError('format v4 inquiry excerpt must match its bounded UTF-16 range')
   }
 }
 

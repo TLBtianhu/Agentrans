@@ -8,7 +8,7 @@ import type {
 import type { Branded } from '@agentrans/brand'
 import type { LlmAttemptId, MessageId } from '@agentrans/llm/brand'
 import type { LlmModelBadge, TextBlock } from '@agentrans/llm'
-import type { SessionId, SessionSeq, SessionSeqCursor } from '@agentrans/session/types'
+import type { SessionId, SessionInquiry, SessionSeq, SessionSeqCursor } from '@agentrans/session/types'
 import type { BranchResultSelectionFailure } from '@agentrans/session-branch/types'
 import type { SessionProjectionMap, SessionProjectionSummaryExcluded, SessionProjectionSummaryValues } from '@agentrans/session-projection/types'
 import type { Principal } from '@agentrans/typert-protocol'
@@ -159,6 +159,8 @@ export interface SessionSummary {
   readonly running: boolean
   readonly blank: boolean
   readonly parentSessionId?: SessionId
+  /** Exact assistant passage selected in the direct parent. */
+  readonly inquiry?: SessionInquiry
   readonly origin?: 'subagent'
   readonly cwd?: string
   readonly projections?: SessionProjectionHints
@@ -192,6 +194,8 @@ declare module '@agentrans/typert-protocol' {
     }
     'session/projections-unavailable': Record<string, never>
     'session/writer-held': { readonly sessionId: SessionId }
+    'session/fork-inquiry-invalid': { readonly sessionId: SessionId }
+    'session/fork-inquiry-conflict': { readonly sessionId: SessionId; readonly requestId: SessionRequestId }
     'session/agent-busy': { readonly reason: string }
     'session/prompt-context-rejected': { readonly kind: string; readonly code: string; readonly details: JsonValue }
     'session/prompt-context-unavailable': { readonly kind: string }
@@ -325,11 +329,15 @@ export interface SessionForkRequest {
   readonly sessionId: SessionId
   /** Exact inclusive source event seq; omission selects the latest completed-turn prefix. */
   readonly atSeq?: number
+  /** Exact passage in the final assistant answer of the completed turn at `atSeq`. */
+  readonly inquiry?: SessionInquiry
+  /** Inquiry-only UUID. Reuse it to recover the same child after a failed or lost response. Omission creates a new child on every call. */
+  readonly requestId?: SessionRequestId
   /** False asks the Host to check for required migration before forking. Defaults to true. */
   readonly allowMigration?: boolean
 }
 
-/** Identity of a newly forked Session. */
+/** Identity of the created or recovered forked Session. */
 export interface SessionForkValue {
   readonly sessionId: SessionId
 }
@@ -424,7 +432,7 @@ export interface SessionOpenWorkspacePathValue {
   readonly opened: true
 }
 
-/** Client-minted prompt identity used to reconcile optimistic and durable messages. */
+/** Client-minted identity scoped to a prompt or inquiry fork request. */
 export type SessionRequestId = Branded<'session-request-id'>
 
 declare module '@agentrans/llm' {

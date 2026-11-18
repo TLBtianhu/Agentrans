@@ -1,6 +1,6 @@
 /** Restricted srcDoc assembly for executable, opaque-origin Artifact previews. */
 import type { ArtifactRuntimeIdentity } from '@agentrans/artifact-runtime/types'
-import { buildArtifactRuntimeBridge } from './runtime-bridge.ts'
+import { buildArtifactRuntimeBridge, type ArtifactDocumentReplay } from './runtime-bridge.ts'
 
 /** Network-independent policy; inline code and styles cannot load remote dependencies. */
 export const ARTIFACT_CSP = [
@@ -24,9 +24,10 @@ export const ARTIFACT_CSP = [
  * Place the restrictive policy before any authored document content without mounting it in the parent.
  * @param source - complete authored HTML.
  * @param identity - Optional source-bound runtime; supplying it installs the explicit ready/error API before authored scripts.
+ * @param replay - Optional isolated checkpoint and explicit permission to report later readings of the same kind.
  * @returns srcDoc HTML with the policy first and meta refresh removed.
  */
-export function createArtifactDocument(source: string, identity?: ArtifactRuntimeIdentity): string {
+export function createArtifactDocument(source: string, identity?: ArtifactRuntimeIdentity, replay?: ArtifactDocumentReplay): string {
   const parsed = new DOMParser().parseFromString(source, 'text/html')
   for (const refresh of parsed.querySelectorAll('meta[http-equiv="refresh" i]')) refresh.remove()
   const policy = parsed.createElement('meta')
@@ -35,7 +36,7 @@ export function createArtifactDocument(source: string, identity?: ArtifactRuntim
   parsed.head.prepend(policy)
   if (identity !== undefined) {
     const bridge = parsed.createElement('script')
-    bridge.textContent = buildArtifactRuntimeBridge(identity)
+    bridge.textContent = buildArtifactRuntimeBridge(identity, replay)
     policy.after(bridge)
   }
   return `<!doctype html>${parsed.documentElement.outerHTML}`

@@ -33,6 +33,7 @@ function renderSettled(
   fileMentions: MarkdownFileMentions | undefined,
   pathImages: MarkdownPathImages | undefined,
   omitHtml: boolean,
+  sourceTextOffset: number | undefined,
 ): ReactNode[] {
   const root = parseGfmWithMath(text)
   const targets = createReferenceTargets()
@@ -43,6 +44,7 @@ function renderSettled(
     fileMentions,
     pathImages,
     omitHtml,
+    ...(sourceTextOffset === undefined ? {} : { sourceText: { text, offset: sourceTextOffset } }),
     targets,
     footnoteOrder: [],
     footnoteCounts: new Map(),
@@ -175,6 +177,7 @@ class StreamingRenderer {
  * HTML as nothing instead of literal text, for documents written for HTML
  * renderers, such as package READMEs. `textInteractionSource` marks the
  * existing root as a source for text selection interactions.
+ * `sourceTextOffset` exposes canonical offsets on literal text in settled content.
  * The provider's `openFile` enables local Markdown links in settled messages,
  * including `#L24` / `#L24-L30` fragments and `:24` / `:24-30` / `:24:5` suffixes
  * (ranges open at their first line, columns are ignored, and invalid locations
@@ -185,6 +188,7 @@ class StreamingRenderer {
  */
 export const MarkdownText = memo(function MarkdownText({
   text, streaming = false, labels, fileMentions, pathImages, variant = 'body', omitHtml = false, textInteractionSource = false,
+  sourceTextOffset,
 }: {
   text: string
   streaming?: boolean
@@ -194,20 +198,21 @@ export const MarkdownText = memo(function MarkdownText({
   variant?: 'body' | 'compact'
   omitHtml?: boolean
   textInteractionSource?: boolean
+  sourceTextOffset?: number | undefined
 }) {
   const streamRef = useRef<StreamingRenderer | null>(null)
   const streamLabelsRef = useRef<MarkdownLabels>(labels)
   const children = useMemo(() => {
     if (!streaming) {
       streamRef.current = null
-      return renderSettled(text, labels, fileMentions, pathImages, omitHtml)
+      return renderSettled(text, labels, fileMentions, pathImages, omitHtml, sourceTextOffset)
     }
     if (streamRef.current === null || streamLabelsRef.current !== labels || streamRef.current.omitHtml !== omitHtml) {
       streamRef.current = new StreamingRenderer(labels, omitHtml)
       streamLabelsRef.current = labels
     }
     return streamRef.current.render(text)
-  }, [text, streaming, labels, fileMentions, pathImages, omitHtml])
+  }, [text, streaming, labels, fileMentions, pathImages, omitHtml, sourceTextOffset])
   return <div className={clsx(css.markdown, variant === 'compact' && css.compact)}
     data-text-interaction-source={textInteractionSource ? '' : undefined}
     data-markdown-variant={variant === 'compact' ? variant : undefined}>{children}</div>

@@ -64,7 +64,9 @@ During uninterrupted following, transcript and steering echoes stay in Chat thro
 
 The user-invocable `skills/list` metadata includes the winning provider’s optional instruction-file `path`. The composer can preview that file without loading every skill body or activating a cold Agent.
 
-Fork copies the exact inclusive event prefix selected by `atSeq`, including a cut inside an open turn, into an independent Session without `parentSession`. Client placeholders likewise omit `parentSessionId`; list indentation applies only to subagent-origin rows, including when historical ordinary forks retain a parent id. Workspace attachment and optional title increments use the source selected for the operation. The child records its inherited marker before synthetic fork results and closing events. Omitting `atSeq` selects the latest completed turn and its standalone tail, stopping before the next turn or queued input; a nonexistent event is rejected. The chat action selects a completed turn.
+Fork copies the inclusive event prefix selected by `atSeq`, including a cut inside an open turn, into an independent Session whose header records the direct parent. Workspace attachment and optional title increments use the source selected for the operation. The child records its inherited marker before synthetic fork results and closing events. Omitting `atSeq` selects the latest completed turn and its standalone tail, stopping before the next turn or queued input. A nonexistent event is rejected. The chat action selects a completed turn.
+
+A fork with an `inquiry` anchor can carry a UUID `requestId`. Reuse it with the same source Session, cut, and anchor to recover the original child and finish workspace attachment after an interrupted request. Reusing the same identity for a different cut or anchor in that Session returns `session/fork-inquiry-conflict`. See [inquiry from selected answer text](../../../docs/subsystems/branch.md).
 
 A resume blocked by an existing write handle returns `session/writer-held` with the Session id; other resume failures retain `gateway/internal`.
 

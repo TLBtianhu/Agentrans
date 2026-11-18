@@ -13,11 +13,13 @@ import {
   SESSION_FORMAT_VERSION,
   KNOWN_SESSION_EVENT_TYPES,
   SessionLogOffset,
+  isSessionInquiry,
 } from '@agentrans/session'
 import type {
   SessionEvent,
   SessionHeader,
   SessionId,
+  SessionInquiry,
   SessionLogOffset as SessionLogOffsetType,
 } from '@agentrans/session'
 import { parseSessionFormatLogFilename, sessionFormatLogFilename, SessionFormatUnsupportedMigrationError } from '@agentrans/session-format'
@@ -87,6 +89,7 @@ interface HeaderLine {
   createdAt: number
   cwd?: string
   parentSession?: SessionId
+  inquiry?: SessionInquiry
   isSeeded: boolean
   origin?: 'subagent'
   delegationDepth: number
@@ -94,7 +97,7 @@ interface HeaderLine {
 }
 
 const HEADER_REQUIRED_KEYS = ['type', 'version', 'id', 'createdAt', 'isSeeded', 'delegationDepth'] as const
-const HEADER_OPTIONAL_KEYS = ['cwd', 'parentSession', 'origin', 'agentPreset'] as const
+const HEADER_OPTIONAL_KEYS = ['cwd', 'parentSession', 'inquiry', 'origin', 'agentPreset'] as const
 const HEADER_KEYS = new Set<string>([...HEADER_REQUIRED_KEYS, ...HEADER_OPTIONAL_KEYS])
 
 /**
@@ -146,6 +149,7 @@ function fromHeaderLine(line: HeaderLine): SessionStorageMetadata {
       createdAt: line.createdAt,
       ...line.cwd !== undefined ? { cwd: line.cwd } : {},
       ...line.parentSession !== undefined ? { parentSession: line.parentSession } : {},
+      ...line.inquiry !== undefined ? { inquiry: line.inquiry } : {},
       isSeeded: line.isSeeded,
       ...line.origin !== undefined ? { origin: line.origin } : {},
       delegationDepth: line.delegationDepth,
@@ -177,6 +181,7 @@ function isHeaderLine(value: unknown): value is HeaderLine {
         && isAbsolute((value as { cwd: string }).cwd)))
     && ((value as { parentSession?: unknown }).parentSession === undefined
       || typeof (value as { parentSession?: unknown }).parentSession === 'string')
+    && ((value as { inquiry?: unknown }).inquiry === undefined || isSessionInquiry((value as { inquiry?: unknown }).inquiry))
     && typeof (value as { isSeeded?: unknown }).isSeeded === 'boolean'
     && ((value as { origin?: unknown }).origin === undefined
       || (value as { origin?: unknown }).origin === 'subagent')

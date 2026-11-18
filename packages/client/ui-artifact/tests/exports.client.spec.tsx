@@ -92,6 +92,36 @@ it('shows fixed source defaults without claiming transient non-particle controls
   await screen.findByText(en['export.requested'])
 })
 
+it('shows locked plot starting conditions while an earlier ready export retains its source defaults', () => {
+  const sample = ready()
+  const baseline = { functionId: 'f', parameters: { a: 2 }, x: 0.5, values: { value: 1, derivative: 2, integral: null } }
+  const artifact: SceneArtifactSnapshot = {
+    ...source, title: 'Continued plot',
+    spec: { kind: 'function-plot', functions: [{ id: 'f', label: 'f(x)', expression: 'a*x' }],
+      parameters: { a: { value: 1, min: 1, max: 3, step: 0.25 } }, viewport: { x: [-2, 2], y: [-3, 3] },
+      trace: { x: 0, derivative: true, integral: false } },
+    continuation: { source: { sessionId: sample.frozen.sessionId, artifactId: source.artifactId,
+      eventSeq: 11 as never, messageId: 'parent-reading' as never, revision: 2 }, baseline },
+  }
+  const earlier: ArtifactHtmlExportRecord = { ...sample,
+    request: { ...request, source: { kind: 'current', artifactId: artifact.artifactId, revision: artifact.revision } },
+    frozen: { sessionId: sample.frozen.sessionId, artifact, exporterVersion: 1, parameters: 'source-defaults' },
+  }
+  const latest: ArtifactHtmlExportRecord = { ...earlier,
+    request: { ...earlier.request, exportId: 'export-B' as ArtifactExportId },
+    frozen: { ...earlier.frozen, exporterVersion: 2, parameters: 'function-plot-baseline', functionPlotBaseline: baseline },
+  }
+  const p = props({ snapshot: artifact })
+  render(<ArtifactCard {...p} exportControls={{ ...p.exportControls!, records: [earlier, latest] }} />)
+
+  const conditions = 'Revision 1 · locked starting conditions · a = 2 · Trace x = 0.5'
+  const [earlierRow, latestRow] = within(screen.getByRole('region', { name: en['export.list'] })).getAllByRole('listitem')
+  expect(screen.getAllByText(conditions)).toHaveLength(2)
+  expect(screen.queryByText(en['export.defaultHint'])).toBeNull()
+  expect(within(earlierRow!).getByText('Revision 1 · source defaults')).toBeTruthy()
+  expect(within(latestRow!).getByText(conditions)).toBeTruthy()
+})
+
 it('does not resume a projected pending export until explicitly requested, and never recreates a ready file', async () => {
   const pending: ArtifactHtmlExportRecord = { request, frozen: ready().frozen, status: 'pending' }
   const p = props()

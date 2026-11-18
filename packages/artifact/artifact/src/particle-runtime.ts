@@ -186,6 +186,31 @@ export function createParticleCheckpoint(state: ParticleState): ParticleCheckpoi
 }
 
 /**
+ * Apply an optional vertical gravity change at the original continuation step.
+ * @param spec - Immutable particle-system source.
+ * @param checkpoint - Reviewed checkpoint, also validated by the restore operation.
+ * @param gravityY - User-confirmed vertical gravity, or undefined for original settings.
+ * @param baselineCheckpoint - Recorded checkpoint of the continued particle system.
+ * @returns The spec for recomputation, or undefined for an override outside the continuation conditions.
+ */
+export function particleSpecAtGravity(
+  spec: ParticleSystemSpec, checkpoint: unknown, gravityY: unknown, baselineCheckpoint: unknown,
+): ParticleSystemSpec | undefined {
+  if (gravityY === undefined) return spec
+  if (typeof gravityY !== 'number' || !Number.isFinite(gravityY)
+    || !isParticleCheckpoint(checkpoint) || !isParticleCheckpoint(baselineCheckpoint)
+    || checkpoint.stepCount !== baselineCheckpoint.stepCount) return undefined
+  return { ...spec, gravity: { ...spec.gravity, y: gravityY === 0 ? 0 : gravityY } }
+}
+
+function isParticleCheckpoint(value: unknown): value is ParticleCheckpoint {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+    && Object.keys(value).length === 2 && 'runtimeVersion' in value && 'stepCount' in value
+    && value.runtimeVersion === PARTICLE_RUNTIME_VERSION && typeof value.stepCount === 'number'
+    && Number.isSafeInteger(value.stepCount) && value.stepCount >= 0
+}
+
+/**
  * Validate a serialized checkpoint and derive its state against the caller's source revision.
  * @param spec - The exact immutable source revision associated with the checkpoint.
  * @param value - Untrusted checkpoint data read across a serialization boundary.
@@ -193,10 +218,7 @@ export function createParticleCheckpoint(state: ParticleState): ParticleCheckpoi
  * @throws {ParticleRuntimeError} For unsupported versions, malformed checkpoints, or non-finite state.
  */
 export function restoreParticleCheckpoint(spec: ParticleSystemSpec, value: unknown): ParticleState {
-  if (typeof value !== 'object' || value === null || Array.isArray(value)
-    || Object.keys(value).length !== 2 || !('runtimeVersion' in value) || !('stepCount' in value)
-    || value.runtimeVersion !== PARTICLE_RUNTIME_VERSION || typeof value.stepCount !== 'number'
-    || !Number.isSafeInteger(value.stepCount) || value.stepCount < 0) {
+  if (!isParticleCheckpoint(value)) {
     throw new ParticleRuntimeError('INVALID_CHECKPOINT', 'Particle checkpoint requires runtime version 1 and a non-negative safe step count')
   }
   return sampleState(spec, value.stepCount)

@@ -1,0 +1,19 @@
+{
+  "formatVersion": 2,
+  "roots": [
+    {"key":"SessionHeader","kind":"header","digest":"9ae228c37b0e13402dff526e4b2237f8a08ca2136bd3c8b006e39f664ff6520e"},
+    {"key":"JsonlHeaderLine","kind":"header","digest":"0be486bfbfc5be794025190e28b5049c72431826a474c98c9bc15b0783e580cc"}
+  ],
+  "types": [],
+  "nodes": {
+    "0657d3ca5ac4e7bf": {"kind":"primitive","type":"number"},
+    "0be486bfbfc5be79": {"kind":"object","properties":[{"name":"agentPreset","type":"4cd48f3e5108bd6e","optional":true},{"name":"createdAt","type":"0657d3ca5ac4e7bf","optional":false},{"name":"cwd","type":"4cd48f3e5108bd6e","optional":true},{"name":"delegationDepth","type":"0657d3ca5ac4e7bf","optional":false},{"name":"id","type":"4cd48f3e5108bd6e","optional":false},{"name":"inquiry","type":"70940f945fb0b44f","optional":true},{"name":"isSeeded","type":"aa93010d0e521ad7","optional":false},{"name":"origin","type":"aacda84a69739238","optional":true},{"name":"parentSession","type":"4cd48f3e5108bd6e","optional":true},{"name":"type","type":"e41bdebe246abe17","optional":false},{"name":"version","type":"0657d3ca5ac4e7bf","optional":false}],"indices":[]},
+    "4cd48f3e5108bd6e": {"kind":"primitive","type":"string"},
+    "70940f945fb0b44f": {"kind":"object","properties":[{"name":"end","type":"0657d3ca5ac4e7bf","optional":false},{"name":"excerpt","type":"4cd48f3e5108bd6e","optional":false},{"name":"messageId","type":"4cd48f3e5108bd6e","optional":false},{"name":"messageSeq","type":"0657d3ca5ac4e7bf","optional":false},{"name":"start","type":"0657d3ca5ac4e7bf","optional":false}],"indices":[]},
+    "9ae228c37b0e1340": {"kind":"object","properties":[{"name":"agentPreset","type":"4cd48f3e5108bd6e","optional":true},{"name":"createdAt","type":"0657d3ca5ac4e7bf","optional":false},{"name":"cwd","type":"4cd48f3e5108bd6e","optional":true},{"name":"delegationDepth","type":"0657d3ca5ac4e7bf","optional":true},{"name":"id","type":"4cd48f3e5108bd6e","optional":false},{"name":"inquiry","type":"70940f945fb0b44f","optional":true},{"name":"isSeeded","type":"aa93010d0e521ad7","optional":false},{"name":"origin","type":"aacda84a69739238","optional":true},{"name":"parentSession","type":"4cd48f3e5108bd6e","optional":true},{"name":"version","type":"af6e173f7be819bc","optional":false}],"indices":[]},
+    "aa93010d0e521ad7": {"kind":"primitive","type":"boolean"},
+    "aacda84a69739238": {"kind":"literal","value":"subagent"},
+    "af6e173f7be819bc": {"kind":"literal","value":4},
+    "e41bdebe246abe17": {"kind":"literal","value":"session"}
+  }
+}

@@ -13,7 +13,7 @@ import {
 
 type CardProps = ComponentProps<typeof RealCard>
 type RuntimeProps = 'useArtifactRuntime' | 'runtimeActions' | 'useParticleRuntime' | 'commandParticleRuntime' | 'chooseParticlePromptContext'
-  | 'chooseRuntimePromptContext' | 'chooseObservationPromptContext' | 'chooseComparisonPromptContext'
+  | 'choosePlotPromptContext' | 'chooseCsvPromptContext' | 'chooseRuntimePromptContext' | 'chooseObservationPromptContext' | 'chooseComparisonPromptContext'
 type NodeProps = Omit<ComponentProps<typeof RealNode>, RuntimeProps>
 type ComparisonProps = Omit<ComponentProps<typeof RealComparison>, RuntimeProps> & { readonly runtimeCommand?: ArtifactRuntimeActions['command'] }
 
@@ -61,7 +61,9 @@ function runtimeProps(
     useParticleRuntime: useRuntime,
     commandParticleRuntime: (key, command) => { owner.command(key, command) },
     chooseRuntimePromptContext: (key, artifact, identity) => { owner.chooseHtmlRuntime(key, artifact, identity) },
-    chooseParticlePromptContext: (key, artifact) => { owner.chooseCurrent(key, artifact) },
+    chooseParticlePromptContext: (key, artifact, readings) => owner.chooseCurrent(key, artifact, readings),
+    choosePlotPromptContext: (key, artifact, conditions) => owner.chooseFunctionPlot(key, artifact, conditions),
+    chooseCsvPromptContext: (key, artifact, groupKey) => owner.chooseCsvGroup(key, artifact, groupKey),
     chooseObservationPromptContext: (saved) => { owner.chooseObservation(saved) },
     chooseComparisonPromptContext: (group, control, variant) => { owner.chooseComparison(group, control, variant) },
   }
@@ -69,9 +71,9 @@ function runtimeProps(
 
 /** Supply framework-bound runtime props to the real standalone node. */
 export function ArtifactNodeView(props: NodeProps) {
-  const source = useMemo(() => createSnapshotStore<readonly ArtifactSnapshot[]>([props.node.data]), [props.sessionId])
+  const source = useMemo(() => createSnapshotStore<readonly ArtifactSnapshot[]>([props.node.data.snapshot]), [props.sessionId])
   const bound = useMemo(() => runtimeProps(source, props.sessionId), [source, props.sessionId])
-  useLayoutEffect(() => { source.set([props.node.data]) }, [source, props.node.data])
+  useLayoutEffect(() => { source.set([props.node.data.snapshot]) }, [source, props.node.data.snapshot])
   return <RealNode {...props} {...bound} />
 }
 

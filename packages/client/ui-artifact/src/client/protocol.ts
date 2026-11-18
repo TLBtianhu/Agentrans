@@ -11,9 +11,11 @@ import type { ArtifactBranchResultRequest } from '@agentrans/artifact-branch/typ
 import type { SessionBranchResultValue } from '@agentrans/api-session-controller/types'
 import type { ArtifactExportId, ArtifactHtmlExportRecord, ArtifactHtmlExportRequest } from '@agentrans/artifact-export/types'
 import type { ObservableSnapshot } from '@agentrans/client-store'
-import type { ArtifactParticleRuntime } from './particle-runtime-owner.ts'
+import type { ArtifactParticleRuntime, ParticleQuestionReadings } from './particle-runtime-owner.ts'
+import type { FunctionPlotQuestionConditions } from '@agentrans/artifact-followup/types'
 import type { ParticleRunCommand } from './particle-run.ts'
 import type { ArtifactRuntimeIdentity } from '@agentrans/artifact-runtime/types'
+import type { ArtifactHtmlCheckpoint } from '@agentrans/artifact/runtime-values'
 import type { ArtifactRuntimeActions, ArtifactRuntimeSnapshot } from './runtime-owner.ts'
 import type { FileSaveResult } from '@agentrans/client-ui-file-actions/client'
 
@@ -154,7 +156,12 @@ export interface ArtifactNodeInjected {
   readonly runtimeActions: ArtifactRuntimeActions
   readonly commandParticleRuntime: (key: string, command: ParticleRunCommand) => void
   readonly chooseRuntimePromptContext: (key: string, source: ArtifactSnapshot, identity: ArtifactRuntimeIdentity) => void
-  readonly chooseParticlePromptContext: (key: string, source: ArtifactSnapshot) => void
+  readonly chooseHtmlCheckpointPromptContext?: (
+    key: string, source: ArtifactSnapshot, identity: ArtifactRuntimeIdentity, checkpoint: ArtifactHtmlCheckpoint,
+  ) => boolean
+  readonly chooseParticlePromptContext: (key: string, source: ArtifactSnapshot, readings: ParticleQuestionReadings) => boolean
+  readonly choosePlotPromptContext: (key: string, source: ArtifactSnapshot, conditions: FunctionPlotQuestionConditions) => boolean
+  readonly chooseCsvPromptContext: (key: string, source: ArtifactSnapshot, groupKey: string) => boolean
   readonly chooseObservationPromptContext: (saved: SavedParticleObservation) => void
   readonly chooseComparisonPromptContext: (group: string, control: SavedParticleObservation, variant: SavedParticleObservation) => void
   readonly recordAction: RecordArtifactAction

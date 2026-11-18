@@ -744,6 +744,24 @@ export class ChatViewport {
   }
 
   /**
+   * Align a control or selected passage with the reading line and remember its owning row.
+   * @param row - Mounted Chat row containing the target.
+   * @param target - The control or passage the reader opened.
+   * @returns The actual landing, or null when the viewport is detached.
+   */
+  scrollToMessageControl(row: HTMLElement, target: HTMLElement | Range): ViewportLanding | null {
+    const metrics = this.metrics()
+    if (metrics === null || this.elements === null) return null
+    const viewportTop = this.elements.scroller.getBoundingClientRect().top
+    const turn = Number(row.dataset.chatTurn)
+    const top = target.getBoundingClientRect().top - viewportTop
+    return this.write(metrics.top + top - 24, metrics, Number.isSafeInteger(turn) ? turn : null, {
+      key: row.dataset.chatAnchorKey,
+      top: row.getBoundingClientRect().top - viewportTop,
+    })
+  }
+
+  /**
    * Align the nearest available fallback for an unavailable turn anchor.
    * @param turn - minimum turn number for a mounted fallback row.
    * @returns the fallback landing, or null when no eligible row exists.

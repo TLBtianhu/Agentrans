@@ -1125,9 +1125,10 @@ imageRequestTarget(provider: string, model: string, image: ImageAttachmentRef): 
  * Resolve the exact text one durable file occurrence contributes to every
  * provider request in the current execution environment.
  * @param ref - durable verbatim file reference from model history.
+ * @param tools - the complete tool catalog admitted for the model request.
  * @returns the same deterministic handle text used at adapter dispatch.
  */
-fileRequestText(ref: FileAttachmentRef): string
+fileRequestText(ref: FileAttachmentRef, tools?: readonly ToolSchema[]): string
 
 /**
  * Discover models advertised by one registered provider. Catalog membership
@@ -1189,7 +1190,7 @@ async prepareCall( config: LlmCallConfig, signal?: AbortSignal, configure?: Conf
 stream(options: GenerateOptions): AsyncIterable<StreamChunk>
 ```
 
-Types: [FileAttachmentRef](attachment.zh.md) · [ImageAttachmentRef](attachment.zh.md) · [ImageRequestTarget](attachment.zh.md)
+Types: [FileAttachmentRef](attachment.zh.md) · [ImageAttachmentRef](attachment.zh.md) · [ImageRequestTarget](attachment.zh.md) · [ToolSchema](tools.zh.md)
 
 Source: [`packages/llm/llm/src/index.ts`](../../packages/llm/llm/src/index.ts)
 

@@ -64,7 +64,9 @@ Session 对象还承载本地提交回显：`session.beginSubmission` 在调用�
 
 面向用户调用的 `skills/list` 元数据包含胜出提供方可选的指令文件 `path`。输入框可据此预览文件，无需加载每个 skill 的正文或激活冷态 Agent。
 
-Fork 将 `atSeq` 选定的含边界事件前缀（包括开放轮次内的截点）复制到不带 `parentSession` 的独立 Session。客户端占位项同样省略 `parentSessionId`；列表缩进仅适用于 subagent 来源的行，历史普通 fork 即使保留父 ID 也不缩进。工作区绑定及可选标题递增使用本次操作选定的源会话。子会话在合成的 fork 结果和结束事件之前记录继承标记。省略 `atSeq` 时选择最近已结束轮次及其独立尾部，在下一轮次或排队输入之前停止；不存在的事件会被拒绝。聊天操作选择已结束轮次。
+Fork 将 `atSeq` 选定的含边界事件前缀（包括开放轮次内的截点）复制到独立 Session，并在子会话的 header 中记录直接父级。工作区绑定及可选标题递增使用本次操作选定的源会话。子会话在合成的 fork 结果和结束事件之前记录继承标记。省略 `atSeq` 时选择最近已结束轮次及其独立尾部，在下一轮次或排队输入之前停止。不存在的事件会被拒绝。聊天操作选择已结束轮次。
+
+携带 `inquiry` 锚点的开岔请求可附上 UUID `requestId`。请求中断后，使用相同的源 Session、截点、锚点和请求 ID 重试，即可找回原子会话并完成工作区挂载。在同一 Session 中将同一个请求 ID 用于其他截点或锚点时，会返回 `session/fork-inquiry-conflict`。参见[从回答选段开启探究](../../../docs/subsystems/branch.zh.md)。
 
 恢复会话时若已有写句柄占用，返回 `session/writer-held`，并携带会话 id；其他恢复失败仍返回 `gateway/internal`。
 

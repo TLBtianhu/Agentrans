@@ -91,6 +91,8 @@ Artifact extensions can subscribe to one Turn and Node kind through `ChatNodeSto
 
 The completed-turn action footer follows the recorded Turn end. Its action row starts 20px below preceding prose or extension content. Actions remain visible only on the latest Turn when its final visible content is a reply; other endings and historical Turns reveal actions on hover or keyboard focus. Devices without hover keep actions visible. An unavailable branch action opens its explanation on click or tap without creating a branch.
 
+Eligible completed answers offer **Explore a sentence** beside the message actions. It shows how to select a sentence and start an inquiry branch from the selection.
+
 -----
 
 <a id="turn-process-folding"></a>

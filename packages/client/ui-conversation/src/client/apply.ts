@@ -85,6 +85,10 @@ const ABSENT_BLOCK = {
   getSnapshot: (): ComposerBlock | undefined => undefined,
   subscribe: () => () => {},
 }
+const ABSENT_SUBMISSION_BLOCK = {
+  getSnapshot: () => false,
+  subscribe: () => () => {},
+}
 const EMPTY_LEXICON: ReadonlyMap<'/' | '@', readonly string[]> = new Map()
 const ABSENT_LEXICON = {
   getSnapshot: () => EMPTY_LEXICON,
@@ -499,6 +503,7 @@ export function apply(ctx: Context, config: Config = Config({})): void {
           stop: undefined,
           hooks: {
             stopShortcut,
+            submissionBlocked: ABSENT_SUBMISSION_BLOCK,
             busyEnter: submissionPolicy.busyEnter,
             fileUploads: ABSENT_FILE_UPLOADS,
             notices: ABSENT_NOTICES,
@@ -578,6 +583,7 @@ export function apply(ctx: Context, config: Config = Config({})): void {
         stop: () => { stop(sessionId) },
         hooks: {
           stopShortcut,
+          submissionBlocked: composerBlocks.submissionFor(sessionId),
           busyEnter: submissionPolicy.busyEnter,
           fileUploads: conversation.fileUploads,
           notices: shell.notices,

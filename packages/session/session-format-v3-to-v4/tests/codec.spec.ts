@@ -43,6 +43,20 @@ describe('V4 framing and restoration', () => {
     expect(() => releasedV4SessionFormatCodec.decodeHeader({ type: 'session', ...header, extra: 1 })).toThrow(/field|member/)
   })
 
+  it('round trips an inquiry in V4 framing and older framing rejects it before reading body rows', () => {
+    const inquiry = { messageSeq: 1, messageId: 'assistant-1', start: 2, end: 5, excerpt: '😀图' }
+    const child = { ...header, id: 'child', isSeeded: true, parentSession: 'parent', inquiry }
+    const physical = releasedV4SessionFormatCodec.encodeHeader(child, 3)
+    expect(physical).toEqual({ type: 'session', ...child })
+    expect(releasedV4SessionFormatCodec.decodeHeader(physical)).toEqual(child)
+    expect(releasedV4SessionFormatCodec.createDecoder(physical, 'strict').header).toEqual(child)
+    expect(() => releasedV2SessionFormatCodec.createDecoder({ ...physical, version: 2 }, 'recoverable'))
+      .toThrow(/inquiry/)
+    expect(() => releasedV4SessionFormatCodec.decodeHeader({ ...physical, isSeeded: false })).toThrow(/inquiry/)
+    expect(() => releasedV4SessionFormatCodec.decodeHeader({ ...physical, inquiry: { ...inquiry, excerpt: '\uD83D图' } }))
+      .toThrow(/inquiry/)
+  })
+
   it('rejects malformed optional and required native header fields', () => {
     const { id: _id, ...missingId } = header
     const malformed = [

@@ -26,7 +26,7 @@ import {
   type ApiSessionAgentResult,
 } from './agent.ts'
 import type {} from '@agentrans/session-input'
-import { SessionCommandController, hasPromptContent } from './commands.ts'
+import { SessionCommandController, hasPromptContent, type SessionForkPreparation } from './commands.ts'
 import { SessionControlController } from './control.ts'
 import { HistoryController } from './history/controller.ts'
 import { StateController } from './state/controller.ts'
@@ -60,7 +60,7 @@ import type {
   SessionOpenWorkspacePathValue,
   SessionEventsPage, SessionPageRequest, SessionEventFrame, SessionObserveEventRequest,
   SessionProjectionFrame, SessionStateRequest, SessionState, SessionWaitRequest, SessionWaitValue,
-  PromptContextInput, SessionPromptRequest,
+  PromptContextInput, SessionPromptRequest, SessionRequestId,
   SessionPromptValue,
   SessionRenameRequest,
   SessionRenameValue,
@@ -160,6 +160,8 @@ export interface SessionControllerInternals {
   readonly canOpenPath?: () => boolean
 }
 
+type PromptContextResolver = (agent: Agent, value: JsonValue, requestId: SessionRequestId) => readonly TextBlock[]
+
 /** Host service backing the generated `ctx.remote.session` namespace. */
 export class SessionController extends TypertRemoteService {
   static inject = [
@@ -199,7 +201,7 @@ export class SessionController extends TypertRemoteService {
   private readonly openFileApplication: typeof openNativeFileApplication
   private readonly revealPath: (path: string, signal: AbortSignal) => Promise<void>
   private readonly canOpenPath: () => boolean
-  private readonly promptContexts = new Map<string, (agent: Agent, value: import('@agentrans/util-values').JsonValue) => readonly TextBlock[]>()
+  private readonly promptContexts = new Map<string, PromptContextResolver>()
   private readonly promptContextPolicy: ResolvedConfig
   private readonly listWorkSliceMs: number
   private readonly promotions = new Set<Promise<void>>()
@@ -228,14 +230,14 @@ export class SessionController extends TypertRemoteService {
    * @param resolve - synchronous Host validation and model-visible text construction.
    * @returns disposer that withdraws this registration.
    */
-  registerPromptContext(kind: string, resolve: (agent: Agent, value: import('@agentrans/util-values').JsonValue) => readonly TextBlock[]): () => void {
+  registerPromptContext(kind: string, resolve: PromptContextResolver): () => void {
     if (!/^[a-z][a-z0-9._-]{0,79}$/.test(kind)) throw new Error('Invalid prompt context kind')
     if (this.promptContexts.has(kind)) throw new Error(`Prompt context already registered: ${kind}`)
     this.promptContexts.set(kind, resolve)
     return () => { if (this.promptContexts.get(kind) === resolve) this.promptContexts.delete(kind) }
   }
 
-  private resolvePromptContexts(agent: Agent, inputs: readonly PromptContextInput[]): readonly TextBlock[] {
+  private resolvePromptContexts(agent: Agent, inputs: readonly PromptContextInput[], requestId: SessionRequestId): readonly TextBlock[] {
     if (inputs.length === 0) return []
     if (inputs.length > this.promptContextPolicy.maxPromptContexts) {
       throw new RemoteError('session/prompt-context-invalid', 'Too many prompt context selections', { kind: inputs[0]?.kind ?? '', reason: 'COUNT_LIMIT' })
@@ -247,7 +249,7 @@ export class SessionController extends TypertRemoteService {
       }
       const resolve = this.promptContexts.get(input.kind)
       if (resolve === undefined) throw new RemoteError('session/prompt-context-unavailable', 'Selected prompt context is unavailable', { kind: input.kind })
-      try { blocks.push(...resolve(agent, input.value)) } catch (error) {
+      try { blocks.push(...resolve(agent, input.value, requestId)) } catch (error) {
         const refusal = remoteErrorOf(error)
         if (refusal === undefined) throw error
         throw new RemoteError('session/prompt-context-rejected', 'Selected context was rejected before prompt admission', {
@@ -269,7 +271,7 @@ export class SessionController extends TypertRemoteService {
     this.agents = new ApiSessionAgentController(ctx)
     this.agents.initialize()
     this.commands = new SessionCommandController(ctx, this.agents, process.cwd(),
-      (agent, inputs) => this.resolvePromptContexts(agent, inputs))
+      (agent, inputs, requestId) => this.resolvePromptContexts(agent, inputs, requestId))
     ctx.effect(() => ctx.fileUploads.registerAgentResolver(async (sessionId) => {
       const result = await this.agents.resolveAgent(sessionId)
       if ('error' in result) throw result.error
@@ -514,11 +516,11 @@ export class SessionController extends TypertRemoteService {
   }
 
   /**
-   * Fork one cold-readable exact event prefix into a new Session. An omitted
-   * boundary selects the latest completed-turn prefix; an open cut receives
-   * synthetic fork closers.
-   * @param request - source Session, optional exact inclusive event boundary, and migration preflight choice.
-   * @returns the new Session identity.
+   * Fork one exact event prefix from live or persisted history. An omitted
+   * boundary selects the latest completed-turn prefix. An open cut receives synthetic closers.
+   * An identical inquiry retry recovers the child created by a prior attempt.
+   * @param request - Source Session, optional boundary, migration preflight and inquiry retry identity.
+   * @returns The new or recovered Session identity after workspace attachment.
    */
   @Remote('fork')
   async fork(request: SessionForkRequest): Promise<SessionForkValue> {
@@ -531,6 +533,19 @@ export class SessionController extends TypertRemoteService {
       }
     }
     return this.commands.fork(request)
+  }
+
+  /**
+   * Fork one previously validated Session observation with trusted feature preparation.
+   * @param source - Retained source observation carrying the exact prefix.
+   * @param boundary - Existing inclusive event position in that observation.
+   * @param preparation - Child identity, publication commit and retry validation.
+   * @returns A newly prepared or previously verified child, after flush and workspace attachment.
+   */
+  forkObserved(
+    source: SessionObservation, boundary: ReturnType<typeof SessionSeq>, preparation: SessionForkPreparation,
+  ): Promise<SessionForkValue> {
+    return this.commands.forkObserved(source, boundary, preparation)
   }
 
   /**

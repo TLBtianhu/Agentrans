@@ -23,6 +23,10 @@ const nativeSources = [
   { kind: 'timeline', events: [{ id: 'a', label: 'A', time: 0 }] },
   { kind: 'network-graph', nodes: [{ id: 'a', label: 'A', x: 0, y: 0 }], edges: [] },
   { kind: 'map', markers: [{ id: 'a', label: 'A', x: 0, y: 0 }] },
+  {
+    kind: 'csv-bar-chart', attachmentId: `sha256:${'a'.repeat(64)}`, groupBy: 'Trial', aggregate: 'count', rowCount: 1,
+    groups: [{ key: '', value: 1, count: 1 }],
+  },
 ]
 
 describe('Artifact source capabilities', () => {
@@ -31,12 +35,14 @@ describe('Artifact source capabilities', () => {
     const before = JSON.stringify(snapshot)
     const capabilities = getArtifactSourceCapabilities(snapshot)
     const particle = snapshot.spec.kind === 'particle-system'
+    const plot = snapshot.spec.kind === 'function-plot'
+    const csv = snapshot.spec.kind === 'csv-bar-chart'
     expect(capabilities).toEqual({
       observe: particle ? 'particle' : 'unsupported',
       save: particle ? 'particle' : 'unsupported',
       restore: particle ? 'particle' : 'unsupported',
       compare: particle ? 'saved-particle-pair' : 'unsupported',
-      questionContext: particle ? 'particle' : 'unsupported',
+      questionContext: particle ? 'particle' : plot ? 'function-plot' : csv ? 'csv-bar-chart' : 'unsupported',
       exportHtml: particle ? 'particle-checkpoint-or-source-defaults' : 'source-defaults',
     })
     expect(capabilities).toBe(sceneCatalog[snapshot.spec.kind].sourceCapabilities)

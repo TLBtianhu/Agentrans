@@ -1,11 +1,96 @@
 /** Per-session Conversation store shared by the shell body and header. */
 import { defineStore, type EngineStoreHandle } from '@agentrans/client-store'
 import type { SessionId } from '@agentrans/session/types'
+import type { SessionRequestId } from '@agentrans/api-session-controller/types'
+import { deepEqualJson } from '@agentrans/util-values'
 import type { ConversationStoreState } from './contract/views.ts'
 import type { DraftInput, DraftSnapshot } from './contract/draft-editor.ts'
 import { parseStoredDraft } from './draft.ts'
 
 const CONVERSATION_STORE_KEY = 'dsh.conversation'
+const CONTEXT_SUBMISSION_KEY = 'dsh.conversation.prompt'
+
+function initialConversationState(): ConversationStoreState {
+  return { draft: '', view: null, viewRequest: null }
+}
+
+/** Prepare a new Session's draft before a composer or View binds to it. An empty saved draft is a deliberate state. */
+export function writeInitialConversationDraft(sessionId: SessionId, draft: DraftSnapshot): 'saved' | 'preserved' | 'unavailable' {
+  if (typeof localStorage === 'undefined') return 'unavailable'
+  try {
+    const key = `${CONVERSATION_STORE_KEY}.${sessionId}`
+    const raw = localStorage.getItem(key)
+    const value: unknown = raw === null ? undefined : JSON.parse(raw)
+    const stored = typeof value === 'object' && value !== null && !Array.isArray(value) ? value : {}
+    if ('draft' in stored) return 'preserved'
+    localStorage.setItem(key, JSON.stringify({ ...initialConversationState(), ...stored, draft }))
+    return 'saved'
+  } catch {
+    return 'unavailable'
+  }
+}
+
+interface ContextSubmissionMarker {
+  readonly requestId: SessionRequestId
+  readonly digest: string
+}
+
+function contextSubmissionKey(sessionId: SessionId, kind: string): string {
+  return `${CONTEXT_SUBMISSION_KEY}.${sessionId}.${kind}`
+}
+
+/** Fingerprint the semantic draft without saving a second copy of its text or references. */
+export async function draftFingerprint(draft: DraftSnapshot): Promise<string | undefined> {
+  if (typeof crypto === 'undefined' || typeof crypto.subtle === 'undefined') return undefined
+  const normalized = JSON.stringify(draft, (_key, value: unknown) => {
+    if (value === null || typeof value !== 'object' || Array.isArray(value)) return value
+    return Object.fromEntries(Object.keys(value).sort().map(key => [key, (value as Record<string, unknown>)[key]]))
+  })
+  const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(normalized))
+  return Array.from(new Uint8Array(hash), value => value.toString(16).padStart(2, '0')).join('')
+}
+
+/** Save the request correlation before dispatch, without putting attachment data in browser storage. */
+export function recordContextSubmission(sessionId: SessionId, kind: string, marker: ContextSubmissionMarker): void {
+  if (typeof localStorage === 'undefined') return
+  try { localStorage.setItem(contextSubmissionKey(sessionId, kind), JSON.stringify(marker)) } catch (_error) {
+    // Draft persistence may be unavailable in this browser.
+  }
+}
+
+/** Read a previous submission marker scoped to one context provider and Session. */
+export function readContextSubmission(sessionId: SessionId, kind: string): ContextSubmissionMarker | undefined {
+  if (typeof localStorage === 'undefined') return undefined
+  try {
+    const raw = localStorage.getItem(contextSubmissionKey(sessionId, kind))
+    if (raw === null) return undefined
+    const marker: unknown = JSON.parse(raw)
+    if (typeof marker !== 'object' || marker === null || !('requestId' in marker) || !('digest' in marker)
+      || typeof marker.requestId !== 'string' || typeof marker.digest !== 'string' || !/^[a-f0-9]{64}$/u.test(marker.digest)) return undefined
+    return { requestId: marker.requestId as SessionRequestId, digest: marker.digest }
+  } catch (_error) { return undefined }
+}
+
+/** Finish a confirmed recovery without clearing another tab's edited draft or newer submission. */
+export function finishContextSubmission(sessionId: SessionId, kind: string, marker: ContextSubmissionMarker,
+  matchingDraft: DraftSnapshot | undefined): boolean {
+  try {
+    const current = readContextSubmission(sessionId, kind)
+    if (current?.requestId !== marker.requestId || current.digest !== marker.digest) return false
+    let cleared = false
+    if (matchingDraft !== undefined) {
+      const key = `${CONVERSATION_STORE_KEY}.${sessionId}`
+      const raw = localStorage.getItem(key)
+      const stored: unknown = raw === null ? undefined : JSON.parse(raw)
+      if (typeof stored === 'object' && stored !== null && 'draft' in stored && deepEqualJson(parseStoredDraft(stored.draft), matchingDraft)) {
+        localStorage.setItem(key, JSON.stringify({ ...stored, draft: '' }))
+        cleared = true
+      }
+    }
+    localStorage.removeItem(contextSubmissionKey(sessionId, kind))
+    return cleared
+  } catch (_error) { return false }
+}
 
 /** Declared write set for the Conversation shell. */
 type ConversationActions = {
@@ -21,7 +106,7 @@ type ConversationActions = {
  */
 export function createConversationStore(): EngineStoreHandle<ConversationStoreState, ConversationActions> {
   return defineStore({
-    init: (): ConversationStoreState => ({ draft: '', view: null, viewRequest: null }),
+    init: initialConversationState,
     persist: CONVERSATION_STORE_KEY,
     actions: {
       setDraft: (d, text: DraftInput) => { d.draft = text },

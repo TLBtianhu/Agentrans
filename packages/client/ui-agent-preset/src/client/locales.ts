@@ -21,6 +21,8 @@ export type AgentPresetSettingsKey =
   | 'presetMinimalDescription'
   | 'presetCordisName'
   | 'presetCordisDescription'
+  | 'presetChatName'
+  | 'presetChatDescription'
   | 'inUse'
   | 'noDescription'
   | 'brokenBadge'
@@ -57,6 +59,8 @@ export const en: Record<AgentPresetSettingsKey, string> = {
   presetMinimalDescription:
     'The agent uses a terminal and image reading, with context compaction. Useful for testing and comparing its basic performance.',
   presetCordisName: 'Creator mode',
+  presetChatName: 'Chat',
+  presetChatDescription: 'Discuss, explore interactive answers, and analyze uploaded CSV files in the conversation.',
   presetCordisDescription:
     'Customize DSH through conversation. Let the agent write plugins that add features or UI, or combine tools and prompts to create your own mode.',
 
@@ -99,6 +103,8 @@ export const zh: Record<AgentPresetSettingsKey, string> = {
   presetMinimalName: '极简模式',
   presetMinimalDescription: 'Agent 使用终端和图片读取工具，并支持上下文压缩，适合测试和对比其基础表现。',
   presetCordisName: '创造模式',
+  presetChatName: '对话',
+  presetChatDescription: '在对话中讨论问题、探索交互式回答，并分析上传的 CSV 文件。',
   presetCordisDescription: '用对话定制 DSH：让 Agent 编写插件，添加新功能或界面；也能组合工具和提示词，创建自己的模式。',
 
   inUse: '新任务默认',
@@ -144,6 +150,8 @@ export const ja = {
   'presetMinimalName': '最小モード',
   'presetMinimalDescription': 'エージェントはターミナルと画像読み取りを使用し、コンテキスト圧縮にも対応します。基本的な性能のテストや比較に役立ちます。',
   'presetCordisName': 'クリエイターモード',
+  presetChatName: 'チャット',
+  presetChatDescription: '会話で質問を検討し、対話型の回答を操作したり、アップロードした CSV ファイルを分析したりできます。',
   'presetCordisDescription': '会話を通じて DSH をカスタマイズします。機能や UI を追加するプラグインをエージェントに書かせたり、ツールとプロンプトを組み合わせて独自のモードを作成したりできます。',
   'inUse': '新しいタスクの既定',
   'noDescription': '説明はありません。',
@@ -182,6 +190,8 @@ export const es = {
   presetMinimalDescription:
     'El agente utiliza un terminal y lectura de imágenes, con compactación de contexto. Útil para probar y comparar su rendimiento básico.',
   presetCordisName: 'Modo creador',
+  presetChatName: 'Chat',
+  presetChatDescription: 'Haz preguntas, explora respuestas interactivas y analiza archivos CSV en la conversación.',
   presetCordisDescription:
     'Personaliza DSH a través de la conversación. Deje que el agente escriba complementos que agreguen funciones o interfaz de usuario, o combine herramientas e indicaciones para crear su propio modo.',
 
@@ -227,6 +237,8 @@ export const fr = {
   presetMinimalDescription:
     "L'agent utilise un terminal et une lecture d'image, avec compactage du contexte. Utile pour tester et comparer ses performances de base.",
   presetCordisName: 'Mode Créateur',
+  presetChatName: 'Discussion',
+  presetChatDescription: 'Discutez, explorez des réponses interactives et analysez les fichiers CSV importés dans la conversation.',
   presetCordisDescription:
     "Personnalisez DSH via la conversation. Laissez l'agent écrire des plugins qui ajoutent des fonctionnalités ou une interface utilisateur, ou combinez des outils et des invites pour créer votre propre mode.",
 
@@ -272,6 +284,8 @@ export const de = {
   presetMinimalDescription:
     'Der Agent verwendet ein Terminal und das Lesen von Bildern mit Kontextkomprimierung. Nützlich zum Testen und Vergleichen der Grundleistung.',
   presetCordisName: 'Erstellermodus',
+  presetChatName: 'Chat',
+  presetChatDescription: 'Stelle Fragen, erkunde interaktive Antworten und analysiere hochgeladene CSV-Dateien im Gespräch.',
   presetCordisDescription:
     'Passen Sie DSH durch Gespräche an. Lassen Sie den Agenten Plugins schreiben, die Funktionen oder Benutzeroberflächen hinzufügen, oder kombinieren Sie Tools und Eingabeaufforderungen, um Ihren eigenen Modus zu erstellen.',
 
@@ -317,6 +331,8 @@ export const ru = {
   presetMinimalDescription:
     'Агент использует терминал и чтение изображений со сжатием контекста. Полезно для тестирования и сравнения его базовой производительности.',
   presetCordisName: 'Режим автора',
+  presetChatName: 'Чат',
+  presetChatDescription: 'Обсуждайте вопросы, изучайте интерактивные ответы и анализируйте загруженные CSV-файлы в чате.',
   presetCordisDescription:
     'Настройте DSH через разговор. Позвольте агенту писать плагины, которые добавляют функции или пользовательский интерфейс, или комбинируйте инструменты и подсказки для создания собственного режима.',
 
@@ -362,6 +378,8 @@ export const pt = {
   presetMinimalDescription:
     'O agente utiliza terminal e leitura de imagens, com compactação de contexto. Útil para testar e comparar seu desempenho básico.',
   presetCordisName: 'Modo criador',
+  presetChatName: 'Conversa',
+  presetChatDescription: 'Converse, explore respostas interativas e analise arquivos CSV enviados na conversa.',
   presetCordisDescription:
     'Personalize DSH por meio de conversa. Deixe o agente escrever plug-ins que adicionem recursos ou UI, ou combine ferramentas e prompts para criar seu próprio modo.',
 

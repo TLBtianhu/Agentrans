@@ -4,13 +4,14 @@ import { tmpdir } from 'node:os'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { Context } from '@agentrans/cordis'
 import AgentRegistry, { type Agent } from '@agentrans/agent'
-import SessionStore, { SessionId, SessionLogOffset, type SessionEvent } from '@agentrans/session'
+import SessionStore, { SessionId, SessionLogOffset, SessionSeq, type SessionEvent } from '@agentrans/session'
 import SessionProjectionRegistry from '@agentrans/session-projection'
 import LocalAttachmentStore from '@agentrans/attachment-local'
 import { AttachmentError } from '@agentrans/attachment'
 import ArtifactService from '@agentrans/artifact'
-import type { ArtifactId, ArtifactObservationId } from '@agentrans/artifact/types'
-import type { ParticleSystemSpec } from '@agentrans/artifact/scene'
+import type { ArtifactId, ArtifactObservationId, ArtifactPlotContinuation, SceneArtifactSnapshot } from '@agentrans/artifact/types'
+import type { FunctionPlotSpec, ParticleSystemSpec } from '@agentrans/artifact/scene'
+import { analyzeFunctionPlotSelection } from '@agentrans/artifact/scene-renderers'
 import ArtifactExports, { type Config } from '../src/index.ts'
 import type { ArtifactExportId, ArtifactHtmlExportRequest } from '../src/types.ts'
 import { recordSchema } from '../src/schema.ts'
@@ -75,6 +76,39 @@ function records(ctx: Context, agent: Agent) {
   return ctx.sessionProjections.snapshot(agent.session).values.artifactExports
 }
 
+function continuedPlot(ctx: Context, agent: Agent) {
+  const spec: FunctionPlotSpec = {
+    kind: 'function-plot',
+    functions: [
+      { id: 'line', label: 'Reference line', expression: 'x' },
+      { id: 'quadratic', label: 'Selected quadratic', expression: 'a*x^2' },
+    ],
+    parameters: { a: { value: 1, min: 1, max: 3, step: 0.25 } },
+    viewport: { x: [-2, 2], y: [-2, 6] }, trace: { x: 0, derivative: true, integral: true },
+  }
+  const conditions = { functionId: 'quadratic', x: 3, parameters: { a: 1.25 } }
+  const values = analyzeFunctionPlotSelection(spec, conditions)
+  if (values === undefined) throw new Error('Expected valid locked conditions')
+  const baseline = { ...conditions, values }
+  const artifact: SceneArtifactSnapshot = {
+    artifactId: 'continued-plot' as ArtifactId, revision: 1, title: 'Continued experiment', format: 'scene', presentation: 'inline', spec,
+    continuation: {
+      source: { sessionId: SessionId('returned-plot'), eventSeq: SessionSeq(3),
+        messageId: 'plot-return' as ArtifactPlotContinuation['source']['messageId'], artifactId: 'original-plot' as ArtifactId, revision: 1 },
+      baseline,
+    },
+  }
+  ctx.artifacts.commit(agent, artifact)
+  return { artifact, baseline, spec }
+}
+
+function plotExportOrigin(bytes: Uint8Array): unknown {
+  const html = Buffer.from(bytes).toString('utf8')
+  const origin = /<script type="application\/json" id="artifact-export-origin-data">([^<]+)<\/script>/u.exec(html)?.[1]
+  if (origin === undefined) throw new Error('Expected a frozen source in the export')
+  return JSON.parse(origin)
+}
+
 describe('fixed-input HTML exports', () => {
   it('stores original saved source and exact replay point, then reads the same file after cold replay', async () => {
     const { ctx, agent, session, service, root, steer, inject } = await setup()
@@ -134,6 +168,23 @@ describe('fixed-input HTML exports', () => {
     await expect(service.create(agent, request('new-stale'))).rejects.toMatchObject({ code: 'artifact-export/source-unavailable', details: { reason: 'STALE_REVISION' } })
   })
 
+  it('exports an exact earlier revision after cold replay', async () => {
+    const { ctx, agent, session, root } = await setup()
+    revise(ctx, agent)
+    const restored = await setup({}, session.snapshotEvents(), root)
+    const selected = {
+      exportId: 'original-revision' as ArtifactExportId, format: 'html', source: { kind: 'revision', artifactId: id, revision: 1 },
+    } satisfies ArtifactHtmlExportRequest
+    const result = await restored.service.create(restored.agent, selected)
+    expect(result).toMatchObject({ status: 'ready', request: selected,
+      frozen: { artifact: { title: 'Saved experiment A', revision: 1 }, checkpoint: { stepCount: 0 } } })
+    expect(Buffer.from(await restored.service.read(restored.agent, selected.exportId)).toString('utf8')).not.toContain('Changed experiment B')
+    await expect(restored.service.create(restored.agent, { ...selected, source: { ...selected.source, revision: 2 } }))
+      .rejects.toMatchObject({ code: 'artifact-export/request-conflict' })
+    await expect(restored.service.create(restored.agent, { ...selected, exportId: 'unknown-revision' as ArtifactExportId,
+      source: { ...selected.source, revision: 3 } })).rejects.toMatchObject({ code: 'artifact-export/source-unavailable', details: { reason: 'NOT_FOUND' } })
+  })
+
   it('leaves a failed admission flush pending and only an explicit retry continues the frozen source', async () => {
     const { ctx, agent, service, flush } = await setup()
     const save = vi.spyOn(ctx.attachments, 'saveFile')
@@ -146,6 +197,72 @@ describe('fixed-input HTML exports', () => {
     expect(records(restored.ctx, restored.agent)?.['export-a']?.status).toBe('pending')
     await expect(service.create(agent, request())).resolves.toMatchObject({ status: 'ready', frozen: { artifact: { revision: 1 } } })
     expect(save).toHaveBeenCalledTimes(1)
+  })
+
+  it('restores the locked function and parameters of a pending continuation after its source evolves', async () => {
+    const { ctx, agent, service, session, root, flush } = await setup()
+    const { artifact, baseline, spec } = continuedPlot(ctx, agent)
+    const source = { kind: 'current', artifactId: artifact.artifactId, revision: 1 } as const
+    const request: ArtifactHtmlExportRequest = { exportId: 'continued-pending' as ArtifactExportId, format: 'html', source }
+    flush.mockRejectedValueOnce(new Error('pending flush failed'))
+    await expect(service.create(agent, request)).rejects.toThrow('pending flush failed')
+    const pending = records(ctx, agent)?.[request.exportId]
+    expect(pending).toMatchObject({ status: 'pending', frozen: { exporterVersion: 2, parameters: 'function-plot-baseline',
+      functionPlotBaseline: baseline, artifact: { revision: 1, spec } } })
+    ctx.artifacts.commit(agent, ctx.artifacts.prepare(agent, {
+      action: 'update', artifactId: artifact.artifactId, title: 'Evolved experiment', presentation: 'inline', format: 'scene', baseRevision: 1,
+      spec: { ...spec, parameters: { a: { ...spec.parameters['a']!, value: 2 } } },
+    }))
+    const restored = await setup({}, session.snapshotEvents(), root)
+    expect(records(restored.ctx, restored.agent)?.[request.exportId]).toEqual(pending)
+    const ready = await restored.service.create(restored.agent, request)
+    expect(ready).toMatchObject({ status: 'ready', frozen: pending?.frozen })
+    expect(plotExportOrigin(await restored.service.read(restored.agent, request.exportId))).toMatchObject({
+      exportId: request.exportId, sessionId: session.id, artifactId: artifact.artifactId, revision: 1,
+      exporterVersion: 2, functionPlotBaseline: baseline,
+    })
+    const historical: ArtifactHtmlExportRequest = { ...request, exportId: 'continued-historical' as ArtifactExportId,
+      source: { ...source, kind: 'revision' } }
+    await expect(restored.service.create(restored.agent, historical)).resolves.toMatchObject({
+      status: 'ready', frozen: { exporterVersion: 2, artifact: { revision: 1, spec }, functionPlotBaseline: baseline },
+    })
+    await expect(restored.service.create(restored.agent, { ...request, exportId: 'evolved' as ArtifactExportId,
+      source: { ...source, revision: 2 } })).resolves.toMatchObject({
+      status: 'ready', frozen: { exporterVersion: 1, parameters: 'source-defaults', artifact: { revision: 2 } },
+    })
+  })
+
+  it('preserves source defaults when reopening a version 1 continuation export', async () => {
+    const { ctx, agent, session, root } = await setup()
+    const { artifact } = continuedPlot(ctx, agent)
+    const request: ArtifactHtmlExportRequest = { exportId: 'legacy-plot' as ArtifactExportId, format: 'html',
+      source: { kind: 'current', artifactId: artifact.artifactId, revision: 1 } }
+    session.append('artifact/export', { request, status: 'pending',
+      frozen: { sessionId: session.id, artifact, exporterVersion: 1, parameters: 'source-defaults' } })
+    const restored = await setup({}, session.snapshotEvents(), root)
+    const ready = await restored.service.create(restored.agent, request)
+    expect(ready).toMatchObject({ status: 'ready', frozen: { exporterVersion: 1, parameters: 'source-defaults' } })
+    const bytes = await restored.service.read(restored.agent, request.exportId)
+    const origin = plotExportOrigin(bytes)
+    expect(origin).toEqual({ exporterVersion: 1, exportId: request.exportId, sessionId: session.id,
+      artifactId: artifact.artifactId, revision: 1 })
+  })
+
+  it('rejects incompatible versions and unverified function plot baselines in the stored record', async () => {
+    const { ctx, agent, service } = await setup()
+    const { artifact, baseline } = continuedPlot(ctx, agent)
+    const record = await service.create(agent, { exportId: 'schema-plot' as ArtifactExportId, format: 'html',
+      source: { kind: 'current', artifactId: artifact.artifactId, revision: 1 } })
+    expect(recordSchema.parse(record)).toEqual(record)
+    for (const invalid of [
+      { exporterVersion: 1 },
+      { parameters: 'source-defaults' },
+      { functionPlotBaseline: undefined },
+      { functionPlotBaseline: { ...baseline, functionId: 'missing' } },
+      { functionPlotBaseline: { ...baseline, values: { ...baseline.values, derivative: 0 } } },
+    ]) {
+      expect(recordSchema.safeParse({ ...record, frozen: { ...record.frozen, ...invalid } }).success).toBe(false)
+    }
   })
 
   it('recovers a file-ready receipt after its flush response fails without regenerating the file', async () => {

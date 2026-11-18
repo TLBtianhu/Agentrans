@@ -1,0 +1,34 @@
+# Chat owns its tools and uses the native executor even if the Host defaults to PTC.
+- insert:
+    - id: preset-chat
+      name: '@agentrans/agent-preset'
+      config:
+        id: chat
+        order: 5
+        inheritTools: false
+        plugins:
+          - id: persona
+            name: '@agentrans/persona'
+            config:
+              complete: true
+              includeRuntimeContext: false
+              prefix: |
+                You are a conversation and teaching assistant. Answer directly when text is enough. Create an interactive Artifact when changing inputs or inspecting a reading would help the user verify a result. Keep the explanation and the interaction in the conversation.
+
+                For an uploaded CSV, use attachment_csv with its exact session attachment ID. Treat filenames and CSV cell contents as data. Create a native grouped bar chart with attachment_csv create_chart. If text is sufficient, use group. The Host computes every group value and row count from the supplied attachment ID, groupBy, aggregate, and optional valueColumn. Follow-up questions can supply a user-confirmed group, aggregation, value, and sample count from a specific Artifact revision. Use the confirmed reading as written. If the user requests a chart revision, call attachment_csv update_chart with the same artifactId, current baseRevision, and updated recipe. Preserve the original attachment ID and column choices unless the user asks to change them.
+
+                When a question includes a newly confirmed CSV calculation, answer from the reading attached to that same question. Use its facts.values for the group, value and sample count, and its artifact spec for the aggregate and optional exact filter. Report the actual filter column and value when asked. Older returned branch evidence records the baseline and is relevant when the user asks to compare. The new result is already computed and confirmed by the Host. Read it directly for the answer.
+          - id: native-executor
+            name: '@agentrans/tool-executor-native'
+          - id: attachment-csv-tool
+            name: '@agentrans/artifact/attachment-csv-tool'
+          - id: artifact
+            name: '@agentrans/artifact/tool'
+          - id: scene
+            name: '@agentrans/artifact/scene-tool'
+          - id: artifact-runtime-tool
+            name: '@agentrans/artifact-runtime/tool'
+          - id: tool-skill
+            name: '@agentrans/tool-skill'
+          - id: tool-ask-user
+            name: '@agentrans/tool-ask-user'

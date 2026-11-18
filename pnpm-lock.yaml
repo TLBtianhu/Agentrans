@@ -1985,6 +1985,12 @@ importers:
       '@agentrans/schemastery':
         specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
+      papaparse:
+        specifier: 5.7.0
+        version: 5.7.0
+      yaml:
+        specifier: ^2.4.2
+        version: 2.9.0
       zod:
         specifier: 4.4.3
         version: 4.4.3
@@ -1992,6 +1998,9 @@ importers:
       '@agentrans/agent':
         specifier: workspace:*
         version: link:../../core/agent
+      '@agentrans/attachment':
+        specifier: workspace:*
+        version: link:../../attachment/attachment
       '@agentrans/brand':
         specifier: workspace:*
         version: link:../../util/brand
@@ -2016,6 +2025,9 @@ importers:
       '@agentrans/session-projection':
         specifier: workspace:*
         version: link:../../session/session-projection
+      '@agentrans/skill':
+        specifier: workspace:*
+        version: link:../../skill/skill
       '@agentrans/system-prompt':
         specifier: workspace:*
         version: link:../../core/system-prompt
@@ -2034,6 +2046,9 @@ importers:
       '@agentrans/util-values':
         specifier: workspace:*
         version: link:../../util/values
+      '@types/papaparse':
+        specifier: ^5.3.16
+        version: 5.5.2
 
   packages/artifact/artifact-branch:
     dependencies:
@@ -2050,6 +2065,12 @@ importers:
       '@agentrans/artifact':
         specifier: workspace:*
         version: link:../artifact
+      '@agentrans/artifact-followup':
+        specifier: workspace:*
+        version: link:../artifact-followup
+      '@agentrans/brand':
+        specifier: workspace:*
+        version: link:../../util/brand
       '@agentrans/cordis':
         specifier: workspace:~
         version: link:../../../vendor/cordis
@@ -2163,6 +2184,15 @@ importers:
       '@agentrans/session-projection':
         specifier: workspace:*
         version: link:../../session/session-projection
+      '@agentrans/storage':
+        specifier: workspace:*
+        version: link:../../storage/storage
+      '@agentrans/storage-domain':
+        specifier: workspace:*
+        version: link:../../storage/storage-domain
+      '@agentrans/storage-json':
+        specifier: workspace:*
+        version: link:../../storage/storage-json
       '@agentrans/typert-protocol':
         specifier: workspace:*
         version: link:../../typert/protocol
@@ -3555,6 +3585,9 @@ importers:
       '@agentrans/tool-cordis':
         specifier: workspace:*
         version: link:../../extensions/tool-cordis
+      '@agentrans/tool-executor-native':
+        specifier: workspace:*
+        version: link:../../core/tool-executor-native
       '@agentrans/tool-executor-ptc':
         specifier: workspace:*
         version: link:../../core/tool-executor-ptc
@@ -4370,6 +4403,9 @@ importers:
       '@agentrans/tool-executor-ptc':
         specifier: workspace:*
         version: link:../../core/tool-executor-ptc
+      '@agentrans/util-crypto':
+        specifier: workspace:*
+        version: link:../../util/crypto
       '@agentrans/util-values':
         specifier: workspace:*
         version: link:../../util/values

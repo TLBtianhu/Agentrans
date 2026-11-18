@@ -660,6 +660,13 @@ register(definition: ToolDefinition, options: ToolRegistrationOptions = {}): () 
 restrict(filter: ToolRestriction): () => void
 
 /**
+ * Hide tools from layers outside the calling scope for it and its descendants.
+ * Tools registered inside the scope remain available.
+ * @returns the disposer that re-enables inheritance for this scope.
+ */
+isolateInherited(): () => void
+
+/**
  * Look up a tool as one scope sees it (scoped
  * shadows global; a restricted-away global reads as absent). Presenters pass
  * the calling agent so the rendered card matches the definition that

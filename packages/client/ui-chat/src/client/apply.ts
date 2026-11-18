@@ -77,7 +77,7 @@ export const CHAT_NODE_INJECT: ChatNodeInjected = {
 
 /** Services required by the Chat target and its presentation registrations. */
 export const inject = [
-  'slots', 'sessions', 'uiWorkspace', 'uiSession', 'uiConversation', 'locale',
+  'slots', 'sessions', 'uiWorkspace', 'uiSession', 'uiConversation', 'conversation', 'locale',
   'configForms', 'connection', 'remote', 'remote.session', 'sidebarRight', 'fileDrag',
 ]
 
@@ -297,6 +297,11 @@ export function apply(ctx: Context): void {
               else chatScrollPositions.set(sessionId, position)
             },
             read: () => chatScrollPositions.get(sessionId) ?? null,
+          },
+          forkInquiry: async ({ atSeq, inquiry }, requestId) => {
+            const childId = await ctx.sessions.fork({ sessionId, atSeq, inquiry, requestId,
+              onCreated: (id) => { ctx.conversation.input.prefillQuoteDraft(id, inquiry.excerpt) } })
+            ctx.uiWorkspace.openSession(childId)
           },
           forkAt: (seq) => {
             const turn = [...chat.getSnapshot().timeline.turns.values()].find(turn => turn.end?.seq === seq)

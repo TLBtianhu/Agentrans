@@ -9,6 +9,7 @@ import type {
   SessionControlFrame,
   SessionBranchResultRequest,
   SessionBranchResultValue,
+  SessionForkRequest,
   SessionProjectionHints,
   SessionRenameValue,
   SessionSummary,
@@ -557,18 +558,14 @@ export class SessionManager {
    * preserve it or lower it after an exact cut before the first `turn/start`.
    * The child records the source as its direct parent without becoming a subagent.
    * A child published before Workspace attachment fails is also reconciled into the list.
-   * @param opts - source session, optional exact inclusive boundary seq, and permission to start migration.
+   * @param opts - Source Session, cut, optional inquiry request identity and migration permission.
    * @returns the fork result (the child session id).
    */
   async fork(
-    opts: { sessionId: SessionId; atSeq?: SessionSeq; allowMigration?: boolean },
+    opts: SessionForkRequest,
   ): Promise<RemoteResult<{ sessionId: SessionId }>> {
     const source = this.summaries.find(s => s.sessionId === opts.sessionId)
-    const result = await this.remote.session.fork({
-      sessionId: opts.sessionId,
-      ...opts.atSeq === undefined ? {} : { atSeq: opts.atSeq },
-      ...opts.allowMigration === undefined ? {} : { allowMigration: opts.allowMigration },
-    })
+    const result = await this.remote.session.fork(opts)
     const childId = result.ok
       ? result.value.sessionId
       : workspaceAttachSessionId(result.error)
@@ -576,6 +573,7 @@ export class SessionManager {
       this.recordMutation({ kind: 'placeholder', summary: { agentAvailable: true,
         sessionId: childId, updatedAt: Date.now(), running: false, blank: true,
         parentSessionId: opts.sessionId,
+        ...(result.ok && opts.inquiry !== undefined ? { inquiry: opts.inquiry } : {}),
         ...(source?.cwd !== undefined ? { cwd: source.cwd } : {}),
       } })
     }
@@ -813,7 +811,7 @@ export class SessionManager {
       if (
         prev !== undefined && prev.updatedAt === entry.updatedAt && prev.running === entry.running
         && prev.blank === entry.blank
-        && prev.parentSessionId === entry.parentSessionId && prev.cwd === entry.cwd
+        && prev.parentSessionId === entry.parentSessionId && prev.cwd === entry.cwd && prev.inquiry === entry.inquiry
         && prev.origin === entry.origin && prev.title === entry.title && prev.depth === entry.depth
         && prev.formatStatus === entry.formatStatus
         && prev.projectionValues === entry.projectionValues
@@ -860,10 +858,11 @@ function applyMutation(summaries: readonly SessionSummary[], mutation: SessionLi
         ...(existing.cwd === undefined && mutation.summary.cwd !== undefined ? { cwd: mutation.summary.cwd } : {}),
         ...(existing.parentSessionId === undefined && mutation.summary.parentSessionId !== undefined
           ? { parentSessionId: mutation.summary.parentSessionId } : {}),
+        ...(existing.inquiry === undefined && mutation.summary.inquiry !== undefined ? { inquiry: mutation.summary.inquiry } : {}),
         ...(existing.origin === undefined && mutation.summary.origin !== undefined
           ? { origin: mutation.summary.origin } : {}),
       }
-      if (filled.cwd === existing.cwd && filled.parentSessionId === existing.parentSessionId
+      if (filled.cwd === existing.cwd && filled.parentSessionId === existing.parentSessionId && filled.inquiry === existing.inquiry
         && filled.origin === existing.origin && filled.blank === existing.blank
         && filled.agentAvailable === existing.agentAvailable && filled.running === existing.running
         && filled.formatStatus === existing.formatStatus

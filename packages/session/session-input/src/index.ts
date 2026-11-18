@@ -101,6 +101,16 @@ export class SessionInputAdmission extends Service {
   }
 
   /**
+   * Check whether this Session has reserved a prompt identity.
+   * @param sessionId - Session receiving the prompt.
+   * @param requestId - Original RPC request identity.
+   * @returns Whether admission is still in flight.
+   */
+  hasPendingPrompt(sessionId: SessionId, requestId: SessionInputRequestId): boolean {
+    return this.pending.get(sessionId)?.has(`rpc:${requestId}`) ?? false
+  }
+
+  /**
    * Admit one already-identified message or return its original acceptance before current-source validation.
    * Delivery mode applies only once; a cold retry cannot change delivery or detect a mode-only difference.
    * @param agent - Exact live Agent; this method never resumes or activates another Agent.

@@ -691,6 +691,8 @@ declare class Session {
 
 显式 `boundary` 允许调用者从任意稳定的轮次间位置 fork，包括之前的 `turn/end` 或更晚的独立纯日志事件，即使源会话有更新的事件或正在进行的轮次。API 拒绝结束于开放轮次内的前缀，而不是静默截断。`@agentrans/subagent-fork-in-process` 保留其已完成前缀截断逻辑，因为工具调用时的委托通常在父轮次仍然打开时启动；普通的会话分支应显式指定请求的 boundary。
 
+对于已校验的 Session 观察，Host 专用的 `sessionController.forkObserved` 使用 `SessionForkPreparation` 携带重试时复用的子 Session id，按需在发布子分支时提交功能状态，并校验之前尝试创建的子分支。普通分支流程负责预设、工作区和继承前缀。
+
 <a id="why-a-turn-ended-turnendreasonmap"></a>
 
 ## 轮次的结束原因：`TurnEndReasonMap`
@@ -879,7 +881,7 @@ Host service backing the generated `ctx.remote.session` namespace.
  * @param resolve - synchronous Host validation and model-visible text construction.
  * @returns disposer that withdraws this registration.
  */
-registerPromptContext(kind: string, resolve: (agent: Agent, value: import('@agentrans/util-values').JsonValue) => readonly TextBlock[]): () => void
+registerPromptContext(kind: string, resolve: PromptContextResolver): () => void
 
 /**
  * Resolve or resume one ordinary Session for another Host API domain.
@@ -970,13 +972,22 @@ workspaceDesktop(): { name: string; available: boolean; fileManager: 'finder' | 
 @Remote('rename') rename(request: SessionRenameRequest): Promise<SessionRenameValue>
 
 /**
- * Fork one cold-readable exact event prefix into a new Session. An omitted
- * boundary selects the latest completed-turn prefix; an open cut receives
- * synthetic fork closers.
- * @param request - source Session, optional exact inclusive event boundary, and migration preflight choice.
- * @returns the new Session identity.
+ * Fork one exact event prefix from live or persisted history. An omitted
+ * boundary selects the latest completed-turn prefix. An open cut receives synthetic closers.
+ * An identical inquiry retry recovers the child created by a prior attempt.
+ * @param request - Source Session, optional boundary, migration preflight and inquiry retry identity.
+ * @returns The new or recovered Session identity after workspace attachment.
  */
 @Remote('fork') async fork(request: SessionForkRequest): Promise<SessionForkValue>
+
+/**
+ * Fork one previously validated Session observation with trusted feature preparation.
+ * @param source - Retained source observation carrying the exact prefix.
+ * @param boundary - Existing inclusive event position in that observation.
+ * @param preparation - Child identity, publication commit and retry validation.
+ * @returns A newly prepared or previously verified child, after flush and workspace attachment.
+ */
+forkObserved( source: SessionObservation, boundary: ReturnType<typeof SessionSeq>, preparation: SessionForkPreparation, ): Promise<SessionForkValue>
 
 /**
  * Return one user-confirmed assistant conclusion to the direct parent without starting a model turn.
@@ -1090,7 +1101,7 @@ workspaceDesktop(): { name: string; available: boolean; fileManager: 'finder' | 
 @Remote({ mode: 'stream' }) async *control(signal: AbortSignal): AsyncIterable<SessionControlFrame>
 ```
 
-Types: [Agent](core.zh.md) · [SessionBranchResultRequest](branch.zh.md) · [SessionBranchResultValue](branch.zh.md) · [SessionId](core.zh.md) · [SessionSearchRequest](session-query.zh.md) · [TextBlock](llm-streaming.zh.md)
+Types: [SessionBranchResultRequest](branch.zh.md) · [SessionBranchResultValue](branch.zh.md) · [SessionId](core.zh.md) · [SessionObservation](session-query.zh.md) · [SessionSearchRequest](session-query.zh.md)
 
 Source: [`packages/api/session-controller/src/index.ts`](../../packages/api/session-controller/src/index.ts)
 
@@ -1120,6 +1131,14 @@ async run<T>(sessionId: SessionId, identity: SessionInputIdentity, input: T, job
  * @returns Whether the original input was accepted, even if its queue item was edited or canceled.
  */
 hasPromptReceipt(agent: Agent, requestId: SessionInputRequestId): boolean
+
+/**
+ * Check whether this Session has reserved a prompt identity.
+ * @param sessionId - Session receiving the prompt.
+ * @param requestId - Original RPC request identity.
+ * @returns Whether admission is still in flight.
+ */
+hasPendingPrompt(sessionId: SessionId, requestId: SessionInputRequestId): boolean
 
 /**
  * Admit one already-identified message or return its original acceptance before current-source validation.

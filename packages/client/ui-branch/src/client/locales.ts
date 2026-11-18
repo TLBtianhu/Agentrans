@@ -3,6 +3,8 @@
 /** Simplified Chinese dictionary (the key-set source of truth). */
 export const zh = {
   'result.return': '回流到父分支',
+  'inquiry.paths': '探究分支',
+  'inquiry.open': '打开探究分支',
   'result.preview': '将以下结论回流到父分支：',
   'result.confirm': '确认回流',
   'result.cancel': '取消',
@@ -18,6 +20,8 @@ export type BranchKey = keyof typeof zh
 /** English dictionary, checked complete against the zh key set. */
 export const en = {
   'result.return': 'Return to parent branch',
+  'inquiry.paths': 'Inquiry branches',
+  'inquiry.open': 'Open inquiry branch',
   'result.preview': 'Return this conclusion to the parent branch:',
   'result.confirm': 'Confirm return',
   'result.cancel': 'Cancel',
@@ -30,6 +34,8 @@ export const en = {
 /** Japanese copy, checked against the zh key set. */
 export const ja = {
   'result.return': '親ブランチへ戻す',
+  'inquiry.paths': '探究ブランチ',
+  'inquiry.open': '探究ブランチを開く',
   'result.preview': 'この結論を親ブランチへ戻します：',
   'result.confirm': '戻すことを確認',
   'result.cancel': 'キャンセル',
@@ -42,6 +48,8 @@ export const ja = {
 /** Spanish copy, checked against the zh key set. */
 export const es = {
   'result.return': 'Devolver a la rama principal',
+  'inquiry.paths': 'Ramas de exploración',
+  'inquiry.open': 'Abrir rama de exploración',
   'result.preview': 'Devolver esta conclusión a la rama principal:',
   'result.confirm': 'Confirmar devolución',
   'result.cancel': 'Cancelar',
@@ -54,6 +62,8 @@ export const es = {
 /** French copy, checked against the zh key set. */
 export const fr = {
   'result.return': 'Renvoyer vers la branche parente',
+  'inquiry.paths': 'Branches d’exploration',
+  'inquiry.open': 'Ouvrir la branche d’exploration',
   'result.preview': 'Renvoyer cette conclusion vers la branche parente :',
   'result.confirm': 'Confirmer le renvoi',
   'result.cancel': 'Annuler',
@@ -66,6 +76,8 @@ export const fr = {
 /** German copy, checked against the zh key set. */
 export const de = {
   'result.return': 'An übergeordneten Branch zurückgeben',
+  'inquiry.paths': 'Erkundungszweige',
+  'inquiry.open': 'Erkundungszweig öffnen',
   'result.preview': 'Dieses Ergebnis an den übergeordneten Branch zurückgeben:',
   'result.confirm': 'Rückgabe bestätigen',
   'result.cancel': 'Abbrechen',
@@ -78,6 +90,8 @@ export const de = {
 /** Russian copy, checked against the zh key set. */
 export const ru = {
   'result.return': 'Вернуть в родительскую ветку',
+  'inquiry.paths': 'Ветки исследования',
+  'inquiry.open': 'Открыть ветку исследования',
   'result.preview': 'Вернуть этот вывод в родительскую ветку:',
   'result.confirm': 'Подтвердить возврат',
   'result.cancel': 'Отмена',
@@ -90,6 +104,8 @@ export const ru = {
 /** Portuguese copy, checked against the zh key set. */
 export const pt = {
   'result.return': 'Devolver à ramificação principal',
+  'inquiry.paths': 'Ramificações de exploração',
+  'inquiry.open': 'Abrir ramificação de exploração',
   'result.preview': 'Devolver esta conclusão à ramificação principal:',
   'result.confirm': 'Confirmar devolução',
   'result.cancel': 'Cancelar',

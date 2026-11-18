@@ -31,9 +31,25 @@ import type {
   DraftAttachmentId, DraftAttachmentSerializationResult, SessionInputResolver, SubmitAttachment, DefaultSubmitOutcome,
 } from './contract/input.ts'
 import type { JsonValue } from '@agentrans/util-values'
-import { snapshotJsonValue, deepFreeze } from '@agentrans/util-values'
-import type { PromptContextInput } from '@agentrans/api-session-controller/types'
+import { snapshotJsonValue, deepEqualJson, deepFreeze } from '@agentrans/util-values'
+import type { PromptContextInput, SessionRequestId } from '@agentrans/api-session-controller/types'
 import type { InputSubmitMode } from './contract/composer-submission.ts'
+import type { InputHub } from './input/hub.ts'
+import { draftFingerprint, finishContextSubmission, readContextSubmission, readConversationDraft, recordContextSubmission } from './stores.ts'
+
+type PromptContextAcceptance = (sessionId: SessionId, value: JsonValue, requestId: SessionRequestId) => void
+type PromptContextPreparation = (sessionId: SessionId, value: JsonValue, requestId: SessionRequestId,
+  signal?: AbortSignal) => Promise<boolean>
+const promptContextRecovery = {
+  untracked: 'untracked', accepted: 'accepted', unconfirmed: 'unconfirmed', pending: 'pending',
+} as const
+type PromptContextRecovery = typeof promptContextRecovery[keyof typeof promptContextRecovery]
+type CheckPromptContextAcceptance = (requestId: SessionRequestId) => Promise<boolean | 'pending'>
+type PromptContextRegistration = {
+  readonly capture: (sessionId: SessionId) => JsonValue | undefined
+  readonly accepted: PromptContextAcceptance | undefined
+  readonly prepare: PromptContextPreparation | undefined
+}
 
 /**
  * The outward conversation face (`ctx.conversation`): the scope-addressed
@@ -47,12 +63,24 @@ export interface IConversation {
    * Register a synchronous submit-time feature selection.
    * @param kind - selection kind.
    * @param capture - current Session selection.
+   * @param accepted - optional callback with the frozen selection after Host acceptance.
+   * @param prepare - optional pre-dispatch callback. True records the request for draft recovery.
    * @returns registration disposer.
    */
-  registerPromptContext(kind: string, capture: (sessionId: SessionId) => JsonValue | undefined): () => void
+  registerPromptContext(kind: string, capture: (sessionId: SessionId) => JsonValue | undefined,
+    accepted?: PromptContextAcceptance, prepare?: PromptContextPreparation): () => void
   /**
-   * The per-session composer-block registry: how a plugin the composer
-   * cannot import makes a session's input inert with its own reason.
+   * Report the original request's state and clear matching draft text after durable acceptance.
+   * @param sessionId - Session that owns the browser draft.
+   * @param kind - Registered prompt context.
+   * @param check - Read acceptance for the browser's recorded request.
+   * @param expectedRequestId - Restrict reconciliation to a request already observed by the caller.
+   * @returns The matching browser submission state, or untracked when no matching marker remains.
+   */
+  reconcilePromptContext(sessionId: SessionId, kind: string, check: CheckPromptContextAcceptance,
+    expectedRequestId?: SessionRequestId): Promise<PromptContextRecovery>
+  /**
+   * Per-session holds on editing and submission, owned by contributing plugins.
    */
   readonly blocks: ComposerBlocks
   /**
@@ -162,7 +190,7 @@ export class UnsupportedImageMediaTypeError extends Error {
 /** Scope-addressed conversation service (root singleton, provided as `conversation`). */
 export class ConversationController extends Service implements IConversation {
   /** The per-session input machine registry (SessionInputResolver face). */
-  readonly input: SessionInputResolver
+  readonly input: SessionInputResolver & Pick<InputHub, 'shellFor'>
   /** The per-session composer-block registry. */
   readonly blocks: ComposerBlocks
   /** Live upload state per draft that uploads when added: every file draft and every uploaded image draft. */
@@ -189,7 +217,7 @@ export class ConversationController extends Service implements IConversation {
    * factories close over).
    */
   constructor(ctx: Context, config: {
-    input: SessionInputResolver
+    input: SessionInputResolver & Pick<InputHub, 'shellFor'>
     blocks: ComposerBlocks
     maxConcurrentFileUploads: number
   }) {
@@ -232,19 +260,51 @@ export class ConversationController extends Service implements IConversation {
     pending.abandon()
   }
 
-  private readonly promptContexts = new Map<string, (sessionId: SessionId) => JsonValue | undefined>()
+  private readonly promptContexts = new Map<string, PromptContextRegistration>()
 
   /**
    * Register one submit-time capture.
    * @param kind - unique kind.
    * @param capture - synchronous selection reader.
+   * @param accepted - optional callback with the frozen selection after Host acceptance.
+   * @param prepare - optional pre-dispatch callback. True records the request for draft recovery.
    * @returns registration disposer.
    */
-  registerPromptContext(kind: string, capture: (sessionId: SessionId) => JsonValue | undefined): () => void {
+  registerPromptContext(kind: string, capture: (sessionId: SessionId) => JsonValue | undefined,
+    accepted?: PromptContextAcceptance, prepare?: PromptContextPreparation): () => void {
     if (!/^[a-z][a-z0-9._-]{0,79}$/.test(kind)) throw new Error('Invalid prompt context kind')
     if (this.promptContexts.has(kind)) throw new Error(`Prompt context already registered: ${kind}`)
-    this.promptContexts.set(kind, capture)
-    return () => { if (this.promptContexts.get(kind) === capture) this.promptContexts.delete(kind) }
+    const registration = { capture, accepted, prepare }
+    this.promptContexts.set(kind, registration)
+    return () => { if (this.promptContexts.get(kind) === registration) this.promptContexts.delete(kind) }
+  }
+
+  /** Reconcile a stored submission without disturbing later edits or scheduling a resend. */
+  async reconcilePromptContext(
+    sessionId: SessionId, kind: string, check: CheckPromptContextAcceptance, expectedRequestId?: SessionRequestId,
+  ): Promise<PromptContextRecovery> {
+    const marker = readContextSubmission(sessionId, kind)
+    if (marker === undefined || (expectedRequestId !== undefined && marker.requestId !== expectedRequestId)) {
+      return promptContextRecovery.untracked
+    }
+    const binding = this.requireSessions().binding(sessionId)
+    const isCurrent = (): boolean => {
+      const current = readContextSubmission(sessionId, kind)
+      return binding === this.requireSessions().binding(sessionId)
+        && current?.requestId === marker.requestId && current.digest === marker.digest
+    }
+    const status = await check(marker.requestId)
+    if (!isCurrent()) return promptContextRecovery.untracked
+    if (status !== true) return status === 'pending' ? promptContextRecovery.pending : promptContextRecovery.unconfirmed
+    if (binding === undefined) return promptContextRecovery.accepted
+    const shell = this.input.shellFor(binding)
+    const draft = shell.draftSnapshot
+    const digest = await draftFingerprint(draft)
+    if (!isCurrent()) return promptContextRecovery.untracked
+    const matching = digest === marker.digest && shell.snapshot.phase === 'plain' && shell.snapshot.attachmentIds.length === 0
+      && deepEqualJson(shell.draftSnapshot, draft)
+    if (finishContextSubmission(sessionId, kind, marker, matching ? draft : undefined)) shell.setDraft('')
+    return promptContextRecovery.accepted
   }
 
   /**
@@ -253,7 +313,7 @@ export class ConversationController extends Service implements IConversation {
    * @returns detached frozen JSON selections.
    */
   capturePromptContexts(sessionId: SessionId): readonly PromptContextInput[] {
-    return Object.freeze([...this.promptContexts].flatMap(([kind, capture]) => {
+    return Object.freeze([...this.promptContexts].flatMap(([kind, { capture }]) => {
       const value = capture(sessionId)
       if (value === undefined) return []
       const detached = snapshotJsonValue(value)
@@ -350,6 +410,30 @@ export class ConversationController extends Service implements IConversation {
     // The composer owns the attachments until the Host accepts the prompt.
     const ownership = { accepted: false, retiredUnobserved: false }
     const acceptance = Promise.withResolvers<undefined>()
+    const contextRegistrations = context?.inputs.map(input => ({ input, registration: this.promptContexts.get(input.kind) }))
+    const preparations = contextRegistrations?.filter(({ registration }) => registration?.prepare !== undefined) ?? []
+    const binding = preparations.length > 0 ? this.requireSessions().binding(session.sessionId) : undefined
+    const capturedDraft = binding?.session === session ? this.input.shellFor(binding).draftSnapshot : undefined
+    const recorded = new Map<string, { requestId: SessionRequestId; digest: string }>()
+    const acceptDraft = (): void => {
+      accept?.()
+      if (recorded.size === 0 || deepEqualJson(readConversationDraft(session.sessionId), capturedDraft)) return
+      for (const [kind, marker] of recorded) finishContextSubmission(session.sessionId, kind, marker, undefined)
+      recorded.clear()
+    }
+    let notifiedContextAcceptance = false
+    const notifyContextAcceptance = (requestId: SessionRequestId): void => {
+      if (notifiedContextAcceptance || contextRegistrations === undefined) return
+      notifiedContextAcceptance = true
+      for (const { input, registration } of contextRegistrations) {
+        if (registration?.accepted === undefined || this.promptContexts.get(input.kind) !== registration) continue
+        try {
+          registration.accepted(session.sessionId, input.value, requestId)
+        } catch (error) {
+          this.ctx.logger('conversation').warn('Prompt context acceptance callback failed', error)
+        }
+      }
+    }
     const submission = session.beginSubmission({
       mode,
       ...context === undefined ? {} : { captureTimeZone: true },
@@ -358,7 +442,8 @@ export class ConversationController extends Service implements IConversation {
       onAccept: () => {
         ownership.accepted = true
         if (context !== undefined && this.contextPrompts.get(session)?.attempt === context.attempt) this.contextPrompts.delete(session)
-        accept?.()
+        notifyContextAcceptance(submission.requestId)
+        acceptDraft()
         acceptance.resolve(undefined)
       },
       onRetire: (settlement) => {
@@ -376,6 +461,20 @@ export class ConversationController extends Service implements IConversation {
       this.lifetime.signal.throwIfAborted()
       signal?.throwIfAborted()
       content = [...uploaded, ...(text === '' ? [] : [{ type: 'text' as const, text }])]
+      if (preparations.length > 0) {
+        const digest = capturedDraft === undefined ? undefined : await draftFingerprint(capturedDraft)
+        for (const { input, registration } of preparations) {
+          signal?.throwIfAborted()
+          const recover = await registration?.prepare?.(session.sessionId, input.value, submission.requestId, signal)
+          if (recover === true && digest !== undefined) {
+            const marker = { requestId: submission.requestId, digest }
+            recordContextSubmission(session.sessionId, input.kind, marker)
+            recorded.set(input.kind, marker)
+          }
+        }
+        this.lifetime.signal.throwIfAborted()
+        signal?.throwIfAborted()
+      }
     } catch (error) {
       submission.abandon()
       throw error
@@ -400,10 +499,11 @@ export class ConversationController extends Service implements IConversation {
         }
         this.contextPrompts.delete(session)
         ownership.accepted = true
+        notifyContextAcceptance(submission.requestId)
         // A historical acknowledgment can outlive its canceled queue row and every event in the local window.
         // Once an unknown retry succeeds, Host inbox/history owns display; retaining the echo could invent pending work.
         if (previouslyUnknown) submission.abandon()
-        accept?.()
+        acceptDraft()
         if (ownership.retiredUnobserved) this.releaseDraftAttachments(attachments)
         return { kind: 'success' }
       } catch (error) {

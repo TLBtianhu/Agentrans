@@ -938,6 +938,8 @@ flowchart TD
   pkg_artifact --> pkg_session
   pkg_artifact --> pkg_session_input
   pkg_artifact --> pkg_session_projection
+  pkg_artifact --> pkg_skill
+  pkg_artifact --> pkg_system_prompt
   pkg_artifact --> pkg_tools
   pkg_artifact --> pkg_typert_protocol
   pkg_artifact --> pkg_util_values
@@ -1476,16 +1478,11 @@ flowchart TD
   pkg_workflow_ptc --> pkg_tools
   pkg_workflow_ptc --> pkg_workflow
   pkg_workflow_ptc --> pkg_working_directory
-  pkg_artifact_branch --> pkg_api_session_controller
-  pkg_artifact_branch --> pkg_artifact
-  pkg_artifact_branch --> pkg_session
-  pkg_artifact_branch --> pkg_session_branch
-  pkg_artifact_branch --> pkg_session_query
-  pkg_artifact_branch --> pkg_typert_protocol
   pkg_artifact_followup --> pkg_api_session_controller
   pkg_artifact_followup --> pkg_artifact
   pkg_artifact_followup --> pkg_artifact_runtime
   pkg_artifact_followup --> pkg_brand
+  pkg_artifact_followup --> pkg_session_projection
   pkg_artifact_followup --> pkg_typert_protocol
   pkg_artifact_followup --> pkg_util_values
   pkg_experimental_tool_agent_team --> pkg_agent
@@ -1535,6 +1532,15 @@ flowchart TD
   pkg_subagent_dsh_sdk --> pkg_session
   pkg_subagent_dsh_sdk --> pkg_subagent
   pkg_subagent_dsh_sdk --> pkg_subprocess
+  pkg_artifact_branch --> pkg_api_session_controller
+  pkg_artifact_branch --> pkg_artifact
+  pkg_artifact_branch --> pkg_artifact_followup
+  pkg_artifact_branch --> pkg_brand
+  pkg_artifact_branch --> pkg_llm
+  pkg_artifact_branch --> pkg_session
+  pkg_artifact_branch --> pkg_session_branch
+  pkg_artifact_branch --> pkg_session_query
+  pkg_artifact_branch --> pkg_typert_protocol
   pkg_tool_schedule --> pkg_llm
   pkg_tool_schedule --> pkg_schedule
   pkg_tool_schedule --> pkg_subagent
@@ -1841,7 +1847,7 @@ flowchart TD
 | [`tool-web`](../packages/web/tool-web) | `web` | [`llm`](../packages/llm/llm), [`system-prompt`](../packages/core/system-prompt), [`tools`](../packages/core/tools), [`web`](../packages/web/web) |
 | [`tool-todo`](../packages/todo/tool-todo) | `todo` | [`agent`](../packages/core/agent), [`session`](../packages/core/session), [`session-projection`](../packages/session/session-projection), [`tools`](../packages/core/tools) |
 | [`plan-mode`](../packages/plan/plan-mode) | `plan` | [`agent`](../packages/core/agent), [`commands`](../packages/interaction/commands), [`llm`](../packages/llm/llm), [`session`](../packages/core/session), [`session-projection`](../packages/session/session-projection), [`system-prompt`](../packages/core/system-prompt), [`tools`](../packages/core/tools), [`user-questions`](../packages/interaction/user-questions) |
-| [`artifact`](../packages/artifact/artifact) | `artifact` | [`agent`](../packages/core/agent), [`brand`](../packages/util/brand), [`llm`](../packages/llm/llm), [`session`](../packages/core/session), [`session-input`](../packages/session/session-input), [`session-projection`](../packages/session/session-projection), [`tools`](../packages/core/tools), [`typert-protocol`](../packages/typert/protocol), [`util-values`](../packages/util/values) |
+| [`artifact`](../packages/artifact/artifact) | `artifact` | [`agent`](../packages/core/agent), [`brand`](../packages/util/brand), [`llm`](../packages/llm/llm), [`session`](../packages/core/session), [`session-input`](../packages/session/session-input), [`session-projection`](../packages/session/session-projection), [`skill`](../packages/skill/skill), [`system-prompt`](../packages/core/system-prompt), [`tools`](../packages/core/tools), [`typert-protocol`](../packages/typert/protocol), [`util-values`](../packages/util/values) |
 | [`command-compact`](../packages/compaction/command-compact) | `compaction` | [`commands`](../packages/interaction/commands), [`compaction`](../packages/compaction/compaction) |
 | [`compaction-image-offload`](../packages/compaction/compaction-image-offload) | `compaction` | [`agent`](../packages/core/agent), [`compaction`](../packages/compaction/compaction), [`llm`](../packages/llm/llm), [`session`](../packages/core/session) |
 | [`agent-instructions`](../packages/context/agent-instructions) | `context` | [`agent`](../packages/core/agent), [`fs`](../packages/fs/fs), [`home-paths`](../packages/util/home-paths), [`llm`](../packages/llm/llm), [`session`](../packages/core/session), [`tools`](../packages/core/tools), [`working-directory`](../packages/session/working-directory) |
@@ -1931,13 +1937,13 @@ flowchart TD
 | [`tool-ralph`](../packages/experimental/tool-ralph) | `experimental` | [`agent`](../packages/core/agent), [`llm`](../packages/llm/llm), [`subagent`](../packages/subagent/subagent), [`system-prompt`](../packages/core/system-prompt), [`tools`](../packages/core/tools), [`workflow`](../packages/workflow/workflow) |
 | [`sdk-protocol`](../packages/sdk/protocol) | `sdk` | [`commands`](../packages/interaction/commands), [`llm`](../packages/llm/llm), [`session`](../packages/core/session), [`subagent`](../packages/subagent/subagent), [`user-questions`](../packages/interaction/user-questions) |
 | [`workflow-ptc`](../packages/workflow/workflow-ptc) | `workflow` | [`agent`](../packages/core/agent), [`llm`](../packages/llm/llm), [`ptc-runtime`](../packages/ptc-runtime/ptc-runtime), [`sandbox`](../packages/sandbox/sandbox), [`sandbox-policy`](../packages/sandbox/sandbox-policy), [`session`](../packages/core/session), [`subagent`](../packages/subagent/subagent), [`tools`](../packages/core/tools), [`workflow`](../packages/workflow/workflow), [`working-directory`](../packages/session/working-directory) |
-| [`artifact-branch`](../packages/artifact/artifact-branch) | `artifact` | [`api-session-controller`](../packages/api/session-controller), [`artifact`](../packages/artifact/artifact), [`session`](../packages/core/session), [`session-branch`](../packages/session/session-branch), [`session-query`](../packages/session-query/session-query), [`typert-protocol`](../packages/typert/protocol) |
-| [`artifact-followup`](../packages/artifact/artifact-followup) | `artifact` | [`api-session-controller`](../packages/api/session-controller), [`artifact`](../packages/artifact/artifact), [`artifact-runtime`](../packages/artifact/artifact-runtime), [`brand`](../packages/util/brand), [`typert-protocol`](../packages/typert/protocol), [`util-values`](../packages/util/values) |
+| [`artifact-followup`](../packages/artifact/artifact-followup) | `artifact` | [`api-session-controller`](../packages/api/session-controller), [`artifact`](../packages/artifact/artifact), [`artifact-runtime`](../packages/artifact/artifact-runtime), [`brand`](../packages/util/brand), [`session-projection`](../packages/session/session-projection), [`typert-protocol`](../packages/typert/protocol), [`util-values`](../packages/util/values) |
 | [`experimental-tool-agent-team`](../packages/experimental/tool-agent-team) | `experimental` | [`agent`](../packages/core/agent), [`experimental-agent-team`](../packages/experimental/agent-team), [`session`](../packages/core/session), [`system-prompt`](../packages/core/system-prompt), [`tools`](../packages/core/tools) |
 | [`schedule`](../packages/schedule/schedule) | `schedule` | [`agent`](../packages/core/agent), [`api-session-controller`](../packages/api/session-controller), [`brand`](../packages/util/brand), [`llm`](../packages/llm/llm), [`session`](../packages/core/session), [`session-persistence`](../packages/session/session-persistence), [`session-projection`](../packages/session/session-projection), [`storage-domain`](../packages/storage/storage-domain), [`subagent`](../packages/subagent/subagent), [`tools`](../packages/core/tools), [`typert-protocol`](../packages/typert/protocol), [`util-time`](../packages/util/time), [`workspace`](../packages/workspace/workspace) |
 | [`sdk-client`](../packages/sdk/client) | `sdk` | [`llm`](../packages/llm/llm), [`sdk-protocol`](../packages/sdk/protocol), [`session`](../packages/core/session) |
 | [`client-test-runtime`](../packages/test-support/client-runtime) | `test-support` | [`api-gateway`](../packages/api/gateway), [`api-session-controller`](../packages/api/session-controller), [`api-workspace-controller`](../packages/api/workspace-controller), [`attachment`](../packages/attachment/attachment), [`client-connection`](../packages/client/connection), [`client-hmr`](../packages/client/hmr), [`client-modules`](../packages/client/modules), [`client-store`](../packages/client/store), [`client-ui-chat`](../packages/client/ui-chat), [`client-ui-context-menu`](../packages/client/ui-context-menu), [`client-ui-conversation`](../packages/client/ui-conversation), [`client-ui-renderer`](../packages/client/ui-renderer), [`client-ui-session`](../packages/client/ui-session), [`client-ui-settings`](../packages/client/ui-settings), [`client-ui-slots`](../packages/client/ui-slots), [`client-web`](../packages/client/web), [`remote-mock`](../packages/test-support/remote-mock), [`session`](../packages/core/session), [`subagent`](../packages/subagent/subagent), [`typert-protocol`](../packages/typert/protocol) |
 | [`subagent-dsh-sdk`](../packages/subagent/subagent-dsh-sdk) | `subagent` | [`agent`](../packages/core/agent), [`llm`](../packages/llm/llm), [`sdk-client`](../packages/sdk/client), [`session`](../packages/core/session), [`subagent`](../packages/subagent/subagent), [`subprocess`](../packages/subprocess/subprocess) |
+| [`artifact-branch`](../packages/artifact/artifact-branch) | `artifact` | [`api-session-controller`](../packages/api/session-controller), [`artifact`](../packages/artifact/artifact), [`artifact-followup`](../packages/artifact/artifact-followup), [`brand`](../packages/util/brand), [`llm`](../packages/llm/llm), [`session`](../packages/core/session), [`session-branch`](../packages/session/session-branch), [`session-query`](../packages/session-query/session-query), [`typert-protocol`](../packages/typert/protocol) |
 | [`tool-schedule`](../packages/schedule/tool-schedule) | `schedule` | [`llm`](../packages/llm/llm), [`schedule`](../packages/schedule/schedule), [`subagent`](../packages/subagent/subagent), [`system-prompt`](../packages/core/system-prompt), [`tools`](../packages/core/tools) |
 | [`sdk-jsonrpc-server`](../packages/sdk/server) | `sdk` | [`agent`](../packages/core/agent), [`attachment`](../packages/attachment/attachment), [`cmdline`](../packages/boot/cmdline), [`commands`](../packages/interaction/commands), [`goal`](../packages/goal/goal), [`llm`](../packages/llm/llm), [`schedule`](../packages/schedule/schedule), [`scope`](../packages/core/scope), [`sdk-protocol`](../packages/sdk/protocol), [`session`](../packages/core/session), [`subagent`](../packages/subagent/subagent), [`user-approval`](../packages/interaction/user-approval), [`user-questions`](../packages/interaction/user-questions), [`working-directory`](../packages/session/working-directory) |
 <!-- END GENERATED module-graph:packages -->

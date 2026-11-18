@@ -6,7 +6,7 @@ import type { Agent } from '@agentrans/agent'
 import type { Session } from '@agentrans/session'
 import { ArtifactError, type ArtifactService } from '@agentrans/artifact'
 import { ParticleRuntimeError } from '@agentrans/artifact/particle-runtime'
-import { buildSceneAnimationHtml, SCENE_EXPORTER_VERSION } from '@agentrans/artifact/scene-export'
+import { buildSceneAnimationHtml, FUNCTION_PLOT_BASELINE_EXPORTER_VERSION, SCENE_EXPORTER_VERSION } from '@agentrans/artifact/scene-export'
 import { isAttachmentError } from '@agentrans/attachment'
 import type { ProjectionDefinition, ProjectionHandle } from '@agentrans/session-projection'
 import { Remote, RemoteError, TypertRemoteService } from '@agentrans/typert-protocol'
@@ -33,7 +33,7 @@ export interface Config {
 }
 
 const projection = {
-  key: 'artifactExports', stateVersion: 1, stateSchema: exportsSchema,
+  key: 'artifactExports', stateVersion: 2, stateSchema: exportsSchema,
   init: (): ArtifactHtmlExports => ({}),
   apply: (state, event) => {
     if (event.type !== 'artifact/export') return state
@@ -54,6 +54,7 @@ function sameRequest(left: ArtifactHtmlExportRequest, right: ArtifactHtmlExportR
   if (left.exportId !== right.exportId || left.source.kind !== right.source.kind
     || left.source.artifactId !== right.source.artifactId) return false
   if (left.source.kind === 'observation') return right.source.kind === 'observation' && left.source.observationId === right.source.observationId
+  if (left.source.kind === 'revision') return right.source.kind === 'revision' && left.source.revision === right.source.revision
   return right.source.kind === 'current' && left.source.revision === right.source.revision
     && left.source.checkpoint?.runtimeVersion === right.source.checkpoint?.runtimeVersion
     && left.source.checkpoint?.stepCount === right.source.checkpoint?.stepCount
@@ -109,14 +110,20 @@ export class ArtifactExports extends TypertRemoteService {
         : error.code === 'STALE_REVISION' ? 'STALE_REVISION' : 'UNSUPPORTED_SOURCE'
       throw new RemoteError('artifact-export/source-unavailable', 'Selected source is unavailable for export', { reason }, { cause: error })
     }
-    return { ...source, sessionId: agent.session.id, exporterVersion: SCENE_EXPORTER_VERSION,
+    const { continuation, ...artifact } = source.artifact
+    const frozen = { ...source, sessionId: agent.session.id }
+    if (continuation !== undefined) {
+      return { ...frozen, artifact, exporterVersion: FUNCTION_PLOT_BASELINE_EXPORTER_VERSION,
+        parameters: 'function-plot-baseline', functionPlotBaseline: continuation.baseline }
+    }
+    return { ...frozen, exporterVersion: SCENE_EXPORTER_VERSION,
       parameters: source.checkpoint === undefined ? 'source-defaults' : 'particle-checkpoint' }
   }
 
   /**
    * Capture and generate one Scene HTML export without adding model input.
    * @param agent - Exact live root owning the result record.
-   * @param input - Stable request identity and current-revision or saved-observation reference.
+   * @param input - Stable request identity and a Scene revision or saved observation reference.
    * @returns The settled record after flush; generation failures return a durable failed record.
    * @throws {RemoteError} Before admission for invalid, conflicting, missing, stale, or over-limit requests.
    * Append or flush failures retain an unknown outcome; retry the identical request to recover or explicitly continue it.
@@ -165,7 +172,7 @@ export class ArtifactExports extends TypertRemoteService {
         sessionId: frozen.sessionId, revision: frozen.artifact.revision,
         ...(frozen.observationId === undefined ? {} : { observationId: frozen.observationId }),
         ...(frozen.checkpoint === undefined ? {} : { checkpoint: frozen.checkpoint }),
-      }), 'utf8')
+      }, frozen.functionPlotBaseline), 'utf8')
     } catch (error) {
       this.ctx.logger.warn('Artifact HTML rendering failed; the fixed input is retained', error)
       return this.fail(agent, record, 'RENDER_FAILED')

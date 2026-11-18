@@ -24,3 +24,30 @@
   overflow-wrap: anywhere;
   font: var(--dsw-font-xs-13);
 }
+
+.replayAction,
+.replayPanel {
+  margin-block-start: 8px;
+  white-space: normal;
+}
+
+.replayPanel {
+  min-width: 0;
+}
+
+.bfsReadings {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 4px 12px;
+  margin-block: 8px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.bfsReadings > div {
+  display: contents;
+}
+
+.bfsReadings dd {
+  margin: 0;
+}

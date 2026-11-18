@@ -96,6 +96,15 @@ const repairDenial = 'Artifact runtime repair budget exhausted (1 update attempt
   + 'Stop automatic repairs and explain the reported error and unresolved result to the user.'
 
 describe('artifact_runtime model inspection', () => {
+  it.each(['bfs-checkpoint', 'half-adder-checkpoint'] as const)('reports %s restore capability for the exact HTML revision', async (restore) => {
+    const { ctx, agent, execute } = await setup()
+    const capabilities = { state: true, commands: ['step'] as const, restore }
+    await report(ctx, agent, 'demo', 1, { status: 'ready', capabilities })
+    const result = await execute({ artifactId: 'demo', revision: 1 })
+    expect(result.isError).toBe(false)
+    expect(result.value).toMatchObject({ runs: [{ status: 'ready', capabilities }] })
+  })
+
   it('returns a bounded source-attributed point read without executing source or claiming an unopened program is ready', async () => {
     const { execute, session } = await setup()
     const events = session.snapshotEvents()
@@ -112,6 +121,20 @@ describe('artifact_runtime model inspection', () => {
     expect(result.value).toEqual(value)
     expect(result.content).toEqual([{ type: 'text', text: JSON.stringify(value) }])
     expect(session.snapshotEvents()).toEqual(events)
+  })
+
+  it('reports function-plot question context without requiring a live renderer', async () => {
+    const { ctx, agent, execute } = await setup()
+    ctx.artifacts.commit(agent, ctx.artifacts.prepare(agent, {
+      action: 'create', artifactId: 'plot', format: 'scene', title: 'Function plot', presentation: 'inline',
+      spec: {
+        kind: 'function-plot', functions: [{ id: 'line', label: 'Line', expression: 'x' }], parameters: {},
+        viewport: { x: [-1, 1], y: [-1, 1] }, trace: { x: 0, derivative: false, integral: false },
+      },
+    }))
+    const result = await execute({ artifactId: 'plot', revision: 1 })
+    expect(result.isError).toBe(false)
+    expect(result.value).toMatchObject({ sceneKind: 'function-plot', sourceCapabilities: { questionContext: 'function-plot' }, runs: [] })
   })
 
   it.each([

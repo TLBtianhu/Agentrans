@@ -1716,6 +1716,31 @@ describe('JsonlSessionPersistence: durability and crash semantics', () => {
     expect((await stat(childPath)).isFile()).toBe(true)
   })
 
+  it('preserves an inquiry anchor through cold catalog, stat, and replay reads', async () => {
+    const inquiry = { messageSeq: 3, messageId: MessageId('one-turn-assistant'), start: 1, end: 4, excerpt: 'ell' }
+    const header: SessionHeader = {
+      ...meta('inquiry-jsonl-child', '/work'), isSeeded: true, parentSession: SessionId('inquiry-jsonl-parent'), inquiry,
+    }
+    const inherited = oneTurnLog()
+    const marker: SessionEvent<'session/end-seed'> = {
+      type: 'session/end-seed', seq: SessionSeq(inherited.length), time: inherited.at(-1)!.time, data: { inherited: true },
+    }
+    const writer = await ctx.sessionPersistence.create(header, { inheritedEventCount: SessionLogOffset(inherited.length) })
+    try {
+      await writer.append([...inherited, marker])
+    } finally { await writer.close() }
+
+    const cold = new Context()
+    liveContexts.push(cold)
+    await cold.plugin(JsonlSessionPersistence, { root, compression: 'none' })
+    const listed = (await cold.sessionPersistence.list()).find(row => row.header.id === header.id)
+    expect(listed?.header.inquiry).toEqual(inquiry)
+    expect((await cold.sessionPersistence.stat(header.id))?.header.inquiry).toEqual(inquiry)
+    const restored = await readAll(cold.sessionPersistence, header.id)
+    expect(restored.meta.inquiry).toEqual(inquiry)
+    expect(restored.events).toEqual([...inherited, marker])
+  })
+
   it('round-trip is byte-identical including nested Assistant stream records', async () => {
     const m = meta('chunks')
     const log: SessionEvent[] = [

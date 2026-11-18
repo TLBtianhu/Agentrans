@@ -69,6 +69,18 @@ describe('branch-result admission', () => {
     expect(fixture.session.snapshotEvents()).toHaveLength(1)
   })
 
+  it('never acknowledges plain returned text as verified BFS evidence even if the content matches', async () => {
+    const fixture = await setup()
+    const evidence = { type: 'text' as const, text: 'BFS evidence' }
+    const plain = { ...selection, content: [...selection.content, evidence] }
+    await admitBranchResult(fixture.parent, plain, fixture.capabilities)
+    const marked: BranchResultSelection = { ...selection, reference: { ...selection.reference, artifactEvidence: 'bfs-checkpoint' } }
+    await expect(admitBranchResult(fixture.parent, marked, fixture.capabilities, [evidence]))
+      .rejects.toBeInstanceOf(BranchResultAdmissionConflict)
+    expect(fixture.session.snapshotEvents()).toHaveLength(1)
+    expect(fixture.session.snapshotEvents()[0]).not.toMatchObject({ data: { source: { artifactEvidence: 'bfs-checkpoint' } } })
+  })
+
   it('keeps a flush rejection unknown after append and recovers the same receipt on retry', async () => {
     const fixture = await setup()
     const failure = new Error('Durability acknowledgement lost')

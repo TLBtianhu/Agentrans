@@ -52,7 +52,7 @@ interface Binding {
 
 /** Registry of YAML-declared presets and the revisions live Agents retain. */
 export class AgentPresetRegistry extends TypertRemoteService {
-  static inject = ['loader', 'sessionProjections', 'agents']
+  static inject = ['loader', 'sessionProjections', 'agents', 'tools']
   static Config = z.object({
     default: z.string().required(),
     selectedDefault: z.string().volatile(),
@@ -123,6 +123,7 @@ export class AgentPresetRegistry extends TypertRemoteService {
       const problem = entryListProblem(record.config.plugins)
       if (problem !== undefined) throw new Error(problem)
       const context = scope.ctx.extend({ baseUrl: record.context.baseUrl })
+      if (record.config.inheritTools === false) context.tools.isolateInherited()
       const mount = await mountPreset(context, record.config.id, record.config.plugins)
       const generation: Generation = { scope, key, mount, users: 0, retired: false }
       context.effect(() => {

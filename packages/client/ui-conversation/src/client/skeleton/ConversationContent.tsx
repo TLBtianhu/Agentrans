@@ -6,8 +6,8 @@ import type { ConversationContentProps, ConversationViewsProps, InputZone } from
 import { HeroShell, WorkspaceChip, workspaceLabel } from './EmptyHero.tsx'
 import css from './ConversationRoot.module.css'
 
-function ConversationSessionView({ renderSlot }: ConversationViewsProps) {
-  return renderSlot('conversation.session', {})
+function ConversationSessionView({ renderSlot, bindOpenView }: ConversationViewsProps) {
+  return renderSlot('conversation.session', { bindOpenView })
 }
 
 function NoConversationWidthControls() {
@@ -83,8 +83,15 @@ export function ConversationContent(props: ConversationContentProps) {
     }
   }, [pendingWorkspaceId, sessionWorkspace?.workspaceId, workspaces.phase, pendingWorkspace])
 
-  const zone: InputZone | undefined =
-    session === undefined || inputState === undefined ? undefined : { session, input: inputState }
+  const viewOpener = useRef<InputZone['openView']>()
+  const bindOpenView = useCallback<ConversationViewsProps['bindOpenView']>((open) => {
+    viewOpener.current = open
+  }, [])
+  const openView = useCallback<NonNullable<InputZone['openView']>>((view, focus) => {
+    viewOpener.current?.(view, focus)
+  }, [])
+  const zone: InputZone | undefined = session === undefined || inputState === undefined ? undefined
+    : { session, input: inputState, ...(props.variant === 'main' ? { openView } : {}) }
 
   // The chip is a selector; label resolution walks the flow top-down:
   //   1. a just-picked workspace (pending) → its title;
@@ -196,7 +203,7 @@ export function ConversationContent(props: ConversationContentProps) {
       data-content-phase={phase}
     >
       <div className={css.scrollBody} data-conversation-scroll="">
-        {sessionId === undefined ? null : <Views />}
+        {sessionId === undefined ? null : <Views bindOpenView={bindOpenView} />}
         {composerSeat}
       </div>
       <WidthControls container={body} phase={phase} />

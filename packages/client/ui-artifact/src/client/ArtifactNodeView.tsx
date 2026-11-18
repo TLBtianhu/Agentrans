@@ -6,7 +6,9 @@ import type { PropsStore } from '@agentrans/client-store'
 import { Button, IconBranchOutlineRegular, Tooltip } from '@agentrans/client-ui-primitives'
 import { ArtifactRuntimePreview } from './ArtifactRuntimePreview.tsx'
 import { getArtifactSourceCapabilities } from '@agentrans/artifact/capabilities'
-import { runtimeQuestionAvailability } from './runtime-question.ts'
+import { runtimeHtmlCheckpoint, runtimeQuestionAvailability } from './runtime-question.ts'
+import { copyHtmlCheckpoint, htmlCheckpointLabels, HtmlCheckpointReview } from './HtmlCheckpointReadings.tsx'
+import type { ArtifactHtmlCheckpoint } from '@agentrans/artifact/runtime-values'
 import type { ArtifactRuntimeIdentity } from '@agentrans/artifact-runtime/types'
 import type { ArtifactRuntimeActions, ArtifactRuntimeSnapshot } from './runtime-owner.ts'
 import { randomUUID } from '@agentrans/util-crypto'
@@ -16,13 +18,15 @@ import { parseArtifactAction, type PendingArtifactAction } from './messages.ts'
 import { artifactPresentationStore, type ArtifactDockEntry } from './presentation.ts'
 import { createParticleCheckpoint, restoreParticleCheckpoint, ParticleRuntimeError } from '@agentrans/artifact/particle-runtime'
 import type { ArtifactActionRequest, SavedParticleObservation } from '@agentrans/artifact/types'
+import type { FunctionPlotQuestionConditions } from '@agentrans/artifact-followup/types'
 import type { ParticleRun, ParticleRunCommand } from './particle-run.ts'
-import { particleRuntimeKey, type ArtifactParticleRuntime } from './particle-runtime-owner.ts'
+import { particleQuestionReadings, particleRuntimeKey, type ArtifactParticleRuntime, type ParticleQuestionReadings } from './particle-runtime-owner.ts'
 import {
   ObservationControls, observationsFor, useObservationActions,
   type ObservationControlsData, type ObservationActions, type ObservationSelection,
 } from './ObservationControls.tsx'
 import { ExportControls, useExportActions, type ExportControlsData, type ExportActions } from './ExportControls.tsx'
+import { ArtifactRevisionHistory } from './ArtifactRevisionHistory.tsx'
 import type { JsonValue } from '@agentrans/util-values'
 import type { ArtifactNodeInjected, ArtifactPlacement, ArtifactSnapshot, ViewRequest } from './protocol.ts'
 import { artifactHostRouteAvailable } from './artifact-route.ts'
@@ -64,8 +68,11 @@ type ArtifactCardProps = Pick<ArtifactNodeViewProps, 'recordAction' | 't'> & {
     readonly command: (command: ParticleRunCommand) => void } | undefined
   readonly promptContext?: {
     readonly chooseRuntime?: (identity: ArtifactRuntimeIdentity) => void
-    readonly chooseCurrent: () => void
+    readonly chooseHtmlCheckpoint?: (identity: ArtifactRuntimeIdentity, checkpoint: ArtifactHtmlCheckpoint) => boolean
+    readonly chooseCurrent: (readings: ParticleQuestionReadings) => boolean
     readonly chooseObservation: (observation: SavedParticleObservation) => void } | undefined
+  readonly onAttachPlotQuestion?: ((conditions: FunctionPlotQuestionConditions) => boolean) | undefined
+  readonly onAttachCsvQuestion?: ((groupKey: string) => boolean) | undefined
   readonly hostOperationsAvailable?: boolean
 }
 
@@ -75,6 +82,7 @@ const PENDING_ACTION_LIMIT = 32
 
 const PLACEMENTS: readonly ViewRequest['placement'][] = ['inline', 'beside', 'focus', 'pip']
 const EMPTY_OBSERVATIONS: readonly SavedParticleObservation[] = []
+const PARTICLE_COORDINATES = ['x', 'y', 'vx', 'vy'] as const
 const PLACEMENT_COPY: Record<ArtifactPlacement, 'view.inline' | 'view.beside' | 'view.focus' | 'view.pip'> = {
   inline: 'view.inline', beside: 'view.beside', focus: 'view.focus', pip: 'view.pip',
 }
@@ -117,7 +125,8 @@ function ArtifactCardInstance({
   observationControls,
   observationSelection,
   observationActions,
-  exportControls, exportActions, actionSubmission, particleRuntime, promptContext, hostOperationsAvailable = true, runtimeControls,
+  exportControls, exportActions, actionSubmission, particleRuntime, promptContext, onAttachPlotQuestion, onAttachCsvQuestion,
+  hostOperationsAvailable = true, runtimeControls,
 }: ArtifactCardProps & {
   readonly observationActions: ObservationActions
   readonly exportActions: ExportActions
@@ -128,6 +137,12 @@ function ArtifactCardInstance({
   const [{ actions: pendingActions, overflow }, dispatchPending] = useReducer(updatePending, { actions: [], overflow: false })
   const [localRestored, setRestored] = useState<{ observation: SavedParticleObservation; run: ParticleRun } | null>(null)
   const [restoreFailed, setRestoreFailed] = useState(false)
+  const [questionReadings, setQuestionReadings] = useState<ParticleQuestionReadings | null>(null)
+  const [checkpointReview, setCheckpointReview] = useState<{
+    readonly identity: ArtifactRuntimeIdentity
+    readonly state: ArtifactHtmlCheckpoint
+  } | null>(null)
+  const [readingsUnavailable, setReadingsUnavailable] = useState(false)
   const controlledRestored = useMemo(() => {
     const observation = observationSelection?.observation
     if (observation === undefined || observation === null) return null
@@ -138,6 +153,7 @@ function ArtifactCardInstance({
   }, [observationSelection?.observation])
   const restored = observationSelection === undefined ? localRestored : controlledRestored
   const snapshot = restored?.observation.artifact ?? latestSnapshot
+  const baselineParticle = snapshot.format === 'scene' && restored === null ? snapshot.particleContinuation : undefined
   const particleSpec = latestSnapshot.format === 'scene' && latestSnapshot.spec.kind === 'particle-system'
     ? latestSnapshot.spec : undefined
   const latestParticleRun = particleRuntime?.current?.revision === latestSnapshot.revision ? particleRuntime.current.run : null
@@ -145,16 +161,23 @@ function ArtifactCardInstance({
     particleRuntime?.command(command)
   }, [particleRuntime?.command])
   const particleRun = restored?.run ?? latestParticleRun
+  const particleGravityY = baselineParticle === undefined ? undefined : particleRuntime?.current?.gravityY
   const htmlRuntime = runtimeControls?.snapshot
   const htmlQuestion = snapshot.format === 'html' && (htmlRuntime === undefined
     || htmlRuntime.identity.artifactId === snapshot.artifactId && htmlRuntime.identity.revision === snapshot.revision)
     ? runtimeQuestionAvailability(htmlRuntime) : 'unavailable'
-  const htmlQuestionAvailable = htmlQuestion === 'state' || htmlQuestion === 'error'
-  const exportSource = snapshot.format !== 'scene' ? undefined : {
+  const restoreKind = htmlRuntime?.report.status === 'ready' ? htmlRuntime.report.capabilities.restore : undefined
+  const checkpointLabels = restoreKind === undefined ? undefined : htmlCheckpointLabels(restoreKind)
+  const htmlCheckpoint = htmlQuestion === 'state' ? runtimeHtmlCheckpoint(htmlRuntime) : undefined
+  const htmlQuestionAvailable = checkpointLabels !== undefined
+    ? htmlCheckpoint !== undefined && promptContext?.chooseHtmlCheckpoint !== undefined
+    : htmlQuestion === 'state' || htmlQuestion === 'error'
+  const exportSource = snapshot.format !== 'scene' || baselineParticle !== undefined ? undefined : {
     artifact: snapshot,
     ...(particleRun === null ? {} : { checkpoint: createParticleCheckpoint(particleRun.state) }),
     ...(restored === null ? {} : { observationId: restored.observation.observationId }),
   }
+  const exportLabel = t(snapshot.format === 'scene' && snapshot.spec.kind === 'csv-bar-chart' ? 'action.exportRevision' : 'action.exportAnimation')
   const backgrounded = placementControls && placement === 'beside' && activeDockId !== snapshot.artifactId
   // Hiding this surface ends playback; returning exposes the same paused state.
   useEffect(() => {
@@ -188,6 +211,7 @@ function ArtifactCardInstance({
       else observationSelection.onSelect(observation.observationId)
       setShowSource(false)
       setRestoreFailed(false)
+      setQuestionReadings(null)
     } catch (error) {
       if (!(error instanceof ParticleRuntimeError)) throw error
       setRestoreFailed(true)
@@ -318,26 +342,36 @@ function ArtifactCardInstance({
             {showSource ? t('view.preview') : t('view.source')}
           </Button>
           {hostOperationsAvailable && exportControls !== undefined && exportControls.canCreate !== false && exportSource !== undefined && (
-            <Button size="sm" variant="ghost" className={css.placement} aria-label={t('action.exportAnimation')}
+            <Button size="sm" variant="ghost" className={css.placement} aria-label={exportLabel}
               disabled={!exportControls.ready || exportActions.state.phase !== 'idle' || exportActions.state.pending !== null
                 || particleRun?.failed === true
                 || snapshot.format === 'scene' && snapshot.spec.kind === 'particle-system' && particleRun === null}
               onClick={() => { void exportActions.begin(exportSource) }}>
-              {t('action.exportAnimation')}
+              {exportLabel}
             </Button>
           )}
           {promptContext?.chooseRuntime !== undefined && snapshot.format === 'html' && restored === null && (
             <Button size="sm" variant="ghost" className={css.placement} disabled={!htmlQuestionAvailable}
+              aria-expanded={checkpointLabels === undefined ? undefined : checkpointReview !== null}
               data-artifact-prompt-attach="html-runtime" onClick={() => {
-                if (htmlRuntime !== undefined) promptContext.chooseRuntime?.(htmlRuntime.identity)
-              }}>{t('promptContext.programAttach')}</Button>
+                if (htmlRuntime === undefined) return
+                if (checkpointLabels !== undefined) {
+                  if (htmlCheckpoint === undefined) return
+                  setCheckpointReview({ identity: htmlRuntime.identity,
+                    state: copyHtmlCheckpoint(htmlCheckpoint) })
+                } else promptContext.chooseRuntime?.(htmlRuntime.identity)
+              }}>{t(checkpointLabels?.review ?? 'promptContext.programAttach')}</Button>
           )}
           {promptContext !== undefined && (restored !== null || particleSpec !== undefined) && (
             <Button size="sm" variant="ghost" className={css.placement}
               disabled={restored === null && (latestParticleRun === null || latestParticleRun.failed)}
+              aria-expanded={restored === null ? questionReadings !== null : undefined}
               onClick={() => {
-                if (restored === null) promptContext.chooseCurrent()
-                else promptContext.chooseObservation(restored.observation)
+                if (restored !== null) promptContext.chooseObservation(restored.observation)
+                else if (particleRuntime?.current !== undefined) {
+                  setQuestionReadings(particleQuestionReadings(particleRuntime.current))
+                  setReadingsUnavailable(false)
+                }
               }}>
               {t('promptContext.attach')}
             </Button>
@@ -386,12 +420,54 @@ function ArtifactCardInstance({
               ? <ArtifactRuntimePreview key={`${snapshot.revision}:${restored?.observation.observationId ?? 'current'}:${previewGeneration}`}
                 snapshot={snapshot} runtime={restored === null ? runtimeControls : undefined} title={t('preview.frame', { title: snapshot.title })} failedText={t('runtime.failed')}
                 native={{ spec: snapshot.spec, artifactId: snapshot.artifactId, revision: snapshot.revision,
-                  placement: placementControls ? placement : 'inline', recordAction, canRecord: hostOperationsAvailable, recordPending: actionSubmission.pending,
+                  placement: placementControls ? placement : 'inline', recordAction,
+                  canRecord: hostOperationsAvailable && baselineParticle === undefined, recordPending: actionSubmission.pending,
                   onStateChange: restored === null ? onSceneState : undefined, readOnly: restored !== null,
-                  particleRun, onParticleCommand: commandParticle, t }} />
+                  onAttachPlotQuestion: restored === null ? onAttachPlotQuestion : undefined,
+                  onAttachCsvQuestion: restored === null ? onAttachCsvQuestion : undefined,
+                  baselinePlot: snapshot.continuation === undefined ? undefined : {
+                    ...snapshot.continuation.baseline, sourceRevision: snapshot.continuation.source.revision,
+                  },
+                  baselineParticle, particleGravityY, particleRun, onParticleCommand: commandParticle, t }} />
               : <ArtifactRuntimePreview key={previewGeneration} snapshot={snapshot} runtime={runtimeControls}
                 onFrame={setFrame} title={t('preview.frame', { title: snapshot.title })} failedText={t('runtime.failed')} />}
       </div>
+      {promptContext?.chooseHtmlCheckpoint !== undefined && checkpointReview !== null && <HtmlCheckpointReview
+        state={checkpointReview.state} attach={state => promptContext.chooseHtmlCheckpoint?.(checkpointReview.identity, state) === true}
+        close={() => { setCheckpointReview(null) }} t={t} />}
+      {promptContext !== undefined && restored === null && questionReadings !== null && (
+        <section className={css.observations} aria-label={t('promptContext.review')} data-particle-question-review
+          data-particle-question-step={questionReadings.checkpoint.stepCount}>
+          <strong>{t('promptContext.review')}</strong>
+          <div className={css.particleReadings} data-particle-question-values>
+            <p>{t('observation.details', { revision: String(snapshot.revision), step: String(questionReadings.checkpoint.stepCount) })}
+              {' · '}{t('scene.time')} <span data-particle-question-time>{String(questionReadings.values.time)}</span>{' '}{t('promptContext.seconds')}</p>
+            {questionReadings.gravityY !== undefined && <p>{t('scene.particleVerticalGravity')}{' '}
+              <span data-particle-question-gravity-y>{String(questionReadings.gravityY)}</span></p>}
+            <ul>
+              {questionReadings.values.particles.map(particle => (
+                <li key={particle.id} data-particle-question-particle={particle.id}>
+                  <strong>{particle.id}</strong>
+                  <dl>{PARTICLE_COORDINATES.map(coordinate => (
+                    <div key={coordinate}>
+                      <dt>{coordinate}</dt>
+                      <dd data-particle-question-coordinate={coordinate}>{String(particle[coordinate])}</dd>
+                    </div>
+                  ))}</dl>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className={css.observationToolbar}>
+            <Button size="sm" variant="primary" onClick={() => {
+              if (promptContext.chooseCurrent(questionReadings)) setQuestionReadings(null)
+              else setReadingsUnavailable(true)
+            }}>{t('promptContext.confirmReadings')}</Button>
+            <Button size="sm" variant="ghost" onClick={() => { setQuestionReadings(null) }}>{t('promptContext.cancelReadings')}</Button>
+          </div>
+          {readingsUnavailable && <p className={css.error} role="alert">{t('promptContext.unavailable')}</p>}
+        </section>
+      )}
       {runtimeControls !== undefined && restored === null && !showSource && <div data-artifact-runtime-status={runtimeControls.snapshot?.report.status ?? 'unknown'}>
         <p role="status">{runtimeControls.snapshot?.host === 'unavailable' ? t('runtime.unavailable')
           : runtimeControls.snapshot?.host === 'denied' ? t('runtime.denied')
@@ -402,7 +478,8 @@ function ArtifactCardInstance({
           || runtimeControls.snapshot?.report.status === 'error') && <Button size="sm" variant="ghost" onClick={restartPreview}>{t('runtime.retry')}</Button>}
       </div>}
       {promptContext !== undefined && restored === null && snapshot.format === 'html' && <p className={css.observationHint}>
-        {t(`promptContext.program.${htmlQuestion}`)}
+        {checkpointLabels === undefined ? t(`promptContext.program.${htmlQuestion}`)
+          : t(htmlCheckpoint === undefined ? checkpointLabels.waiting : 'bfs.reported')}
       </p>}
       {!hostOperationsAvailable && <p className={css.observationHint}>
         {t('route.subagentLocalOnly')}
@@ -412,12 +489,13 @@ function ArtifactCardInstance({
         {t('promptContext.unsupported')}
       </p>}
       {observationControls !== undefined
-        && (latestParticleRun !== null || !observationControls.ready || observationControls.observations.length > 0
+        && (baselineParticle === undefined && (latestParticleRun !== null || !observationControls.ready)
+          || observationControls.observations.length > 0
           || observationActions.state.savePhase !== 'idle') && (
         <ObservationControls {...observationControls} artifactId={latestSnapshot.artifactId} revision={latestSnapshot.revision}
           checkpoint={latestParticleRun === null ? null : createParticleCheckpoint(latestParticleRun.state)}
           canSubmit={hostOperationsAvailable}
-          canSave={restored === null && latestParticleRun !== null && !latestParticleRun.failed}
+          canSave={baselineParticle === undefined && restored === null && latestParticleRun !== null && !latestParticleRun.failed}
           onRestore={restoreObservation} actions={observationActions} selection={observationSelection} t={t} />
       )}
       {exportControls !== undefined && (exportSource !== undefined || exportControls.records.length > 0
@@ -459,9 +537,10 @@ export const ArtifactNodeView = memo(function ArtifactNodeView({
   node, sessionId, useSession, useSessions, useStore, useProjection, useAccess, actions,
   recordAction, saveObservation, sendObservation, exports, forkAt, t,
   useParticleRuntime, useArtifactRuntime, runtimeActions, commandParticleRuntime,
-  chooseRuntimePromptContext, chooseParticlePromptContext, chooseObservationPromptContext,
+  chooseRuntimePromptContext, chooseHtmlCheckpointPromptContext, chooseParticlePromptContext,
+  choosePlotPromptContext, chooseCsvPromptContext, chooseObservationPromptContext,
 }: ArtifactNodeViewProps) {
-  const snapshot = node.data
+  const snapshot = node.data.snapshot
   const artifactId = snapshot.artifactId
   const runtimeKey = particleRuntimeKey(node.key, artifactId)
   const currentRuntime = useParticleRuntime(runtimeKey)
@@ -515,7 +594,11 @@ export const ArtifactNodeView = memo(function ArtifactNodeView({
     }
   }, [actions, artifactId, snapshot.revision, snapshot.title])
 
-  return (
+  const exportControls = exports === undefined ? undefined : {
+    ...exports, ready: projectedExports !== undefined, canCreate: canExport, canRead: canReadExport,
+    records: Object.values(projectedExports ?? {}).filter(record => record.frozen.artifact.artifactId === artifactId),
+  }
+  return <>
     <ArtifactCard
       key={`${sessionId}:${artifactId}`}
       snapshot={snapshot}
@@ -526,21 +609,26 @@ export const ArtifactNodeView = memo(function ArtifactNodeView({
       onPlacement={onPlacement}
       onActivateDock={actions.activateDock}
       onCloseDock={actions.undock}
-      onBranch={() => { forkAt(node.anchorSeq) }}
+      onBranch={() => { forkAt(node.data.firstSeq) }}
       recordAction={recordAction}
       particleRuntime={{ current: currentRuntime, command }}
       runtimeControls={{ key: runtimeKey, actions: runtimeActions, snapshot: reportRuntime }}
       promptContext={hostRouteAvailable ? {
         chooseRuntime: (identity) => { chooseRuntimePromptContext(runtimeKey, snapshot, identity) },
-        chooseCurrent: () => { chooseParticlePromptContext(runtimeKey, snapshot) },
+        chooseHtmlCheckpoint: (identity, checkpoint) =>
+          chooseHtmlCheckpointPromptContext?.(runtimeKey, snapshot, identity, checkpoint) ?? false,
+        chooseCurrent: readings => chooseParticlePromptContext(runtimeKey, snapshot, readings),
         chooseObservation: chooseObservationPromptContext } : undefined}
+      onAttachPlotQuestion={hostRouteAvailable && snapshot.format === 'scene' && snapshot.spec.kind === 'function-plot'
+        ? conditions => choosePlotPromptContext(runtimeKey, snapshot, conditions) : undefined}
+      onAttachCsvQuestion={hostRouteAvailable && snapshot.format === 'scene' && snapshot.spec.kind === 'csv-bar-chart'
+        ? groupKey => chooseCsvPromptContext(runtimeKey, snapshot, groupKey) : undefined}
       hostOperationsAvailable={hostRouteAvailable}
       observationControls={{ ready: projectedObservations !== undefined, observations, save: saveObservation, send: sendObservation }}
-      exportControls={exports === undefined ? undefined : {
-        ...exports, ready: projectedExports !== undefined, canCreate: canExport, canRead: canReadExport,
-        records: Object.values(projectedExports ?? {}).filter(record => record.frozen.artifact.artifactId === artifactId),
-      }}
+      exportControls={exportControls}
       t={t}
     />
-  )
+    {node.data.history !== null && <ArtifactRevisionHistory history={node.data.history}
+      exportControls={hostRouteAvailable ? exportControls : undefined} t={t} />}
+  </>
 })

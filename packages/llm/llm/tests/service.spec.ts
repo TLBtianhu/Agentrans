@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { Context } from '@agentrans/cordis'
 import { AttachmentId } from '@agentrans/attachment'
 import LlmRuntime, {
@@ -349,6 +349,34 @@ describe('LlmRuntime', () => {
         expect(projected.text, fixture.name).toContain('include this saved path in the delegation prompt')
       }
     }
+  })
+
+  it('uses session attachment IDs without querying Host paths when the CSV tool is available', async () => {
+    const ctx = new Context()
+    const fileHostPath = vi.fn(() => '/host/private.csv')
+    ctx.provide('attachments', { fileHostPath } as never)
+    ctx.provide('fs', { processPathFromHostPath: () => '/sandbox/private.csv' } as never)
+    await ctx.plugin(LlmRuntime)
+    const adapter = new RecordingAdapter(SCRIPT)
+    ctx.llm.registerAdapter(['test-provider'], adapter)
+    const attachment = { attachmentId: AttachmentId(`sha256:${'ab'.repeat(32)}`), name: 'Sales.CSV', bytes: 30 }
+    const unsupported = { ...attachment, name: 'notes.txt' }
+    const tools = [{ name: 'attachment_csv', description: 'Read a session CSV', parameters: { type: 'object' } }]
+    await collect(ctx.llm.stream({
+      provider: 'test-provider', model: 'test-model', tools,
+      messages: [createUserMessage({
+        content: [{ type: 'file', attachment }, { type: 'file', attachment: unsupported }], source: { kind: 'user' },
+      })],
+    }))
+
+    expect(fileHostPath).not.toHaveBeenCalled()
+    expect(adapter.lastOptions?.messages[0]?.content).toEqual([
+      { type: 'text', text: ctx.llm.fileRequestText(attachment, tools) },
+      { type: 'text', text: ctx.llm.fileRequestText(unsupported, tools) },
+    ])
+    expect(ctx.llm.fileRequestText(attachment, tools)).toContain(`attachment ID "${attachment.attachmentId}"`)
+    expect(ctx.llm.fileRequestText(attachment, tools)).toContain('attachment_csv')
+    expect(ctx.llm.fileRequestText(unsupported, tools)).toContain('The session file tool supports CSV files.')
   })
 
   it('captures provider-owned retry policy at registration and defaults omission', async () => {

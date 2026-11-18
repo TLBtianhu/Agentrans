@@ -237,6 +237,7 @@
       "@agentrans/artifact/capabilities": ["./packages/artifact/artifact/src/capabilities.ts"],
       "@agentrans/artifact/runtime-values": ["./packages/artifact/artifact/src/runtime-values.ts"],
       "@agentrans/artifact/tool": ["./packages/artifact/artifact/src/tool.ts"],
+      "@agentrans/artifact/attachment-csv-tool": ["./packages/artifact/artifact/src/attachment-csv-tool.ts"],
       "@agentrans/artifact/scene": ["./packages/artifact/artifact/src/scene.ts"],
       "@agentrans/artifact/particle-runtime": ["./packages/artifact/artifact/src/particle-runtime.ts"],
       "@agentrans/artifact/observation-comparison": ["./packages/artifact/artifact/src/observation-comparison.ts"],

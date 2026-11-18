@@ -1,5 +1,5 @@
 /** Native FunctionPlot renderer for validated SceneSpec values. */
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import type { RuntimeReport } from '@agentrans/artifact-runtime/types'
 import { drawNativeScene, scenePaletteFor } from './native-runtime.ts'
 import type { PropsLocale } from '@agentrans/client-ui-slots'
@@ -7,11 +7,19 @@ import { Button } from '@agentrans/client-ui-primitives'
 import { parseExpression, type JsonValue } from '@agentrans/util-values'
 import { recordSceneVideo } from './scene-video.ts'
 import { renderFunctionPlot } from './renderers/function-plot.ts'
-import { analyzeFunction } from './renderers/function-analysis.ts'
+import { analyzeFunction, type FunctionAnalysis } from './renderers/function-analysis.ts'
+import type { FunctionPlotQuestionConditions } from '@agentrans/artifact-followup/types'
 import type { FunctionPlotSpec } from '@agentrans/artifact/scene'
 import type { ArtifactId } from '@agentrans/artifact/types'
 import type { ArtifactPlacement, RecordArtifactAction } from './protocol.ts'
+import { formatReadingDifference } from './format-reading-difference.ts'
 import css from './FunctionPlotView.module.css'
+
+/** Conditions and numerical readings retained by a confirmed question. */
+export type RecordedFunctionPlot = FunctionPlotQuestionConditions & { readonly values: FunctionAnalysis }
+
+/** Confirmed source revision and readings for an editable one-parameter comparison. */
+export type FunctionPlotBaseline = RecordedFunctionPlot & { readonly sourceRevision: number }
 
 interface FunctionPlotViewProps {
   readonly spec: FunctionPlotSpec
@@ -23,6 +31,10 @@ interface FunctionPlotViewProps {
   readonly recordPending?: boolean
   readonly onRuntimeReport?: ((report: RuntimeReport) => void) | undefined
   readonly onStateChange?: ((state: JsonValue) => void) | undefined
+  readonly onAttachPlotQuestion?: ((conditions: FunctionPlotQuestionConditions) => boolean) | undefined
+  readonly replayPlot?: RecordedFunctionPlot | undefined
+  readonly baselinePlot?: FunctionPlotBaseline | undefined
+  readonly readOnly?: boolean
   readonly t: PropsLocale<'artifact'>['t']
 }
 
@@ -38,7 +50,16 @@ interface CanvasSize {
 }
 
 const FALLBACK_SIZE: CanvasSize = { width: 640, height: 300 }
-/** Grid lines per axis; the same counts label the axis ticks. */
+const READING_SYMBOLS = { x: 'x', value: 'f(x)', derivative: 'f′(x) ≈', integral: '∫₀ˣ f(t) dt ≈' } as const
+const READING_FIELDS = ['x', 'value', 'derivative', 'integral'] as const
+const COMPARISON_READING_FIELDS = ['x', 'value', 'derivative'] as const
+
+interface PlotQuestionReview {
+  readonly conditions: FunctionPlotQuestionConditions
+  readonly label: string
+  readonly values: FunctionAnalysis
+  readonly unavailable: boolean
+}
 
 /**
  * Render a validated FunctionPlot SceneSpec without executing generated source.
@@ -46,35 +67,48 @@ const FALLBACK_SIZE: CanvasSize = { width: 640, height: 300 }
  * @returns An interactive native function-plot editor.
  */
 export function FunctionPlotView({
-  spec, artifactId, revision, placement, recordAction, canRecord = true, recordPending = false, onRuntimeReport, onStateChange, t,
+  spec, artifactId, revision, placement, recordAction, canRecord = true, recordPending = false, onRuntimeReport, onStateChange,
+  onAttachPlotQuestion, replayPlot, baselinePlot, readOnly: readOnlyPreview = false, t,
 }: FunctionPlotViewProps) {
+  const [sourceXMin, sourceXMax] = spec.viewport.x
+  const recordedTrace = replayPlot?.x ?? baselinePlot?.x
+  const tracePan = recordedTrace === undefined ? 0 : recordedTrace - (sourceXMin + sourceXMax) / 2
+  const initialPan = recordedTrace !== undefined && (recordedTrace < sourceXMin || recordedTrace > sourceXMax) && Number.isFinite(tracePan)
+    ? tracePan : 0
+  const initialParameters = useMemo<Readonly<Record<string, number>>>(() => baselinePlot?.parameters
+    ?? Object.fromEntries(Object.entries(spec.parameters).map(([key, value]) => [key, value.value])), [baselinePlot, spec.parameters])
+  const formId = useId()
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const plotRef = useRef<HTMLDivElement | null>(null)
   const dragRef = useRef({ active: false, x: 0 })
   const [size, setSize] = useState<CanvasSize>(FALLBACK_SIZE)
-  const [parameters, setParameters] = useState<Record<string, number>>(() =>
-    Object.fromEntries(Object.entries(spec.parameters).map(([key, value]) => [key, value.value])),
-  )
-  const [traceX, setTraceX] = useState(spec.trace.x)
-  const [selectedFunction, setSelectedFunction] = useState(spec.functions[0]?.id ?? '')
+  const [liveParameters, setParameters] = useState(initialParameters)
+  const [liveTraceX, setTraceX] = useState(spec.trace.x)
+  const [liveFunction, setSelectedFunction] = useState(spec.functions[0]?.id ?? '')
   const [showDerivative, setShowDerivative] = useState(spec.trace.derivative)
   const [showIntegral, setShowIntegral] = useState(spec.trace.integral)
   const [scale, setScale] = useState(1)
-  const [pan, setPan] = useState(0)
+  const [pan, setPan] = useState(initialPan)
   const [playing, setPlaying] = useState(false)
   const [recording, setRecording] = useState(false)
+  const [review, setReview] = useState<PlotQuestionReview | null>(null)
   const recordingRef = useRef<{ stop: () => void } | null>(null)
 
+  const readOnly = readOnlyPreview || replayPlot !== undefined
+  const parameters = replayPlot?.parameters ?? liveParameters
+  const traceX = recordedTrace ?? liveTraceX
+  const selectedFunction = replayPlot?.functionId ?? baselinePlot?.functionId ?? liveFunction
+  const drawPan = replayPlot === undefined ? pan : initialPan
   const functions = useMemo<readonly ParsedFunction[]>(() => spec.functions.map(fn => ({
     id: fn.id, label: fn.label, node: parseExpression(fn.expression, Object.keys(spec.parameters)),
   })), [spec])
   const currentFunction = functions.find(fn => fn.id === selectedFunction) ?? functions[0]
-  const sweepKey = Object.keys(spec.parameters)[0]
-  const sweep = sweepKey === undefined ? undefined : spec.parameters[sweepKey]
+  const [sweepKey, sweep] = Object.entries(spec.parameters).find(([, parameter]) =>
+    baselinePlot === undefined || parameter.min < parameter.max) ?? []
 
-  const analysis = currentFunction === undefined
+  const analysis = replayPlot?.values ?? (currentFunction === undefined
     ? { value: null, derivative: null, integral: null }
-    : analyzeFunction(currentFunction.node, parameters, traceX)
+    : analyzeFunction(currentFunction.node, parameters, traceX))
 
   // The canvas is drawn in CSS pixels: sizing the backing store from the
   // stage's measured box keeps the plot sharp and un-stretched in every
@@ -99,15 +133,15 @@ export function FunctionPlotView({
     const canvas = canvasRef.current
     if (!canvas || !currentFunction) return
     drawNativeScene(canvas, () => { renderFunctionPlot(spec, canvas, size.width, size.height, {
-      traceX, scale, pan, parameters, currentFunctionId: currentFunction.id, showDerivative, showIntegral,
+      traceX, scale, pan: drawPan, parameters, currentFunctionId: currentFunction.id, showDerivative, showIntegral,
     }, scenePaletteFor(canvas)) }, onRuntimeReport)
-  }, [spec, currentFunction, functions, parameters, traceX, scale, pan, showDerivative, showIntegral, size, onRuntimeReport])
+  }, [spec, currentFunction, functions, parameters, traceX, scale, drawPan, showDerivative, showIntegral, size, onRuntimeReport])
 
   // React's onWheel is passive, so preventDefault cannot stop the page from
   // scrolling. A native non-passive listener is required for an explicit zoom.
   useEffect(() => {
     const canvas = canvasRef.current
-    if (canvas === null) return
+    if (canvas === null || readOnly) return
     function handleWheel(event: WheelEvent): void {
       if (!event.ctrlKey && !event.metaKey) return
       event.preventDefault()
@@ -119,7 +153,7 @@ export function FunctionPlotView({
     }
     canvas.addEventListener('wheel', handleWheel, { passive: false })
     return () => { canvas.removeEventListener('wheel', handleWheel) }
-  }, [])
+  }, [readOnly])
 
   useEffect(() => {
     if (!playing || sweepKey === undefined || sweep === undefined) return
@@ -142,13 +176,13 @@ export function FunctionPlotView({
 
   const reset = (): void => {
     setPlaying(false)
-    setParameters(Object.fromEntries(Object.entries(spec.parameters).map(([key, value]) => [key, value.value])))
+    setParameters(initialParameters)
     setTraceX(spec.trace.x)
     setSelectedFunction(spec.functions[0]?.id ?? '')
     setShowDerivative(spec.trace.derivative)
     setShowIntegral(spec.trace.integral)
     setScale(1)
-    setPan(0)
+    setPan(initialPan)
   }
 
   const confirm = async (): Promise<void> => {
@@ -194,32 +228,32 @@ export function FunctionPlotView({
     })
   }, [onStateChange, parameters, traceX, derivative, integral, scale, currentFunction])
 
-  const readout: readonly { readonly symbol: string; readonly value: string }[] = [
-    { symbol: t('scene.trace'), value: traceX.toFixed(2) },
-    { symbol: 'f(x)', value: currentValue === null ? '—' : currentValue.toFixed(3) },
-    { symbol: 'f′(x)', value: derivative === null ? '—' : derivative.toFixed(3) },
-    { symbol: '∫', value: integral === null ? '—' : integral.toFixed(3) },
-  ]
+  const readings = { x: traceX, value: currentValue, derivative, integral }
+  const liveSymbols = { x: t('scene.trace'), value: 'f(x)', derivative: 'f′(x)', integral: '∫' }
+  const compareBaseline = !readOnly && baselinePlot !== undefined
 
   return (
-    <div className={css.workspace} data-placement={placement}>
+    <div className={css.workspace} data-placement={placement} data-read-only={readOnly ? '' : undefined}
+      data-baseline={compareBaseline ? '' : undefined}>
       <div className={css.stage}>
         <div className={css.legend}>
           {functions.map((fn, index) => (
-            <span key={fn.id} className={css.legendItem} data-current={fn.id === currentFunction?.id ? '' : undefined}>
+            <span key={fn.id} className={css.legendItem} data-function-id={fn.id}
+              aria-current={fn.id === currentFunction?.id ? 'true' : undefined} data-current={fn.id === currentFunction?.id ? '' : undefined}>
               <i className={index === 0 ? css.swatchAccent : css.swatchSecondary} aria-hidden="true" />
               {fn.label}
             </span>
           ))}
         </div>
         <div className={css.plot} ref={plotRef}>
-          <canvas ref={canvasRef} className={css.chart} role="img" aria-label={t('scene.canvas')}
-            onPointerDown={(event) => {
+          <canvas ref={canvasRef} className={css.chart} width={size.width} height={size.height}
+            role="img" aria-label={t(readOnly ? 'scene.historyCanvas' : 'scene.canvas')}
+            onPointerDown={readOnly ? undefined : (event) => {
               dragRef.current = { active: true, x: event.clientX }
               event.currentTarget.setPointerCapture(event.pointerId)
             }}
-            onPointerUp={() => { dragRef.current.active = false }}
-            onPointerMove={(event) => {
+            onPointerUp={readOnly ? undefined : () => { dragRef.current.active = false }}
+            onPointerMove={readOnly ? undefined : (event) => {
               const canvas = canvasRef.current
               if (!canvas) return
               const rect = canvas.getBoundingClientRect()
@@ -231,30 +265,68 @@ export function FunctionPlotView({
                 setPan(current => current - delta)
                 dragRef.current.x = event.clientX
               }
-              setTraceX(center - range / 2 + ((event.clientX - rect.left) / rect.width) * range)
+              if (baselinePlot === undefined) setTraceX(center - range / 2 + ((event.clientX - rect.left) / rect.width) * range)
             }} />
         </div>
-        <div className={css.readout} role="status" aria-live="polite">
-          {readout.map(item => (
-            <div key={item.symbol} className={css.readoutItem}>
-              <span className={css.readoutLabel}>{item.symbol}</span>
-              <span className={css.readoutValue}>{item.value}</span>
+        {replayPlot === undefined ? (
+          <div className={css.readout} role="status" aria-live="polite">
+            {(compareBaseline ? COMPARISON_READING_FIELDS : READING_FIELDS).map(field => (
+              <div key={field} className={css.readoutItem}>
+                <span className={css.readoutLabel}>{liveSymbols[field]}</span>
+                <span className={css.readoutValue}>{readings[field]?.toFixed(field === 'x' ? 2 : 3) ?? '—'}</span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <dl className={css.sourceParameters}>
+            {READING_FIELDS.map(field => (
+              <div key={field}>
+                <dt>{READING_SYMBOLS[field]}</dt>
+                <dd data-function-source-value={field}>{readings[field] === null ? '—' : String(readings[field])}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+        {readOnly && Object.keys(parameters).length > 0 && <dl className={css.sourceParameters}>
+          {Object.entries(parameters).map(([name, value]) => (
+            <div key={name}>
+              <dt>{t('scene.parameter', { name })}</dt>
+              <dd data-function-source-parameter={name}>{String(value)}</dd>
             </div>
           ))}
-        </div>
+        </dl>}
+        {compareBaseline && (
+          <section className={css.baselineComparison} aria-label={t('scene.baselineComparison')} data-function-baseline-comparison>
+            <strong>{t('scene.baselineComparison')}</strong>
+            <dl aria-live="polite">
+              <div>
+                <dt>{t('scene.baselineValue', { revision: String(baselinePlot.sourceRevision) })}</dt>
+                <dd data-function-integral="baseline">{baselinePlot.values.integral?.toFixed(3) ?? '—'}</dd>
+              </div>
+              <div>
+                <dt>{t('scene.baselineCurrent')}</dt>
+                <dd data-function-integral="current">{integral?.toFixed(3) ?? '—'}</dd>
+              </div>
+              <div>
+                <dt>{t('scene.baselineDelta')}</dt>
+                <dd data-function-integral="delta">{formatReadingDifference(integral, baselinePlot.values.integral)}</dd>
+              </div>
+            </dl>
+          </section>
+        )}
       </div>
 
-      <aside className={css.panel} aria-label={t('scene.controls')}>
-        <div className={css.field}>
-          <label htmlFor="scene-function">{t('scene.selected')}</label>
-          <select id="scene-function" value={selectedFunction} onChange={(event) => { setSelectedFunction(event.target.value) }}>
+      {!readOnly && <aside className={css.panel} aria-label={t('scene.controls')}>
+        {baselinePlot === undefined && <div className={css.field}>
+          <label htmlFor={`${formId}-function`}>{t('scene.selected')}</label>
+          <select id={`${formId}-function`} value={selectedFunction} onChange={(event) => { setSelectedFunction(event.target.value) }}>
             {functions.map(fn => <option key={fn.id} value={fn.id}>{fn.label}</option>)}
           </select>
-        </div>
+        </div>}
         {sweepKey && sweep && (
           <div className={css.field}>
-            <label htmlFor="scene-parameter">{t('scene.parameter', { name: sweepKey })} <output>{(parameters[sweepKey] ?? sweep.value).toFixed(2)}</output></label>
-            <input id="scene-parameter" type="range" min={sweep.min} max={sweep.max} step={sweep.step} value={parameters[sweepKey] ?? sweep.value}
+            <label htmlFor={`${formId}-parameter`}>{t('scene.parameter', { name: sweepKey })} <output>{(parameters[sweepKey] ?? sweep.value).toFixed(2)}</output></label>
+            <input id={`${formId}-parameter`} type="range" min={sweep.min} max={sweep.max} step={sweep.step} value={parameters[sweepKey] ?? sweep.value}
               onChange={(event) => { setParameters(current => ({ ...current, [sweepKey]: Number(event.target.value) })) }} />
           </div>
         )}
@@ -270,7 +342,7 @@ export function FunctionPlotView({
           <Button size="sm" variant="ghost" className={css.toggle} aria-label={t('scene.zoomIn')}
             onClick={() => { setScale(current => Math.min(8, current * 1.25)) }}>+</Button>
           <Button size="sm" variant="ghost" className={css.toggle}
-            onClick={() => { setScale(1); setPan(0) }}>{t('scene.viewReset')}</Button>
+            onClick={() => { setScale(1); setPan(initialPan) }}>{t('scene.viewReset')}</Button>
         </div>
         <div className={css.buttonRow}>
           <Button size="sm" variant="ghost" className={css.toggle} data-selected={playing ? '' : undefined}
@@ -284,11 +356,46 @@ export function FunctionPlotView({
           }}>{t('scene.step')}</Button>
           <Button size="sm" variant="ghost" className={css.toggle} onClick={reset}>{t('scene.reset')}</Button>
         </div>
+        {onAttachPlotQuestion !== undefined && currentFunction !== undefined && (
+          <Button size="sm" variant="outline" aria-expanded={review !== null} aria-controls={`${formId}-review`}
+            onClick={() => {
+              setReview({ conditions: { functionId: currentFunction.id, x: traceX, parameters },
+                label: currentFunction.label, values: analysis, unavailable: false })
+            }}>{t('promptContext.attach')}</Button>
+        )}
         {canRecord && <Button size="sm" variant="outline" disabled={recordPending} onClick={() => { void confirm() }}>{t('scene.confirm')}</Button>}
         <Button size="sm" variant="ghost" className={css.toggle} data-selected={recording ? '' : undefined}
           aria-pressed={recording} onClick={exportVideo}>{recording ? t('scene.stopRecording') : t('scene.exportVideo')}</Button>
-        <p className={css.hint}>{t('scene.hint')}</p>
-      </aside>
+        {baselinePlot === undefined && <p className={css.hint}>{t('scene.hint')}</p>}
+      </aside>}
+      {!readOnly && onAttachPlotQuestion !== undefined && review !== null && (
+        <section id={`${formId}-review`} className={css.questionReview} aria-label={t('promptContext.functionReview')} data-function-question-review>
+          <strong>{t('promptContext.functionReview')}</strong>
+          <p>{t('revision', { revision: String(revision) })} · {review.label}</p>
+          <dl>
+            {READING_FIELDS.map((field) => {
+              const value = field === 'x' ? review.conditions.x : review.values[field]
+              return <div key={field}>
+                <dt>{READING_SYMBOLS[field]}</dt>
+                <dd data-function-question-value={field}>{value === null ? '—' : String(value)}</dd>
+              </div>
+            })}
+            {Object.entries(review.conditions.parameters).map(([name, value]) => (
+              <div key={name}>
+                <dt>{t('scene.parameter', { name })}</dt><dd data-function-question-parameter={name}>{String(value)}</dd>
+              </div>
+            ))}
+          </dl>
+          <div className={css.buttonRow}>
+            <Button size="sm" variant="primary" onClick={() => {
+              if (onAttachPlotQuestion(review.conditions)) setReview(null)
+              else setReview({ ...review, unavailable: true })
+            }}>{t('promptContext.confirmReadings')}</Button>
+            <Button size="sm" variant="ghost" onClick={() => { setReview(null) }}>{t('promptContext.cancelReadings')}</Button>
+          </div>
+          {review.unavailable && <p role="alert">{t('promptContext.unavailable')}</p>}
+        </section>
+      )}
     </div>
   )
 }

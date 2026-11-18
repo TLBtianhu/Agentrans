@@ -411,7 +411,7 @@ Each table lists the rows that profile actually composes, the layer that supplie
 
 ### `web`
 
-218 rows; 21 are not unconditionally mounted.
+221 rows; 21 are not unconditionally mounted.
 
 | Row id | Package / module | State | Source layer |
 | --- | --- | --- | --- |
@@ -470,7 +470,7 @@ Each table lists the rows that profile actually composes, the layer that supplie
 | `agent-instructions` | `@agentrans/agent-instructions` | `mounted` | [`packages/bundle/web-app/presets/cordis.patch.yml`](../../packages/bundle/web-app/presets/cordis.patch.yml) |
 | `skill` | `@agentrans/skill` | `mounted` | [`packages/bundle/base/cordis.patch.yml`](../../packages/bundle/base/cordis.patch.yml) |
 | `skill-filesystem` | `@agentrans/skill-filesystem` | `mounted` | [`packages/bundle/web-app/presets/cordis.patch.yml`](../../packages/bundle/web-app/presets/cordis.patch.yml) |
-| `tool-skill` | `@agentrans/tool-skill` | `mounted` | [`packages/bundle/web-app/presets/cordis.patch.yml`](../../packages/bundle/web-app/presets/cordis.patch.yml) |
+| `tool-skill` | `@agentrans/tool-skill` | `mounted` | [`packages/bundle/web-app/presets/chat.patch.yml`](../../packages/bundle/web-app/presets/chat.patch.yml) |
 | `commands` | `@agentrans/commands` | `mounted` | [`packages/bundle/base/cordis.patch.yml`](../../packages/bundle/base/cordis.patch.yml) |
 | `command-feedback` | `@agentrans/command-feedback` | `mounted` | [`packages/bundle/base/cordis.patch.yml`](../../packages/bundle/base/cordis.patch.yml) |
 | `goal` | `@agentrans/goal` | `mounted` | [`packages/bundle/base/cordis.patch.yml`](../../packages/bundle/base/cordis.patch.yml) |
@@ -611,17 +611,17 @@ Each table lists the rows that profile actually composes, the layer that supplie
 | `ui-trajectory` | `@agentrans/client-ui-trajectory` | `mounted` | [`packages/bundle/web-app/cordis.patch.yml`](../../packages/bundle/web-app/cordis.patch.yml) |
 | `agent-preset-registry` | `@agentrans/agent-preset-registry` | `mounted` | [`packages/bundle/web-app/cordis.patch.yml`](../../packages/bundle/web-app/cordis.patch.yml) |
 | `preset-standard` | `@agentrans/agent-preset` | `mounted` | [`packages/bundle/web-app/presets/standard.patch.yml`](../../packages/bundle/web-app/presets/standard.patch.yml) |
-| `persona` | `@agentrans/persona` | `mounted` | [`packages/bundle/web-app/presets/cordis.patch.yml`](../../packages/bundle/web-app/presets/cordis.patch.yml) |
+| `persona` | `@agentrans/persona` | `mounted` | [`packages/bundle/web-app/presets/chat.patch.yml`](../../packages/bundle/web-app/presets/chat.patch.yml) |
 | `time-context` | `@agentrans/time-context` | `mounted` | [`packages/bundle/web-app/presets/cordis.patch.yml`](../../packages/bundle/web-app/presets/cordis.patch.yml) |
 | `tool-schedule` | `@agentrans/tool-schedule` | `mounted` | [`packages/bundle/web-app/presets/cordis.patch.yml`](../../packages/bundle/web-app/presets/cordis.patch.yml) |
 | `planning` | `cordis:group` | `mounted` | [`packages/bundle/web-app/presets/cordis.patch.yml`](../../packages/bundle/web-app/presets/cordis.patch.yml) |
 | `compaction` | `cordis:group` | `mounted` | [`packages/bundle/web-app/presets/cordis.patch.yml`](../../packages/bundle/web-app/presets/cordis.patch.yml) |
 | `delegation` | `cordis:group` | `mounted` | [`packages/bundle/web-app/presets/cordis.patch.yml`](../../packages/bundle/web-app/presets/cordis.patch.yml) |
-| `tool-ask-user` | `@agentrans/tool-ask-user` | `mounted` | [`packages/bundle/web-app/presets/cordis.patch.yml`](../../packages/bundle/web-app/presets/cordis.patch.yml) |
+| `tool-ask-user` | `@agentrans/tool-ask-user` | `mounted` | [`packages/bundle/web-app/presets/chat.patch.yml`](../../packages/bundle/web-app/presets/chat.patch.yml) |
 | `present` | `@agentrans/tool-present` | `mounted` | [`packages/bundle/web-app/presets/cordis.patch.yml`](../../packages/bundle/web-app/presets/cordis.patch.yml) |
-| `artifact` | `@agentrans/artifact/tool` | `mounted` | [`packages/bundle/web-app/presets/cordis.patch.yml`](../../packages/bundle/web-app/presets/cordis.patch.yml) |
-| `scene` | `@agentrans/artifact/scene-tool` | `mounted` | [`packages/bundle/web-app/presets/cordis.patch.yml`](../../packages/bundle/web-app/presets/cordis.patch.yml) |
-| `artifact-runtime-tool` | `@agentrans/artifact-runtime/tool` | `mounted` | [`packages/bundle/web-app/presets/cordis.patch.yml`](../../packages/bundle/web-app/presets/cordis.patch.yml) |
+| `artifact` | `@agentrans/artifact/tool` | `mounted` | [`packages/bundle/web-app/presets/chat.patch.yml`](../../packages/bundle/web-app/presets/chat.patch.yml) |
+| `scene` | `@agentrans/artifact/scene-tool` | `mounted` | [`packages/bundle/web-app/presets/chat.patch.yml`](../../packages/bundle/web-app/presets/chat.patch.yml) |
+| `artifact-runtime-tool` | `@agentrans/artifact-runtime/tool` | `mounted` | [`packages/bundle/web-app/presets/chat.patch.yml`](../../packages/bundle/web-app/presets/chat.patch.yml) |
 | `tool-plugin-market` | `@agentrans/plugin-market/tools` | `conditional` | [`packages/bundle/web-app/presets/cordis.patch.yml`](../../packages/bundle/web-app/presets/cordis.patch.yml) |
 | `preset-ptc` | `@agentrans/agent-preset` | `mounted` | [`packages/bundle/web-app/presets/ptc.patch.yml`](../../packages/bundle/web-app/presets/ptc.patch.yml) |
 | `preset-minimal` | `@agentrans/agent-preset` | `mounted` | [`packages/bundle/web-app/presets/minimal.patch.yml`](../../packages/bundle/web-app/presets/minimal.patch.yml) |
@@ -633,6 +633,9 @@ Each table lists the rows that profile actually composes, the layer that supplie
 | `persistent-pwsh` | `@agentrans/tool-pwsh-persistent` | `conditional` | [`packages/bundle/web-app/presets/minimal.patch.yml`](../../packages/bundle/web-app/presets/minimal.patch.yml) |
 | `preset-cordis` | `@agentrans/agent-preset` | `mounted` | [`packages/bundle/web-app/presets/cordis.patch.yml`](../../packages/bundle/web-app/presets/cordis.patch.yml) |
 | `tool-cordis` | `@agentrans/tool-cordis` | `mounted` | [`packages/bundle/web-app/presets/cordis.patch.yml`](../../packages/bundle/web-app/presets/cordis.patch.yml) |
+| `preset-chat` | `@agentrans/agent-preset` | `mounted` | [`packages/bundle/web-app/presets/chat.patch.yml`](../../packages/bundle/web-app/presets/chat.patch.yml) |
+| `native-executor` | `@agentrans/tool-executor-native` | `mounted` | [`packages/bundle/web-app/presets/chat.patch.yml`](../../packages/bundle/web-app/presets/chat.patch.yml) |
+| `attachment-csv-tool` | `@agentrans/artifact/attachment-csv-tool` | `mounted` | [`packages/bundle/web-app/presets/chat.patch.yml`](../../packages/bundle/web-app/presets/chat.patch.yml) |
 
 ### `headless`
 

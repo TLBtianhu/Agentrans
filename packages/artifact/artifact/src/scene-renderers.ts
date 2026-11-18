@@ -5,7 +5,9 @@ export {
   resolveScenePalette, scenePaletteOwnership,
   type ScenePalette, type ScenePaletteOwnership, type ScenePaletteRole,
 } from './scene-palette.ts'
-export { analyzeFunction, evaluateFunction, differentiateFunction, integrateFunction, type FunctionAnalysis } from './renderers/function-analysis.ts'
+export {
+  analyzeFunction, analyzeFunctionPlotSelection, evaluateFunction, differentiateFunction, integrateFunction, type FunctionAnalysis,
+} from './renderers/function-analysis.ts'
 export { renderFlowchart, type FlowchartRenderState } from './renderers/flowchart.ts'
 export { renderParticleSystem, type ParticleRenderState } from './renderers/particle-system.ts'
 export {

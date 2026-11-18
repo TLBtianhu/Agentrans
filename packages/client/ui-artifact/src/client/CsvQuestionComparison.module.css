@@ -1,0 +1,212 @@
+:is(.panel, .review)[hidden] { display: none; }
+
+.review {
+  box-sizing: border-box;
+  padding: 8px 12px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: var(--dsw-radius-xs);
+}
+
+.review > strong { font-weight: 500; }
+
+.panel table :is(th, td) { padding-inline: 4px; }
+
+.panel thead th:nth-child(2) { width: 28%; }
+
+.toggle {
+  height: auto;
+  min-height: 28px;
+  max-width: 100%;
+  padding-block: 4px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.sourceTrail ol {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sourceTrail li {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.sourceTrail li[aria-current] {
+  padding-block: 4px;
+  font-weight: 500;
+}
+
+.sourceTrailStop {
+  min-width: 0;
+  min-height: 28px;
+  height: auto;
+  padding-block: 4px;
+  padding-inline: 3px;
+  text-align: start;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.sourceTrailSeparator {
+  flex: none;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.sourceChainDialog { max-height: 100%; }
+
+.sourceChainContent {
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.sourceChainList {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  margin: 0;
+  padding-inline-start: 20px;
+}
+
+.sourceChainQuestion {
+  justify-content: flex-start;
+  width: 100%;
+  min-height: 36px;
+  height: auto;
+  padding-block: 6px;
+  text-align: start;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.sourceChainStatus { margin: 0; }
+
+.sourceChainStatus:empty { position: absolute; }
+
+.downloadStatus { margin: 0; }
+.downloadStatus:empty { position: absolute; }
+
+.sourceChainStatus[data-csv-source-chain-status="invalid"] { order: 1; }
+
+.sourceChainContentItems {
+  display: grid;
+  gap: 8px;
+}
+
+.sourceChainContentItems > button {
+  justify-self: start;
+}
+
+.readings {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 8px;
+}
+
+.readings strong { font-weight: 500; }
+
+.returnSource { margin-block-start: 8px; }
+
+.draftReturnSources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+
+.draftReturnSources > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.readings > div {
+  min-width: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: var(--dsw-radius-xs);
+  overflow-wrap: anywhere;
+}
+
+.changes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.changes li {
+  padding: 2px 6px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: var(--dsw-radius-xs);
+  overflow-wrap: anywhere;
+}
+
+.explanationSteps, .explanationStepContent {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.explanationStepContent { margin-block: 8px; }
+
+.importedProvenance { overflow-wrap: anywhere; }
+.importedProvenance p { margin: 0; }
+
+.importedReturnCards, .importedReturnContent {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.importedReturnCards summary {
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.importedReturnContent {
+  margin-block-start: 8px;
+  overflow-wrap: anywhere;
+}
+
+.importedReturnIdentity {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+}
+
+.importedReturnContent p { margin: 0; }
+.importedReturnConclusion p { margin-block-start: 4px; white-space: pre-wrap; }
+
+.counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 0;
+}
+
+.counts div {
+  display: flex;
+  gap: 6px;
+}
+
+.counts dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.pageRange {
+  margin: 0;
+  color: var(--dsw-alias-label-secondary);
+}

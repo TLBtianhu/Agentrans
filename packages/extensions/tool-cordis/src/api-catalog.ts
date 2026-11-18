@@ -461,13 +461,193 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
   },
   {
     key: 'artifactBranchResults',
-    summary: 'Artifact-owned API for manually attaching saved evidence to one branch conclusion.',
-    description: 'Artifact-owned API for manually attaching saved evidence to one branch conclusion.',
+    summary: 'Artifact-owned API for manually attaching experiment evidence to one branch conclusion.',
+    description: 'Artifact-owned API for manually attaching experiment evidence to one branch conclusion.',
     methods: [
+      {
+        signature: '@Remote({ resources: { session: (request: ArtifactBranchContinuePlotRequest) => request.sessionId } }) async continuePlot(request: ArtifactBranchContinuePlotRequest): Promise<ArtifactBranchContinuePlotValue>',
+        description: 'Fork a returned function plot into an editable child without waking either Agent.',
+        parameters: [{ name: 'request', description: 'Receiving Session, exact evidence notice identity and retry UUID.' }],
+        returns: 'The durable child Session and its initial editable Artifact.',
+        throws: ['{RemoteError} For unavailable evidence or conflicting reuse of the request identity. A durability or workspace error can follow creation. Retry the identical request to recover the child.'],
+      },
+      {
+        signature: '@Remote({ resources: { session: (request: ArtifactBranchExportReturnedPlotRequest) => request.sessionId } }) async exportReturnedPlot(request: ArtifactBranchExportReturnedPlotRequest): Promise<Uint8Array>',
+        description: 'Export the exact locked function plot in an original branch-return notice as offline HTML.',
+        parameters: [{ name: 'request', description: 'Receiving Session and exact notice sequence and message ID.' }],
+        returns: 'UTF-8 HTML with the recorded source revision and replay conditions.',
+        throws: ['{RemoteError} For unavailable or unverified evidence.'],
+      },
+      {
+        signature: '@Remote({ resources: { session: (request: ArtifactBranchExportSentPlotRequest) => request.sessionId } }) async exportSentPlot(request: ArtifactBranchExportSentPlotRequest): Promise<Uint8Array>',
+        description: 'Export the exact function plot locked on a sent follow-up as offline HTML.',
+        parameters: [{ name: 'request', description: 'Owning Session and exact question sequence and message ID.' }],
+        returns: 'UTF-8 HTML with the recorded source revision and replay conditions.',
+        throws: ['{RemoteError} For unavailable or unverified evidence.'],
+      },
+      {
+        signature: '@Remote({ resources: { session: (request: ArtifactBranchExportReturnedParticleRequest) => request.sessionId } }) async exportReturnedParticle(request: ArtifactBranchExportReturnedParticleRequest): Promise<Uint8Array>',
+        description: 'Export the checkpoint of a returned particle experiment as offline HTML.',
+        parameters: [{ name: 'request', description: 'Receiving Session and exact notice sequence and message ID.' }],
+        returns: 'UTF-8 HTML with the original revision and confirmed replay conditions.',
+        throws: ['{RemoteError} For unavailable or unverified evidence.'],
+      },
+      {
+        signature: '@Remote({ resources: { session: (request: ArtifactBranchExportSentParticleRequest) => request.sessionId } }) async exportSentParticle(request: ArtifactBranchExportSentParticleRequest): Promise<Uint8Array>',
+        description: 'Export the particle experiment locked on a sent follow-up as offline HTML.',
+        parameters: [{ name: 'request', description: 'Owning Session and exact question sequence and message ID.' }],
+        returns: 'UTF-8 HTML with the recorded revision, effective gravity and confirmed checkpoint.',
+        throws: ['{RemoteError} For unavailable or unverified evidence.'],
+      },
+      {
+        signature: '@Remote({ resources: { session: (request: ArtifactBranchExportReturnedBfsRequest) => request.sessionId } }) async exportReturnedBfs(request: ArtifactBranchExportReturnedBfsRequest): Promise<ArtifactBranchExportReturnedBfsValue>',
+        description: 'Read the original program and checkpoint of an exact BFS return for offline download.',
+        parameters: [{ name: 'request', description: 'Receiving Session and exact notice sequence and message ID.' }],
+        returns: 'The source revision and the program-reported checkpoint confirmed on that notice.',
+        throws: ['{RemoteError} For unavailable or unverified evidence.'],
+      },
+      {
+        signature: '@Remote({ resources: { session: (request: ArtifactBranchExportSentBfsRequest) => request.sessionId } }) async exportSentBfs(request: ArtifactBranchExportSentBfsRequest): Promise<ArtifactBranchExportReturnedBfsValue>',
+        description: 'Read the exact original program and the step locked on a sent BFS follow-up for offline download.',
+        parameters: [{ name: 'request', description: 'Owning Session and exact sent question sequence and message ID.' }],
+        returns: 'The source revision from the verified return and the follow-up\'s recorded checkpoint.',
+        throws: ['{RemoteError} For unavailable or unverified evidence.'],
+      },
+      {
+        signature: '@Remote({ resources: { session: (request: ArtifactBranchExportReturnedHalfAdderRequest) => request.sessionId } }) async exportReturnedHalfAdder( request: ArtifactBranchExportReturnedHalfAdderRequest, ): Promise<ArtifactBranchExportReturnedHalfAdderValue>',
+        description: 'Read the original program and checkpoint of an exact half-adder return for offline download.',
+        parameters: [{ name: 'request', description: 'Receiving Session and exact notice sequence and message ID.' }],
+        returns: 'The source revision and the program-reported checkpoint confirmed on that notice.',
+        throws: ['{RemoteError} For unavailable or unverified evidence.'],
+      },
+      {
+        signature: '@Remote({ resources: { session: (request: ArtifactBranchExportSentHalfAdderRequest) => request.sessionId } }) async exportSentHalfAdder(request: ArtifactBranchExportSentHalfAdderRequest): Promise<ArtifactBranchExportReturnedHalfAdderValue>',
+        description: 'Read the original program and state locked on a sent half-adder follow-up for offline download.',
+        parameters: [{ name: 'request', description: 'Owning Session and exact sent question sequence and message ID.' }],
+        returns: 'The source revision from the verified return and the input and output bits recorded on the question.',
+        throws: ['{RemoteError} For unavailable or unverified evidence.'],
+      },
+      {
+        signature: '@Remote({ resources: { session: (request: ArtifactBranchContinueParticleRequest) => request.sessionId } }) async continueParticle(request: ArtifactBranchContinueParticleRequest): Promise<ArtifactBranchContinueParticleValue>',
+        description: 'Fork returned native particle readings into an editable child without waking either Agent.',
+        parameters: [{ name: 'request', description: 'Receiving Session, exact evidence notice identity and retry UUID.' }],
+        returns: 'The durable child Session and its initial editable Artifact at the original checkpoint.',
+        throws: ['{RemoteError} For unavailable evidence or conflicting reuse of the request identity. A durability or workspace error can follow creation. Retry the identical request to recover the child.'],
+      },
+      {
+        signature: '@Remote({ resources: { session: (request: ArtifactBranchRecalculateCsvRequest) => request.sessionId } }) async recalculateCsv(request: ArtifactBranchRecalculateCsvRequest): Promise<CsvBarChartSpec>',
+        description: 'Recalculate the groups from one exact CSV return without mutating the Session.',
+        parameters: [{ name: 'request', description: 'Receiving Session, exact evidence notice and selected calculation.' }],
+        returns: 'A chart source computed from the original attachment, grouping column and numeric column.',
+        throws: ['{RemoteError} For unavailable evidence, attachment, or calculation.'],
+      },
+      {
+        signature: '@Remote({ resources: { session: (request: ArtifactBranchCsvFilterOptionsRequest) => request.sessionId } }) async csvFilterOptions(request: ArtifactBranchCsvFilterOptionsRequest): Promise<ArtifactBranchCsvFilterOptionsValue>',
+        description: 'Inspect the CSV columns and a bounded list of distinct values for one column without mutating the Session.',
+        parameters: [{ name: 'request', description: 'Exact approved return and optional column name.' }],
+        returns: 'The available columns and the requested column options.',
+      },
+      {
+        signature: '@Remote({ resources: { session: (request: ArtifactBranchCsvRowsRequest) => request.sessionId } }) async csvParticipatingRows(request: ArtifactBranchCsvRowsRequest): Promise<ArtifactBranchCsvRowsValue>',
+        description: 'Inspect a page of original CSV records contributing to a group before confirmation.',
+        parameters: [{ name: 'request', description: 'Exact approved return, current recipe, group key and optional offset.' }],
+        returns: 'The matching record range with filter and measure cells only.',
+      },
+      {
+        signature: '@Remote({ resources: { session: (request: ArtifactBranchCsvReturnedRowsRequest) => request.sessionId } }) async csvReturnedParticipatingRows(request: ArtifactBranchCsvReturnedRowsRequest): Promise<ArtifactBranchCsvRowsValue>',
+        description: 'Inspect the records that contributed to the adopted CSV reading.',
+        parameters: [{ name: 'request', description: 'Exact receiving Session, return identity and optional record offset.' }],
+        returns: 'A page from the original branch CSV using the adopted group and recipe.',
+      },
+      {
+        signature: '@Remote({ resources: { session: (request: ArtifactBranchCsvQuestionRowsRequest) => request.sessionId } }) async csvQuestionParticipatingRows(request: ArtifactBranchCsvQuestionRowsRequest): Promise<ArtifactBranchCsvQuestionRowsValue>',
+        description: 'Inspect the records that contributed to a sent CSV question\'s confirmed reading.',
+        parameters: [{ name: 'request', description: 'Exact receiving Session, question identity and optional record offset.' }],
+        returns: 'A page from the original branch CSV using the stored group and filter.',
+      },
+      {
+        signature: '@Remote({ resources: { session: (request: ArtifactBranchCsvQuestionComparisonRequest) => request.sessionId } }) async compareCsvQuestionToReturn(request: ArtifactBranchCsvQuestionComparisonRequest): Promise<ArtifactBranchCsvQuestionComparisonValue>',
+        description: 'Compare the confirmed CSV readings and their contributing records.',
+        parameters: [{ name: 'request', description: 'Exact receiving Session, sent question identity and optional record offset.' }],
+        returns: 'A page of kept, excluded and added records for the same group of the original CSV.',
+      },
+      {
+        signature: '@Remote({ resources: { session: (request: ArtifactBranchCsvReturnedComparisonRequest) => request.sessionId } }) async compareCsvReturns(request: ArtifactBranchCsvReturnedComparisonRequest): Promise<ArtifactBranchCsvReturnedComparisonValue>',
+        description: 'Compare two confirmed CSV returns and their record membership.',
+        parameters: [{ name: 'request', description: 'Parent Session, exact saved returns in comparison order, and optional page offset.' }],
+        returns: 'The saved readings, the bounded record page and its confirmation proof when available to the owner.',
+      },
+      {
+        signature: '@Remote({ resources: { session: (request: ArtifactBranchReadCsvComparisonDraftRequest) => request.sessionId } }) async readCsvComparisonDraft(request: ArtifactBranchReadCsvComparisonDraftRequest): Promise<ArtifactCsvComparisonDraft | null>',
+        description: 'Restore the owner\'s unsent CSV comparison for the receiving Session.',
+        parameters: [{ name: 'request', description: 'The receiving Session identity.' }],
+        returns: 'The exact confirmed draft, or null when there is no draft.',
+      },
+      {
+        signature: '@Remote({ resources: { session: (request: ArtifactBranchSaveCsvComparisonDraftRequest) => request.sessionId } }) async saveCsvComparisonDraft(request: ArtifactBranchSaveCsvComparisonDraftRequest): Promise<ArtifactCsvComparisonDraft>',
+        description: 'Durably save an explicitly confirmed CSV comparison before prompt admission.',
+        parameters: [{ name: 'request', description: 'Receiving Session, sealed reviewed page, and expected current receipt.' }],
+        returns: 'The private receipt and the exact comparison visible in the draft.',
+      },
+      {
+        signature: '@Remote({ resources: { session: (request: ArtifactBranchBindCsvComparisonDraftRequest) => request.sessionId } }) async bindCsvComparisonDraftRequest( request: ArtifactBranchBindCsvComparisonDraftRequest, ): Promise<ArtifactBranchBindCsvComparisonDraftValue>',
+        description: 'Bind the exact confirmed draft to the next ordinary prompt request.',
+        parameters: [{ name: 'request', description: 'Owner receiving Session, current draft receipt and prompt request identity.' }],
+        returns: 'Confirmation that the request identity is durable.',
+      },
+      {
+        signature: '@Remote({ resources: { session: (request: ArtifactBranchCheckCsvComparisonDraftRequest) => request.sessionId } }) async checkCsvComparisonDraftRequest( request: ArtifactBranchCheckCsvComparisonDraftRequest, ): Promise<ArtifactBranchCheckCsvComparisonDraftValue>',
+        description: 'Check whether the exact identified comparison prompt reached the Session.',
+        parameters: [{ name: 'request', description: 'The owner receiving Session and original prompt identity.' }],
+        returns: 'Whether this comparison prompt is durably accepted and its exact chat or inbox identity when available.',
+      },
+      {
+        signature: '@Remote({ resources: { session: (request: ArtifactBranchReviewSentCsvComparisonRequest) => request.sessionId } }) async reviewSentCsvComparison(request: ArtifactBranchReviewSentCsvComparisonRequest): Promise<ArtifactCsvComparisonAttachment>',
+        description: 'Review the exact single comparison or imported explanation attached to an own sent question.',
+        parameters: [{ name: 'request', description: 'Receiving Session and exact message coordinates from chat history.' }],
+        returns: 'The unchanged reviewed pages and transient proof for a fresh explicit draft lock.',
+      },
+      {
+        signature: '@Remote({ resources: { session: (request: ArtifactBranchReviewCsvComparisonExplanationRequest) => request.sessionId } }) async reviewCsvComparisonExplanation( request: ArtifactBranchReviewCsvComparisonExplanationRequest, ): Promise<ArtifactCsvComparisonAttachment>',
+        description: 'Review two exact sent CSV comparisons as an ordered explanation before confirmation.',
+        parameters: [{ name: 'request', description: 'Receiving Session and both exact history message addresses in either selection order.' }],
+        returns: 'The saved pages in recipe order with a transient proof for explicit draft confirmation.',
+      },
+      {
+        signature: '@Remote({ resources: { session: (request: ArtifactBranchExportSentCsvComparisonRequest) => request.sessionId } }) async exportSentCsvComparison(request: ArtifactBranchExportSentCsvComparisonRequest): Promise<Uint8Array>',
+        description: 'Export the exact recorded pages of a sent CSV comparison or explanation as offline HTML.',
+        parameters: [{ name: 'request', description: 'Receiving Session, exact message coordinates, and optional document language.' }],
+        returns: 'UTF-8 HTML with the saved readings, reviewed records, and original return cards when the comparison records them.',
+      },
+      {
+        signature: '@Remote({ resources: { session: (request: ArtifactBranchReviewSentCsvComparisonRequest) => request.sessionId } }) async exportSentCsvComparisonJson(request: ArtifactBranchReviewSentCsvComparisonRequest): Promise<Uint8Array>',
+        description: 'Export the reviewed pages of the exact own sent comparison or explanation as portable JSON.',
+        parameters: [{ name: 'request', description: 'Receiving Session and exact message coordinates from chat history.' }],
+        returns: 'Bounded UTF-8 JSON containing the exact reviewed pages and any original return cards without local resource identities.',
+      },
+      {
+        signature: '@Remote({ resources: { session: (request: ArtifactBranchImportCsvComparisonRequest) => request.sessionId } }) async importCsvComparison(request: ArtifactBranchImportCsvComparisonRequest): Promise<ArtifactCsvComparisonAttachment>',
+        description: 'Review a portable comparison or explanation in a destination Session before the user confirms it.',
+        parameters: [{ name: 'request', description: 'Destination Session and decoded JSON file selected by the caller.' }],
+        returns: 'Exact imported readings, their explicit source classification and a transient review proof.',
+      },
+      {
+        signature: '@Remote({ resources: { session: (request: ArtifactBranchClearCsvComparisonDraftRequest) => request.sessionId } }) async clearCsvComparisonDraft( request: ArtifactBranchClearCsvComparisonDraftRequest, ): Promise<ArtifactBranchClearCsvComparisonDraftValue>',
+        description: 'Remove the matching draft on explicit discard or after its accepted prompt reaches durability.',
+        parameters: [{ name: 'request', description: 'Receiving Session, exact receipt, and optional accepted prompt request ID.' }],
+        returns: 'Whether that matching receipt was removed.',
+      },
+      {
+        signature: '@Remote({ resources: { session: (request: ArtifactBranchLockCsvRequest) => request.sessionId } }) async lockCsv(request: ArtifactBranchLockCsvRequest): Promise<ArtifactBranchLockCsvValue>',
+        description: 'Confirm and persist one recalculated group in the receiving Session without waking the Agent.',
+        parameters: [{ name: 'request', description: 'Exact returned evidence, selected aggregation and group.' }],
+        returns: 'The new immutable source and its confirmed group after the durability checkpoint.',
+        throws: ['{RemoteError} For invalid or unavailable source, group or conflicting result. An identical retry reuses the same source.'],
+      },
       {
         signature: '@Remote({ resources: { session: (request: ArtifactBranchResultRequest) => [request.sessionId, request.branchSessionId] } }) async returnResult(request: ArtifactBranchResultRequest): Promise<SessionBranchResultValue>',
         description: 'Return one child-owned conclusion with evidence selected by the user, without starting a model turn.',
-        parameters: [{ name: 'request', description: 'Direct parent, branch conclusion and branch-visible saved references; no text or coordinates are accepted.' }],
+        parameters: [{ name: 'request', description: 'Direct parent, child-owned conclusion and a branch-visible evidence reference.' }],
         returns: 'Parent-local event and message ids after the durability checkpoint; identical retries reuse the receipt.',
         throws: ['{RemoteError} For invalid lineage, unavailable evidence, oversized content, a busy parent or different earlier content. Other failures preserve an unknown outcome after append; retry the identical request to recover its receipt.'],
       },
@@ -481,7 +661,7 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
       {
         signature: '@Remote async create(agent: Agent, input: ArtifactHtmlExportRequest): Promise<ArtifactHtmlExportRecord>',
         description: 'Capture and generate one Scene HTML export without adding model input.',
-        parameters: [{ name: 'agent', description: 'Exact live root owning the result record.' }, { name: 'input', description: 'Stable request identity and current-revision or saved-observation reference.' }],
+        parameters: [{ name: 'agent', description: 'Exact live root owning the result record.' }, { name: 'input', description: 'Stable request identity and a Scene revision or saved observation reference.' }],
         returns: 'The settled record after flush; generation failures return a durable failed record.',
         throws: ['{RemoteError} Before admission for invalid, conflicting, missing, stale, or over-limit requests. Append or flush failures retain an unknown outcome; retry the identical request to recover or explicitly continue it.'],
       },
@@ -543,7 +723,7 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
       {
         signature: 'resolveSceneSource(agent: Agent, selection: ArtifactExportSourceSelection): ArtifactExportSource',
         description: 'Resolve a Scene selection to a complete original source and validated replay point.',
-        parameters: [{ name: 'agent', description: 'Agent whose prepared Session owns the source and saved observations.' }, { name: 'selection', description: 'Current source revision or a previously saved observation reference.' }],
+        parameters: [{ name: 'agent', description: 'Agent whose prepared Session owns the source and saved observations.' }, { name: 'selection', description: 'Current revision, historical revision, or saved observation reference.' }],
         returns: 'Independent complete source values; particle coordinates are recomputed.',
         throws: ['{ArtifactError} For missing, stale, or unsupported sources.', '{ParticleRuntimeError} For invalid replay conditions.'],
       },
@@ -553,6 +733,12 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         parameters: [{ name: 'agent', description: 'Agent whose Session supplies the current artifact revision.' }, { name: 'input', description: 'Complete new values and, for update, the observed base revision.' }],
         returns: 'The snapshot to commit after the enclosing operation succeeds.',
         throws: ['{ArtifactError} `ARTIFACT_BUSY`, `ARTIFACT_EXISTS`, `ARTIFACT_NOT_FOUND`, `STALE_REVISION`, `BAD_SOURCE`, or `BAD_INPUT`; no Session event is appended.'],
+      },
+      {
+        signature: 'prepareCsvBarChart(agent: Agent, input: CsvBarChartPrepareInput): ArtifactSnapshot',
+        description: 'Prepare an inline chart from authoritative results computed by a Host attachment operation.',
+        parameters: [{ name: 'agent', description: 'Agent whose Session supplies the current Artifact revision.' }, { name: 'input', description: 'Host-calculated CSV source and compare-and-set revision fields.' }],
+        returns: 'The pending source to commit after the authoritative tool result succeeds.',
       },
       {
         signature: 'commit(agent: Agent, snapshot: ArtifactSnapshot): void',
@@ -2151,9 +2337,9 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         returns: 'dimensions and byte target used by the adapter\'s request serializer.',
       },
       {
-        signature: 'fileRequestText(ref: FileAttachmentRef): string',
+        signature: 'fileRequestText(ref: FileAttachmentRef, tools?: readonly ToolSchema[]): string',
         description: 'Resolve the exact text one durable file occurrence contributes to every provider request in the current execution environment.',
-        parameters: [{ name: 'ref', description: 'durable verbatim file reference from model history.' }],
+        parameters: [{ name: 'ref', description: 'durable verbatim file reference from model history.' }, { name: 'tools', description: 'the complete tool catalog admitted for the model request.' }],
         returns: 'the same deterministic handle text used at adapter dispatch.',
       },
       {
@@ -2805,7 +2991,7 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
     description: 'Host service backing the generated `ctx.remote.session` namespace.',
     methods: [
       {
-        signature: 'registerPromptContext(kind: string, resolve: (agent: Agent, value: import(\'@agentrans/util-values\').JsonValue) => readonly TextBlock[]): () => void',
+        signature: 'registerPromptContext(kind: string, resolve: PromptContextResolver): () => void',
         description: 'Register the domain owner of one optional prompt selection.',
         parameters: [{ name: 'kind', description: 'unique selection kind.' }, { name: 'resolve', description: 'synchronous Host validation and model-visible text construction.' }],
         returns: 'disposer that withdraws this registration.',
@@ -2886,9 +3072,15 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
       },
       {
         signature: '@Remote(\'fork\') async fork(request: SessionForkRequest): Promise<SessionForkValue>',
-        description: 'Fork one cold-readable exact event prefix into a new Session. An omitted boundary selects the latest completed-turn prefix; an open cut receives synthetic fork closers.',
-        parameters: [{ name: 'request', description: 'source Session, optional exact inclusive event boundary, and migration preflight choice.' }],
-        returns: 'the new Session identity.',
+        description: 'Fork one exact event prefix from live or persisted history. An omitted boundary selects the latest completed-turn prefix. An open cut receives synthetic closers. An identical inquiry retry recovers the child created by a prior attempt.',
+        parameters: [{ name: 'request', description: 'Source Session, optional boundary, migration preflight and inquiry retry identity.' }],
+        returns: 'The new or recovered Session identity after workspace attachment.',
+      },
+      {
+        signature: 'forkObserved( source: SessionObservation, boundary: ReturnType<typeof SessionSeq>, preparation: SessionForkPreparation, ): Promise<SessionForkValue>',
+        description: 'Fork one previously validated Session observation with trusted feature preparation.',
+        parameters: [{ name: 'source', description: 'Retained source observation carrying the exact prefix.' }, { name: 'boundary', description: 'Existing inclusive event position in that observation.' }, { name: 'preparation', description: 'Child identity, publication commit and retry validation.' }],
+        returns: 'A newly prepared or previously verified child, after flush and workspace attachment.',
       },
       {
         signature: '@Remote({ name: \'returnBranchResult\', resources: { session: (request: SessionBranchResultRequest) => [request.sessionId, request.branchSessionId], }, }) async returnBranchResult(request: SessionBranchResultRequest): Promise<SessionBranchResultValue>',
@@ -3020,6 +3212,12 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         description: 'Read the original ordinary-prompt acceptance before resolving optional context or attachments.',
         parameters: [{ name: 'agent', description: 'Agent whose already-prepared own Session supplies the receipts.' }, { name: 'requestId', description: 'Ordinary prompt identity; inherited aliases do not count.' }],
         returns: 'Whether the original input was accepted, even if its queue item was edited or canceled.',
+      },
+      {
+        signature: 'hasPendingPrompt(sessionId: SessionId, requestId: SessionInputRequestId): boolean',
+        description: 'Check whether this Session has reserved a prompt identity.',
+        parameters: [{ name: 'sessionId', description: 'Session receiving the prompt.' }, { name: 'requestId', description: 'Original RPC request identity.' }],
+        returns: 'Whether admission is still in flight.',
       },
       {
         signature: 'admitMessage(agent: Agent, message: UserMessage, mode: SessionInputMode, validateFirst?: () => void): Promise<SessionInputReceipt>',
@@ -4249,6 +4447,12 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         description: 'Restrict global tools for the calling agent scope. Empty filters, unknown names, scope-local names, and reserved transport names fail. Restrictions intersect; scoped registrations remain visible.',
         parameters: [{ name: 'filter', description: 'global-tool mask: `allow` (keep only) and/or `deny` (remove).' }],
         returns: 'the exact disposer that lifts this restriction.',
+      },
+      {
+        signature: 'isolateInherited(): () => void',
+        description: 'Hide tools from layers outside the calling scope for it and its descendants. Tools registered inside the scope remain available.',
+        parameters: [],
+        returns: 'the disposer that re-enables inheritance for this scope.',
       },
       {
         signature: 'get(name: string, scope?: ScopeKey, toolSet?: ResolvedToolSet): ToolDefinition | undefined',
@@ -5760,16 +5964,248 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface ArtifactActionRequest {\n    readonly requestId: MessageId;\n    readonly artifactId: ArtifactId;\n    readonly revision: number;\n    readonly action: string;\n    readonly payload: JsonValue;\n    readonly wake: boolean;\n}',
   },
   {
+    name: 'ArtifactBfsCheckpoint',
+    declaration: 'export type ArtifactBfsCheckpoint = {\n    readonly kind: \'bfs-checkpoint\';\n    readonly current: string | null;\n    readonly queue: string[];\n    readonly visited: string[];\n};',
+  },
+  {
+    name: 'ArtifactBranchBindCsvComparisonDraftRequest',
+    declaration: 'export interface ArtifactBranchBindCsvComparisonDraftRequest extends ArtifactBranchReadCsvComparisonDraftRequest {\n    readonly receiptId: string;\n    readonly requestId: SessionRequestId;\n}',
+  },
+  {
+    name: 'ArtifactBranchBindCsvComparisonDraftValue',
+    declaration: 'export interface ArtifactBranchBindCsvComparisonDraftValue {\n    readonly bound: true;\n}',
+  },
+  {
+    name: 'ArtifactBranchCheckCsvComparisonDraftRequest',
+    declaration: 'export interface ArtifactBranchCheckCsvComparisonDraftRequest extends ArtifactBranchReadCsvComparisonDraftRequest {\n    readonly requestId: SessionRequestId;\n}',
+  },
+  {
+    name: 'ArtifactBranchCheckCsvComparisonDraftValue',
+    declaration: 'export type ArtifactBranchCheckCsvComparisonDraftValue = {\n    readonly accepted: true;\n    readonly pending?: never;\n    readonly message?: {\n        readonly eventSeq: number;\n        readonly messageId: MessageId;\n    };\n    readonly queuedMessageId?: MessageId;\n} | {\n    readonly accepted: false;\n    readonly pending?: true;\n};',
+  },
+  {
+    name: 'ArtifactBranchClearCsvComparisonDraftRequest',
+    declaration: 'export interface ArtifactBranchClearCsvComparisonDraftRequest extends ArtifactBranchReadCsvComparisonDraftRequest {\n    readonly receiptId: string;\n    readonly requestId?: SessionRequestId;\n}',
+  },
+  {
+    name: 'ArtifactBranchClearCsvComparisonDraftValue',
+    declaration: 'export interface ArtifactBranchClearCsvComparisonDraftValue {\n    readonly cleared: boolean;\n}',
+  },
+  {
+    name: 'ArtifactBranchContinueParticleRequest',
+    declaration: 'export type ArtifactBranchContinueParticleRequest = ArtifactBranchContinuePlotRequest;',
+  },
+  {
+    name: 'ArtifactBranchContinueParticleValue',
+    declaration: 'export type ArtifactBranchContinueParticleValue = ArtifactBranchContinuePlotValue;',
+  },
+  {
+    name: 'ArtifactBranchContinuePlotRequest',
+    declaration: 'export interface ArtifactBranchContinuePlotRequest {\n    readonly sessionId: SessionId;\n    readonly eventSeq: number;\n    readonly messageId: MessageId;\n    readonly requestId: ArtifactBranchContinuePlotRequestId;\n}',
+  },
+  {
+    name: 'ArtifactBranchContinuePlotRequestId',
+    declaration: 'export type ArtifactBranchContinuePlotRequestId = Branded<\'ArtifactBranchContinuePlotRequestId\'>;',
+  },
+  {
+    name: 'ArtifactBranchContinuePlotValue',
+    declaration: 'export interface ArtifactBranchContinuePlotValue {\n    readonly sessionId: SessionId;\n    readonly artifactId: ArtifactId;\n}',
+  },
+  {
+    name: 'ArtifactBranchCsvEvidenceRef',
+    declaration: 'export interface ArtifactBranchCsvEvidenceRef {\n    readonly sessionId: SessionId;\n    readonly eventSeq: number;\n    readonly messageId: MessageId;\n}',
+  },
+  {
+    name: 'ArtifactBranchCsvFilterOptionsRequest',
+    declaration: 'export interface ArtifactBranchCsvFilterOptionsRequest extends ArtifactBranchCsvEvidenceRef {\n    readonly column?: string;\n}',
+  },
+  {
+    name: 'ArtifactBranchCsvFilterOptionsValue',
+    declaration: 'export interface ArtifactBranchCsvFilterOptionsValue {\n    readonly columns: readonly string[];\n    readonly values: readonly string[];\n    readonly hasMore: boolean;\n}',
+  },
+  {
+    name: 'ArtifactBranchCsvQuestionComparisonRequest',
+    declaration: 'export type ArtifactBranchCsvQuestionComparisonRequest = ArtifactBranchCsvQuestionRowsRequest;',
+  },
+  {
+    name: 'ArtifactBranchCsvQuestionComparisonValue',
+    declaration: 'export interface ArtifactBranchCsvQuestionComparisonValue extends ArtifactCsvComparisonPage {\n    readonly attachment?: ArtifactCsvComparisonAttachment;\n}',
+  },
+  {
+    name: 'ArtifactBranchCsvQuestionRowsRequest',
+    declaration: 'export interface ArtifactBranchCsvQuestionRowsRequest {\n    readonly sessionId: SessionId;\n    readonly eventSeq: number;\n    readonly messageId: MessageId;\n    readonly offset?: number;\n}',
+  },
+  {
+    name: 'ArtifactBranchCsvQuestionRowsValue',
+    declaration: 'export interface ArtifactBranchCsvQuestionRowsValue extends ArtifactBranchCsvRowsValue {\n    readonly valueColumn?: string;\n}',
+  },
+  {
+    name: 'ArtifactBranchCsvReturnedComparisonRequest',
+    declaration: 'export interface ArtifactBranchCsvReturnedComparisonRequest {\n    readonly sessionId: SessionId;\n    readonly first: Omit<ArtifactBranchCsvEvidenceRef, \'sessionId\'>;\n    readonly second: Omit<ArtifactBranchCsvEvidenceRef, \'sessionId\'>;\n    readonly offset?: number;\n}',
+  },
+  {
+    name: 'ArtifactBranchCsvReturnedComparisonValue',
+    declaration: 'export interface ArtifactBranchCsvReturnedComparisonValue extends ArtifactCsvComparisonPage {\n    readonly attachment?: ArtifactCsvComparisonAttachment;\n}',
+  },
+  {
+    name: 'ArtifactBranchCsvReturnedRowsRequest',
+    declaration: 'export interface ArtifactBranchCsvReturnedRowsRequest extends ArtifactBranchCsvEvidenceRef {\n    readonly offset?: number;\n}',
+  },
+  {
+    name: 'ArtifactBranchCsvRowsRequest',
+    declaration: 'export interface ArtifactBranchCsvRowsRequest extends ArtifactBranchRecalculateCsvRequest {\n    readonly groupKey: string;\n    readonly offset?: number;\n}',
+  },
+  {
+    name: 'ArtifactBranchCsvRowsValue',
+    declaration: 'export interface ArtifactBranchCsvRowsValue {\n    readonly rows: readonly {\n        readonly record: number;\n        readonly filterValue?: string;\n        readonly value?: string;\n    }[];\n    readonly total: number;\n    readonly offset: number;\n    readonly nextOffset?: number;\n}',
+  },
+  {
     name: 'ArtifactBranchEvidenceSelection',
-    declaration: 'export type ArtifactBranchEvidenceSelection = {\n    readonly kind: \'observation\';\n    readonly observation: SavedParticleObservationRef;\n} | {\n    readonly kind: \'comparison\';\n    readonly group: string;\n    readonly control: SavedParticleObservationRef;\n    readonly variant: SavedParticleObservationRef;\n};',
+    declaration: 'export type ArtifactBranchEvidenceSelection = {\n    readonly kind: \'observation\';\n    readonly observation: SavedParticleObservationRef;\n} | {\n    readonly kind: \'comparison\';\n    readonly group: string;\n    readonly control: SavedParticleObservationRef;\n    readonly variant: SavedParticleObservationRef;\n} | {\n    readonly kind: \'question\';\n    readonly questionSeq: number;\n    readonly blockIndex: number;\n};',
+  },
+  {
+    name: 'ArtifactBranchExportReturnedBfsRequest',
+    declaration: 'export type ArtifactBranchExportReturnedBfsRequest = ArtifactBranchExportReturnedPlotRequest;',
+  },
+  {
+    name: 'ArtifactBranchExportReturnedBfsValue',
+    declaration: 'export interface ArtifactBranchExportReturnedBfsValue {\n    readonly artifact: HtmlArtifactSnapshot;\n    readonly checkpoint: ArtifactBfsCheckpoint;\n}',
+  },
+  {
+    name: 'ArtifactBranchExportReturnedHalfAdderRequest',
+    declaration: 'export type ArtifactBranchExportReturnedHalfAdderRequest = ArtifactBranchExportReturnedPlotRequest;',
+  },
+  {
+    name: 'ArtifactBranchExportReturnedHalfAdderValue',
+    declaration: 'export interface ArtifactBranchExportReturnedHalfAdderValue {\n    readonly artifact: HtmlArtifactSnapshot;\n    readonly checkpoint: ArtifactHalfAdderCheckpoint;\n}',
+  },
+  {
+    name: 'ArtifactBranchExportReturnedParticleRequest',
+    declaration: 'export type ArtifactBranchExportReturnedParticleRequest = ArtifactBranchExportReturnedPlotRequest;',
+  },
+  {
+    name: 'ArtifactBranchExportReturnedPlotRequest',
+    declaration: 'export type ArtifactBranchExportReturnedPlotRequest = Pick<ArtifactBranchContinuePlotRequest, \'sessionId\' | \'eventSeq\' | \'messageId\'>;',
+  },
+  {
+    name: 'ArtifactBranchExportSentBfsRequest',
+    declaration: 'export type ArtifactBranchExportSentBfsRequest = ArtifactBranchExportReturnedBfsRequest;',
+  },
+  {
+    name: 'ArtifactBranchExportSentCsvComparisonRequest',
+    declaration: 'export interface ArtifactBranchExportSentCsvComparisonRequest extends ArtifactBranchCsvEvidenceRef {\n    readonly locale?: string;\n}',
+  },
+  {
+    name: 'ArtifactBranchExportSentHalfAdderRequest',
+    declaration: 'export type ArtifactBranchExportSentHalfAdderRequest = ArtifactBranchExportReturnedHalfAdderRequest;',
+  },
+  {
+    name: 'ArtifactBranchExportSentParticleRequest',
+    declaration: 'export type ArtifactBranchExportSentParticleRequest = ArtifactBranchExportReturnedParticleRequest;',
+  },
+  {
+    name: 'ArtifactBranchExportSentPlotRequest',
+    declaration: 'export type ArtifactBranchExportSentPlotRequest = ArtifactBranchExportReturnedPlotRequest;',
+  },
+  {
+    name: 'ArtifactBranchImportCsvComparisonRequest',
+    declaration: 'export interface ArtifactBranchImportCsvComparisonRequest {\n    readonly sessionId: SessionId;\n    readonly json: string;\n}',
+  },
+  {
+    name: 'ArtifactBranchLockCsvRequest',
+    declaration: 'export interface ArtifactBranchLockCsvRequest extends ArtifactBranchRecalculateCsvRequest {\n    readonly groupKey: string;\n}',
+  },
+  {
+    name: 'ArtifactBranchLockCsvValue',
+    declaration: 'export interface ArtifactBranchLockCsvValue {\n    readonly artifact: SceneArtifactSnapshot;\n    readonly groupKey: string;\n}',
+  },
+  {
+    name: 'ArtifactBranchReadCsvComparisonDraftRequest',
+    declaration: 'export interface ArtifactBranchReadCsvComparisonDraftRequest {\n    readonly sessionId: SessionId;\n}',
+  },
+  {
+    name: 'ArtifactBranchRecalculateCsvRequest',
+    declaration: 'export interface ArtifactBranchRecalculateCsvRequest extends ArtifactBranchCsvEvidenceRef {\n    readonly aggregate: CsvAggregate;\n    readonly filter?: CsvExactFilter;\n}',
   },
   {
     name: 'ArtifactBranchResultRequest',
     declaration: 'export interface ArtifactBranchResultRequest {\n    readonly sessionId: SessionId;\n    readonly branchSessionId: SessionId;\n    readonly resultSeq: number;\n    readonly evidence: ArtifactBranchEvidenceSelection;\n}',
   },
   {
+    name: 'ArtifactBranchReviewCsvComparisonExplanationRequest',
+    declaration: 'export interface ArtifactBranchReviewCsvComparisonExplanationRequest {\n    readonly sessionId: SessionId;\n    readonly first: Omit<ArtifactBranchCsvEvidenceRef, \'sessionId\'>;\n    readonly second: Omit<ArtifactBranchCsvEvidenceRef, \'sessionId\'>;\n}',
+  },
+  {
+    name: 'ArtifactBranchReviewSentCsvComparisonRequest',
+    declaration: 'export type ArtifactBranchReviewSentCsvComparisonRequest = ArtifactBranchCsvEvidenceRef;',
+  },
+  {
+    name: 'ArtifactBranchSaveCsvComparisonDraftRequest',
+    declaration: 'export interface ArtifactBranchSaveCsvComparisonDraftRequest extends ArtifactBranchReadCsvComparisonDraftRequest {\n    readonly attachment: ArtifactCsvComparisonAttachment;\n    readonly expectedReceiptId: string | null;\n}',
+  },
+  {
     name: 'ArtifactComparison',
     declaration: 'export interface ArtifactComparison {\n    readonly group: string;\n    readonly role: \'control\' | \'variant\';\n}',
+  },
+  {
+    name: 'ArtifactCsvComparisonAttachment',
+    declaration: 'export type ArtifactCsvComparisonAttachment = {\n    readonly facts: ArtifactCsvComparisonQuestionFacts;\n    readonly proof: string;\n};',
+  },
+  {
+    name: 'ArtifactCsvComparisonDraft',
+    declaration: 'export type ArtifactCsvComparisonDraft = {\n    readonly receiptId: string;\n    readonly facts: ArtifactCsvComparisonQuestionFacts;\n    readonly pendingRequestId?: SessionRequestId;\n};',
+  },
+  {
+    name: 'ArtifactCsvComparisonExplanation',
+    declaration: 'export interface ArtifactCsvComparisonExplanation {\n    readonly aggregation: {\n        readonly message: CsvComparisonMessageRef;\n        readonly comparison: ArtifactCsvComparisonPage;\n    };\n    readonly filtering: CsvComparisonMessageRef;\n}',
+  },
+  {
+    name: 'ArtifactCsvComparisonImportedExplanation',
+    declaration: 'export type ArtifactCsvComparisonImportedExplanation = {\n    readonly aggregation: {\n        readonly comparison: ArtifactCsvComparisonPage;\n        readonly message?: never;\n    };\n    readonly filtering?: never;\n};',
+  },
+  {
+    name: 'ArtifactCsvComparisonImportedReturnedFacts',
+    declaration: 'export type ArtifactCsvComparisonImportedReturnedFacts = CsvComparisonFactsBase & ImportedCsvComparisonSource & {\n    readonly returnCards: ArtifactCsvComparisonReturnCards;\n    readonly reusedFrom?: CsvComparisonMessageRef;\n    readonly explanation?: never;\n};',
+  },
+  {
+    name: 'ArtifactCsvComparisonLocalExplanationFacts',
+    declaration: 'export type ArtifactCsvComparisonLocalExplanationFacts = CsvComparisonFactsBase & LocalCsvComparisonSource & {\n    readonly reusedFrom?: never;\n    readonly explanation: ArtifactCsvComparisonExplanation;\n    readonly returnCards?: never;\n};',
+  },
+  {
+    name: 'ArtifactCsvComparisonPage',
+    declaration: 'export type ArtifactCsvComparisonPage = {\n    readonly original: ArtifactCsvComparisonReading;\n    readonly current: ArtifactCsvComparisonReading;\n    readonly rows: readonly ArtifactCsvComparisonRow[];\n    readonly kept: number;\n    readonly excluded: number;\n    readonly added: number;\n    readonly total: number;\n    readonly offset: number;\n    readonly nextOffset?: number;\n};',
+  },
+  {
+    name: 'ArtifactCsvComparisonQuestionFacts',
+    declaration: 'export type ArtifactCsvComparisonQuestionFacts = ArtifactCsvComparisonSingleFacts | ArtifactCsvComparisonLocalExplanationFacts | ArtifactCsvComparisonReturnedFacts | ArtifactCsvComparisonImportedReturnedFacts | (CsvComparisonFactsBase & ImportedCsvComparisonSource & {\n    readonly reusedFrom?: CsvComparisonMessageRef;\n    readonly explanation: ArtifactCsvComparisonImportedExplanation;\n    readonly returnCards?: never;\n});',
+  },
+  {
+    name: 'ArtifactCsvComparisonReading',
+    declaration: 'export type ArtifactCsvComparisonReading = {\n    readonly groupKey: string;\n    readonly aggregate: CsvAggregate;\n    readonly valueColumn?: string;\n    readonly filter?: Readonly<Pick<CsvExactFilter, \'column\' | \'value\'>>;\n    readonly value: number;\n    readonly count: number;\n};',
+  },
+  {
+    name: 'ArtifactCsvComparisonReturnCard',
+    declaration: 'export type ArtifactCsvComparisonReturnCard = {\n    readonly title: string;\n    readonly revision: number;\n    readonly conclusion: readonly string[];\n    readonly groupBy: string;\n    readonly groups: readonly {\n        readonly key: string;\n        readonly value: number;\n        readonly count: number;\n    }[];\n};',
+  },
+  {
+    name: 'ArtifactCsvComparisonReturnCards',
+    declaration: 'export type ArtifactCsvComparisonReturnCards = {\n    readonly first: ArtifactCsvComparisonReturnCard;\n    readonly second: ArtifactCsvComparisonReturnCard;\n};',
+  },
+  {
+    name: 'ArtifactCsvComparisonReturnedFacts',
+    declaration: 'export type ArtifactCsvComparisonReturnedFacts = CsvComparisonFactsBase & {\n    readonly returns: {\n        readonly branchSessionId: SessionId;\n        readonly first: CsvComparisonReturnRef;\n        readonly second: CsvComparisonReturnRef;\n    };\n    readonly reusedFrom?: CsvComparisonMessageRef;\n    readonly question?: never;\n    readonly source?: never;\n    readonly provenance?: never;\n    readonly explanation?: never;\n    readonly returnCards?: never;\n};',
+  },
+  {
+    name: 'ArtifactCsvComparisonRow',
+    declaration: 'export type ArtifactCsvComparisonRow = {\n    readonly record: number;\n    readonly status: \'kept\' | \'excluded\' | \'added\';\n    readonly value?: string;\n    readonly originalFilterValue?: string;\n    readonly currentFilterValue?: string;\n};',
+  },
+  {
+    name: 'ArtifactCsvComparisonSingleFacts',
+    declaration: 'export type ArtifactCsvComparisonSingleFacts = CsvComparisonFactsBase & {\n    readonly reusedFrom?: CsvComparisonMessageRef;\n    readonly explanation?: never;\n    readonly returnCards?: never;\n} & (LocalCsvComparisonSource | ImportedCsvComparisonSource);',
+  },
+  {
+    name: 'ArtifactCsvContinuation',
+    declaration: 'export interface ArtifactCsvContinuation {\n    readonly source: ArtifactContinuationSource;\n    readonly groupKey: string;\n}',
   },
   {
     name: 'ArtifactExportId',
@@ -5781,11 +6217,23 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'ArtifactExportSourceSelection',
-    declaration: 'export type ArtifactExportSourceSelection = {\n    readonly kind: \'current\';\n    readonly artifactId: ArtifactId;\n    readonly revision: number;\n    readonly checkpoint?: ParticleCheckpoint;\n} | {\n    readonly kind: \'observation\';\n    readonly artifactId: ArtifactId;\n    readonly observationId: ArtifactObservationId;\n};',
+    declaration: 'export type ArtifactExportSourceSelection = {\n    readonly kind: \'current\';\n    readonly artifactId: ArtifactId;\n    readonly revision: number;\n    readonly checkpoint?: ParticleCheckpoint;\n} | {\n    readonly kind: \'revision\';\n    readonly artifactId: ArtifactId;\n    readonly revision: number;\n} | {\n    readonly kind: \'observation\';\n    readonly artifactId: ArtifactId;\n    readonly observationId: ArtifactObservationId;\n};',
   },
   {
     name: 'ArtifactFormat',
     declaration: 'export type ArtifactFormat = \'html\' | \'scene\';',
+  },
+  {
+    name: 'ArtifactHalfAdderCheckpoint',
+    declaration: 'export type ArtifactHalfAdderCheckpoint = {\n    readonly kind: \'half-adder-checkpoint\';\n    readonly a: 0 | 1;\n    readonly b: 0 | 1;\n    readonly sum: 0 | 1;\n    readonly carry: 0 | 1;\n};',
+  },
+  {
+    name: 'ArtifactHtmlCheckpoint',
+    declaration: 'export type ArtifactHtmlCheckpoint = ArtifactBfsCheckpoint | ArtifactHalfAdderCheckpoint;',
+  },
+  {
+    name: 'ArtifactHtmlCheckpointKind',
+    declaration: 'export type ArtifactHtmlCheckpointKind = ArtifactHtmlCheckpoint[\'kind\'];',
   },
   {
     name: 'ArtifactHtmlExportFailure',
@@ -5793,7 +6241,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'ArtifactHtmlExportInput',
-    declaration: 'export interface ArtifactHtmlExportInput extends ArtifactExportSource {\n    readonly sessionId: SessionId;\n    readonly exporterVersion: 1;\n    readonly parameters: \'source-defaults\' | \'particle-checkpoint\';\n}',
+    declaration: 'export interface ArtifactHtmlExportInput extends ArtifactExportSource {\n    readonly sessionId: SessionId;\n    readonly exporterVersion: 1 | 2;\n    readonly parameters: \'source-defaults\' | \'particle-checkpoint\' | \'function-plot-baseline\';\n    readonly functionPlotBaseline?: ArtifactPlotContinuation[\'baseline\'];\n}',
   },
   {
     name: 'ArtifactHtmlExportRecord',
@@ -5816,6 +6264,14 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export type ArtifactObservationId = Branded<\'ArtifactObservationId\'>;',
   },
   {
+    name: 'ArtifactParticleContinuation',
+    declaration: 'export interface ArtifactParticleContinuation {\n    readonly source: ArtifactContinuationSource;\n    readonly baseline: {\n        readonly checkpoint: ParticleCheckpoint;\n    };\n}',
+  },
+  {
+    name: 'ArtifactPlotContinuation',
+    declaration: 'export interface ArtifactPlotContinuation {\n    readonly source: ArtifactContinuationSource;\n    readonly baseline: {\n        readonly functionId: string;\n        readonly x: number;\n        readonly parameters: Readonly<Record<string, number>>;\n        readonly values: FunctionAnalysis;\n    };\n}',
+  },
+  {
     name: 'ArtifactPrepareInput',
     declaration: 'export interface ArtifactPrepareInput {\n    readonly action: \'create\' | \'update\';\n    readonly artifactId: string;\n    readonly title: string;\n    readonly presentation: ArtifactPresentation;\n    readonly comparison?: ArtifactComparison;\n    readonly format?: ArtifactFormat;\n    readonly source?: string;\n    readonly spec?: SceneSpec;\n    readonly baseRevision?: number;\n}',
   },
@@ -5829,7 +6285,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'ArtifactRuntimeCapabilities',
-    declaration: 'export interface ArtifactRuntimeCapabilities {\n    readonly state: boolean;\n    readonly commands: readonly ArtifactRuntimeCommand[];\n}',
+    declaration: 'export interface ArtifactRuntimeCapabilities {\n    readonly state: boolean;\n    readonly commands: readonly ArtifactRuntimeCommand[];\n    readonly restore?: ArtifactHtmlCheckpointKind;\n}',
   },
   {
     name: 'ArtifactRuntimeCommand',
@@ -5869,7 +6325,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'ArtifactSourceCapabilities',
-    declaration: 'export type ArtifactSourceCapabilities = {\n    readonly observe: \'particle\' | \'unsupported\';\n    readonly save: \'particle\' | \'unsupported\';\n    readonly restore: \'particle\' | \'unsupported\';\n    readonly compare: \'saved-particle-pair\' | \'unsupported\';\n    readonly questionContext: \'particle\' | \'program-reported\' | \'unsupported\';\n    readonly exportHtml: \'particle-checkpoint-or-source-defaults\' | \'source-defaults\' | \'unsupported\';\n};',
+    declaration: 'export type ArtifactSourceCapabilities = {\n    readonly observe: \'particle\' | \'unsupported\';\n    readonly save: \'particle\' | \'unsupported\';\n    readonly restore: \'particle\' | \'unsupported\';\n    readonly compare: \'saved-particle-pair\' | \'unsupported\';\n    readonly questionContext: \'particle\' | \'function-plot\' | \'csv-bar-chart\' | \'program-reported\' | \'unsupported\';\n    readonly exportHtml: \'particle-checkpoint-or-source-defaults\' | \'source-defaults\' | \'unsupported\';\n};',
   },
   {
     name: 'AskOptions',
@@ -6377,7 +6833,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'CreateSessionOptions',
-    declaration: 'export interface CreateSessionOptions {\n    readonly seed?: readonly SessionEvent[];\n    readonly inheritedEventCount?: SessionLogOffset;\n    readonly meta?: {\n        readonly cwd?: string;\n        readonly parentSession?: SessionId;\n        readonly createdAt?: number;\n        readonly isSeeded?: boolean;\n        readonly origin?: \'subagent\';\n        readonly delegationDepth?: number;\n        readonly agentPreset?: string;\n    };\n}',
+    declaration: 'export interface CreateSessionOptions {\n    readonly seed?: readonly SessionEvent[];\n    readonly inheritedEventCount?: SessionLogOffset;\n    readonly meta?: {\n        readonly cwd?: string;\n        readonly parentSession?: SessionId;\n        readonly inquiry?: SessionInquiry;\n        readonly createdAt?: number;\n        readonly isSeeded?: boolean;\n        readonly origin?: \'subagent\';\n        readonly delegationDepth?: number;\n        readonly agentPreset?: string;\n    };\n}',
   },
   {
     name: 'CreateShareRequest',
@@ -6426,6 +6882,26 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'CronScheduleRecord',
     declaration: 'export interface CronScheduleRecord {\n    readonly id: ScheduleId;\n    readonly kind: \'cron\';\n    readonly title: string;\n    readonly prompt: string;\n    readonly expression: string;\n    readonly timeZone: string;\n    readonly scheduledAt: string;\n}',
+  },
+  {
+    name: 'CsvAggregate',
+    declaration: 'export type CsvAggregate = typeof CSV_AGGREGATES[number];',
+  },
+  {
+    name: 'CsvBarChartPrepareInput',
+    declaration: 'export interface CsvBarChartPrepareInput extends Pick<ArtifactPrepareInput, \'action\' | \'artifactId\' | \'title\' | \'baseRevision\'> {\n    readonly spec: CsvBarChartSpec;\n}',
+  },
+  {
+    name: 'CsvBarChartSpec',
+    declaration: 'export interface CsvBarChartSpec {\n    readonly kind: \'csv-bar-chart\';\n    readonly attachmentId: AttachmentId;\n    readonly groupBy: string;\n    readonly aggregate: CsvAggregate;\n    readonly valueColumn?: string;\n    readonly filter?: CsvExactFilter;\n    readonly rowCount: number;\n    readonly groups: readonly CsvBarGroup[];\n}',
+  },
+  {
+    name: 'CsvBarGroup',
+    declaration: 'export interface CsvBarGroup {\n    readonly key: string;\n    readonly value: number;\n    readonly count: number;\n}',
+  },
+  {
+    name: 'CsvExactFilter',
+    declaration: 'export interface CsvExactFilter {\n    readonly column: string;\n    readonly value: string;\n}',
   },
   {
     name: 'CuaApplicationGrant',
@@ -6864,6 +7340,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface FsWriteOutcome {\n    operation: \'create\' | \'update\';\n    version: FsVersion;\n    before: string | null;\n    after: string;\n}',
   },
   {
+    name: 'FunctionAnalysis',
+    declaration: 'export interface FunctionAnalysis {\n    readonly value: number | null;\n    readonly derivative: number | null;\n    readonly integral: number | null;\n}',
+  },
+  {
     name: 'FunctionPlotSpec',
     declaration: 'export interface FunctionPlotSpec {\n    readonly kind: \'function-plot\';\n    readonly functions: readonly SceneFunctionSpec[];\n    readonly parameters: Readonly<Record<string, SceneParameterSpec>>;\n    readonly viewport: {\n        readonly x: readonly [\n            number,\n            number\n        ];\n        readonly y: readonly [\n            number,\n            number\n        ];\n    };\n    readonly trace: {\n        readonly x: number;\n        readonly derivative: boolean;\n        readonly integral: boolean;\n    };\n    readonly style?: SceneStyle;\n    readonly timeline?: {\n        readonly duration: number;\n        readonly fps: number;\n    };\n}',
   },
@@ -7285,7 +7765,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'LlmRuntime',
-    declaration: 'export class LlmRuntime extends TypertRemoteService {\n    constructor(ctx: Context);\n    registerAdapter(providers: string[], adapter: LlmAdapter): AdapterRegistrationHandle;\n    @Remote\n    listProviders(): LlmProviderInfo[];\n    registerConfigurableProviders(entries: readonly LlmConfigurableProvider[]): DirectoryRegistrationHandle;\n    @Remote\n    listConfigurableProviders(): LlmConfigurableProvider[];\n    registerModelDiscovery(settingsNs: string, discover: (request: LlmModelDiscoveryRequest, signal?: AbortSignal) => Promise<readonly LlmDiscoveredModel[]>): () => void;\n    async discoverModels(settingsNs: string, request: LlmModelDiscoveryRequest, signal?: AbortSignal): Promise<LlmDiscoveredModel[]>;\n    @Remote(\'discoverModels\')\n    async remoteDiscoverModels(settingsNs: string, request: LlmModelDiscoveryRequest, signal: AbortSignal): Promise<LlmDiscoveredModel[]>;\n    providerRetryPolicy(provider: string): ResolvedRetryPolicy;\n    imageRequestPricing(provider: string, model: string): LlmImageRequestPricing | undefined;\n    imageRequestTarget(provider: string, model: string, image: ImageAttachmentRef): ImageRequestTarget;\n    fileRequestText(ref: FileAttachmentRef): string;\n    async listModels(provider: string): Promise<LlmModelInfo[]>;\n    async resolveModelInfo(provider: string, model: string, signal?: AbortSignal): Promise<LlmResolvedModelInfo>;\n    async resolveCallConfig(config: LlmCallConfig, signal?: AbortSignal): Promise<LlmCallConfig>;\n    async prepareCall(conf /* …truncated — full shape in source */',
+    declaration: 'export class LlmRuntime extends TypertRemoteService {\n    constructor(ctx: Context);\n    registerAdapter(providers: string[], adapter: LlmAdapter): AdapterRegistrationHandle;\n    @Remote\n    listProviders(): LlmProviderInfo[];\n    registerConfigurableProviders(entries: readonly LlmConfigurableProvider[]): DirectoryRegistrationHandle;\n    @Remote\n    listConfigurableProviders(): LlmConfigurableProvider[];\n    registerModelDiscovery(settingsNs: string, discover: (request: LlmModelDiscoveryRequest, signal?: AbortSignal) => Promise<readonly LlmDiscoveredModel[]>): () => void;\n    async discoverModels(settingsNs: string, request: LlmModelDiscoveryRequest, signal?: AbortSignal): Promise<LlmDiscoveredModel[]>;\n    @Remote(\'discoverModels\')\n    async remoteDiscoverModels(settingsNs: string, request: LlmModelDiscoveryRequest, signal: AbortSignal): Promise<LlmDiscoveredModel[]>;\n    providerRetryPolicy(provider: string): ResolvedRetryPolicy;\n    imageRequestPricing(provider: string, model: string): LlmImageRequestPricing | undefined;\n    imageRequestTarget(provider: string, model: string, image: ImageAttachmentRef): ImageRequestTarget;\n    fileRequestText(ref: FileAttachmentRef, tools?: readonly ToolSchema[]): string;\n    async listModels(provider: string): Promise<LlmModelInfo[]>;\n    async resolveModelInfo(provider: string, model: string, signal?: AbortSignal): Promise<LlmResolvedModelInfo>;\n    async resolveCallConfig(config: LlmCallConfig, signal?: AbortSignal): Promise<LlmCallConf /* …truncated — full shape in source */',
   },
   {
     name: 'LocalAtInput',
@@ -7913,7 +8393,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'PresetDefinition',
-    declaration: 'export interface PresetDefinition {\n    readonly id: string;\n    readonly name?: string;\n    readonly description?: string;\n    readonly order?: number;\n    readonly plugins: readonly (Omit<EntryOptions, \'id\' | \'disabled\'> & {\n        id?: string;\n        disabled?: EntryOptions[\'disabled\'] | JsExpr;\n    })[];\n}',
+    declaration: 'export interface PresetDefinition {\n    readonly id: string;\n    readonly name?: string;\n    readonly description?: string;\n    readonly order?: number;\n    readonly inheritTools?: boolean;\n    readonly plugins: readonly (Omit<EntryOptions, \'id\' | \'disabled\'> & {\n        id?: string;\n        disabled?: EntryOptions[\'disabled\'] | JsExpr;\n    })[];\n}',
   },
   {
     name: 'PresetOption',
@@ -8381,7 +8861,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'SceneArtifactSnapshot',
-    declaration: 'export interface SceneArtifactSnapshot extends ArtifactSnapshotBase {\n    readonly format: \'scene\';\n    readonly spec: SceneSpec;\n}',
+    declaration: 'export interface SceneArtifactSnapshot extends ArtifactSnapshotBase {\n    readonly format: \'scene\';\n    readonly spec: SceneSpec;\n    readonly continuation?: ArtifactPlotContinuation;\n    readonly particleContinuation?: ArtifactParticleContinuation;\n    readonly csvContinuation?: ArtifactCsvContinuation;\n}',
   },
   {
     name: 'SceneFunctionSpec',
@@ -8393,7 +8873,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'SceneSpec',
-    declaration: 'export type SceneSpec = FunctionPlotSpec | FlowchartSpec | ParticleSystemSpec | TimelineSpec | NetworkGraphSpec | MapSpec;',
+    declaration: 'export type SceneSpec = FunctionPlotSpec | FlowchartSpec | ParticleSystemSpec | TimelineSpec | NetworkGraphSpec | MapSpec | CsvBarChartSpec;',
   },
   {
     name: 'SceneStyle',
@@ -8764,8 +9244,12 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface SessionFollowRequest extends Pick<SessionPageRequest, \'maxMessages\' | \'turnWindow\'> {\n    readonly address: SessionAddress;\n    readonly activate?: boolean;\n    readonly assistantStream?: true;\n}',
   },
   {
+    name: 'SessionForkPreparation',
+    declaration: 'export interface SessionForkPreparation {\n    readonly childId: SessionId;\n    readonly initialise?: (agent: Agent) => void;\n    readonly verifyExisting: (child: SessionObservation) => void;\n}',
+  },
+  {
     name: 'SessionForkRequest',
-    declaration: 'export interface SessionForkRequest {\n    readonly sessionId: SessionId;\n    readonly atSeq?: number;\n    readonly allowMigration?: boolean;\n}',
+    declaration: 'export interface SessionForkRequest {\n    readonly sessionId: SessionId;\n    readonly atSeq?: number;\n    readonly inquiry?: SessionInquiry;\n    readonly requestId?: SessionRequestId;\n    readonly allowMigration?: boolean;\n}',
   },
   {
     name: 'SessionForkSource',
@@ -8797,7 +9281,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'SessionHeader',
-    declaration: 'export interface SessionHeader {\n    readonly version: typeof SESSION_FORMAT_VERSION;\n    readonly id: SessionId;\n    readonly createdAt: number;\n    readonly cwd?: string;\n    readonly parentSession?: SessionId;\n    readonly isSeeded: boolean;\n    readonly origin?: \'subagent\';\n    readonly delegationDepth?: number;\n    readonly agentPreset?: string;\n}',
+    declaration: 'export interface SessionHeader {\n    readonly version: typeof SESSION_FORMAT_VERSION;\n    readonly id: SessionId;\n    readonly createdAt: number;\n    readonly cwd?: string;\n    readonly parentSession?: SessionId;\n    readonly inquiry?: SessionInquiry;\n    readonly isSeeded: boolean;\n    readonly origin?: \'subagent\';\n    readonly delegationDepth?: number;\n    readonly agentPreset?: string;\n}',
   },
   {
     name: 'SessionHistoryRecord',
@@ -8822,6 +9306,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'SessionInputRequestId',
     declaration: 'export type SessionInputRequestId = Branded<\'session-request-id\'>;',
+  },
+  {
+    name: 'SessionInquiry',
+    declaration: 'export type SessionInquiry = {\n    readonly messageSeq: number;\n    readonly messageId: MessageId;\n    readonly start: number;\n    readonly end: number;\n    readonly excerpt: string;\n};',
   },
   {
     name: 'SessionInspection',
@@ -9125,7 +9613,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'SessionSummary',
-    declaration: 'export interface SessionSummary {\n    readonly agentAvailable: boolean;\n    readonly formatStatus?: \'current\' | \'migration-required\';\n    readonly sessionId: SessionId;\n    readonly updatedAt: number;\n    readonly running: boolean;\n    readonly blank: boolean;\n    readonly parentSessionId?: SessionId;\n    readonly origin?: \'subagent\';\n    readonly cwd?: string;\n    readonly projections?: SessionProjectionHints;\n}',
+    declaration: 'export interface SessionSummary {\n    readonly agentAvailable: boolean;\n    readonly formatStatus?: \'current\' | \'migration-required\';\n    readonly sessionId: SessionId;\n    readonly updatedAt: number;\n    readonly running: boolean;\n    readonly blank: boolean;\n    readonly parentSessionId?: SessionId;\n    readonly inquiry?: SessionInquiry;\n    readonly origin?: \'subagent\';\n    readonly cwd?: string;\n    readonly projections?: SessionProjectionHints;\n}',
   },
   {
     name: 'SessionSurface',
@@ -10069,7 +10557,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'ToolsService',
-    declaration: 'export class ToolsService extends Service {\n    static inject;\n    static Config;\n    constructor(ctx: Context);\n    register(definition: ToolDefinition, options: ToolRegistrationOptions = {}): () => void;\n    restrict(filter: ToolRestriction): () => void;\n    get(name: string, scope?: ScopeKey, toolSet?: ResolvedToolSet): ToolDefinition | undefined;\n    executable(name: string, scope?: ScopeKey, toolSet?: ResolvedToolSet): ToolDefinition | undefined;\n    async resolve(context: ToolActivationContext): Promise<ResolvedToolSet>;\n    definitions(scope?: ScopeKey, toolSet?: ResolvedToolSet): readonly ToolDefinition[];\n    schemas(scope?: ScopeKey, toolSet?: ResolvedToolSet): ToolSchema[];\n    setExecutor(executor: ToolExecutor): () => void;\n    async execute(input: ToolBatchInput): Promise<ToolBatchResult>;\n    guard(guard: ToolGuard): () => void;\n    checkGuards(exec: ToolExecution): string | undefined;\n}',
+    declaration: 'export class ToolsService extends Service {\n    static inject;\n    static Config;\n    constructor(ctx: Context);\n    register(definition: ToolDefinition, options: ToolRegistrationOptions = {}): () => void;\n    restrict(filter: ToolRestriction): () => void;\n    isolateInherited(): () => void;\n    get(name: string, scope?: ScopeKey, toolSet?: ResolvedToolSet): ToolDefinition | undefined;\n    executable(name: string, scope?: ScopeKey, toolSet?: ResolvedToolSet): ToolDefinition | undefined;\n    async resolve(context: ToolActivationContext): Promise<ResolvedToolSet>;\n    definitions(scope?: ScopeKey, toolSet?: ResolvedToolSet): readonly ToolDefinition[];\n    schemas(scope?: ScopeKey, toolSet?: ResolvedToolSet): ToolSchema[];\n    setExecutor(executor: ToolExecutor): () => void;\n    async execute(input: ToolBatchInput): Promise<ToolBatchResult>;\n    guard(guard: ToolGuard): () => void;\n    checkGuards(exec: ToolExecution): string | undefined;\n}',
   },
   {
     name: 'ToolUpdate',

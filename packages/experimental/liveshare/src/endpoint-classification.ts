@@ -98,6 +98,34 @@ export const VIEWER_ENDPOINT_CLASSES = {
   'artifacts/sendObservation': 'owner-only', // owner confirms a saved observation before Agent admission
   'artifacts/confirmObservationComparison': 'owner-only', // owner confirms the fixed pair before Agent admission
   'artifactBranchResults/returnResult': 'owner-only', // owner adopts a child conclusion with selected evidence
+  'artifactBranchResults/continuePlot': 'owner-only', // owner creates a child experiment from returned evidence
+  'artifactBranchResults/continueParticle': 'owner-only', // owner creates a child experiment from returned evidence
+  'artifactBranchResults/exportReturnedPlot': 'owner-only', // owner downloads a returned function plot and its locked conditions
+  'artifactBranchResults/exportSentPlot': 'owner-only', // owner downloads a function plot locked on a sent follow-up
+  'artifactBranchResults/exportReturnedParticle': 'owner-only', // owner downloads a returned particle experiment and its locked conditions
+  'artifactBranchResults/exportSentParticle': 'owner-only', // owner downloads a particle experiment locked on a sent follow-up
+  'artifactBranchResults/exportReturnedBfs': 'owner-only', // owner downloads a returned BFS program and its locked checkpoint
+  'artifactBranchResults/exportSentBfs': 'owner-only', // owner downloads the checkpoint locked on a sent BFS follow-up
+  'artifactBranchResults/exportReturnedHalfAdder': 'owner-only', // owner downloads a returned half-adder and its locked checkpoint
+  'artifactBranchResults/exportSentHalfAdder': 'owner-only', // owner downloads the checkpoint locked on a sent half-adder follow-up
+  'artifactBranchResults/recalculateCsv': 'owner-only', // owner calculates a new recipe from the returned attachment
+  'artifactBranchResults/lockCsv': 'owner-only', // owner locks the chosen CSV group for a question
+  'artifactBranchResults/csvFilterOptions': 'owner-only', // owner inspects authorized CSV filter values
+  'artifactBranchResults/csvParticipatingRows': 'owner-only', // owner inspects exact contributing records
+  'artifactBranchResults/csvReturnedParticipatingRows': 'owner-only', // owner inspects the returned reading's original records
+  'artifactBranchResults/csvQuestionParticipatingRows': 'owner-only', // owner inspects the locked question's source records
+  'artifactBranchResults/compareCsvQuestionToReturn': 'owner-only', // owner compares source records across recorded readings
+  'artifactBranchResults/compareCsvReturns': 'owner-only', // owner compares two returned readings and can review the page
+  'artifactBranchResults/saveCsvComparisonDraft': 'owner-only', // owner stores a confirmed draft outside Session history
+  'artifactBranchResults/readCsvComparisonDraft': 'owner-only', // owner restores a private, unsent attachment
+  'artifactBranchResults/clearCsvComparisonDraft': 'owner-only', // owner discards or settles a private draft
+  'artifactBranchResults/bindCsvComparisonDraftRequest': 'owner-only', // owner binds the private draft to a prompt request
+  'artifactBranchResults/checkCsvComparisonDraftRequest': 'owner-only', // owner recovers the status of its prompt request
+  'artifactBranchResults/reviewSentCsvComparison': 'owner-only', // owner obtains a proof for reattaching a sent comparison
+  'artifactBranchResults/reviewCsvComparisonExplanation': 'owner-only', // owner reviews two witnessed pages for one follow-up
+  'artifactBranchResults/exportSentCsvComparison': 'owner-only', // owner downloads a reviewed comparison page
+  'artifactBranchResults/exportSentCsvComparisonJson': 'owner-only', // owner downloads a portable comparison page
+  'artifactBranchResults/importCsvComparison': 'owner-only', // owner supplies comparison data to review before sending
   'artifactExports/create': 'owner-only', // owner freezes and stores an export
   'artifactExports/read': 'owner-only', // exported HTML may contain private source
   'artifactRuntime/attach': 'owner-only', // owner supplies live renderer reports; reports grant no authority

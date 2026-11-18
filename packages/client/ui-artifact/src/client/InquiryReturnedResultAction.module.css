@@ -1,0 +1,15 @@
+.menu {
+  max-inline-size: min(360px, calc(100vw - 24px));
+}
+
+.choice {
+  display: block;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.detail {
+  display: block;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 12px;
+}

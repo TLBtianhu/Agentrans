@@ -1,14 +1,21 @@
-/** Explicit return of one branch conclusion with immutable saved particle evidence. */
+/** Explicit return of one branch conclusion with immutable experiment evidence. */
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import type { InjectFace, PropsLocale, PropsRuntime } from '@agentrans/client-ui-slots'
 import { Button } from '@agentrans/client-ui-primitives'
 import type { SessionId } from '@agentrans/session/types'
+import type { UserMessageNode } from '@agentrans/client-ui-conversation/client'
+import type { ObservableSnapshot } from '@agentrans/client-store'
 import type { ArtifactBranchEvidenceSelection, ArtifactBranchResultRequest } from '@agentrans/artifact-branch/types'
 import type { SavedParticleObservation, SavedParticleObservationRef } from '@agentrans/artifact/types'
 import {
   buildParticleObservationComparison, ParticleObservationComparisonError,
 } from '@agentrans/artifact/observation-comparison'
 import { observeParticleState, restoreParticleCheckpoint, ParticleRuntimeError } from '@agentrans/artifact/particle-runtime'
+import { ArtifactQuestionReplay } from './ArtifactQuestionReplay.tsx'
+import { csvGroupLabel } from './CsvBarChartView.tsx'
+import { HtmlCheckpointReadingsView } from './HtmlCheckpointReadings.tsx'
+import { parseHtmlQuestionReplay, parseNativeQuestionReplay,
+  type ArtifactQuestionReplay as QuestionReplay, type HtmlQuestionReplay } from './question-context-text.ts'
 import {
   ArtifactBranchReturnError, type ArtifactBranchReturnFailure, type ReturnArtifactBranchResult,
 } from './protocol.ts'
@@ -18,13 +25,28 @@ import css from './ArtifactBranchResultAction.module.css'
 export interface ArtifactBranchResultInjected {
   readonly returnResult: ReturnArtifactBranchResult
   readonly openSession: (sessionId: SessionId) => void
+  readonly keyedHooks: {
+    readonly userMessages: (turn: string) => ObservableSnapshot<readonly QuestionMessage[]>
+    readonly steeringMessages: (turn: string) => ObservableSnapshot<readonly QuestionMessage[]>
+  }
 }
 
 type ActionProps = PropsRuntime<'conversation.chat.assistant.details'> & InjectFace<ArtifactBranchResultInjected> & PropsLocale<'artifact'>
-interface EvidencePreview {
+type QuestionMessage = Pick<UserMessageNode, 'seq' | 'content'>
+const EMPTY_QUESTION_MESSAGES: readonly QuestionMessage[] = []
+type EvidenceMode = ArtifactBranchEvidenceSelection['kind']
+type QuestionEvidence = Extract<ArtifactBranchEvidenceSelection, { kind: 'question' }>
+type QuestionPreview = { readonly kind: 'native'; readonly replay: QuestionReplay } | { readonly kind: 'html'; readonly replay: HtmlQuestionReplay }
+interface QuestionChoice {
+  readonly key: string
+  readonly evidence: QuestionEvidence
+  readonly preview: QuestionPreview
+}
+type EvidencePreview = {
+  readonly kind: 'saved'
   readonly saved: SavedParticleObservation
   readonly values: SavedParticleObservation['values']
-}
+} | { readonly kind: 'question'; readonly choice: QuestionChoice }
 interface CapturedReturn {
   readonly request: ArtifactBranchResultRequest
   readonly preview: readonly EvidencePreview[]
@@ -42,6 +64,19 @@ function reference(saved: SavedParticleObservation): SavedParticleObservationRef
 
 function referenceKey(value: SavedParticleObservationRef | null): string {
   return value === null ? '' : JSON.stringify([value.artifactId, value.observationId])
+}
+
+function questionChoices(messages: readonly QuestionMessage[], resultSeq: number, sessionId: SessionId): QuestionChoice[] {
+  return messages.flatMap(({ seq, content }) => seq >= resultSeq ? [] : content.flatMap((block, blockIndex) => {
+    if (blockIndex === 0 || block.type !== 'text') return []
+    const native = parseNativeQuestionReplay(block.text, sessionId)
+    const html = native === undefined ? parseHtmlQuestionReplay(block.text, sessionId) : undefined
+    const preview: QuestionPreview | undefined = native !== undefined ? { kind: 'native', replay: native }
+      : html !== undefined ? { kind: 'html', replay: html } : undefined
+    return preview === undefined ? [] : [{
+      key: `${seq}:${blockIndex}`, evidence: { kind: 'question', questionSeq: seq, blockIndex }, preview,
+    }]
+  }))
 }
 
 /** Render one independent adoption draft per durable branch conclusion. */
@@ -68,11 +103,17 @@ function BranchResultOwner(props: ActionProps) {
 }
 
 function EvidenceReturnPreview({
-  parentId, sessionId, seq, text, useProjection, returnResult, openSession, onClose, t,
+  parentId, sessionId, seq, turn, text, useProjection, useUserMessages, useSteeringMessages, returnResult, openSession, onClose, t,
 }: ActionProps & { readonly parentId: SessionId; readonly onClose: () => void }) {
   const observations = useProjection('artifactObservations')
   const choices = useMemo(() => Object.values(observations ?? {}).flat(), [observations])
-  const [mode, setMode] = useState<'observation' | 'comparison'>('observation')
+  const turnKey = String(turn ?? 0)
+  const userMessages = useUserMessages(turnKey) ?? EMPTY_QUESTION_MESSAGES
+  const steeringMessages = useSteeringMessages(turnKey) ?? EMPTY_QUESTION_MESSAGES
+  const questions = useMemo(() => questionChoices([...userMessages, ...steeringMessages], seq, sessionId),
+    [userMessages, steeringMessages, seq, sessionId])
+  const [modeChoice, setMode] = useState<EvidenceMode | null>(null)
+  const [questionKey, setQuestionKey] = useState<string | null>(null)
   const [single, setSingle] = useState<SavedParticleObservationRef | null>(null)
   const [control, setControl] = useState<SavedParticleObservationRef | null>(null)
   const [variant, setVariant] = useState<SavedParticleObservationRef | null>(null)
@@ -82,7 +123,14 @@ function EvidenceReturnPreview({
   const mounted = useRef(true)
   useEffect(() => { mounted.current = true; return () => { mounted.current = false } }, [])
 
+  const mode = modeChoice ?? (questions.length === 0 ? 'observation' : 'question')
+  const selectedQuestionKey = questionKey ?? (questions.length === 1 ? questions[0]?.key ?? '' : '')
   const prepared = useMemo(() => {
+    if (mode === 'question') {
+      const choice = questions.find(question => question.key === selectedQuestionKey)
+      return choice === undefined ? { kind: 'missing' } as const
+        : { kind: 'ready', evidence: choice.evidence, preview: [{ kind: 'question', choice }] } as const
+    }
     const resolve = (value: SavedParticleObservationRef | null) =>
       choices.find(saved => referenceKey(reference(saved)) === referenceKey(value))
     const left = resolve(mode === 'observation' ? single : control)
@@ -93,7 +141,7 @@ function EvidenceReturnPreview({
         if (left.artifact.spec.kind !== 'particle-system') return { kind: 'invalid' } as const
         const values = observeParticleState(restoreParticleCheckpoint(left.artifact.spec, left.checkpoint))
         const evidence: ArtifactBranchEvidenceSelection = { kind: 'observation', observation: reference(left) }
-        return { kind: 'ready', evidence, preview: [{ saved: left, values }] } as const
+        return { kind: 'ready', evidence, preview: [{ kind: 'saved', saved: left, values }] } as const
       }
       if (right === undefined) return { kind: 'missing' } as const
       const compared = buildParticleObservationComparison(left.artifact.comparison?.group ?? '', left, right)
@@ -101,13 +149,13 @@ function EvidenceReturnPreview({
         kind: 'comparison', group: compared.group, control: compared.control.ref, variant: compared.variant.ref,
       }
       return { kind: 'ready', evidence, preview: [
-        { saved: left, values: compared.control.values }, { saved: right, values: compared.variant.values },
+        { kind: 'saved', saved: left, values: compared.control.values }, { kind: 'saved', saved: right, values: compared.variant.values },
       ] } as const
     } catch (error) {
       if (!(error instanceof ParticleObservationComparisonError) && !(error instanceof ParticleRuntimeError)) throw error
       return { kind: 'invalid' } as const
     }
-  }, [choices, mode, single, control, variant])
+  }, [choices, mode, single, control, variant, questions, selectedQuestionKey])
 
   const captured = submission.kind === 'submitting' || submission.kind === 'retry' ? submission.captured : null
   const locked = captured !== null || (submission.kind === 'rejected'
@@ -123,12 +171,13 @@ function EvidenceReturnPreview({
   }
   const confirm = async (): Promise<void> => {
     if (inFlight.current || submission.kind === 'rejected') return
-    const request = captured ?? (observations !== undefined && prepared.kind === 'ready' ? {
+    const request = captured ?? (prepared.kind === 'ready' ? {
       request: { sessionId: parentId, branchSessionId: sessionId, resultSeq: seq, evidence: prepared.evidence },
       preview: prepared.preview, text,
     } : null)
     if (request === null) return
     inFlight.current = true
+    setMode(request.request.evidence.kind)
     setSubmission({ kind: 'submitting', captured: request })
     try {
       await returnResult(request.request)
@@ -147,6 +196,18 @@ function EvidenceReturnPreview({
   })
   const selectOptions = (items: readonly SavedParticleObservation[]) => items.map(saved =>
     <option key={referenceKey(reference(saved))} value={referenceKey(reference(saved))}>{optionLabel(saved)}</option>)
+  const questionLabel = ({ preview }: QuestionChoice): string => {
+    const { artifact } = preview.replay
+    const source = { title: artifact.title, revision: String(artifact.revision) }
+    if (preview.kind === 'html') return t('questionContext.programReady', source)
+    const { state } = preview.replay
+    if (state.kind === 'csv-bar-chart') return t('csvChart.context', { ...source, group: csvGroupLabel(state.group.key, t) })
+    return state.kind === 'function-plot' ? t('questionContext.plot', { ...source, x: String(state.x) })
+      : t('questionContext.single', { ...source, step: String(state.checkpoint.stepCount) })
+  }
+  const modeLabels = { question: 'branchEvidence.question', observation: 'branchEvidence.single', comparison: 'branchEvidence.comparison' } as const
+  const modes: readonly EvidenceMode[] = questions.length > 0 || mode === 'question'
+    ? ['question', 'observation', 'comparison'] : ['observation', 'comparison']
   const failure = submission.kind === 'rejected' ? submission.failure : null
   const failureKey = failure?.kind === 'conflict' ? 'branchEvidence.conflict'
     : failure?.kind === 'too-large' ? 'branchEvidence.tooLarge'
@@ -158,14 +219,21 @@ function EvidenceReturnPreview({
     <p className={css.conclusion}>{captured?.text ?? text}</p>
     <fieldset className={css.mode} disabled={locked}>
       <legend>{t('branchEvidence.kind')}</legend>
-      {(['observation', 'comparison'] as const).map(kind => <label key={kind}>
+      {modes.map(kind => <label key={kind}>
         <input type="radio" name={modeName} checked={mode === kind} onChange={() => {
           if (!locked) { setMode(kind); setSubmission({ kind: 'editing' }) }
         }} />
-        {t(kind === 'observation' ? 'branchEvidence.single' : 'branchEvidence.comparison')}
+        {t(modeLabels[kind])}
       </label>)}
     </fieldset>
-    {mode === 'observation'
+    {mode === 'question' ? (
+      <select aria-label={t('branchEvidence.question')} disabled={locked} value={selectedQuestionKey} onChange={(event) => {
+        if (!locked) { setQuestionKey(event.target.value); setSubmission({ kind: 'editing' }) }
+      }}>
+        <option value="">{t('branchEvidence.chooseQuestion')}</option>
+        {questions.map(choice => <option key={choice.key} value={choice.key}>{questionLabel(choice)}</option>)}
+      </select>
+    ) : mode === 'observation'
       ? <select aria-label={t('branchEvidence.observation')} disabled={locked || observations === undefined}
         value={referenceKey(single)} onChange={(event) => { choose(event.target.value, single, setSingle) }}>
         <option value="">{t('branchEvidence.choose')}</option>{selectOptions(choices)}
@@ -182,13 +250,20 @@ function EvidenceReturnPreview({
           {selectOptions(choices.filter(saved => saved.artifact.comparison?.role === 'variant'))}
         </select>
       </div>}
-    {observations === undefined && <p role="status">{t('observation.loading')}</p>}
-    {observations !== undefined && choices.length === 0 && <p>{t('branchEvidence.empty')}</p>}
+    {mode !== 'question' && observations === undefined && <p role="status">{t('observation.loading')}</p>}
+    {mode !== 'question' && observations !== undefined && choices.length === 0 && <p>{t('branchEvidence.empty')}</p>}
     {prepared.kind === 'invalid' && captured === null && <p role="status">{t('branchEvidence.incompatible')}</p>}
-    {preview.map(({ saved, values }) => <div key={referenceKey(reference(saved))} data-evidence-observation-id={saved.observationId}>
-      <strong>{optionLabel(saved)}</strong>
-      <pre className={css.values} aria-label={t('branchEvidence.values', { label: saved.label })}>{JSON.stringify(values, null, 2)}</pre>
-    </div>)}
+    {preview.map(item => item.kind === 'question' ? (
+      <div key={item.choice.key} data-branch-question-preview>
+        <strong>{questionLabel(item.choice)}</strong>
+        <QuestionEvidenceReadings preview={item.choice.preview} t={t} />
+      </div>
+    ) : (
+      <div key={referenceKey(reference(item.saved))} data-evidence-observation-id={item.saved.observationId}>
+        <strong>{optionLabel(item.saved)}</strong>
+        <pre className={css.values} aria-label={t('branchEvidence.values', { label: item.saved.label })}>{JSON.stringify(item.values, null, 2)}</pre>
+      </div>
+    ))}
     {submission.kind === 'retry' && <p role="alert" className={css.error}>
       {t(submission.busy ? 'branchEvidence.busy' : 'branchEvidence.unknown')}
     </p>}
@@ -199,11 +274,19 @@ function EvidenceReturnPreview({
       {failure?.kind === 'conflict'
         ? <Button size="sm" variant="primary" onClick={() => { openSession(parentId) }}>{t('branchEvidence.openParent')}</Button>
         : <Button size="sm" variant="primary" disabled={pending || submission.kind === 'rejected'
-          || (captured === null && (observations === undefined || prepared.kind !== 'ready'))}
+          || (captured === null && prepared.kind !== 'ready')}
         onClick={() => { void confirm() }}>
           {t(pending ? 'branchEvidence.returning' : captured === null ? 'branchEvidence.confirm' : 'branchEvidence.retry')}
         </Button>}
       <Button size="sm" variant="ghost" disabled={pending} onClick={onClose}>{t('branchEvidence.cancel')}</Button>
     </div>
   </div>
+}
+
+function QuestionEvidenceReadings({ preview, t }: { readonly preview: QuestionPreview } & PropsLocale<'artifact'>) {
+  if (preview.kind === 'html') return <>
+    <p>{t('bfs.reported')}</p>
+    <HtmlCheckpointReadingsView state={preview.replay.state} t={t} />
+  </>
+  return <ArtifactQuestionReplay snapshot={preview.replay.artifact} replay={preview.replay.state} t={t} />
 }

@@ -214,6 +214,12 @@ const packageFileExtras: Readonly<Record<string, readonly string[]>> = {
   '@agentrans/experimental-inspector': ['lib/client.*.js', 'lib/worker.js', 'lib/devtools/**'],
   // Creator's composition guidance travels with the declaration package.
   '@agentrans/agent-preset': ['skills'],
+  '@agentrans/artifact': [
+    'lib/tool.js', 'lib/attachment-csv-tool.js', 'lib/scene.js', 'lib/particle-runtime.js', 'lib/capabilities.js',
+    'lib/runtime-values.js', 'lib/observation-comparison.js', 'lib/scene-export.js',
+    'lib/scene-renderers.js', 'lib/scene-tool.js',
+    'skills/artifact-design/SKILL.md', 'skills/artifact-design/parameter-explorer.html',
+  ],
   // Personalized pages ship the location guidance used by their Creator.
   '@agentrans/creation-recommendations': ['references/*.md', 'skills/*.md'],
   // Official-plugin recommendations ship the skill text their provider loads.

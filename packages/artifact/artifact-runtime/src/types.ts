@@ -3,6 +3,7 @@ import type { Branded } from '@agentrans/brand'
 import type { ArtifactId, ArtifactFormat } from '@agentrans/artifact/types'
 import type { SceneSpec } from '@agentrans/artifact/scene'
 import type { ArtifactSourceCapabilities } from '@agentrans/artifact/capabilities'
+import type { ArtifactHtmlCheckpointKind } from '@agentrans/artifact/runtime-values'
 
 /** Identity of one mounted runtime, replaced whenever its document or native renderer is recreated. */
 export type ArtifactRuntimeId = Branded<'ArtifactRuntimeId'>
@@ -14,6 +15,7 @@ export type ArtifactRuntimeCommand = 'play' | 'pause' | 'step' | 'reset'
 export interface ArtifactRuntimeCapabilities {
   readonly state: boolean
   readonly commands: readonly ArtifactRuntimeCommand[]
+  readonly restore?: ArtifactHtmlCheckpointKind
 }
 
 /** One source-bound physical runtime. */

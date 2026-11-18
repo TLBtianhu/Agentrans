@@ -15,7 +15,7 @@ type UserTextOwner = Parameters<FactoryComponentPropsOf<'conversation.user.text'
  * @returns ordered inline nodes with raw-text fallbacks for missing registrations.
  */
 export function UserText({
-  text, facts, interactive = false, ellipsis = false,
+  text, facts, messageRef, openView, interactive = false, ellipsis = false,
   useUserTextRevision, createUserTextEvaluator, reportTransformFailure, renderSlot,
 }: FactoryComponentPropsOf<'conversation.user.text'>) {
   useUserTextRevision(revision => revision)
@@ -34,14 +34,15 @@ export function UserText({
   const content = useMemo(() => nodes === undefined ? <UserTextRun text={text} /> : <>{nodes.map((node) => {
     const raw = text.slice(node.start, node.end)
     // The node ID determines its payload; TypeScript does not distribute this enclosing owner over the node union.
-    const owner = { node, raw, interactive } as UserTextOwner
+    const owner = { node, raw, interactive, ...(messageRef === undefined ? {} : { messageRef }),
+      ...(openView === undefined ? {} : { openView }) } as UserTextOwner
     return <Fragment key={`${node.id}:${node.start}`}>
       {renderSlot('conversation.user.text.node', owner, {
         entryKey: node.id,
         fallback: <UserTextRun text={node.id === 'text' ? node.data.display ?? raw : raw} />,
       })}
     </Fragment>
-  })}</>, [nodes, text, interactive, renderSlot])
+  })}</>, [nodes, text, messageRef, openView, interactive, renderSlot])
   return <HoverCardGroup as="span" className={ellipsis ? css.ellipsis : css.root}>{content}</HoverCardGroup>
 }
 

@@ -1,13 +1,16 @@
 // @vitest-environment jsdom
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { makeTranslate } from '@agentrans/client-test-runtime'
 import { ArtifactCard } from './runtime-harness.tsx'
-import { createParticleRun, updateParticleRun } from '../src/client/particle-run.ts'
+import { SceneNodeView } from '../src/client/SceneNodeView.tsx'
+import { createParticleRun, updateParticleRun, type ParticleRunCommand } from '../src/client/particle-run.ts'
 import { en } from '../src/client/locales.ts'
 import type { ParticleSystemSpec } from '@agentrans/artifact/scene'
-import type { SceneArtifactSnapshot } from '@agentrans/artifact/types'
+import type { ArtifactParticleContinuation, SceneArtifactSnapshot } from '@agentrans/artifact/types'
 import * as particleRuntime from '@agentrans/artifact/particle-runtime'
+import { SessionId, SessionSeq } from '@agentrans/session/types'
+import { MessageId } from '@agentrans/llm/brand'
 import type { ArtifactId, ArtifactPlacement, ArtifactExportCommands, RecordArtifactAction } from '../src/client/protocol.ts'
 
 const t = makeTranslate(en)
@@ -49,15 +52,66 @@ beforeEach(() => { vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockRetur
 afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); vi.useRealTimers() })
 
 describe('revision-owned particle runtime', () => {
+  it('compares the first particle at a fixed step while editing vertical gravity', () => {
+    const continuedSpec: ParticleSystemSpec = { ...spec, timeStep: 0.1, gravity: { x: 0, y: 0 },
+      particles: [{ id: 'alpha', x: 0, y: 1, vx: 1, vy: 2, mass: 2 }] }
+    const checkpoint = { runtimeVersion: 1, stepCount: 2 } as const
+    const baselineParticle: ArtifactParticleContinuation = {
+      source: { sessionId: SessionId('parent'), eventSeq: SessionSeq(4), messageId: MessageId('notice'),
+        artifactId: 'original-particles' as ArtifactId, revision: 1 },
+      baseline: { checkpoint },
+    }
+    const recordAction = vi.fn<RecordArtifactAction>()
+    const onParticleCommand = vi.fn<(command: ParticleRunCommand) => void>()
+    const preview = (gravityY: number) => {
+      const source = { ...continuedSpec, gravity: { x: continuedSpec.gravity.x, y: gravityY } }
+      const state = particleRuntime.restoreParticleCheckpoint(source, checkpoint)
+      return <SceneNodeView spec={continuedSpec} artifactId={'continued-particles' as ArtifactId} revision={1} placement="inline"
+        particleRun={{ state, playing: false, failed: false }} baselineParticle={baselineParticle} particleGravityY={gravityY}
+        recordAction={recordAction} onParticleCommand={onParticleCommand} t={t} />
+    }
+    const view = render(preview(0))
+    const comparison = within(screen.getByRole('region', { name: 'Vertical position · alpha · step 2' }))
+    expect(comparison.getAllByText('1.400')).toHaveLength(2)
+    expect(comparison.getByText('0.000')).toBeTruthy()
+    expect(stepCount()).toBe(2)
+    expect(screen.queryByRole('button', { name: 'Step' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Play sweep' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Confirm analysis' })).toBeNull()
+
+    const gravity = screen.getByRole<HTMLInputElement>('spinbutton', { name: 'Vertical gravity' })
+    fireEvent.change(gravity, { target: { value: '' } })
+    expect(onParticleCommand).not.toHaveBeenCalled()
+    fireEvent.change(gravity, { target: { value: '-10' } })
+    expect(onParticleCommand).toHaveBeenLastCalledWith({ kind: 'set-gravity-y', value: -10 })
+    view.rerender(preview(-10))
+    expect(stepCount()).toBe(2)
+    expect(comparison.getByText('1.400')).toBeTruthy()
+    expect(comparison.getByText('1.300')).toBeTruthy()
+    expect(comparison.getByText('−0.100')).toBeTruthy()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Reset' }))
+    expect(onParticleCommand).toHaveBeenLastCalledWith('reset')
+    view.rerender(preview(0))
+    expect(gravity.value).toBe('0')
+    expect(stepCount()).toBe(2)
+    expect(comparison.getAllByText('1.400')).toHaveLength(2)
+    expect(recordAction).not.toHaveBeenCalled()
+  })
+
   it('renders the initial time and confirms the same fixed-step values shown by the preview', () => {
     const recordAction = vi.fn<RecordArtifactAction>().mockResolvedValue(undefined)
     render(surface({ recordAction }))
     const readout = screen.getAllByRole('status')[0]!
+    const readings = screen.getByRole('list', { name: en['scene.particles'] })
+    const coordinate = (name: string) => readings.querySelector(`[data-particle-live-coordinate="${name}"]`)?.textContent
     expect(readout.textContent).toContain('0.00')
     expect(readout.textContent).toContain('-9.80')
+    expect([coordinate('x'), coordinate('y'), coordinate('vx'), coordinate('vy')]).toEqual(['0', '10', '1', '0'])
     fireEvent.click(screen.getByRole('button', { name: 'Step' }))
     expect(stepCount()).toBe(1)
     expect(readout.textContent).toContain('0.02')
+    expect([coordinate('x'), coordinate('y'), coordinate('vx'), coordinate('vy')]).toEqual(['0.02', '10', '1', '-0.196'])
     expect(recordAction).not.toHaveBeenCalled()
     fireEvent.click(screen.getByRole('button', { name: 'Confirm analysis' }))
     expect(recordAction).toHaveBeenCalledWith('particles', 1, 'physics.inspected', {

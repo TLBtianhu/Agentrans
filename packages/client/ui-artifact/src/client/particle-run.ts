@@ -14,8 +14,10 @@ export interface ParticleRun {
   readonly failure?: { readonly code: string; readonly message: string }
 }
 
-/** Commands supported by the particle preview in this runtime version. */
-export type ParticleRunCommand = 'play' | 'pause' | 'step' | 'reset'
+type ParticlePlaybackCommand = 'play' | 'pause' | 'step' | 'reset'
+
+/** Playback commands and the controlled comparison's one editable condition. */
+export type ParticleRunCommand = ParticlePlaybackCommand | { readonly kind: 'set-gravity-y'; readonly value: number }
 
 /**
  * Create the first local run for a validated particle specification.
@@ -33,7 +35,7 @@ export function createParticleRun(spec: ParticleSystemSpec): ParticleRun {
  * @param command - User control or one timer-driven step.
  * @returns Updated run; unexpected programming errors propagate.
  */
-export function updateParticleRun(spec: ParticleSystemSpec, run: ParticleRun, command: ParticleRunCommand): ParticleRun {
+export function updateParticleRun(spec: ParticleSystemSpec, run: ParticleRun, command: ParticlePlaybackCommand): ParticleRun {
   switch (command) {
     case 'reset': return createParticleRun(spec)
     case 'pause': return run.playing ? { ...run, playing: false } : run

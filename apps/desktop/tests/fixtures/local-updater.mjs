@@ -1,6 +1,7 @@
 /** Actual Electron HTTP/download qualification; installer execution is forbidden. */
 import { setTimeout as delay } from 'node:timers/promises'
 import assert from 'node:assert/strict'
+import { createHash, generateKeyPairSync, sign } from 'node:crypto'
 import { once } from 'node:events'
 import fs from 'node:fs'
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises'
@@ -15,6 +16,7 @@ import { createUpdateServer } from './update-server.mjs'
 import { DesktopUpdatePreparationError } from '../../lib/types/update-error.js'
 import { DesktopUpdateHttpExecutor } from '../../lib/types/update-http-executor.js'
 import { DesktopUpdateOverlays } from '../../lib/types/update-overlay.js'
+import { verifyFileDigest } from '../../lib/types/update-signature.js'
 import { qualifyUpdateDialogs } from './update-dialogs.mjs'
 
 const root = process.env.AGENTRANS_LOCAL_UPDATE_TEST_ROOT
@@ -33,6 +35,14 @@ const messages = resolveDesktopLocale('zh-CN').messages
 async function main() {
   await app.whenReady()
   const server = await createUpdateServer()
+  const { privateKey, publicKey } = generateKeyPairSync('ed25519')
+  const signature = sign(null, createHash('sha256').update(server.payload).digest(), privateKey).toString('base64')
+  const verification = {
+    async verify(files) {
+      assert.equal(files.length, 1)
+      assert.ok(await verifyFileDigest(files[0], signature, publicKey), 'Downloaded bytes must match the qualification signature')
+    },
+  }
   let serial = 0
   const fixtures = []
   async function fixture(mode = 'healthy', timeoutMs = 60_000) {
@@ -40,7 +50,7 @@ async function main() {
     const directory = join(root, String(++serial))
     await mkdir(directory, { recursive: true })
     const config = join(directory, 'app-update.yml')
-    // Unsigned inert bytes are confined to this fixture; production configuration is never loaded or changed.
+    // The inert installer and its temporary update signature are confined to this fixture.
     await writeFile(config, `updaterCacheDirName: cache\n`)
     const forbidden = () => { throw new Error('Unexpected application quit or relaunch') }
     const updater = new NsisUpdater(undefined, {
@@ -58,7 +68,7 @@ async function main() {
     let restart = async () => true
     updater.quitAndInstall = (...args) => { installations.push(args) }
     const coordinator = new DesktopUpdateCoordinator(state => { states.push(state); return state },
-      () => restart(), updater, () => true, () => '1.0.0')
+      () => restart(), updater, () => true, () => '1.0.0', undefined, 'nightly', verification)
     const result = { updater, coordinator, installations, states, directory, restart: handler => { restart = handler } }
     fixtures.push(result)
     return result

@@ -6,12 +6,12 @@
  */
 import type { Context } from '@agentrans/cordis'
 import type { SubagentAddress } from '@agentrans/subagent/client'
-import type { SessionId } from '@agentrans/session/types'
+import type { SessionId, SessionInquiry } from '@agentrans/session/types'
 import type { WorkspaceId } from '@agentrans/workspace/types'
 import type { RemoteResult } from '@agentrans/typert-protocol'
 import type { AgentContext } from '../scope.ts'
 import type { SessionSearchResultItem } from '../sessions/manager.ts'
-import type { SessionBranchResultRequest, SessionBranchResultValue } from '../../types.ts'
+import type { SessionBranchResultRequest, SessionBranchResultValue, SessionRequestId } from '../../types.ts'
 import type { SessionBinding, SessionListState } from '../sessions/service.ts'
 import type { SessionFace } from './session.ts'
 import type { ObservableSnapshot } from '@agentrans/client-store'
@@ -136,6 +136,9 @@ export interface ISessions {
   fork(opts: {
     sessionId: SessionId
     atSeq?: number
+    inquiry?: SessionInquiry
+    /** Stable identity for every attempt to fork this inquiry. */
+    requestId?: SessionRequestId
     increaseTitle?: boolean
     onCreated?: (childId: SessionId) => void
     /** False refuses source migration; omission preserves the Host default. */

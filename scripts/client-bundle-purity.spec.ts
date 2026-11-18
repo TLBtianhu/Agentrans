@@ -289,7 +289,7 @@ describe('client bundle purity gate', () => {
     expect(resolveId('@agentrans/artifact/scene-renderers')).toBeNull()
     expect(resolveId('@agentrans/artifact/capabilities')).toBeNull()
     expect(resolveId('@agentrans/artifact/runtime-values')).toBeNull()
-    for (const specifier of ['@agentrans/artifact', '@agentrans/artifact/tool',
+    for (const specifier of ['@agentrans/artifact', '@agentrans/artifact/tool', '@agentrans/artifact/attachment-csv-tool',
       '@agentrans/artifact/scene-tool', '@agentrans/artifact/particle-runtime/internal',
       '@agentrans/artifact/observation-comparison/internal',
       '@agentrans/artifact/scene-export/internal', '@agentrans/artifact/scene-renderers/internal',

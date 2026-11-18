@@ -1,14 +1,19 @@
 /** Standalone HTML animation export for validated SceneSpec values. */
-import type { FunctionPlotSpec, FlowchartSpec, ParticleSystemSpec, TimelineSpec, NetworkGraphSpec, MapSpec } from './scene.ts'
+import type { SceneSpec } from './scene.ts'
+import type { ArtifactPlotContinuation } from './types.ts'
 import {
   createParticleCheckpoint, createParticleState, restoreParticleCheckpoint, ParticleRuntimeError, type ParticleCheckpoint,
 } from './particle-runtime.ts'
 import { sceneExprBundle } from './scene-expr.generated.ts'
 import { sceneRenderersBundle } from './scene-renderers.generated.ts'
 import type { ScenePaletteRole } from './scene-palette.ts'
+import { buildCsvChartHtml } from './csv-chart-export.ts'
 
 /** Version of the standalone SceneSpec HTML program and its fixed output options. */
 export const SCENE_EXPORTER_VERSION = 1
+
+/** Version of the standalone HTML exporter for a locked function-plot baseline. */
+export const FUNCTION_PLOT_BASELINE_EXPORTER_VERSION = 2
 
 /**
  * Palette the exported document carries, light scheme.
@@ -34,9 +39,9 @@ const EXPORT_PALETTE_DARK: Readonly<Record<ScenePaletteRole, string>> = {
 /** Inert JSON carrying both pinned palettes to the exported program. */
 const EXPORT_PALETTES_JSON = JSON.stringify({ light: EXPORT_PALETTE_LIGHT, dark: EXPORT_PALETTE_DARK }).replaceAll('<', '\\u003c')
 
-/** Source identity embedded in a standalone export; particle conditions use the replay checkpoint. */
+/** Source identity embedded in a standalone export, with replay conditions supplied separately. */
 export interface SceneExportOrigin {
-  readonly exporterVersion: typeof SCENE_EXPORTER_VERSION
+  readonly exporterVersion: typeof SCENE_EXPORTER_VERSION | typeof FUNCTION_PLOT_BASELINE_EXPORTER_VERSION
   readonly exportId: string
   /** Original Session that admitted this export; absent for standalone non-Session callers. */
   readonly sessionId?: string
@@ -44,6 +49,10 @@ export interface SceneExportOrigin {
   readonly revision: number
   readonly observationId?: string
   readonly checkpoint?: ParticleCheckpoint
+  /** Exact message in the receiving Session when downloaded from returned evidence. */
+  readonly returnedEvidence?: { readonly eventSeq: number; readonly messageId: string }
+  /** Exact sent follow-up that supplies the locked readings. */
+  readonly sentQuestion?: { readonly eventSeq: number; readonly messageId: string }
 }
 
 function escapeHtml(value: string): string {
@@ -57,18 +66,28 @@ function escapeHtml(value: string): string {
  * @param title - Document title for the exported page.
  * @param checkpoint - Optional particle replay origin, bound to this exact spec and Artifact revision.
  * @param origin - Optional export identity; when absent no identity block is added. When present,
- * source identity and the resolved particle checkpoint are embedded as inert JSON and shown as text.
+ * source identity and resolved replay conditions are embedded as inert JSON and shown as text.
+ * @param functionPlotBaseline - Validated initial conditions of a continued function plot.
  * @returns A complete HTML document with an inline parser, shared renderers, and timeline player.
  */
 export function buildSceneAnimationHtml(
-  spec: FunctionPlotSpec | FlowchartSpec | ParticleSystemSpec | TimelineSpec | NetworkGraphSpec | MapSpec,
+  spec: SceneSpec,
   title: string,
   checkpoint?: ParticleCheckpoint,
   origin?: SceneExportOrigin,
+  functionPlotBaseline?: ArtifactPlotContinuation['baseline'],
 ): string {
   if (checkpoint !== undefined && spec.kind !== 'particle-system') {
     throw new ParticleRuntimeError('INVALID_CHECKPOINT', 'A particle checkpoint requires a particle-system source')
   }
+  if (functionPlotBaseline !== undefined && spec.kind !== 'function-plot') {
+    throw new TypeError('A locked function-plot baseline requires a function-plot source')
+  }
+  if (origin !== undefined
+    && (origin.exporterVersion === FUNCTION_PLOT_BASELINE_EXPORTER_VERSION) !== (functionPlotBaseline !== undefined)) {
+    throw new TypeError('The standalone HTML exporter version must match its function-plot conditions')
+  }
+  if (spec.kind === 'csv-bar-chart') return buildCsvChartHtml(spec, title, origin)
   const particleCheckpoint = spec.kind === 'particle-system'
     ? createParticleCheckpoint(checkpoint === undefined ? createParticleState(spec) : restoreParticleCheckpoint(spec, checkpoint))
     : null
@@ -76,9 +95,66 @@ export function buildSceneAnimationHtml(
   const specJson = JSON.stringify(spec).replaceAll('<', '\\u003c')
   const checkpointJson = JSON.stringify(particleCheckpoint).replaceAll('<', '\\u003c')
   const titleHtml = escapeHtml(title)
-  const metadata = origin === undefined ? null : { ...origin, checkpoint: particleCheckpoint ?? undefined }
+  const metadata = origin === undefined ? null : { ...origin, checkpoint: particleCheckpoint ?? undefined, functionPlotBaseline }
   const metadataBlock = metadata === null ? '' : `<script type="application/json" id="artifact-export-origin-data">${JSON.stringify(metadata).replaceAll('<', '\\u003c')}</script>`
-  const identityLabel = origin === undefined ? '' : `<p class="meta" id="artifact-export-origin">${escapeHtml(origin.artifactId)} · revision ${origin.revision} · ${particleCheckpoint === null ? 'Source defaults' : `runtime ${particleCheckpoint.runtimeVersion} · step ${particleCheckpoint.stepCount}`}</p>`
+  const conditionsLabel = particleCheckpoint !== null ? `runtime ${particleCheckpoint.runtimeVersion} · step ${particleCheckpoint.stepCount}`
+    : functionPlotBaseline === undefined ? 'Source defaults' : 'Locked function-plot conditions'
+  const identityLabel = origin === undefined ? '' : `<p class="meta" id="artifact-export-origin">${escapeHtml(origin.artifactId)} · revision ${origin.revision} · ${conditionsLabel}</p>`
+  const baselineScript = functionPlotBaseline === undefined ? '' : `const functionPlotBaseline = ${JSON.stringify(functionPlotBaseline).replaceAll('<', '\\u003c')}
+const [plotMin, plotMax] = spec.viewport.x
+const probe = functionPlotBaseline.x
+const recenteredPan = probe - (plotMin + plotMax) / 2
+const plotPan = (probe < plotMin || probe > plotMax) && Number.isFinite(recenteredPan) ? recenteredPan : 0
+const fraction = (probe - (plotMin + plotPan)) / (plotMax - plotMin)
+const startProgress = Number.isFinite(fraction) ? Math.max(0, Math.min(1, fraction)) : 0
+`
+  const initialProgress = functionPlotBaseline === undefined ? '0' : 'startProgress'
+  const plotParameters = functionPlotBaseline === undefined
+    ? 'Object.fromEntries(Object.entries(spec.parameters ?? {}).map(([key, value]) => [key, value.value]))' : 'functionPlotBaseline.parameters'
+  const plotTrace = functionPlotBaseline === undefined ? 'xMin + progress * (xMax - xMin)'
+    : 'progress === startProgress ? probe : xMin + plotPan + progress * (xMax - xMin)'
+  const plotRendering = functionPlotBaseline === undefined ? 'pan: 0, parameters,'
+    : 'pan: plotPan, parameters, currentFunctionId: functionPlotBaseline.functionId,'
+  const plotAnalysis = functionPlotBaseline === undefined ? 'functions[0].node' : 'selectedPlot.node'
+  const lockedReadout = functionPlotBaseline === undefined ? '' : `
+    ['Function', selectedPlot.label],
+    ...Object.entries(parameters).map(([name, value]) => [name, String(value)]),`
+  const lockedParticle = particleCheckpoint !== null && (origin?.returnedEvidence !== undefined || origin?.sentQuestion !== undefined)
+  const particleTableStyle = lockedParticle ? `.particle-readings { min-width:0; overflow-x:auto; }
+.particle-readings table { width:100%; border-collapse:collapse; }
+.particle-readings caption { text-align:left; font-weight:600; }
+.particle-readings th, .particle-readings td { padding:4px 8px; text-align:right; border-bottom:1px solid var(--border); white-space:nowrap; }
+.particle-readings th:first-child { text-align:left; }
+` : ''
+  const particleTableMarkup = lockedParticle ? `  <div class="particle-readings">
+    <table id="particle-readings">
+      <caption>Particle readings</caption>
+      <thead><tr><th scope="col">Particle</th><th scope="col">x</th><th scope="col">y</th><th scope="col">vx</th><th scope="col">vy</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+` : ''
+  const particleTableScript = lockedParticle ? `const particleRows = document.querySelector('#particle-readings tbody')
+function renderParticleReadings(state) {
+  const { particles } = SceneRenderers.observeParticleState(state)
+  particleRows.replaceChildren(...particles.map(particle => {
+    const row = document.createElement('tr')
+    row.dataset.particleId = particle.id
+    const name = document.createElement('th')
+    name.scope = 'row'
+    name.textContent = particle.id
+    row.append(name)
+    for (const coordinate of ['x', 'y', 'vx', 'vy']) {
+      const cell = document.createElement('td')
+      cell.dataset.particleCoordinate = coordinate
+      cell.textContent = String(particle[coordinate])
+      row.append(cell)
+    }
+    return row
+  }))
+}
+
+` : ''
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -101,7 +177,7 @@ input[type='range'] { flex:1; min-width:160px; accent-color:var(--accent); }
 .readout { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
 .readout span { display:block; color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:0.06em; }
 .readout strong { font-family:ui-monospace,monospace; font-size:13px; }
-.legend { display:flex; flex-wrap:wrap; gap:12px; color:var(--muted); font-size:11px; }
+${particleTableStyle}.legend { display:flex; flex-wrap:wrap; gap:12px; color:var(--muted); font-size:11px; }
 .legend i { display:inline-block; width:12px; height:2px; margin-right:5px; background:var(--accent); vertical-align:middle; }
 .legend .alt { background:var(--good); }
 </style>
@@ -114,7 +190,7 @@ input[type='range'] { flex:1; min-width:160px; accent-color:var(--accent); }
   <div class="legend" id="legend"></div>
   <canvas id="plot" width="900" height="420" role="img" aria-label="SceneSpec animation"></canvas>
   <div class="readout" id="readout" role="status" aria-live="polite"></div>
-  <p id="error" role="alert" hidden></p>
+${particleTableMarkup}  <p id="error" role="alert" hidden></p>
   <div class="controls">
     <button id="play" type="button" data-active="false">Play</button>
     <button id="reset" type="button">Reset</button>
@@ -128,7 +204,7 @@ ${metadataBlock}
 <script>${sceneRenderersBundle}</script>
 <script>
 const spec = ${specJson}
-const isFlowchart = spec.kind === 'flowchart'
+${baselineScript}const isFlowchart = spec.kind === 'flowchart'
 const isParticleSystem = spec.kind === 'particle-system'
 const isTimeline = spec.kind === 'timeline'
 const isNetworkGraph = spec.kind === 'network-graph'
@@ -140,9 +216,9 @@ const timelineTimes = isTimeline ? spec.events.map(event => event.time) : []
 const minTime = timelineTimes.length > 0 ? Math.min(...timelineTimes) : 0
 const maxTime = timelineTimes.length > 0 ? Math.max(...timelineTimes) : 1
 let pathIndex = 0
-const parameters = Object.fromEntries(Object.entries(spec.parameters ?? {}).map(([key, value]) => [key, value.value]))
+const parameters = ${plotParameters}
 const functions = isFlowchart || isParticleSystem || isTimeline || isNetworkGraph || isMap ? [] : spec.functions.map(fn => ({ ...fn, node: SceneExpr.parseExpression(fn.expression, Object.keys(spec.parameters)) }))
-const canvas = document.getElementById('plot')
+${functionPlotBaseline === undefined ? '' : 'const selectedPlot = functions.find(fn => fn.id === functionPlotBaseline.functionId)\n'}const canvas = document.getElementById('plot')
 const context = canvas.getContext('2d')
 // The document pins its own palette under the shared role names, so the same
 // renderers draw here and in the conversation preview.
@@ -156,8 +232,8 @@ const timeLabel = document.getElementById('time')
 const readout = document.getElementById('readout')
 const errorNotice = document.getElementById('error')
 const timeline = spec.timeline ?? { duration: 8, fps: 30 }
-let progress = 0
-let playing = false
+let progress = ${initialProgress}
+${functionPlotBaseline === undefined ? '' : 'scrub.value = String(progress)\n'}let playing = false
 let frame = 0
 let lastTime = 0
 let activeRecording = null
@@ -173,7 +249,7 @@ function renderReadout(entries) {
     return row
   }))
 }
-function formatMeasurement(value) {
+${particleTableScript}function formatMeasurement(value) {
   return value === null ? '—' : value.toFixed(3)
 }
 function drawScene() {
@@ -235,23 +311,23 @@ function drawScene() {
       ['time', state.time.toFixed(2)],
       ['particles', String(state.particles.length)],
       ['gravity', spec.gravity.x.toFixed(2) + ', ' + spec.gravity.y.toFixed(2)],
-      ['dt', spec.timeStep.toFixed(3)],
+      ['dt', spec.timeStep.toFixed(3)],${lockedParticle ? "\n      ['step', String(state.stepCount)]," : ''}
     ])
-    timeLabel.textContent = state.time.toFixed(2) + ' s'
+${lockedParticle ? '    renderParticleReadings(state)\n' : ''}    timeLabel.textContent = state.time.toFixed(2) + ' s'
     return
   }
   const [xMin, xMax] = spec.viewport.x
-  const traceX = xMin + progress * (xMax - xMin)
+  const traceX = ${plotTrace}
   SceneRenderers.renderFunctionPlot(spec, canvas, canvas.width, canvas.height, {
-    traceX, scale: 1, pan: 0, parameters,
+    traceX, scale: 1, ${plotRendering}
     showDerivative: spec.trace.derivative, showIntegral: spec.trace.integral,
   }, palette)
-  const analysis = SceneRenderers.analyzeFunction(functions[0].node, parameters, traceX)
+  const analysis = SceneRenderers.analyzeFunction(${plotAnalysis}, parameters, traceX)
   renderReadout([
     ['x', traceX.toFixed(2)],
     ['f(x)', formatMeasurement(analysis.value)],
     ['f′(x)', formatMeasurement(analysis.derivative)],
-    ['∫', formatMeasurement(analysis.integral)],
+    ['∫', formatMeasurement(analysis.integral)],${lockedReadout}
   ])
   timeLabel.textContent = (progress * timeline.duration).toFixed(2) + ' s'
 }
@@ -296,8 +372,8 @@ playButton.addEventListener('click', () => {
 })
 document.getElementById('reset').addEventListener('click', () => {
   stopPlayback()
-  progress = 0
-  scrub.value = '0'
+  progress = ${initialProgress}
+  scrub.value = ${functionPlotBaseline === undefined ? "'0'" : 'String(progress)'}
   draw()
 })
 scrub.addEventListener('input', () => {

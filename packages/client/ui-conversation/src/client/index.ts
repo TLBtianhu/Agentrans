@@ -98,7 +98,7 @@ export type {
   UseConversationViews,
 } from './contract/slots.ts'
 export type {
-  BeginCommandRequest, CommandClaim, ConsumeTokenRequest, DraftAttachmentId, DraftInitializationOptions,
+  BeginCommandRequest, CommandClaim, ConsumeTokenRequest, DraftAttachmentId, DraftFocusBookmark, DraftInitializationOptions,
   DraftInitializationResult, InputActions,
   InputState, InsertReferenceRequest, InsertTextRequest, PickOutcome, SessionInput,
   SessionInputResolver, SubmitAttachment, SubmitOutcome, DefaultSubmitOutcome,

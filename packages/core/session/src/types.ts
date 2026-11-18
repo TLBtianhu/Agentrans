@@ -7,6 +7,7 @@ import type {
   LlmCallConfig,
   LlmCallConfigAdapterDefaults,
   LlmFailure,
+  MessageId,
   SystemMessage,
   SystemPromptUpdate,
   TokenUsage,
@@ -89,6 +90,36 @@ export type OptionalSessionSeq = SessionSeq | null
  */
 export const SESSION_FORMAT_VERSION = 4
 
+/** Exact passage in the completed assistant answer from which an inquiry Session was forked. */
+export type SessionInquiry = {
+  readonly messageSeq: number
+  readonly messageId: MessageId
+  /** Inclusive offset in the concatenated assistant text blocks, in UTF-16 code units. */
+  readonly start: number
+  /** Exclusive offset in the same text. */
+  readonly end: number
+  readonly excerpt: string
+}
+
+/** Maximum length of an inquiry excerpt in UTF-16 code units. */
+export const SESSION_INQUIRY_MAX_LENGTH = 512
+
+/**
+ * Validate a bounded excerpt independent of its owning Session log.
+ * @param value - Source anchor supplied for a fork or read from storage.
+ * @returns Whether it has the exact range and identity fields.
+ */
+export function isSessionInquiry(value: unknown): value is SessionInquiry {
+  if (value === null || typeof value !== 'object' || Array.isArray(value) || Object.keys(value).length !== 5) return false
+  const { messageSeq, messageId, start, end, excerpt } = value as Record<string, unknown>
+  return typeof messageSeq === 'number' && Number.isSafeInteger(messageSeq) && messageSeq >= 0 && !Object.is(messageSeq, -0)
+    && typeof messageId === 'string' && messageId.length > 0
+    && typeof start === 'number' && Number.isSafeInteger(start) && start >= 0 && !Object.is(start, -0)
+    && typeof end === 'number' && Number.isSafeInteger(end) && end > start
+    && typeof excerpt === 'string' && excerpt.length === end - start && excerpt.length <= SESSION_INQUIRY_MAX_LENGTH
+    && excerpt.trim().length > 0 && !/[\uD800-\uDFFF]/u.test(excerpt)
+}
+
 /**
  * Immutable validated storage metadata, kept outside the conversation event log.
  */
@@ -109,6 +140,8 @@ export interface SessionHeader {
    * Presence alone does not classify a Session as a subagent; use `origin` for that distinction.
    */
   readonly parentSession?: SessionId
+  /** Selected passage in the direct parent of an ordinary inquiry branch. */
+  readonly inquiry?: SessionInquiry
   /**
    * Whether this Session contains a fork-inherited event prefix. The exact prefix
    * length is Session state rather than ordinary header metadata.
@@ -155,6 +188,7 @@ export interface CreateSessionOptions {
   readonly meta?: {
     readonly cwd?: string
     readonly parentSession?: SessionId
+    readonly inquiry?: SessionInquiry
     readonly createdAt?: number
     readonly isSeeded?: boolean
     readonly origin?: 'subagent'

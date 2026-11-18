@@ -49,7 +49,7 @@ function turnOf(node: ChatNode | undefined): number | undefined {
  */
 export const ChatNodeSeat = memo(function ChatNodeSeat({
   nodeKey, groupPart, useChatNode, useChatNodeProcess, usePresentation,
-  cwd, openFile, inspectCall, forkAt,
+  cwd, openFile, openView, inspectCall, forkAt,
   loadImage, useStore, actions, renderSlot, t, useChatNodeBottom, deferCollapse, useGroupAction,
 }: ChatNodeSeatProps) {
   const bottom = useChatNodeBottom(nodeKey)
@@ -135,12 +135,13 @@ export const ChatNodeSeat = memo(function ChatNodeSeat({
       ...groupPart === undefined ? {} : { groupPart },
       cwd,
       openFile,
+      openView,
       inspectCall,
       forkAt,
       loadImage,
       turnProcess,
     }, [
-    node, groupPart, cwd, openFile, inspectCall, forkAt,
+    node, groupPart, cwd, openFile, openView, inspectCall, forkAt,
     loadImage, turnProcess,
   ])
   if (routedNode === undefined || owner === null) return null
@@ -149,6 +150,9 @@ export const ChatNodeSeat = memo(function ChatNodeSeat({
   // distribute an object containing a union into a union of objects itself.
   const routedOwner = { ...owner, node: routedNode } as RoutedChatNodeOwner
   const flowKey = groupPart === undefined || groupPart === 'response' ? routedNode.key : JSON.stringify([routedNode.key, groupPart])
+  const message = routedNode.kind === 'user' || routedNode.kind === 'steering' ? routedNode.data
+    : routedNode.kind === 'assistant-step' && groupPart !== 'reasoning' && routedNode.data.status === 'settled'
+      ? routedNode.data.finalNode : undefined
   return (
     <div
       ref={wrapperRef}
@@ -159,6 +163,8 @@ export const ChatNodeSeat = memo(function ChatNodeSeat({
       data-chat-node-key={routedNode.key}
       data-chat-group-part={groupPart}
       data-chat-flow-kind={routedNode.kind}
+      data-chat-message-id={message?.messageId}
+      data-chat-message-seq={message?.messageId === undefined ? undefined : message.seq}
       data-chat-turn={turn}
       data-turn-process-member={processMember || undefined}
       data-turn-process-hidden={processHidden || undefined}

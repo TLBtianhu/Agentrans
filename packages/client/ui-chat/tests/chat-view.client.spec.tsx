@@ -551,6 +551,7 @@ function makeHarness(
     loadImage: vi.fn(() => Promise.reject(new Error('not used'))),
     chatScroll,
     forkAt,
+    forkInquiry: vi.fn(async () => {}),
     // Absent-service default; mention tests override with a real resolver.
     fileMentions: () => undefined,
     t,
@@ -3649,6 +3650,7 @@ describe('ChatView', () => {
     }, { running: true })
     const view = render(<h.ChatView {...h.props} />)
     expect(view.queryByRole('button', { name: '在新对话中分支' })).toBeNull()
+    expect(view.queryByRole('button', { name: '选句探究' })).toBeNull()
 
     act(() => {
       h.setChat({
@@ -3658,6 +3660,7 @@ describe('ChatView', () => {
     })
     expect(view.getByText('已停止')).toBeTruthy()
     expect(view.queryByRole('button', { name: '在新对话中分支' })).toBeNull()
+    expect(view.queryByRole('button', { name: '选句探究' })).toBeNull()
   })
 
   it('forks durable user and assistant rows at their exact seq and retains the Turn footer entry', () => {
@@ -3673,6 +3676,110 @@ describe('ChatView', () => {
       expect(buttons[index]!.getAttribute('aria-disabled')).toBeNull()
       fireEvent.click(buttons[index]!)
       expect(h.forkAt).toHaveBeenLastCalledWith(seq)
+    }
+  })
+
+  it('opens an inquiry from the selected occurrence in a completed answer without a quote plugin', async () => {
+    const markdown = '相位差作为概念，**相位差**作为探究切口。'
+    const messageId = MessageId('answer')
+    const h = makeHarness({
+      nodes: [user(1, 'question'), { ...assistant(2, markdown), messageId }],
+      turnEnds: new Map([[1, 3]]),
+    })
+    const view = render(<h.ChatView {...h.props} />)
+    const row = view.container.querySelector<HTMLElement>('[data-chat-message-id="answer"]')!
+    expect(row.dataset.chatMessageSeq).toBe('2')
+    const guide = within(row).getByRole('button', { name: '选句探究' })
+    const instructions = document.getElementById(guide.getAttribute('aria-controls')!)!
+    expect(guide.getAttribute('aria-expanded')).toBe('false')
+    expect(instructions.hidden).toBe(true)
+    fireEvent.click(guide)
+    expect(guide.getAttribute('aria-expanded')).toBe('true')
+    expect(instructions.hidden).toBe(false)
+    expect(instructions.textContent).toBe('选中回答里想追问的一句话，再点「从选中内容开探究分支」。')
+    expect(h.props.forkInquiry).not.toHaveBeenCalled()
+    expect(h.forkAt).not.toHaveBeenCalled()
+    const span = row.querySelector<HTMLElement>('strong [data-markdown-source-start]')!
+    const range = document.createRange()
+    range.selectNodeContents(span)
+    const selection = window.getSelection()!
+    const rect = new DOMRect(100, 120, 40, 20)
+    Object.defineProperty(Range.prototype, 'getClientRects', { configurable: true, value: () => [rect] })
+    Object.defineProperty(Range.prototype, 'getBoundingClientRect', { configurable: true, value: () => rect })
+    selection.removeAllRanges()
+    try {
+      selection.addRange(range)
+      fireEvent(document, new Event('selectionchange'))
+      const action = view.container.querySelector<HTMLButtonElement>('[data-chat-inquiry-create]')!
+      expect(action.textContent).toBe('从选中内容开探究分支')
+      await act(async () => { fireEvent.click(action) })
+      const start = markdown.lastIndexOf('相位差')
+      expect(h.props.forkInquiry).toHaveBeenCalledOnce()
+      expect(h.props.forkInquiry).toHaveBeenCalledWith({
+        atSeq: 3,
+        inquiry: { messageSeq: 2, messageId, start, end: start + 3, excerpt: '相位差' },
+      }, expect.stringMatching(/^[0-9a-f-]{36}$/u))
+      expect(h.forkAt).not.toHaveBeenCalled()
+    } finally {
+      selection.removeAllRanges()
+      Reflect.deleteProperty(Range.prototype, 'getClientRects')
+      Reflect.deleteProperty(Range.prototype, 'getBoundingClientRect')
+    }
+  })
+
+  it.for(['retry', 'reselect'] as const)('reuses the inquiry request through %s after a transport failure', async (recovery) => {
+    const messageId = MessageId('answer')
+    const h = makeHarness({
+      nodes: [user(1, 'question'), { ...assistant(2, 'Keep this excerpt.'), messageId }],
+      turnEnds: new Map([[1, 3]]),
+    })
+    const forkInquiry = vi.fn<ChatViewSlotProps['forkInquiry']>()
+      .mockRejectedValueOnce(new Error('The first response was lost'))
+      .mockResolvedValue(undefined)
+    const view = render(<h.ChatView {...h.props} forkInquiry={forkInquiry} />)
+    const source = view.container.querySelector<HTMLElement>('[data-chat-message-id="answer"] [data-markdown-source-start]')!
+    const range = document.createRange()
+    range.selectNodeContents(source)
+    const selection = window.getSelection()!
+    const rect = new DOMRect(100, 120, 40, 20)
+    Object.defineProperty(Range.prototype, 'getClientRects', { configurable: true, value: () => [rect] })
+    Object.defineProperty(Range.prototype, 'getBoundingClientRect', { configurable: true, value: () => rect })
+    const select = (): HTMLButtonElement => {
+      selection.removeAllRanges()
+      selection.addRange(range)
+      fireEvent(document, new Event('selectionchange'))
+      return view.container.querySelector<HTMLButtonElement>('[data-chat-inquiry-create]')!
+    }
+    const startInquiry = async (): Promise<void> => {
+      const button = select()
+      await act(async () => { fireEvent.click(button) })
+    }
+
+    try {
+      await startInquiry()
+      const dialog = screen.getByRole('dialog', { name: '无法打开探究分支' })
+      const initial = forkInquiry.mock.calls[0]
+      expect(initial?.[0].inquiry.excerpt).toBe('Keep this excerpt.')
+      expect(view.container.querySelector('[data-chat-inquiry-create]')).toBeNull()
+      selection.removeAllRanges()
+      if (recovery === 'retry') {
+        await act(async () => { fireEvent.click(within(dialog).getByRole('button', { name: '重试' })) })
+      } else {
+        fireEvent.click(within(dialog).getByRole('button', { name: '关闭' }))
+        await startInquiry()
+      }
+      expect(forkInquiry).toHaveBeenCalledTimes(2)
+      expect(forkInquiry.mock.calls[1]).toEqual(initial)
+      expect(screen.queryByRole('dialog')).toBeNull()
+
+      await startInquiry()
+      expect(forkInquiry).toHaveBeenCalledTimes(3)
+      expect(forkInquiry.mock.calls[2]?.[0]).toEqual(initial?.[0])
+      expect(forkInquiry.mock.calls[2]?.[1]).not.toBe(initial?.[1])
+    } finally {
+      selection.removeAllRanges()
+      Reflect.deleteProperty(Range.prototype, 'getClientRects')
+      Reflect.deleteProperty(Range.prototype, 'getBoundingClientRect')
     }
   })
 

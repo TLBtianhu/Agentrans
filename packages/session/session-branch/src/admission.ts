@@ -59,7 +59,8 @@ export async function admitBranchResult(
       const existing = findBranchResult(current.events, selection.reference)
       if (existing !== undefined) {
         const event = current.events[existing.eventSeq]
-        if (event?.type !== 'user/message' || event.data.content.length !== content.length
+        if (event?.type !== 'user/message' || event.data.source.kind !== 'branch-result'
+          || event.data.source.artifactEvidence !== selection.reference.artifactEvidence || event.data.content.length !== content.length
           || !event.data.content.every((block, index) => block.type === 'text' && block.text === content[index]?.text)) {
           throw new BranchResultAdmissionConflict()
         }

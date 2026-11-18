@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { webcrypto } from 'node:crypto'
 import { contextMenuHook } from '@agentrans/client-test-runtime'
 // InputBar behavior over the editor + submit-machine wiring: Enter-send
 // semantics (IME guard, Shift newline, busy Enter policy, Ctrl/Meta steering,
@@ -138,9 +139,11 @@ function bench(over?: BenchOptions) {
     removed: over?.disabled ?? false,
     promptError: over?.promptError ?? null,
   }))
+  const submissionBlock = createSnapshotStore(false)
   type ShellDeps = ConstructorParameters<typeof SessionInputShell>[0]
   const shell = new SessionInputShell({
     actx: SCTX,
+    submissionBlocked: () => submissionBlock.getSnapshot(),
     defaultSink: sink,
     commandAttachments: { serialize: () => Promise.resolve([]), release: () => {}, unsupportedNotice: (token: string) => `${token.trim()} attachments-unsupported` },
     inbox: createSnapshotStore<InboxState>({
@@ -218,6 +221,7 @@ function bench(over?: BenchOptions) {
     toggleCommandMenu: over?.toggleCommandMenu ?? vi.fn(),
     useBusyEnter: bindSnapshotSelector(busyEnter),
     useStopShortcut: bindSnapshotSelector(stopShortcut),
+    useSubmissionBlocked: bindSnapshotSelector(submissionBlock),
     useNotices: bindSnapshotSelector(shell.notices),
     useLexicon: bindSnapshotSelector(shell.lexicon),
     useMenuLauncher: bindSnapshotSelector(menuLauncher),
@@ -261,7 +265,7 @@ function bench(over?: BenchOptions) {
   const interruptButton = view.container.querySelector<HTMLButtonElement>('button[aria-label="停止生成"]')
   return {
     view, textarea, button, interruptButton, props, sink, shell, wiring: shell, session, stop, removeAttachment, slotCalls,
-    menuLauncher, busyEnter, stopShortcut,
+    menuLauncher, busyEnter, stopShortcut, submissionBlock,
     steerQueue: over?.steerQueue,
     get placeholder() { return placeholderOf(view.container) },
     get inputDisabled() { return textarea.getAttribute('aria-disabled') === 'true' },
@@ -379,12 +383,71 @@ describe('composer focus handoff', () => {
     expect(document.activeElement).not.toBe(textarea)
 
     const lexicalFocus = vi.spyOn(shell.editor, 'focus')
-    act(() => { shell.focus() })
+    act(() => { expect(shell.focus()).toBe(true) })
     expect(document.activeElement).toBe(textarea)
     // Lexical's own focus restores its stored selection; a bare DOM focus would
     // land the caret at the start of the draft. jsdom carries no caret, so the
     // selection itself is asserted in the browser lane.
     expect(lexicalFocus).toHaveBeenCalled()
+  })
+
+  it.each([{ disabled: true }, { blocked: { reason: 'unavailable' } }])(
+    'leaves focus with the caller when the composer is unavailable: %j', (options) => {
+      const { shell, textarea } = bench(options)
+      expect(shell.focus()).toBe(false)
+      expect(document.activeElement).not.toBe(textarea)
+    },
+  )
+
+  it('restores a captured caret only if the draft is still the same revision', () => {
+    const { shell, textarea, view } = bench({ draft: 'Original draft', modelEntry: <button>Other control</button> })
+    const move = (start: number): void => {
+      act(() => { shell.editor.update(() => { $selectDetectSpan({ start, end: start }) }, { discrete: true }) })
+    }
+    move(4)
+    const captured = shell.actions.captureInsertion()
+    expect(captured).toMatchObject({ start: 4, end: 4 })
+    move(10)
+    act(() => { view.getByRole('button', { name: 'Other control' }).focus() })
+    act(() => { expect(shell.focus(captured)).toBe(true) })
+    expect(document.activeElement).toBe(textarea)
+    expect(shell.actions.captureInsertion()).toEqual(captured)
+    expect(shell.snapshot.draft).toBe('Original draft')
+
+    writeDraft(shell, 'Changed draft')
+    move(8)
+    act(() => { view.getByRole('button', { name: 'Other control' }).focus() })
+    act(() => { expect(shell.focus(captured)).toBe(true) })
+    expect(shell.actions.captureInsertion()).toMatchObject({ start: 8, end: 8 })
+    expect(shell.snapshot.draft).toBe('Changed draft')
+  })
+
+  it('restores a reloaded caret only after matching the semantic draft and current visit', async () => {
+    vi.stubGlobal('crypto', webcrypto)
+    onTestFinished(() => { vi.unstubAllGlobals() })
+    const { shell, textarea, view } = bench({ draft: 'Original draft', modelEntry: <button>Other control</button> })
+    const move = (start: number): void => {
+      act(() => { shell.editor.update(() => { $selectDetectSpan({ start, end: start }) }, { discrete: true }) })
+    }
+    move(4)
+    const bookmark = await shell.captureDraftFocus(shell.actions.captureInsertion())
+    expect(bookmark.digest).toMatch(/^[a-f0-9]{64}$/u)
+    const reloaded = { ...bookmark, selection: { ...bookmark.selection, draftRev: -1 } }
+
+    move(10)
+    act(() => { view.getByRole('button', { name: 'Other control' }).focus() })
+    await act(async () => { expect(await shell.restoreDraftFocus(reloaded, () => false)).toBe(false) })
+    expect(document.activeElement).not.toBe(textarea)
+    await act(async () => { expect(await shell.restoreDraftFocus(reloaded, () => true)).toBe(true) })
+    expect(document.activeElement).toBe(textarea)
+    expect(shell.actions.captureInsertion()).toMatchObject({ start: 4, end: 4 })
+
+    writeDraft(shell, 'Changed draft')
+    move(8)
+    act(() => { view.getByRole('button', { name: 'Other control' }).focus() })
+    await act(async () => { expect(await shell.restoreDraftFocus(reloaded, () => true)).toBe(true) })
+    expect(shell.actions.captureInsertion()).toMatchObject({ start: 8, end: 8 })
+    expect(shell.snapshot.draft).toBe('Changed draft')
   })
 
   it.each<[string, SubmitOutcome, boolean]>([
@@ -1049,6 +1112,30 @@ describe('Enter semantics', () => {
 })
 
 describe('running and lock semantics', () => {
+  it('holds mouse and keyboard submission while leaving the draft and Stop available', async () => {
+    const { view, textarea, shell, sink, stop, submissionBlock } = bench({ draft: 'Original question', running: true })
+    act(() => { submissionBlock.set(true) })
+    const send = view.getByRole('button', { name: '发送消息' })
+    expect(send.hasAttribute('disabled')).toBe(true)
+    expect(editableOf(textarea)).toBe(true)
+    fireEvent.click(send)
+    fireEvent.keyDown(textarea, { key: 'Enter', code: 'Enter' })
+    fireEvent.keyDown(textarea, { key: 'Enter', code: 'Enter', ctrlKey: true })
+    act(() => { shell.actions.submit() })
+    expect(sink).not.toHaveBeenCalled()
+    expect(shell.snapshot.draft).toBe('Original question')
+    fireEvent.click(view.getByRole('button', { name: '停止生成' }))
+    expect(stop).toHaveBeenCalledOnce()
+
+    writeDraft(shell, 'Edited question')
+    act(() => { submissionBlock.set(false) })
+    const queue = view.getByRole('button', { name: '排队发送' })
+    expect(queue.hasAttribute('disabled')).toBe(false)
+    await act(async () => { fireEvent.click(queue) })
+    expect(sink).toHaveBeenCalledOnce()
+    expect(sink.mock.calls[0]?.[0]).toBe('Edited question')
+  })
+
   it.each([
     { messages: zh, label: '停止生成', trigger: 'hover' },
     { messages: en, label: 'Stop generating', trigger: 'focus' },

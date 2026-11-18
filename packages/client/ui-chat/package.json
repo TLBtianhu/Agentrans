@@ -90,6 +90,7 @@
     "@agentrans/session-turn-outline": "workspace:*",
     "@agentrans/subagent": "workspace:*",
     "@agentrans/token-meter": "workspace:*",
+    "@agentrans/util-crypto": "workspace:*",
     "@agentrans/util-workspace-path": "workspace:*",
     "@agentrans/tool-executor-ptc": "workspace:*",
     "@agentrans/util-values": "workspace:*",

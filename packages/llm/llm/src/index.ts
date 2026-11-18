@@ -38,6 +38,7 @@ import { normalizeLlmFailure } from './adapter-failure.ts'
 import { normalizeApiKey } from './api-key.ts'
 import {
   contentHasFile, contentHasImage, fileHandleText, projectFilesToText, projectImagesForTextModel, projectToolUpdates,
+  sessionFileHandleText, usesSessionFileHandles,
 } from './content.ts'
 import type { FileAttachmentRef, ImageAttachmentRef, ImageRequestTarget } from '@agentrans/attachment'
 
@@ -697,9 +698,11 @@ export class LlmRuntime extends TypertRemoteService {
    * Resolve the exact text one durable file occurrence contributes to every
    * provider request in the current execution environment.
    * @param ref - durable verbatim file reference from model history.
+   * @param tools - the complete tool catalog admitted for the model request.
    * @returns the same deterministic handle text used at adapter dispatch.
    */
-  fileRequestText(ref: FileAttachmentRef): string {
+  fileRequestText(ref: FileAttachmentRef, tools?: readonly ToolSchema[]): string {
+    if (usesSessionFileHandles(tools)) return sessionFileHandleText(ref)
     return fileHandleText(ref, this.fileReadPath(ref))
   }
 
@@ -1100,7 +1103,8 @@ export class LlmRuntime extends TypertRemoteService {
       // Files are never dispatched natively: every route receives handle text.
       let projectedMessages: readonly RequestMessage[] = resolvedOptions.messages
       if (projectedMessages.some(message => contentHasFile(message.content))) {
-        projectedMessages = projectFilesToText(projectedMessages, ref => this.fileReadPath(ref))
+        const sessionOnly = usesSessionFileHandles(resolvedOptions.tools)
+        projectedMessages = projectFilesToText(projectedMessages, ref => this.fileReadPath(ref), sessionOnly)
       }
       if (modelInfo.inputModalities !== undefined
         && !modelInfo.inputModalities.includes('image')

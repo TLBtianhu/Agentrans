@@ -1,0 +1,28 @@
+# Bilingual-pair consistency record for 2026-11-12-half-adder-branch-evidence.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write docs/persistence-changes/2026-11-12-half-adder-branch-evidence.md
+/:
+  en: 3d5a424ae7d7e46b
+  zh: c22a8e4a62d8cc1a
+/2026-11-12-half-adder-branch-evidence:
+  en: 9ab43102bf099fd0
+  zh: 5bc9efe457c032f4
+/2026-11-12-half-adder-branch-evidence/summary:
+  en: a0dfd3e8b77c75c0
+  zh: a7ab77b4d7975306
+/2026-11-12-half-adder-branch-evidence/table-of-contents:
+  en: 6cf314a069ceb451
+  zh: 9adff678e9ecab3b
+/2026-11-12-half-adder-branch-evidence/declaration:
+  en: 6907136f28e48c90
+  zh: 02f8298485f3d8e7
+/2026-11-12-half-adder-branch-evidence/compatibility:
+  en: 8de80fcc0124ee43
+  zh: 78f4124f07d4427a
+/2026-11-12-half-adder-branch-evidence/verification:
+  en: 4545761f40078d23
+  zh: 2bc81599b44be380
+/2026-11-12-half-adder-branch-evidence/dev-note:
+  en: b75c8458928b72b9
+  zh: 003ba4e17b4b5269

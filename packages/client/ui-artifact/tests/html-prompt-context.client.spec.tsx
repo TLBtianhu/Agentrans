@@ -44,6 +44,22 @@ function receiveState(b: ReturnType<typeof bench>, state: import('@agentrans/uti
 }
 
 describe('explicit program report question selection', () => {
+  it('retains the reviewed BFS fields after later program reports and detects source replacement', () => {
+    const b = bench()
+    const checkpoint = { kind: 'bfs-checkpoint' as const, current: 'B', queue: ['C', 'D'], visited: ['A', 'B'] }
+    b.runtimes.actions.report(key, b.run, { status: 'ready', capabilities: { state: true, commands: [], restore: 'bfs-checkpoint' } })
+    b.runtimes.actions.state(key, b.run, checkpoint)
+    expect(b.owner.chooseHtmlCheckpoint(key, artifact, b.run, checkpoint)).toBe(true)
+    checkpoint.queue.shift()
+    b.runtimes.actions.state(key, b.run, { kind: 'bfs-checkpoint', current: 'C', queue: ['D'], visited: ['A', 'B', 'C'] })
+    b.release()
+    expect(b.owner.capture('Unavailable')).toMatchObject({ kind: 'html-runtime', capture: { status: 'ready', restore: 'bfs-checkpoint',
+      state: { current: 'B', queue: ['C', 'D'], visited: ['A', 'B'] } } })
+    b.source.set({ ...artifact, revision: 2 })
+    expect(b.owner.selection.getSnapshot()).toMatchObject({ kind: 'html-bfs', available: false })
+    expect(() => b.owner.capture('Unavailable')).toThrow('Unavailable')
+  })
+
   it('binds the physical instance but freezes the latest received state at send, independently of later changes or release', () => {
     const b = bench()
     receiveState(b, { counter: 1 })

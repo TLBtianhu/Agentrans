@@ -1,7 +1,7 @@
 /** V4 framing with native tool-role admission and released physical rows. */
 
-import { SessionFormatError, isSessionFormatJsonObject } from '@agentrans/session-format'
-import type { SessionFormatCodec, SessionFormatCurrentEncoder, SessionFormatHeader, SessionFormatEvent } from '@agentrans/session-format'
+import { SessionFormatError, isSessionFormatJsonObject, snapshotSessionFormatJson } from '@agentrans/session-format'
+import type { SessionFormatCodec, SessionFormatCurrentEncoder, SessionFormatHeader, SessionFormatEvent, SessionFormatJsonValue } from '@agentrans/session-format'
 import { releasedV2SessionFormatCodec } from '@agentrans/session-format-v2-to-v3'
 import { assertV4SourceRowAdmission } from './message-sources.ts'
 import { assertV4RetiredSyntax } from './retired-syntax.ts'
@@ -11,9 +11,17 @@ import { assertV4ForkResult } from './fork-result.ts'
 import { assertV4ToolResultMessage } from './tool-role.ts'
 import { assertReleasedV4Header } from './validation.ts'
 
-function physicalV2(value: unknown): SessionFormatHeader {
-  if (!isSessionFormatJsonObject(value) || value['version'] !== 4) throw new SessionFormatError('expected format v4 physical header')
-  return { ...value, version: 2 } as SessionFormatHeader
+function physicalV2(value: unknown): { header: SessionFormatHeader; inquiry: SessionFormatJsonValue | undefined } {
+  const snapshot = snapshotSessionFormatJson(value, 'format v4 physical header')
+  if (!isSessionFormatJsonObject(snapshot) || snapshot['version'] !== 4) throw new SessionFormatError('expected format v4 physical header')
+  const { inquiry, ...header } = snapshot
+  return { header: { ...header, version: 2 } as SessionFormatHeader, inquiry }
+}
+
+function logicalV4(header: SessionFormatHeader, inquiry: SessionFormatJsonValue | undefined): SessionFormatHeader {
+  const current = { ...header, version: 4, ...(inquiry === undefined ? {} : { inquiry }) }
+  if (inquiry !== undefined) assertReleasedV4Header(current)
+  return current
 }
 
 /**
@@ -23,13 +31,15 @@ function physicalV2(value: unknown): SessionFormatHeader {
 export const releasedV4SessionFormatCodec = Object.freeze({
   version: 4,
   decodeHeader(value: unknown) {
-    return { ...releasedV2SessionFormatCodec.decodeHeader(physicalV2(value)), version: 4 }
+    const { header, inquiry } = physicalV2(value)
+    return logicalV4(releasedV2SessionFormatCodec.decodeHeader(header), inquiry)
   },
   createDecoder(value, recovery) {
-    const decoder = releasedV2SessionFormatCodec.createDecoder(physicalV2(value), recovery)
+    const { header, inquiry } = physicalV2(value)
+    const decoder = releasedV2SessionFormatCodec.createDecoder(header, recovery)
     return {
       ...decoder,
-      header: { ...decoder.header, version: 4 },
+      header: logicalV4(decoder.header, inquiry),
       decodeRow(row, context) {
         assertV4RowAdmission(row)
         decoder.decodeRow(row, {
@@ -41,7 +51,9 @@ export const releasedV4SessionFormatCodec = Object.freeze({
   },
   encodeHeader(header, inheritedEventCount) {
     assertReleasedV4Header(header)
-    return { ...releasedV2SessionFormatCodec.encodeHeader({ ...header, version: 2 }, inheritedEventCount), version: 4 }
+    const { inquiry, ...v2 } = header
+    return { ...releasedV2SessionFormatCodec.encodeHeader({ ...v2, version: 2 }, inheritedEventCount), version: 4,
+      ...(inquiry === undefined ? {} : { inquiry }) }
   },
   encodeEvent(event: SessionFormatEvent) {
     if (event.type === 'developer/message' && event['ignorable'] === true) {

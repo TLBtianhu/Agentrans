@@ -7,6 +7,8 @@ import type {
 } from '@agentrans/client-ui-conversation/client'
 import type { InboxState } from '@agentrans/agent/types'
 import type { PendingSubmission } from '@agentrans/api-session-controller/client'
+import type { SessionRequestId } from '@agentrans/api-session-controller/types'
+import { randomUUID } from '@agentrans/util-crypto'
 import {
   Button, IconChevronDownOutlineRegular, MarkdownDelegateProvider, Modal, type MarkdownMenuTarget,
 } from '@agentrans/client-ui-primitives'
@@ -16,7 +18,9 @@ import type { ChatSnapshot } from '../contract/snapshot.ts'
 import { TurnNavigator } from './TurnNavigator.tsx'
 import { mergeTurnRailItems } from './turn-rail-items.ts'
 import { useTextInteraction } from './text-interaction.ts'
+import type { AssistantInquirySelection } from './text-selection.ts'
 import { useChatScroll } from './use-chat-scroll.ts'
+import { useMessageFocusRequest } from './use-message-focus-request.ts'
 import { fileMediaUrl, resolveWorkspacePath, sessionFileAddress } from '@agentrans/util-workspace-path'
 import css from './ChatView.module.css'
 
@@ -51,6 +55,19 @@ function observedInputs(
 
 type PendingInput = PendingSubmission | InboxState['next-step'][number]
 
+interface InquiryAttempt {
+  readonly selection: AssistantInquirySelection
+  readonly requestId: SessionRequestId
+  running: boolean
+}
+
+function sameInquiry(left: AssistantInquirySelection, right: AssistantInquirySelection): boolean {
+  const a = left.inquiry
+  const b = right.inquiry
+  return left.atSeq === right.atSeq && a.messageSeq === b.messageSeq && a.messageId === b.messageId
+    && a.start === b.start && a.end === b.end && a.excerpt === b.excerpt
+}
+
 /** How long fold transitions stay enabled after a Turn stops running. */
 const MOTION_TAIL_MS = 800
 
@@ -61,8 +78,9 @@ const MOTION_TAIL_MS = 800
 export function ChatView({
   useSession, useChat, useConversation, useSessions, renderSlot,
   sessionId, openFile, openExternalLink, resolveFilePath, useContextMenu,
-  loadOlder, loadThrough, loadImage, inspectCall, chatScroll, forkAt,
+  loadOlder, loadThrough, loadImage, inspectCall, chatScroll, forkAt, forkInquiry, useAccess,
   usePresentation, useProjection, useInteractionIds, dispatchInteraction, t, fileDrag,
+  viewRequest, completeViewRequest, openView,
 }: ChatViewSlotProps) {
   const { getTriggerProps } = useContextMenu()
   const getMarkdownTriggerProps = useCallback((target: MarkdownMenuTarget) => getTriggerProps(() => {
@@ -209,9 +227,47 @@ export function ChatView({
     loadedTurns: turnNavigationItems,
     transcriptView,
   })
+  useMessageFocusRequest({
+    viewRequest, completeViewRequest, loadThrough, ready: openState === 'open',
+    order, firstSeq, lastSeq: lastKey === null ? null : nodeStore.get(lastKey)?.anchorSeq ?? null,
+    hasMore, loadingOlder, columnRef: scroll.columnRef, reveal: scroll.revealMessageControl,
+  })
   const interactionSurfaceRef = useRef<HTMLDivElement>(null)
   const interactionIds = useInteractionIds(ids => ids)
-  const textInteraction = useTextInteraction(scroll.columnRef, interactionSurfaceRef, dispatchInteraction, interactionIds)
+  const forkAllowed = useAccess('session/fork')
+  const canStartInquiry = useSession(session => !session.removed && session.subagent === null) && forkAllowed
+  const textInteraction = useTextInteraction(
+    scroll.columnRef, interactionSurfaceRef, dispatchInteraction, interactionIds, canStartInquiry,
+  )
+  const inquiryAttempt = useRef<InquiryAttempt | null>(null)
+  const [inquiryPhase, setInquiryPhase] = useState<'idle' | 'opening' | 'failed' | 'retrying'>('idle')
+  const inquiryBusy = inquiryPhase === 'opening' || inquiryPhase === 'retrying'
+  const runInquiry = async (attempt: InquiryAttempt, phase: 'opening' | 'retrying'): Promise<void> => {
+    if (!canStartInquiry || inquiryAttempt.current?.running === true) return
+    inquiryAttempt.current = attempt
+    attempt.running = true
+    setInquiryPhase(phase)
+    try {
+      await forkInquiry(attempt.selection, attempt.requestId)
+      inquiryAttempt.current = null
+      setInquiryPhase('idle')
+    } catch {
+      setInquiryPhase('failed')
+    } finally {
+      attempt.running = false
+    }
+  }
+  const startInquiry = (): void => {
+    if (inquiryAttempt.current?.running === true) return
+    const selection = textInteraction.readInquiry()
+    if (selection === null) { textInteraction.dismiss(); return }
+    const previous = inquiryAttempt.current
+    const attempt = previous !== null && sameInquiry(previous.selection, selection)
+      ? previous : { selection, requestId: randomUUID() as SessionRequestId, running: false }
+    textInteraction.clearSelection()
+    textInteraction.dismiss()
+    void runInquiry(attempt, 'opening')
+  }
   const flowContext = useMemo<ChatFlowHookContext>(() => ({ motion: scroll.motion }), [scroll.motion])
 
   return (
@@ -251,15 +307,20 @@ export function ChatView({
             >
               {renderSlot('conversation.chat.flow', {
                 entries, pendingInputs, lastInputTurn, deferCollapse,
-                cwd, openFile: requestOpenFile, inspectCall, forkAt, loadImage,
+                cwd, openFile: requestOpenFile, openView, inspectCall, forkAt, loadImage,
               }, { hookContext: flowContext })}
             </MarkdownDelegateProvider>
             <div ref={interactionSurfaceRef} className={css.textInteraction} data-text-interaction-surface=""
               aria-hidden={textInteraction.active === null}>
-              {textInteraction.active !== null && renderSlot('conversation.chat.text-interaction', {
+              {textInteraction.active !== null && textInteraction.active.id !== null && renderSlot('conversation.chat.text-interaction', {
                 trigger: textInteraction.active.trigger, readText: textInteraction.readText,
                 dismiss: textInteraction.dismiss, clearSelection: textInteraction.clearSelection,
               }, { entryKey: textInteraction.active.id })}
+              {canStartInquiry && textInteraction.active?.inquiry === true && (
+                <button type="button" className={css.inquiryAction} data-chat-inquiry-create=""
+                  disabled={inquiryBusy} onPointerDown={(event) => { event.preventDefault() }}
+                  onClick={startInquiry}>{t('inquiry.create')}</button>
+              )}
             </div>
             {/* No pending placeholders: questions (ui-user-questions) and approvals
                 (ApprovalPanel) both take over the composer, so a flow card would
@@ -289,6 +350,17 @@ export function ChatView({
           onRetry={() => { requestOpenFile(fileOpenError.path) }}
           t={t}
         />
+      )}
+      {(inquiryPhase === 'failed' || inquiryPhase === 'retrying') && (
+        <Modal open title={t('inquiry.failed')} closeLabel={t('close')}
+          onClose={() => { if (inquiryAttempt.current?.running !== true) setInquiryPhase('idle') }}
+          footer={(
+            <Button variant="primary" className={css.modalAction} data-chat-inquiry-retry="" disabled={inquiryBusy || !canStartInquiry}
+              onClick={() => {
+                const attempt = inquiryAttempt.current
+                if (attempt !== null) void runInquiry(attempt, 'retrying')
+              }}>{t('retry')}</Button>
+          )} />
       )}
     </div>
   )

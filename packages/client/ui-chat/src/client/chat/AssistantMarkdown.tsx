@@ -38,6 +38,8 @@ export interface AssistantMarkdownProps extends
   streaming: boolean
   /** Only finalized durable Assistant messages supply selection sources. */
   textInteractionSource?: boolean
+  /** Completed-Turn boundary for starting an inquiry from the closing answer. */
+  inquiryCut?: number | undefined
   /** Frozen partial of an aborted turn: rendered with a stopped marker. */
   interrupted?: boolean | undefined
   /** Hide reasoning that belongs to the Turn-level process disclosure. */
@@ -56,7 +58,7 @@ export interface AssistantMarkdownProps extends
 
 /** Renders non-blank reasoning blocks as independent disclosures alongside the response. */
 export const AssistantMarkdown = memo(function AssistantMarkdown({
-  blocks, streaming, textInteractionSource = false, interrupted, loadImage, groupPart, useDisclosure,
+  blocks, streaming, textInteractionSource = false, inquiryCut, interrupted, loadImage, groupPart, useDisclosure,
   reasoningHidden = false, usePresentation, revealProcess, mentions, renderSlot, useGroupAction, t,
 }: AssistantMarkdownProps) {
   // Stable per locale revision (t identity changes on switch): a fresh object
@@ -75,6 +77,7 @@ export const AssistantMarkdown = memo(function AssistantMarkdown({
     || blocks.some(block => block.kind !== 'tool-call')
   if (!hasVisible) return null
   const rendered: ReactNode[] = []
+  let textOffset = 0
   for (let i = 0; i < blocks.length; i++) {
     const block = blocks[i]
     if (block === undefined) continue
@@ -91,8 +94,10 @@ export const AssistantMarkdown = memo(function AssistantMarkdown({
             fileMentions={mentions}
             pathImages={pathImages}
             textInteractionSource={textInteractionSource}
+            sourceTextOffset={inquiryCut === undefined ? undefined : textOffset}
           />,
         )
+        textOffset += block.text.length
         break
       case 'reasoning':
         if (block.text.trim() === '') break
@@ -146,7 +151,7 @@ export const AssistantMarkdown = memo(function AssistantMarkdown({
     }
   }
   return (
-    <div className={css.root} data-streaming={streaming || undefined}>
+    <div className={css.root} data-streaming={streaming || undefined} data-chat-inquiry-cut={inquiryCut}>
       <div className={css.body}>
         {rendered}
         {interrupted && (groupPart === undefined || groupPart === 'response'

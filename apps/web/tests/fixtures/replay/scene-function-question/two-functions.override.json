@@ -1,0 +1,40 @@
+{
+  "patches": [
+    {
+      "at": 0,
+      "entry": {
+        "kind": "chunks",
+        "chunks": [
+          {
+            "type": "block-start",
+            "index": 0,
+            "blockType": "tool-call"
+          },
+          {
+            "type": "tool-call-delta",
+            "index": 0,
+            "id": "scene-create",
+            "name": "scene",
+            "argumentsDelta": "{\"action\":\"create\",\"kind\":\"function-plot\",\"sceneId\":\"function-question-line\",\"title\":\"Slope and area lab\",\"spec\":{\"kind\":\"function-plot\",\"functions\":[{\"id\":\"linear\",\"label\":\"Linear\",\"expression\":\"a*x\"},{\"id\":\"scaled\",\"label\":\"Scaled line\",\"expression\":\"2*a*x\"}],\"parameters\":{\"a\":{\"value\":1,\"min\":0.5,\"max\":3,\"step\":0.25}},\"viewport\":{\"x\":[0,4],\"y\":[-1,10]},\"trace\":{\"x\":1,\"derivative\":true,\"integral\":true}},\"presentation\":\"inline\"}"
+          },
+          {
+            "type": "block-end",
+            "index": 0,
+            "block": {
+              "type": "tool-call",
+              "id": "scene-create",
+              "name": "scene",
+              "arguments": "{\"action\":\"create\",\"kind\":\"function-plot\",\"sceneId\":\"function-question-line\",\"title\":\"Slope and area lab\",\"spec\":{\"kind\":\"function-plot\",\"functions\":[{\"id\":\"linear\",\"label\":\"Linear\",\"expression\":\"a*x\"},{\"id\":\"scaled\",\"label\":\"Scaled line\",\"expression\":\"2*a*x\"}],\"parameters\":{\"a\":{\"value\":1,\"min\":0.5,\"max\":3,\"step\":0.25}},\"viewport\":{\"x\":[0,4],\"y\":[-1,10]},\"trace\":{\"x\":1,\"derivative\":true,\"integral\":true}},\"presentation\":\"inline\"}"
+            }
+          },
+          {
+            "type": "finish",
+            "reason": {
+              "kind": "stop"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -154,7 +154,7 @@ export class TokenMeter extends Service {
       ? this._cachedHeader(state, measurement.headerSeq)
       : canonicalHeader(requestHeader)
     const pricing = this._routeImagePricing(header)
-    const fileText = this._fileRequestText()
+    const fileText = this._fileRequestText(header)
     const surface = priceSurface(state.surface, pricing, fileText)
     const anchor = measurement.anchor
 
@@ -203,11 +203,11 @@ export class TokenMeter extends Service {
   }
 
   /** Resolve request-time file projection when an LLM service is mounted. */
-  private _fileRequestText(): (
+  private _fileRequestText(header: EpochHeader | undefined): (
     (ref: Parameters<LlmRuntime['fileRequestText']>[0]) => string
   ) | undefined {
     const llm = this.ctx.get('llm')
-    return llm === undefined ? undefined : ref => llm.fileRequestText(ref)
+    return llm === undefined ? undefined : ref => llm.fileRequestText(ref, header?.tools)
   }
 
   /**

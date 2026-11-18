@@ -83,7 +83,7 @@ function styleInjectionModule(
  * Everything else under @agentrans/* is either a module-table entry
  * (external) or a leak the purity gate rejects.
  */
-export const INLINE_SAFE = /^(?:@agentrans\/(?:file-reference|session|llm|tools|brand|official-bundles|deque|output-retention|typert-protocol|shortcut-protocol|util-crypto|util-time|util-values|util-workspace-path)(?:\/|$)|@agentrans\/util-file-drag$|@agentrans\/token-meter\/client$|@agentrans\/commands\/builtin$|@agentrans\/native-command\/types$|@agentrans\/host-open-in-app\/shared$|@agentrans\/plugin-manager\/registry$|@agentrans\/agent-preset-registry\/display$|@agentrans\/api-workspace-controller\/default-workspace$|@agentrans\/spill-policy\/notice$|@agentrans\/artifact\/(?:particle-runtime|observation-comparison|scene-export|scene-renderers|capabilities|runtime-values)$)/
+export const INLINE_SAFE = /^(?:@agentrans\/(?:file-reference|session|llm|tools|brand|official-bundles|deque|output-retention|typert-protocol|shortcut-protocol|util-crypto|util-time|util-values|util-workspace-path)(?:\/|$)|@agentrans\/util-file-drag$|@agentrans\/token-meter\/client$|@agentrans\/commands\/builtin$|@agentrans\/native-command\/types$|@agentrans\/host-open-in-app\/shared$|@agentrans\/plugin-manager\/registry$|@agentrans\/agent-preset-registry\/display$|@agentrans\/api-workspace-controller\/default-workspace$|@agentrans\/spill-policy\/notice$|@agentrans\/artifact\/(?:particle-runtime|observation-comparison|scene|scene-export|scene-renderers|capabilities|runtime-values)$)/
 
 /**
  * Vendored framework libraries: rescoped into @deepseek-ai, so the gate below

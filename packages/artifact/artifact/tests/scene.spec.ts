@@ -31,6 +31,14 @@ const spec: FunctionPlotSpec = {
   timeline: { duration: 6, fps: 30 },
 }
 
+const duplicatePlot: FunctionPlotSpec = {
+  ...spec,
+  functions: [
+    { id: 'curve', label: 'Linear', expression: 'x' },
+    { id: 'curve', label: 'Quadratic', expression: 'x^2' },
+  ],
+}
+
 function input(overrides: Partial<ArtifactPrepareInput> = {}): ArtifactPrepareInput {
   return {
     action: 'create', artifactId: 'scene-demo', title: 'Scene demo', presentation: 'inline', format: 'scene', spec,
@@ -78,6 +86,48 @@ describe('SceneSpec validation and persistence', () => {
     expect(() => ctx.artifacts.prepare(agent, input({ spec: { ...spec, functions: [{ id: 'bad', label: 'bad', expression: 'alert(1)' }] } })))
       .toThrow(expect.objectContaining({ code: 'BAD_SCENE_SPEC' }))
     expect(agent.session.snapshotEvents().filter(event => event.type === 'artifact/upsert')).toHaveLength(0)
+  })
+
+  it('rejects duplicate function IDs before creating or updating a plot', async () => {
+    const ctx = new Context()
+    contexts.push(ctx)
+    await ctx.plugin(SessionProjectionRegistry)
+    await ctx.plugin(AgentRegistry)
+    await ctx.plugin(ArtifactService)
+    const agent = makeAgent(ctx)
+    const invalid = { code: 'BAD_SCENE_SPEC', message: '/functions/1/id: must be unique within the plot' }
+
+    expect(() => ctx.artifacts.prepare(agent, input({ spec: duplicatePlot }))).toThrow(expect.objectContaining(invalid))
+    expect(agent.session.snapshotEvents().filter(event => event.type === 'artifact/upsert')).toHaveLength(0)
+
+    const first = ctx.artifacts.prepare(agent, input())
+    expect(() => {
+      ctx.artifacts.commit(agent, { ...first, format: 'scene', spec: duplicatePlot })
+    }).toThrow(expect.objectContaining(invalid))
+    expect(agent.session.snapshotEvents().filter(event => event.type === 'artifact/upsert')).toHaveLength(0)
+
+    ctx.artifacts.commit(agent, ctx.artifacts.prepare(agent, input()))
+    const update = input({ action: 'update', baseRevision: 1 })
+    expect(() => ctx.artifacts.prepare(agent, { ...update, spec: duplicatePlot })).toThrow(expect.objectContaining(invalid))
+    expect(agent.session.snapshotEvents().filter(event => event.type === 'artifact/upsert')).toHaveLength(1)
+    ctx.artifacts.commit(agent, ctx.artifacts.prepare(agent, update))
+    expect(agent.session.snapshotEvents().filter(event => event.type === 'artifact/upsert').map(event => event.data.revision))
+      .toEqual([1, 2])
+  })
+
+  it('reads a stored plot with duplicate function IDs without rewriting its historical source', async () => {
+    const ctx = new Context()
+    contexts.push(ctx)
+    await ctx.plugin(SessionProjectionRegistry)
+    await ctx.plugin(AgentRegistry)
+    await ctx.plugin(ArtifactService)
+    const agent = makeAgent(ctx)
+    const prepared = ctx.artifacts.prepare(agent, input())
+    ctx.artifacts.discard(agent, prepared.artifactId)
+    agent.session.append('artifact/upsert', { ...prepared, format: 'scene', spec: duplicatePlot })
+
+    const resolved = ctx.artifacts.resolveSceneSource(agent, { kind: 'current', artifactId: prepared.artifactId, revision: 1 })
+    expect(resolved.artifact.spec).toMatchObject(duplicatePlot)
   })
 
   it('preserves comparison metadata on a SceneSpec snapshot', async () => {

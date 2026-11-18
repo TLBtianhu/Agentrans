@@ -3,6 +3,7 @@
 // TestSessions mints tagged scopes through the production createScope, so the
 // service's scopeOf/binding path runs against production resolution (no local
 // tag probe).
+import { webcrypto } from 'node:crypto'
 import type { UserMessage } from '@agentrans/llm/types'
 import type { MessageId } from '@agentrans/llm/brand'
 import { Context } from '@agentrans/cordis'
@@ -13,11 +14,13 @@ import { Session } from '@agentrans/api-session-controller/src/client/sessions/s
 import type {
   BeginSubmissionInput, PendingSubmissionRetirement, SessionFace,
 } from '@agentrans/api-session-controller/client'
+import type { SessionRequestId } from '@agentrans/api-session-controller/types'
 import { SessionSeq, type SessionId } from '@agentrans/session/types'
 import { ComposerBlockRegistry } from '../src/client/input/blocks.ts'
 import { InputHub } from '../src/client/input/hub.ts'
 import { reportMessageSubmission } from '../src/client/input/submission-analytics.ts'
 import { ConversationController } from '../src/client/service.ts'
+import { readContextSubmission } from '../src/client/stores.ts'
 import { zh } from '../src/client/locales.ts'
 
 const IMAGE_REF = {
@@ -746,16 +749,21 @@ describe('sendSession submission echo', () => {
       const receipt = Promise.withResolvers<{ ok: true; value: { accepted: true } }>()
       b.prompt.mockImplementationOnce(() => receipt.promise)
       const accept = vi.fn()
-      const sending = b.root.sendSession(session, '收件箱先到', [], 'queue', undefined, accept)
+      const contextAccepted = vi.fn()
+      b.root.registerPromptContext('experiment', () => ({ receipt: 'selected' }), contextAccepted)
+      const inputs = b.root.capturePromptContexts(session.sessionId)
+      const sending = b.root.sendSession(session, '收件箱先到', [], 'queue', undefined, accept, { attempt: 1, inputs })
       const echo = await b.begun
       await vi.waitFor(() => { expect(b.prompt).toHaveBeenCalledOnce() })
       echo.onAccept?.()
       // The composer settles inside the Session's acceptance, before the echo renders.
       expect(accept).toHaveBeenCalledOnce()
+      expect(contextAccepted).toHaveBeenCalledExactlyOnceWith('s1', { receipt: 'selected' }, 'req-echo')
       await expect(sending).resolves.toEqual({ kind: 'success' })
       // The Host already holds the message, so a receipt lost afterwards changes nothing.
       receipt.reject(new Error('connection closed after the Host accepted the prompt'))
       await new Promise(resolve => setTimeout(resolve, 0))
+      expect(contextAccepted).toHaveBeenCalledTimes(1)
     } finally {
       b.restore()
     }
@@ -1268,12 +1276,14 @@ describe('submit-time feature context', () => {
     try {
       let step = 6
       const capture = vi.fn(() => ({ step }))
-      b.root.registerPromptContext('experiment', capture)
+      const accepted = vi.fn()
+      b.root.registerPromptContext('experiment', capture, accepted)
       b.prompt.mockRejectedValueOnce(new Error('lost response'))
         .mockResolvedValueOnce({ ok: false, error: new RemoteError('gateway/service-unavailable', 'temporarily unavailable', { endpoint: 'session/prompt' }) })
       b.shell.setDraft('Explain A')
       b.shell.submit()
       await expect.poll(() => b.shell.snapshot.phase).toBe('uncertain')
+      expect(accepted).not.toHaveBeenCalled()
       step = 12
       b.shell.setDraft('Explain B')
       expect(b.shell.snapshot.draft).toBe('Explain A')
@@ -1289,7 +1299,83 @@ describe('submit-time feature context', () => {
       expect(first?.slice(3)).toEqual(second?.slice(3))
       expect(first?.slice(3)).toEqual(third?.slice(3))
       expect(capture).toHaveBeenCalledTimes(1)
+      expect(accepted).toHaveBeenCalledExactlyOnceWith('s1', { step: 6 }, first?.[3])
     } finally { await b.runtime.dispose() }
+  })
+
+  it('records a prepared request before display can be lost and only clears an exact draft after recovery', async () => {
+    const b = await bench()
+    const sessionId = 's1' as SessionId
+    const storeKey = 'dsh.conversation.s1'
+    const markerKey = 'dsh.conversation.prompt.s1.experiment'
+    const prepare = Promise.withResolvers<boolean>()
+    vi.stubGlobal('crypto', webcrypto)
+    const unbind = b.shell.bindDraftPersistence((draft) => { localStorage.setItem(storeKey, JSON.stringify({ draft, view: 'chat' })) })
+    try {
+      const setup = vi.fn(() => prepare.promise)
+      b.root.registerPromptContext('experiment', () => ({ receipt: 'selected' }), undefined, setup)
+      b.prompt.mockRejectedValueOnce(new Error('response lost after dispatch'))
+      b.shell.setDraft('Original question')
+      b.shell.submit()
+      await expect.poll(() => setup.mock.calls.length).toBe(1)
+      expect(b.prompt).not.toHaveBeenCalled()
+      expect(readContextSubmission(sessionId, 'experiment')).toBeUndefined()
+      prepare.resolve(true)
+      await expect.poll(() => b.shell.snapshot.phase).toBe('uncertain')
+      const requestId = b.prompt.mock.calls[0]?.[3]
+      expect(readContextSubmission(sessionId, 'experiment')?.requestId).toBe(requestId)
+      expect(localStorage.getItem(markerKey)).not.toContain('Original question')
+      b.shell.actions.dismissSubmission?.()
+
+      const pending = vi.fn(async () => 'pending' as const)
+      await expect(b.root.reconcilePromptContext(sessionId, 'experiment', pending, 'another-request' as SessionRequestId))
+        .resolves.toBe('untracked')
+      expect(pending).not.toHaveBeenCalled()
+      expect(b.shell.draftSnapshot.text).toBe('Original question')
+      await expect(b.root.reconcilePromptContext(sessionId, 'experiment', pending)).resolves.toBe('pending')
+      expect(pending).toHaveBeenCalledExactlyOnceWith(requestId)
+      expect(b.shell.draftSnapshot.text).toBe('Original question')
+      expect(readContextSubmission(sessionId, 'experiment')?.requestId).toBe(requestId)
+
+      const notAccepted = vi.fn(async () => false)
+      await expect(b.root.reconcilePromptContext(sessionId, 'experiment', notAccepted)).resolves.toBe('unconfirmed')
+      expect(notAccepted).toHaveBeenCalledExactlyOnceWith(requestId)
+      expect(b.shell.draftSnapshot.text).toBe('Original question')
+      expect(readContextSubmission(sessionId, 'experiment')).toBeDefined()
+
+      const marker = localStorage.getItem(markerKey)!
+      const replaced = Promise.withResolvers<boolean>()
+      const checkingOld = b.root.reconcilePromptContext(sessionId, 'experiment', () => replaced.promise)
+      const newerMarker = JSON.stringify({ requestId: 'newer-request', digest: '0'.repeat(64) })
+      localStorage.setItem(markerKey, newerMarker)
+      replaced.resolve(true)
+      await expect(checkingOld).resolves.toBe('untracked')
+      expect(b.shell.draftSnapshot.text).toBe('Original question')
+      expect(localStorage.getItem(markerKey)).toBe(newerMarker)
+
+      localStorage.setItem(markerKey, marker)
+      const confirmed = Promise.withResolvers<boolean>()
+      const reconciling = b.root.reconcilePromptContext(sessionId, 'experiment', () => confirmed.promise)
+      b.shell.setDraft('A later edit')
+      confirmed.resolve(true)
+      await expect(reconciling).resolves.toBe('accepted')
+      expect(b.shell.draftSnapshot.text).toBe('A later edit')
+      expect(readContextSubmission(sessionId, 'experiment')).toBeUndefined()
+
+      b.shell.setDraft('Original question')
+      localStorage.setItem(markerKey, marker)
+      await expect(b.root.reconcilePromptContext(sessionId, 'experiment', async () => true)).resolves.toBe('accepted')
+      expect(b.shell.draftSnapshot.text).toBe('')
+      expect(readContextSubmission(sessionId, 'experiment')).toBeUndefined()
+      await expect(b.root.reconcilePromptContext(sessionId, 'experiment', pending)).resolves.toBe('untracked')
+      expect(b.prompt).toHaveBeenCalledTimes(1)
+    } finally {
+      unbind()
+      localStorage.removeItem(storeKey)
+      localStorage.removeItem(markerKey)
+      vi.unstubAllGlobals()
+      await b.runtime.dispose()
+    }
   })
 
   it('requires explicit dismissal before capturing a different experiment', async () => {

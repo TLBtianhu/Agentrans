@@ -2,7 +2,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, render } from '@testing-library/react'
 import { MarkdownText } from '@agentrans/client-ui-primitives'
-import { readTextSelection, selectedText } from '../src/client/chat/text-selection.ts'
+import { readTextSelection, selectedAssistantInquiry, selectedText } from '../src/client/chat/text-selection.ts'
 
 function readSelection(root: HTMLElement, selection: Selection | null) {
   const result = readTextSelection(root, selection)
@@ -18,6 +18,58 @@ afterEach(() => {
   cleanup()
   vi.useRealTimers()
   vi.unstubAllGlobals()
+})
+
+describe('inquiry selection', () => {
+  const messageId = 'a0bacfb1-9411-4230-9791-6bba928892fd'
+
+  function answer(markdown: string, sourceTextOffset = 0) {
+    const view = render(<article data-chat-flow-kind="assistant-step" data-chat-message-seq="10" data-chat-message-id={messageId}>
+      <div data-chat-inquiry-cut="12">
+        <MarkdownText text={markdown} textInteractionSource sourceTextOffset={sourceTextOffset} labels={markdownLabels} />
+      </div>
+    </article>)
+    const source = view.container.querySelector<HTMLElement>('[data-text-interaction-source]')!
+    return { source, range: document.createRange() }
+  }
+
+  it('identifies the selected repeated occurrence inside rendered emphasis in canonical UTF-16 units', () => {
+    const markdown = '🧪 相位差相位差以及 **相位差**。'
+    const base = 27
+    const selection = answer(markdown, base)
+    const target = selection.source.querySelector('strong span')!
+    selection.range.selectNodeContents(target)
+    const start = base + markdown.lastIndexOf('相位差')
+    expect(selectedAssistantInquiry(selection)).toEqual({
+      atSeq: 12, inquiry: { messageSeq: 10, messageId, start, end: start + 3, excerpt: '相位差' },
+    })
+  })
+
+  it('trims selection whitespace without losing the canonical offsets and handles inline code text', () => {
+    const markdown = '🧪  precise range   inside a fixture. `offset_2`'
+    const selection = answer(markdown)
+    const text = selection.source.querySelector('p > span')!.firstChild!
+    selection.range.setStart(text, 2)
+    selection.range.setEnd(text, markdown.indexOf('inside'))
+    expect(selectedAssistantInquiry(selection)?.inquiry).toMatchObject({
+      start: markdown.indexOf('precise'), end: markdown.indexOf('range') + 'range'.length, excerpt: 'precise range',
+    })
+    const code = selection.source.querySelector('code span')!
+    selection.range.selectNodeContents(code)
+    expect(selectedAssistantInquiry(selection)?.inquiry).toMatchObject({
+      start: markdown.indexOf('offset_2'), end: markdown.indexOf('offset_2') + 'offset_2'.length, excerpt: 'offset_2',
+    })
+  })
+
+  it('does not invent exact anchors for transformed Markdown, renderer chrome or excessive selections', () => {
+    const formatted = answer('Read **this** and &amp; carefully.')
+    formatted.range.selectNodeContents(formatted.source)
+    expect(selectedText(formatted)).toBe('Read this and & carefully.')
+    expect(selectedAssistantInquiry(formatted)).toBeNull()
+    const oversized = answer('字'.repeat(513))
+    oversized.range.selectNodeContents(oversized.source)
+    expect(selectedAssistantInquiry(oversized)).toBeNull()
+  })
 })
 
 describe('quote selection', () => {

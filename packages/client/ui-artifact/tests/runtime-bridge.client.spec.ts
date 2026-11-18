@@ -3,17 +3,22 @@ import { JSDOM, VirtualConsole } from 'jsdom'
 import { describe, expect, it, onTestFinished } from 'vitest'
 import type { ArtifactRuntimeId, ArtifactRuntimeIdentity } from '@agentrans/artifact-runtime/types'
 import type { ArtifactId } from '@agentrans/artifact/types'
+import type { ArtifactBfsCheckpoint, ArtifactHalfAdderCheckpoint, ArtifactHtmlCheckpoint } from '@agentrans/artifact/runtime-values'
 import { createArtifactDocument } from '../src/client/document.ts'
-import { ARTIFACT_RUNTIME_FAILURE_MAX_BYTES, parseArtifactRuntimeMessage } from '../src/client/runtime-messages.ts'
+import { ARTIFACT_RUNTIME_FAILURE_MAX_BYTES, parseArtifactReplayCheckpoint, parseArtifactRuntimeMessage } from '../src/client/runtime-messages.ts'
 
 const identity: ArtifactRuntimeIdentity = {
   artifactId: 'runtime-source' as ArtifactId, revision: 1, runtimeId: 'runtime-a' as ArtifactRuntimeId, renderer: 'html',
 }
+const checkpoint: ArtifactBfsCheckpoint = { kind: 'bfs-checkpoint', current: 'B', queue: ['C', 'D'], visited: ['A', 'B'] }
+const halfAdder: ArtifactHalfAdderCheckpoint = { kind: 'half-adder-checkpoint', a: 1, b: 1, sum: 0, carry: 1 }
+const restore = { kind: 'artifact-runtime-restore', identity }
 
-function program(source = '<p>Not initialized</p>', current = identity) {
+function program(source = '<p>Not initialized</p>', current = identity, replay: boolean | 'report' = false,
+  saved: ArtifactHtmlCheckpoint = checkpoint) {
   const posts: unknown[] = []
   const virtualConsole = new VirtualConsole()
-  const dom = new JSDOM(createArtifactDocument(source, current), {
+  const dom = new JSDOM(createArtifactDocument(source, current, replay ? { checkpoint: saved, reportState: replay === 'report' } : undefined), {
     runScripts: 'dangerously', virtualConsole,
     beforeParse(window) {
       Object.defineProperty(window, 'TextEncoder', { value: TextEncoder })
@@ -62,6 +67,138 @@ describe('injected Artifact runtime bridge', () => {
     expect(probe.states()).toEqual([{ count: 0 }, { count: 0 }])
     probe.dom.window.eval('window.artifactRuntime.ready({commands:{play:true}})')
     expect(probe.reports().at(-1)).toMatchObject({ status: 'error', error: { code: 'INVALID_CAPABILITIES' } })
+  })
+
+  it('advertises paired BFS support and ignores restore requests in the live preview', async () => {
+    const probe = program(`<body><script>window.artifactRuntime.ready({state:()=>({count:0}),restore:{
+      kind:'bfs-checkpoint',apply:()=>{document.body.dataset.restored='yes'}
+    }})</script></body>`)
+    expect(probe.reports().at(-1)).toEqual({ status: 'ready', capabilities: { state: true, commands: [], restore: 'bfs-checkpoint' } })
+    probe.send(restore)
+    await settle()
+    expect(probe.dom.window.document.body.dataset.restored).toBeUndefined()
+    expect(probe.states()).toEqual([{ count: 0 }])
+    probe.dom.window.eval('window.artifactRuntime.ready({restore:{kind:"bfs-checkpoint",apply:()=>{}}})')
+    expect(probe.reports().at(-1)).toMatchObject({ status: 'error', error: { code: 'INVALID_CAPABILITIES' } })
+  })
+
+  it('waits for readiness and asynchronous apply and acknowledges the exact state once', async () => {
+    const probe = program(`<body><script>
+      let state, calls=0;
+      window.start=()=>window.artifactRuntime.ready({state:()=>state,commands:{step:()=>{throw Error('host action')}},restore:{
+        kind:'bfs-checkpoint',apply:saved=>new Promise(resolve=>{
+          calls++;
+          window.finish=()=>{state={visited:saved.visited,queue:saved.queue,current:saved.current,kind:saved.kind};resolve()}
+        })
+      }});
+      window.restoreCalls=()=>calls;
+    </script></body>`, identity, true)
+    probe.send({ ...restore, identity: { ...identity, revision: 2 } })
+    probe.send(restore, false)
+    probe.send(restore)
+    probe.dom.window.eval('window.start()')
+    probe.command('step')
+    await settle()
+    expect(probe.posts).toEqual([{ kind: 'artifact-runtime-report', identity, report: { status: 'starting' } }])
+    expect(probe.dom.window.eval('window.restoreCalls()')).toBe(1)
+    probe.dom.window.eval('window.finish()')
+    await settle()
+    expect(probe.posts.at(-1)).toEqual({ kind: 'artifact-runtime-restored', identity, state: checkpoint })
+    probe.send(restore)
+    probe.send({ kind: 'artifact-runtime-request-status', identity })
+    probe.dom.window.eval('window.start(); window.artifactRuntime.reportState({count:3})')
+    await settle()
+    expect(probe.posts).toHaveLength(2)
+    expect(probe.dom.window.eval('window.restoreCalls()')).toBe(1)
+  })
+
+  it('reports BFS progress only after an opted-in replay is restored and rejects invalid reports', async () => {
+    const probe = program(`<button>Step</button><script>
+      let state={kind:'bfs-checkpoint',current:null,queue:['A'],visited:[]};
+      const step=()=>{
+        state.current=state.queue.shift();
+        state.visited.push(state.current);
+        window.artifactRuntime.reportState(state);
+      };
+      document.querySelector('button').addEventListener('click',step);
+      window.artifactRuntime.ready({state:()=>state,commands:{step},restore:{
+        kind:'bfs-checkpoint',apply:saved=>{state=saved;window.artifactRuntime.reportState(state)}
+      }});
+      window.artifactRuntime.reportState(state);
+    </script>`, identity, 'report')
+    expect(probe.posts).toHaveLength(1)
+    probe.send(restore)
+    await settle()
+    expect(probe.posts).toHaveLength(2)
+    expect(parseArtifactReplayCheckpoint(probe.posts.at(-1), identity, 'artifact-runtime-restored')).toEqual(checkpoint)
+    probe.command('step')
+    await settle()
+    expect(probe.posts).toHaveLength(2)
+    probe.dom.window.document.querySelector('button')?.click()
+    expect(parseArtifactReplayCheckpoint(probe.posts.at(-1), identity, 'artifact-runtime-replay-state')).toEqual({
+      kind: 'bfs-checkpoint', current: 'C', queue: ['D'], visited: ['A', 'B', 'C'],
+    })
+    expect(probe.states()).toEqual([])
+    probe.dom.window.eval('window.artifactRuntime.reportState({count:3}); window.artifactRuntime.reportState(state)')
+    expect(probe.posts).toHaveLength(4)
+    expect(probe.reports().at(-1)).toMatchObject({ status: 'error', error: { code: 'INVALID_STATE' } })
+  })
+
+  it('advertises the half-adder kind, restores all bits and reports the result of a local control', async () => {
+    const source = `<button>Toggle B</button><script>
+      let state = {kind:'half-adder-checkpoint',a:0,b:0,sum:0,carry:0};
+      const toggle = () => {
+        state.b ^= 1;
+        state.sum = state.a ^ state.b;
+        state.carry = state.a & state.b;
+        window.artifactRuntime.reportState(state);
+      };
+      document.querySelector('button').addEventListener('click',toggle);
+      window.artifactRuntime.ready({state:()=>state,commands:{step:toggle},restore:{
+        kind:'half-adder-checkpoint',apply:saved=>{state=saved}
+      }});
+    </script>`
+    const live = program(source)
+    expect(live.reports().at(-1)).toEqual({ status: 'ready', capabilities: { state: true, commands: ['step'], restore: halfAdder.kind } })
+    const replay = program(source, identity, 'report', halfAdder)
+    replay.send(restore)
+    await settle()
+    expect(parseArtifactReplayCheckpoint(replay.posts.at(-1), identity, 'artifact-runtime-restored')).toEqual(halfAdder)
+    replay.command('step')
+    await settle()
+    expect(replay.posts).toHaveLength(2)
+    replay.dom.window.document.querySelector('button')?.click()
+    expect(parseArtifactReplayCheckpoint(replay.posts.at(-1), identity, 'artifact-runtime-replay-state')).toEqual({
+      kind: 'half-adder-checkpoint', a: 1, b: 0, sum: 1, carry: 0,
+    })
+    replay.dom.window.eval(`window.artifactRuntime.reportState(${JSON.stringify(checkpoint)})`)
+    expect(replay.reports().at(-1)).toMatchObject({ status: 'error', error: { code: 'INVALID_STATE' } })
+  })
+
+  it.each([
+    ['half-adder-checkpoint', 'state={...saved,b:0,sum:1,carry:0}', 'RESTORE_MISMATCH'],
+    ['bfs-checkpoint', 'throw Error("Unexpected call")', 'RESTORE_UNSUPPORTED'],
+  ])('rejects changed half-adder state or a different restore kind %#', async (kind, apply, code) => {
+    const replay = program(`<script>
+      let state;
+      window.artifactRuntime.ready({state:()=>state,restore:{kind:${JSON.stringify(kind)},apply:saved=>{${apply}}}});
+    </script>`, identity, 'report', halfAdder)
+    replay.send(restore)
+    await settle()
+    expect(replay.posts).toHaveLength(2)
+    expect(replay.reports().at(-1)).toMatchObject({ status: 'error', error: { code } })
+  })
+
+  it.each([
+    ['window.artifactRuntime.ready({state:()=>({})})', 'RESTORE_UNSUPPORTED'],
+    ["window.artifactRuntime.ready({state:()=>({}),restore:{kind:'bfs-checkpoint',apply:()=>{throw Error('broken')}}})", 'RESTORE_FAILED'],
+    ["let state; window.artifactRuntime.ready({state:()=>state,restore:{kind:'bfs-checkpoint',apply:saved=>{saved.queue.reverse();state=saved}}})", 'RESTORE_MISMATCH'],
+  ])('reports explicit failure without acknowledging unavailable or altered BFS state %#', async (source, code) => {
+    const probe = program(`<script>${source}</script>`, identity, true)
+    probe.send(restore)
+    await settle()
+    expect(probe.posts).toHaveLength(2)
+    expect(probe.reports().at(-1)).toMatchObject({ status: 'error', error: { code } })
   })
 
   it('waits for the actual command callback and samples its resulting state', async () => {

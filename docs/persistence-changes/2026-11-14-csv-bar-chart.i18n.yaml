@@ -1,0 +1,28 @@
+# Bilingual-pair consistency record for 2026-11-14-csv-bar-chart.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write docs/persistence-changes/2026-11-14-csv-bar-chart.md
+/:
+  en: 3d5a424ae7d7e46b
+  zh: c22a8e4a62d8cc1a
+/2026-11-14-csv-bar-chart:
+  en: a679c0ff53752726
+  zh: bb9333d31013eb48
+/2026-11-14-csv-bar-chart/summary:
+  en: a21f25f681926cc1
+  zh: 1909a04f2d29f62a
+/2026-11-14-csv-bar-chart/table-of-contents:
+  en: 6cf314a069ceb451
+  zh: 9adff678e9ecab3b
+/2026-11-14-csv-bar-chart/declaration:
+  en: 6907136f28e48c90
+  zh: 02f8298485f3d8e7
+/2026-11-14-csv-bar-chart/compatibility:
+  en: 301a727c9ea9ca8a
+  zh: 4b81576a4d49ae7c
+/2026-11-14-csv-bar-chart/verification:
+  en: c94a0101bd8e3e46
+  zh: 2e67c79d37a6a611
+/2026-11-14-csv-bar-chart/dev-note:
+  en: b75c8458928b72b9
+  zh: 003ba4e17b4b5269

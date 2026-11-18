@@ -13,7 +13,7 @@ import { assertNever, deepFreeze, snapshotJsonValue } from '@agentrans/util-valu
 import { scopeOf, scopeTarget } from '@agentrans/scope'
 import type { Scoped } from '@agentrans/scope'
 import type { Message } from '@agentrans/llm'
-import { SESSION_FORMAT_VERSION, SessionLogOffset, SessionSeq } from './types.ts'
+import { isSessionInquiry, SESSION_FORMAT_VERSION, SessionLogOffset, SessionSeq } from './types.ts'
 import type { TypertLookup } from '@agentrans/typert-protocol'
 import type { CreateSessionOptions, EpochHeader, PluginRecord, PluginRecordMap, PluginRecordType, PrepareSessionOptions, RequestContext, SessionEvent, SessionEventMap, SessionEventType, SessionHeader, SessionId, SessionSeedEventState, SurfaceIntent, SurfaceEventType } from './types.ts'
 import { SurfaceManager, validateSessionEventData, validateSurfaceMetadata } from './surface.ts'
@@ -125,6 +125,10 @@ function validateSessionHeader(id: SessionId, input: unknown): SessionHeader {
   }
   if (record.origin !== undefined && record.origin !== 'subagent') {
     throw new Error('session header origin must be "subagent"')
+  }
+  if (record.inquiry !== undefined
+    && (!isSessionInquiry(record.inquiry) || !record.isSeeded || record.origin !== undefined || !record.parentSession)) {
+    throw new Error('session header inquiry must be a valid passage in the direct parent of an ordinary fork')
   }
   if (record.delegationDepth !== undefined
     && (typeof record.delegationDepth !== 'number' || !Number.isSafeInteger(record.delegationDepth) || record.delegationDepth < 0)) {
@@ -1195,6 +1199,7 @@ export class SessionStore extends Service {
       createdAt: meta?.createdAt ?? Date.now(),
       ...meta?.cwd === undefined ? {} : { cwd: meta.cwd },
       ...meta?.parentSession === undefined ? {} : { parentSession: meta.parentSession },
+      ...meta?.inquiry === undefined ? {} : { inquiry: meta.inquiry },
       isSeeded: meta?.isSeeded ?? false,
       ...meta?.origin === undefined ? {} : { origin: meta.origin },
       ...meta?.delegationDepth === undefined ? {} : { delegationDepth: meta.delegationDepth },

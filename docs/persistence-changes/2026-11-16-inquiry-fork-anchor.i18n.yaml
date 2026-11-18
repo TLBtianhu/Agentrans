@@ -1,0 +1,28 @@
+# Bilingual-pair consistency record for 2026-11-16-inquiry-fork-anchor.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write docs/persistence-changes/2026-11-16-inquiry-fork-anchor.md
+/:
+  en: 3d5a424ae7d7e46b
+  zh: c22a8e4a62d8cc1a
+/2026-11-16-inquiry-fork-anchor:
+  en: 5f3abb179d6684bd
+  zh: b631d5a706b1aab0
+/2026-11-16-inquiry-fork-anchor/summary:
+  en: 2fc21f54fdccc6f5
+  zh: 5a7698f80c0f2acf
+/2026-11-16-inquiry-fork-anchor/table-of-contents:
+  en: 6cf314a069ceb451
+  zh: 9adff678e9ecab3b
+/2026-11-16-inquiry-fork-anchor/declaration:
+  en: 6907136f28e48c90
+  zh: 02f8298485f3d8e7
+/2026-11-16-inquiry-fork-anchor/compatibility:
+  en: 2a398f972ac755b8
+  zh: b74159e2f9a020b5
+/2026-11-16-inquiry-fork-anchor/verification:
+  en: f29296322be64e18
+  zh: 3a75683a7f318491
+/2026-11-16-inquiry-fork-anchor/dev-note:
+  en: b75c8458928b72b9
+  zh: 003ba4e17b4b5269

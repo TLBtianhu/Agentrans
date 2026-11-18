@@ -30,6 +30,7 @@ export function installDraftKeyboardDismissal(editor: LexicalEditor, destination
 interface DraftViewGate {
   locked: boolean
   machineBusy: boolean
+  submissionBlocked: boolean
   canSteerQueue: boolean
   running: boolean
   steeringAvailable: boolean
@@ -44,12 +45,11 @@ interface DraftViewGate {
 
 /**
  * Reveal the DOM selection within the draft's own scrollport.
- * @param scrollRef - the InputBar-owned scrollport reference.
+ * @param scrollEl - the InputBar-owned scrollport.
  */
-export function revealDraftSelection(scrollRef: RefObject<HTMLDivElement>): void {
-  const scrollEl = scrollRef.current
+export function revealDraftSelection(scrollEl: HTMLElement | null): void {
   if (scrollEl === null || scrollEl.scrollHeight <= scrollEl.clientHeight) return
-  const selection = window.getSelection()
+  const selection = scrollEl.ownerDocument.getSelection()
   if (selection === null || selection.rangeCount === 0) return
   const range = selection.getRangeAt(0)
   let rect = range.getBoundingClientRect()
@@ -136,7 +136,7 @@ export function installDraftKeymap(
       return keyboard.space()
     },
     dismissPopup: () => { keyboard.dismissPopup() },
-    canSubmit: () => !gate.current.locked && !gate.current.machineBusy,
+    canSubmit: () => !gate.current.locked && !gate.current.machineBusy && !gate.current.submissionBlocked,
     submit: (accelerated) => {
       const g = gate.current
       // Empty-draft accelerated Enter acts on the queue instead of the

@@ -5,7 +5,7 @@ import {
   $addUpdateTag, $createParagraphNode, $createTextNode, $getAdjacentNode, $isTextNode,
   $getRoot, $getSelection, $getNodeByKey, $isRangeSelection,
   BLUR_COMMAND, CLEAR_HISTORY_COMMAND, COMMAND_PRIORITY_BEFORE_CRITICAL, COMMAND_PRIORITY_CRITICAL, createEditor,
-  HISTORY_MERGE_TAG, PASTE_TAG,
+  HISTORY_MERGE_TAG, PASTE_TAG, SKIP_SCROLL_INTO_VIEW_TAG,
   RootNode, SELECTION_CHANGE_COMMAND, SKIP_DOM_SELECTION_TAG, KEY_BACKSPACE_COMMAND, KEY_DELETE_COMMAND, HISTORY_PUSH_TAG,
 } from 'lexical'
 import { registerPlainText } from '@lexical/plain-text'
@@ -24,7 +24,7 @@ import { registerCommandChipSelection } from './command-chip-selection.ts'
 import { registerTextRefDecoration, rescanTextRefs, TextRefNode } from './text-ref.ts'
 import type { EditorProjection } from './projection.ts'
 import { $composerLayout, $projectComposer, detectOffsetOfClipboardOffset } from './projection.ts'
-import { $replaceDetectSpanWithNodes, $replaceDetectSpanWithText } from './span-map.ts'
+import { $replaceDetectSpanWithNodes, $replaceDetectSpanWithText, $selectDetectSpan } from './span-map.ts'
 import type { DetectSpan } from './span-map.ts'
 
 type Lexicon = ReadonlyMap<'/' | '@', readonly string[]>
@@ -260,6 +260,11 @@ export class DraftEditorRuntime {
     if (this.projection.selection !== null) return this.projection.selection
     const at = this.projection.detectText.length
     return { start: at, end: at }
+  }
+
+  /** Restore a captured editor position without modifying draft content. @param span - Detect-coordinate selection. */
+  selectSpan(span: DetectSpan): void {
+    this.applyEdit(() => { $selectDetectSpan(span) }, SKIP_SCROLL_INTO_VIEW_TAG)
   }
 
   /**

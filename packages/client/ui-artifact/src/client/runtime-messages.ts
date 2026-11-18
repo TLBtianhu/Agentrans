@@ -3,7 +3,7 @@ import type {
   ArtifactRuntimeCommand, ArtifactRuntimeFailure, ArtifactRuntimeIdentity, RuntimeReport,
 } from '@agentrans/artifact-runtime/types'
 import type { JsonValue } from '@agentrans/util-values'
-import { ARTIFACT_RUNTIME_FAILURE_MAX_BYTES } from '@agentrans/artifact/runtime-values'
+import { ARTIFACT_RUNTIME_FAILURE_MAX_BYTES, isArtifactHtmlCheckpoint, type ArtifactHtmlCheckpoint } from '@agentrans/artifact/runtime-values'
 import { ARTIFACT_ACTION_MAX_BYTES, isArtifactJsonValue } from './messages.ts'
 
 export { ARTIFACT_RUNTIME_FAILURE_MAX_BYTES } from '@agentrans/artifact/runtime-values'
@@ -14,6 +14,12 @@ export interface ArtifactRuntimeCommandMessage {
   readonly identity: ArtifactRuntimeIdentity
   readonly requestId: string
   readonly command: ArtifactRuntimeCommand
+}
+
+/** Restore a single checkpoint in a newly mounted historical iframe. */
+export interface ArtifactRuntimeRestoreMessage {
+  readonly kind: 'artifact-runtime-restore'
+  readonly identity: ArtifactRuntimeIdentity
 }
 
 /** A callback result confirms handler completion, never pixels or an experiment's correctness. */
@@ -62,7 +68,9 @@ function isReport(value: unknown): value is RuntimeReport {
   if (value.status === 'error') return exactKeys(value, ['status', 'error']) && isFailure(value.error)
   if (value.status !== 'ready' || !exactKeys(value, ['status', 'capabilities'])) return false
   const capabilities = value.capabilities
-  return isRecord(capabilities) && exactKeys(capabilities, ['state', 'commands'])
+  return isRecord(capabilities) && (exactKeys(capabilities, ['state', 'commands'])
+    || exactKeys(capabilities, ['state', 'commands', 'restore']) && capabilities.state === true
+      && (capabilities.restore === 'bfs-checkpoint' || capabilities.restore === 'half-adder-checkpoint'))
     && typeof capabilities.state === 'boolean' && Array.isArray(capabilities.commands)
     && capabilities.commands.length <= 4 && capabilities.commands.every(isCommand)
     && new Set(capabilities.commands).size === capabilities.commands.length
@@ -94,4 +102,19 @@ export function parseArtifactRuntimeMessage(data: unknown, identity: ArtifactRun
     return { kind: data.kind, identity, requestId: data.requestId, result: data.result }
   }
   return null
+}
+
+/**
+ * Read a bounded checkpoint from a historical iframe after restoration.
+ * @param data - Untrusted iframe message. The renderer checks the physical frame separately.
+ * @param identity - Exact source revision and physical historical iframe.
+ * @param kind - Distinguishes the restoration acknowledgement from later readings.
+ * @returns The reported checkpoint, or null for malformed or unrelated messages.
+ */
+export function parseArtifactReplayCheckpoint(data: unknown, identity: ArtifactRuntimeIdentity,
+  kind: 'artifact-runtime-restored' | 'artifact-runtime-replay-state'): ArtifactHtmlCheckpoint | null {
+  if (!isRecord(data) || data.kind !== kind || !exactKeys(data, ['kind', 'identity', 'state'])
+    || !isArtifactJsonValue(data) || !matchesIdentity(data.identity, identity) || !isArtifactHtmlCheckpoint(data.state)
+    || new TextEncoder().encode(JSON.stringify(data)).byteLength > ARTIFACT_ACTION_MAX_BYTES) return null
+  return data.state
 }

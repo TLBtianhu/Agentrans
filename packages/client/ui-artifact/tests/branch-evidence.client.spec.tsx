@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import type { ComponentProps } from 'react'
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { bindSnapshotSelector, makeTranslate } from '@agentrans/client-test-runtime'
 import { createSnapshotStore } from '@agentrans/client-store'
@@ -10,12 +10,27 @@ import type { ArtifactId, ArtifactObservationId, ArtifactObservations, SavedPart
 import { advanceParticleState, createParticleState, observeParticleState } from '@agentrans/artifact/particle-runtime'
 import { ArtifactBranchResultAction } from '../src/client/ArtifactBranchResultAction.tsx'
 import { ArtifactBranchReturnError, type ReturnArtifactBranchResult } from '../src/client/protocol.ts'
+import { PROGRAM_CONTEXT_PREFIX, QUESTION_CONTEXT_PREFIX } from '../src/client/question-context-text.ts'
 import { en } from '../src/client/locales.ts'
 
 type Props = ComponentProps<typeof ArtifactBranchResultAction>
 const parent = SessionId('parent')
 const child = SessionId('child')
 const t = makeTranslate(en)
+const bfsContextPrefix = 'The user selected the following program-reported context for this question. '
+  + 'The Host checked the source identity and revision and validated the BFS checkpoint shape. '
+  + 'Use facts.capture.state for the selected current node, queue and visited nodes. '
+  + 'This program-reported checkpoint can be reopened with the recorded HTML revision.\n'
+
+function bfsAttachment(sessionId: SessionId, locked = true, state: unknown = { kind: 'bfs-checkpoint', current: 'B', queue: ['C', 'A2'], visited: ['A', 'B'] }): string {
+  const prefix = locked ? bfsContextPrefix : PROGRAM_CONTEXT_PREFIX
+  return prefix + JSON.stringify({ kind: 'artifact-question-context', sessionId, facts: {
+    kind: 'html-runtime', runtimeId: 'bfs-runtime', attribution: 'program-reported', artifact: {
+      artifactId: 'bfs', title: 'BFS traversal', format: 'html', source: '<p>Graph</p>', revision: 3, presentation: 'inline',
+    },
+    capture: { status: 'ready', state, ...(locked ? { restore: 'bfs-checkpoint' } : {}) },
+  } })
+}
 
 function saved(role: 'control' | 'variant', label: string, stepCount = 6): SavedParticleObservation {
   const spec = {
@@ -52,15 +67,17 @@ function fixture(options: { childAllowed?: boolean; parentAllowed?: boolean; par
   })
   let projection: ArtifactObservations | undefined = observations
   const useProjection = vi.fn(() => projection)
+  const useUserMessages = vi.fn<Props['useUserMessages']>().mockReturnValue([])
+  const useSteeringMessages = vi.fn<Props['useSteeringMessages']>().mockReturnValue([])
   const returnResult = vi.fn<ReturnArtifactBranchResult>().mockResolvedValue(receipt)
   const openSession = vi.fn()
   const useSessionAccess = vi.fn<Props['useSessionAccess']>().mockReturnValue(options.parentAllowed ?? true)
   const props = {
-    sessionId: child, seq: 6, text: 'Child conclusion', useSessions: bindSnapshotSelector(sessions),
-    useAccess: () => options.childAllowed ?? true, useSessionAccess, useProjection,
+    sessionId: child, seq: 6, turn: 2, text: 'Child conclusion', useSessions: bindSnapshotSelector(sessions),
+    useAccess: () => options.childAllowed ?? true, useSessionAccess, useProjection, useUserMessages, useSteeringMessages,
     returnResult, openSession, t,
   } as Props
-  return { props, returnResult, openSession, useSessionAccess, useProjection,
+  return { props, returnResult, openSession, useSessionAccess, useProjection, useUserMessages, useSteeringMessages,
     project: (value: ArtifactObservations | undefined) => { projection = value } }
 }
 
@@ -120,6 +137,74 @@ describe('branch conclusion with saved evidence', () => {
       sessionId: parent, branchSessionId: child, resultSeq: 6,
       evidence: { kind: 'observation', observation: { artifactId: 'control', observationId: 'A' } },
     })
+  })
+
+  it('previews attached readings from the branch turn and confirms the durable question reference', async () => {
+    const h = fixture()
+    const attachment = (sessionId: SessionId) => QUESTION_CONTEXT_PREFIX + JSON.stringify({
+      kind: 'artifact-question-context', sessionId, facts: {
+        kind: 'current-particle', artifact: A.artifact, checkpoint: A.checkpoint, values: A.values,
+      },
+    })
+    const question = (seq: number, sessionId: SessionId) => ({
+      seq, content: [{ type: 'text' as const, text: 'What changed?' }, { type: 'text' as const, text: attachment(sessionId) }],
+    })
+    h.project(undefined)
+    h.useUserMessages.mockReturnValue([question(2, parent), question(7, child)])
+    h.useSteeringMessages.mockReturnValue([question(4, child)])
+    render(<ArtifactBranchResultAction {...h.props} />)
+    open()
+    expect(h.useUserMessages).toHaveBeenCalledWith('2')
+    expect(screen.getByRole('radio', { name: 'Question readings' })).toHaveProperty('checked', true)
+    expect(screen.getAllByRole('option')).toHaveLength(2)
+    expect(screen.getByText('Experiment context · control · revision 1 · step 6', { selector: 'strong' })).toBeTruthy()
+    expect(screen.getByRole('img', { name: 'Interactive particle simulation' })).toBeTruthy()
+    expect(h.returnResult).not.toHaveBeenCalled()
+    fireEvent.click(confirm())
+    await waitFor(() => { expect(h.openSession).toHaveBeenCalledWith(parent) })
+    expect(h.returnResult).toHaveBeenCalledExactlyOnceWith({
+      sessionId: parent, branchSessionId: child, resultSeq: 6, evidence: { kind: 'question', questionSeq: 4, blockIndex: 1 },
+    })
+  })
+
+  it('previews the locked BFS revision and confirms the exact question attachment without running its HTML', async () => {
+    const h = fixture()
+    h.project(undefined)
+    h.useUserMessages.mockReturnValue([{ seq: 3, content: [
+      { type: 'text', text: 'What is the next node?' },
+      { type: 'text', text: bfsAttachment(child, false) },
+      { type: 'text', text: bfsAttachment(parent) },
+      { type: 'text', text: bfsAttachment(child) },
+    ] }])
+    const view = render(<ArtifactBranchResultAction {...h.props} />)
+    open()
+    expect(screen.getByRole('radio', { name: 'Question readings' })).toHaveProperty('checked', true)
+    expect(screen.getAllByRole('option')).toHaveLength(2)
+    const preview = view.container.querySelector<HTMLElement>('[data-branch-question-preview]')!
+    expect(within(preview).getByText('Program-reported state · BFS traversal · revision 3')).toBeTruthy()
+    expect(within(preview).getByText(en['bfs.reported'])).toBeTruthy()
+    expect(preview.querySelector('[data-artifact-bfs-current]')?.textContent).toBe('B')
+    expect(preview.querySelector('[data-artifact-bfs-queue]')?.textContent).toBe('C, A2')
+    expect(preview.querySelector('[data-artifact-bfs-visited]')?.textContent).toBe('A, B')
+    expect(preview.querySelector('iframe')).toBeNull()
+    expect(h.returnResult).not.toHaveBeenCalled()
+    fireEvent.click(confirm())
+    await waitFor(() => { expect(h.openSession).toHaveBeenCalledWith(parent) })
+    expect(h.returnResult).toHaveBeenCalledExactlyOnceWith({ sessionId: parent, branchSessionId: child, resultSeq: 6,
+      evidence: { kind: 'question', questionSeq: 3, blockIndex: 3 } })
+  })
+
+  it('leaves plain HTML reports and malformed BFS checkpoints out of question evidence', () => {
+    const h = fixture()
+    h.useUserMessages.mockReturnValue([{ seq: 3, content: [
+      { type: 'text', text: 'What is the next node?' },
+      { type: 'text', text: bfsAttachment(child, false) },
+      { type: 'text', text: bfsAttachment(child, true, { kind: 'bfs-checkpoint', current: 'B', queue: ['C', 'C'], visited: ['B'] }) },
+    ] }])
+    render(<ArtifactBranchResultAction {...h.props} />)
+    open()
+    expect(screen.queryByRole('radio', { name: 'Question readings' })).toBeNull()
+    expect(confirm()).toHaveProperty('disabled', true)
   })
 
   it('requires a compatible saved pair and performs no admission during selection', async () => {

@@ -63,11 +63,16 @@ const reportSchema = schema.discriminatedUnion('status', [
     state: schema.boolean(),
     commands: schema.array(schema.enum(['play', 'pause', 'step', 'reset'])).max(4)
       .refine(commands => new Set(commands).size === commands.length),
-  }).strict() }).strict(),
+    restore: schema.enum(['bfs-checkpoint', 'half-adder-checkpoint']).optional(),
+  }).strict().refine(capabilities => capabilities.restore === undefined || capabilities.state) }).strict(),
   schema.object({ status: schema.literal('error'), error: schema.object({
     code: schema.string().regex(/^[A-Za-z][A-Za-z0-9._-]{0,95}$/), message: schema.string(),
   }).strict() }).strict(),
-])
+]).transform((report): RuntimeReport => {
+  if (report.status !== 'ready') return report
+  const { restore, ...capabilities } = report.capabilities
+  return { status: 'ready', capabilities: restore === undefined ? capabilities : { ...capabilities, restore } }
+})
 
 /** Owns only currently attached report streams; inspection reads authoritative source identity separately. */
 export class ArtifactRuntime extends TypertRemoteService {
@@ -159,7 +164,9 @@ export class ArtifactRuntime extends TypertRemoteService {
         const next = await Promise.race([reading, stop])
         if (next === undefined || next.done === true || view.lifetime.signal.aborted) return
         const report = reportSchema.safeParse(next.value)
-        if (!report.success) throw new RemoteError('artifact-runtime/rejected', 'Invalid runtime report', { reason: 'INVALID_REPORT' })
+        if (!report.success || (report.data.status === 'ready' && report.data.capabilities.restore !== undefined && identity.renderer !== 'html')) {
+          throw new RemoteError('artifact-runtime/rejected', 'Invalid runtime report', { reason: 'INVALID_REPORT' })
+        }
         if (report.data.status === 'error' && Buffer.byteLength(JSON.stringify(report.data.error), 'utf8') > this.config.maxErrorBytes) {
           throw new RemoteError('artifact-runtime/rejected', 'Runtime diagnostic exceeds its byte budget', { reason: 'ERROR_TOO_LARGE', limit: this.config.maxErrorBytes })
         }

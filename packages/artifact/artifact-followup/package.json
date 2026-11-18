@@ -26,6 +26,8 @@
     "@agentrans/artifact": "workspace:*",
     "@agentrans/artifact-runtime": "workspace:*",
     "@agentrans/brand": "workspace:*",
+    "@agentrans/session-projection": "workspace:*",
+    "@agentrans/storage-domain": "workspace:*",
     "@agentrans/typert-protocol": "workspace:*",
     "@agentrans/util-values": "workspace:*"
   },
@@ -41,6 +43,9 @@
     "@agentrans/session-format": "workspace:*",
     "@agentrans/session-format-v3-to-v4": "workspace:*",
     "@agentrans/session-projection": "workspace:*",
+    "@agentrans/storage": "workspace:*",
+    "@agentrans/storage-domain": "workspace:*",
+    "@agentrans/storage-json": "workspace:*",
     "@agentrans/typert-protocol": "workspace:*",
     "@agentrans/util-values": "workspace:*"
   }

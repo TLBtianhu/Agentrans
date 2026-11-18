@@ -138,6 +138,8 @@ interface SessionLocation {
 
 每个会话的元数据与事件日志**分开**存储：header 携带格式版本、cwd 与 `isSeeded` 谱系 bit，含正文的存储值则在其旁边单独携带精确 inherited cut。二者都不进入 `SessionEventMap`，也不会到达 `deriveMessages()`。logical header 通过 `session.header` 附加，Session 则以 `inheritedEventCount` 暴露其 cut。
 
+普通探究分支的可选字段 `inquiry` 记录用户在直接父会话中选中的助手回答片段。
+
 源码：[`packages/core/session/src/types.ts`](../../packages/core/session/src/types.ts)
 
 ```ts type-equiv
@@ -161,6 +163,8 @@ interface SessionHeader {
    * Presence alone does not classify a Session as a subagent; use `origin` for that distinction.
    */
   readonly parentSession?: SessionId
+  /** Selected passage in the direct parent of an ordinary inquiry branch. */
+  readonly inquiry?: SessionInquiry
   /**
    * Whether this Session contains a fork-inherited event prefix. The exact prefix
    * length is Session state rather than ordinary header metadata.
@@ -195,6 +199,8 @@ interface SessionHeader {
 
 通过 store 创建 `Session` 时会接收 `seed`（初始回放或 fork 历史）、可选的精确 `inheritedEventCount` 与 `meta`（store 整合进 `SessionHeader` 的存储层字段）。store 填充 `version`/`id` 并为 `createdAt` 提供默认值；调用方可以提供已校验的绝对 `cwd`、`parentSession` 谱系、`isSeeded` 谱系标记、可选的粗粒度 `origin`、`delegationDepth`、用于组装该 agent（智能体）的 `agentPreset` 以及已有的 `createdAt`。seeded 创建必须显式提供与 inherited prefix 完全相等的 seed 和精确 cut；constructor 会先在该 cut 追加 child-owned tagged end-seed marker，setup 再添加 child-owned event。`origin: 'subagent'` 让产品导航能够隐藏重复的 child 行；它不证明描述符有效，也不证明 child 可以恢复。
 
+创建普通探究分支时，`meta.inquiry` 将选中的片段写入子会话的 header。
+
 ```ts type-equiv
 /**
  * Options for creating a {@link Session} via the store. `seed` replays/forks
@@ -217,6 +223,7 @@ interface CreateSessionOptions {
   readonly meta?: {
     readonly cwd?: string
     readonly parentSession?: SessionId
+    readonly inquiry?: SessionInquiry
     readonly createdAt?: number
     readonly isSeeded?: boolean
     readonly origin?: 'subagent'

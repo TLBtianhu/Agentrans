@@ -22,6 +22,19 @@ export interface ComposerBlocks {
    */
   storeFor(sessionId: SessionId): SnapshotStore<ComposerBlock | undefined>
   /**
+   * Hold or release one source's submission block while allowing draft editing.
+   * @param sessionId - Session whose submission is affected.
+   * @param source - Stable key owned by the caller.
+   * @param blocked - Whether this source currently holds the block.
+   */
+  setSubmission(sessionId: SessionId, source: string, blocked: boolean): void
+  /**
+   * Resolve the submission block for one Session.
+   * @param sessionId - Session to observe.
+   * @returns Identity-stable store reporting whether any source holds the block.
+   */
+  submissionFor(sessionId: SessionId): SnapshotStore<boolean>
+  /**
    * Drop one Session's store.
    * @param sessionId - Session being released.
    */

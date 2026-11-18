@@ -4,6 +4,7 @@ import { brandString } from '@agentrans/brand'
 import type { ArtifactId, ArtifactObservationId } from '@agentrans/artifact/types'
 import { normalizeSceneSpec } from '@agentrans/artifact/scene'
 import { restoreParticleCheckpoint } from '@agentrans/artifact/particle-runtime'
+import { analyzeFunctionPlotSelection } from '@agentrans/artifact/scene-renderers'
 import { AttachmentId } from '@agentrans/attachment'
 import { SessionId } from '@agentrans/session'
 import type { ArtifactExportId, ArtifactHtmlExportInput, ArtifactHtmlExportRecord, ArtifactHtmlExportRequest, ArtifactHtmlExports } from './types.ts'
@@ -15,6 +16,10 @@ const artifactId = z.string().regex(/^[a-z][a-z0-9-]{0,63}$/).transform(value =>
 const observationId = identity.transform(value => brandString<ArtifactObservationId>(value))
 const revision = z.number().int().min(1).max(Number.MAX_SAFE_INTEGER)
 const checkpoint = z.object({ runtimeVersion: z.literal(1), stepCount: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER) }).strict()
+const functionPlotBaseline = z.object({
+  functionId: z.string().min(1), x: z.number(), parameters: z.record(z.string(), z.number()),
+  values: z.object({ value: z.number().nullable(), derivative: z.number().nullable(), integral: z.number().nullable() }).strict(),
+}).strict()
 
 /** Normalize the immutable reference-only request before checking retry identity. */
 export const requestSchema: z.ZodType<ArtifactHtmlExportRequest> = z.object({
@@ -22,11 +27,12 @@ export const requestSchema: z.ZodType<ArtifactHtmlExportRequest> = z.object({
   format: z.literal('html'),
   source: z.discriminatedUnion('kind', [
     z.object({ kind: z.literal('current'), artifactId, revision, checkpoint: checkpoint.optional() }).strict(),
+    z.object({ kind: z.literal('revision'), artifactId, revision }).strict(),
     z.object({ kind: z.literal('observation'), artifactId, observationId }).strict(),
   ]),
 }).strict().transform((value): ArtifactHtmlExportRequest => ({
   exportId: value.exportId, format: value.format,
-  source: value.source.kind === 'observation' ? value.source : {
+  source: value.source.kind !== 'current' ? value.source : {
     kind: value.source.kind, artifactId: value.source.artifactId, revision: value.source.revision,
     ...(value.source.checkpoint === undefined ? {} : { checkpoint: value.source.checkpoint }),
   },
@@ -48,7 +54,9 @@ const frozen = z.object({
     spec,
   }),
   checkpoint: checkpoint.optional(), observationId: observationId.optional(),
-  exporterVersion: z.literal(1), parameters: z.enum(['source-defaults', 'particle-checkpoint']),
+  exporterVersion: z.union([z.literal(1), z.literal(2)]),
+  parameters: z.enum(['source-defaults', 'particle-checkpoint', 'function-plot-baseline']),
+  functionPlotBaseline: functionPlotBaseline.optional(),
 }).transform((value): ArtifactHtmlExportInput => ({
   sessionId: value.sessionId,
   artifact: {
@@ -59,7 +67,25 @@ const frozen = z.object({
   exporterVersion: value.exporterVersion, parameters: value.parameters,
   ...(value.checkpoint === undefined ? {} : { checkpoint: value.checkpoint }),
   ...(value.observationId === undefined ? {} : { observationId: value.observationId }),
+  ...(value.functionPlotBaseline === undefined ? {} : { functionPlotBaseline: value.functionPlotBaseline }),
 })).superRefine((value, context) => {
+  if (value.parameters === 'function-plot-baseline') {
+    const baseline = value.functionPlotBaseline
+    if (value.exporterVersion !== 2 || value.artifact.spec.kind !== 'function-plot' || baseline === undefined
+      || value.checkpoint !== undefined || value.observationId !== undefined) {
+      context.addIssue({ code: 'custom', message: 'Version 2 function plot exports require fixed function plot conditions' })
+      return
+    }
+    const analysis = analyzeFunctionPlotSelection(value.artifact.spec, baseline)
+    if (analysis === undefined || analysis.value !== baseline.values.value
+      || analysis.derivative !== baseline.values.derivative || analysis.integral !== baseline.values.integral) {
+      context.addIssue({ code: 'custom', message: 'Function plot export readings do not match the selected source conditions' })
+    }
+    return
+  }
+  if (value.exporterVersion !== 1 || value.functionPlotBaseline !== undefined) {
+    context.addIssue({ code: 'custom', message: 'Source defaults and particle exports require version 1' })
+  }
   if (value.artifact.spec.kind === 'particle-system') {
     if (value.parameters !== 'particle-checkpoint') context.addIssue({ code: 'custom', message: 'Particle export conditions are required' })
     try { restoreParticleCheckpoint(value.artifact.spec, value.checkpoint) } catch (error) {
@@ -87,8 +113,8 @@ export const recordSchema: z.ZodType<ArtifactHtmlExportRecord> = z.intersection(
 ).superRefine((value, context) => {
   const source = value.request.source
   if (source.artifactId !== value.frozen.artifact.artifactId
-    || (source.kind === 'current' && (source.revision !== value.frozen.artifact.revision
-      || JSON.stringify(source.checkpoint) !== JSON.stringify(value.frozen.checkpoint) || value.frozen.observationId !== undefined))
+    || (source.kind !== 'observation' && (source.revision !== value.frozen.artifact.revision || value.frozen.observationId !== undefined))
+    || (source.kind === 'current' && JSON.stringify(source.checkpoint) !== JSON.stringify(value.frozen.checkpoint))
     || (source.kind === 'observation' && source.observationId !== value.frozen.observationId)) {
     context.addIssue({ code: 'custom', message: 'Export request does not identify its frozen source' })
   }

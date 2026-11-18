@@ -157,16 +157,23 @@ export function fileHandleText(ref: FileAttachmentRef, readonlyPath: string | un
   return `[${identity}: verbatim read-only copy saved at ${quoted(readonlyPath)}. Read that path with your file tools when its contents are needed; copy it to a writable location before modifying it. When delegating file work, include this saved path in the delegation prompt; only subagents sharing this execution environment can read it.]`
 }
 
+/** Model-facing handle for a file accessible only through the session tool. */
+export function sessionFileHandleText(ref: FileAttachmentRef): string {
+  const identity = `File ${quoted(ref.name)} (${ref.bytes} bytes, attachment ID ${quoted(ref.attachmentId)})`
+  if (!ref.name.toLowerCase().endsWith('.csv')) return `[${identity} was uploaded. The session file tool supports CSV files.]`
+  return `[${identity}. Pass this exact attachment ID to attachment_csv to inspect or group the CSV.]`
+}
+
 /** Replace every file occurrence with handle text. */
 function replaceFilesWithHandles(
   blocks: readonly ContentBlock[],
-  resolvePath: (ref: FileAttachmentRef) => string | undefined,
+  render: (ref: FileAttachmentRef) => string,
 ): ContentBlock[] {
   let next: ContentBlock[] | undefined
   for (const [index, block] of blocks.entries()) {
     if (block.type === 'file') {
       next ??= blocks.slice(0, index)
-      next.push({ type: 'text', text: fileHandleText(block.attachment, resolvePath(block.attachment)) })
+      next.push({ type: 'text', text: render(block.attachment) })
       continue
     }
     next?.push(block)
@@ -180,31 +187,42 @@ function replaceFilesWithHandles(
  * projection is unconditional in request assembly.
  * @param messages - complete request history.
  * @param resolvePath - resolve one reference's current execution-world read path.
+ * @param sessionOnly - use session attachment IDs in place of execution-world paths.
  * @returns the original list without files, otherwise shallow message copies with handle text.
  */
 export function projectFilesToText(
   messages: readonly Message[],
   resolvePath: (ref: FileAttachmentRef) => string | undefined,
+  sessionOnly?: boolean,
 ): readonly Message[]
 /**
  * Project file content in mixed durable and request-only inputs.
  * @param messages - complete request inputs.
  * @param resolvePath - resolve a reference's execution-world read path.
+ * @param sessionOnly - use session attachment IDs in place of execution-world paths.
  * @returns original inputs without files, otherwise copies with handle text.
  */
 export function projectFilesToText(
   messages: readonly RequestMessage[],
   resolvePath: (ref: FileAttachmentRef) => string | undefined,
+  sessionOnly?: boolean,
 ): readonly RequestMessage[]
 export function projectFilesToText(
   messages: readonly RequestMessage[],
   resolvePath: (ref: FileAttachmentRef) => string | undefined,
+  sessionOnly = false,
 ): readonly RequestMessage[] {
   if (!messages.some(message => contentHasFile(message.content))) return messages
+  const render = sessionOnly ? sessionFileHandleText : (ref: FileAttachmentRef) => fileHandleText(ref, resolvePath(ref))
   return messages.map((message) => {
-    const content = replaceFilesWithHandles(message.content, resolvePath)
+    const content = replaceFilesWithHandles(message.content, render)
     return content === message.content ? message : { ...message, content }
   })
+}
+
+/** Session-only file handles are used when the session CSV capability is declared. */
+export function usesSessionFileHandles(tools: readonly ToolSchema[] | undefined): boolean {
+  return tools?.some(tool => tool.name === 'attachment_csv') === true
 }
 
 /** Base64 length of raw image bytes, including padding. */

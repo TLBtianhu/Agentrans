@@ -215,6 +215,24 @@ describe('restrict() over an inherited scope layer', () => {
     return { scope, key }
   }
 
+  it('isolates outside tools at the parent boundary and still inherits preset registrations', async () => {
+    const ctx = await mount()
+    ctx.tools.register(tool('host'))
+    const parent = await mintAgentScope(ctx, 'parent')
+    const isolate = parent.scope.ctx.tools.isolateInherited()
+    parent.scope.ctx.tools.register(tool('csv'))
+    const child = await mintChild(ctx, parent.key, 'child')
+    ctx.tools.register(tool('another_host'))
+
+    expect(ctx.tools.schemas(child.key).map(tool => tool.name)).toEqual(['csv'])
+    expect(ctx.tools.schemas(parent.key).map(tool => tool.name)).toEqual(['csv'])
+    expect(await run(ctx, 'host', child.key)).toBe('Error: unknown tool "host"')
+    expect(await run(ctx, 'csv', child.key)).toBe('ran:csv')
+    expect(ctx.tools.schemas().map(tool => tool.name)).toEqual(['host', 'another_host'])
+    isolate()
+    expect(await run(ctx, 'host', child.key)).toBe('ran:host')
+  })
+
   it('filters tools the child inherits from an ancestor scope, not only global ones', async () => {
     // The shape every preset deployment has: no model-facing row in the global
     // layer, all of them contributed by an ancestor scope the child joined.

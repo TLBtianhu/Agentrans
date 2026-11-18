@@ -41,13 +41,13 @@ const inspectionSchema = {
   properties: {
     artifactId: { type: 'string', required: true }, revision: { type: 'integer', required: true },
     title: { type: 'string', required: true }, format: { type: 'string', required: true, enum: ['scene', 'html'] },
-    sceneKind: { type: 'string', enum: ['function-plot', 'flowchart', 'particle-system', 'timeline', 'network-graph', 'map'] },
+    sceneKind: { type: 'string', enum: ['function-plot', 'flowchart', 'particle-system', 'timeline', 'network-graph', 'map', 'csv-bar-chart'] },
     sourceCapabilities: { type: 'object', additionalProperties: false, required: true, properties: {
       observe: { type: 'string', required: true, enum: ['particle', 'unsupported'] },
       save: { type: 'string', required: true, enum: ['particle', 'unsupported'] },
       restore: { type: 'string', required: true, enum: ['particle', 'unsupported'] },
       compare: { type: 'string', required: true, enum: ['saved-particle-pair', 'unsupported'] },
-      questionContext: { type: 'string', required: true, enum: ['particle', 'program-reported', 'unsupported'] },
+      questionContext: { type: 'string', required: true, enum: ['particle', 'function-plot', 'csv-bar-chart', 'program-reported', 'unsupported'] },
       exportHtml: { type: 'string', required: true, enum: ['particle-checkpoint-or-source-defaults', 'source-defaults', 'unsupported'] },
     } },
     reportAuthority: { type: 'string', required: true, enum: ['client-reported'] },
@@ -58,6 +58,7 @@ const inspectionSchema = {
         capabilities: { type: 'object', additionalProperties: false, required: true, properties: {
           state: { type: 'boolean', required: true },
           commands: { type: 'array', required: true, items: { type: 'string', enum: ['play', 'pause', 'step', 'reset'] } },
+          restore: { type: 'string', enum: ['bfs-checkpoint', 'half-adder-checkpoint'] },
         } },
       } },
       { type: 'object', additionalProperties: false, properties: { ...runIdentity,

@@ -1,0 +1,103 @@
+.root {
+  min-width: 0;
+  padding: 12px 16px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: var(--dsw-radius-md);
+}
+
+.heading {
+  margin: 0 0 8px;
+  color: var(--dsw-alias-label-secondary);
+  font: var(--dsw-font-xs-13);
+}
+
+.conclusion {
+  margin: 0 0 8px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.items {
+  display: grid;
+  gap: 8px;
+}
+
+.item {
+  min-width: 0;
+  padding-block: 8px;
+  border-block-start: 1px solid var(--dsw-alias-border-l2);
+  overflow-wrap: anywhere;
+}
+
+.csvAnalysis {
+  display: grid;
+  min-width: 0;
+  gap: 8px;
+  margin-block: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: var(--dsw-radius-xs);
+}
+
+.csvAnalysis p {
+  margin: 0;
+}
+
+.csvAnalysisSelect, .csvAnalysisFailure {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.csvAnalysisSelect select, .csvAnalysisSelect textarea {
+  max-width: 100%;
+  min-height: 28px;
+  padding: 3px 6px;
+  border: 0.5px solid var(--dsw-alias-border-l2);
+  border-radius: var(--dsw-radius-xs);
+  background: var(--dsw-alias-bg-base);
+  color: var(--dsw-alias-label-primary);
+  font: var(--dsw-font-xs-13);
+}
+
+.csvFilter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.csvFilter textarea { resize: vertical; }
+
+.csvParticipants {
+  display: grid;
+  justify-items: start;
+  min-width: 0;
+  gap: 8px;
+}
+
+.csvParticipants section {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+
+.csvParticipantsTotal { color: var(--dsw-alias-label-secondary); }
+
+.csvParticipants table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font: var(--dsw-font-xs-13);
+}
+
+.csvParticipants :is(th, td) {
+  padding: 6px;
+  border-block-end: 1px solid var(--dsw-alias-border-l2);
+  text-align: start;
+  overflow-wrap: anywhere;
+}
+
+.csvParticipants th { font-weight: 500; }

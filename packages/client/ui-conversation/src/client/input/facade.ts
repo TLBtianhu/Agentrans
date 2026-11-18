@@ -15,7 +15,7 @@ import {
 } from '@agentrans/client-store'
 import type { LexicalEditor } from 'lexical'
 import type {
-  CommandClaim, ConsumeTokenRequest, DraftAttachmentId, DraftInitializationOptions, DraftInitializationResult,
+  CommandClaim, ConsumeTokenRequest, DraftAttachmentId, DraftFocusBookmark, DraftInitializationOptions, DraftInitializationResult,
   InputActions, InputEffect, InputNotice, InputState, InputTriggerController, PickOutcome,
   SessionInput, SubmitAttempt, SubmitAttachment, DefaultSubmitOutcome,
 } from '../contract/input.ts'
@@ -28,8 +28,10 @@ import type { MathNodeLabels } from './editor/math-node.tsx'
 import { serializeDraftPrompt } from './prompt.ts'
 import { SubmitMachine } from './machine.ts'
 import { resolveDraftInput, snapshotDraft } from '../draft.ts'
+import { draftFingerprint } from '../stores.ts'
 import { DraftEditorRuntime } from './editor/runtime.ts'
 import type { EditorProjection } from './editor/projection.ts'
+import { focusDraftEditor, revealDraftSelection } from './editor/view-binding.ts'
 
 /** Popup face the shell needs (dismissal only; typed structurally to avoid a value import). */
 export interface PopupDismissFace {
@@ -44,6 +46,8 @@ export interface PopupDismissFace {
 export interface SessionInputDeps {
   /** Session-scope ctx handed to claim.submit transactions. */
   actx: Context
+  /** Read the current submission hold before any command or context capture. */
+  submissionBlocked?: () => boolean
   /** Snapshot the Session facts before asynchronous command arbitration. */
   capturePromptContexts?: () => readonly PromptContextInput[]
   contextCaptureFailure?: () => string
@@ -125,6 +129,13 @@ function projectionContentChanged(prev: EditorProjection, next: EditorProjection
 /** Message of a failure surfaced as a composer notice. */
 function errorText(error: unknown): string {
   return error instanceof Error ? error.message : String(error)
+}
+
+async function fingerprintForFocus(draft: DraftSnapshot): Promise<string | undefined> {
+  try { return await draftFingerprint(draft) } catch (_error) {
+    // Keep the current caret if the browser cannot fingerprint the draft.
+    return undefined
+  }
 }
 
 const EMPTY_QUEUE: InboxState['next-turn'] = []
@@ -417,7 +428,7 @@ export class SessionInputShell implements SessionInput {
    * popup dismisses and the menu tracks frozen.
    */
   submit(mode: InputSubmitMode = 'queue', source?: 'click' | 'enter'): void {
-    if (this.disposed) return
+    if (this.disposed || this.deps.submissionBlocked?.() === true) return
     const timestamp = Date.now()
     let contexts: readonly PromptContextInput[] | undefined
     let contextError: string | undefined
@@ -616,14 +627,39 @@ export class SessionInputShell implements SessionInput {
     this.notices.set({ level, text, seq: this.noticeSeq })
   }
 
+  /** @inheritdoc */
+  focus(selection?: TokenSpan): boolean {
+    const root = this.editor.getRootElement()
+    if (this.disposed || root === null || !root.isConnected || !this.editor.isEditable() || frozen(this.snapshot.phase)) return false
+    if (selection?.draftRev === this.rev) this.draftEditor.selectSpan(selection)
+    if (root.ownerDocument.activeElement !== root) {
+      focusDraftEditor(this.editor, () => {
+        if (root.ownerDocument.activeElement === root) revealDraftSelection(root.closest<HTMLElement>('[data-input-scroll]'))
+      })
+    }
+    return root.ownerDocument.activeElement === root
+  }
+
   /**
-   * Return the keyboard to the composer with the caret it last held. Lexical's
-   * own focus restores its stored selection; a bare DOM focus on the
-   * contenteditable would land the caret at the start instead.
+   * @param selection - Current revision-guarded selection.
+   * @returns The selection and, when available, its semantic draft digest.
    */
-  focus(): void {
-    this.editor.getRootElement()?.focus({ preventScroll: true })
-    this.editor.focus()
+  async captureDraftFocus(selection: TokenSpan): Promise<DraftFocusBookmark> {
+    const digest = selection.draftRev === this.rev ? await fingerprintForFocus(this.draftSnapshot) : undefined
+    return digest === undefined ? { selection } : { selection, digest }
+  }
+
+  /**
+   * @param bookmark - Captured selection and optional digest.
+   * @param isCurrent - Recheck navigation before applying focus.
+   * @returns Whether the composer received focus.
+   */
+  async restoreDraftFocus(bookmark: DraftFocusBookmark, isCurrent: () => boolean): Promise<boolean> {
+    const { selection, digest } = bookmark
+    if (selection.draftRev >= 0 || digest === undefined) return isCurrent() && this.focus(selection)
+    const draftRev = this.rev
+    const currentDigest = await fingerprintForFocus(this.draftSnapshot)
+    return isCurrent() && this.focus(currentDigest === digest ? { ...selection, draftRev } : undefined)
   }
 
   // ---- wiring-layer extras (not on the frozen SessionInput face) ----

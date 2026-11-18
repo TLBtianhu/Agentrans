@@ -12,6 +12,7 @@ import type { SessionBinding } from '@agentrans/api-session-controller/client'
 import type { InboxState } from '@agentrans/agent/types'
 import type { ObservableSnapshot, SnapshotStore } from '@agentrans/client-store'
 import type { Branded } from '@agentrans/brand'
+import type { SessionId } from '@agentrans/session/types'
 import type { ArbitrateKey, ArbitrateOutcome, DraftQuote, Occurrence, ReferenceInsert, TokenSpan } from './draft-editor.ts'
 import type { InputSubmitMode, MessageSubmission } from './composer-submission.ts'
 
@@ -184,6 +185,12 @@ export interface InputTarget {
   insertReference(ref: ReferenceInsert, span: TokenSpan): boolean
 }
 
+/** Selection and optional semantic draft identity for restoring focus after reload. */
+export interface DraftFocusBookmark {
+  readonly selection: TokenSpan
+  readonly digest?: string
+}
+
 /** Per-session input facade owned by the conversation wiring layer. */
 export interface SessionInput extends InputTarget {
   /** Insert selected transcript text as an atomic quote. @param text - nonblank selection. @returns whether editing accepted it. */
@@ -214,10 +221,24 @@ export interface SessionInput extends InputTarget {
   notify(level: 'info' | 'error', text: string): void
 
   /**
-   * Return the keyboard to the composer with the caret it last held, for
-   * callers that took focus away from it (an overlay that held its own).
+   * Return the keyboard to the mounted, editable composer.
+   * @param selection - Captured editor position. If the draft changed, retain the current selection.
+   * @returns Whether the composer received focus.
    */
-  focus(): void
+  focus(selection?: TokenSpan): boolean
+  /**
+   * Capture a selection with a fingerprint of the draft it belongs to.
+   * @param selection - Current revision-guarded selection.
+   * @returns The selection and, when available, its semantic draft digest.
+   */
+  captureDraftFocus(selection: TokenSpan): Promise<DraftFocusBookmark>
+  /**
+   * Focus the draft and restore its selection if the captured content still matches.
+   * @param bookmark - Captured selection and optional digest.
+   * @param isCurrent - Recheck the caller's navigation immediately before applying focus.
+   * @returns Whether the composer received focus.
+   */
+  restoreDraftFocus(bookmark: DraftFocusBookmark, isCurrent: () => boolean): Promise<boolean>
   /** Input state store (InputZone currency + decorations read here). */
   readonly state: SnapshotStore<InputState>
 }
@@ -226,6 +247,13 @@ export interface SessionInput extends InputTarget {
 export interface SessionInputResolver {
   /** Resolve the facade for one session-scope ctx. */
   for(actx: Context): SessionInput
+  /**
+   * Seed a native quote in a just-created Session before publishing its navigation.
+   * Call from creation only. Existing drafts, including an empty saved draft, take precedence.
+   * @param sessionId - newly created Session.
+   * @param excerpt - the selected transcript passage.
+   */
+  prefillQuoteDraft(sessionId: SessionId, excerpt: string): void
   /**
    * Prepare the exact retained Session before navigation publishes it.
    * @param binding - target Session generation, already retained by the caller.

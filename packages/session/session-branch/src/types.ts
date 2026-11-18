@@ -12,6 +12,8 @@ export interface BranchResultSource {
   readonly resultSeq: SessionSeq
   readonly resultMessageId: MessageId
   readonly form: 'notice'
+  /** The Host verified and appended an HTML checkpoint from a child question. */
+  readonly artifactEvidence?: 'bfs-checkpoint' | 'half-adder-checkpoint'
 }
 
 declare module '@agentrans/llm' {

@@ -235,6 +235,8 @@ export interface MarkdownRenderContext {
   readonly pathImages: MarkdownPathImages | undefined
   /** Raw HTML renders nothing instead of literal text. */
   readonly omitHtml: boolean
+  /** Opt-in position of this block in a settled message's canonical text. */
+  readonly sourceText?: { readonly text: string; readonly offset: number }
   /** Inside an anchor's children: interactive mentions must not nest there. */
   readonly inLink?: boolean
   /** Reference targets visible to this pass. */
@@ -312,10 +314,25 @@ function renderChildren(
   return nodes.map((node, index) => renderNode(node, index, context))
 }
 
+function renderLiteralText(
+  value: string, node: Md.Text | Md.InlineCode, key: Key, source: MarkdownRenderContext['sourceText'],
+): ReactNode {
+  const start = node.position?.start.offset
+  const end = node.position?.end.offset
+  if (source === undefined || start === undefined || end === undefined || value === '') return value
+  const raw = source.text.slice(start, end)
+  const delimiter = node.type === 'inlineCode' ? /^`+/u.exec(raw)?.[0].length : undefined
+  const body = delimiter === undefined ? raw : raw.slice(delimiter, -delimiter)
+  const trim = node.type === 'inlineCode' && body === ` ${value} ` ? 1 : 0
+  if (body.slice(trim, body.length - trim) !== value) return value
+  const absolute = source.offset + start + (delimiter ?? 0) + trim
+  return <span key={key} data-markdown-source-start={absolute} data-markdown-source-end={absolute + value.length}>{value}</span>
+}
+
 function renderNode(node: Md.RootContent, key: Key, context: MarkdownRenderContext): ReactNode {
   switch (node.type) {
     case 'text':
-      return node.value
+      return renderLiteralText(node.value, node, key, context.sourceText)
     case 'paragraph':
       return <p key={key}>{renderChildren(node.children, context)}</p>
     case 'heading':
@@ -343,13 +360,14 @@ function renderNode(node: Md.RootContent, key: Key, context: MarkdownRenderConte
     case 'inlineCode': {
       // Parity with mdast-util-to-hast: inline code renders line endings as spaces.
       const value = node.value.replace(/\r?\n|\r/g, ' ')
+      const content = renderLiteralText(value, node, 'literal', context.sourceText)
       // An inline-code token that is entirely an absolute HTTP(S) URL keeps
       // its code chrome and gains the same safe external anchor as a link;
       // commands, partial URLs, and other schemes stay inert. The value is
       // authored text, not a parsed destination, so no normalizeUri: port,
       // path, and query render unchanged.
       const href = inlineCodeHttpUrl(value)
-      if (href !== undefined) return <code key={key}>{renderSafeLink(href, [value], 'link')}</code>
+      if (href !== undefined) return <code key={key}>{renderSafeLink(href, [content], 'link')}</code>
       // A token the owner's file-mention vocabulary recognizes opens that
       // file; the resolver, not this renderer, decides what names a file.
       // Inside an anchor the token stays inert — a button cannot nest there.
@@ -366,12 +384,12 @@ function renderNode(node: Md.RootContent, key: Key, context: MarkdownRenderConte
               {...mention.contextMenuProps}
             >
               <LinkIconMedium kind={classifyLinkPath(value)} className={css.linkIcon} />
-              {value}
+              {content}
             </button>
           </code>
         )
       }
-      return <code key={key}>{value}</code>
+      return <code key={key}>{content}</code>
     }
     case 'html':
       // No HTML parser enters the pipeline: raw HTML is literal text, or nothing where the owner omits it.

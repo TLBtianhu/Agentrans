@@ -36,7 +36,7 @@ function propsFor(id: string, presentation: Presentation, revision = 1): ViewPro
   return {
     node: {
       key: `artifact:${id}`, id: data.artifactId, kind: 'artifact', target: 'chat', anchorSeq: revision,
-      location: { kind: 'session' }, visibility: 'visible', data,
+      location: { kind: 'session' }, visibility: 'visible', data: { snapshot: data, history: null, firstSeq: 1 },
     },
     sessionId: SessionId('session'),
     useStore: presentation.useStore,

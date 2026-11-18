@@ -18,6 +18,9 @@
       "path": "../../core/agent"
     },
     {
+      "path": "../../attachment/attachment"
+    },
+    {
       "path": "../../core/session"
     },
     {
@@ -25,6 +28,12 @@
     },
     {
       "path": "../../core/tools"
+    },
+    {
+      "path": "../../core/system-prompt"
+    },
+    {
+      "path": "../../skill/skill"
     },
     {
       "path": "../../llm/llm"

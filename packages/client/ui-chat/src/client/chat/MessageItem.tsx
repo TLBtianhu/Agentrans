@@ -179,7 +179,8 @@ const NO_MESSAGE_SOURCE: PropsRenderSlots<'conversation.chat.user.before'>['rend
 function UserStyleBubble({
   node, renderSlotChain, content, loadImage, renderFactorySlot, actions,
   pending = false, echo = false, batchStart = false,
-  referenceLabels, skillNames, previewAttachments, facts: inputFacts = EMPTY_TEXT_FACTS, interactive = false,
+  referenceLabels, skillNames, previewAttachments, facts: inputFacts = EMPTY_TEXT_FACTS, interactive = false, messageRef,
+  openView,
 }: {
   content: readonly unknown[]
   renderFactorySlot: PropsRenderFactories['renderFactorySlot']
@@ -203,7 +204,7 @@ function UserStyleBubble({
   previewAttachments?: readonly UserContentAttachment[]
   /** Inputs used by text transforms, separate from row and rendering props. */
   facts?: Readonly<Partial<UserTextFacts>>
-} & Pick<ChatNodeOwnerProps, 'loadImage'> & Pick<UserContentInput, 'interactive'>): ReactNode {
+} & Pick<ChatNodeOwnerProps, 'loadImage'> & Pick<UserContentInput, 'interactive' | 'messageRef' | 'openView'>): ReactNode {
   const parts = useMemo(() => contentParts(content), [content])
   const prepared = useMemo<UserContentData>(() => ({
     text: parts.text,
@@ -229,6 +230,8 @@ function UserStyleBubble({
         loadImage,
         facts,
         interactive,
+        ...(messageRef === undefined ? {} : { messageRef }),
+        ...(openView === undefined ? {} : { openView }),
       })}
       {actions?.(prepared.text)}
     </div>
@@ -330,7 +333,7 @@ export function PendingSubmissionBubble({ submission, loadImage, renderFactorySl
  * bubble without asking for it.
  */
 export const UserMessageNodeView = memo(function UserMessageNodeView({
-  node, renderFactorySlot, loadImage, renderSlotChain, forkAt, useAccess, t,
+  node, renderFactorySlot, loadImage, renderSlotChain, forkAt, openView, useAccess, t,
 }: ChatNodeViewProps<'user' | 'steering'> & {
   /** Bound by the `user` keyed registration, the only entry that declares the seat. */
   renderSlotChain: PropsRenderSlots<'conversation.chat.user.before'>['renderSlotChain']
@@ -343,6 +346,8 @@ export const UserMessageNodeView = memo(function UserMessageNodeView({
       renderSlotChain={renderSlotChain}
       content={data.content}
       interactive
+      {...data.messageId === undefined ? {} : { messageRef: { eventSeq: data.seq, messageId: data.messageId } }}
+      {...openView === undefined ? {} : { openView }}
       renderFactorySlot={renderFactorySlot}
       loadImage={loadImage}
       batchStart={node.kind === 'steering' && node.data.batchStart === true}

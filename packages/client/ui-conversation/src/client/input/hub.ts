@@ -16,18 +16,19 @@ import type { TranslateNS } from '@agentrans/client-locale/client'
 import type { InboxState } from '@agentrans/agent/types'
 import type { ModelSelectionProjection } from '@agentrans/agent/types'
 import type { ObservableSnapshot } from '@agentrans/client-store'
+import { formatQuoteText } from '@agentrans/client-ui-primitives'
 import type {
   DraftAttachmentId, DraftAttachmentSerializationResult, DraftInitializationOptions, DraftInitializationResult, InputTriggerController,
   SessionInputResolver, SessionInput, DefaultSubmitOutcome,
 } from '../contract/input.ts'
-import type { ComposerKeyboard } from '../contract/draft-editor.ts'
+import type { ComposerKeyboard, DraftSnapshot } from '../contract/draft-editor.ts'
 import type { ComposerBlocks } from '../contract/composer-blocks.ts'
 import type { PromptContextInput } from '@agentrans/api-session-controller/types'
 import type { InputSubmitMode } from '../contract/composer-submission.ts'
 import type { PopupDismissFace } from './facade.ts'
 import { SessionInputShell } from './facade.ts'
 import { reportMessageSubmission } from './submission-analytics.ts'
-import { readConversationDraft } from '../stores.ts'
+import { readConversationDraft, writeInitialConversationDraft } from '../stores.ts'
 
 /** Structural command face for per-session popup resolution. */
 interface CommandFace {
@@ -61,6 +62,7 @@ interface ConversationAttachmentFace {
 /** Session-addressed input facade registry (SessionInputResolver face + composer-layer extras). */
 export class InputHub implements SessionInputResolver {
   private readonly shells = new WeakMap<SessionBinding, SessionInputShell>()
+  private readonly unsavedInitialDrafts = new Map<SessionId, DraftSnapshot>()
 
   /**
    * @param ctx - client root context (services resolved lazily per call — boot order stays free).
@@ -93,6 +95,24 @@ export class InputHub implements SessionInputResolver {
     return this.shellFor(binding).requestDraftInitialization(options)
   }
 
+  prefillQuoteDraft(sessionId: SessionId, excerpt: string): void {
+    if (excerpt.trim() === '') return
+    const binding = this.sessions().binding(sessionId)
+    const shell = binding === undefined ? undefined : this.shells.get(binding)
+    if (shell !== undefined && (shell.snapshot.phase !== 'plain' || shell.draftSnapshot.text !== ''
+      || shell.snapshot.attachmentIds.length > 0)) return
+    const text = excerpt.replace(/\r\n?/gu, '\n')
+    const formatted = formatQuoteText(text)
+    const draft: DraftSnapshot = {
+      text: `${formatted} `, references: [],
+      quotes: [{ offset: 0, length: formatted.length, text }],
+    }
+    const status = writeInitialConversationDraft(sessionId, draft)
+    if (status === 'preserved') return
+    if (shell !== undefined) shell.setDraft(draft)
+    else if (status === 'unavailable') this.unsavedInitialDrafts.set(sessionId, draft)
+  }
+
   /**
    * Resolve the resident shell for an already-retained, addressable Session binding.
    * Draft import completes before return. The Session scope owns input listeners,
@@ -106,6 +126,7 @@ export class InputHub implements SessionInputResolver {
     const { session, ctx: actx } = binding
     const shell = new SessionInputShell({
       actx,
+      submissionBlocked: () => this.conversation().blocks.submissionFor(session.sessionId).getSnapshot(),
       capturePromptContexts: () => this.conversation().capturePromptContexts(session.sessionId),
       contextCaptureFailure: () => this.t('input.contextCaptureFailed'),
       abandonContextPrompt: (attempt) => { this.conversation().abandonContextPrompt(session, attempt) },
@@ -190,7 +211,11 @@ export class InputHub implements SessionInputResolver {
         return () => { shell.refreshLexiconSubscription() }
       }, 'conversation.input: reference catalogs')
     })
-    shell.setDraft(readConversationDraft(binding.sessionId))
+    const unsavedInitial = this.unsavedInitialDrafts.get(binding.sessionId)
+    this.unsavedInitialDrafts.delete(binding.sessionId)
+    const draft = unsavedInitial !== undefined && writeInitialConversationDraft(binding.sessionId, unsavedInitial) === 'unavailable'
+      ? unsavedInitial : readConversationDraft(binding.sessionId)
+    shell.setDraft(draft)
     return shell
   }
 

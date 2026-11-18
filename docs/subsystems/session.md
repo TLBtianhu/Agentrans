@@ -689,6 +689,8 @@ Everything else (`turn/*`, `step/*`, `assistant/attempt`, plugin-owned `llm/retr
 
 An explicit `boundary` lets callers fork from any stable between-turn position, including a previous `turn/end` or a later standalone log-only event, even if the source has newer events or an open current turn. The API rejects a prefix that ends inside an open turn instead of clipping silently. `@agentrans/subagent-fork-in-process` keeps its completed-prefix clipping because tool-time delegation usually starts while the parent turn is open; ordinary session branching should make the requested boundary explicit.
 
+For an already validated Session observation, the Host-only `sessionController.forkObserved` uses `SessionForkPreparation` to carry a retry-stable child id, optionally commit feature-owned state at child publication, and verify a child from a prior attempt. The ordinary fork path supplies the preset, workspace and inherited prefix.
+
 ## Why a turn ended: `TurnEndReasonMap`
 
 `turn/start` has no trigger field. The entered `user/message` batch records what entered each step, `llm/retry` records request recovery, and idle injection remains pending until a waking delivery reaches a later pre-step. Live turns retain the typed [`AgentCancelCause`](core.md#the-agent-handle) that stopped the driver; persistence uses the additional `{ kind: 'legacy' }` cause only when importing a supported coarse cancellation record that did not store its caller.
@@ -875,7 +877,7 @@ Host service backing the generated `ctx.remote.session` namespace.
  * @param resolve - synchronous Host validation and model-visible text construction.
  * @returns disposer that withdraws this registration.
  */
-registerPromptContext(kind: string, resolve: (agent: Agent, value: import('@agentrans/util-values').JsonValue) => readonly TextBlock[]): () => void
+registerPromptContext(kind: string, resolve: PromptContextResolver): () => void
 
 /**
  * Resolve or resume one ordinary Session for another Host API domain.
@@ -966,13 +968,22 @@ workspaceDesktop(): { name: string; available: boolean; fileManager: 'finder' | 
 @Remote('rename') rename(request: SessionRenameRequest): Promise<SessionRenameValue>
 
 /**
- * Fork one cold-readable exact event prefix into a new Session. An omitted
- * boundary selects the latest completed-turn prefix; an open cut receives
- * synthetic fork closers.
- * @param request - source Session, optional exact inclusive event boundary, and migration preflight choice.
- * @returns the new Session identity.
+ * Fork one exact event prefix from live or persisted history. An omitted
+ * boundary selects the latest completed-turn prefix. An open cut receives synthetic closers.
+ * An identical inquiry retry recovers the child created by a prior attempt.
+ * @param request - Source Session, optional boundary, migration preflight and inquiry retry identity.
+ * @returns The new or recovered Session identity after workspace attachment.
  */
 @Remote('fork') async fork(request: SessionForkRequest): Promise<SessionForkValue>
+
+/**
+ * Fork one previously validated Session observation with trusted feature preparation.
+ * @param source - Retained source observation carrying the exact prefix.
+ * @param boundary - Existing inclusive event position in that observation.
+ * @param preparation - Child identity, publication commit and retry validation.
+ * @returns A newly prepared or previously verified child, after flush and workspace attachment.
+ */
+forkObserved( source: SessionObservation, boundary: ReturnType<typeof SessionSeq>, preparation: SessionForkPreparation, ): Promise<SessionForkValue>
 
 /**
  * Return one user-confirmed assistant conclusion to the direct parent without starting a model turn.
@@ -1086,7 +1097,7 @@ workspaceDesktop(): { name: string; available: boolean; fileManager: 'finder' | 
 @Remote({ mode: 'stream' }) async *control(signal: AbortSignal): AsyncIterable<SessionControlFrame>
 ```
 
-Types: [Agent](core.md) · [SessionBranchResultRequest](branch.md) · [SessionBranchResultValue](branch.md) · [SessionId](core.md) · [SessionSearchRequest](session-query.md) · [TextBlock](llm-streaming.md)
+Types: [SessionBranchResultRequest](branch.md) · [SessionBranchResultValue](branch.md) · [SessionId](core.md) · [SessionObservation](session-query.md) · [SessionSearchRequest](session-query.md)
 
 Source: [`packages/api/session-controller/src/index.ts`](../../packages/api/session-controller/src/index.ts)
 
@@ -1116,6 +1127,14 @@ async run<T>(sessionId: SessionId, identity: SessionInputIdentity, input: T, job
  * @returns Whether the original input was accepted, even if its queue item was edited or canceled.
  */
 hasPromptReceipt(agent: Agent, requestId: SessionInputRequestId): boolean
+
+/**
+ * Check whether this Session has reserved a prompt identity.
+ * @param sessionId - Session receiving the prompt.
+ * @param requestId - Original RPC request identity.
+ * @returns Whether admission is still in flight.
+ */
+hasPendingPrompt(sessionId: SessionId, requestId: SessionInputRequestId): boolean
 
 /**
  * Admit one already-identified message or return its original acceptance before current-source validation.

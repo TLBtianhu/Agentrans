@@ -1,0 +1,3 @@
+- insert:
+    - id: fixture-retained-sidebar
+      name: '@fixture/retained-sidebar'

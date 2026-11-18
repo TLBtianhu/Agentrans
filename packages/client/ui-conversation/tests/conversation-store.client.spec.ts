@@ -2,7 +2,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { SessionId } from '@agentrans/session/types'
 import type { DraftSnapshot } from '../src/client/contract/draft-editor.ts'
-import { createConversationStore, readConversationDraft, readConversationViewPreference } from '../src/client/stores.ts'
+import {
+  createConversationStore, readConversationDraft, readConversationViewPreference, writeInitialConversationDraft,
+} from '../src/client/stores.ts'
 
 const KEY = 'dsh.conversation'
 
@@ -16,6 +18,20 @@ afterEach(() => {
 })
 
 describe('createConversationStore', () => {
+  it('restores an initial quote through the ordinary draft store and preserves its deletion', () => {
+    const sessionId = 'inquiry' as SessionId
+    const draft: DraftSnapshot = {
+      text: '> 切线斜率 ', references: [], quotes: [{ offset: 0, length: 6, text: '切线斜率' }],
+    }
+    expect(writeInitialConversationDraft(sessionId, draft)).toBe('saved')
+    expect(readConversationDraft(sessionId)).toEqual(draft)
+    const store = createConversationStore().create(sessionId)
+    expect(store.getSnapshot()).toEqual({ draft, view: null, viewRequest: null })
+    store.actions.setDraft('')
+    expect(writeInitialConversationDraft(sessionId, draft)).toBe('preserved')
+    expect(readConversationDraft(sessionId)).toEqual({ text: '', references: [] })
+  })
+
   it('owns draft, selected View, and one-shot View requests', () => {
     const store = createConversationStore().create()
     expect(store.store.getSnapshot()).toEqual({ draft: '', view: null, viewRequest: null })

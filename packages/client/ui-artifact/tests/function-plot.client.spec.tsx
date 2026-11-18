@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { makeTranslate } from '@agentrans/client-test-runtime'
 import { FunctionPlotView } from '../src/client/FunctionPlotView.tsx'
@@ -111,6 +111,59 @@ describe('FunctionPlotView', () => {
     expect(screen.getByText('0.50')).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: 'Reset' }))
     expect(screen.getByText('0.40')).toBeTruthy()
+  })
+
+  it('compares one editable parameter at the confirmed function and trace and attaches the new readings', () => {
+    const continuedSpec: FunctionPlotSpec = {
+      ...spec,
+      functions: [{ id: 'other', label: 'Other', expression: 'x' }, { id: 'line', label: 'Line', expression: 'a*x' }],
+      parameters: { fixed: { value: 3, min: 3, max: 3, step: 1 }, a: { value: 1, min: 0, max: 3, step: 0.25 } },
+      viewport: { x: [-2, 0.5], y: [-2, 3] },
+      trace: { ...spec.trace, x: 0 },
+    }
+    const recordAction = vi.fn<RecordArtifactAction>().mockResolvedValue(undefined)
+    const attach = vi.fn(() => true)
+    const baselinePlot = { sourceRevision: 1, functionId: 'line', x: 1, parameters: { a: 1.25, fixed: 3 },
+      values: { value: 1.25, derivative: 1.25, integral: 0.625 } }
+    render(<FunctionPlotView spec={continuedSpec} artifactId={'a' as ArtifactId} revision={1} placement="inline"
+      recordAction={recordAction} onAttachPlotQuestion={attach} baselinePlot={baselinePlot} t={t} />)
+    const comparison = within(screen.getByRole('region', { name: 'Integral comparison' }))
+    expect(comparison.getAllByText('0.625')).toHaveLength(2)
+    expect(comparison.getByText('0.000')).toBeTruthy()
+    expect(screen.getByRole<HTMLInputElement>('slider').value).toBe('1.25')
+    expect(screen.queryByRole('combobox')).toBeNull()
+    expect(screen.getByText('Line').getAttribute('aria-current')).toBe('true')
+
+    fireEvent.pointerMove(screen.getByRole('img', { name: 'Interactive function plot' }), { clientX: 100 })
+    for (let i = 0; i < 3; i++) fireEvent.click(screen.getByRole('button', { name: 'Step' }))
+    expect(screen.getByRole<HTMLInputElement>('slider').value).toBe('2')
+    expect(comparison.getByText('0.625')).toBeTruthy()
+    expect(comparison.getByText('1.000')).toBeTruthy()
+    expect(comparison.getByText('+0.375')).toBeTruthy()
+    expect(attach).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('button', { name: 'Use for next question' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Attach readings' }))
+    expect(attach).toHaveBeenLastCalledWith({ functionId: 'line', x: 1, parameters: { a: 2, fixed: 3 } })
+    expect(recordAction).not.toHaveBeenCalled()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Reset' }))
+    expect(screen.getByRole<HTMLInputElement>('slider').value).toBe('1.25')
+    expect(comparison.getAllByText('0.625')).toHaveLength(2)
+    expect(comparison.getByText('0.000')).toBeTruthy()
+  })
+
+  it('leaves the integral difference unavailable when the adjusted function crosses a domain gap', () => {
+    const continuedSpec: FunctionPlotSpec = {
+      ...spec, functions: [{ id: 'root', label: 'Root', expression: 'sqrt(x-d)' }],
+    }
+    const recordAction = vi.fn<RecordArtifactAction>().mockResolvedValue(undefined)
+    render(<FunctionPlotView spec={continuedSpec} artifactId={'a' as ArtifactId} revision={1} placement="inline"
+      recordAction={recordAction} baselinePlot={{ sourceRevision: 1, functionId: 'root', x: 1, parameters: { d: 0 },
+        values: { value: 1, derivative: 0.5, integral: 2 / 3 } }} t={t} />)
+    const comparison = within(screen.getByRole('region', { name: 'Integral comparison' }))
+    fireEvent.change(screen.getByRole('slider'), { target: { value: '0.5' } })
+    expect(comparison.getByText('0.667')).toBeTruthy()
+    expect(comparison.getAllByText('—')).toHaveLength(2)
   })
 
   it('switches the traced function and recomputes the analysis', () => {

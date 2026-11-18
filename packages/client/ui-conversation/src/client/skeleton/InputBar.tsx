@@ -47,7 +47,7 @@ export const InputBar = memo(function InputBar({
   useSession, useInput, inputActions, keyboard, addFiles, removeAttachment, resolveDraftAttachments,
   retryFileUpload,
   toggleCommandMenu, stop, t,
-  renderSlot, useBusyEnter, useFileUploads, useNotices, useLexicon, useMenuLauncher, useStopShortcut,
+  renderSlot, useBusyEnter, useFileUploads, useNotices, useLexicon, useMenuLauncher, useStopShortcut, useSubmissionBlocked,
   useAccess,
   useProjection, sessionId, variant, disabled: inert = false, blocked,
   workspacePickerOpen = false, onRequestWorkspace,
@@ -57,6 +57,7 @@ export const InputBar = memo(function InputBar({
   const notice = useNotices(s => s)
   const busyEnter = useBusyEnter(s => s)
   const stopKeys = useStopShortcut(keys => keys)
+  const submissionBlocked = useSubmissionBlocked(value => value)
   // A page whose access snapshot excludes prompting, stopping, or uploading to this Session is offered
   // no Send, no Stop, or no file intake rather than a disabled control. `useAccess` is undefined only
   // without a Session, where the bar is an inert placeholder with no keyboard, stop, or file intake.
@@ -193,7 +194,7 @@ export const InputBar = memo(function InputBar({
   // session switches that land the caret off screen). The live DOM selection
   // is the ruler; no mirror layer exists to consult.
   const revealSelection = (): void => {
-    revealDraftSelection(scrollRef)
+    revealDraftSelection(scrollRef.current)
   }
 
   // Automatic desktop focus restores and reveals the draft selection without
@@ -294,11 +295,11 @@ export const InputBar = memo(function InputBar({
   // The keymap handlers read live bar state through this ref so the editor
   // registration survives re-renders without re-arming per keystroke.
   const gate = useRef({
-    locked, machineBusy, canSteerQueue, running, steeringAvailable, busyEnter,
+    locked, machineBusy, submissionBlocked, canSteerQueue, running, steeringAvailable, busyEnter,
     intakeFiles, uploadsPending, uploadsHeldText, showToast, canAcceptDrop,
   })
   gate.current = {
-    locked, machineBusy, canSteerQueue, running, steeringAvailable, busyEnter,
+    locked, machineBusy, submissionBlocked, canSteerQueue, running, steeringAvailable, busyEnter,
     intakeFiles, uploadsPending, uploadsHeldText, showToast, canAcceptDrop,
   }
 
@@ -371,15 +372,17 @@ export const InputBar = memo(function InputBar({
   // message waits for the Host.
   const primaryStops = running && subagent === null && !sending && (empty || blocked !== undefined)
   // Disabled native buttons may omit mouseleave; their tooltip must close from state.
-  const primaryDisabled = primaryStops ? stopAction === undefined : empty || disabled || machineBusy || uploadsPending
-  const interruptible = running && (continuable || (sending && subagent === null))
+  const primaryDisabled = primaryStops
+    ? stopAction === undefined
+    : empty || disabled || machineBusy || uploadsPending || submissionBlocked
+  const interruptible = running && (continuable || (!primaryStops && subagent === null && (sending || submissionBlocked)))
   const primarySubmitMode = resolveSubmitMode(busyEnter, running, 'enter', steeringAvailable)
   const plainMessageDraft = !empty && input?.phase === 'plain' && !draft.trimStart().startsWith('/')
   const primaryLabel = primaryStops
     ? t('input.stop')
     : sending
       ? t('input.sending')
-      : running && steeringAvailable && !disabled && !uploadsPending && plainMessageDraft
+      : running && steeringAvailable && !primaryDisabled && plainMessageDraft
         ? t(primarySubmitMode === 'steer' ? 'input.send.steer' : 'input.send.queue')
         : t('input.send')
   const onPrimary = (): void => {
@@ -388,8 +391,8 @@ export const InputBar = memo(function InputBar({
       return
     }
     if (keyboard === undefined) return // absent machine: the button is disabled
-    /* v8 ignore next -- defensive: the primary button is disabled for empty, disabled, and pending-upload states. */
-    if (!empty && !disabled && !machineBusy && !uploadsPending) keyboard.submit(primarySubmitMode, 'click')
+    /* v8 ignore next -- defensive: a disabled native button cannot dispatch a click. */
+    if (!primaryDisabled) keyboard.submit(primarySubmitMode, 'click')
   }
 
   // Claim ghost hint: rendered by CSS as generated content after the last

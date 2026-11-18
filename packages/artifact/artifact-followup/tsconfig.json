@@ -10,6 +10,8 @@
     { "path": "../artifact-runtime" },
     { "path": "../../core/agent" },
     { "path": "../../core/session" },
+    { "path": "../../session/session-projection" },
+    { "path": "../../storage/storage-domain" },
     { "path": "../../llm/llm" },
     { "path": "../../util/brand" },
     { "path": "../../util/values" },

@@ -326,6 +326,8 @@ export interface WebScaffold {
   hostFetch(path: string, init?: RequestInit): Promise<Response>
   /** Await a settled turn end: in-process turn/end, then the agent's idle flip (which follows the persistence flush). */
   whenTurnSettled(timeoutMs?: number): Promise<SessionId>
+  /** Replace the Host at the same origin and optionally verify the outage before starting the replacement. */
+  restart(whileStopped?: () => Promise<void>): Promise<void>
   /**
    * Tear everything down; asserts the replay fixture was fully consumed first
    * (replay/refresh), unless booted with replayProvidersOnly (whose fixture
@@ -336,6 +338,8 @@ export interface WebScaffold {
 
 /** Options for {@link launchWebScaffold}. */
 export interface LaunchOptions {
+  /** Permit a direct record-mode or model-free test to start a fresh Host over the same test roots. */
+  restartable?: boolean
   /** Override the developer-tools preference; omitted uses the shipped default. */
   developerTools?: boolean
   /** Enable the real Open In rows with deterministic launch-environment facts. */
@@ -484,13 +488,28 @@ export interface LaunchOptions {
   harnessHome?: string
 }
 
-/** Dispose the booted tree and remove both owned temp roots, reporting every independent cleanup failure. */
-async function cleanupScaffoldWorld(ctx: Context, workspaceCwd: string, persistenceRoot: string): Promise<unknown[]> {
+async function removeScaffoldRoots(workspaceCwd: string, persistenceRoot: string): Promise<unknown[]> {
   const failures: unknown[] = []
-  await Promise.resolve(ctx.fiber.dispose()).catch((error: unknown) => failures.push(error))
   await rm(workspaceCwd, { recursive: true, force: true }).catch((error: unknown) => failures.push(error))
   await rm(persistenceRoot, { recursive: true, force: true }).catch((error: unknown) => failures.push(error))
   return failures
+}
+
+/** Dispose the booted tree; the final Host also removes both owned temp roots. */
+async function cleanupScaffoldWorld(ctx: Context, workspaceCwd: string, persistenceRoot: string,
+  preserveRoots = false): Promise<unknown[]> {
+  const failures: unknown[] = []
+  await Promise.resolve(ctx.fiber.dispose()).catch((error: unknown) => failures.push(error))
+  if (!preserveRoots || failures.length > 0) {
+    failures.push(...await removeScaffoldRoots(workspaceCwd, persistenceRoot))
+  }
+  return failures
+}
+
+interface RestartedScaffoldRoots {
+  readonly workspaceCwd: string
+  readonly persistenceRoot: string
+  readonly port: number
 }
 
 /**
@@ -499,7 +518,14 @@ async function cleanupScaffoldWorld(ctx: Context, workspaceCwd: string, persiste
  * @returns the running scaffold.
  */
 export async function launchWebScaffold(options: LaunchOptions = {}): Promise<WebScaffold> {
+  return await bootWebScaffold(options)
+}
+
+async function bootWebScaffold(options: LaunchOptions, reused?: RestartedScaffoldRoots): Promise<WebScaffold> {
   const mode = webSnapshotMode()
+  if (options.restartable === true && (options.publicMount !== undefined || (mode !== 'record' && options.replayFixture !== undefined))) {
+    throw new Error('Restartable Web scaffold requires a direct listener and no replay fixture outside record mode')
+  }
   const replayFixture = options.replayFixture === undefined
     ? undefined
     : await selectedSessionFixture(options.replayFixture, options.replayOverride !== undefined)
@@ -559,7 +585,7 @@ export async function launchWebScaffold(options: LaunchOptions = {}): Promise<We
     if (paddingLength < 0) throw new Error('compaction snapshot temporary root exceeds its fixed cwd text length')
     workspacePrefix += '-'.repeat(paddingLength)
   }
-  const workspaceCwd = await realpath(await mkdtemp(join(workspaceParent, workspacePrefix)))
+  const workspaceCwd = reused?.workspaceCwd ?? await realpath(await mkdtemp(join(workspaceParent, workspacePrefix)))
   // Isolated harness home: the settings/credentials rows resolve $AGENTRANS_HOME
   // paths at load, and an in-process boot must NEVER touch the developer's
   // real ~/.dsh document or credential file.
@@ -594,7 +620,7 @@ export async function launchWebScaffold(options: LaunchOptions = {}): Promise<We
   Object.assign(process.env, skillRootEnvironment)
   let persistenceRoot: string
   try {
-    persistenceRoot = await mkdtemp(join(tmpdir(), 'dsh-web-e2e-sessions-'))
+    persistenceRoot = reused?.persistenceRoot ?? await mkdtemp(join(tmpdir(), 'dsh-web-e2e-sessions-'))
   } catch (error) {
     const failures: unknown[] = [error]
     await rm(workspaceCwd, { recursive: true, force: true }).catch((cleanupError: unknown) => failures.push(cleanupError))
@@ -683,7 +709,7 @@ export async function launchWebScaffold(options: LaunchOptions = {}): Promise<We
     {
       id: 'webserver',
       config: {
-        host: '127.0.0.1', port: 0, compression: 'gzip',
+        host: '127.0.0.1', port: reused?.port ?? 0, compression: 'gzip',
         compressionLevel: 1, compressionThresholdBytes: 1024,
       },
     },
@@ -783,7 +809,12 @@ export async function launchWebScaffold(options: LaunchOptions = {}): Promise<We
       // Reproduce that link so a private bundle can import its own plugin.
       const installedLink = join(profileDir, 'node_modules', manifest.name)
       await mkdir(dirname(installedLink), { recursive: true })
-      await symlink(packageDir, installedLink, 'junction')
+      try {
+        await symlink(packageDir, installedLink, 'junction')
+      } catch (error) {
+        if (reused === undefined || !(error instanceof Error) || !('code' in error) || error.code !== 'EEXIST'
+          || await realpath(installedLink) !== await realpath(packageDir)) throw error
+      }
       return {
         packageName: manifest.name,
         packageDir,
@@ -973,6 +1004,55 @@ export async function launchWebScaffold(options: LaunchOptions = {}): Promise<We
     if (process.cwd() !== originalCwd) process.chdir(originalCwd)
   }
 
+  let disposed = false
+  const shutdown = async (preserveRoots = false): Promise<void> => {
+    if (disposed) return
+    disposed = true
+    const failures: unknown[] = []
+    if (mode !== 'record'
+      && replayFixture !== undefined
+      && options.replayProvidersOnly !== true
+      && compareReplaySession) {
+      try {
+        await assertReplaySession(
+          [...observedSessions.values()],
+          replayFixture,
+          compareReplaySession === 'read-only' ? 'replay' : mode,
+          `http://${browserHost}:${port}`,
+          harnessHome,
+        )
+      } catch (error) {
+        failures.push(error)
+      }
+    }
+    // Fixture-consumption check first, while the run's binding state is
+    // still authoritative — a scenario that drove fewer model calls than
+    // recorded fails here instead of drifting green. Skipped for
+    // replayProvidersOnly, whose fixture is validated call-free at boot.
+    if (!options.replayProvidersOnly) {
+      try {
+        replayHandle?.assertConsumed()
+      } catch (error) {
+        failures.push(error)
+      }
+    }
+    try {
+      stopObservingSessions()
+      failures.push(...await cleanupScaffoldWorld(ctx, workspaceCwd, persistenceRoot, preserveRoots))
+      if (publicProxy !== undefined) {
+        try {
+          await publicProxy.close()
+        } catch (error) {
+          failures.push(error)
+        }
+      }
+    } finally {
+      restoreCredentialEnvironment()
+      restoreSkillRootEnvironment()
+    }
+    if (failures.length > 0) throw new AggregateError(failures, 'web scaffold teardown failed')
+  }
+
   return {
     harnessHome,
     mode,
@@ -1004,50 +1084,19 @@ export async function launchWebScaffold(options: LaunchOptions = {}): Promise<We
         })
       })
     },
-    async close(): Promise<void> {
-      const failures: unknown[] = []
-      if (mode !== 'record'
-        && replayFixture !== undefined
-        && options.replayProvidersOnly !== true
-        && compareReplaySession) {
-        try {
-          await assertReplaySession(
-            [...observedSessions.values()],
-            replayFixture,
-            compareReplaySession === 'read-only' ? 'replay' : mode,
-            `http://${browserHost}:${port}`,
-            harnessHome,
-          )
-        } catch (error) {
-          failures.push(error)
-        }
-      }
-      // Fixture-consumption check first, while the run's binding state is
-      // still authoritative — a scenario that drove fewer model calls than
-      // recorded fails here instead of drifting green. Skipped for
-      // replayProvidersOnly, whose fixture is validated call-free at boot.
-      if (!options.replayProvidersOnly) {
-        try {
-          replayHandle?.assertConsumed()
-        } catch (error) {
-          failures.push(error)
-        }
-      }
+    close: () => shutdown(),
+    async restart(this: WebScaffold, whileStopped?: () => Promise<void>): Promise<void> {
+      if (options.restartable !== true || disposed) throw new Error('Web scaffold is not available to restart')
       try {
-        stopObservingSessions()
-        failures.push(...await cleanupScaffoldWorld(ctx, workspaceCwd, persistenceRoot))
-        if (publicProxy !== undefined) {
-          try {
-            await publicProxy.close()
-          } catch (error) {
-            failures.push(error)
-          }
-        }
-      } finally {
-        restoreCredentialEnvironment()
-        restoreSkillRootEnvironment()
+        await shutdown(true)
+        await whileStopped?.()
+        const restarted = await bootWebScaffold(options, { workspaceCwd, persistenceRoot, port })
+        Object.assign(this, restarted)
+      } catch (error) {
+        const cleanupFailures = await removeScaffoldRoots(workspaceCwd, persistenceRoot)
+        if (cleanupFailures.length > 0) throw new AggregateError([error, ...cleanupFailures], 'web scaffold restart failed')
+        throw error
       }
-      if (failures.length > 0) throw new AggregateError(failures, 'web scaffold teardown failed')
     },
   }
 }

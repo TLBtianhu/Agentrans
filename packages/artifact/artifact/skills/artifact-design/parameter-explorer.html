@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sample a scaled signal</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --art-bg: light-dark(#fbfcfd, #151922);
+      --art-ink: light-dark(#17202b, #edf2fb);
+      --art-muted: light-dark(#536377, #a1aec2);
+      --art-accent: light-dark(#4f56c7, #a5b4fc);
+      --art-border: light-dark(#d7deea, #39445a);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--art-bg);
+      color: var(--art-ink);
+      font: 15px/1.45 system-ui, sans-serif;
+      font-variant-numeric: tabular-nums;
+    }
+    main { max-inline-size: 46rem; margin-inline: auto; padding: 0.625rem; display: grid; gap: 0.5rem; }
+    h1, p { margin: 0; overflow-wrap: anywhere; }
+    h1 { font-size: 1.2rem; }
+    header p { color: var(--art-muted); }
+    svg { display: block; inline-size: 100%; block-size: auto; max-block-size: 8.5rem; border: 1px solid var(--art-border); border-radius: 0.55rem; }
+    .axis { stroke: var(--art-border); }
+    .trace { stroke: var(--art-accent); fill: none; }
+    .probe { fill: var(--art-accent); }
+    .probe-target { fill: transparent; cursor: ew-resize; touch-action: none; }
+    .controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
+    .field { min-inline-size: 0; overflow-wrap: anywhere; }
+    .label-row { display: flex; flex-wrap: wrap; gap: 0.2rem 0.75rem; justify-content: space-between; }
+    .field input { display: block; inline-size: 100%; min-block-size: 1.65rem; margin: 0.15rem 0 0; accent-color: var(--art-accent); }
+    :focus-visible { outline: 2px solid var(--art-accent); outline-offset: 0.2rem; }
+    .readings { border-block-start: 1px solid var(--art-border); padding-block-start: 0.35rem; }
+    .readings output { font-weight: 650; }
+    @media (max-width: 17.5rem) { .controls { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main data-artifact-template="parameter-explorer">
+    <header>
+      <h1>Sample a scaled signal</h1>
+      <p>Adjust gain or drag the probe.</p>
+    </header>
+    <p class="readings" data-explorer-readings>Signal <output id="result" for="gain probe" aria-label="Signal"></output></p>
+    <svg id="stage" data-explorer-stage viewBox="0 0 400 140" role="group" aria-label="Scaled signal plot">
+      <path class="axis" d="M30 15 V112 H370" fill="none"/>
+      <line id="trace" class="trace" x1="30" y1="112" x2="370" y2="32" stroke-width="2"/>
+      <circle id="probe-dot" class="probe" r="6" pointer-events="none"/>
+      <circle id="probe-target" class="probe-target" r="25" role="img" aria-label="Probe marker"/>
+    </svg>
+    <section class="controls" data-explorer-controls aria-label="Controls">
+      <div class="field">
+        <div class="label-row"><label for="gain">Gain</label><span id="gain-value" aria-hidden="true"></span></div>
+        <input id="gain" type="range" min="0.5" max="1.5" value="1" step="0.1">
+      </div>
+      <div class="field">
+        <div class="label-row"><label for="probe">Probe position</label><span id="probe-value" aria-hidden="true"></span></div>
+        <input id="probe" type="range" min="0" max="10" value="4" step="0.1">
+      </div>
+    </section>
+  </main>
+  <script>
+    const stage = document.getElementById('stage')
+    const trace = document.getElementById('trace')
+    const probeDot = document.getElementById('probe-dot')
+    const probeTarget = document.getElementById('probe-target')
+    const gain = document.getElementById('gain')
+    const probe = document.getElementById('probe')
+    const gainValue = document.getElementById('gain-value')
+    const probeValue = document.getElementById('probe-value')
+    const result = document.getElementById('result')
+    const plot = { left: 30, width: 340, baseline: 112, units: 10, scale: 6 }
+
+    function readState() {
+      const position = probe.valueAsNumber
+      const multiplier = gain.valueAsNumber
+      return { position, gain: multiplier, signal: position * multiplier }
+    }
+
+    function render(state) {
+      const x = plot.left + state.position / plot.units * plot.width
+      const y = plot.baseline - state.signal * plot.scale
+      trace.setAttribute('y2', String(plot.baseline - plot.units * state.gain * plot.scale))
+      for (const marker of [probeDot, probeTarget]) {
+        marker.setAttribute('cx', String(x))
+        marker.setAttribute('cy', String(y))
+      }
+      gainValue.textContent = state.gain.toFixed(1) + '×'
+      probeValue.textContent = state.position.toFixed(1)
+      result.value = state.signal.toFixed(2)
+    }
+
+    function update() {
+      const state = readState()
+      render(state)
+      window.artifactRuntime?.reportState(state)
+    }
+
+    gain.addEventListener('input', update)
+    probe.addEventListener('input', update)
+    probeTarget.addEventListener('pointerdown', event => {
+      if (event.isPrimary && event.button === 0) stage.setPointerCapture(event.pointerId)
+    })
+    stage.addEventListener('pointermove', event => {
+      if (!stage.hasPointerCapture(event.pointerId)) return
+      const transform = stage.getScreenCTM()
+      if (!transform) return
+      const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(transform.inverse())
+      const position = (point.x - plot.left) / plot.width * plot.units
+      probe.value = Math.max(0, Math.min(plot.units, position)).toFixed(1)
+      update()
+    })
+
+    render(readState())
+    window.artifactRuntime?.ready({ state: readState })
+  </script>
+</body>
+</html>

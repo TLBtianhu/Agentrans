@@ -10,21 +10,25 @@ import z from '@agentrans/schemastery'
 import { z as zod, type ZodType } from 'zod'
 import type { Agent } from '@agentrans/agent'
 import { brandString } from '@agentrans/brand'
-import { createUserMessage, freezeMessage, HarnessError, type UserMessage } from '@agentrans/llm'
+import { createUserMessage, freezeMessage, HarnessError, MessageId, type UserMessage } from '@agentrans/llm'
+import { SessionId, SessionSeq } from '@agentrans/session'
 import { Remote, RemoteError, TypertRemoteService, principalOf } from '@agentrans/typert-protocol'
 import { assertNever, snapshotJsonValue } from '@agentrans/util-values'
 import { SessionInputAdmissionError } from '@agentrans/session-input'
 import type { ProjectionDefinition, ProjectionHandle } from '@agentrans/session-projection'
 import type {
-  ArtifactId, ArtifactComparison, ArtifactPrepareInput, ArtifactRecordResult, ArtifactSnapshot, ArtifactSnapshotBase,
+  ArtifactId, ArtifactComparison, ArtifactPrepareInput, ArtifactRecordResult, ArtifactSnapshot, ArtifactSnapshotBase, SceneArtifactSnapshot,
   ArtifactObservationId, ArtifactObservations, SavedParticleObservation,
   ArtifactObservationComparisonResult, ParticleObservationComparison, SavedParticleObservationRef,
-  ArtifactExportSource, ArtifactExportSourceSelection, ArtifactActionRequest,
+  ArtifactExportSource, ArtifactExportSourceSelection, ArtifactActionRequest, ArtifactPlotContinuation, ArtifactParticleContinuation,
+  ArtifactCsvContinuation, CsvBarChartPrepareInput,
 } from './types.ts'
 import { normalizeSceneSpec } from './scene.ts'
+import { analyzeFunctionPlotSelection } from './renderers/function-analysis.ts'
 import {
-  createParticleCheckpoint, observeParticleState, restoreParticleCheckpoint, ParticleRuntimeError, type ParticleCheckpoint,
-  type ParticleObservation,
+  createParticleCheckpoint, createParticleState, observeParticleState, restoreParticleCheckpoint,
+  PARTICLE_RUNTIME_VERSION, ParticleRuntimeError,
+  type ParticleCheckpoint, type ParticleObservation,
 } from './particle-runtime.ts'
 import { buildParticleObservationComparison, ParticleObservationComparisonError } from './observation-comparison.ts'
 
@@ -105,6 +109,43 @@ function comparisonOf(value: unknown): ArtifactComparison {
   return { group: value.group, role: value.role }
 }
 
+const continuationSourceSchema = zod.object({
+  sessionId: zod.string().min(1).transform(SessionId),
+  eventSeq: zod.number().int().nonnegative().transform(SessionSeq),
+  messageId: zod.string().min(1).transform(MessageId),
+  artifactId: zod.string().regex(ARTIFACT_ID_PATTERN).transform(value => brandString<ArtifactId>(value)),
+  revision: zod.number().int().positive(),
+}).strict()
+
+const CONTINUED_CSV_ID = /^continued-csv-[a-f0-9]{32}$/
+
+const csvContinuationSchema = zod.object({ source: continuationSourceSchema, groupKey: zod.string().max(256) })
+  .strict() satisfies ZodType<ArtifactCsvContinuation>
+
+const plotContinuationSchema = zod.object({
+  source: continuationSourceSchema,
+  baseline: zod.object({
+    functionId: zod.string().min(1),
+    x: zod.number(),
+    parameters: zod.record(zod.string(), zod.number()),
+    values: zod.object({
+      value: zod.number().nullable(),
+      derivative: zod.number().nullable(),
+      integral: zod.number().nullable(),
+    }).strict(),
+  }).strict(),
+}).strict() satisfies ZodType<ArtifactPlotContinuation>
+
+const particleContinuationSchema = zod.object({
+  source: continuationSourceSchema,
+  baseline: zod.object({
+    checkpoint: zod.object({
+      runtimeVersion: zod.literal(PARTICLE_RUNTIME_VERSION),
+      stepCount: zod.number().int().nonnegative(),
+    }).strict(),
+  }).strict(),
+}).strict() satisfies ZodType<ArtifactParticleContinuation>
+
 function snapshotOf(value: unknown, maxSourceBytes?: number): ArtifactSnapshot {
   if (!isRecord(value)) return badInput('artifact snapshot must be an object')
   if (value.format !== 'html' && value.format !== 'scene') return badInput('artifact format must be html or scene')
@@ -120,13 +161,62 @@ function snapshotOf(value: unknown, maxSourceBytes?: number): ArtifactSnapshot {
     ...value.comparison === undefined ? {} : { comparison: comparisonOf(value.comparison) },
   }
   if (value.format === 'scene') {
+    let spec: ReturnType<typeof normalizeSceneSpec>
     try {
-      return { ...common, format: 'scene', spec: normalizeSceneSpec(value.spec) }
+      spec = normalizeSceneSpec(value.spec)
     } catch (error) {
       throw new ArtifactError(error instanceof Error ? error.message : 'invalid SceneSpec', 'BAD_SCENE_SPEC')
     }
+    if (spec.kind === 'csv-bar-chart' && (common.presentation !== 'inline' || common.comparison !== undefined)) {
+      return badInput('CSV charts require a standalone inline Artifact')
+    }
+    if (value.csvContinuation !== undefined) {
+      if (spec.kind !== 'csv-bar-chart' || common.revision !== 1 || !CONTINUED_CSV_ID.test(common.artifactId)
+        || value.continuation !== undefined || value.particleContinuation !== undefined) return badInput('invalid CSV continuation source')
+      const parsed = csvContinuationSchema.safeParse(value.csvContinuation)
+      if (!parsed.success || parsed.data.source.artifactId === common.artifactId
+        || !spec.groups.some(group => group.key === parsed.data.groupKey)) return badInput('invalid CSV continuation group or origin')
+      return { ...common, format: 'scene', spec, csvContinuation: parsed.data }
+    }
+    if (spec.kind === 'csv-bar-chart' && spec.filter !== undefined) return badInput('Filtered CSV sources require a confirmed analysis')
+    if (value.particleContinuation !== undefined) {
+      if (spec.kind !== 'particle-system' || common.revision !== 1 || common.comparison !== undefined || value.continuation !== undefined) {
+        return badInput('particle continuation requires the first revision of a standalone particle system')
+      }
+      const parsed = particleContinuationSchema.safeParse(value.particleContinuation)
+      if (!parsed.success) return badInput('invalid particle continuation')
+      restoreParticleCheckpoint(spec, parsed.data.baseline.checkpoint)
+      return { ...common, format: 'scene', spec, particleContinuation: parsed.data }
+    }
+    if (value.continuation === undefined) return { ...common, format: 'scene', spec }
+    if (spec.kind !== 'function-plot' || common.revision !== 1 || common.comparison !== undefined
+      || !Object.values(spec.parameters).some(({ min, max }) => min < max)) {
+      return badInput('continuation requires the first revision of a standalone function plot with an adjustable parameter')
+    }
+    const parsed = plotContinuationSchema.safeParse(value.continuation)
+    if (!parsed.success) return badInput('invalid function-plot continuation')
+    const analysis = analyzeFunctionPlotSelection(spec, parsed.data.baseline)
+    const recorded = parsed.data.baseline.values
+    if (analysis === undefined || analysis.value !== recorded.value
+      || analysis.derivative !== recorded.derivative || analysis.integral !== recorded.integral) {
+      return badInput('function-plot continuation readings do not match the source and baseline')
+    }
+    return { ...common, format: 'scene', spec, continuation: parsed.data }
   }
   return { ...common, format: 'html', source: sourceOf(value.source, maxSourceBytes) }
+}
+
+function snapshotForWrite(value: unknown, maxSourceBytes: number): ArtifactSnapshot {
+  const snapshot = snapshotOf(value, maxSourceBytes)
+  // Continuing a saved plot preserves its exact source, including any legacy IDs.
+  if (snapshot.format !== 'scene' || snapshot.spec.kind !== 'function-plot' || snapshot.continuation !== undefined) return snapshot
+
+  const ids = new Set<string>()
+  for (const [index, { id }] of snapshot.spec.functions.entries()) {
+    if (ids.has(id)) throw new ArtifactError(`/functions/${index}/id: must be unique within the plot`, 'BAD_SCENE_SPEC')
+    ids.add(id)
+  }
+  return snapshot
 }
 
 function positiveLimit(value: number, name: string): number {
@@ -138,10 +228,20 @@ function positiveLimit(value: number, name: string): number {
 
 interface ArtifactState {
   readonly current: Readonly<Record<string, ArtifactSnapshot>>
+  readonly earlier: Readonly<Record<string, SceneArtifactSnapshot>>
   readonly observations: ArtifactObservations
   readonly sent: Readonly<Record<string, readonly ArtifactObservationId[]>>
   readonly sentComparisons: Readonly<Record<string, true>>
   readonly inheritedEventCount: number
+}
+
+function reviewableRevision(snapshot: ArtifactSnapshot | undefined): snapshot is SceneArtifactSnapshot {
+  return snapshot?.format === 'scene'
+    && (snapshot.spec.kind === 'function-plot' || snapshot.spec.kind === 'particle-system' || snapshot.spec.kind === 'csv-bar-chart')
+}
+
+function revisionKey(artifactId: ArtifactId, revision: number): string {
+  return `${artifactId}:${revision}`
 }
 
 function observationIdOf(value: unknown): ArtifactObservationId {
@@ -321,13 +421,20 @@ function projectionSchema<T>(parse: (value: unknown) => T): ZodType<T> {
 
 const artifactProjection = {
   key: 'artifactObservations',
-  stateVersion: 3,
+  stateVersion: 9,
   stateSchema: projectionSchema<ArtifactState>((value) => {
     if (!isRecord(value) || !isRecord(value.current)) return badInput('Artifact projection requires current snapshots')
     const current = Object.fromEntries(Object.entries(value.current).map(([id, snapshot]) => {
       const parsed = snapshotOf(snapshot)
       if (parsed.artifactId !== artifactIdOf(id)) return badInput('Artifact projection snapshot key does not match its identity')
       return [id, parsed]
+    }))
+    if (!isRecord(value.earlier)) return badInput('Artifact projection requires earlier Scene revisions')
+    const earlier = Object.fromEntries(Object.entries(value.earlier).map(([key, snapshot]) => {
+      const parsed = snapshotOf(snapshot)
+      if (!reviewableRevision(parsed) || key !== revisionKey(parsed.artifactId, parsed.revision)
+        || (current[parsed.artifactId]?.revision ?? 0) <= parsed.revision) return badInput('Invalid earlier Artifact revision')
+      return [key, parsed]
     }))
     const observations = observationMapOf(value.observations)
     if (!isRecord(value.sent) || !Number.isSafeInteger(value.inheritedEventCount)
@@ -342,15 +449,19 @@ const artifactProjection = {
       return [artifactIdOf(id), parsed]
     }))
     const sentComparisons = comparisonReceiptsOf(value.sentComparisons, observations)
-    return { current, observations, sent, sentComparisons, inheritedEventCount: value.inheritedEventCount }
+    return { current, earlier, observations, sent, sentComparisons, inheritedEventCount: value.inheritedEventCount }
   }),
   init: (_header, inheritedEventCount): ArtifactState => ({
-    current: {}, observations: {}, sent: {}, sentComparisons: {}, inheritedEventCount,
+    current: {}, earlier: {}, observations: {}, sent: {}, sentComparisons: {}, inheritedEventCount,
   }),
   apply: (state, event) => {
     if (event.type === 'artifact/upsert') {
       const snapshot = snapshotOf(event.data)
-      return { ...state, current: { ...state.current, [snapshot.artifactId]: snapshot } }
+      const previous = state.current[snapshot.artifactId]
+      const earlier = reviewableRevision(previous) && previous.revision < snapshot.revision
+        ? { ...state.earlier, [revisionKey(previous.artifactId, previous.revision)]: previous }
+        : state.earlier
+      return { ...state, earlier, current: { ...state.current, [snapshot.artifactId]: snapshot } }
     }
     if (event.type === 'artifact/observations') {
       const id = artifactIdOf(event.data.artifactId)
@@ -440,7 +551,7 @@ export class ArtifactService extends TypertRemoteService {
   /**
    * Resolve a Scene selection to a complete original source and validated replay point.
    * @param agent - Agent whose prepared Session owns the source and saved observations.
-   * @param selection - Current source revision or a previously saved observation reference.
+   * @param selection - Current revision, historical revision, or saved observation reference.
    * @returns Independent complete source values; particle coordinates are recomputed.
    * @throws {ArtifactError} For missing, stale, or unsupported sources.
    * @throws {ParticleRuntimeError} For invalid replay conditions.
@@ -452,6 +563,15 @@ export class ArtifactService extends TypertRemoteService {
       return { artifact: saved.artifact, checkpoint: saved.checkpoint, observationId: saved.observationId }
     }
     const expectedRevision = revisionOf(selection.revision)
+    if (selection.kind === 'revision') {
+      const saved = this.projection.stateOf(agent.session).earlier[revisionKey(id, expectedRevision)]
+      if (saved === undefined) throw new ArtifactError('Artifact source revision is unavailable', 'ARTIFACT_NOT_FOUND')
+      const artifact = structuredClone(saved)
+      if (artifact.spec.kind !== 'particle-system') return { artifact }
+      const baseline = artifact.particleContinuation?.baseline.checkpoint
+      const state = baseline === undefined ? createParticleState(artifact.spec) : restoreParticleCheckpoint(artifact.spec, baseline)
+      return { artifact, checkpoint: createParticleCheckpoint(state) }
+    }
     const current = this.current(agent, id)
     if (current === undefined) throw new ArtifactError('Artifact source is unavailable', 'ARTIFACT_NOT_FOUND')
     if (current.revision !== expectedRevision) throw new ArtifactError('Artifact source revision changed', 'STALE_REVISION')
@@ -473,12 +593,27 @@ export class ArtifactService extends TypertRemoteService {
    * `BAD_SOURCE`, or `BAD_INPUT`; no Session event is appended.
    */
   prepare(agent: Agent, input: ArtifactPrepareInput): ArtifactSnapshot {
+    return this.prepareSnapshot(agent, input, false)
+  }
+
+  /**
+   * Prepare an inline chart from authoritative results computed by a Host attachment operation.
+   * @param agent - Agent whose Session supplies the current Artifact revision.
+   * @param input - Host-calculated CSV source and compare-and-set revision fields.
+   * @returns The pending source to commit after the authoritative tool result succeeds.
+   */
+  prepareCsvBarChart(agent: Agent, input: CsvBarChartPrepareInput): ArtifactSnapshot {
+    return this.prepareSnapshot(agent, { ...input, format: 'scene', presentation: 'inline' }, true)
+  }
+
+  private prepareSnapshot(agent: Agent, input: ArtifactPrepareInput, hostCsv: boolean): ArtifactSnapshot {
     if (!isRecord(input)) return badInput('artifact input must be an object')
     const action: unknown = input.action
     if (action !== 'create' && action !== 'update') {
       return badInput('action must be create or update')
     }
     const artifactId = artifactIdOf(input.artifactId)
+    if (CONTINUED_CSV_ID.test(artifactId)) return badInput('This Artifact identity is reserved for confirmed CSV analysis')
     const writers = this.writersOf(agent)
     if (writers.has(artifactId)) {
       throw new ArtifactError(
@@ -489,6 +624,10 @@ export class ArtifactService extends TypertRemoteService {
     writers.set(artifactId, Symbol(artifactId))
     try {
       const current = this.current(agent, artifactId)
+      const currentIsCsv = current?.format === 'scene' && current.spec.kind === 'csv-bar-chart'
+      if (!hostCsv && (input.spec?.kind === 'csv-bar-chart' || currentIsCsv)) {
+        return badInput('Use attachment_csv to create or update a CSV chart')
+      }
       let revision: number
       if (action === 'create') {
         if (input.baseRevision !== undefined) return badInput('create does not accept baseRevision')
@@ -507,12 +646,15 @@ export class ArtifactService extends TypertRemoteService {
             'STALE_REVISION',
           )
         }
+        if (hostCsv && !currentIsCsv) {
+          return badInput('CSV chart update requires an existing CSV chart')
+        }
         if (current.revision === Number.MAX_SAFE_INTEGER) {
           return badInput('artifact revision cannot exceed the maximum safe integer')
         }
         revision = current.revision + 1
       }
-      return snapshotOf({
+      return snapshotForWrite({
         artifactId,
         revision,
         format: input.format ?? 'html',
@@ -538,6 +680,9 @@ export class ArtifactService extends TypertRemoteService {
   commit(agent: Agent, snapshot: ArtifactSnapshot): void {
     const writers = this.writersOf(agent)
     const current = this.current(agent, snapshot.artifactId)
+    if (current?.format === 'scene' && current.csvContinuation !== undefined) {
+      return badInput('A confirmed CSV analysis is immutable')
+    }
     if (current === undefined ? snapshot.revision !== 1 : snapshot.revision !== current.revision + 1) {
       writers.delete(snapshot.artifactId)
       throw new ArtifactError(
@@ -548,7 +693,11 @@ export class ArtifactService extends TypertRemoteService {
       )
     }
     writers.delete(snapshot.artifactId)
-    agent.session.append('artifact/upsert', snapshotOf(snapshot, this.maxSourceBytes))
+    const committed = snapshotForWrite(snapshot, this.maxSourceBytes)
+    if (committed.format === 'scene' && committed.csvContinuation !== undefined && committed.csvContinuation.source.sessionId !== agent.session.id) {
+      return badInput('CSV analysis must be confirmed in the receiving Session')
+    }
+    agent.session.append('artifact/upsert', committed)
   }
 
   /**

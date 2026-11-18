@@ -13,7 +13,7 @@ import { createClientTest, webApp } from '@agentrans/client-test-runtime/src/ass
 import { ClientSessions, SessionCreateError, SessionForkError, SessionBranchResultError } from '../src/client/sessions/service.ts'
 import { scopeOf } from '../src/client/scope.ts'
 import type {
-  SessionAssistantStreamBaseline, SessionFollowFrame, SessionFollowRequest, SessionHistoryRecord,
+  SessionAssistantStreamBaseline, SessionFollowFrame, SessionFollowRequest, SessionHistoryRecord, SessionRequestId,
 } from '../src/types.ts'
 import { FOLLOW, err, followScript, sessionWorld } from './remote/session.client.ts'
 
@@ -934,6 +934,27 @@ describe('create', () => {
 })
 
 describe('fork', () => {
+  it('forwards the exact inquiry retry and projects the same child and anchor after it succeeds', async ({ bench }) => {
+    const b = bench()
+    const sessionId = sid('inquiry-parent')
+    const childId = sid('inquiry-child')
+    const inquiry = { messageSeq: 5, messageId: MessageId('answer'), start: 2, end: 11, excerpt: 'diffusion' }
+    const requestId = '3b52a9d0-96fe-4cd3-9cc5-7745e463f0df' as SessionRequestId
+    const input = { sessionId, atSeq: 7, inquiry, requestId }
+    const onCreated = vi.fn<(childId: SessionId) => void>()
+    const error = new RemoteError('session/workspace-attach-failed', 'attach failed', {
+      sessionId: childId, workspaceId: 'workspace',
+    })
+    b.mock.remote.session.fork.mockResolvedValueOnce(err(error)).mockResolvedValueOnce(ok({ sessionId: childId }))
+    await expect(b.svc.fork({ ...input, onCreated })).rejects.toMatchObject({ rpcError: error })
+    expect(onCreated).not.toHaveBeenCalled()
+    await expect(b.svc.fork({ ...input, onCreated })).resolves.toBe(childId)
+    expect(b.mock.remote.session.fork.mock.calls).toEqual([[input], [input]])
+    expect(onCreated).toHaveBeenCalledExactlyOnceWith(childId)
+    expect(b.svc.list.getSnapshot().byId[childId]).toMatchObject({ parentId: sessionId, inquiry })
+    expect(b.mock.log.requests(FOLLOW)).toHaveLength(0)
+  })
+
   it.for([undefined, false, true])('forwards migration permission %s without opening the source', async (allowMigration, { bench }) => {
     const b = bench()
     b.mock.remote.session.fork.mockResolvedValueOnce(ok({ sessionId: sid('child') }))

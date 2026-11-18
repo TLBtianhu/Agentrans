@@ -2,19 +2,21 @@
 import SessionProjectionRegistry from '@agentrans/session-projection'
 
 import { describe, expect, it, onTestFinished, vi } from 'vitest'
+import { brandString } from '@agentrans/brand'
 import { Context } from '@agentrans/cordis'
 import AgentRegistry from '@agentrans/agent'
 import type { Agent, AgentHandle, CreateAgentOptions } from '@agentrans/agent'
 import { mountAgentLoopTestDependencies, mountAgentLoopTestHarness } from '@agentrans/agent-loop-testkit'
 import { BasicCompactionEngine } from '@agentrans/compaction-basic'
 import { MockAdapter, textResponse } from '../../../core/agent-loop/tests/mock-adapter.ts'
-import { ToolCallId, createMessage, createUserMessage, ReasoningEffortId } from '@agentrans/llm'
+import { ToolCallId, createAssistantMessage, createMessage, createUserMessage, ReasoningEffortId } from '@agentrans/llm'
 import SessionStore, { TOOL_OUTCOME_UNKNOWN, SESSION_FORMAT_VERSION, SessionLogOffset, SessionSeq } from '@agentrans/session'
 import type { Session, SessionEvent, SessionHeader, SessionId } from '@agentrans/session'
 import { SessionPersistenceRevision, type SessionPersistenceSnapshot } from '@agentrans/session-persistence'
 import SystemPrompt from '@agentrans/system-prompt'
 import TokenMeter from '@agentrans/token-meter'
-import type { Workspace } from '@agentrans/workspace'
+import { WorkspaceId, type Workspace } from '@agentrans/workspace'
+import type { SessionRequestId } from '../src/types.ts'
 import {
   createSessionTestRemote, installSessionReadTestServices, testSessionPersistence,
 } from './test-remote.ts'
@@ -28,7 +30,7 @@ function request<P>(payload: P): P {
   return payload
 }
 
-async function composed(workspaces: readonly Workspace[] = []): Promise<Context> {
+async function composed(workspaces: readonly Pick<Workspace, 'id' | 'sessionIds' | 'attachSession'>[] = []): Promise<Context> {
   const ctx = new Context()
   await ctx.plugin(SessionStore)
   await ctx.plugin(SystemPrompt, { personaPrefix: '' })
@@ -96,7 +98,164 @@ const remote = async (ctx: Context) => await createSessionTestRemote(ctx, {
   cwd: '/tmp',
 })
 
+function inquiryFork(ctx: Context) {
+  const source = ctx.sessions.create(sid('retry-inquiry-parent'), { meta: { cwd: '/proj' } })
+  source.append('turn/start', { turn: 1 })
+  const answer = source.append('assistant/message', { turn: 1, step: 1, stream: [], message: createAssistantMessage({
+    source: { provider: 'test', model: 'fixture' }, content: [{ type: 'text', text: 'Diffusion moves particles.' }],
+  }) }, { surfaceOp: 'append' })
+  const end = source.append('turn/end', { turn: 1, reason: { kind: 'completed' } })
+  return {
+    source,
+    input: { sessionId: source.id, atSeq: end.seq, requestId: brandString<SessionRequestId>('1fa3576a-eced-42c5-8bf7-886aa3b86165'),
+      inquiry: { messageSeq: answer.seq, messageId: answer.data.message.id, start: 0, end: 9, excerpt: 'Diffusion' } },
+  }
+}
+
 describe('sessions.fork', () => {
+  it('records only the exact selected final answer passage and catalogs the ordinary child', async () => {
+    const ctx = await composed()
+    onTestFinished(() => ctx.fiber.dispose())
+    const source = ctx.sessions.create(sid('inquiry-parent'), { meta: { cwd: '/proj' } })
+    const model = { provider: 'test', model: 'fixture' }
+    source.append('turn/start', { turn: 1 })
+    const intermediate = source.append('assistant/message', { turn: 1, step: 1, stream: [],
+      message: createAssistantMessage({ source: model, content: [{ type: 'text', text: 'diffusion' }] }) }, { surfaceOp: 'append' })
+    const answer = source.append('assistant/message', { turn: 1, step: 2, stream: [],
+      message: createAssistantMessage({ source: model, content: [
+        { type: 'reasoning', text: 'private reasoning' },
+        { type: 'text', text: 'A😀 ' },
+        { type: 'text', text: 'diffusion example' },
+      ] }) }, { surfaceOp: 'append' })
+    const end = source.append('turn/end', { turn: 1, reason: { kind: 'completed' } })
+    const inquiry = { messageSeq: answer.seq, messageId: answer.data.message.id, start: 1, end: 13, excerpt: '😀 diffusion' }
+    const before = source.snapshotEvents()
+    const service = await remote(ctx)
+    const input = { sessionId: source.id, atSeq: end.seq, inquiry }
+    for (const invalid of [
+      { sessionId: source.id, inquiry },
+      { ...input, atSeq: answer.seq },
+      { ...input, inquiry: { ...inquiry, excerpt: 'private text' } },
+      { ...input, inquiry: { ...inquiry, start: 2, excerpt: '\uDE00 diffusion' } },
+      { ...input, inquiry: { ...inquiry, messageId: intermediate.data.message.id } },
+      { ...input, inquiry: { messageSeq: intermediate.seq, messageId: intermediate.data.message.id, start: 0, end: 9, excerpt: 'diffusion' } },
+    ]) {
+      await expect(service.fork(invalid)).resolves.toMatchObject({ ok: false, error: { code: 'session/fork-inquiry-invalid' } })
+    }
+    const forked = await service.fork(input)
+    if (!forked.ok) throw forked.error
+    const child = ctx.sessions.get(forked.value.sessionId)
+    if (child === undefined) throw new Error('Expected an ordinary child')
+    expect(child.header).toMatchObject({ parentSession: source.id, isSeeded: true, inquiry })
+    expect(child.inheritedEventCount).toBe(end.seq + 1)
+    expect(source.snapshotEvents()).toEqual(before)
+    expect(child.snapshotEvents().slice(child.inheritedEventCount).map(event => event.type)).toEqual(['session/end-seed'])
+    const listed = await service.list({})
+    if (!listed.ok) throw listed.error
+    expect(listed.value.items.find(item => item.sessionId === child.id)).toMatchObject({ parentSessionId: source.id, inquiry })
+    await expect(service.fork({ ...input, sessionId: child.id }))
+      .resolves.toMatchObject({ ok: false, error: { code: 'session/fork-inquiry-invalid' } })
+  })
+
+  it('reattaches the same inquiry after workspace attachment fails following child publication', async () => {
+    const accounted: SessionId[] = []
+    const attachSession = vi.fn((childId: SessionId): Promise<void> => {
+      accounted.push(childId)
+      return Promise.resolve()
+    }).mockRejectedValueOnce(new Error('workspace storage unavailable'))
+    const workspace = { id: WorkspaceId('inquiry-workspace'), sessionIds: accounted, attachSession }
+    const ctx = await composed([workspace])
+    onTestFinished(() => ctx.fiber.dispose())
+    const { source, input } = inquiryFork(ctx)
+    accounted.push(source.id)
+    const service = await remote(ctx)
+    const flush = vi.spyOn(ctx.sessions, 'flush')
+    const failed = await service.fork(input)
+    if (failed.ok || failed.error.code !== 'session/workspace-attach-failed') throw new Error('Expected workspace attachment failure')
+    const childId = failed.error.details.sessionId
+    const child = ctx.sessions.get(childId)
+    expect(child?.header).toMatchObject({ parentSession: source.id, inquiry: input.inquiry })
+    expect(accounted).toEqual([source.id])
+    expect(flush).toHaveBeenCalledExactlyOnceWith(child)
+    expect(flush.mock.invocationCallOrder[0]).toBeLessThan(attachSession.mock.invocationCallOrder[0]!)
+
+    await expect(service.fork(input)).resolves.toEqual({ ok: true, value: { sessionId: childId } })
+    expect(attachSession.mock.calls).toEqual([[childId], [childId]])
+    expect(accounted).toEqual([source.id, childId])
+    expect(ctx.sessions.get(childId)).toBe(child)
+    expect(ctx.sessions.list().map(session => session.id)).toEqual([source.id, childId])
+  })
+
+  it('recovers the persisted inquiry when its successful response was lost before a Host restart', async () => {
+    const ctx = await composed()
+    onTestFinished(() => ctx.fiber.dispose())
+    const { source, input } = inquiryFork(ctx)
+    const service = await remote(ctx)
+    await expect(service.fork(input)).resolves.toMatchObject({ ok: true })
+    const child = ctx.sessions.list().find(session => session.header.parentSession === source.id)
+    if (child === undefined) throw new Error('Expected the fork to publish before its response is discarded')
+
+    const restarted = await composed()
+    onTestFinished(() => restarted.fiber.dispose())
+    const sessions = [source, child]
+    restarted.provide('sessionPersistence', testSessionPersistence(restarted, {
+      list: () => Promise.resolve(sessions.map(session => session.header)),
+      inspect: (sessionId) => {
+        const session = sessions.find(item => item.id === sessionId)
+        return Promise.resolve(session === undefined ? undefined : { meta: session.header,
+          events: session.snapshotEvents(), inheritedEventCount: session.inheritedEventCount })
+      },
+    }) as never)
+    const retry = await remote(restarted)
+    const create = vi.spyOn(restarted.agents, 'create')
+    const resume = vi.spyOn(restarted.agents, 'resume')
+    await expect(retry.fork({ ...input, requestId: brandString<SessionRequestId>(input.requestId.toUpperCase()) }))
+      .resolves.toEqual({ ok: true, value: { sessionId: child.id } })
+    await expect(retry.fork({ ...input, inquiry: { ...input.inquiry, excerpt: 'moves', start: 10, end: 15 } }))
+      .resolves.toMatchObject({ ok: false, error: { code: 'session/fork-inquiry-conflict' } })
+    expect(create).not.toHaveBeenCalled()
+    expect(resume).not.toHaveBeenCalled()
+    expect(restarted.sessions.list()).toEqual([])
+  })
+
+  it('joins overlapping identical inquiry forks and rejects a different passage using the same request', async () => {
+    const accounted: SessionId[] = []
+    const entered = Promise.withResolvers<SessionId>()
+    const release = Promise.withResolvers<undefined>()
+    const attachSession = vi.fn((childId: SessionId) => {
+      entered.resolve(childId)
+      return release.promise.then(() => { accounted.push(childId) })
+    })
+    const workspace = { id: WorkspaceId('inquiry-workspace'), sessionIds: accounted, attachSession }
+    const ctx = await composed([workspace])
+    onTestFinished(() => ctx.fiber.dispose())
+    const { source, input } = inquiryFork(ctx)
+    accounted.push(source.id)
+    const service = await remote(ctx)
+    await expect(service.fork({ sessionId: source.id, requestId: input.requestId }))
+      .resolves.toMatchObject({ ok: false, error: { code: 'gateway/bad-request' } })
+    await expect(service.fork({ ...input, requestId: brandString<SessionRequestId>('invalid') }))
+      .resolves.toMatchObject({ ok: false, error: { code: 'gateway/bad-request' } })
+    const create = vi.spyOn(ctx.agents, 'create')
+    const first = service.fork(input)
+    const repeated = service.fork(input)
+    try {
+      const childId = await entered.promise
+      await expect(service.fork({ ...input, inquiry: { ...input.inquiry, excerpt: 'moves', start: 10, end: 15 } }))
+        .resolves.toMatchObject({ ok: false, error: { code: 'session/fork-inquiry-conflict' } })
+      release.resolve(undefined)
+      await expect(Promise.all([first, repeated])).resolves.toEqual([
+        { ok: true, value: { sessionId: childId } }, { ok: true, value: { sessionId: childId } },
+      ])
+      expect(create).toHaveBeenCalledOnce()
+      expect(attachSession).toHaveBeenCalledExactlyOnceWith(childId)
+      expect(accounted).toEqual([source.id, childId])
+    } finally {
+      release.resolve(undefined)
+      await Promise.allSettled([first, repeated])
+    }
+  })
+
   it.each([
     { allowMigration: undefined, status: 'current' },
     { allowMigration: false, status: 'current' },

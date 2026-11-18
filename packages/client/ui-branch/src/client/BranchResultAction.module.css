@@ -34,3 +34,12 @@
   margin: 0;
   color: var(--dsw-alias-state-error-primary);
 }
+
+.inquiryPath {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  color: var(--dsw-alias-label-secondary);
+  overflow-wrap: anywhere;
+}

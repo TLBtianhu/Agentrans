@@ -1,0 +1,28 @@
+# Bilingual-pair consistency record for 2026-11-14-csv-continued-analysis.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write docs/persistence-changes/2026-11-14-csv-continued-analysis.md
+/:
+  en: 3d5a424ae7d7e46b
+  zh: c22a8e4a62d8cc1a
+/2026-11-14-csv-continued-analysis:
+  en: a8bfe0891b2c2adc
+  zh: d8fef0ea0a727e1b
+/2026-11-14-csv-continued-analysis/summary:
+  en: b1c2f2b07c3c41eb
+  zh: 259fc0eff97c485d
+/2026-11-14-csv-continued-analysis/table-of-contents:
+  en: 6cf314a069ceb451
+  zh: 9adff678e9ecab3b
+/2026-11-14-csv-continued-analysis/declaration:
+  en: 6907136f28e48c90
+  zh: 02f8298485f3d8e7
+/2026-11-14-csv-continued-analysis/compatibility:
+  en: 762ff3b9c4d21615
+  zh: 807210714b675f7c
+/2026-11-14-csv-continued-analysis/verification:
+  en: 5b82fa3ad6044f04
+  zh: ec6b078dc0a1369a
+/2026-11-14-csv-continued-analysis/dev-note:
+  en: b75c8458928b72b9
+  zh: 003ba4e17b4b5269

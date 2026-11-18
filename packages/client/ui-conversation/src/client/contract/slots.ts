@@ -15,6 +15,7 @@ import type {
 import type { SessionPendingInteraction } from '@agentrans/client-ui-session/client'
 import type {} from '@agentrans/client-ui-layout/client'
 import type { SessionId } from '@agentrans/session/types'
+import type { MessageId } from '@agentrans/llm/brand'
 import type { WorkspaceId } from '@agentrans/workspace/types'
 import type { ComposerBlock } from './composer-blocks.ts'
 import type { DraftAttachmentId, InputActions, InputNotice, InputState } from './input.ts'
@@ -158,7 +159,7 @@ export interface MessageImagesContentInput extends MessageImagesOwnerProps {
 }
 
 /** Transform inputs and independently controlled rendering behavior. */
-export interface UserTextInput extends UserTextDocumentInput {
+export interface UserTextInput extends UserTextDocumentInput, Pick<UserTextNodeOwnerProps, 'messageRef' | 'openView'> {
   /** Enable renderer-owned reference actions; omitted values keep references read-only. */
   readonly interactive?: boolean
   /** Use CSS single-line overflow ellipsis without shortening source text. */
@@ -174,10 +175,14 @@ export interface UserTextInjected {
   reportTransformFailure: (error: unknown) => void
 }
 
-/** JSON-only owner data common to every business text node. */
+/** Rendering data and optional navigation for a business text node. */
 export interface UserTextNodeOwnerProps {
   readonly raw: string
   readonly interactive: boolean
+  /** Exact durable user message in the current Session when the caller owns the transcript row. */
+  readonly messageRef?: { readonly eventSeq: number; readonly messageId: MessageId }
+  /** Open a view in the current Session with a target-owned focus address. */
+  readonly openView?: OpenConversationView
 }
 
 /** Complete props for the selected business node, including its Session scope. */
@@ -224,7 +229,7 @@ declare module '@agentrans/client-ui-slots' {
     'conversation.session': {
       kind: 'single'
       scope: 'session'
-      owner: { view?: string }
+      owner: { view?: string; bindOpenView?: (openView: OpenConversationView | undefined) => void }
     }
     /** Resident navigation container, including when no Session is selected. */
     'conversation.header': { kind: 'single'; scope: 'session-maybe' }
@@ -336,7 +341,7 @@ declare module '@agentrans/client-ui-slots' {
       inject: ConversationInjected
       locale: 'conversation'
       slots: {
-        views: { scope: 'session' }
+        views: { scope: 'session'; props: { bindOpenView: (openView: OpenConversationView | undefined) => void } }
         widthControls: { scope: 'root'; props: ConversationWidthControlsInputProps }
       }
     }
@@ -401,9 +406,13 @@ export interface ConversationHeaderLineageOwnerProps {
 }
 
 /** Point-in-time owner values for composer extension entries. */
+type OpenConversationView = (view: string, focus: string) => void
+
 export interface InputZone {
   readonly session: SessionSnapshot
   readonly input: InputState
+  /** Open a history view with a target-owned focus address. */
+  readonly openView?: OpenConversationView
 }
 
 /** Conversation View entries obtain their data from registered standard hooks. */
@@ -533,6 +542,8 @@ export interface ComposerBarInjected {
   hooks: {
     /** Readable sequence while the fixed Stop command is registered. */
     stopShortcut: ObservableSnapshot<readonly string[]>
+    /** Whether a contributing plugin is holding draft submission. */
+    submissionBlocked: ObservableSnapshot<boolean>
     /**
      * Live busy-state submission preference: the delivery mode plain Enter
      * and the primary Send button use while the addressed agent is busy.

@@ -13,7 +13,7 @@ export type ArtifactSourceCapabilities = {
   /** Fixed saved observations the Host can compare at compatible conditions. */
   readonly compare: 'saved-particle-pair' | 'unsupported'
   /** Question-context mode, retaining HTML reports as program claims rather than Host calculations. */
-  readonly questionContext: 'particle' | 'program-reported' | 'unsupported'
+  readonly questionContext: 'particle' | 'function-plot' | 'csv-bar-chart' | 'program-reported' | 'unsupported'
   /** Conditions an installed HTML exporter can preserve; source defaults omit local view state. */
   readonly exportHtml: 'particle-checkpoint-or-source-defaults' | 'source-defaults' | 'unsupported'
 }

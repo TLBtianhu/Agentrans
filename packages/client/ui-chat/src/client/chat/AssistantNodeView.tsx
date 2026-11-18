@@ -1,4 +1,5 @@
-import { memo, useCallback, useMemo } from 'react'
+import { memo, useCallback, useId, useMemo, useState } from 'react'
+import { Button } from '@agentrans/client-ui-primitives'
 import type { InjectFace, PropsRenderSlots } from '@agentrans/client-ui-slots'
 import type { ChatFileMentions, ChatNodeViewProps, PresentationInjected, TurnTailOwnerProps } from '../contract/slots.ts'
 import { AssistantMarkdown } from './AssistantMarkdown.tsx'
@@ -19,8 +20,8 @@ type AssistantNodeViewProps = ChatNodeViewProps<'assistant-step'> & InjectFace<A
 
 /** Streaming, settled, and interrupted Assistant states share one keyed renderer instance. */
 export const AssistantNodeView = memo(function AssistantNodeView({
-  node, groupPart, useDisclosure, useGroupAction, useTurnData, turnProcess, openFile, loadImage, fileMentions,
-  usePresentation, renderSlot, t, sessionId, useContextMenu, resolveFilePath, forkAt, useAccess,
+  node, groupPart, useDisclosure, useGroupAction, useTurnData, turnProcess, openFile, openView, loadImage, fileMentions,
+  usePresentation, renderSlot, t, sessionId, useContextMenu, resolveFilePath, forkAt, useAccess, useSession,
 }: AssistantNodeViewProps) {
   const { getTriggerProps } = useContextMenu()
   const getFileTriggerProps = useCallback((path: string) => getTriggerProps(() => ({
@@ -28,6 +29,9 @@ export const AssistantNodeView = memo(function AssistantNodeView({
   })), [getTriggerProps, sessionId, resolveFilePath])
   const data = node.data
   const forkAllowed = useAccess('session/fork')
+  const inquirySession = useSession(session => !session.removed && session.subagent === null)
+  const inquiryGuideId = useId()
+  const [inquiryGuideOpen, setInquiryGuideOpen] = useState(false)
   const finalNode = data.finalNode
   const messageId = finalNode?.messageId
   const text = assistantText(data.blocks)
@@ -44,6 +48,12 @@ export const AssistantNodeView = memo(function AssistantNodeView({
     () => owner === undefined ? undefined : fileMentions(owner, getFileTriggerProps),
     [fileMentions, owner, getFileTriggerProps],
   )
+  const inquiryCut = owner !== undefined && data.status === 'settled' && finalNode?.messageId !== undefined
+    && turn?.end?.data.reason.kind === 'completed'
+    && !turn.steps.some(step => (step.data.get('assistant-step')?.finalNode?.seq ?? -1) > finalNode.seq)
+    ? turn.end.seq : undefined
+  const showInquiryGuide = forkAllowed && inquirySession && inquiryCut !== undefined
+    && groupPart !== 'reasoning' && text.trim() !== ''
   const keepReplies = usePresentation(policy => policy.foldedReplies === 'all')
   // A kept reply row stays visible while the folded Turn hides its inline reasoning.
   const reasoningHidden = turnProcess !== undefined
@@ -61,6 +71,7 @@ export const AssistantNodeView = memo(function AssistantNodeView({
         useDisclosure={useDisclosure}
         streaming={data.status === 'running'}
         textInteractionSource={data.status === 'settled' && finalNode?.messageId !== undefined}
+        inquiryCut={inquiryCut}
         interrupted={data.status === 'interrupted'}
         loadImage={loadImage}
         reasoningHidden={reasoningHidden}
@@ -80,11 +91,23 @@ export const AssistantNodeView = memo(function AssistantNodeView({
               clock="end"
               showCopy={false}
               onBranch={() => { forkAt(finalNode.seq) }}
+              extraActions={showInquiryGuide && (
+                <Button type="button" size="sm" variant="ghost"
+                  aria-expanded={inquiryGuideOpen} aria-controls={inquiryGuideId}
+                  onClick={() => { setInquiryGuideOpen(open => !open) }}>
+                  {t('inquiry.guide')}
+                </Button>
+              )}
               className={css.actions}
               t={t}
             />
           )}
-          {renderSlot('conversation.chat.assistant.details', { messageId, seq: finalNode.seq, text })}
+          {showInquiryGuide && (
+            <p id={inquiryGuideId} className={css.inquiryGuide} hidden={!inquiryGuideOpen}>
+              {t('inquiry.guideHint')}
+            </p>
+          )}
+          {renderSlot('conversation.chat.assistant.details', { messageId, seq: finalNode.seq, text, turn: turn?.turn, openView })}
         </>
       )}
     </>

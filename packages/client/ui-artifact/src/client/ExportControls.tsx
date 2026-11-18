@@ -4,7 +4,7 @@ import { Button } from '@agentrans/client-ui-primitives'
 import type { PropsLocale } from '@agentrans/client-ui-slots'
 import type { ArtifactExportSource } from '@agentrans/artifact/types'
 import type {
-  ArtifactExportId, ArtifactHtmlExportFailure, ArtifactHtmlExportRecord, ArtifactHtmlExportRequest,
+  ArtifactExportId, ArtifactHtmlExportFailure, ArtifactHtmlExportInput, ArtifactHtmlExportRecord, ArtifactHtmlExportRequest,
 } from '@agentrans/artifact-export/types'
 import { randomUUID } from '@agentrans/util-crypto'
 import { ArtifactExportRequestError, type ArtifactExportCommands, type ArtifactExportRequestFailure } from './protocol.ts'
@@ -18,9 +18,11 @@ export interface ExportControlsData extends ArtifactExportCommands {
   readonly canRead?: boolean | undefined
 }
 
+type ExportPreview = ArtifactExportSource & Pick<Partial<ArtifactHtmlExportInput>, 'parameters' | 'functionPlotBaseline'>
+
 interface CapturedExport {
   readonly request: ArtifactHtmlExportRequest
-  readonly preview: ArtifactExportSource
+  readonly preview: ExportPreview
 }
 
 type ExportFailure = ArtifactExportRequestFailure | ArtifactHtmlExportFailure | 'download'
@@ -34,7 +36,7 @@ interface ExportState {
 /** Card-owned request identity survives source and placement changes; lists remain projection-owned. */
 export interface ExportActions {
   readonly state: ExportState
-  readonly begin: (source: ArtifactExportSource) => Promise<void>
+  readonly begin: (source: ArtifactExportSource, kind?: 'revision') => Promise<void>
   readonly retry: () => Promise<void>
   readonly dismiss: () => void
   readonly continue: (record: ArtifactHtmlExportRecord) => Promise<void>
@@ -84,13 +86,16 @@ export function useExportActions(commands: ExportControlsData | undefined): Expo
   }
   return {
     state,
-    begin: async (source) => {
+    begin: async (source, kind) => {
       if (state.pending !== null) return
+      const { artifactId, revision } = source.artifact
       await submit({
-        request: { exportId: randomUUID() as ArtifactExportId, format: 'html', source: source.observationId === undefined
-          ? { kind: 'current', artifactId: source.artifact.artifactId, revision: source.artifact.revision,
-            ...(source.checkpoint === undefined ? {} : { checkpoint: source.checkpoint }) }
-          : { kind: 'observation', artifactId: source.artifact.artifactId, observationId: source.observationId } },
+        request: { exportId: randomUUID() as ArtifactExportId, format: 'html', source: kind === 'revision'
+          ? { kind, artifactId, revision }
+          : source.observationId === undefined
+            ? { kind: 'current', artifactId, revision,
+              ...(source.checkpoint === undefined ? {} : { checkpoint: source.checkpoint }) }
+            : { kind: 'observation', artifactId, observationId: source.observationId } },
         preview: source,
       })
     },
@@ -106,16 +111,22 @@ export function useExportActions(commands: ExportControlsData | undefined): Expo
 }
 
 /**
- * Describe exactly the source defaults or fixed particle step represented by one export.
- * @param source - Original source and optional runtime checkpoint.
+ * Describe the conditions an export will open with.
+ * @param source - Proposed source or previously frozen export input.
  * @param t - Locale-owned Artifact copy.
  * @returns Human-readable fixed source and runtime conditions.
  */
-export function exportConditions(source: ArtifactExportSource, t: PropsLocale<'artifact'>['t']): string {
-  return source.checkpoint === undefined
-    ? t('export.defaults', { revision: String(source.artifact.revision) })
-    : t('export.checkpoint', { revision: String(source.artifact.revision), step: String(source.checkpoint.stepCount),
-      runtime: String(source.checkpoint.runtimeVersion) })
+function exportConditions(source: ExportPreview, t: PropsLocale<'artifact'>['t']): string {
+  const { artifact, checkpoint } = source
+  const revision = String(artifact.revision)
+  if (checkpoint !== undefined) {
+    return t('export.checkpoint', { revision, step: String(checkpoint.stepCount), runtime: String(checkpoint.runtimeVersion) })
+  }
+  const baseline = source.parameters === undefined ? artifact.continuation?.baseline : source.functionPlotBaseline
+  if (baseline === undefined) return t('export.defaults', { revision })
+  const conditions = Object.entries(baseline.parameters).map(([name, value]) => `${name} = ${value}`)
+  conditions.push(`${t('scene.trace')} = ${baseline.x}`)
+  return t('export.plotBaseline', { revision, conditions: conditions.join(' · ') })
 }
 
 const FAILURE_COPY = {
@@ -124,6 +135,11 @@ const FAILURE_COPY = {
   denied: 'export.denied', invalid: 'export.invalid',
   'input-too-large': 'export.inputTooLarge',
   RENDER_FAILED: 'export.renderFailed', OUTPUT_TOO_LARGE: 'export.tooLarge', STORAGE_FAILED: 'export.storageFailed',
+} as const
+
+/** Shared notices for a pending or completed HTML file transfer. */
+export const HTML_DOWNLOAD_NOTICES = {
+  downloading: 'export.downloading', requested: 'export.requested', saved: 'export.saved', cancelled: 'export.cancelled',
 } as const
 
 /** Render durable generation history separately from browser or native save outcomes. */
@@ -137,7 +153,8 @@ export function ExportControls({ ready, records, canCreate = true, canRead = tru
   const busy = state.phase !== 'idle'
   return <section className={css.observations} aria-label={t('export.list')}>
     {source !== undefined && <p className={css.observationHint}>{exportConditions(source, t)}</p>}
-    {source !== undefined && source.checkpoint === undefined && <p className={css.observationHint}>{t('export.defaultHint')}</p>}
+    {source !== undefined && source.checkpoint === undefined && source.artifact.continuation === undefined
+      && <p className={css.observationHint}>{t('export.defaultHint')}</p>}
     {hostOperationsAvailable && !ready && <p role="status" className={css.observationHint}>{t('export.loading')}</p>}
     {state.pending !== null && <div className={css.exportRequest} data-export-request={state.pending.request.exportId}>
       <strong>{state.pending.preview.artifact.title}</strong>
@@ -156,7 +173,7 @@ export function ExportControls({ ready, records, canCreate = true, canRead = tru
     {state.failure !== null && <p role="alert" className={css.error}>{t(FAILURE_COPY[state.failure])}</p>}
     {hostOperationsAvailable && !canCreate && <p className={css.observationHint}>{t('export.denied')}</p>}
     {state.notice !== null && <p role="status" className={css.observationHint}>
-      {t(state.notice === 'requested' ? 'export.requested' : state.notice === 'saved' ? 'export.saved' : 'export.cancelled')}
+      {t(HTML_DOWNLOAD_NOTICES[state.notice])}
     </p>}
     {records.length > 0 && <ul className={css.observationList}>
       {records.map(record => <li key={record.request.exportId} data-export-id={record.request.exportId} data-export-status={record.status}>

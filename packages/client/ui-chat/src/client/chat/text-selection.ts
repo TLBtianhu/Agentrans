@@ -1,4 +1,5 @@
 /** DOM selection validation and visible-text projection, independent of business actions. */
+import { isSessionInquiry, SESSION_INQUIRY_MAX_LENGTH, type SessionInquiry } from '@agentrans/session/types'
 
 const PROJECTED_BLOCK_TAGS = new Set([
   'ADDRESS', 'ARTICLE', 'ASIDE', 'BLOCKQUOTE', 'DD', 'DIV', 'DL', 'DT', 'FIGCAPTION',
@@ -177,4 +178,53 @@ export function selectedText(selection: TextSelection): string | null {
   if (start === null || end === null) return null
   const text = projection.text.slice(start, end).trim()
   return text === '' ? null : text
+}
+
+/** Exact settled answer and completed Turn boundary selected by a native DOM gesture. */
+export interface AssistantInquirySelection {
+  readonly atSeq: number
+  readonly inquiry: SessionInquiry
+}
+
+/** Resolve only literal, contiguous text with known canonical Markdown offsets. */
+export function selectedAssistantInquiry(selection: TextSelection): AssistantInquirySelection | null {
+  const { source, range } = selection
+  const answer = source.closest<HTMLElement>('[data-chat-inquiry-cut]')
+  const row = source.closest<HTMLElement>('[data-chat-flow-kind="assistant-step"][data-chat-message-seq][data-chat-message-id]')
+  if (answer === null || row === null || !row.contains(answer)) return null
+  const atSeq = Number(answer.dataset.chatInquiryCut)
+  const messageSeq = Number(row.dataset.chatMessageSeq)
+  if (!Number.isSafeInteger(atSeq) || atSeq <= messageSeq) return null
+  const projection = projectedFragment(source)
+  const first = projectedOffset(projection, range.startContainer, range.startOffset)
+  const last = projectedOffset(projection, range.endContainer, range.endOffset)
+  if (first === null || last === null) return null
+  const visible = projection.text.slice(first, last)
+  const excerpt = visible.trim()
+  if (excerpt === '' || excerpt.length > SESSION_INQUIRY_MAX_LENGTH) return null
+  const begin = first + visible.length - visible.trimStart().length
+  const finish = begin + excerpt.length
+  let canonicalStart: number | undefined
+  let canonicalEnd: number | undefined
+  let visited = begin
+  for (const span of projection.spans) {
+    const start = Math.max(begin, span.start)
+    const end = Math.min(finish, span.start + (span.offsets.at(-1) ?? 0))
+    if (end <= start) continue
+    const mapped = span.node.parentElement
+    if (mapped === null || !mapped.hasAttribute('data-markdown-source-start') || !mapped.hasAttribute('data-markdown-source-end')) return null
+    const sourceStart = Number(mapped.dataset.markdownSourceStart)
+    const sourceEnd = Number(mapped.dataset.markdownSourceEnd)
+    const rawStart = span.offsets.indexOf(start - span.start)
+    const rawEnd = span.offsets.indexOf(end - span.start)
+    if (!Number.isSafeInteger(sourceStart) || sourceStart < 0 || sourceEnd !== sourceStart + span.node.length
+      || start !== visited || rawStart < 0 || rawEnd < 0
+      || span.node.data.slice(rawStart, rawEnd) !== projection.text.slice(start, end)
+      || (canonicalEnd !== undefined && canonicalEnd !== sourceStart + rawStart)) return null
+    canonicalStart ??= sourceStart + rawStart
+    canonicalEnd = sourceStart + rawEnd
+    visited = end
+  }
+  const inquiry = { messageSeq, messageId: row.dataset.chatMessageId, start: canonicalStart, end: canonicalEnd, excerpt }
+  return visited === finish && isSessionInquiry(inquiry) ? { atSeq, inquiry } : null
 }

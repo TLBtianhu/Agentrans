@@ -41,12 +41,12 @@ import type { ViewTab } from '../src/client/contract/views.ts'
 // Every session-scope fixture carries the resource hook the resources plugin merges into GlobalStandardProps.
 const useResource = (() => ({ status: 'none' as const, value: undefined, failure: undefined })) as GlobalStandardProps['useResource']
 
-const FactoryViewsTestContext = createContext<ConversationViewsProps | undefined>(undefined)
+const FactoryViewsTestContext = createContext<Omit<ConversationViewsProps, 'bindOpenView'> | undefined>(undefined)
 
-function StableConversationViews() {
+function StableConversationViews({ bindOpenView }: Pick<ConversationViewsProps, 'bindOpenView'>) {
   const props = useContext(FactoryViewsTestContext)
   if (props === undefined) throw new Error('Factory views test context is missing')
-  return <>{props.renderSlot('conversation.session', {})}</>
+  return <>{props.renderSlot('conversation.session', { bindOpenView })}</>
 }
 
 // jsdom implements no Range geometry (Lexical's scroll-into-view measures the
@@ -261,6 +261,7 @@ function mount(
     if (key === 'conversation.session') {
       return (
         <ConversationSession
+          {...owner}
           sessionId={SID}
           SessionProvider={({ children }) => children}
           useSession={useSession}
@@ -316,6 +317,7 @@ function mount(
           toggleCommandMenu={vi.fn()}
           useBusyEnter={bindSnapshotSelector(createSnapshotStore<'queue' | 'steer'>('queue'))}
           useStopShortcut={bindSnapshotSelector(createSnapshotStore<readonly string[]>([]))}
+          useSubmissionBlocked={bindSnapshotSelector(createSnapshotStore(false))}
           useNotices={bindSnapshotSelector(wiring.notices)}
           useLexicon={bindSnapshotSelector(wiring.lexicon)}
           useMenuLauncher={bindSnapshotSelector(createSnapshotStore<string | null>(null))}
@@ -350,7 +352,7 @@ function mount(
     slots?: Record<string, (props: never) => ReactNode>
   }) => {
     if (options.headerOnly) return null
-    const common: ConversationViewsProps = {
+    const common: Omit<ConversationViewsProps, 'bindOpenView'> = {
       sessionId: SID,
       SessionProvider,
       useSession,

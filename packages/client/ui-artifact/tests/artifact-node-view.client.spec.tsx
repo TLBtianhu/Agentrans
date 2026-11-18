@@ -28,7 +28,7 @@ function props(revision = 1, recordAction: RecordArtifactAction = vi.fn().mockRe
   return {
     node: {
       key: 'artifact:artifact-a', id: data.artifactId, kind: 'artifact', target: 'chat', anchorSeq: revision,
-      location: { kind: 'session' }, visibility: 'visible', data,
+      location: { kind: 'session' }, visibility: 'visible', data: { snapshot: data, history: null, firstSeq: 1 },
     },
     sessionId: SessionId('artifact-a'),
     useStore: bindSnapshotSelector(store.store),
@@ -105,7 +105,7 @@ describe('ArtifactNodeView', () => {
     }))
     render(<ArtifactNodeView {...base} />)
     const target = frame()
-    const identity = { artifactId: base.node.data.artifactId, revision: 1, renderer: 'html', runtimeId: target.dataset.artifactRuntimeId }
+    const identity = { artifactId: base.node.data.snapshot.artifactId, revision: 1, renderer: 'html', runtimeId: target.dataset.artifactRuntimeId }
     post(target, { kind: 'artifact-runtime-report', identity, report: { status: 'ready', capabilities: { state: true, commands: [] } } })
     post(target, { kind: 'artifact-runtime-state', identity, state: { count: 1 } })
     if (route === 'subagent') {
@@ -125,26 +125,26 @@ describe('ArtifactNodeView', () => {
     const data = { artifactId: 'constructor' as ArtifactId, revision: 1, format: 'scene', title: 'Constructor', presentation: 'inline',
       spec: { kind: 'particle-system', particles: [{ id: 'p', x: 0, y: 0, vx: 1, vy: 0, mass: 1 }],
         gravity: { x: 0, y: 0 }, timeStep: 0.1, trails: false } } as const
-    render(<ArtifactNodeView {...base} node={{ ...base.node, data }} />)
+    render(<ArtifactNodeView {...base} node={{ ...base.node, data: { ...base.node.data, snapshot: data } }} />)
     expect(screen.getByText('No saved observations yet.')).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Save observation' }).hasAttribute('disabled')).toBe(false)
   })
   it('checks create and read permissions separately before exposing export actions', () => {
     const base = props()
-    const scene = { artifactId: base.node.data.artifactId, revision: 1, format: 'scene', title: 'Protected', presentation: 'inline',
+    const scene = { artifactId: base.node.data.snapshot.artifactId, revision: 1, format: 'scene', title: 'Protected', presentation: 'inline',
       spec: { kind: 'flowchart', nodes: [], edges: [] } } as const
     const record = { request: { exportId: 'protected-export', format: 'html', source: { kind: 'current', artifactId: scene.artifactId, revision: 1 } },
       frozen: { artifact: scene, exporterVersion: 1, parameters: 'source-defaults' }, status: 'ready',
       file: { attachmentId: 'sha256:abc', bytes: 8, name: 'protected.html' } }
     const access = vi.fn().mockReturnValue(false)
     const commands = { create: vi.fn(), download: vi.fn() }
-    const view = render(<ArtifactNodeView {...base} node={{ ...base.node, data: scene }} exports={commands}
+    const view = render(<ArtifactNodeView {...base} node={{ ...base.node, data: { ...base.node.data, snapshot: scene } }} exports={commands}
       useAccess={access} useProjection={vi.fn(key => key === 'artifactExports' ? { 'protected-export': record } : {}) as never} />)
     expect(access).toHaveBeenCalledWith('artifactExports/create')
     expect(access).toHaveBeenCalledWith('artifactExports/read')
     expect(screen.queryByRole('button', { name: 'Export animation' })).toBeNull()
     expect(screen.queryByRole('button', { name: 'Download HTML' })).toBeNull()
-    view.rerender(<ArtifactNodeView {...base} node={{ ...base.node, data: scene }} exports={commands}
+    view.rerender(<ArtifactNodeView {...base} node={{ ...base.node, data: { ...base.node.data, snapshot: scene } }} exports={commands}
       useAccess={vi.fn(method => method === 'artifactExports/read')}
       useProjection={vi.fn(key => key === 'artifactExports' ? { 'protected-export': record } : {}) as never} />)
     expect(screen.queryByRole('button', { name: 'Export animation' })).toBeNull()
@@ -208,18 +208,21 @@ describe('ArtifactNodeView', () => {
     base.node = {
       ...base.node,
       data: {
-        artifactId: 'artifact-a' as ArtifactId, revision: 1, format: 'scene', title: 'Plot', presentation: 'inline',
-        spec: {
-          kind: 'function-plot',
-          functions: [{ id: 'sine', label: 'sin(x)', expression: 'sin(x)' }],
-          parameters: { a: { value: 1, min: -2, max: 2, step: 0.1 } },
-          viewport: { x: [-6, 6], y: [-2, 2] },
-          trace: { x: 1, derivative: true, integral: false },
+        ...base.node.data,
+        snapshot: {
+          artifactId: 'artifact-a' as ArtifactId, revision: 1, format: 'scene', title: 'Plot', presentation: 'inline',
+          spec: {
+            kind: 'function-plot',
+            functions: [{ id: 'sine', label: 'sin(x)', expression: 'sin(x)' }],
+            parameters: { a: { value: 1, min: -2, max: 2, step: 0.1 } },
+            viewport: { x: [-6, 6], y: [-2, 2] },
+            trace: { x: 1, derivative: true, integral: false },
+          },
         },
       },
     }
     const create = vi.fn().mockResolvedValue({ request: { exportId: 'created' }, status: 'ready',
-      frozen: { sessionId: base.sessionId, artifact: base.node.data, exporterVersion: 1, parameters: 'source-defaults' },
+      frozen: { sessionId: base.sessionId, artifact: base.node.data.snapshot, exporterVersion: 1, parameters: 'source-defaults' },
       file: { attachmentId: 'sha256:abc', bytes: 8, name: 'plot.html' } })
     const download = vi.fn().mockResolvedValue({ status: 'requested' })
     render(<ArtifactNodeView {...base} exports={{ create, download }} />)
@@ -230,9 +233,9 @@ describe('ArtifactNodeView', () => {
       source: { kind: 'current', artifactId: 'artifact-a', revision: 1 } })
   })
 
-  it('forks an inquiry branch from the Artifact checkpoint without changing placement', () => {
+  it('forks an inquiry branch from the original checkpoint when the display anchor moves', () => {
     const base = props(1)
-    render(<ArtifactNodeView {...base} />)
+    render(<ArtifactNodeView {...base} node={{ ...base.node, anchorSeq: 8 }} />)
     fireEvent.click(screen.getByRole('button', { name: 'Branch inquiry' }))
     expect(base.forkAt).toHaveBeenCalledExactlyOnceWith(1)
     expect(screen.getByLabelText('Artifact: Report 1').getAttribute('data-placement')).toBe('inline')

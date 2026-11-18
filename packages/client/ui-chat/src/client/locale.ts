@@ -5,6 +5,10 @@ export const NS = 'chat'
 
 /** Simplified Chinese dictionary and key-set source of truth. */
 export const zh = {
+  'inquiry.create': '从选中内容开探究分支',
+  'inquiry.failed': '无法打开探究分支',
+  'inquiry.guide': '选句探究',
+  'inquiry.guideHint': '选中回答里想追问的一句话，再点「从选中内容开探究分支」。',
   'message.stepProcess.thinking': '正在分析请求',
   'message.stepProcess.read': '正在读取文件',
   'message.stepProcess.readImage': '正在读取图片',
@@ -207,6 +211,10 @@ export type ChatKey = keyof typeof zh
 
 /** English dictionary, checked against the Chinese key set. */
 export const en = {
+  'inquiry.create': 'Start inquiry branch from selection',
+  'inquiry.failed': 'Couldn’t open the inquiry branch',
+  'inquiry.guide': 'Explore a sentence',
+  'inquiry.guideHint': 'Select a sentence in this answer, then choose “Start inquiry branch from selection”.',
   'message.stepProcess.thinking': 'Analyzing the request',
   'message.stepProcess.read': 'Reading files',
   'message.stepProcess.readImage': 'Reading images',
@@ -406,6 +414,10 @@ export const en = {
 
 /** Japanese copy, checked against the English keys. */
 export const ja = {
+  'inquiry.create': '選択した内容から探究ブランチを作成',
+  'inquiry.failed': '探究ブランチを開けませんでした',
+  'inquiry.guide': '一文を選んで探究',
+  'inquiry.guideHint': '回答から詳しく知りたい一文を選び、「選択した内容から探究ブランチを作成」を選択してください。',
   'message.stepProcess.thinking': 'リクエストを分析中',
   'message.stepProcess.read': 'ファイルを読み取り中',
   'message.stepProcess.readImage': '画像を読み取り中',
@@ -605,6 +617,10 @@ export const ja = {
 
 /** Spanish dictionary, checked against the English keys. */
 export const es = {
+  'inquiry.create': 'Crear una rama de exploración desde la selección',
+  'inquiry.failed': 'No se pudo abrir la rama de exploración',
+  'inquiry.guide': 'Explorar una frase',
+  'inquiry.guideHint': 'Selecciona una frase de esta respuesta y elige «Crear una rama de exploración desde la selección».',
   'message.stepProcess.thinking': 'Analizando la solicitud',
   'message.stepProcess.read': 'Leyendo archivos',
   'message.stepProcess.readImage': 'Leyendo imágenes',
@@ -804,6 +820,10 @@ export const es = {
 
 /** French dictionary, checked against the English keys. */
 export const fr = {
+  'inquiry.create': 'Ouvrir une branche d’exploration depuis la sélection',
+  'inquiry.failed': 'Impossible d’ouvrir la branche d’exploration',
+  'inquiry.guide': 'Explorer une phrase',
+  'inquiry.guideHint': 'Sélectionnez une phrase de cette réponse, puis choisissez « Ouvrir une branche d’exploration depuis la sélection ».',
   'message.stepProcess.thinking': 'Analyser la demande',
   'message.stepProcess.read': 'Lecture de fichiers',
   'message.stepProcess.readImage': 'Lire des images',
@@ -1003,6 +1023,10 @@ export const fr = {
 
 /** German dictionary, checked against the English keys. */
 export const de = {
+  'inquiry.create': 'Erkundungszweig aus der Auswahl öffnen',
+  'inquiry.failed': 'Der Erkundungszweig konnte nicht geöffnet werden',
+  'inquiry.guide': 'Einen Satz erkunden',
+  'inquiry.guideHint': 'Markiere einen Satz aus dieser Antwort und wähle „Erkundungszweig aus der Auswahl öffnen“.',
   'message.stepProcess.thinking': 'Analyse der Anfrage',
   'message.stepProcess.read': 'Dateien lesen',
   'message.stepProcess.readImage': 'Bilder lesen',
@@ -1202,6 +1226,10 @@ export const de = {
 
 /** Russian dictionary, checked against the English keys. */
 export const ru = {
+  'inquiry.create': 'Открыть ветку исследования по выделенному тексту',
+  'inquiry.failed': 'Не удалось открыть ветку исследования',
+  'inquiry.guide': 'Изучить предложение',
+  'inquiry.guideHint': 'Выделите предложение в этом ответе и выберите «Открыть ветку исследования по выделенному тексту».',
   'message.stepProcess.thinking': 'Анализ запроса',
   'message.stepProcess.read': 'Чтение файлов',
   'message.stepProcess.readImage': 'Чтение изображений',
@@ -1401,6 +1429,10 @@ export const ru = {
 
 /** Portuguese dictionary, checked against the English keys. */
 export const pt = {
+  'inquiry.create': 'Abrir um ramo de exploração a partir da seleção',
+  'inquiry.failed': 'Não foi possível abrir o ramo de exploração',
+  'inquiry.guide': 'Explorar uma frase',
+  'inquiry.guideHint': 'Selecione uma frase desta resposta e escolha “Abrir um ramo de exploração a partir da seleção”.',
   'message.stepProcess.thinking': 'Analisando a solicitação',
   'message.stepProcess.read': 'Lendo arquivos',
   'message.stepProcess.readImage': 'Lendo imagens',

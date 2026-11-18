@@ -280,12 +280,41 @@ describe('the shipped Web composition', () => {
     }
   })
 
-  it('supplies both shipped presets, and only those, from the system root', async () => {
+  it('supplies the shipped presets from the system root', async () => {
     const listed = await ctx.agentPresets.list()
 
-    expect(listed.map(preset => preset.id).sort()).toEqual(['cordis', 'minimal', 'ptc', 'standard'])
+    expect(listed.map(preset => preset.id).sort()).toEqual(['chat', 'cordis', 'minimal', 'ptc', 'standard'])
     expect(listed.every(preset => !('path' in preset))).toBe(true)
     expect(ctx.agentPresets.defaultId).toBe('standard')
+  })
+
+  it('uses only Chat tools and sends an uploaded CSV by session attachment ID', async () => {
+    const adapter = new MinimalCompactionAdapter()
+    onTestFinished(ctx.llm.registerAdapter(['preset-chat-test'], adapter))
+    const handle = await ctx.agents.create({
+      sessionId: SessionId(`preset-chat-${randomUUID()}`),
+      agentOptions: { provider: 'preset-chat-test', model: 'preset-chat-test' },
+      setup: agentCtx => ctx.agentPresets.mount(agentCtx, 'chat').then(() => undefined),
+    })
+    onTestFinished(() => handle.dispose())
+    const { agent } = handle
+    const tools = ['artifact', 'artifact_runtime', 'ask_user_question', 'attachment_csv', 'scene', 'skill']
+    expect(toolNames(ctx, agent)).toEqual(tools)
+    for (const name of ['working_directory', 'bash', 'read', 'run_code']) {
+      const result = await executeToolFixture(ctx, {
+        agent, name, callId: ToolCallId(`chat-denied-${name}`), arguments: {}, signal: new AbortController().signal,
+      })
+      expect(result.isError).toBe(true)
+    }
+
+    const attachment = await ctx.attachments.saveFile({ name: 'sales.csv', data: Buffer.from('group,sales\nA,2\n') })
+    agent.followup(createUserMessage({ content: [{ type: 'file', attachment }], source: { kind: 'user' } }))
+    await agent.whenIdle()
+    const request = adapter.requests.find(request => request.purpose === undefined)
+    expect(request?.tools?.map(tool => tool.name).sort()).toEqual(tools)
+    const userInput = request?.messages.find(message => message.role === 'user' && message.source?.kind === 'user')
+    expect(userInput?.content).toContainEqual({ type: 'text', text: expect.stringContaining(`attachment ID "${attachment.attachmentId}"`) })
+    expect(JSON.stringify(userInput?.content)).not.toContain('saved at')
   })
 
   it('composes the full agent from `standard`', async () => {
@@ -786,7 +815,7 @@ describe.each(['web', 'desktop'] as const)('%s native subagent bundles', (surfac
   }
 
   it.each([[[]], [['codex']], [['claude-code']], [['codex', 'claude-code']]] as Array<[Product[]]>)(
-    'adds the selected %j delegation tools to every preset as global tools', async (installed) => {
+    'adds the selected %j delegation tools to presets that inherit global tools', async (installed) => {
       const productCtx = await bootSelected(installed)
       const spawn = vi.spyOn(productCtx.subprocess, 'spawn')
       try {
@@ -796,6 +825,7 @@ describe.each(['web', 'desktop'] as const)('%s native subagent bundles', (surfac
         for (const preset of ['standard', 'cordis', 'ptc', 'minimal']) {
           expect(await presetTools(productCtx, preset)).toEqual(expected)
         }
+        expect(await presetTools(productCtx, 'chat')).toEqual([])
         const handle = await productCtx.agents.create({
           sessionId: SessionId(`native-${surface}-params-${randomUUID()}`),
           setup: owner => productCtx.agentPresets.mount(owner, 'standard').then(() => undefined),

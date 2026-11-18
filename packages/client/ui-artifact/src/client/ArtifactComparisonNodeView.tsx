@@ -49,7 +49,8 @@ function ComparisonInstance({
   node, sessionId, useSession, useSessions, useProjection, useAccess, recordAction,
   saveObservation, sendObservation, confirmObservationComparison, exports, t,
   useParticleRuntime, useArtifactRuntime, runtimeActions, commandParticleRuntime,
-  chooseRuntimePromptContext, chooseParticlePromptContext, chooseObservationPromptContext, chooseComparisonPromptContext,
+  chooseRuntimePromptContext, chooseHtmlCheckpointPromptContext, chooseParticlePromptContext, choosePlotPromptContext,
+  chooseObservationPromptContext, chooseComparisonPromptContext,
 }: ComparisonProps) {
   const comparison = node.data
   const hostRouteAvailable = useSession(artifactHostRouteAvailable)
@@ -224,7 +225,12 @@ function ComparisonInstance({
                 placement="inline" placementControls={false}
                 particleRuntime={{ current: role === 'control' ? controlRuntime : variantRuntime, command: role === 'control' ? commandControl : commandVariant }}
                 promptContext={hostRouteAvailable ? { chooseRuntime: (identity) => { chooseRuntimePromptContext(role === 'control' ? controlKey : variantKey, source, identity) },
-                  chooseCurrent: () => { chooseParticlePromptContext(role === 'control' ? controlKey : variantKey, source) }, chooseObservation: chooseObservationPromptContext } : undefined}
+                  chooseHtmlCheckpoint: (identity, checkpoint) =>
+                    chooseHtmlCheckpointPromptContext?.(role === 'control' ? controlKey : variantKey, source, identity, checkpoint) ?? false,
+                  chooseCurrent: readings => chooseParticlePromptContext(role === 'control' ? controlKey : variantKey, source, readings),
+                  chooseObservation: chooseObservationPromptContext } : undefined}
+                onAttachPlotQuestion={hostRouteAvailable && source.format === 'scene' && source.spec.kind === 'function-plot'
+                  ? conditions => choosePlotPromptContext(role === 'control' ? controlKey : variantKey, source, conditions) : undefined}
                 hostOperationsAvailable={hostRouteAvailable}
                 exportControls={exports === undefined ? undefined : {
                   ...exports, ready: projectedExports !== undefined, canCreate: canExport, canRead: canReadExport,

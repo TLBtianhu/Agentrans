@@ -63,6 +63,7 @@ interface ToolView {
 class ToolLayer implements ScopeLayer {
   readonly tools: NamedEntries<ToolRegistration>
   readonly restrictions = new AnonymousEntries<CompiledToolRestriction>()
+  readonly isolated = new AnonymousEntries<true>()
 
   constructor(scope: ScopeKey | undefined) {
     this.tools = new NamedEntries(name => new Error(scope === undefined
@@ -72,7 +73,7 @@ class ToolLayer implements ScopeLayer {
 
   /** Whether every contribution table in this aggregate layer is empty. */
   isEmpty(): boolean {
-    return this.tools.isEmpty() && this.restrictions.isEmpty()
+    return this.tools.isEmpty() && this.restrictions.isEmpty() && this.isolated.isEmpty()
   }
 
   /** Whether every compiled restriction in this layer admits a global tool name. */
@@ -189,6 +190,20 @@ export class ToolsService extends Service {
   }
 
   /**
+   * Hide tools from layers outside the calling scope for it and its descendants.
+   * Tools registered inside the scope remain available.
+   * @returns the disposer that re-enables inheritance for this scope.
+   */
+  isolateInherited(): () => void {
+    if (scopeOf(this.ctx) === undefined) throw new Error('tools.isolateInherited() requires a scoped context')
+    return this.layers.effect(
+      this.ctx,
+      layer => layer.isolated.append(true),
+      { label: 'tools.isolateInherited()' },
+    )
+  }
+
+  /**
    * Resolve visible tools and pre-restriction names. Restrictions across the
    * scope chain intersect over inherited global and ancestor tools; the viewing
    * scope's own registrations remain exempt. Nearer registrations shadow
@@ -201,6 +216,7 @@ export class ToolsService extends Service {
     const own = this.layers.peek(scope)
     const inherited = new Map(this.layers.global.tools.entries())
     for (const layer of layers) {
+      if (!layer.isolated.isEmpty()) inherited.clear()
       if (layer === own) continue
       for (const [name, registration] of layer.tools.entries()) inherited.set(name, registration)
     }

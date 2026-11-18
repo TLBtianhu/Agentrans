@@ -1,4 +1,5 @@
 /** Versioned SceneSpec definitions and validation for model-generated scenes. */
+import type { AttachmentId } from '@agentrans/attachment/types'
 import { parseExpression } from '@agentrans/util-values'
 import type { ArtifactSourceCapabilities } from './capabilities.ts'
 
@@ -26,6 +27,49 @@ export interface FunctionPlotSpec {
   readonly trace: { readonly x: number; readonly derivative: boolean; readonly integral: boolean }
   readonly style?: SceneStyle
   readonly timeline?: { readonly duration: number; readonly fps: number }
+}
+
+/** Aggregations performed by the Host for CSV data. */
+export const CSV_AGGREGATES = ['count', 'sum', 'mean', 'min', 'max'] as const
+
+/** One approved Host aggregation over all CSV rows in a group. */
+export type CsvAggregate = typeof CSV_AGGREGATES[number]
+
+/** Exact match against one original CSV column. Values retain case and whitespace. */
+export interface CsvExactFilter {
+  readonly column: string
+  readonly value: string
+}
+
+/** A bound on a complete CSV chart source embedded with a confirmed reading. */
+export const CSV_CHART_SOURCE_MAX_BYTES = 6_500
+
+/** Exact group label, computed value and contributing row count. */
+export interface CsvBarGroup {
+  readonly key: string
+  readonly value: number
+  readonly count: number
+}
+
+/** A Scene source calculated by the Host from a Session-visible upload. */
+export interface CsvBarChartSpec {
+  readonly kind: 'csv-bar-chart'
+  readonly attachmentId: AttachmentId
+  readonly groupBy: string
+  readonly aggregate: CsvAggregate
+  readonly valueColumn?: string
+  readonly filter?: CsvExactFilter
+  readonly rowCount: number
+  readonly groups: readonly CsvBarGroup[]
+}
+
+/**
+ * Recognize the attachment store identity format used by CSV uploads and sources.
+ * @param value - Untrusted attachment reference.
+ * @returns Whether the value is a complete content-addressed attachment ID.
+ */
+export function isCsvAttachmentId(value: unknown): value is AttachmentId {
+  return typeof value === 'string' && /^sha256:[0-9a-f]{64}$/u.test(value)
 }
 
 /** One node in a flowchart. */
@@ -131,7 +175,7 @@ export interface MapSpec {
 }
 
 /** Union of all currently supported declarative SceneSpec primitives. */
-export type SceneSpec = FunctionPlotSpec | FlowchartSpec | ParticleSystemSpec | TimelineSpec | NetworkGraphSpec | MapSpec
+export type SceneSpec = FunctionPlotSpec | FlowchartSpec | ParticleSystemSpec | TimelineSpec | NetworkGraphSpec | MapSpec | CsvBarChartSpec
 
 /** Catalog entry owning one primitive's version, normalization, and source-supported operations. */
 export interface SceneCatalogEntry {
@@ -181,6 +225,67 @@ function rangeAt(value: unknown, path: string): readonly [number, number] {
   const max = numberAt(value[1], `${path}[1]`)
   if (min >= max) throw new SceneValidationError(path, 'min must be < max')
   return [min, max]
+}
+
+const utf8 = new TextEncoder()
+
+function csvColumnAt(value: unknown, path: string): string {
+  const name = stringAt(value, path)
+  if (name.trim() === '' || utf8.encode(name).byteLength > 128) throw new SceneValidationError(path, 'must be a non-blank CSV column name')
+  return name
+}
+
+/** Validate the complete one-column filter used for preview, lock and replay. */
+export function normalizeCsvExactFilter(input: unknown): CsvExactFilter {
+  if (!isRecord(input) || Object.keys(input).length !== 2) throw new SceneValidationError('/filter', 'must contain column and value')
+  const column = csvColumnAt(input.column, '/filter/column')
+  const value = stringAt(input.value, '/filter/value')
+  if (utf8.encode(value).byteLength > 1_024) throw new SceneValidationError('/filter/value', 'must be at most 1024 UTF-8 bytes')
+  return { column, value }
+}
+
+function normalizeCsvBarChart(value: unknown): CsvBarChartSpec {
+  if (!isRecord(value) || value.kind !== 'csv-bar-chart') throw new SceneValidationError('/kind', 'must be csv-bar-chart')
+  const { attachmentId, aggregate, rowCount } = value
+  if (!isCsvAttachmentId(attachmentId)) throw new SceneValidationError('/attachmentId', 'must be a complete CSV attachment ID')
+  if (aggregate !== 'count' && aggregate !== 'sum' && aggregate !== 'mean' && aggregate !== 'min' && aggregate !== 'max') {
+    throw new SceneValidationError('/aggregate', 'must be count, sum, mean, min, or max')
+  }
+  const groupBy = csvColumnAt(value.groupBy, '/groupBy')
+  if (aggregate === 'count' && value.valueColumn !== undefined) throw new SceneValidationError('/valueColumn', 'is omitted for count')
+  const valueColumn = aggregate === 'count' ? undefined : csvColumnAt(value.valueColumn, '/valueColumn')
+  const filter = value.filter === undefined ? undefined : normalizeCsvExactFilter(value.filter)
+  const minRows = filter === undefined ? 1 : 0
+  if (typeof rowCount !== 'number' || !Number.isSafeInteger(rowCount) || rowCount < minRows || rowCount > 20_000) {
+    throw new SceneValidationError('/rowCount', `must be an integer between ${minRows} and 20000`)
+  }
+  if (!Array.isArray(value.groups) || value.groups.length > 64) {
+    throw new SceneValidationError('/groups', 'must contain at most 64 groups')
+  }
+  const seenKeys = new Set<string>()
+  let total = 0
+  const groups = value.groups.map((group, index): CsvBarGroup => {
+    const path = `/groups/${index}`
+    if (!isRecord(group)) throw new SceneValidationError(path, 'must be an object')
+    const key = stringAt(group.key, `${path}/key`)
+    if (seenKeys.has(key) || utf8.encode(key).byteLength > 256) throw new SceneValidationError(`${path}/key`, 'must be a unique CSV group key')
+    seenKeys.add(key)
+    const count = numberAt(group.count, `${path}/count`)
+    if (!Number.isSafeInteger(count) || count < 1 || count > rowCount) throw new SceneValidationError(`${path}/count`, 'must be a positive row count')
+    total += count
+    const measurement = numberAt(group.value, `${path}/value`)
+    if (aggregate === 'count' && measurement !== count) throw new SceneValidationError(`${path}/value`, 'must equal the count')
+    return { key, value: measurement === 0 ? 0 : measurement, count }
+  })
+  if (total !== rowCount) throw new SceneValidationError('/groups', 'counts must sum to rowCount')
+  const spec: CsvBarChartSpec = {
+    kind: 'csv-bar-chart', attachmentId, groupBy, aggregate,
+    ...(valueColumn === undefined ? {} : { valueColumn }), ...(filter === undefined ? {} : { filter }), rowCount, groups,
+  }
+  if (utf8.encode(JSON.stringify(spec)).byteLength > CSV_CHART_SOURCE_MAX_BYTES) {
+    throw new SceneValidationError('/groups', `CSV chart exceeds ${CSV_CHART_SOURCE_MAX_BYTES} UTF-8 bytes`)
+  }
+  return spec
 }
 
 /**
@@ -405,9 +510,13 @@ const particleSourceCapabilities: ArtifactSourceCapabilities = Object.freeze({
   exportHtml: 'particle-checkpoint-or-source-defaults',
 })
 
+const functionPlotSourceCapabilities: ArtifactSourceCapabilities = Object.freeze({ ...sourceDefaultCapabilities, questionContext: 'function-plot' })
+const csvBarChartSourceCapabilities: ArtifactSourceCapabilities = Object.freeze({ ...sourceDefaultCapabilities, questionContext: 'csv-bar-chart' })
+
 /** Versioned catalog of SceneSpec primitives available to model generation. */
 export const sceneCatalog: Readonly<Record<SceneSpec['kind'], SceneCatalogEntry>> = {
-  'function-plot': { kind: 'function-plot', catalogVersion: 1, normalize: normalizeFunctionPlot, sourceCapabilities: sourceDefaultCapabilities },
+  'function-plot': { kind: 'function-plot', catalogVersion: 1, normalize: normalizeFunctionPlot, sourceCapabilities: functionPlotSourceCapabilities },
+  'csv-bar-chart': { kind: 'csv-bar-chart', catalogVersion: 1, normalize: normalizeCsvBarChart, sourceCapabilities: csvBarChartSourceCapabilities },
   'flowchart': { kind: 'flowchart', catalogVersion: 1, normalize: normalizeFlowchart, sourceCapabilities: sourceDefaultCapabilities },
   'particle-system': { kind: 'particle-system', catalogVersion: 1, normalize: normalizeParticleSystem, sourceCapabilities: particleSourceCapabilities },
   'timeline': { kind: 'timeline', catalogVersion: 1, normalize: normalizeTimeline, sourceCapabilities: sourceDefaultCapabilities },
@@ -471,6 +580,6 @@ function normalizeNetworkGraph(value: unknown): NetworkGraphSpec {
 export function normalizeSceneSpec(value: unknown): SceneSpec {
   if (!isRecord(value) || typeof value.kind !== 'string') throw new SceneValidationError('/kind', 'must be a known scene kind')
   if (!Object.hasOwn(sceneCatalog, value.kind)) throw new SceneValidationError('/kind', `unsupported scene kind: ${value.kind}`)
-  const entry = sceneCatalog[value.kind as FunctionPlotSpec['kind']]
+  const entry = sceneCatalog[value.kind as SceneSpec['kind']]
   return entry.normalize(value)
 }

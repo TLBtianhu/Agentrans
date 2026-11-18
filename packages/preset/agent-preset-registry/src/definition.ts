@@ -7,6 +7,8 @@ export interface PresetDefinition {
   readonly name?: string
   readonly description?: string
   readonly order?: number
+  /** Whether tools registered outside the preset can be inherited. Defaults to true. */
+  readonly inheritTools?: boolean
   readonly plugins: readonly (Omit<EntryOptions, 'id' | 'disabled'> & { id?: string; disabled?: EntryOptions['disabled'] | JsExpr })[]
 }
 

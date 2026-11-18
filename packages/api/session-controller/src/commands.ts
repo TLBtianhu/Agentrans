@@ -1,7 +1,8 @@
 /** Session commands whose activation policy is explicit at each Remote method. */
 
 import { modelAvailable } from './catalog.ts'
-import { randomUUID } from 'node:crypto'
+import { createHash, randomUUID } from 'node:crypto'
+import { isDeepStrictEqual } from 'node:util'
 import type { Context } from '@agentrans/cordis'
 import { brandString } from '@agentrans/brand'
 import type { Agent, ModelSelection as AgentModelSelection } from '@agentrans/agent'
@@ -16,8 +17,8 @@ import {
 } from '@agentrans/llm'
 import type { MessageSource, TextBlock } from '@agentrans/llm'
 import { buildForkSeed } from '@agentrans/session/fork'
-import { SessionLogOffset, SessionSeq } from '@agentrans/session'
-import type { SessionEvent, SessionHeader, SessionId, UserMessage } from '@agentrans/session'
+import { isAppendSurfaceEvent, isSessionInquiry, SessionLogOffset, SessionSeq } from '@agentrans/session'
+import type { SessionEvent, SessionHeader, SessionId, SessionInquiry, UserMessage } from '@agentrans/session'
 import { SessionQueryError, type SessionObservation } from '@agentrans/session-query'
 import { SessionTitleInvalidError } from '@agentrans/session-title'
 import { assertNever } from '@agentrans/util-values'
@@ -42,7 +43,7 @@ import type {
   SessionCreateValue,
   SessionForkRequest,
   SessionForkValue,
-  PromptContextInput, SessionPromptRequest,
+  PromptContextInput, SessionPromptRequest, SessionRequestId,
   SessionPromptValue,
   SessionRenameRequest,
   SessionRenameValue,
@@ -55,6 +56,8 @@ import type {
 type PromptContentCandidate =
   | SessionPromptRequest['content'][number]
   | Extract<SessionUpdateQueueRequest['action'], { readonly kind: 'edit' }>['content'][number]
+
+const INQUIRY_REQUEST_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu
 
 /**
  * Whether prompt content carries non-whitespace text or an attachment.
@@ -81,6 +84,37 @@ function latestCompletedPrefixBoundary(events: readonly SessionEvent[]): Session
   return boundary
 }
 
+function isExactInquiry(source: SessionObservation, atSeq: SessionSeq, value: SessionInquiry): boolean {
+  if (source.header.origin !== undefined
+    || value.messageSeq < source.inheritedEventCount || value.messageSeq >= atSeq) return false
+  const end = source.events[atSeq]
+  const answer = source.events[value.messageSeq]
+  if (end?.type !== 'turn/end' || end.seq !== atSeq || end.data.reason.kind !== 'completed'
+    || answer?.type !== 'assistant/message' || answer.seq !== value.messageSeq || answer.data.turn !== end.data.turn || answer.data.interrupted
+    || !isAppendSurfaceEvent(answer) || answer.data.message.id !== value.messageId) return false
+  // A later assistant message makes this an intermediate reply, rather than this completed answer.
+  for (let seq = value.messageSeq + 1; seq < atSeq; seq++) {
+    const later = source.events[seq]
+    if (later?.type === 'turn/end' || later?.type === 'turn/start'
+      || (later?.type === 'assistant/message' && isAppendSurfaceEvent(later))) return false
+  }
+  const text = answer.data.message.content.flatMap(block => block.type === 'text' ? [block.text] : []).join('')
+  return value.end <= text.length && text.slice(value.start, value.end) === value.excerpt
+}
+
+function inquiryConflict(sessionId: SessionId, requestId: SessionRequestId): never {
+  throw new RemoteError('session/fork-inquiry-conflict', 'This inquiry request identifies a different fork', { sessionId, requestId })
+}
+
+/** Trusted Host setup for a prepared fork with a retry-stable Session identity. */
+export interface SessionForkPreparation {
+  readonly childId: SessionId
+  /** Commit feature-owned initial state at publication when it extends the inherited prefix. */
+  readonly initialise?: (agent: Agent) => void
+  /** Reject a previously allocated child unless its durable state matches this request. */
+  readonly verifyExisting: (child: SessionObservation) => void
+}
+
 /** Implements Session business commands delegated by the Session Controller Remote service. */
 export class SessionCommandController {
   /**
@@ -93,19 +127,26 @@ export class SessionCommandController {
     private readonly ctx: Context,
     private readonly agents: ApiSessionAgentController,
     private readonly defaultCwd: string,
-    private readonly resolveContexts: (agent: Agent, inputs: readonly PromptContextInput[]) => readonly TextBlock[] = (_agent, inputs) => {
+    private readonly resolveContexts: (
+      agent: Agent, inputs: readonly PromptContextInput[], requestId: SessionRequestId,
+    ) => readonly TextBlock[] = (_agent, inputs) => {
       if (inputs.length > 0) throw new RemoteError('session/prompt-context-unavailable', 'Prompt context owner is not mounted', { kind: inputs[0]?.kind ?? '' })
       return []
     },
   ) {
     ctx.effect(() => async () => {
       this.closing = true
-      await Promise.allSettled([...this.promptSettlements])
-    }, 'Session prompt caller settlement')
+      await Promise.allSettled([...this.promptSettlements, ...Array.from(this.inquiryForks.values(), fork => fork.result)])
+    }, 'Session command caller settlement')
   }
 
   private closing = false
   private readonly promptSettlements = new Set<Promise<SessionPromptValue>>()
+  private readonly inquiryForks = new Map<SessionId, {
+    readonly boundary: SessionSeq
+    readonly inquiry: SessionInquiry
+    readonly result: Promise<SessionForkValue>
+  }>()
 
   /**
    * Create one ordinary Session for a new conversation, reusing the named
@@ -220,10 +261,15 @@ export class SessionCommandController {
    * Create a new ordinary Session from an exact event prefix. An explicit
    * `atSeq` is the inclusive cut; an omitted value selects the latest
    * completed-turn prefix. An open cut receives synthetic fork closers.
-   * @param request - source Session and optional exact event boundary.
-   * @returns the new Session identity.
+   * @param request - Source, optional exact boundary, and optional inquiry retry identity.
+   * @returns The new or recovered Session identity after workspace attachment.
    */
   async fork(request: SessionForkRequest): Promise<SessionForkValue> {
+    const { sessionId, requestId, inquiry: selection } = request
+    if (requestId !== undefined && (selection === undefined || typeof requestId !== 'string' || !INQUIRY_REQUEST_ID.test(requestId))) {
+      throw new RemoteError('gateway/bad-request', 'An inquiry fork is required when requestId is supplied, and requestId must be a UUID', {})
+    }
+    const inquiry = isSessionInquiry(selection) ? { ...selection } : undefined
     let atSeq: ReturnType<typeof SessionSeq> | undefined
     try {
       atSeq = request.atSeq === undefined ? undefined : SessionSeq(request.atSeq)
@@ -232,7 +278,7 @@ export class SessionCommandController {
     }
     let observed: SessionObservation
     try {
-      observed = await this.ctx.sessionQuery.observeSession(request.sessionId)
+      observed = await this.ctx.sessionQuery.observeSession(sessionId)
     } catch (error) {
       if (error instanceof SessionQueryError
         && error.code === 'SESSION_QUERY_SESSION_NOT_FOUND') {
@@ -248,6 +294,11 @@ export class SessionCommandController {
     }
     using source = observed
     const boundary = atSeq ?? latestCompletedPrefixBoundary(source.events)
+    if (selection !== undefined && (inquiry === undefined || atSeq === undefined || !isExactInquiry(source, atSeq, inquiry))) {
+      throw new RemoteError('session/fork-inquiry-invalid', 'The selected passage does not match the completed assistant answer', {
+        sessionId: request.sessionId,
+      })
+    }
     if (boundary === undefined || source.events[boundary]?.seq !== boundary) {
       throw new RemoteError(
         'session/fork-unavailable',
@@ -257,43 +308,105 @@ export class SessionCommandController {
         { sessionId: request.sessionId },
       )
     }
-    const seed = buildForkSeed(source.events, boundary)
+    return requestId === undefined || inquiry === undefined
+      ? await this.forkObserved(source, boundary, undefined, inquiry)
+      : await this.forkInquiry(source, boundary, inquiry, requestId)
+  }
+
+  private async forkInquiry(source: SessionObservation, boundary: SessionSeq, inquiry: SessionInquiry,
+    requestId: SessionRequestId): Promise<SessionForkValue> {
+    const sessionId = source.header.id
+    if (this.closing) throw new RemoteError('session/fork-unavailable', 'Session inquiry fork admission is closing', { sessionId })
+    const identity = createHash('sha256').update(JSON.stringify(['inquiry-fork', sessionId, requestId.toLowerCase()])).digest('hex')
+    const childId = brandString<SessionId>(`session-${identity.slice(0, 32)}`)
+    const pending = this.inquiryForks.get(childId)
+    if (pending !== undefined) {
+      if (pending.boundary !== boundary || !isDeepStrictEqual(pending.inquiry, inquiry)) return inquiryConflict(sessionId, requestId)
+      return pending.result
+    }
+    const result = this.forkObserved(source, boundary, {
+      childId,
+      verifyExisting: (child) => {
+        if (child.header.parentSession !== sessionId || !child.header.isSeeded || child.header.origin !== undefined
+          || child.inheritedEventCount !== boundary + 1 || !isDeepStrictEqual(child.header.inquiry, inquiry)) {
+          inquiryConflict(sessionId, requestId)
+        }
+      },
+    }, inquiry)
+    this.inquiryForks.set(childId, { boundary, inquiry, result })
+    try {
+      return await result
+    } finally {
+      this.inquiryForks.delete(childId)
+    }
+  }
+
+  /**
+   * Create a child from an already validated cut, with optional feature-owned preparation.
+   * @param source - Retained source cut the caller validated.
+   * @param boundary - Existing inclusive event seq from that cut.
+   * @param preparation - Host-only initial commit and exact retry validation.
+   * @param inquiry - Validated assistant passage for an ordinary inquiry branch.
+   * @returns The workspace-attached child identity.
+   */
+  async forkObserved(
+    source: SessionObservation, boundary: SessionSeq, preparation?: SessionForkPreparation, inquiry?: SessionInquiry,
+  ): Promise<SessionForkValue> {
     let workspace: Workspace | undefined
     try {
       workspace = await this.forkWorkspace(source.header)
     } catch (error) {
       throw new RemoteError(
         'gateway/internal',
-        `failed to resolve fork workspace for session "${request.sessionId}": ${String(error)}`,
+        `failed to resolve fork workspace for session "${source.header.id}": ${String(error)}`,
         {},
       )
     }
-    const childId = brandString<SessionId>(`session-${randomUUID()}`)
-    const composition = await this.agents.composeAgent(this.agents.presetForObservation(source))
-    try {
-      const { provider, model } = this.ctx.agentDefaultModel.currentSelection()
-      await this.ctx.agents.create({
-        sessionId: childId,
-        seed,
-        inheritedEventCount: SessionLogOffset(boundary + 1),
-        meta: {
-          ...(source.header.cwd === undefined ? {} : { cwd: source.header.cwd }),
-          parentSession: source.header.id,
-          isSeeded: true,
-          ...(composition.agentPreset === undefined
-            ? {}
-            : { agentPreset: composition.agentPreset }),
-        },
-        agentOptions: { provider, model },
-        setup: composition.setup,
-      })
-    } catch (error) {
-      throw new RemoteError(
-        'gateway/internal',
-        `failed to fork session "${request.sessionId}": ${String(error)}`,
-        {},
-      )
+    const childId = preparation?.childId ?? brandString<SessionId>(`session-${randomUUID()}`)
+    const existing = preparation === undefined ? undefined : await this.observeExistingFork(childId)
+    if (existing !== undefined && preparation !== undefined) {
+      using child = existing
+      preparation.verifyExisting(child)
+    } else {
+      const seed = buildForkSeed(source.events, boundary)
+      const composition = await this.agents.composeAgent(this.agents.presetForObservation(source))
+      const initialise = preparation?.initialise
+      try {
+        const { provider, model } = this.ctx.agentDefaultModel.currentSelection()
+        await this.ctx.agents.create({
+          sessionId: childId,
+          seed,
+          inheritedEventCount: SessionLogOffset(boundary + 1),
+          meta: {
+            ...(source.header.cwd === undefined ? {} : { cwd: source.header.cwd }),
+            parentSession: source.header.id,
+            isSeeded: true,
+            ...(inquiry === undefined ? {} : { inquiry }),
+            ...(composition.agentPreset === undefined
+              ? {}
+              : { agentPreset: composition.agentPreset }),
+          },
+          agentOptions: { provider, model },
+          setup: initialise === undefined ? composition.setup : async (agentCtx, agent) => {
+            const commit = await composition.setup(agentCtx, agent)
+            return {
+              commit() {
+                commit?.commit()
+                initialise(agent)
+              },
+            }
+          },
+        })
+      } catch (error) {
+        throw new RemoteError(
+          'gateway/internal',
+          `failed to fork session "${source.header.id}": ${String(error)}`,
+          {},
+        )
+      }
     }
+    const live = preparation === undefined && inquiry === undefined ? undefined : this.ctx.sessions.get(childId)
+    if (live !== undefined) await this.ctx.sessions.flush(live)
     if (workspace !== undefined) {
       try {
         await workspace.attachSession(childId)
@@ -306,6 +419,15 @@ export class SessionCommandController {
       }
     }
     return { sessionId: childId }
+  }
+
+  private async observeExistingFork(childId: SessionId): Promise<SessionObservation | undefined> {
+    try {
+      return await this.ctx.sessionQuery.observeSession(childId, { projectionMode: 'none' })
+    } catch (error) {
+      if (!(error instanceof SessionQueryError) || error.code !== 'SESSION_QUERY_SESSION_NOT_FOUND') throw error
+      return undefined
+    }
   }
 
   /**
@@ -346,7 +468,7 @@ export class SessionCommandController {
   }
 
   private async admitPrompt(agent: Agent, request: SessionPromptRequest, source: MessageSource): Promise<SessionPromptValue> {
-    const context = this.resolveContexts(agent, request.contexts ?? [])
+    const context = this.resolveContexts(agent, request.contexts ?? [], request.requestId)
     const admission = resolvePromptFileReceipts(
       request.content,
       receiptId => this.ctx.fileUploads.resolve(agent, receiptId),

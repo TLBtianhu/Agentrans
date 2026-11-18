@@ -158,7 +158,7 @@ export type Config = PresetDefinition
 
 ## `@agentrans/agent-preset-registry`
 
-- `inject`: `loader` · `sessionProjections` · `agents`
+- `inject`: `loader` · `sessionProjections` · `agents` · `tools`
 - `refs`: `Volatile` (`@agentrans/cordis`)
 - `source`: [`packages/preset/agent-preset-registry/src/preset.ts:13`](../packages/preset/agent-preset-registry/src/preset.ts)
 
@@ -378,7 +378,7 @@ export interface Config {
 ## `@agentrans/artifact`
 
 - `inject`: `sessionProjections`
-- `source`: [`packages/artifact/artifact/src/index.ts:43`](../packages/artifact/artifact/src/index.ts)
+- `source`: [`packages/artifact/artifact/src/index.ts:47`](../packages/artifact/artifact/src/index.ts)
 
 ```ts config-catalog
 /** Deployment limits for durable source and user-action messages. */
@@ -399,7 +399,7 @@ export interface Config {
 ## `@agentrans/artifact-branch`
 
 - `inject`: `sessionQuery` · `sessionController` · `sessions` · `artifacts`
-- `source`: [`packages/artifact/artifact-branch/src/index.ts:26`](../packages/artifact/artifact-branch/src/index.ts)
+- `source`: [`packages/artifact/artifact-branch/src/index.ts:68`](../packages/artifact/artifact-branch/src/index.ts)
 
 ```ts config-catalog
 /** Complete returned-message deployment budget. */
@@ -436,8 +436,8 @@ export interface Config {
 
 ## `@agentrans/artifact-followup`
 
-- `inject`: `artifacts` · `sessionController`
-- `source`: [`packages/artifact/artifact-followup/src/index.ts:33`](../packages/artifact/artifact-followup/src/index.ts)
+- `inject`: `artifacts` · `sessionController` · `sessionProjections`
+- `source`: [`packages/artifact/artifact-followup/src/index.ts:49`](../packages/artifact/artifact-followup/src/index.ts)
 
 ```ts config-catalog
 /** Deployment budget for complete serialized question-context blocks. */
@@ -3791,7 +3791,7 @@ export interface Config {
 
 ## `@agentrans/system-prompt`
 
-- `source`: [`packages/core/system-prompt/src/index.ts:265`](../packages/core/system-prompt/src/index.ts)
+- `source`: [`packages/core/system-prompt/src/index.ts:266`](../packages/core/system-prompt/src/index.ts)
 
 ```ts config-catalog
 /** Plugin config: the deployment-authored fragment of the system prompt (see {@link Config.personaPrefix} for its contract). */

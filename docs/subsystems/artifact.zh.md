@@ -38,11 +38,23 @@ Artifact 操作是用户意图，不是权限。它不能批准工具、读取�
 
 ### 分支证据回流
 
-可选的 `artifact-branch` Host 插件拥有 `artifactBranchResults.returnResult`。`ArtifactBranchResultRequest` 指定直接父级、子分支、子分支自有结论序号，以及 `ArtifactBranchEvidenceSelection`：单个观察引用，或比较组与有序 control/variant 引用。它声明两个 Session 资源，并从与结论相同的子分支切面解析全部证据。主 Artifact 服务不依赖这个 Web 桥接能力。
+可选的 `artifact-branch` Host 插件拥有 `artifactBranchResults.returnResult`。`ArtifactBranchResultRequest` 指定直接父级、子分支、子分支自有结论序号和 `ArtifactBranchEvidenceSelection`。可选择已保存观察引用、有序比较双方，或本分支较早的原生实验追问中的文本块引用。服务声明两个 Session 资源，并从与结论相同的子分支切面解析证据。
 
-父级收到普通 `branch-result` 消息，包含可见结论和额外的用户选择证据文本。每条观察含完整原始源码、检查点和重算值；比较复用上方的纯兼容规则。源码副本不会更新父级 Artifact 命名空间。这些是用户后附的观察，不声称助手先前使用过哪些事实。共用的[分支准入](branch.zh.md#confirmed-result-return)防止同一结论以不同内容再次回流，并保留未知结果后的相同重试。
+父级收到一条普通 `branch-result` 消息，包含可见结论和用户所选证据。证据携带原始源码、检查点或函数图设置，以及重算值。已保存比较复用上方的兼容规则。追问证据按追问时可见的源码校验。[Artifact Client](../../packages/client/ui-artifact/README.zh.md) 可独立于父级 Artifact 复现消息中的源码。共用的[分支准入](branch.zh.md#confirmed-result-return)保留相同请求的重试，并拒绝用不同证据再次回流同一结论。
 
-`artifact-branch/evidence-unavailable` 以 `ArtifactBranchEvidenceFailure` 报告观察缺失、投影不可用或比较条件不兼容。`artifact-branch/result-too-large` 报告配置的完整消息上限。两者都在新追加之前拒绝。既有 `branch-result` source 字段和 Session 事件类型不变；已发布读取器与 SDK 将证据保留为普通文本块。
+`artifact-branch/evidence-unavailable` 以 `ArtifactBranchEvidenceFailure` 报告追问读数不可用、观察缺失、投影不可用或比较条件不兼容。`artifact-branch/result-too-large` 报告配置的完整消息上限。两者都在新追加之前拒绝。已发布读取器与 SDK 将证据保留为普通文本块。
+
+`artifactBranchResults.continuePlot` 从回流的函数图读数创建手动分支。`ArtifactBranchContinuePlotRequest` 指定接收 Session、确切通知和重试 UUID。`ArtifactBranchContinuePlotValue` 标明子 Session 及其新 Artifact。子快照保留原始源码与记录中的函数、参数、描点和读数，供对照。
+
+在接收会话的函数图、粒子实验、BFS 或半加器回流卡上点**下载实验 HTML**，即可保存独立的交互文件。已发送的函数图或粒子实验追问，以及从回流继续操作 BFS 或半加器的已发送追问，也可用同一入口下载随追问锁定的状态。打开或重置文件会恢复各自锁定的读数或状态。BFS 和半加器文件在隔离的框架中运行保存的程序修订。下载请求和权限见[证据回流服务](../../packages/artifact/artifact-branch/README.zh.md#use-this-package)。
+
+在 CSV 回流证据上选择 **继续分析**，会调用 `artifactBranchResults.recalculateCsv`，在接收对话中预览另一种聚合方式。Host 用原分支追问校验已采纳的通知，再读取该图表可见的 CSV 引用。`artifactBranchResults.lockCsv` 在父会话的不可变 Artifact 中保存用户核对的分组。两项操作都不启动模型轮次。追问附件读取已保存的分组，并携带完整图表用于复现。
+
+单列精确筛选在分组前匹配 CSV 原始单元格文本，区分大小写和空格。筛选生效后，**继续分析** 的两侧预览使用同一种聚合方式。**查看参与行** 会分页显示原始记录序号和相关单元格，表头是第 1 条记录。读取使用经验证的分支附件。确认时保存筛选条件、图表、分组数值和样本数，可在新追问中复现。
+
+在原 CSV 回流卡或已发送的 CSV 继续分析追问上选择 **复现实验**，即可查看参与记录。Host 定位已采纳的分支读数或追问确认的修订，并按该读数保存的分组与计算条件分页读取获准访问的分支 CSV。展开参与行不会启动模型轮次。源文件不可用时，各自的复现仍会显示已保存的计算条件、数值和样本数，并提供重试入口。
+
+在已发送的 CSV 继续分析追问上选择 **对照原回流**，即可查看同一分组的两份已保存读数，以及各自的聚合方式、筛选条件和样本数。Host 按两边保存的条件核对原始 CSV，并按原始记录号分页展示。每条记录标明保留、排除或新增。仅更改聚合方式时，参与记录保持一致。展开对照不会启动模型轮次。
 
 ## 运行就绪与支持的操作
 
@@ -70,6 +82,8 @@ SceneHost 支持 `inline`、`beside`、`focus` 和 `pip` 呈现方式。`ViewReq
 SceneCatalog 支持 `function-plot`、`flowchart`、`particle-system`、`timeline`、`network-graph` 和 `map` 原语：函数图使用共享安全表达式解析器原生渲染；流程图呈现节点、有向边和推进路径，确认动作为 `flow.inspected`；粒子系统进行固定步长模拟并显示速度向量，确认动作为 `physics.inspected`；时间轴配合事件详情，确认动作为 `timeline.inspected`；网络图使用确定性力导向布局，确认动作为 `network.inspected`；地图呈现标记与详情，确认动作为 `map.inspected`。六类都可导出独立 HTML 动画和同一播放过程的 WebM 录制。
 
 函数图预览与导出共享有限采样、中心差分求导和从零开始的梯形积分。无定义采样会断开曲线；不可用读数显示为 `—`，并在确认分析中记为 `null`。导出标签是文本，内嵌 SceneSpec JSON 不能终止脚本元素。
+
+对于 `csv-bar-chart`，`attachment_csv` 接收会话附件 ID、分组列、可选数值列和聚合方式。Host 读取获准访问的 CSV，计算分组结果并写入完整的图表修订。确认追问时提供修订和分组键，Host 查出该组已经保存的数值和行数。回流证据恢复原先选中的分组。独立 HTML 保存指定修订的全部分组，用户可离线查看。
 
 原生粒子运行归属单个卡片修订。查看源码和切换布局会保留步数；隐藏预览会暂停，新修订或卡片卸载会释放该次运行。预览和 HTML 导出使用同一份显式 Euler 计算及有界轨迹。导出捕获当前步数并从该处重放。未保存的运行仍是瞬态。
 
@@ -105,9 +119,9 @@ keyless [Artifact 交互场景](../../apps/web/tests/artifact-interaction.e2e.ts
 
 ## 固定来源的 HTML 导出
 
-可选 Web Host 服务 `artifactExports` 在生成 HTML 文件前固定完整 Scene 源码。`ArtifactHtmlExportRequest` 包含稳定 `exportId`、`format: 'html'`，以及当前 Artifact 身份/修订/检查点或已保存观察引用。Host 解析源码并重算已保存粒子条件。后续源码更新不能改变已接受请求。非粒子导出按源码默认条件生成，不捕获未保存局部参数、选择、视口或 iframe 堆。
+可选 Web Host 服务 `artifactExports` 在生成 HTML 文件前固定完整 Scene 源码。`ArtifactHtmlExportRequest` 包含稳定 `exportId`、`format: 'html'`，以及当前修订、历史修订或已保存观察的引用。Host 从会话中读取源码、重算粒子条件，并读取继续函数图实验时保存的基线。后续源码更新不能改变已接受的请求。其他 Scene 使用默认条件。
 
-`artifact/export` 保存完整不可变请求与 `frozen` 输入，包括 `exporterVersion: 1` 和明确的 `parameters`，随后记录 `pending`、附内容寻址 `FileAttachmentRef` 的 `ready`，或附机器可读失败原因的 `failed`。`artifactExports` Projection 恢复这些记录；HTML 字节仍存于当前实例的附件存储。不认识此必需事件的旧读取器会拒绝恢复，避免丢失输出历史。
+`artifact/export` 保存不可变请求、完整 `frozen` 输入和状态。状态为 `pending`、附内容寻址 `FileAttachmentRef` 的 `ready`，或附机器可读原因的 `failed`。导出器版本 1 使用源码默认值或粒子检查点。版本 2 使用明确的 `function-plot-baseline` 条件，打开和重置时恢复已保存的函数、参数和探针。`artifactExports` Projection 恢复这些记录，HTML 字节仍存于当前实例的附件存储。不认识此必需事件的旧读取器会拒绝恢复，避免丢失输出历史。
 
 `create` 在渲染前 flush 固定请求，在追加就绪状态前保存完整文件，并在返回前 flush 结果。相同请求重试会返回已有回执或明确继续固定输入；同 id 的不同请求被拒绝。重启后没有确认结果的 pending 记录不代表仍有生产者或已经成功。读取失败不会抹去原先生成回执。文件读取只解析本 Session 的导出 id，完整校验存储对象后才返回字节。
 
@@ -115,11 +129,43 @@ keyless [Artifact 交互场景](../../apps/web/tests/artifact-interaction.e2e.ts
 
 ## 普通问题中的实验上下文
 
-`artifact-followup` Web 插件在 Session Controller 注册 `artifact` 问题上下文提供者。`ArtifactPromptContextSelection` 可选择当前粒子检查点、保存观察、兼容的固定比较或明确选中的 HTML 运行。粒子值由 Host 自有源码与已记录条件重算。HTML 捕获包含目标 Session、源码身份、修订、运行身份与 `ArtifactProgramQuestionCapture`：ready 携带实际已收到的 JSON 状态，或 error 携带诊断。Host 读取完整当前 HTML 源码并检查目标 Session 与修订；程序数据始终是未经验证的 `program-reported` 上下文。
+`artifact-followup` Web 插件在 Session Controller 注册 `artifact` 问题上下文提供者。`ArtifactPromptContextSelection` 可选择当前粒子检查点、当前函数图、保存观察、兼容的固定比较或明确选中的 HTML 运行。Host 从自有源码和检查点重算粒子值。对于函数图，Host 按当前源码修订校验所选函数和参数，在已核对的描点位置重算函数值、数值导数与积分。HTML 捕获包含目标 Session、源码身份、修订、运行身份与 `ArtifactProgramQuestionCapture`：ready 携带实际已收到的 JSON 状态，或 error 携带诊断。Host 读取完整当前 HTML 源码并检查目标 Session 与修订；程序数据始终是未经验证的 `program-reported` 上下文。
 
 提供者将一个文本块与问题放入同一条普通 `user` 消息。`ArtifactQuestionContext` 保留完整源码与所选事实。粒子与程序报告使用不同说明前缀，后者不宣称 Host 重算、可重放性或因果结论。不新增 Session 事件、消息来源、运行账本或独立模型唤醒。识别的文本显示为可展开摘要，复制、历史、已发布读取器与模型输入保留完整原文；展示不授予验证或执行权限。`maxContextBytes` 与通用发送限制约束完整文本块数组，包括源码与报告，不静默截断。
 
-可移除的输入框标签标明用户选择。粒子捕获读取唯一计算所有者。HTML 选择持有物理运行身份与已准备的节点/运行源，不把状态复制到选择中；同步提交在异步引用和附件工作前捕获最近收到的状态或当前错误。ready 但没有状态不等于空状态：null、false、零与空字符串都是合法值，缺失数据则不可用。换源码、重新挂载和断线会将实时选择锁定为失效，需要重选或移除。清除选择或按任意顺序释放两个所有者，都会释放订阅，不重新查找正在关闭的服务。
+选择回流的原生分支读数时，输入框捕获接收 Session id、通知序号和消息 id。提供者通过私有 Session 投影定位该通知，并从内嵌源码校验记录的条件和读数。追问附件保存通知和原分支追问的身份及完整读数，供复现。选择规则见 [Artifact 追问](../../packages/artifact/artifact-followup/README.zh.md)。
+
+在 CSV 对照中选择 **核对并附到追问** 后，确认会锁定两侧读数、完整的行数统计和用户核对的记录页。Host 将确认页保存为该 Session 的私有草稿。页面刷新或 Host 重启后，浏览器恢复草稿文字，并加载同一份附件。打开另一份对照会保留当前选择。
+
+发送前，Host 在同一 Session 中绑定私有草稿凭据和请求 ID。普通追问按这条绑定读取已确认的对照，并以文本附上。恢复时，Host 在已持久化的队列或消息中核对原请求和对照，确认后清除对应附件。浏览器清除匹配的草稿文字，并保留之后的编辑。请求未经确认时，草稿仍可使用，恢复过程不会发送。已发送的追问可从消息历史复现附带的记录页和行状态。
+
+如果 Host 仍在接收原请求，恢复的草稿会显示 **正在等待宿主确认追问…**。此时发送按钮禁用，用户仍可编辑问题和查看已锁定的对照。输入框会提示上一条追问已发送，或宿主尚未收到。请求持久化后会移除已发送的对照，并保留等待期间的文字修改。如果没有查到已接收或正在处理的请求，发送按钮会重新可用，原草稿仍在。状态检查不会启动模型轮次。
+
+原追问及其已确认的对照进入聊天历史后，输入框会提供 **查看已发送的追问**。点击会定位到原消息，展开已保存的对照，并把焦点移到展开按钮。在这份对照中点击 **返回草稿**，焦点会回到当前输入框，同时恢复光标或选区。追问还在队列中时，入口会等它进入聊天历史后出现。
+
+已发送的对照可以再次核对，并附到同一 Session 的下一条追问。Host 按事件序号和消息 ID 定位原消息，以该草稿绑定发送请求时记录的私有摘要验证对照，再为当前草稿签发同一页的附件凭据，并记录这次直接选中的来源消息。刷新后，草稿和已发送对照中的 **查看这次复用的来源追问** 都可以打开对应消息。再次复用会记录这一次选中的来源，保留最初的计算和参与行。核对、附加和打开来源都不会读取原 CSV 或调用模型。缺少验真记录的旧对照仍可从历史复现。
+
+便携 CSV 对照使用 `agentrans-csv-comparison` 版本 1 JSON 格式，包含已核对的一页。导入请求提交目标 Session ID 和解码后的 JSON。Host 校验页面，标为 **用户导入** 并返回供核对。确认后沿用对照草稿准入和复现流程。读数与记录状态来自文件，独立于原 CSV 和原 Session。
+
+CSV 分步解释引用同一次原回流下的两条已验真追问。Host 从同一 Session 的历史定位两页，核对记录的基线，并按页面呈现的变化排序。第一份提供聚合步骤的无筛选总和，第二份提供筛选后的总和及已核对的记录状态。确认的草稿和已发送追问都保存确切的两页，复现卡可以打开两条来源追问。
+
+导出已发送的两步解释时，Host 用已保存的证据生成一个离线 HTML。文件按计算顺序展示两步，读者可分别展开两张原始页，核对保存的参与行和状态。
+
+`agentrans-csv-comparison-explanation` 版本 1 JSON 可将这两页带入另一个 Session。文件保存聚合页与筛选页的读数和参与行。导入时，Host 校验文件结构和两页的组合关系，标为 **用户导入**，返回完整的两页供用户核对。新对话的预览和已发送追问都能从导入的快照分别打开两页。
+
+**复用整份解释** 可以一起核对已发送的 **用户导入** 卡片中的两页。Host 核验确切的历史追问，再为同一对页面与导入标记签发新的草稿凭据。确认、草稿恢复与历史复现均使用已保存的两页，只有手动发送才调用模型。
+
+从历史复用导入解释时，会保存这次直接选中追问的事件序号和消息 ID。从草稿或已发送追问点击 **查看这次复用的来源追问** 会打开这张确切的导入卡，两份原始页仍可分别展开。导航和刷新使用已保存的历史，无须启动 Agent 或访问 CSV 数据。
+
+复用导入解释的完整来源链会按同样的引用核验每一层。返回路径保存沿途打开的导入卡，刷新后仍能回到确切的草稿或已发送对照。
+
+在当前来源对照继续查看它的来源时，**来源路径** 会增加一层，显示出发位置和沿途追问。点较早的追问会重新展开它保存的对照，路径随之缩短到那一层。点 **草稿** 会直接回到输入框。**返回对照** 仍可逐层返回。两种回草稿的方式都会在草稿和附件仍相同时恢复光标。在同一个标签页刷新会重新展开当前来源并恢复剩余路径。标签页只记录导航位置，草稿路径还会记录附件凭据和校验光标所用的草稿摘要。回到出发位置或收起当前来源对照会清除路径。
+
+复用的草稿附件和展开的已发送对照都提供 **查看完整来源链**，按顺序列出从直接来源到最早对照的已保存追问。查看列表时保留草稿和当前对话位置。选择一条追问会直接打开它保存的对照，途经的追问会加入返回路径。在当前来源上打开列表并选中追问，会接续已有路径。无论从草稿还是已发送追问出发，刷新后都能找回路径。历史暂时读不到时，可以在列表里重试。来源引用失效时，列表会标明断在哪一层，直接来源算第 1 层。两种情况下都能打开已核对的追问。
+
+刷新时若无法恢复整条返回路径，聊天会打开最后一条可核对的对照，返回草稿或已发送追问的路径仍可用。点 **重试** 会重新核对原来保存的路径，历史可读后会回到原位置。重试期间返回草稿或选择另一条来源时，以用户的新操作为准。切换会话会结束这次重试，即使侧栏仍开着旧会话，或者用户在响应到达前切回。迟到的响应到达后，当前对照和返回路径保持原样，刷新会恢复当前会话保存的路径。引用失效时，最后一条已核对的对照会标明断开的层级。若没有任何可核对的对照，提示会出现在输入框旁。收起对照会结束这次恢复。
+
+可移除的输入框标签标明用户选择。核对当前粒子实验时，从唯一计算所有者固定检查点和读数。确认后附上该检查点，后续播放会保留它。HTML 选择持有物理运行身份与已准备的节点/运行源，不把状态复制到选择中；同步提交在异步引用和附件工作前捕获最近收到的状态或当前错误。ready 但没有状态不等于空状态：null、false、零与空字符串都是合法值，缺失数据则不可用。换源码、重新挂载和断线会将实时选择锁定为失效，需要重选或移除。清除选择或按任意顺序释放两个所有者，都会释放订阅，不重新查找正在关闭的服务。
 
 捕获完成后，不要求 frame 继续打开。Host 不查询实时运行注册表，也不替换为后来报告。当前源码变化会在准入前明确拒绝；已接受请求则先返回原确认。未知结果重试保留完整原请求，不受后来状态变化影响。保存引用保持原始证据。选择是瞬态，不从可见内容推断；历史问题文本刷新后仍在，但不会复活运行。其它 Scene 控件与子代理继续输入的上下文仍不支持。Client 根据实际子 agent 通道描述隐藏不支持的问题上下文选择，并说明仍可输入普通文字问题；手动分支继续使用根通道。选择与捕获回调在发送前执行同一限制。参见[程序上下文指南](../upgrade-guide/v0.2.2-alpha.2/program-question-context/guide.zh.md)与[浏览器场景](../../apps/web/tests/artifact-program-question.e2e.ts)。
 
@@ -135,12 +181,222 @@ Generated from source by `scripts/gen-cordis-catalog.ts` (verified fresh by `pnp
 
 ### `ctx.artifactBranchResults` — `ArtifactBranchResults`
 
-Artifact-owned API for manually attaching saved evidence to one branch conclusion.
+Artifact-owned API for manually attaching experiment evidence to one branch conclusion.
 
 ```ts cordis-catalog
 /**
+ * Fork a returned function plot into an editable child without waking either Agent.
+ * @param request - Receiving Session, exact evidence notice identity and retry UUID.
+ * @returns The durable child Session and its initial editable Artifact.
+ * @throws {RemoteError} For unavailable evidence or conflicting reuse of the request identity.
+ * A durability or workspace error can follow creation. Retry the identical request to recover the child.
+ */
+@Remote({ resources: { session: (request: ArtifactBranchContinuePlotRequest) => request.sessionId } }) async continuePlot(request: ArtifactBranchContinuePlotRequest): Promise<ArtifactBranchContinuePlotValue>
+
+/**
+ * Export the exact locked function plot in an original branch-return notice as offline HTML.
+ * @param request - Receiving Session and exact notice sequence and message ID.
+ * @returns UTF-8 HTML with the recorded source revision and replay conditions.
+ * @throws {RemoteError} For unavailable or unverified evidence.
+ */
+@Remote({ resources: { session: (request: ArtifactBranchExportReturnedPlotRequest) => request.sessionId } }) async exportReturnedPlot(request: ArtifactBranchExportReturnedPlotRequest): Promise<Uint8Array>
+
+/**
+ * Export the exact function plot locked on a sent follow-up as offline HTML.
+ * @param request - Owning Session and exact question sequence and message ID.
+ * @returns UTF-8 HTML with the recorded source revision and replay conditions.
+ * @throws {RemoteError} For unavailable or unverified evidence.
+ */
+@Remote({ resources: { session: (request: ArtifactBranchExportSentPlotRequest) => request.sessionId } }) async exportSentPlot(request: ArtifactBranchExportSentPlotRequest): Promise<Uint8Array>
+
+/**
+ * Export the checkpoint of a returned particle experiment as offline HTML.
+ * @param request - Receiving Session and exact notice sequence and message ID.
+ * @returns UTF-8 HTML with the original revision and confirmed replay conditions.
+ * @throws {RemoteError} For unavailable or unverified evidence.
+ */
+@Remote({ resources: { session: (request: ArtifactBranchExportReturnedParticleRequest) => request.sessionId } }) async exportReturnedParticle(request: ArtifactBranchExportReturnedParticleRequest): Promise<Uint8Array>
+
+/**
+ * Export the particle experiment locked on a sent follow-up as offline HTML.
+ * @param request - Owning Session and exact question sequence and message ID.
+ * @returns UTF-8 HTML with the recorded revision, effective gravity and confirmed checkpoint.
+ * @throws {RemoteError} For unavailable or unverified evidence.
+ */
+@Remote({ resources: { session: (request: ArtifactBranchExportSentParticleRequest) => request.sessionId } }) async exportSentParticle(request: ArtifactBranchExportSentParticleRequest): Promise<Uint8Array>
+
+/**
+ * Read the original program and checkpoint of an exact BFS return for offline download.
+ * @param request - Receiving Session and exact notice sequence and message ID.
+ * @returns The source revision and the program-reported checkpoint confirmed on that notice.
+ * @throws {RemoteError} For unavailable or unverified evidence.
+ */
+@Remote({ resources: { session: (request: ArtifactBranchExportReturnedBfsRequest) => request.sessionId } }) async exportReturnedBfs(request: ArtifactBranchExportReturnedBfsRequest): Promise<ArtifactBranchExportReturnedBfsValue>
+
+/**
+ * Read the exact original program and the step locked on a sent BFS follow-up for offline download.
+ * @param request - Owning Session and exact sent question sequence and message ID.
+ * @returns The source revision from the verified return and the follow-up's recorded checkpoint.
+ * @throws {RemoteError} For unavailable or unverified evidence.
+ */
+@Remote({ resources: { session: (request: ArtifactBranchExportSentBfsRequest) => request.sessionId } }) async exportSentBfs(request: ArtifactBranchExportSentBfsRequest): Promise<ArtifactBranchExportReturnedBfsValue>
+
+/**
+ * Read the original program and checkpoint of an exact half-adder return for offline download.
+ * @param request - Receiving Session and exact notice sequence and message ID.
+ * @returns The source revision and the program-reported checkpoint confirmed on that notice.
+ * @throws {RemoteError} For unavailable or unverified evidence.
+ */
+@Remote({ resources: { session: (request: ArtifactBranchExportReturnedHalfAdderRequest) => request.sessionId } }) async exportReturnedHalfAdder( request: ArtifactBranchExportReturnedHalfAdderRequest, ): Promise<ArtifactBranchExportReturnedHalfAdderValue>
+
+/**
+ * Read the original program and state locked on a sent half-adder follow-up for offline download.
+ * @param request - Owning Session and exact sent question sequence and message ID.
+ * @returns The source revision from the verified return and the input and output bits recorded on the question.
+ * @throws {RemoteError} For unavailable or unverified evidence.
+ */
+@Remote({ resources: { session: (request: ArtifactBranchExportSentHalfAdderRequest) => request.sessionId } }) async exportSentHalfAdder(request: ArtifactBranchExportSentHalfAdderRequest): Promise<ArtifactBranchExportReturnedHalfAdderValue>
+
+/**
+ * Fork returned native particle readings into an editable child without waking either Agent.
+ * @param request - Receiving Session, exact evidence notice identity and retry UUID.
+ * @returns The durable child Session and its initial editable Artifact at the original checkpoint.
+ * @throws {RemoteError} For unavailable evidence or conflicting reuse of the request identity.
+ * A durability or workspace error can follow creation. Retry the identical request to recover the child.
+ */
+@Remote({ resources: { session: (request: ArtifactBranchContinueParticleRequest) => request.sessionId } }) async continueParticle(request: ArtifactBranchContinueParticleRequest): Promise<ArtifactBranchContinueParticleValue>
+
+/**
+ * Recalculate the groups from one exact CSV return without mutating the Session.
+ * @param request - Receiving Session, exact evidence notice and selected calculation.
+ * @returns A chart source computed from the original attachment, grouping column and numeric column.
+ * @throws {RemoteError} For unavailable evidence, attachment, or calculation.
+ */
+@Remote({ resources: { session: (request: ArtifactBranchRecalculateCsvRequest) => request.sessionId } }) async recalculateCsv(request: ArtifactBranchRecalculateCsvRequest): Promise<CsvBarChartSpec>
+
+/**
+ * Inspect the CSV columns and a bounded list of distinct values for one column without mutating the Session.
+ * @param request - Exact approved return and optional column name.
+ * @returns The available columns and the requested column options.
+ */
+@Remote({ resources: { session: (request: ArtifactBranchCsvFilterOptionsRequest) => request.sessionId } }) async csvFilterOptions(request: ArtifactBranchCsvFilterOptionsRequest): Promise<ArtifactBranchCsvFilterOptionsValue>
+
+/**
+ * Inspect a page of original CSV records contributing to a group before confirmation.
+ * @param request - Exact approved return, current recipe, group key and optional offset.
+ * @returns The matching record range with filter and measure cells only.
+ */
+@Remote({ resources: { session: (request: ArtifactBranchCsvRowsRequest) => request.sessionId } }) async csvParticipatingRows(request: ArtifactBranchCsvRowsRequest): Promise<ArtifactBranchCsvRowsValue>
+
+/**
+ * Inspect the records that contributed to the adopted CSV reading.
+ * @param request - Exact receiving Session, return identity and optional record offset.
+ * @returns A page from the original branch CSV using the adopted group and recipe.
+ */
+@Remote({ resources: { session: (request: ArtifactBranchCsvReturnedRowsRequest) => request.sessionId } }) async csvReturnedParticipatingRows(request: ArtifactBranchCsvReturnedRowsRequest): Promise<ArtifactBranchCsvRowsValue>
+
+/**
+ * Inspect the records that contributed to a sent CSV question's confirmed reading.
+ * @param request - Exact receiving Session, question identity and optional record offset.
+ * @returns A page from the original branch CSV using the stored group and filter.
+ */
+@Remote({ resources: { session: (request: ArtifactBranchCsvQuestionRowsRequest) => request.sessionId } }) async csvQuestionParticipatingRows(request: ArtifactBranchCsvQuestionRowsRequest): Promise<ArtifactBranchCsvQuestionRowsValue>
+
+/**
+ * Compare the confirmed CSV readings and their contributing records.
+ * @param request - Exact receiving Session, sent question identity and optional record offset.
+ * @returns A page of kept, excluded and added records for the same group of the original CSV.
+ */
+@Remote({ resources: { session: (request: ArtifactBranchCsvQuestionComparisonRequest) => request.sessionId } }) async compareCsvQuestionToReturn(request: ArtifactBranchCsvQuestionComparisonRequest): Promise<ArtifactBranchCsvQuestionComparisonValue>
+
+/**
+ * Compare two confirmed CSV returns and their record membership.
+ * @param request - Parent Session, exact saved returns in comparison order, and optional page offset.
+ * @returns The saved readings, the bounded record page and its confirmation proof when available to the owner.
+ */
+@Remote({ resources: { session: (request: ArtifactBranchCsvReturnedComparisonRequest) => request.sessionId } }) async compareCsvReturns(request: ArtifactBranchCsvReturnedComparisonRequest): Promise<ArtifactBranchCsvReturnedComparisonValue>
+
+/**
+ * Restore the owner's unsent CSV comparison for the receiving Session.
+ * @param request - The receiving Session identity.
+ * @returns The exact confirmed draft, or null when there is no draft.
+ */
+@Remote({ resources: { session: (request: ArtifactBranchReadCsvComparisonDraftRequest) => request.sessionId } }) async readCsvComparisonDraft(request: ArtifactBranchReadCsvComparisonDraftRequest): Promise<ArtifactCsvComparisonDraft | null>
+
+/**
+ * Durably save an explicitly confirmed CSV comparison before prompt admission.
+ * @param request - Receiving Session, sealed reviewed page, and expected current receipt.
+ * @returns The private receipt and the exact comparison visible in the draft.
+ */
+@Remote({ resources: { session: (request: ArtifactBranchSaveCsvComparisonDraftRequest) => request.sessionId } }) async saveCsvComparisonDraft(request: ArtifactBranchSaveCsvComparisonDraftRequest): Promise<ArtifactCsvComparisonDraft>
+
+/**
+ * Bind the exact confirmed draft to the next ordinary prompt request.
+ * @param request - Owner receiving Session, current draft receipt and prompt request identity.
+ * @returns Confirmation that the request identity is durable.
+ */
+@Remote({ resources: { session: (request: ArtifactBranchBindCsvComparisonDraftRequest) => request.sessionId } }) async bindCsvComparisonDraftRequest( request: ArtifactBranchBindCsvComparisonDraftRequest, ): Promise<ArtifactBranchBindCsvComparisonDraftValue>
+
+/**
+ * Check whether the exact identified comparison prompt reached the Session.
+ * @param request - The owner receiving Session and original prompt identity.
+ * @returns Whether this comparison prompt is durably accepted and its exact chat or inbox identity when available.
+ */
+@Remote({ resources: { session: (request: ArtifactBranchCheckCsvComparisonDraftRequest) => request.sessionId } }) async checkCsvComparisonDraftRequest( request: ArtifactBranchCheckCsvComparisonDraftRequest, ): Promise<ArtifactBranchCheckCsvComparisonDraftValue>
+
+/**
+ * Review the exact single comparison or imported explanation attached to an own sent question.
+ * @param request - Receiving Session and exact message coordinates from chat history.
+ * @returns The unchanged reviewed pages and transient proof for a fresh explicit draft lock.
+ */
+@Remote({ resources: { session: (request: ArtifactBranchReviewSentCsvComparisonRequest) => request.sessionId } }) async reviewSentCsvComparison(request: ArtifactBranchReviewSentCsvComparisonRequest): Promise<ArtifactCsvComparisonAttachment>
+
+/**
+ * Review two exact sent CSV comparisons as an ordered explanation before confirmation.
+ * @param request - Receiving Session and both exact history message addresses in either selection order.
+ * @returns The saved pages in recipe order with a transient proof for explicit draft confirmation.
+ */
+@Remote({ resources: { session: (request: ArtifactBranchReviewCsvComparisonExplanationRequest) => request.sessionId } }) async reviewCsvComparisonExplanation( request: ArtifactBranchReviewCsvComparisonExplanationRequest, ): Promise<ArtifactCsvComparisonAttachment>
+
+/**
+ * Export the exact recorded pages of a sent CSV comparison or explanation as offline HTML.
+ * @param request - Receiving Session, exact message coordinates, and optional document language.
+ * @returns UTF-8 HTML with the saved readings, reviewed records, and original return cards when the comparison records them.
+ */
+@Remote({ resources: { session: (request: ArtifactBranchExportSentCsvComparisonRequest) => request.sessionId } }) async exportSentCsvComparison(request: ArtifactBranchExportSentCsvComparisonRequest): Promise<Uint8Array>
+
+/**
+ * Export the reviewed pages of the exact own sent comparison or explanation as portable JSON.
+ * @param request - Receiving Session and exact message coordinates from chat history.
+ * @returns Bounded UTF-8 JSON containing the exact reviewed pages and any original return cards without local resource identities.
+ */
+@Remote({ resources: { session: (request: ArtifactBranchReviewSentCsvComparisonRequest) => request.sessionId } }) async exportSentCsvComparisonJson(request: ArtifactBranchReviewSentCsvComparisonRequest): Promise<Uint8Array>
+
+/**
+ * Review a portable comparison or explanation in a destination Session before the user confirms it.
+ * @param request - Destination Session and decoded JSON file selected by the caller.
+ * @returns Exact imported readings, their explicit source classification and a transient review proof.
+ */
+@Remote({ resources: { session: (request: ArtifactBranchImportCsvComparisonRequest) => request.sessionId } }) async importCsvComparison(request: ArtifactBranchImportCsvComparisonRequest): Promise<ArtifactCsvComparisonAttachment>
+
+/**
+ * Remove the matching draft on explicit discard or after its accepted prompt reaches durability.
+ * @param request - Receiving Session, exact receipt, and optional accepted prompt request ID.
+ * @returns Whether that matching receipt was removed.
+ */
+@Remote({ resources: { session: (request: ArtifactBranchClearCsvComparisonDraftRequest) => request.sessionId } }) async clearCsvComparisonDraft( request: ArtifactBranchClearCsvComparisonDraftRequest, ): Promise<ArtifactBranchClearCsvComparisonDraftValue>
+
+/**
+ * Confirm and persist one recalculated group in the receiving Session without waking the Agent.
+ * @param request - Exact returned evidence, selected aggregation and group.
+ * @returns The new immutable source and its confirmed group after the durability checkpoint.
+ * @throws {RemoteError} For invalid or unavailable source, group or conflicting result. An identical retry reuses the same source.
+ */
+@Remote({ resources: { session: (request: ArtifactBranchLockCsvRequest) => request.sessionId } }) async lockCsv(request: ArtifactBranchLockCsvRequest): Promise<ArtifactBranchLockCsvValue>
+
+/**
  * Return one child-owned conclusion with evidence selected by the user, without starting a model turn.
- * @param request - Direct parent, branch conclusion and branch-visible saved references; no text or coordinates are accepted.
+ * @param request - Direct parent, child-owned conclusion and a branch-visible evidence reference.
  * @returns Parent-local event and message ids after the durability checkpoint; identical retries reuse the receipt.
  * @throws {RemoteError} For invalid lineage, unavailable evidence, oversized content, a busy parent or different earlier content.
  * Other failures preserve an unknown outcome after append; retry the identical request to recover its receipt.
@@ -162,7 +418,7 @@ Owns fixed HTML export inputs, explicit continuation, and verified result reads.
 /**
  * Capture and generate one Scene HTML export without adding model input.
  * @param agent - Exact live root owning the result record.
- * @param input - Stable request identity and current-revision or saved-observation reference.
+ * @param input - Stable request identity and a Scene revision or saved observation reference.
  * @returns The settled record after flush; generation failures return a durable failed record.
  * @throws {RemoteError} Before admission for invalid, conflicting, missing, stale, or over-limit requests.
  * Append or flush failures retain an unknown outcome; retry the identical request to recover or explicitly continue it.
@@ -256,7 +512,7 @@ resolveSavedObservation(agent: Agent, ref: SavedParticleObservationRef): SavedPa
 /**
  * Resolve a Scene selection to a complete original source and validated replay point.
  * @param agent - Agent whose prepared Session owns the source and saved observations.
- * @param selection - Current source revision or a previously saved observation reference.
+ * @param selection - Current revision, historical revision, or saved observation reference.
  * @returns Independent complete source values; particle coordinates are recomputed.
  * @throws {ArtifactError} For missing, stale, or unsupported sources.
  * @throws {ParticleRuntimeError} For invalid replay conditions.
@@ -272,6 +528,14 @@ resolveSceneSource(agent: Agent, selection: ArtifactExportSourceSelection): Arti
  * `BAD_SOURCE`, or `BAD_INPUT`; no Session event is appended.
  */
 prepare(agent: Agent, input: ArtifactPrepareInput): ArtifactSnapshot
+
+/**
+ * Prepare an inline chart from authoritative results computed by a Host attachment operation.
+ * @param agent - Agent whose Session supplies the current Artifact revision.
+ * @param input - Host-calculated CSV source and compare-and-set revision fields.
+ * @returns The pending source to commit after the authoritative tool result succeeds.
+ */
+prepareCsvBarChart(agent: Agent, input: CsvBarChartPrepareInput): ArtifactSnapshot
 
 /**
  * Append one validated complete snapshot only when it still follows the committed revision.

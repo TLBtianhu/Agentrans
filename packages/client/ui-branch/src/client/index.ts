@@ -7,6 +7,7 @@ import type {} from '@agentrans/client-ui-renderer/client'
 import type {} from '@agentrans/client-ui-session/client'
 import type {} from '@agentrans/client-ui-workspace/client'
 import { BranchResultAction, type BranchResultActionInjected } from './BranchResultAction.tsx'
+import { InquiryBranchPath } from './InquiryBranchPath.tsx'
 import { de, en, es, fr, ja, pt, ru, zh, type BranchKey } from './locales.ts'
 
 declare module '@agentrans/client-ui-slots' {
@@ -34,4 +35,13 @@ export function apply(ctx: ClientContext): void {
       openSession: (sessionId) => { ctx.uiWorkspace.openSession(sessionId) },
     }),
   }, BranchResultAction))
+  ctx.slots.inject('conversation.chat.assistant.details', () => ctx.slots.register({
+    name: 'conversation.chat.assistant.details',
+    id: 'inquiry-branch-path',
+    locale: NS,
+    children: { 'conversation.chat.inquiry.actions': { kind: 'list', scope: 'session' } },
+    inject: (): Pick<BranchResultActionInjected, 'openSession'> => ({
+      openSession: (sessionId) => { ctx.uiWorkspace.openSession(sessionId) },
+    }),
+  }, InquiryBranchPath))
 }

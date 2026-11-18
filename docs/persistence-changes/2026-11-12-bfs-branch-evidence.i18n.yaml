@@ -1,0 +1,28 @@
+# Bilingual-pair consistency record for 2026-11-12-bfs-branch-evidence.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write docs/persistence-changes/2026-11-12-bfs-branch-evidence.md
+/:
+  en: 3d5a424ae7d7e46b
+  zh: c22a8e4a62d8cc1a
+/2026-11-12-bfs-branch-evidence:
+  en: d421c0d85984fac0
+  zh: 27b7968f45591eb8
+/2026-11-12-bfs-branch-evidence/summary:
+  en: 61968d0e8d59d475
+  zh: 03a04a35f5b7f2bb
+/2026-11-12-bfs-branch-evidence/table-of-contents:
+  en: 6cf314a069ceb451
+  zh: 9adff678e9ecab3b
+/2026-11-12-bfs-branch-evidence/declaration:
+  en: 6907136f28e48c90
+  zh: 02f8298485f3d8e7
+/2026-11-12-bfs-branch-evidence/compatibility:
+  en: 3c62a3e8a2021942
+  zh: 2e0b7ca657ea0726
+/2026-11-12-bfs-branch-evidence/verification:
+  en: 58427f6ffc5aaa6f
+  zh: 14e6ab618bdb5cd5
+/2026-11-12-bfs-branch-evidence/dev-note:
+  en: b75c8458928b72b9
+  zh: 003ba4e17b4b5269
