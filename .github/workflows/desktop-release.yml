@@ -1,4 +1,5 @@
 name: Publish Desktop release
+run-name: Verify the signed Desktop draft
 
 on:
   workflow_dispatch:
@@ -21,9 +22,17 @@ permissions:
   contents: write
   actions: read
 
+concurrency:
+  group: agentrans-desktop-release-${{ inputs.version }}
+  cancel-in-progress: false
+
 jobs:
   publish:
     runs-on: ubuntu-latest
+    env:
+      PACKAGE_RUN_ID: ${{ inputs.package_run_id }}
+      PACKAGE_VERSION: ${{ inputs.version }}
+      PACKAGE_CHANNEL: ${{ inputs.channel }}
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: pnpm/action-setup@v5.0.0
@@ -32,22 +41,17 @@ jobs:
           node-version: '24'
       - name: Install locked dependencies
         run: pnpm install --frozen-lockfile
-      # The packaging run keeps each target in its own artifact; one release carries both.
-      - name: Download packaged artifacts
+      - name: Verify the packaging run and stage its assets
+        id: package
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-          mkdir -p .desktop-download .desktop-assets
-          gh run download "${{ inputs.package_run_id }}" --dir .desktop-download
-          # Diagnostics ride along in their own artifacts; a release carries installers and metadata only.
-          rm -rf .desktop-download/*-logs-*
-          find .desktop-download -mindepth 2 -maxdepth 2 -type f -exec cp {} .desktop-assets/ \;
-      - name: Attach the assets to the release
+        run: node --import tsx apps/desktop/scripts/stage-hosted-desktop-release.ts "$PACKAGE_RUN_ID" "$PACKAGE_VERSION" "$PACKAGE_CHANNEL"
+      - name: Sign and stage the Desktop draft
+        shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Signs every artifact; a release without this key is refused, not published unsigned.
-          # The repository still stores this key under its pre-rename name; keep publishing while
-          # the new name is being set, then drop the fallback.
           AGENTRANS_UPDATE_SIGNING_KEY: ${{ secrets.AGENTRANS_UPDATE_SIGNING_KEY }}
-        run: node --import tsx apps/desktop/scripts/publish-github-release.ts .desktop-assets "${{ inputs.version }}" "${{ inputs.channel }}"
+          AGENTRANS_DESKTOP_PACKAGE_SHA: ${{ steps.package.outputs.source_sha }}
+          AGENTRANS_DESKTOP_PACKAGE_TARGET: ${{ steps.package.outputs.package_target }}
+          PACKAGE_ASSETS_DIR: ${{ steps.package.outputs.assets_dir }}
+        run: node --import tsx apps/desktop/scripts/publish-github-release.ts "$PACKAGE_ASSETS_DIR" "$PACKAGE_VERSION" "$PACKAGE_CHANNEL" --draft-only
