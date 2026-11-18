@@ -68,15 +68,21 @@ $originalHosts = [IO.File]::ReadAllBytes($hostsPath)
 if ([Text.Encoding]::ASCII.GetString($originalHosts) -match '(?im)^[^#\r\n]+\bgithub\.com(?=\s|$)') {
   throw 'The clean runner already has a GitHub hosts override'
 }
-$trusted = $null
+$certificate = [Security.Cryptography.X509Certificates.X509Certificate2]::new($rootDer)
+$rootStore = [Security.Cryptography.X509Certificates.X509Store]::new('Root', 'LocalMachine')
+$trusted = $false
 $hostsChanged = $false
 try {
-  $trusted = Import-Certificate -FilePath $rootDer -CertStoreLocation 'Cert:\CurrentUser\Root'
+  $rootStore.Open([Security.Cryptography.X509Certificates.OpenFlags]::ReadWrite)
+  $rootStore.Add($certificate)
+  $trusted = $true
+  Write-Output 'Trusted the isolated CA in the disposable runner'
   $route = [Text.Encoding]::ASCII.GetBytes([Environment]::NewLine + '127.0.0.1 github.com # Agentrans Windows update fixture' + [Environment]::NewLine)
   $hostsChanged = $true
   [IO.File]::WriteAllBytes($hostsPath, [byte[]]($originalHosts + $route))
   ipconfig.exe /flushdns | Out-Null
   node --input-type=module -e "import {lookup} from 'node:dns/promises'; const result = await lookup('github.com'); if (result.address !== '127.0.0.1') throw Error('Loopback GitHub route is not active')"
+  Write-Output 'Verified the GitHub loopback route'
   node scripts/verify-upgrade.mjs $manifest (Join-Path $runnerTemp 'agentrans-upgrade-qa')
 } finally {
   try {
@@ -85,6 +91,11 @@ try {
       ipconfig.exe /flushdns | Out-Null
     }
   } finally {
-    if ($trusted) { Remove-Item -LiteralPath "Cert:\CurrentUser\Root\$($trusted.Thumbprint)" -ErrorAction Stop }
+    try {
+      if ($trusted) { $rootStore.Remove($certificate) }
+    } finally {
+      $rootStore.Dispose()
+      $certificate.Dispose()
+    }
   }
 }

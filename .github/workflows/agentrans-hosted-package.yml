@@ -96,7 +96,8 @@ jobs:
           node --input-type=module -e $source
       - name: Verify the true installed update using the local feed
         shell: pwsh
-        run: pwsh -NoLogo -NoProfile -File scripts/run-windows-upgrade-qa.ps1
+        timeout-minutes: 14
+        run: pwsh -NoLogo -NoProfile -NonInteractive -File scripts/run-windows-upgrade-qa.ps1
       - name: Retain the verification report
         if: always()
         uses: actions/upload-artifact@v4
