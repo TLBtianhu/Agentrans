@@ -28,7 +28,7 @@ description: "将已完成的 Desktop 安装包与更新元数据发布为 GitHu
 
 在 [Verify signed Desktop artifacts](../../../.github/workflows/desktop-signed-intake.yml) 中填入 Windows x64、macOS arm64 和 macOS x64 的三个成功 `production` 打包运行 ID，以及共用的源码提交、可信的打包工作流提交、版本和更新通道。选择含有 `desktop-signed-build.json` 的运行，该文件记录实际检出的源码和生成的产物。
 
-在仓库变量 `DESKTOP_WINDOWS_CERT_THUMBPRINT` 中填写 Windows 签名证书的 40 位十六进制指纹，在 `DESKTOP_MACOS_TEAM_ID` 中填写 Apple Team ID，在 `DESKTOP_MACOS_SIGNING_IDENTITY` 中填写完整的 Developer ID Application 签名身份。预检在对应平台的 runner 上使用这些公开值验证安装包。[打包指南](../packaging/README.zh.md)说明了生成产物需要的机器配置和签名凭据。
+在仓库变量 `DESKTOP_WINDOWS_CERT_THUMBPRINT` 中填写 Windows 签名证书的 40 位十六进制指纹，在 `DESKTOP_MACOS_TEAM_ID` 中填写 10 位 Apple Team ID。在 `DESKTOP_MACOS_SIGNING_IDENTITY` 中填写证书名称里 `Developer ID Application:` 之后的内容，例如 `Example Company (AB12CD34EF)`。预检在对应平台的 runner 上使用这些公开值验证安装包。[打包指南](../packaging/README.zh.md)说明了生成产物需要的机器配置和签名凭据。
 
 工作流只有仓库内容和 Actions 的读取权限。它先校验打包运行、归档、文件摘要和系统签名，再合并两种 macOS 架构的更新元数据。验收报告和合并后的元数据保存在 `signed-desktop-intake-report` Actions 产物中。签名和公证的端到端验收需要三套真实的生产打包产物。
 
