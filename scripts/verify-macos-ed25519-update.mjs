@@ -1,7 +1,7 @@
 /** Verify detached update signatures using real packaged macOS builds and the installed updater. */
 import assert from 'node:assert/strict'
 import { execFile, spawn } from 'node:child_process'
-import { createHash } from 'node:crypto'
+import { createHash, X509Certificate } from 'node:crypto'
 import { lookup } from 'node:dns/promises'
 import { createReadStream } from 'node:fs'
 import { lstat, mkdir, mkdtemp, readFile, readdir, realpath, writeFile } from 'node:fs/promises'
@@ -231,9 +231,10 @@ async function nativeSignatureIssue(app) {
 const dialogUrl = 'dsh-app://shell/update-dialog.html'
 const signatureError = `${basename(newZip)} does not match its published signature`
 
-async function checkScenario(mode, tls) {
+async function checkScenario(mode, tls, tlsSpki) {
   const state = { passed: false }
   record.cases[mode] = state
+  console.log(`Preparing the original ${arch} .4 app for the ${mode} update case.`)
   const stage = await mkdtemp(join(workRoot, `${mode}-`))
   const instance = await mkdtemp(join(stage, 'state-'))
   const home = await mkdtemp(join(stage, 'home-'))
@@ -246,7 +247,6 @@ async function checkScenario(mode, tls) {
     HOME: home,
     TMPDIR: stage,
     NODE_EXTRA_CA_CERTS: rootCa,
-    NODE_USE_SYSTEM_CA: '1',
     AGENTRANS_TELEMETRY_DISABLED: '1',
     AGENTRANS_DESKTOP_UPDATE_CHECK_INTERVAL_MS: '3600000',
     AGENTRANS_DESKTOP_UPDATE_JOURNAL_DIR: journal,
@@ -256,6 +256,9 @@ async function checkScenario(mode, tls) {
   const child = spawn(bundle.executable, ['--remote-debugging-pipe', '--enable-logging=stderr',
     '--disable-backgrounding-occluded-windows', '--no-proxy-server',
     '--host-resolver-rules=MAP github.com 127.0.0.1, MAP api.github.com 127.0.0.1',
+    `--user-data-dir=${join(stage, 'chromium')}`,
+    // Trust the single ephemeral TLS key served on loopback inside this test, without changing system trust.
+    `--ignore-certificate-errors-spki-list=${tlsSpki}`,
   ], { cwd: stage, env, detached: true, stdio: ['ignore', 'pipe', 'pipe', 'pipe', 'pipe'] })
   let output = ''
   let spawnError
@@ -305,6 +308,7 @@ async function checkScenario(mode, tls) {
     }, 'an update check against the local release feed')
     assert.equal(offer.phase, 'available', `Unexpected update check result ${JSON.stringify(offer)}`)
     assert.equal(offer.version, newVersion)
+    console.log(`The installed ${arch} .4 app offered .5 in the ${mode} case.`)
     await evaluate(cdp, workspace, 'setTimeout(() => { void window.dshDesktop.updates.open().catch(() => {}); }, 0); true')
     if (mode === 'tampered') {
       const rejection = await poll(async () => {
@@ -365,6 +369,7 @@ async function checkScenario(mode, tls) {
     assert.ok(state.events.some(event => event.event === 'download-requested'))
     assert.equal(state.events.some(event => event.event === 'install-confirmed'), state.installationAuthorized)
     state.passed = true
+    console.log(`Completed the ${arch} ${mode} Ed25519 case.`)
   } catch (error) {
     state.failure = cleanText(error.message)
     state.events = await events()
@@ -382,9 +387,10 @@ try {
     assert.equal((await lookup(hostname, { family: 4 })).address, '127.0.0.1', 'The runner must route releases to its local fixture')
   }
   const tls = { key: await readFile(tlsKey), cert: await readFile(tlsCert) }
+  const tlsSpki = createHash('sha256').update(new X509Certificate(tls.cert).publicKey.export({ type: 'spki', format: 'der' })).digest('base64')
   record.input = { oldName: basename(oldZip), newName: basename(newZip), oldSha256: await sha256(oldZip), newSha256: await sha256(newZip) }
-  await checkScenario('tampered', tls)
-  await checkScenario('valid', tls)
+  await checkScenario('tampered', tls, tlsSpki)
+  await checkScenario('valid', tls, tlsSpki)
   record.passed = true
 } catch (error) {
   record.failure = cleanText(error.message)

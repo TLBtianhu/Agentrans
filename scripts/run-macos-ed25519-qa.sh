@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Restore the disposable runner's network and trust settings before retaining reports.
+# Serve the disposable HTTPS fixture and restore the runner's host routing before retaining reports.
 set -euo pipefail
 
 [[ $(uname -s) == Darwin && ${GITHUB_ACTIONS:-} == true && ${RUNNER_OS:-} == macOS ]]
@@ -12,9 +12,7 @@ set -euo pipefail
 umask 077
 scratch=$(mktemp -d "$RUNNER_TEMP/agentrans-ed25519-tls.XXXXXX")
 hosts=/private/etc/hosts
-keychain=/Library/Keychains/System.keychain
 root_ca=$scratch/root.pem
-trusted=0
 hosts_changed=0
 
 flush_hosts() {
@@ -30,10 +28,6 @@ cleanup() {
     flush_hosts || cleanup_error=1
     cmp -s "$scratch/hosts.before" "$hosts" || cleanup_error=1
   fi
-  if (( trusted )); then
-    sudo -n /usr/bin/security remove-trusted-cert -d "$root_ca" || cleanup_error=1
-    sudo -n /usr/bin/security delete-certificate -Z "$fingerprint" "$keychain" || cleanup_error=1
-  fi
   /bin/rm -rf -- "$scratch" || cleanup_error=1
   if (( cleanup_error )); then
     echo 'Could not restore the disposable runner fixture settings' >&2
@@ -45,6 +39,7 @@ trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 
+echo 'Preparing private loopback routing and a disposable test TLS certificate.'
 cp "$hosts" "$scratch/hosts.before"
 if awk '{sub(/#.*/, ""); for (i = 2; i <= NF; i++) if ($i == "github.com" || $i == "api.github.com") found = 1} END {exit !found}' "$hosts"; then
   echo 'Unexpected pre-existing GitHub loopback fixture routing' >&2
@@ -74,10 +69,6 @@ openssl req -new -newkey rsa:2048 -nodes -sha256 -subj '/CN=github.com' \
   -keyout "$scratch/leaf.key" -out "$scratch/leaf.csr" 2>>"$scratch/keygen.log"
 openssl x509 -req -in "$scratch/leaf.csr" -CA "$root_ca" -CAkey "$scratch/root.key" -CAcreateserial \
   -days 1 -sha256 -extfile "$scratch/leaf.ext" -out "$scratch/leaf.pem"
-fingerprint=$(openssl x509 -in "$root_ca" -noout -fingerprint -sha1 | cut -d= -f2 | tr -d ':')
-[[ $fingerprint =~ ^[A-Fa-f0-9]{40}$ ]]
-sudo -n /usr/bin/security add-trusted-cert -d -r trustRoot -p ssl -k "$keychain" "$root_ca"
-trusted=1
 hosts_changed=1
 printf '\n127.0.0.1 github.com api.github.com # disposable Agentrans update fixture\n' | sudo -n /usr/bin/tee -a "$hosts" >/dev/null
 flush_hosts
@@ -90,6 +81,7 @@ node --input-type=module -e '
 '
 
 # Only socket binding needs elevated privileges. The test and Electron run as the normal runner account.
+echo 'Loopback routing checked. Launching the packaged application test.'
 sudo -n /usr/bin/env -i HOME="$HOME" USER="${USER:-$(id -un)}" LOGNAME="${LOGNAME:-$(id -un)}" PATH="$PATH" TMPDIR="${TMPDIR:-/tmp}" \
   GITHUB_ACTIONS="$GITHUB_ACTIONS" GITHUB_REF="$GITHUB_REF" GITHUB_REPOSITORY="$GITHUB_REPOSITORY" GITHUB_WORKSPACE="$GITHUB_WORKSPACE" \
   RUNNER_ENVIRONMENT="$RUNNER_ENVIRONMENT" RUNNER_OS="$RUNNER_OS" RUNNER_ARCH="$RUNNER_ARCH" RUNNER_TEMP="$RUNNER_TEMP" \
