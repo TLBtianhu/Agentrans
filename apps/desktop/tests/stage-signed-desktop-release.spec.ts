@@ -110,7 +110,7 @@ async function verifiedTargets(root: string, build: Request) {
   return { fixtures, verifyNative }
 }
 
-describe('signed Desktop packaging provenance', () => {
+describe('signed Desktop packaging run and archive', () => {
   it('selects only the requested successful workflow revision and attempt', () => {
     expect(selectSignedPackageRun('win-x64', runId, request.workflowSha, workflow, run)).toBe(attempt)
     expect(() => selectSignedPackageRun('win-x64', runId, request.workflowSha, workflow, {

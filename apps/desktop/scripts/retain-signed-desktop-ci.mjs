@@ -1,4 +1,4 @@
-/** Retain the exact files and source provenance of a production signed Desktop build. */
+/** Retain the files and source record of a production signed Desktop build. */
 import { execFileSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { createReadStream } from 'node:fs'

@@ -41,8 +41,8 @@ interface IntakeRequest {
   readonly channel: z.infer<typeof channelName>
 }
 
-const artifactProvenance = z.object({ runId: id, runAttempt: id, artifactId: id, archiveDigest })
-type ArtifactProvenance = z.infer<typeof artifactProvenance>
+const artifactRunRecord = z.object({ runId: id, runAttempt: id, artifactId: id, archiveDigest })
+type ArtifactRunRecord = z.infer<typeof artifactRunRecord>
 const repository = z.object({
   full_name: z.string().refine(name => name.toLowerCase() === productRepository.toLowerCase()),
 })
@@ -71,7 +71,7 @@ const releaseRecordSchema = z.object({
   dirty: z.literal(false), provider: z.literal('github'), owner: z.literal(DESKTOP_UPDATE_REPOSITORY.owner),
   repo: z.literal(DESKTOP_UPDATE_REPOSITORY.repo),
 })
-const nativeReceipt = artifactProvenance.extend({
+const nativeReceipt = artifactRunRecord.extend({
   schemaVersion: z.literal(1), target: targetName, manifestSha256: sha256,
 })
 type NativePaths = { installer: string } | { dmg: string; zip: string }
@@ -127,12 +127,12 @@ async function readJson(path: string): Promise<unknown> {
 
 function assertNames(actual: readonly string[], expected: readonly string[]): void {
   if (actual.length !== expected.length || expected.some(name => !actual.includes(name))) {
-    throw new Error(`signed desktop intake: expected exactly ${expected.join(', ')}; found ${actual.join(', ')}`)
+    throw new Error(`signed desktop intake: expected exactly ${expected.join(', ')}. Found ${actual.join(', ')}`)
   }
 }
 
 async function verifyTargetFiles(
-  directory: string, target: SignedTarget, request: IntakeRequest, artifact: ArtifactProvenance, withReceipt: boolean,
+  directory: string, target: SignedTarget, request: IntakeRequest, artifact: ArtifactRunRecord, withReceipt: boolean,
 ) {
   const signedNames = signedDesktopAssetNames(target, request.version)
   const recordName = desktopBuildRecordFilename(target)
@@ -183,17 +183,17 @@ function nativeAssetPaths(assets: Awaited<ReturnType<typeof collectReleaseAssets
  * @param directory - Fresh, privately extracted Actions artifact directory.
  * @param target - Expected architecture and platform.
  * @param request - Independently pinned source, workflow, version, and channel.
- * @param artifact - Provenance of the authenticated and verified archive.
+ * @param artifact - Run IDs and checksum of the authenticated archive.
  * @param verifyNative - Native verifier for the indicated installer formats.
  * @returns When the immutable receipt has been written.
  */
 export async function verifySignedTarget(
-  directory: string, target: SignedTarget, request: IntakeRequest, artifact: ArtifactProvenance, verifyNative: NativeVerifier,
+  directory: string, target: SignedTarget, request: IntakeRequest, artifact: ArtifactRunRecord, verifyNative: NativeVerifier,
 ): Promise<void> {
-  const provenance = artifactProvenance.parse(artifact)
-  const { assets, manifestSha256 } = await verifyTargetFiles(directory, target, request, provenance, false)
+  const archiveRecord = artifactRunRecord.parse(artifact)
+  const { assets, manifestSha256 } = await verifyTargetFiles(directory, target, request, archiveRecord, false)
   await verifyNative(target, nativeAssetPaths(assets, target), request)
-  const receipt = { schemaVersion: 1, target, ...provenance, manifestSha256 }
+  const receipt = { schemaVersion: 1, target, ...archiveRecord, manifestSha256 }
   await writeFile(join(directory, receiptName), `${JSON.stringify(receipt, null, 2)}\n`, { flag: 'wx' })
 }
 
