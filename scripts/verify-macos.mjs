@@ -1,4 +1,4 @@
-/** Check ordinary first launch from one actual macOS installer on a fresh native runner. */
+/** Check first launch and same-build Session persistence from one actual macOS installer. */
 import assert from 'node:assert/strict'
 import { execFile, spawn } from 'node:child_process'
 import { createHash, randomUUID } from 'node:crypto'
@@ -12,7 +12,7 @@ import { promisify } from 'node:util'
 assert.equal(process.platform, 'darwin')
 assert.equal(process.env.GITHUB_ACTIONS, 'true')
 assert.equal(process.env.RUNNER_ENVIRONMENT, 'github-hosted')
-const [artifactArgument, resultArgument, architecture, format, version = '0.1.0-test.20261118.4', ...extra] = process.argv.slice(2)
+const [artifactArgument, resultArgument, architecture, format, version, ...extra] = process.argv.slice(2)
 assert.ok(artifactArgument && isAbsolute(artifactArgument))
 assert.ok(resultArgument && isAbsolute(resultArgument))
 assert.ok(architecture === 'arm64' || architecture === 'x64')
@@ -39,7 +39,7 @@ const markerPath = join(stateRoot, '.agentrans-instance.json')
 const journal = join(stateRoot, 'data', 'install', 'update-journal')
 const result = { format, artifactIntegrityPassed: false }
 const report = {
-  evidenceVersion: 2, version, architecture, format, runnerArchitecture: process.arch,
+  evidenceVersion: 3, version, architecture, format, runnerArchitecture: process.arch,
   hostRepresentation: process.env.RUNNER_ARCH, results: { [format]: result }, passed: false,
 }
 
@@ -224,12 +224,31 @@ async function attach(cdp, target) {
   return session.sessionId
 }
 
-async function evaluate(cdp, sessionId, expression) {
-  const result = await cdp.send('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true }, { sessionId })
+async function evaluate(cdp, sessionId, expression, timeout) {
+  const result = await cdp.send('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true }, { sessionId, timeout })
   if (result.exceptionDetails !== undefined) {
     throw new Error(result.exceptionDetails.exception?.description ?? result.exceptionDetails.text ?? 'Renderer exception')
   }
   return result.result.value
+}
+
+async function callSession(cdp, sessionId, method, args) {
+  const rpcId = randomUUID()
+  const body = JSON.stringify({ type: 'client-request', rpcId, method, payload: { args } })
+  return evaluate(cdp, sessionId, `(async () => {
+    const response = await fetch(${JSON.stringify('/api/' + method)}, {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: ${JSON.stringify(body)}, signal: AbortSignal.timeout(6_000),
+    })
+    if (!response.ok) throw new Error(${JSON.stringify(method)} + ' returned HTTP ' + response.status)
+    const envelope = await response.json()
+    if (envelope.rpcId !== ${JSON.stringify(rpcId)}) throw new Error('Mismatched Session RPC response ID')
+    if (envelope.result?.ok !== true) {
+      const error = envelope.result?.error
+      throw new Error(${JSON.stringify(method)} + ': ' + (error?.code ?? 'invalid response') + ': ' + (error?.message ?? ''))
+    }
+    return envelope.result.value
+  })()`, 8_000)
 }
 
 async function poll(owned, operation, label, duration = 90_000) {
@@ -275,14 +294,19 @@ async function stopOwnedMembers(group, signal) {
   }
 }
 
-async function stopProcess(owned, cdp) {
+async function stopProcess(owned, cdp, launch) {
+  launch.shutdown = 'browser-close'
   if (owned.status === undefined) {
     await cdp.send('Browser.close', {}, { timeout: 2_000 }).catch(() => undefined)
   }
   cdp.close()
-  if (!(await waitForOwnedGroupExit(owned.pid, 2_000))) {
+  if (!(await waitForOwnedGroupExit(owned.pid, 8_000))) {
+    launch.shutdown = 'sigterm'
     await stopOwnedMembers(owned.pid, 'SIGTERM')
-    if (!(await waitForOwnedGroupExit(owned.pid, 5_000))) await stopOwnedMembers(owned.pid, 'SIGKILL')
+    if (!(await waitForOwnedGroupExit(owned.pid, 5_000))) {
+      launch.shutdown = 'sigkill'
+      await stopOwnedMembers(owned.pid, 'SIGKILL')
+    }
   }
   assert.ok(await waitForOwnedGroupExit(owned.pid, 5_000), 'Could not stop the owned packaged app processes')
   assert.ok(await Promise.race([owned.closed.then(() => true), delay(3_000, false, { ref: false })]),
@@ -339,9 +363,8 @@ async function inspectStartup(owned, stage) {
   }
 }
 
-async function launch(bundle, stage, result) {
-  await assertNoInstance()
-  const osDiagnostics = join(stage, 'startup.log')
+async function launch(bundle, stage, launch, checkSession) {
+  const osDiagnostics = join(stage, launch.freshRunnerInstance ? 'startup.log' : 'restart.log')
   const env = {
     ...Object.fromEntries(['PATH', 'HOME', 'USER', 'LOGNAME', 'LANG', 'LC_ALL']
       .filter(key => typeof process.env[key] === 'string').map(key => [key, process.env[key]])),
@@ -366,8 +389,7 @@ async function launch(bundle, stage, result) {
     pipe.on('data', chunk => { owned.output = (owned.output + chunk).slice(-24_000) })
   }
   const cdp = createDevtoolsPipe(child.stdio[3], child.stdio[4])
-  const launch = { passed: false, mode: 'ordinary', freshRunnerInstance: true, pid: owned.pid, instrumentation: 'owned DevTools pipe' }
-  result.normal = launch
+  Object.assign(launch, { passed: false, mode: 'ordinary', pid: owned.pid, instrumentation: 'owned DevTools pipe' })
   const targets = async () => (await cdp.send('Target.getTargets')).targetInfos
   let active = 'native welcome'
   try {
@@ -398,17 +420,11 @@ async function launch(bundle, stage, result) {
 
     active = 'Desktop architecture and authenticated session service'
     const workspaceSession = await attach(cdp, workspace)
-    const rpcId = randomUUID()
-    const request = JSON.stringify({ type: 'client-request', rpcId, method: 'session/list', payload: { args: { _request: {} } } })
     const details = await poll(owned, async () => {
-      const details = await evaluate(cdp, workspaceSession, '(async () => {' +
-        'const info = await window.dshDesktop.deviceInfo();' +
-        'const response = await fetch("/api/session/list", { method: "POST", headers: { "content-type": "application/json" }, body: ' +
-        JSON.stringify(request) + ' }); if (!response.ok) throw new Error("session/list returned HTTP " + response.status);' +
-        'const message = await response.json();' +
-        'return { info, ready: message.rpcId === ' + JSON.stringify(rpcId) +
-        ' && message.result?.ok === true && Array.isArray(message.result.value?.items), count: message.result?.value?.items?.length }; })()')
-      return details?.ready ? details : undefined
+      const info = await evaluate(cdp, workspaceSession, 'window.dshDesktop.deviceInfo()')
+      const sessions = await callSession(cdp, workspaceSession, 'session/list', { _request: {} })
+      assert.ok(Array.isArray(sessions.items), 'Session catalog is not ready')
+      return { info, count: sessions.items.length }
     }, active)
     const runtimeArch = details.info.split('; ').find(value => value.startsWith('app_arch='))?.slice('app_arch='.length)
     assert.equal(runtimeArch, architecture, 'The running Electron shell must use the packaged architecture')
@@ -420,17 +436,19 @@ async function launch(bundle, stage, result) {
     await poll(owned, async () => {
       const evidence = await readInstanceEvidence()
       launch.instanceEvidence = evidence
-      if (!evidence.events.some(event => event.event === 'workspace-ready' && event.pid === owned.pid)) {
+      const processEvents = evidence.events.filter(event => event.pid === owned.pid)
+      if (!processEvents.some(event => event.event === 'workspace-ready' && event.version === version)) {
         return undefined
       }
       assert.equal(evidence.stateRoot, sanitized(stateRoot), 'Expected the normal macOS state directory')
       assert.equal(evidence.rendererData, true)
       assert.ok(evidence.markerPurpose === undefined || evidence.markerPurpose === 'user', 'Unexpected instance purpose')
-      const started = evidence.events.filter(event => event.event === 'started')
-      assert.deepEqual(started, [{ event: 'started', version, pid: owned.pid }], 'Expected one fresh journal from this packaged app')
+      const started = processEvents.filter(event => event.event === 'started')
+      assert.deepEqual(started, [{ event: 'started', version, pid: owned.pid }], 'Expected exactly one start for this packaged app process')
       launch.runtimeVersion = started[0].version
       return true
     }, active, 15_000)
+    await checkSession(owned, cdp, workspaceSession, label => { active = label })
     launch.passed = true
   } catch (error) {
     launch.stage = active
@@ -438,7 +456,7 @@ async function launch(bundle, stage, result) {
     launch.instanceEvidence ??= await readInstanceEvidence()
     launch.nativeDiagnostics = await inspectStartup(owned, stage)
   } finally {
-    try { await stopProcess(owned, cdp) }
+    try { await stopProcess(owned, cdp, launch) }
     catch (error) {
       launch.passed = false
       launch.shutdownFailure = diagnostics(error)
@@ -449,6 +467,49 @@ async function launch(bundle, stage, result) {
       launch.output = sanitized(owned.output + '\n' + extra).replace(/([?&]token=)[A-Za-z0-9_-]+/giu, '$1<redacted>')
     }
   }
+}
+
+async function checkSavedSession(owned, cdp, workspaceSession, fixture, evidence, setStage) {
+  const { sessionId, title, titleEventSequence } = fixture
+  setStage('same Session identity and title in the authenticated catalog')
+  await poll(owned, async () => {
+    const sessions = await callSession(cdp, workspaceSession, 'session/list', { _request: {} })
+    const entries = sessions.items.filter(row => row.sessionId === sessionId)
+    assert.equal(entries.length, 1, 'Expected exactly one catalog entry for the test Session')
+    assert.equal(entries[0].blank, false, 'Expected a Session that can be reopened from the sidebar')
+    assert.equal(entries[0].projections?.values?.title, title)
+    return true
+  }, 'same catalog entry', 15_000)
+  evidence.catalogVerified = true
+
+  setStage('exact user title event read from Session history')
+  const history = await callSession(cdp, workspaceSession, 'session/events', {
+    request: { address: { kind: 'session', sessionId } },
+  })
+  const entry = history.records.find(row => row.type === 'event' && row.event.seq === titleEventSequence)
+  assert.deepEqual({ type: entry?.event.type, title: entry?.event.data.title, source: entry?.event.data.source?.kind },
+    { type: 'session/title', title, source: 'user' })
+  evidence.titleEventVerified = true
+
+  setStage('opening the exact Session in the workspace sidebar')
+  const sidebarRow = '[role="treeitem"][data-row-key="session:' + sessionId + '"]'
+  await poll(owned, () => evaluate(cdp, workspaceSession, `(() => {
+    const row = document.querySelector(${JSON.stringify(sidebarRow)})
+    if (!row?.getClientRects().length) {
+      document.querySelector('[data-sidebar-opener]')?.click()
+      document.querySelector('[data-row-key="workspace:"][aria-expanded="false"]')?.click()
+      return false
+    }
+    if (!row.textContent.includes(${JSON.stringify(title)})) return false
+    row.click()
+    return true
+  })()`), 'visible Session row opened by ID and title', 20_000)
+  const conversation = '[data-conversation-session="' + sessionId + '"]'
+  await poll(owned, () => evaluate(cdp, workspaceSession, `Boolean(
+    document.querySelector(${JSON.stringify(sidebarRow + '[aria-selected="true"]')})?.getClientRects().length &&
+    document.querySelector(${JSON.stringify(conversation)})?.getClientRects().length
+  )`), 'visible active Session conversation with the exact ID', 20_000)
+  evidence.uiOpened = true
 }
 
 let step = 'runner'
@@ -466,15 +527,55 @@ try {
   const bundle = await verifyBundle(app, result)
   result.artifactIntegrityPassed = true
   step = 'ordinary first launch'
-  await launch(bundle, stage, result)
-  report.passed = result.normal.passed
+  await assertNoInstance()
+  result.normal = { freshRunnerInstance: true }
+  const workspace = await mkdtemp(join(stage, 'session-workspace-'))
+  const fixture = result.session = {
+    title: 'Agentrans native persistence ' + randomUUID(),
+    created: false, titleSaved: false, beforeRestart: {}, afterRestart: {},
+  }
+  await launch(bundle, stage, result.normal, async (owned, cdp, workspaceSession, setStage) => {
+    setStage('creating a new keyless Session')
+    const created = await callSession(cdp, workspaceSession, 'session/create', { request: { cwd: workspace } })
+    assert.match(created.sessionId, /^[a-z0-9_-]+$/iu)
+    fixture.sessionId = created.sessionId
+    fixture.created = true
+
+    // A local turn makes the Session addressable in the sidebar. The persisted title is the test content.
+    setStage('starting a local turn in the new Session')
+    const prompt = await callSession(cdp, workspaceSession, 'session/prompt', { request: {
+      sessionId: fixture.sessionId, requestId: randomUUID(), mode: 'queue',
+      content: [{ type: 'text', text: 'Native Session persistence fixture' }],
+    } })
+    assert.equal(prompt.accepted, true)
+
+    setStage('saving the user Session title')
+    const renamed = await callSession(cdp, workspaceSession, 'session/rename', { request: {
+      sessionId: fixture.sessionId, title: fixture.title,
+    } })
+    assert.equal(renamed.title, fixture.title)
+    assert.ok(Number.isSafeInteger(renamed.seq) && renamed.seq > 0)
+    fixture.titleEventSequence = renamed.seq
+    fixture.titleSaved = true
+    await checkSavedSession(owned, cdp, workspaceSession, fixture, fixture.beforeRestart, setStage)
+  })
+  if (result.normal.passed) {
+    step = 'ordinary restart of the same bundle and product instance'
+    assert.equal((await lstat(stateRoot)).isDirectory(), true)
+    result.restart = { freshRunnerInstance: false }
+    await launch(bundle, stage, result.restart, (owned, cdp, workspaceSession, setStage) =>
+      checkSavedSession(owned, cdp, workspaceSession, fixture, fixture.afterRestart, setStage))
+    assert.notEqual(result.restart.pid, result.normal.pid, 'A restart must use a new app process')
+    report.passed = result.restart.passed
+  }
 } catch (error) {
   result.failure = { stage: step, ...diagnostics(error) }
 }
 await save()
 console.log(JSON.stringify({
   architecture, format, integrity: result.artifactIntegrityPassed, ordinary: result.normal?.passed,
-  welcome: result.normal?.nativeWelcome, workspace: result.normal?.workspaceLoaded, sessions: result.normal?.sessionServiceReady,
-  failure: result.failure ?? result.normal?.failure ?? result.normal?.shutdownFailure,
+  welcome: result.normal?.nativeWelcome, workspace: result.normal?.workspaceLoaded, restart: result.restart?.passed,
+  sessionSaved: result.session?.titleSaved, sessionReopened: result.session?.afterRestart.uiOpened,
+  failure: result.failure ?? result.normal?.failure ?? result.normal?.shutdownFailure ?? result.restart?.failure ?? result.restart?.shutdownFailure,
 }))
 if (!report.passed) process.exitCode = 1
