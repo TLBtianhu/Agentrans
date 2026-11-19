@@ -147,6 +147,12 @@ async function capture(mode) {
         await client.call('Debugger.resume').catch(() => undefined)
       }
     }
+    await client.call('Runtime.enable')
+    const earlyObserver = await client.call('Runtime.evaluate', { expression: observer(events), returnByValue: true })
+    if (earlyObserver.result?.value === true) {
+      installedObserver = true
+      probe.observerInstalled = true
+    }
     await client.call('Debugger.enable')
     await client.call('Debugger.setPauseOnExceptions', { state: 'all' })
     await client.call('Runtime.runIfWaitingForDebugger')
