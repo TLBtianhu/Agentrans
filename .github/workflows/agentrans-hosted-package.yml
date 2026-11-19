@@ -47,7 +47,6 @@ jobs:
       QA_BUILD_COMMIT: '3c6b00d9827fe49f4766fb6b4ce0139a554f0c72'
       QA_OLD_VERSION: '0.1.0-test.20261119.1'
       QA_NEW_VERSION: '0.1.0-test.20261120.1'
-      QA_REPORT_DIR: ${{ runner.temp }}/macos-candidate-report/verification
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -56,6 +55,9 @@ jobs:
       - uses: actions/setup-node@v7.0.0
         with:
           node-version: '24'
+      - name: Set the runner report directory
+        shell: bash
+        run: printf 'QA_REPORT_DIR=%s\n' "$RUNNER_TEMP/macos-candidate-report/verification" >> "$GITHUB_ENV"
       - name: Verify the exact successful package run
         id: package
         shell: bash
