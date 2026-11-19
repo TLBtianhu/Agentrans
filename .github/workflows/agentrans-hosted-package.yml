@@ -1,156 +1,303 @@
 name: Package Agentrans · hosted
-run-name: Package Agentrans · ${{ inputs.target }} · ${{ inputs.channel }} · ${{ inputs.version }}
-
-# Hosted-runner packaging for the unsigned Agentrans application.
-#
-# The self-hosted lanes exist for signed release builds, which need a hardware
-# token, a signing environment, and an Apple Developer ID. This lane builds the
-# same application without any of them so the packaging, publishing, and update
-# chain can be exercised without that hardware. Its artifacts are unsigned:
-# Windows warns on first install and macOS warns on first open, and those
-# warnings are the certificates' problem, not this workflow's.
+run-name: Verify macOS native update · ${{ inputs.target }} · ${{ inputs.version }}
 
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: '项目版本或基于该版本的测试构建号，例如 0.1.0-test.20261118.1。latest 要求稳定版本。'
+        description: Version of the macOS successor
         type: string
         required: true
       channel:
-        description: '更新通道：nightly 读取预发布，latest 读取正式版本'
+        description: Channel of the macOS successor
         type: choice
         options: [nightly, latest]
-        default: nightly
         required: true
       target:
-        description: '打包目标（mac = 两种 macOS 架构合并元数据；all = Windows 与 macOS 一并产出，供同一个 Release 使用）'
+        description: Build target family
         type: choice
-        options: [all, win-x64, mac-arm64, mac-x64, mac]
-        default: win-x64
+        options: [mac, mac-arm64, mac-x64]
+        required: true
+      build_arm64_run_id:
+        description: Successful macOS arm64 package run
+        type: string
+        required: true
+      build_x64_run_id:
+        description: Successful macOS x64 package run
+        type: string
         required: true
 
 permissions:
+  actions: read
   contents: read
 
-concurrency:
-  group: agentrans-hosted-package-${{ inputs.target }}
-  cancel-in-progress: false
-
 jobs:
-  package:
-    # A release attaches every platform from one packaging run, so `all` fans out here rather than
-    # asking the release workflow to merge separate runs.
+  macos-upgrade:
+    if: github.repository == 'TLBtianhu/Agentrans' && github.ref == 'refs/heads/codex/macos-20261120-qa'
     strategy:
       fail-fast: false
       matrix:
-        target: ${{ fromJSON(inputs.target == 'all' && '["win-x64","mac"]' || format('["{0}"]', inputs.target)) }}
-    runs-on: ${{ startsWith(matrix.target, 'win') && 'windows-latest' || 'macos-latest' }}
-    timeout-minutes: 150
+        arch: ${{ fromJSON(inputs.target == 'mac' && '["arm64","x64"]' || inputs.target == 'mac-arm64' && '["arm64"]' || '["x64"]') }}
+    runs-on: ${{ matrix.arch == 'arm64' && 'macos-26' || 'macos-26-intel' }}
+    timeout-minutes: 35
     env:
-      AGENTRANS_DESKTOP_UPDATE_CHANNEL: ${{ inputs.channel }}
       AGENTRANS_TELEMETRY_DISABLED: '1'
-      # An emulated target converts far slower than a native one.
-      AGENTRANS_OFFICE_TIMEOUT_MS: '240000'
-      AGENTRANS_DESKTOP_BUILD_VERSION: ${{ inputs.version }}
-      AGENTRANS_DESKTOP_BUILD_COMMIT: ${{ github.sha }}
-      AGENTRANS_DESKTOP_BUILD_DIRTY: '0'
-      TARGET: ${{ matrix.target }}
+      QA_ARCH: ${{ matrix.arch }}
+      QA_BUILD_RUN: ${{ matrix.arch == 'arm64' && '44587762172' || '44587768747' }}
+      QA_BUILD_COMMIT: '3c6b00d9827fe49f4766fb6b4ce0139a554f0c72'
+      QA_OLD_VERSION: '0.1.0-test.20261119.1'
+      QA_NEW_VERSION: '0.1.0-test.20261120.1'
+      QA_REPORT_DIR: ${{ runner.temp }}/macos-candidate-report/verification
     steps:
       - uses: actions/checkout@v7.0.1
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
-
-      - name: Verify the clean packaging checkout
-        shell: pwsh
-        run: |
-          $PSNativeCommandUseErrorActionPreference = $true
-          $commit = git rev-parse HEAD
-          $changes = git status --porcelain=v1 --untracked-files=normal
-          if ($commit -cne $env:AGENTRANS_DESKTOP_BUILD_COMMIT -or $changes) {
-            throw 'Desktop packaging requires the clean commit selected by the workflow.'
-          }
-
-      - uses: pnpm/action-setup@v5.0.0
-
       - uses: actions/setup-node@v7.0.0
         with:
           node-version: '24'
-          cache: pnpm
-
-      - name: Install locked dependencies
-        run: pnpm install --frozen-lockfile
-
-      # Packaging reads its settings from a git-ignored file, so the lane writes only the
-      # settings it needs rather than copying the template's stale release credentials.
-      # PowerShell runs on both images, so the same step serves either platform.
-      - name: Write the packaging settings this lane uses
-        shell: pwsh
+      - name: Verify the exact successful package run
+        id: package
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PACKAGE_RUN_ID: ${{ matrix.arch == 'arm64' && inputs.build_arm64_run_id || inputs.build_x64_run_id }}
+          PACKAGE_VERSION: ${{ inputs.version }}
+          PACKAGE_CHANNEL: ${{ inputs.channel }}
+          PACKAGE_TARGET: ${{ inputs.target }}
         run: |
-          $lines = @('AGENTRANS_DESKTOP_APP_ID=com.agentrans.app')
-          if ($env:TARGET -like 'win-*') { $lines += 'AGENTRANS_DESKTOP_WINDOWS_COMPRESSION_LEVEL=3' }
-          $file = if ($env:TARGET -like 'win-*') { 'apps/desktop/.env.windows' } else { 'apps/desktop/.env.macos' }
-          Set-Content -Path $file -Value $lines -Encoding utf8
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict'
+          import { appendFile } from 'node:fs/promises'
 
-      # The preparation starts the packaged application once to prove it runs. An Intel build on an
-      # arm64 runner needs Rosetta before that check can pass.
-      - name: Install Rosetta for the Intel build
-        if: matrix.target == 'mac-x64' || matrix.target == 'mac'
-        run: sudo softwareupdate --install-rosetta --agree-to-license
-
-      # The installer entry packages a prepared tree; this prepares it without producing an
-      # installer of its own, which is the step the signed lanes get from their full package run.
-      - name: Prepare the packaged runtime
-        if: matrix.target != 'mac'
-        shell: pwsh
+          const env = process.env
+          const repository = 'TLBtianhu/Agentrans'
+          const target = `mac-${env.QA_ARCH}`
+          assert.equal(process.platform, 'darwin')
+          assert.equal(process.arch, env.QA_ARCH, 'Use a native runner matching the packaged architecture')
+          assert.equal(env.RUNNER_ENVIRONMENT, 'github-hosted')
+          assert.equal(env.PACKAGE_VERSION, env.QA_NEW_VERSION)
+          assert.equal(env.PACKAGE_CHANNEL, 'nightly')
+          assert.ok(env.PACKAGE_TARGET === 'mac' || env.PACKAGE_TARGET === target)
+          assert.equal(env.PACKAGE_RUN_ID, env.QA_BUILD_RUN, 'Expected the authorized architecture-specific build run')
+          assert.ok(env.GH_TOKEN, 'An Actions-read token is required')
+          async function github(path) {
+            const response = await fetch(`https://api.github.com/repos/${repository}/${path}`, {
+              headers: {
+                Accept: 'application/vnd.github+json', Authorization: `Bearer ${env.GH_TOKEN}`, 'X-GitHub-Api-Version': '2022-11-28',
+              },
+              redirect: 'error',
+            })
+            assert.ok(response.ok, `Package metadata request returned HTTP ${response.status}`)
+            return response.json()
+          }
+          const name = `agentrans-${target}`
+          const runId = Number(env.QA_BUILD_RUN)
+          const [run, list] = await Promise.all([
+            github(`actions/runs/${runId}`), github(`actions/runs/${runId}/artifacts?name=${name}`),
+          ])
+          assert.equal(run.id, runId)
+          assert.equal(run.workflow_id, 413465192)
+          assert.equal(run.path, '.github/workflows/agentrans-hosted-package.yml')
+          assert.equal(run.repository?.full_name, repository)
+          assert.equal(run.head_repository?.full_name, repository)
+          assert.equal(run.head_sha, env.QA_BUILD_COMMIT)
+          assert.equal(run.event, 'workflow_dispatch')
+          assert.equal(run.status, 'completed')
+          assert.equal(run.conclusion, 'success')
+          assert.equal(run.display_title, `Package Agentrans · ${target} · nightly · ${env.QA_NEW_VERSION}`)
+          assert.equal(list.total_count, 1, `Expected one ${name} artifact`)
+          const [artifact] = list.artifacts
+          assert.equal(artifact.name, name)
+          assert.equal(artifact.expired, false)
+          assert.equal(artifact.workflow_run.id, runId)
+          assert.ok(Number.isSafeInteger(artifact.id) && artifact.id > 0)
+          assert.ok(Number.isSafeInteger(artifact.size_in_bytes) && artifact.size_in_bytes > 0)
+          assert.match(artifact.digest, /^sha256:[0-9a-f]{64}$/u)
+          await appendFile(env.GITHUB_OUTPUT,
+            `artifact_id=${artifact.id}\nartifact_bytes=${artifact.size_in_bytes}\nartifact_sha256=${artifact.digest}\n`)
+          JS
+      - name: Download the verified candidate archive
+        uses: actions/download-artifact@v8.0.1
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ env.QA_BUILD_RUN }}
+          artifact-ids: ${{ steps.package.outputs.artifact_id }}
+          path: ${{ runner.temp }}/macos-candidate-input/new
+          digest-mismatch: error
+      - name: Stage the original public DMG and verify package inputs
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUILD_ARTIFACT_ID: ${{ steps.package.outputs.artifact_id }}
+          BUILD_ARTIFACT_BYTES: ${{ steps.package.outputs.artifact_bytes }}
+          BUILD_ARTIFACT_SHA256: ${{ steps.package.outputs.artifact_sha256 }}
         run: |
-          $script = if ($env:TARGET -eq 'win-x64') { 'package:desktop:win:x64' } else { 'package:desktop:mac:' + ($env:TARGET -replace '^mac-', '') }
-          pnpm run $script --unsigned --prepare-only --build-version $env:AGENTRANS_DESKTOP_BUILD_VERSION
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict'
+          import { execFileSync } from 'node:child_process'
+          import { createHash } from 'node:crypto'
+          import { createReadStream } from 'node:fs'
+          import { appendFile, lstat, mkdir, readFile, writeFile } from 'node:fs/promises'
+          import { basename, dirname, join } from 'node:path'
+          import { publicKeyFromBase64, sha256File, verifyFileDigest } from './apps/desktop/src/update-signature.ts'
+          import { UPDATE_SIGNING_PUBLIC_KEY } from './apps/desktop/src/update-signing-key.ts'
 
-      - name: Build the unsigned application
-        if: matrix.target != 'mac'
-        shell: pwsh
-        run: node apps/desktop/scripts/package-agentrans-installer.mjs artifacts/agentrans-installer $env:TARGET
+          const env = process.env
+          const repo = 'TLBtianhu/Agentrans'
+          const arch = env.QA_ARCH
+          const tag = `v${env.QA_OLD_VERSION}`
+          const oldName = `agentrans-${env.QA_OLD_VERSION}-mac-${arch}-unsigned.dmg`
+          const oldImages = {
+            arm64: [
+              [oldName, 767596598, 273275335, 'c1eefcb48f2488ac19f4749d77d186a4e573927a29424e30eb1c6df781819d94'],
+              [`${oldName}.sig`, 767600271, 88, 'aa33a6897639e45d883687a386f416fecc4b5b7a8f84fbd25e8378ad3cbbc194'],
+            ],
+            x64: [
+              [oldName, 767598081, 292847072, '332914610f6573728c631b13ef1b3cd064b4f58425733614412528644fad2fd2'],
+              [`${oldName}.sig`, 767600345, 88, '577c7847c51dcd878ee7e422896118a4b75d6976f594d09ef9e1ae83cfc7b331'],
+            ],
+          }
+          const oldAssets = [
+            ...oldImages[arch],
+            ['test-mac.yml', 767600248, 604, 'd77c1e1f41e38e3701c488031ad4f2aee1c339ea47ac3eb06030c4077bbe9cee'],
+            ['test-mac.yml.sig', 767600602, 88, 'c7db6477dcd6b789c34063031aa2780c1e8aa15694f9df2c29551076ee0f3c0f'],
+          ]
+          const response = await fetch(`https://api.github.com/repos/${repo}/releases/tags/${tag}`, {
+            headers: {
+              Accept: 'application/vnd.github+json', Authorization: `Bearer ${env.GH_TOKEN}`, 'X-GitHub-Api-Version': '2022-11-28',
+            },
+            redirect: 'error',
+          })
+          assert.ok(response.ok, `Public Release metadata request returned HTTP ${response.status}`)
+          const release = await response.json()
+          assert.equal(release.id, 451310439)
+          assert.equal(release.tag_name, tag)
+          assert.equal(release.target_commitish, 'bee9aaee0db28bf05061b3f7461842b6d85b1fb0')
+          assert.equal(release.draft, false)
+          assert.equal(release.prerelease, true)
 
-      # One release needs one metadata file per platform, and each macOS architecture produces its
-      # own, so both architectures are built here and assembled into a single upload directory.
-      - name: Package both macOS architectures
-        if: matrix.target == 'mac'
-        shell: pwsh
-        run: |
-          $PSNativeCommandUseErrorActionPreference = $true
-          pnpm run package:desktop:mac:arm64 --unsigned --prepare-only --build-version $env:AGENTRANS_DESKTOP_BUILD_VERSION
-          node apps/desktop/scripts/package-agentrans-installer.mjs artifacts/mac-arm64 mac-arm64
-          pnpm run package:desktop:mac:x64 --unsigned --prepare-only --build-version $env:AGENTRANS_DESKTOP_BUILD_VERSION
-          node apps/desktop/scripts/package-agentrans-installer.mjs artifacts/mac-x64 mac-x64
-          node apps/desktop/scripts/merge-mac-metadata.mjs apps/desktop/artifacts/mac-arm64 apps/desktop/artifacts/mac-x64 apps/desktop/artifacts/agentrans-installer
-
-      - name: Verify packaging did not change the source checkout
-        shell: pwsh
-        run: |
-          $PSNativeCommandUseErrorActionPreference = $true
-          $commit = git rev-parse HEAD
-          git diff --quiet HEAD --
-          $untracked = git ls-files --others --exclude-standard -- . ':(exclude)apps/desktop/artifacts/'
-          if ($commit -cne $env:AGENTRANS_DESKTOP_BUILD_COMMIT -or $untracked) {
-            throw 'Desktop packaging changed the source checkout.'
+          const root = join(env.RUNNER_TEMP, 'macos-candidate-input')
+          const oldDir = join(root, 'old')
+          const candidateDir = join(root, 'new')
+          await mkdir(oldDir)
+          for (const [name, id, size, sha256] of oldAssets) {
+            const assets = release.assets.filter(asset => asset.name === name)
+            assert.equal(assets.length, 1, `Expected one published ${name}`)
+            const [asset] = assets
+            const url = `https://github.com/${repo}/releases/download/${tag}/${name}`
+            assert.equal(asset.id, id)
+            assert.equal(asset.state, 'uploaded')
+            assert.equal(asset.size, size)
+            assert.equal(asset.digest, `sha256:${sha256}`)
+            assert.equal(asset.browser_download_url, url)
+            const file = join(oldDir, name)
+            execFileSync('/usr/bin/curl', [
+              '--fail', '--silent', '--show-error', '--location', '--retry', '3', '--connect-timeout', '20', '--max-time', '400',
+              '--output', file, url,
+            ], { stdio: 'inherit' })
+            assert.equal((await lstat(file)).size, size, name)
+            assert.equal(await sha256File(file), sha256, name)
+          }
+          const oldDmg = join(oldDir, oldName)
+          const oldIndex = join(oldDir, 'test-mac.yml')
+          const publicKey = publicKeyFromBase64(UPDATE_SIGNING_PUBLIC_KEY)
+          const fingerprint = createHash('sha256').update(publicKey.export({ format: 'der', type: 'spki' })).digest('hex')
+          assert.equal(fingerprint, '098885a5447f876f616ecd3cbdb156737cc6f4c00601958b1c78088842a81753')
+          for (const file of [oldDmg, oldIndex]) {
+            assert.ok(await verifyFileDigest(file, await readFile(`${file}.sig`, 'utf8'), publicKey),
+              `Published ${basename(file)} failed its Ed25519 signature`)
           }
 
-      - name: List the packaged files
-        shell: pwsh
-        run: Get-ChildItem -Recurse apps/desktop/artifacts/agentrans-installer | Select-Object -ExpandProperty FullName
+          const candidateStem = `agentrans-${env.QA_NEW_VERSION}-mac-${arch}-unsigned`
+          const candidateDmg = join(candidateDir, `${candidateStem}.dmg`)
+          const candidateZip = join(candidateDir, `${candidateStem}.zip`)
+          const candidateMap = `${candidateZip}.blockmap`
+          const candidateIndex = join(candidateDir, 'test-mac.yml')
+          const candidateFiles = [candidateDmg, candidateZip, candidateMap, candidateIndex]
+          const manifests = await Promise.all(candidateFiles.map(async file => {
+            const stat = await lstat(file)
+            assert.ok(stat.isFile() && stat.size > 0, `Candidate is missing the original ${basename(file)}`)
+            return { name: basename(file), size: stat.size, sha256: await sha256File(file) }
+          }))
+          const [dmg, zip, blockmap, index] = manifests
+          const hash = createHash('sha512')
+          for await (const chunk of createReadStream(candidateZip)) hash.update(chunk)
+          const zipSha512 = hash.digest('base64')
+          const lines = (await readFile(candidateIndex, 'utf8')).split(/\r?\n/u)
+          assert.ok(lines.includes(`version: ${env.QA_NEW_VERSION}`), 'Index version does not match the selected candidate')
+          assert.ok(lines.includes(`  - url: ${zip.name}`), 'Index does not name the architecture-specific ZIP')
+          assert.ok(lines.includes(`    sha512: ${zipSha512}`), 'Index does not match the original candidate ZIP digest')
+          assert.ok(lines.includes(`    size: ${zip.size}`), 'Index does not match the original candidate ZIP size')
+          await appendFile(env.GITHUB_ENV, [
+            `QA_OLD_DMG=${oldDmg}`, `QA_NEW_ZIP=${candidateZip}`, `QA_NEW_METADATA=${candidateIndex}`,
+            `QA_NEW_METADATA_SIG=${candidateIndex}.sig`, `QA_EXPECTED_NEW_SHA256=${zip.sha256}`,
+            `QA_EXPECTED_OLD_SHA256=${oldAssets[0][3]}`, '',
+          ].join('\n'))
+          const reportDir = dirname(env.QA_REPORT_DIR)
+          await mkdir(reportDir, { recursive: true })
+          const report = {
+            architecture: arch, baselineReleaseId: release.id, baselineTag: tag, baselineBuildCommit: release.target_commitish,
+            baselineAssets: oldAssets.map(([name, id, size, sha256]) => ({ name, id, size, sha256 })),
+            baselineSignatureVerified: true, candidateVersion: env.QA_NEW_VERSION, candidateBuildCommit: env.QA_BUILD_COMMIT,
+            candidateBuildRun: Number(env.QA_BUILD_RUN), candidateArtifactId: Number(env.BUILD_ARTIFACT_ID),
+            candidateArchiveBytes: Number(env.BUILD_ARTIFACT_BYTES), candidateArchiveSha256: env.BUILD_ARTIFACT_SHA256,
+            candidateDmg: dmg, candidateZip: { ...zip, sha512: zipSha512 }, candidateBlockmap: blockmap, candidateIndex: index,
+            publicKeySha256: fingerprint,
+          }
+          await writeFile(join(reportDir, 'inputs.json'), `${JSON.stringify(report, null, 2)}\n`, { flag: 'wx' })
+          console.log(`Verified the published ${arch} installer and pinned the original candidate ZIP ${zip.sha256}`)
+          JS
+      - name: Sign the original candidate ZIP and update index for the isolated feed
+        id: sign
+        shell: bash
+        env:
+          AGENTRANS_UPDATE_SIGNING_KEY: ${{ secrets.AGENTRANS_UPDATE_SIGNING_KEY }}
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict'
+          import { createPublicKey } from 'node:crypto'
+          import { readFile, writeFile } from 'node:fs/promises'
+          import { dirname, join } from 'node:path'
+          import { privateKeyFromBase64, publicKeyFromBase64, sha256File, signFileDigest, verifyFileDigest } from './apps/desktop/src/update-signature.ts'
+          import { UPDATE_SIGNING_PUBLIC_KEY } from './apps/desktop/src/update-signing-key.ts'
 
-      - name: Publish the packaged files for this run
-        uses: actions/upload-artifact@v4
+          const env = process.env
+          assert.ok(env.AGENTRANS_UPDATE_SIGNING_KEY, 'The existing update signing key is required')
+          const key = privateKeyFromBase64(env.AGENTRANS_UPDATE_SIGNING_KEY)
+          const pinned = publicKeyFromBase64(UPDATE_SIGNING_PUBLIC_KEY)
+          assert.ok(key.asymmetricKeyType === 'ed25519' && createPublicKey(key).equals(pinned),
+            'Signing key does not match the shipped public key')
+          const inputs = JSON.parse(await readFile(join(dirname(env.QA_REPORT_DIR), 'inputs.json'), 'utf8'))
+          for (const [file, expected] of [[env.QA_NEW_ZIP, inputs.candidateZip], [env.QA_NEW_METADATA, inputs.candidateIndex]]) {
+            assert.equal(await sha256File(file), expected.sha256, 'Candidate bytes changed after input verification')
+            const signature = await signFileDigest(file, key)
+            assert.ok(await verifyFileDigest(file, signature, pinned), 'Candidate signature failed self-verification')
+            await writeFile(`${file}.sig`, signature, { flag: 'wx' })
+          }
+          console.log(`Verified the isolated ${env.QA_ARCH} ZIP and index signatures against the shipped Ed25519 key`)
+          JS
+      - name: Verify genuine native installation, restart, and session reopening
+        shell: bash
+        timeout-minutes: 20
+        run: bash apps/desktop/tests/fixtures/run-mac-candidate.sh
+      - name: Retain the input and native-upgrade reports
+        if: always()
+        uses: actions/upload-artifact@v7.0.1
         with:
-          name: agentrans-${{ matrix.target }}
+          name: macos-native-upgrade-qa-${{ matrix.arch }}
           path: |
-            apps/desktop/artifacts/agentrans-installer/*.exe
-            apps/desktop/artifacts/agentrans-installer/*.dmg
-            apps/desktop/artifacts/agentrans-installer/*.zip
-            apps/desktop/artifacts/agentrans-installer/*.blockmap
-            apps/desktop/artifacts/agentrans-installer/*.yml
-            !apps/desktop/artifacts/agentrans-installer/builder-debug.yml
+            ${{ runner.temp }}/macos-candidate-report/inputs.json
+            ${{ runner.temp }}/macos-candidate-report/verification/**/*.json
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Retain the candidate update signatures for this Actions build
+        if: always() && steps.sign.outcome == 'success'
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: macos-candidate-update-signatures-${{ matrix.arch }}
+          path: |
+            ${{ runner.temp }}/macos-candidate-input/new/agentrans-0.1.0-test.20261120.1-mac-${{ matrix.arch }}-unsigned.zip.sig
+            ${{ runner.temp }}/macos-candidate-input/new/test-mac.yml.sig
           if-no-files-found: error
-          compression-level: 0
+          retention-days: 14
