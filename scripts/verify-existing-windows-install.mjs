@@ -120,9 +120,8 @@ async function install() {
 }
 
 async function readLaunchEvidence(pid) {
-  const marker = JSON.parse(await readFile(markerPath, 'utf8'))
-  assert.equal(marker.productId, 'agentrans')
-  assert.equal(marker.purpose, 'user', 'The installed app should use its ordinary user instance')
+  // Ordinary user installs leave the development/verification instance marker absent.
+  await assertAbsent(markerPath)
   assert.ok((await lstat(rendererData)).isDirectory(), 'Expected the native installation-owned Electron data directory')
   assert.equal((await realpath(rendererData)).toLowerCase(), rendererData.toLowerCase())
   const events = []
@@ -137,7 +136,7 @@ async function readLaunchEvidence(pid) {
   assert.equal(started.length, 1, 'Expected one startup event from the launched Windows process')
   assert.equal(started[0].version, version, 'The installed Windows process must run the expected version')
   assert.ok(events.some(event => event.event === 'workspace-ready' && event.version === version))
-  return { markerPurpose: marker.purpose, nativeRendererData: true, runtimeVersion: started[0].version, journalPid: pid }
+  return { instanceMarker: 'absent', nativeRendererData: true, runtimeVersion: started[0].version, journalPid: pid }
 }
 
 async function getLoopbackPort() {
