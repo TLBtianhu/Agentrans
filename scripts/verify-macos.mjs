@@ -1,10 +1,10 @@
-/** Read-only artifact checks and separately isolated first launches on a hosted Mac runner. */
+/** Check ordinary first launch from one actual macOS installer on a fresh native runner. */
 import assert from 'node:assert/strict'
 import { execFile, spawn } from 'node:child_process'
 import { createHash, randomUUID } from 'node:crypto'
 import { createReadStream } from 'node:fs'
-import { lstat, mkdir, readFile, readdir, realpath, stat, writeFile } from 'node:fs/promises'
-import { createServer } from 'node:net'
+import { lstat, mkdir, mkdtemp, readFile, readdir, realpath, stat, writeFile } from 'node:fs/promises'
+import { userInfo } from 'node:os'
 import { basename, dirname, isAbsolute, join } from 'node:path'
 import { setTimeout as delay } from 'node:timers/promises'
 import { promisify } from 'node:util'
@@ -12,13 +12,18 @@ import { promisify } from 'node:util'
 assert.equal(process.platform, 'darwin')
 assert.equal(process.env.GITHUB_ACTIONS, 'true')
 assert.equal(process.env.RUNNER_ENVIRONMENT, 'github-hosted')
-const [artifactArgument, resultArgument, architecture] = process.argv.slice(2)
+const [artifactArgument, resultArgument, architecture, format, version = '0.1.0-test.20261118.4', ...extra] = process.argv.slice(2)
 assert.ok(artifactArgument && isAbsolute(artifactArgument))
 assert.ok(resultArgument && isAbsolute(resultArgument))
 assert.ok(architecture === 'arm64' || architecture === 'x64')
-assert.equal(process.arch, architecture, 'The verification requires a native runner of the target architecture')
+assert.ok(format === 'dmg' || format === 'zip')
+assert.match(version, /^\d+\.\d+\.\d+-test\.\d+\.\d+$/u)
+assert.equal(extra.length, 0)
+assert.equal(process.arch, architecture, 'Use a native runner of the target architecture')
 assert.equal(process.env.RUNNER_ARCH, architecture === 'arm64' ? 'ARM64' : 'X64')
 
+const exec = promisify(execFile)
+const runnerHome = await realpath(userInfo().homedir)
 const temporaryRoot = await realpath(process.env.RUNNER_TEMP)
 const artifactRoot = await realpath(artifactArgument)
 assert.equal(dirname(artifactRoot), temporaryRoot, 'Retained inputs must be directly under RUNNER_TEMP')
@@ -27,15 +32,15 @@ assert.equal(basename(resultArgument), 'agentrans-mac-launch-report')
 const resultRoot = join(temporaryRoot, basename(resultArgument))
 await mkdir(resultRoot, { mode: 0o700 })
 const reportPath = join(resultRoot, 'result.json')
-const version = '0.1.0-test.20261118.3'
 const releaseAsset = 'agentrans-' + version + '-mac-' + architecture + '-unsigned'
 const machArchitecture = architecture === 'arm64' ? 'arm64' : 'x86_64'
-const layoutError = 'Packaged user startup requires a platform-specific product layout'
-const exec = promisify(execFile)
-const diagnostic = process.env.AGENTRANS_MAC_LAUNCH_DIAGNOSTICS === '1'
+const stateRoot = join(runnerHome, 'Library', 'Application Support', 'com.agentrans.app')
+const markerPath = join(stateRoot, '.agentrans-instance.json')
+const journal = join(stateRoot, 'data', 'install', 'update-journal')
+const result = { format, artifactIntegrityPassed: false }
 const report = {
-  evidenceVersion: 1, version, architecture, runnerArchitecture: process.arch,
-  hostRepresentation: process.env.RUNNER_ARCH, results: {}, passed: false,
+  evidenceVersion: 2, version, architecture, format, runnerArchitecture: process.arch,
+  hostRepresentation: process.env.RUNNER_ARCH, results: { [format]: result }, passed: false,
 }
 
 async function save() {
@@ -44,7 +49,7 @@ async function save() {
 
 function sanitized(message) {
   return String(message).replaceAll(temporaryRoot, '<runner-temp>').replaceAll(process.cwd(), '<checkout>')
-    .split(/\r?\n/u).slice(-18).join('\n').slice(-5_000)
+    .replaceAll(runnerHome, '<runner-home>').slice(-24_000)
 }
 
 function diagnostics(error) {
@@ -58,50 +63,9 @@ function diagnostics(error) {
 async function command(executable, args, timeout = 120_000) {
   const result = await exec(executable, args, {
     encoding: 'utf8', timeout, maxBuffer: 8 * 1024 * 1024,
-    env: { PATH: '/usr/bin:/bin:/usr/sbin:/sbin', LANG: 'C', HOME: temporaryRoot, TMPDIR: temporaryRoot },
+    env: { PATH: '/usr/bin:/bin:/usr/sbin:/sbin', LANG: 'C', TMPDIR: temporaryRoot },
   })
   return result.stdout.trim()
-}
-
-async function probe(executable, args, timeout) {
-  try {
-    return { ok: true, output: sanitized(await command(executable, args, timeout)) }
-  } catch (error) {
-    return { ok: false, ...diagnostics(error) }
-  }
-}
-
-async function inspectStartup(owned, stage, mode, base, journal, stateRoot) {
-  const state = await lstat(join(stateRoot, '.agentrans-instance.json')).then(() => true, () => false)
-  const files = await readdir(journal).catch(() => [])
-  const eventTypes = []
-  for (const file of files.filter(name => name.endsWith('.jsonl'))) {
-    for (const line of (await readFile(join(journal, file), 'utf8')).split('\n').filter(Boolean)) {
-      try {
-        const event = JSON.parse(line)
-        if (event.pid === owned.pid && event.version === version) eventTypes.push(event.event)
-      } catch { /* A concurrent journal write may leave an incomplete final line. */ }
-    }
-  }
-  if (!Number.isSafeInteger(owned.pid)) return { state, eventTypes }
-  const pid = String(owned.pid)
-  const samplePath = join(stage, mode + '-process-sample.txt')
-  const [processState, port, loopback, systemLog] = await Promise.all([
-    probe('/bin/ps', ['-p', pid, '-o', 'pid=,state=,comm='], 4_000),
-    probe('/usr/sbin/lsof', ['-nP', '-a', '-p', pid, '-iTCP'], 4_000),
-    probe('/usr/bin/curl', ['--noproxy', '*', '--max-time', '2', '-sS', base + '/json/version'], 4_000),
-    probe('/usr/bin/log', ['show', '--last', '2m', '--style', 'compact', '--predicate',
-      'process == "Agentrans" OR ((process == "amfid" OR process == "syspolicyd") AND eventMessage CONTAINS "Agentrans")'], 12_000),
-  ])
-  const sampleCommand = owned.status === undefined
-    ? await probe('/usr/bin/sample', [pid, '2', '1', '-file', samplePath], 12_000)
-    : { ok: false }
-  const sample = await readFile(samplePath, 'utf8').then(body => {
-    const frames = body.split('\n')
-    const start = frames.findIndex(line => line.includes('Call graph:'))
-    return sanitized(frames.slice(Math.max(0, start), Math.max(0, start) + 32).join('\n'))
-  }, () => undefined)
-  return { state, eventTypes, processState, port, loopback, systemLog, sampleCommand, sample }
 }
 
 async function sha256(path) {
@@ -137,13 +101,13 @@ async function verifyBundle(appPath, result) {
   result.bundle = { bundleId, shortVersion, buildVersion, machArchitecture, asarSha256, executableSha256,
     updater: { provider: 'github', owner: 'TLBtianhu', repository: 'Agentrans', channel: 'nightly' } }
   try {
-    await command('/usr/bin/codesign', ['--verify', '--strict', diagnostic ? appPath : executable])
-    result.bundle.executableSignatureValid = true
+    await command('/usr/bin/codesign', ['--verify', '--strict', appPath])
+    result.bundle.bundleSignatureValid = true
   } catch (error) {
-    result.bundle.executableSignatureValid = false
+    result.bundle.bundleSignatureValid = false
     result.bundle.signatureDiagnostic = diagnostics(error)
   }
-  return { codeRoot, resourcesRoot, executable }
+  return { executable }
 }
 
 async function prepareDmg(asset, stage, result) {
@@ -198,71 +162,80 @@ async function prepareZip(asset, stage, result) {
   return join(stage, 'Agentrans.app')
 }
 
-async function reservePort() {
-  const listener = createServer()
-  try {
-    await new Promise((resolve, reject) => {
-      listener.once('error', reject)
-      listener.listen(0, '127.0.0.1', resolve)
-    })
-    return listener.address().port
-  } finally {
-    if (listener.listening) await new Promise((resolve, reject) => {
-      listener.close(error => error === undefined ? resolve() : reject(error))
-    })
+// DevTools uses NUL-delimited JSON on the child-owned FD 3/4 pipe pair.
+function createDevtoolsPipe(input, output) {
+  const pending = new Map()
+  let nextId = 1
+  let buffer = ''
+  let disconnected
+  function fail(cause) {
+    disconnected ??= cause
+    for (const entry of pending.values()) entry.finish(cause)
   }
-}
-
-async function json(url) {
-  const response = await fetch(url, { signal: AbortSignal.timeout(2_000) }).catch(error => {
-    throw new Error(error.message + (error.cause?.code ? ' ' + error.cause.code : ''), { cause: error })
+  output.setEncoding('utf8')
+  output.on('data', chunk => {
+    buffer += chunk
+    let end
+    while ((end = buffer.indexOf('\0')) !== -1) {
+      const frame = buffer.slice(0, end)
+      buffer = buffer.slice(end + 1)
+      try {
+        const reply = JSON.parse(frame)
+        const entry = pending.get(reply.id)
+        if (entry) entry.finish(reply.error ? new Error(reply.error.message) : undefined, reply.result)
+      } catch (error) {
+        fail(new Error('Invalid DevTools pipe message', { cause: error }))
+      }
+    }
+    if (buffer.length > 2 * 1024 * 1024) fail(new Error('Oversized DevTools pipe message'))
   })
-  assert.ok(response.ok, 'CDP endpoint returned HTTP ' + response.status)
-  return response.json()
-}
-
-async function devtools(websocket, port, method, params = {}) {
-  const endpoint = new URL(websocket)
-  assert.equal(endpoint.protocol, 'ws:')
-  assert.equal(endpoint.hostname, '127.0.0.1')
-  assert.equal(endpoint.port, String(port))
-  const socket = new WebSocket(endpoint)
-  try {
-    return await new Promise((resolve, reject) => {
-      const signal = AbortSignal.timeout(4_000)
-      signal.addEventListener('abort', () => reject(new Error('CDP response timed out for ' + method)), { once: true })
-      socket.addEventListener('open', () => socket.send(JSON.stringify({ id: 1, method, params })), { once: true })
-      socket.addEventListener('error', () => reject(new Error('CDP socket failed for ' + method)), { once: true })
-      socket.addEventListener('close', () => reject(new Error('CDP socket closed for ' + method)), { once: true })
-      socket.addEventListener('message', event => {
-        try {
-          const value = JSON.parse(event.data)
-          if (value.id !== 1) return
-          if (value.error !== undefined) reject(new Error(value.error.message))
-          else resolve(value.result)
-        } catch (error) { reject(error) }
+  output.once('end', () => fail(new Error('DevTools pipe closed')))
+  output.once('error', fail)
+  input.once('error', fail)
+  return {
+    send(method, params = {}, { sessionId, timeout = 4_000 } = {}) {
+      if (disconnected !== undefined) return Promise.reject(disconnected)
+      const id = nextId++
+      return new Promise((resolve, reject) => {
+        function finish(error, reply) {
+          clearTimeout(timer)
+          pending.delete(id)
+          if (error) reject(error)
+          else resolve(reply)
+        }
+        const timer = setTimeout(() => finish(new Error('DevTools timed out for ' + method)), timeout)
+        pending.set(id, { finish })
+        input.write(JSON.stringify({ id, method, params, sessionId }) + '\0', error => {
+          if (error) finish(error)
+        })
       })
-    })
-  } finally {
-    socket.close()
+    },
+    close() {
+      fail(new Error('DevTools pipe disposed'))
+      input.destroy()
+      output.destroy()
+    },
   }
 }
 
-async function evaluate(target, port, expression) {
-  const result = await devtools(target.webSocketDebuggerUrl, port, 'Runtime.evaluate', {
-    expression, awaitPromise: true, returnByValue: true,
-  })
+async function attach(cdp, target) {
+  const session = await cdp.send('Target.attachToTarget', { targetId: target.targetId, flatten: true })
+  assert.ok(session.sessionId, 'DevTools did not attach to the expected page')
+  return session.sessionId
+}
+
+async function evaluate(cdp, sessionId, expression) {
+  const result = await cdp.send('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true }, { sessionId })
   if (result.exceptionDetails !== undefined) {
     throw new Error(result.exceptionDetails.exception?.description ?? result.exceptionDetails.text ?? 'Renderer exception')
   }
   return result.result.value
 }
 
-async function poll(owned, operation, label, duration = 75_000) {
+async function poll(owned, operation, label, duration = 90_000) {
   const until = Date.now() + duration
   let lastError
   while (Date.now() < until) {
-    if (owned.output.includes(layoutError)) throw new Error(layoutError)
     if (owned.status !== undefined) throw new Error('Packaged app exited before ' + label + ': ' + JSON.stringify(owned.status))
     try {
       const value = await operation()
@@ -273,202 +246,226 @@ async function poll(owned, operation, label, duration = 75_000) {
   throw new Error('Timed out waiting for ' + label + (lastError === undefined ? '' : ': ' + lastError.message))
 }
 
-async function stopProcess(owned, base, port) {
-  if (owned.status === undefined) {
-    const info = await json(base + '/json/version').catch(() => null)
-    if (info?.webSocketDebuggerUrl !== undefined) {
-      await devtools(info.webSocketDebuggerUrl, port, 'Browser.close').catch(() => undefined)
-    }
+function signalProcessGroup(pid, signal) {
+  if (!Number.isSafeInteger(pid)) return false
+  try {
+    process.kill(-pid, signal)
+    return true
+  } catch (error) {
+    if (error.code === 'ESRCH') return false
+    throw error
   }
-  if (owned.status === undefined) await Promise.race([owned.exited, delay(5_000, undefined, { ref: false })])
-  if (owned.status === undefined && owned.pid !== undefined) {
-    try { process.kill(-owned.pid, 'SIGTERM') } catch (error) { if (error.code !== 'ESRCH') throw error }
-    await Promise.race([owned.exited, delay(5_000, undefined, { ref: false })])
-  }
-  if (owned.status === undefined && owned.pid !== undefined) {
-    try { process.kill(-owned.pid, 'SIGKILL') } catch (error) { if (error.code !== 'ESRCH') throw error }
-    await Promise.race([owned.exited, delay(5_000, undefined, { ref: false })])
-  }
-  assert.notEqual(owned.status, undefined, 'Could not stop the owned packaged app')
 }
 
-async function launch(bundle, stage, mode) {
-  const stateRoot = join(stage, mode + '-state')
-  const osHome = join(stage, mode + '-home')
-  const journal = join(stateRoot, 'data', 'install', 'update-journal')
-  await mkdir(osHome, { mode: 0o700 })
-  const port = await reservePort()
-  const base = 'http://127.0.0.1:' + port
-  // The child has no workflow credentials, injected Node settings, or runner user profile.
+async function waitForGroupExit(pid, milliseconds) {
+  const end = Date.now() + milliseconds
+  while (signalProcessGroup(pid, 0)) {
+    if (Date.now() >= end) return false
+    await delay(150)
+  }
+  return true
+}
+
+async function stopProcess(owned, cdp) {
+  if (owned.status === undefined) {
+    await cdp.send('Browser.close', {}, { timeout: 2_000 }).catch(() => undefined)
+  }
+  cdp.close()
+  if (!(await waitForGroupExit(owned.pid, 2_000))) {
+    signalProcessGroup(owned.pid, 'SIGTERM')
+    if (!(await waitForGroupExit(owned.pid, 5_000))) signalProcessGroup(owned.pid, 'SIGKILL')
+  }
+  assert.ok(await waitForGroupExit(owned.pid, 5_000), 'Could not stop the owned packaged app process group')
+  assert.ok(await Promise.race([owned.closed.then(() => true), delay(3_000, false, { ref: false })]),
+    'Packaged app stdio did not reach quiescence')
+}
+
+async function assertNoInstance() {
+  try {
+    await lstat(stateRoot)
+    throw new Error('A packaged macOS instance already exists for the runner account')
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error
+  }
+}
+
+async function readInstanceEvidence() {
+  const evidence = { events: [] }
+  try {
+    evidence.stateRoot = sanitized(await realpath(stateRoot))
+    evidence.rendererData = (await lstat(join(stateRoot, 'data', 'settings', 'electron'))).isDirectory()
+  } catch (error) {
+    if (error.code !== 'ENOENT') evidence.stateError = diagnostics(error)
+  }
+  try {
+    evidence.markerPurpose = JSON.parse(await readFile(markerPath, 'utf8')).purpose
+  } catch (error) {
+    if (error.code !== 'ENOENT') evidence.markerError = diagnostics(error)
+  }
+  try {
+    const files = (await readdir(journal)).filter(name => name.endsWith('.jsonl'))
+    for (const file of files) {
+      for (const line of (await readFile(join(journal, file), 'utf8')).split('\n').filter(Boolean)) {
+        const { event, version, pid } = JSON.parse(line)
+        evidence.events.push({ event, version, pid })
+      }
+    }
+  } catch (error) {
+    if (error.code !== 'ENOENT') evidence.journalError = diagnostics(error)
+  }
+  return evidence
+}
+
+async function inspectStartup(owned, stage) {
+  if (owned.status !== undefined || !Number.isSafeInteger(owned.pid)) return {}
+  const samplePath = join(stage, 'process-sample.txt')
+  try {
+    await command('/usr/bin/sample', [String(owned.pid), '2', '1', '-file', samplePath], 15_000)
+    const sample = await readFile(samplePath, 'utf8')
+    const lines = sample.split('\n')
+    const callGraph = Math.max(0, lines.findIndex(line => line.includes('Call graph:')))
+    return { sample: sanitized(lines.slice(callGraph, callGraph + 48).join('\n')) }
+  } catch (error) {
+    return { sampleError: diagnostics(error) }
+  }
+}
+
+async function launch(bundle, stage, result) {
+  await assertNoInstance()
+  const osDiagnostics = join(stage, 'startup.log')
   const env = {
-    PATH: '/usr/bin:/bin:/usr/sbin:/sbin', HOME: osHome, CFFIXED_USER_HOME: osHome, ZDOTDIR: osHome,
-    TMPDIR: stage, USER: process.env.USER ?? '', LOGNAME: process.env.LOGNAME ?? '',
-    AGENTRANS_TELEMETRY_DISABLED: '1', AGENTRANS_DESKTOP_UPDATE_CHECK_INTERVAL_MS: '3600000',
-    AGENTRANS_DESKTOP_DIAGNOSTIC_FILE: join(stage, mode + '-startup.log'),
+    ...Object.fromEntries(['PATH', 'HOME', 'USER', 'LOGNAME', 'LANG', 'LC_ALL']
+      .filter(key => typeof process.env[key] === 'string').map(key => [key, process.env[key]])),
+    TMPDIR: stage,
+    AGENTRANS_TELEMETRY_DISABLED: '1',
+    AGENTRANS_DESKTOP_UPDATE_CHECK_INTERVAL_MS: '3600000',
+    AGENTRANS_DESKTOP_DIAGNOSTIC_FILE: osDiagnostics,
     AGENTRANS_DESKTOP_UPDATE_JOURNAL_DIR: journal,
   }
-  if (mode === 'verification') {
-    env.AGENTRANS_LAUNCH_CONTEXT = JSON.stringify({
-      purpose: 'verification', instanceRoot: stateRoot,
-      codeRoot: bundle.codeRoot, resourcesRoot: bundle.resourcesRoot,
-    })
-  }
-  const rendererState = join(stateRoot, 'data', 'settings', 'electron')
-  if (diagnostic) env.ELECTRON_ENABLE_LOGGING = '1'
   const child = spawn(bundle.executable, [
-    ...(diagnostic ? ['--enable-logging=stderr', '--log-level=0'] : []),
-    '--remote-debugging-port=' + port, '--remote-debugging-address=127.0.0.1',
+    '--remote-debugging-pipe',
+    '--enable-logging=stderr',
     '--disable-backgrounding-occluded-windows', '--no-proxy-server',
     '--host-resolver-rules=MAP github.com 127.0.0.1, MAP api.github.com 127.0.0.1',
-    '--user-data-dir=' + (mode === 'verification' ? rendererState : join(osHome, 'electron')),
-  ], { cwd: stage, env, detached: true, stdio: ['ignore', 'pipe', 'pipe'] })
+  ], { cwd: stage, env, detached: true, stdio: ['ignore', 'pipe', 'pipe', 'pipe', 'pipe'] })
   const owned = { pid: child.pid, status: undefined, output: '' }
-  owned.exited = new Promise(resolve => {
-    child.once('exit', (code, signal) => { owned.status = { code, signal }; resolve() })
-    child.once('error', error => { owned.status = { spawnError: sanitized(error.message) }; resolve() })
-  })
-  const outputDrained = new Promise(resolve => { child.once('close', resolve) })
+  child.once('exit', (code, signal) => { owned.status = { code, signal } })
+  child.once('error', error => { owned.status = { spawnError: sanitized(error.message) } })
+  owned.closed = new Promise(resolve => child.once('close', resolve))
   for (const pipe of [child.stdout, child.stderr]) {
-    pipe.on('data', chunk => { owned.output = (owned.output + chunk.toString('utf8')).slice(-24_000) })
+    pipe.setEncoding('utf8')
+    pipe.on('data', chunk => { owned.output = (owned.output + chunk).slice(-24_000) })
   }
-  const result = { passed: false, isolatedHome: true, mode }
+  const cdp = createDevtoolsPipe(child.stdio[3], child.stdio[4])
+  const launch = { passed: false, mode: 'ordinary', freshRunnerInstance: true, pid: owned.pid, instrumentation: 'owned DevTools pipe' }
+  result.normal = launch
+  const targets = async () => (await cdp.send('Target.getTargets')).targetInfos
   let active = 'native welcome'
   try {
     const welcome = await poll(owned, async () => {
-      for (const target of await json(base + '/json/list')) {
-        if (target.type !== 'page' || !target.url.startsWith('file:') || !target.url.endsWith('/renderer/welcome.html')) continue
-        if (await evaluate(target, port, "Boolean(document.querySelector('#key-input') && document.querySelector('#skip-key'))")) return target
+      const target = (await targets()).find(target => target.type === 'page' &&
+        target.url.startsWith('file:') && target.url.endsWith('/renderer/welcome.html'))
+      if (!target) return undefined
+      const sessionId = await attach(cdp, target)
+      let displayed = false
+      try {
+        displayed = await evaluate(cdp, sessionId,
+          'Boolean(document.querySelector("#key-input")?.getClientRects().length && document.querySelector("#skip-key")?.getClientRects().length)')
+        if (displayed) return { target, sessionId }
+      } finally {
+        if (!displayed) await cdp.send('Target.detachFromTarget', { sessionId }).catch(() => undefined)
       }
-    }, active, diagnostic ? 30_000 : 75_000)
-    result.nativeWelcome = true
-    await evaluate(welcome, port, "setTimeout(() => document.querySelector('#skip-key').click(), 0); true")
+    }, active)
+    launch.nativeWelcome = true
+    await evaluate(cdp, welcome.sessionId, "setTimeout(() => document.querySelector('#skip-key').click(), 0); true")
+
     active = 'Desktop workspace after keyless welcome'
     const workspace = await poll(owned, async () => {
-      const targets = await json(base + '/json/list')
-      if (targets.some(target => target.id === welcome.id)) return
-      return targets.find(target => target.type === 'page' && target.url.startsWith('dsh-app://app/'))
+      const current = await targets()
+      if (current.some(target => target.targetId === welcome.target.targetId)) return undefined
+      return current.find(target => target.type === 'page' && target.url.startsWith('dsh-app://app/'))
     }, active)
-    result.workspaceLoaded = true
-    active = 'Desktop runtime architecture and authenticated session service'
+    launch.workspaceLoaded = true
+
+    active = 'Desktop architecture and authenticated session service'
+    const workspaceSession = await attach(cdp, workspace)
     const rpcId = randomUUID()
     const request = JSON.stringify({ type: 'client-request', rpcId, method: 'session/list', payload: { args: { _request: {} } } })
-    await poll(owned, async () => {
-      const details = await evaluate(workspace, port, '(async () => {' +
+    const details = await poll(owned, async () => {
+      const details = await evaluate(cdp, workspaceSession, '(async () => {' +
         'const info = await window.dshDesktop.deviceInfo();' +
         'const response = await fetch("/api/session/list", { method: "POST", headers: { "content-type": "application/json" }, body: ' +
         JSON.stringify(request) + ' }); if (!response.ok) throw new Error("session/list returned HTTP " + response.status);' +
         'const message = await response.json();' +
         'return { info, ready: message.rpcId === ' + JSON.stringify(rpcId) +
         ' && message.result?.ok === true && Array.isArray(message.result.value?.items), count: message.result?.value?.items?.length }; })()')
-      if (!details?.ready) return false
-      const runtimeArch = details.info.split('; ').find(value => value.startsWith('app_arch='))?.slice('app_arch='.length)
-      assert.equal(runtimeArch, architecture, 'The running Electron shell must use the packaged architecture')
-      result.runtimeArchitecture = runtimeArch
-      result.sessionServiceReady = true
-      result.initialSessionCount = details.count
-      return true
+      return details?.ready ? details : undefined
     }, active)
-    const journalFiles = (await readdir(journal)).filter(name => name.endsWith('.jsonl'))
-    assert.equal(journalFiles.length, 1, 'Expected one fresh application journal')
-    const startup = JSON.parse((await readFile(join(journal, journalFiles[0]), 'utf8')).split('\n')[0])
-    assert.equal(startup.event, 'started')
-    assert.equal(startup.version, version, 'Expected the tested application version at runtime')
-    assert.equal(startup.pid, owned.pid)
-    result.runtimeVersion = startup.version
-    if (mode === 'verification') {
-      const marker = JSON.parse(await readFile(join(stateRoot, '.agentrans-instance.json'), 'utf8'))
-      assert.equal(marker.purpose, 'verification')
-      result.isolatedProductState = true
-    }
-    result.passed = true
-  } catch (error) {
-    result.stage = active
-    result.failure = diagnostics(error)
-    if (diagnostic) result.nativeDiagnostics = await inspectStartup(owned, stage, mode, base, journal, stateRoot)
-  } finally {
-    try { await stopProcess(owned, base, port) }
-    catch (error) {
-      result.passed = false
-      result.shutdownFailure = diagnostics(error)
-    }
-    result.processExit = owned.status
-    if (!result.passed) {
-      await Promise.race([outputDrained, delay(1_000)])
-      const diagnosticFile = await readFile(env.AGENTRANS_DESKTOP_DIAGNOSTIC_FILE, 'utf8').catch(() => '')
-      result.output = sanitized(owned.output + '\n' + diagnosticFile)
-      result.knownLayoutBlocker = owned.output.includes(layoutError) ||
-        diagnosticFile.includes(layoutError) || result.failure?.error === layoutError
-    }
-  }
-  return result
-}
+    const runtimeArch = details.info.split('; ').find(value => value.startsWith('app_arch='))?.slice('app_arch='.length)
+    assert.equal(runtimeArch, architecture, 'The running Electron shell must use the packaged architecture')
+    launch.runtimeArchitecture = runtimeArch
+    launch.sessionServiceReady = true
+    launch.initialSessionCount = details.count
 
-report.macOSVersion = await command('/usr/bin/sw_vers', ['-productVersion'])
-await save()
-for (const format of diagnostic ? ['zip'] : ['dmg', 'zip']) {
-  const result = { format, artifactIntegrityPassed: false }
-  report.results[format] = result
-  const stage = join(resultRoot, format)
-  let step = 'open retained artifact'
-  try {
-    const asset = join(artifactRoot, releaseAsset + '.' + format)
-    const info = await lstat(asset)
-    assert.ok(info.isFile(), 'Expected an ordinary artifact file')
-    result.asset = { name: basename(asset), size: info.size, sha256: await sha256(asset) }
-    await mkdir(stage, { mode: 0o700 })
-    step = 'dmg or zip validation and extraction'
-    const app = format === 'dmg' ? await prepareDmg(asset, stage, result) : await prepareZip(asset, stage, result)
-    step = 'bundle version, architecture, and payload'
-    const bundle = await verifyBundle(app, result)
-    result.artifactIntegrityPassed = true
-    if (diagnostic) {
-      try {
-        const child = await exec(bundle.executable, ['-p',
-          'JSON.stringify({arch:process.arch,electron:process.versions.electron})'], {
-          encoding: 'utf8', timeout: 15_000, maxBuffer: 1024 * 1024,
-          env: { PATH: '/usr/bin:/bin:/usr/sbin:/sbin', ELECTRON_RUN_AS_NODE: '1' },
-        })
-        result.packagedNodeControl = { passed: true, output: sanitized(child.stdout) }
-      } catch (error) {
-        result.packagedNodeControl = { passed: false, ...diagnostics(error) }
+    active = 'ordinary macOS product instance and runtime version'
+    await poll(owned, async () => {
+      const evidence = await readInstanceEvidence()
+      launch.instanceEvidence = evidence
+      if (!evidence.events.some(event => event.event === 'workspace-ready' && event.pid === owned.pid)) {
+        return undefined
       }
-      report.consoleUser = await probe('/usr/bin/stat', ['-f', '%Su', '/dev/console'], 4_000)
-      const desktopDomain = await probe('/bin/launchctl', ['print', 'gui/' + process.getuid()], 4_000)
-      report.hasGuiDomain = desktopDomain.ok
-    }
-    step = 'ordinary first launch'
-    result.normal = await launch(bundle, stage, 'normal')
-    await save()
-    if (!result.normal.passed) {
-      step = 'verification-context first launch'
-      result.verification = await launch(bundle, stage, 'verification')
-    }
+      assert.equal(evidence.stateRoot, sanitized(stateRoot), 'Expected the normal macOS state directory')
+      assert.equal(evidence.rendererData, true)
+      assert.ok(evidence.markerPurpose === undefined || evidence.markerPurpose === 'user', 'Unexpected instance purpose')
+      const started = evidence.events.filter(event => event.event === 'started')
+      assert.deepEqual(started, [{ event: 'started', version, pid: owned.pid }], 'Expected one fresh journal from this packaged app')
+      launch.runtimeVersion = started[0].version
+      return true
+    }, active, 15_000)
+    launch.passed = true
   } catch (error) {
-    result.failure = { stage: step, ...diagnostics(error) }
+    launch.stage = active
+    launch.failure = diagnostics(error)
+    launch.instanceEvidence ??= await readInstanceEvidence()
+    launch.nativeDiagnostics = await inspectStartup(owned, stage)
+  } finally {
+    try { await stopProcess(owned, cdp) }
+    catch (error) {
+      launch.passed = false
+      launch.shutdownFailure = diagnostics(error)
+    }
+    launch.processExit = owned.status
+    if (!launch.passed) {
+      const extra = await readFile(osDiagnostics, 'utf8').catch(() => '')
+      launch.output = sanitized(owned.output + '\n' + extra)
+    }
   }
-  await save()
-  console.log(JSON.stringify({
-    architecture, format, integrity: result.artifactIntegrityPassed, normal: result.normal?.passed,
-    verification: result.verification?.passed,
-    failure: result.failure?.stage ?? result.normal?.failure?.error,
-  }))
 }
 
-if (diagnostic) {
-  const { zip } = report.results
-  report.diagnosticOnly = true
-  report.passed = Boolean(zip.artifactIntegrityPassed && zip.normal?.passed)
-  await save()
-  if (!report.passed) process.exitCode = 2
-} else {
-  const { dmg, zip } = report.results
-  report.matchingBundlePayloads = Boolean(dmg.bundle && zip.bundle &&
-    dmg.bundle.asarSha256 === zip.bundle.asarSha256 &&
-    dmg.bundle.executableSha256 === zip.bundle.executableSha256)
-  report.passed = report.matchingBundlePayloads && [dmg, zip].every(result => result.failure === undefined && result.normal?.passed)
-  report.allPassedExceptKnownLayoutBlocker = report.matchingBundlePayloads && [dmg, zip].every(result =>
-    result.failure === undefined && (result.normal?.passed ||
-      (result.normal?.knownLayoutBlocker && result.verification?.passed)))
-  await save()
-  if (!report.passed) process.exitCode = report.allPassedExceptKnownLayoutBlocker ? 2 : 1
+let step = 'runner'
+try {
+  report.macOSVersion = await command('/usr/bin/sw_vers', ['-productVersion'])
+  step = 'open retained artifact'
+  const asset = join(artifactRoot, releaseAsset + '.' + format)
+  const info = await lstat(asset)
+  assert.ok(info.isFile(), 'Expected an ordinary artifact file')
+  result.asset = { name: basename(asset), size: info.size, sha256: await sha256(asset) }
+  const stage = await mkdtemp(join(resultRoot, format + '-'))
+  step = 'installer validation and extraction'
+  const app = format === 'dmg' ? await prepareDmg(asset, stage, result) : await prepareZip(asset, stage, result)
+  step = 'bundle version, architecture, and payload'
+  const bundle = await verifyBundle(app, result)
+  result.artifactIntegrityPassed = true
+  step = 'ordinary first launch'
+  await launch(bundle, stage, result)
+  report.passed = result.normal.passed
+} catch (error) {
+  result.failure = { stage: step, ...diagnostics(error) }
 }
+await save()
+console.log(JSON.stringify({
+  architecture, format, integrity: result.artifactIntegrityPassed, ordinary: result.normal?.passed,
+  welcome: result.normal?.nativeWelcome, workspace: result.normal?.workspaceLoaded, sessions: result.normal?.sessionServiceReady,
+  failure: result.failure ?? result.normal?.failure ?? result.normal?.shutdownFailure,
+}))
+if (!report.passed) process.exitCode = 1

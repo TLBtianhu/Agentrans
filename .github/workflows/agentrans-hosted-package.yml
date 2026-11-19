@@ -1,5 +1,5 @@
 name: Package Agentrans · hosted
-run-name: Capture macOS .3 startup alert
+run-name: Verify ordinary macOS candidate .4 first launch
 
 on:
   workflow_dispatch:
@@ -25,30 +25,39 @@ permissions:
 
 jobs:
   verify:
-    name: Verify macOS ${{ matrix.arch }}
+    name: Verify macOS ${{ matrix.arch }} / ${{ matrix.format }}
     strategy:
       fail-fast: false
       matrix:
         include:
           - arch: arm64
+            format: dmg
+            runner: macos-latest
+            runner_arch: ARM64
+          - arch: arm64
+            format: zip
             runner: macos-latest
             runner_arch: ARM64
           - arch: x64
+            format: dmg
+            runner: macos-26-intel
+            runner_arch: X64
+          - arch: x64
+            format: zip
             runner: macos-26-intel
             runner_arch: X64
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 35
-    env:
-      AGENTRANS_TELEMETRY_DISABLED: '1'
-      AGENTRANS_DESKTOP_UPDATE_CHECK_INTERVAL_MS: '3600000'
     steps:
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
+      - uses: pnpm/action-setup@v5.0.0
+        if: matrix.arch == 'arm64' && matrix.format == 'dmg'
       - uses: actions/setup-node@v7.0.0
         with:
           node-version: '24'
-      - name: Download the exact candidate package artifact
+      - name: Download the exact macOS startup candidate
         id: download
         shell: bash
         env:
@@ -60,42 +69,49 @@ jobs:
         run: |
           set -euo pipefail
           [[ "$RUNNER_ENVIRONMENT" == 'github-hosted' && "$RUNNER_OS" == 'macOS' ]]
-          [[ "$RUNNER_ARCH" == "$QA_RUNNER_ARCH" ]]
-          [[ "$QA_VERSION" == '0.1.0-test.20261118.3' && "$QA_CHANNEL" == 'nightly' && "$QA_TARGET" == 'mac' ]]
-          [[ "$GITHUB_REPOSITORY" == 'TLBtianhu/Agentrans' ]]
-          mac_build=44471181090
-          windows_build=44321192711
-          candidate_sha=5e1154e1dcdb0d23f84fdb4d5e8f252dfcbf884b
+          [[ "$RUNNER_ARCH" == "$QA_RUNNER_ARCH" && "$GITHUB_REPOSITORY" == 'TLBtianhu/Agentrans' ]]
+          [[ "$QA_VERSION" == '0.1.0-test.20261118.4' && "$QA_CHANNEL" == 'nightly' && "$QA_TARGET" == 'mac' ]]
+          build=44480323500
+          candidate_sha=aa52b730df40252cbe1675039f1043698148beee
+          [[ "$build" =~ ^[0-9]+$ && "$candidate_sha" =~ ^[0-9a-f]{40}$ ]]
           input_dir="$RUNNER_TEMP/agentrans-mac-inputs"
           source_dir="$RUNNER_TEMP/agentrans-mac-source"
           mkdir "$input_dir" "$source_dir"
-          for build in "$mac_build" "$windows_build"; do
-            if [[ "$build" == "$mac_build" ]]; then target=mac; else target=win-x64; fi
-            title="Package Agentrans · $target · nightly · $QA_VERSION"
-            gh api "repos/$GITHUB_REPOSITORY/actions/runs/$build" | jq -e \
-              --arg sha "$candidate_sha" --arg title "$title" \
-              'select(.conclusion == "success" and .head_sha == $sha and .display_title == $title)
-                | {id, head_sha, display_title, conclusion, html_url}' > "$source_dir/$target.json"
-          done
-          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$mac_build/artifacts?per_page=20" \
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$build" | jq -e \
+            --arg sha "$candidate_sha" --arg title "Package Agentrans · mac · nightly · $QA_VERSION" \
+            'select(.conclusion == "success" and .head_sha == $sha and .display_title == $title)
+              | {id, head_sha, display_title, conclusion, html_url}' > "$source_dir/mac.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$build/artifacts?per_page=20" \
             | jq -e '[.artifacts[] | select(.name == "agentrans-mac" and .expired == false)]
                 | select(length == 1) | .[0] | {id, name, size_in_bytes, digest}' > "$source_dir/artifact.json"
-          gh run download "$mac_build" --repo "$GITHUB_REPOSITORY" --name agentrans-mac --dir "$input_dir"
-      - name: Capture the startup alert from the original ZIP
+          gh run download "$build" --repo "$GITHUB_REPOSITORY" --name agentrans-mac --dir "$input_dir"
+      - name: Install locked metadata-validation dependencies
+        if: matrix.arch == 'arm64' && matrix.format == 'dmg'
+        run: pnpm install --frozen-lockfile
+      - name: Verify update metadata and both ZIP blockmaps
+        if: matrix.arch == 'arm64' && matrix.format == 'dmg'
+        shell: bash
+        run: |
+          mkdir "$RUNNER_TEMP/agentrans-mac-metadata"
+          node scripts/verify-metadata.mjs "$RUNNER_TEMP/agentrans-mac-inputs" 0.1.0-test.20261118.4 \
+            "$RUNNER_TEMP/agentrans-mac-metadata/metadata.json"
+      - name: Verify the normal first launch from this artifact
         if: ${{ !cancelled() && steps.download.outcome == 'success' }}
-        timeout-minutes: 16
+        timeout-minutes: 12
         shell: bash
         env:
           QA_ARCH: ${{ matrix.arch }}
+          QA_FORMAT: ${{ matrix.format }}
         run: |
-          node scripts/capture-mac-startup.mjs "$RUNNER_TEMP/agentrans-mac-inputs" \
-            "$RUNNER_TEMP/agentrans-mac-launch-report" "$QA_ARCH"
+          node scripts/verify-macos.mjs "$RUNNER_TEMP/agentrans-mac-inputs" \
+            "$RUNNER_TEMP/agentrans-mac-launch-report" "$QA_ARCH" "$QA_FORMAT" 0.1.0-test.20261118.4
       - name: Retain the verification reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: macos-candidate-${{ matrix.arch }}-qa
+          name: macos-candidate-${{ matrix.arch }}-${{ matrix.format }}-qa
           path: |
             ${{ runner.temp }}/agentrans-mac-source/*.json
+            ${{ runner.temp }}/agentrans-mac-metadata/metadata.json
             ${{ runner.temp }}/agentrans-mac-launch-report/result.json
           if-no-files-found: warn
