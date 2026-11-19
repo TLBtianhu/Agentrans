@@ -336,22 +336,22 @@ async function callSession(cdp, sessionId, method, args) {
 
 async function verifySession(application, { sessionId, title, titleEventSequence }) {
   await poll(async () => {
-    const catalog = await call(application.workspace, 'session/list', { _request: {} })
+    const catalog = await application.call('session/list', { _request: {} })
     const entries = catalog.items.filter(row => row.sessionId === sessionId)
     assert.equal(entries.length, 1, 'Expected exactly one catalog entry for the test Session')
     assert.equal(entries[0].blank, false, 'Expected a Session that can be reopened from the sidebar')
     assert.equal(entries[0].projections?.values?.title, title)
     return true
   }, 'durable session identity and title', 20_000)
-  const history = await call(application.workspace, 'session/events', {
+  const history = await application.call('session/events', {
     request: { address: { kind: 'session', sessionId } },
   })
   const entry = history.records.find(row => row.type === 'event' && row.event.seq === titleEventSequence)
   assert.deepEqual({ type: entry?.event.type, title: entry?.event.data.title, source: entry?.event.data.source?.kind },
     { type: 'session/title', title, source: 'user' })
   const sidebarRow = '[role="treeitem"][data-row-key="session:' + sessionId + '"]'
-  await poll(application.owned, async () => {
-    const opened = await evaluation(application.workspace, `(() => {
+  await poll(async () => {
+    const opened = await application.evaluation(`(() => {
       const row = document.querySelector(${JSON.stringify(sidebarRow)})
       if (!row?.getClientRects().length) {
         document.querySelector('[data-sidebar-opener]')?.click()
@@ -365,8 +365,8 @@ async function verifySession(application, { sessionId, title, titleEventSequence
     if (opened) return true
   }, 'visible Session row opened by ID and title', 20_000)
   const visibleConversation = '[data-conversation-session="' + sessionId + '"]'
-  await poll(application.owned, async () => {
-    const opened = await evaluation(application.workspace, `Boolean(
+  await poll(async () => {
+    const opened = await application.evaluation(`Boolean(
       document.querySelector(${JSON.stringify(sidebarRow + '[aria-selected="true"]')})?.getClientRects().length &&
       document.querySelector(${JSON.stringify(visibleConversation)})?.getClientRects().length
     )`)
