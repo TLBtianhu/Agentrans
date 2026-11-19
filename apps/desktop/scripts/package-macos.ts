@@ -12,11 +12,11 @@ import {
 } from './desktop-release-environment.mjs'
 import {
   desktopUpdateMetadataFilename,
-  resolveDesktopGitHubUpdateConfig,
+  resolveDesktopPackagingUpdateConfig,
 } from './desktop-auto-update-environment.mjs'
 import { verifyMacOSAppUpdateConfig, type MacOSAppUpdateFeed } from './macos-app-update-config.mjs'
 import { verifyMacOSNotarizedApplication, verifyMacOSSignature } from './verify-macos-signature.mjs'
-import { DESKTOP_PRODUCT_NAME } from './desktop-product-identity.mjs'
+import { DESKTOP_ARTIFACT_SLUG, DESKTOP_PRODUCT_NAME } from './desktop-product-identity.mjs'
 
 const execute = promisify(execFile)
 
@@ -79,7 +79,7 @@ export async function packageMacOSArtifacts(
   const expected = resolveMacOSSigningEnvironment(environment)
   const credentials = resolveMacOSNotarizationEnvironment(environment)
   // The packaged feed must match what electron-builder publishes, so both derive it the same way.
-  const update = resolveDesktopGitHubUpdateConfig(environment)
+  const update = resolveDesktopPackagingUpdateConfig(environment)
   const feed: MacOSAppUpdateFeed = { provider: 'github', owner: update.owner, repo: update.repo, channel: update.channel }
   const appPath = join(artifactsRoot, arch === 'arm64' ? 'mac-arm64' : 'mac', `${DESKTOP_PRODUCT_NAME}.app`)
   const root = await mkdtemp(join(dirname(artifactsRoot), 'notarization-'))
@@ -113,12 +113,12 @@ export async function packageMacOSArtifacts(
     await verifyMacOSAppUpdateConfig(dmgApp, feed)
     apple.verifySignature(zipApp, expected)
     apple.verifySignature(dmgApp, expected)
-    const base = `deepseek-harness-${version}-mac-${arch}`
+    const base = `${DESKTOP_ARTIFACT_SLUG}-${version}-mac-${arch}`
     const artifacts = [
       [dmgOutput, `${base}.dmg`],
       [zipOutput, `${base}.zip`],
       [zipOutput, `${base}.zip.blockmap`],
-      [zipOutput, desktopUpdateMetadataFilename(version, 'darwin', update.channel)],
+      [zipOutput, desktopUpdateMetadataFilename(version, 'darwin')],
     ] as const
     for (const [output, filename] of artifacts) {
       const file = join(output, filename)

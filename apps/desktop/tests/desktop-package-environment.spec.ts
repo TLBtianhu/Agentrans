@@ -19,6 +19,20 @@ async function withDirectory(action: (directory: string) => Promise<void>): Prom
 }
 
 describe('Desktop local packaging configuration', () => {
+  it('accepts the product identity in signed Mac preflight and still requires a readable signing file', async () => {
+    await withDirectory(async (directory) => {
+      const certificate = join(directory, 'fixture.p12')
+      const environment = {
+        AGENTRANS_DESKTOP_APP_ID: 'com.agentrans.app', AGENTRANS_DESKTOP_MACOS_SIGNING_IDENTITY: 'Test Owner (TEAMID1234)',
+        AGENTRANS_DESKTOP_MACOS_TEAM_ID: 'TEAMID1234', APPLE_KEYCHAIN_PROFILE: 'test-notarization',
+        CSC_LINK: certificate, CSC_KEY_PASSWORD: '',
+      }
+      expect(() => { validateDesktopPackageEnvironment(environment, MACOS) }).toThrow(/CSC_LINK.*readable/u)
+      await writeFile(certificate, 'fixture bytes')
+      expect(() => { validateDesktopPackageEnvironment(environment, MACOS) }).not.toThrow()
+    })
+  })
+
   it('loads file-owned compression and defaults to fast Windows archive compression', async () => {
     expect(resolveWindowsPackageSettings({}).compressionLevel).toBe(3)
     await withDirectory(async (directory) => {

@@ -1,7 +1,9 @@
-/** Agentrans's unsigned Windows artifact configuration: its own release feed, and no credential files. */
+/** Agentrans installer identity for hosted tests and supervised signed packaging. */
 import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { desktopTargetPlatform, resolveDesktopBuildTarget } from './desktop-build-paths.mjs'
 import { createAgentransInstallerBuilderConfig } from './electron-builder-config.mjs'
-import { AGENTRANS_DESKTOP_APP_ID } from './desktop-release-environment.mjs'
+import { AGENTRANS_DESKTOP_APP_ID, resolveDesktopAppId } from './desktop-release-environment.mjs'
 import { DESKTOP_ARTIFACT_SLUG, DESKTOP_PRODUCT_NAME } from './desktop-product-identity.mjs'
 import { scrubWindowsSigningEnvironment } from './windows-sign.mjs'
 
@@ -54,9 +56,9 @@ export function agentransInstallerEnvironment(environment, target = 'win-x64') {
 }
 
 /**
- * Resolve product metadata and versioned output through the shared unsigned Windows builder.
- * @param {{ environment: NodeJS.ProcessEnv, output: string, repositoryRoot: string }} options - Prepared product environment and output roots.
- * @returns {import('./agentrans-installer-config.mjs').AgentransInstallerConfig} Configuration that cannot publish or register dsh protocols.
+ * Resolve product metadata and versioned output through the hosted unsigned builder.
+ * @param {{ environment: NodeJS.ProcessEnv, output: string, repositoryRoot: string, target?: keyof typeof TARGETS }} options - Prepared product environment and output roots.
+ * @returns {import('./agentrans-installer-config.mjs').AgentransInstallerConfig} Unsigned configuration with the product feed.
  */
 export function createAgentransInstallerConfig({ environment, output, repositoryRoot, target = 'win-x64' }) {
   if (target !== 'win-x64' && target !== 'mac-arm64' && target !== 'mac-x64') {
@@ -65,14 +67,43 @@ export function createAgentransInstallerConfig({ environment, output, repository
   const platform = TARGETS[target].platform
   const arch = TARGETS[target].arch
   const base = createAgentransInstallerBuilderConfig(agentransInstallerEnvironment(environment, target), platform, arch)
-  const { nsis: baseNsis, ...baseWithoutNsis } = base
   const artifactName = `${DESKTOP_ARTIFACT_SLUG}-\${version}-${target}-unsigned.\${ext}`
+  const config = withAgentransIdentity({ ...base, artifactName, directories: { output } }, target, repositoryRoot)
+  if (target !== 'win-x64') {
+    // Hosted unsigned builds do not use a Developer ID signing identity or notarization.
+    return { ...config, mac: { ...config.mac, identity: null, notarize: false } }
+  }
+  return config
+}
+
+/**
+ * Keep the supervisor's signed builder hooks and target-owned outputs under the product identity.
+ * @param {NodeJS.ProcessEnv} environment - Signed environment selected by the packaging supervisor.
+ * @param {NodeJS.Platform} hostPlatform - Platform used when the supervisor does not supply a target.
+ * @param {string} hostArch - Architecture used when the supervisor does not supply a target.
+ * @returns {import('./agentrans-installer-config.mjs').AgentransInstallerConfig} Signed Agentrans builder configuration.
+ */
+export function createAgentransSignedInstallerConfig(environment = process.env, hostPlatform = process.platform, hostArch = process.arch) {
+  if (resolveDesktopAppId(environment) !== AGENTRANS_DESKTOP_APP_ID) {
+    throw new Error(`Agentrans signed installer requires AGENTRANS_DESKTOP_APP_ID=${AGENTRANS_DESKTOP_APP_ID}`)
+  }
+  if (environment.AGENTRANS_DESKTOP_UNSIGNED !== '0') {
+    throw new Error('Agentrans signed installer requires AGENTRANS_DESKTOP_UNSIGNED=0')
+  }
+  const target = resolveDesktopBuildTarget(environment, hostPlatform, hostArch)
+  const { platform, arch } = desktopTargetPlatform(target)
+  const base = createAgentransInstallerBuilderConfig({
+    ...environment, AGENTRANS_DESKTOP_TARGET_PLATFORM: platform, AGENTRANS_DESKTOP_TARGET_ARCH: arch,
+  }, platform, arch)
+  return withAgentransIdentity(base, target, fileURLToPath(new URL('../../..', import.meta.url)))
+}
+
+function withAgentransIdentity(base, target, repositoryRoot) {
+  const { nsis: baseNsis, ...baseWithoutNsis } = base
   const shared = {
     ...baseWithoutNsis,
     appId: AGENTRANS_DESKTOP_APP_ID,
     productName: PRODUCT_NAME,
-    artifactName,
-    directories: { output },
     protocols: [],
     extraMetadata: { ...base.extraMetadata, agentransAppId: AGENTRANS_DESKTOP_APP_ID,
       agentransChannel: base.extraMetadata.dshDesktopUpdateChannel, name: 'agentrans' },
@@ -83,14 +114,10 @@ export function createAgentransInstallerConfig({ environment, output, repository
       { from: join(repositoryRoot, 'distribution/keys'), to: 'distribution/keys' },
     ],
   }
-  if (target !== 'win-x64') {
-    // The unsigned entry cannot notarize or carry a Developer ID signature, so the bundle is ad-hoc
-    // signed at most and Gatekeeper warns on first open until a certificate exists.
-    return { ...shared, mac: { ...base.mac, identity: null, notarize: false } }
-  }
+  if (target !== 'win-x64') return shared
   return {
     ...shared,
-    nsis: { ...baseNsis, uninstallDisplayName: PRODUCT_NAME, shortcutName: PRODUCT_NAME, artifactName,
+    nsis: { ...baseNsis, uninstallDisplayName: PRODUCT_NAME, shortcutName: PRODUCT_NAME, artifactName: base.artifactName,
       allowToChangeInstallationDirectory: false },
   }
 }

@@ -1,7 +1,9 @@
 /** Resolve the Desktop auto-update channel, target, and packaged artifact names. */
 
-import { valid } from 'semver'
-import { assertUpstreamDesktopReleaseIdentity, DESKTOP_UPDATE_REPOSITORY } from './desktop-release-environment.mjs'
+import { parse } from 'semver'
+import {
+  AGENTRANS_DESKTOP_APP_ID, assertUpstreamDesktopReleaseIdentity, DESKTOP_APP_ID_ENV, DESKTOP_UPDATE_REPOSITORY,
+} from './desktop-release-environment.mjs'
 
 /**
  * Resolve the channel embedded in the installer; omitted local settings retain nightly.
@@ -42,20 +44,27 @@ export function desktopBuildRecordFilename(target) {
 }
 
 /**
+ * Resolve the electron-builder metadata channel from the packaged version.
+ * @param {string} version - Desktop semantic version.
+ * @returns {string} Metadata channel identifier before the platform suffix.
+ */
+export function desktopUpdateMetadataChannel(version) {
+  const parsed = parse(version)
+  if (parsed === null) throw new Error(`desktop auto-update: invalid Desktop version ${JSON.stringify(version)}`)
+  return String(parsed.prerelease[0] ?? 'latest')
+}
+
+/**
  * Return the electron-builder channel metadata filename for an application version.
  * @param {string} version - Desktop semantic version.
  * @param {NodeJS.Platform} platform - Target platform.
- * @param {'nightly' | 'latest'} channel - Selected channel; omitted means nightly.
  * @returns {string} Channel metadata filename emitted for the target.
  */
-export function desktopUpdateMetadataFilename(version, platform, channel = 'nightly') {
-  if (valid(version) === null) {
-    throw new Error(`desktop auto-update: invalid Desktop version ${JSON.stringify(version)}`)
-  }
+export function desktopUpdateMetadataFilename(version, platform) {
+  const channel = desktopUpdateMetadataChannel(version)
   if (platform !== 'darwin' && platform !== 'win32') {
     throw new Error(`desktop auto-update: unsupported metadata platform ${platform}`)
   }
-  resolveDesktopUpdateChannel({ AGENTRANS_DESKTOP_UPDATE_CHANNEL: channel })
   return `${channel}${platform === 'darwin' ? '-mac' : ''}.yml`
 }
 
@@ -98,4 +107,15 @@ export function resolveDesktopAgentransUpdateConfig(env) {
     channel,
     releaseType: channel === 'latest' ? 'release' : 'prerelease',
   }
+}
+
+/**
+ * Select the update feed for the identity in a supervised packaging configuration.
+ * @param {NodeJS.ProcessEnv} env - File-owned packaging environment.
+ * @returns {ReturnType<typeof resolveDesktopGitHubUpdateConfig>} Feed coordinates for the selected builder.
+ */
+export function resolveDesktopPackagingUpdateConfig(env) {
+  return env[DESKTOP_APP_ID_ENV]?.trim() === AGENTRANS_DESKTOP_APP_ID
+    ? resolveDesktopAgentransUpdateConfig(env)
+    : resolveDesktopGitHubUpdateConfig(env)
 }

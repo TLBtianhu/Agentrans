@@ -5,6 +5,7 @@ import {
   desktopUpdateMetadataFilename,
   resolveDesktopAutoUpdateTarget,
   resolveDesktopGitHubUpdateConfig,
+  resolveDesktopPackagingUpdateConfig,
   resolveDesktopUpdateChannel,
 } from '../scripts/desktop-auto-update-environment.mjs'
 
@@ -26,8 +27,9 @@ describe('desktop auto-update environment', () => {
   it('derives the build record and channel metadata filenames', () => {
     expect(desktopBuildRecordFilename('win-x64')).toBe('win-x64-release.json')
     expect(() => desktopBuildRecordFilename('linux-x64' as never)).toThrow(/unsupported target/u)
-    expect(desktopUpdateMetadataFilename('1.2.3', 'win32')).toBe('nightly.yml')
-    expect(desktopUpdateMetadataFilename('1.2.3', 'darwin', 'latest')).toBe('latest-mac.yml')
+    expect(desktopUpdateMetadataFilename('1.2.3', 'win32')).toBe('latest.yml')
+    expect(desktopUpdateMetadataFilename('1.2.3', 'darwin')).toBe('latest-mac.yml')
+    expect(desktopUpdateMetadataFilename('1.2.3-test.20261118.1', 'darwin')).toBe('test-mac.yml')
     expect(() => desktopUpdateMetadataFilename('1.2.3', 'linux')).toThrow(/unsupported metadata platform/u)
     expect(() => desktopUpdateMetadataFilename('not-a-version', 'win32')).toThrow(/invalid Desktop version/u)
   })
@@ -38,5 +40,13 @@ describe('desktop auto-update environment', () => {
     })
     expect(resolveDesktopGitHubUpdateConfig({ AGENTRANS_DESKTOP_UPDATE_CHANNEL: 'latest' }))
       .toMatchObject({ channel: 'latest', releaseType: 'release' })
+  })
+
+  it('resolves the configured product feed for signing while enforcing the upstream identity guard', () => {
+    const environment = { AGENTRANS_DESKTOP_APP_ID: 'com.agentrans.app', AGENTRANS_DESKTOP_UPDATE_CHANNEL: 'latest' }
+    expect(resolveDesktopPackagingUpdateConfig(environment)).toEqual({
+      provider: 'github', owner: 'TLBtianhu', repo: 'Agentrans', channel: 'latest', releaseType: 'release',
+    })
+    expect(() => resolveDesktopGitHubUpdateConfig(environment)).toThrow(/upstream release/u)
   })
 })

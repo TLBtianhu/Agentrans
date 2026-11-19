@@ -88,7 +88,7 @@ pnpm --dir apps/desktop run check:package
 pnpm run package:desktop
 ```
 
-发布自动化使用固定目标命令，确保运行时准备、Agentrans 准备与 electron-builder 接收相同的平台和架构：
+生成带系统签名的 Agentrans 安装包时，在所选平台配置文件或机器 preset 中设置 `AGENTRANS_DESKTOP_APP_ID=com.agentrans.app`。沿用现有平台签名配置，在匹配的构建主机上运行固定目标命令。
 
 ```sh
 pnpm run package:desktop:mac:arm64
@@ -96,7 +96,9 @@ pnpm run package:desktop:mac:x64
 pnpm run package:desktop:win:x64
 ```
 
-macOS arm64 命令要求 Apple Silicon。macOS x64 命令可以在 Intel macOS 或带 Rosetta 的 Apple Silicon 上运行。Windows x64 命令要求 Windows x64。Linux 不是受支持的 Desktop 发布目标。
+在所选命令后添加 `--check`，可在构建前验证本地配置与工具链。macOS arm64 命令要求 Apple Silicon。macOS x64 命令可以在 Intel macOS 或带 Rosetta 的 Apple Silicon 上运行。Windows x64 命令要求 Windows x64。Linux 不是受支持的 Desktop 发布目标。
+
+自动发布任务目前接收托管工作流生成的未签名包。带系统签名的构建与已安装应用验收分别执行。[托管打包工作流](../../../.github/workflows/agentrans-hosted-package.yml) · [发布工作流](../../../.github/workflows/desktop-release.yml)
 
 macOS 正式发布和本地未签名 DMG 都通过 [electron-builder 配置](../scripts/electron-builder-config.mjs)中的 `dmg.format: 'ULMO'` 使用 LZMA 压缩。[构建时补丁](../../../patches/app-builder-lib@26.17.0.patch)为固定版本 builder 的校验规则和 TypeScript 声明添加此格式。
 

@@ -257,6 +257,34 @@ it('checks the assembled macOS runtime before notarizing and recording the relea
   expect(writeFileSync).toHaveBeenCalledOnce()
 })
 
+it.each(['win-x64', 'mac-arm64', 'mac-x64'] as const)('uses the Agentrans signed builder for %s without publishing', async (target) => {
+  const { run } = supervisor()
+  const mac = target !== 'win-x64'
+  const invocation = parseDesktopPackageInvocation([target], mac ? 'darwin' : 'win32', mac ? 'arm64' : 'x64')
+  if (mac) {
+    vi.mocked(packageMacOSArtifacts).mockImplementationOnce(async (_request, build) => {
+      await build({ format: 'dmg', appPath: 'fixture/Agentrans.app', output: 'fixture/dmg' })
+      await build({ format: 'zip', appPath: 'fixture/Agentrans.app', output: 'fixture/zip' })
+    })
+  }
+  await packageTarget(invocation, { ...environment, AGENTRANS_DESKTOP_APP_ID: 'com.agentrans.app' }, run)
+  const builders = run.run.mock.calls.filter(call => call[0].startsWith('exec electron-builder'))
+  expect(builders).toHaveLength(mac ? 3 : 1)
+  for (const [, , args, { env }] of builders) {
+    expect(args.slice(1, 4)).toEqual(['exec', 'electron-builder', '--config'])
+    expect(args[4]).toBe('electron-builder.agentrans-signed.config.mjs')
+    expect(args.slice(args.indexOf('--publish'), args.indexOf('--publish') + 2)).toEqual(['--publish', 'never'])
+    expect(env.AGENTRANS_DESKTOP_UNSIGNED).toBe('0')
+  }
+  if (!mac) expect(run.run.mock.calls.map(call => call[0])).toContain('run sign:primary-runtime --dsh')
+  expect(writeFileSync).toHaveBeenCalledOnce()
+  const record = vi.mocked(writeFileSync).mock.calls[0]?.[1]
+  if (typeof record !== 'string') throw new Error('Expected a JSON release record')
+  expect(JSON.parse(record)).toMatchObject({
+    target, provider: 'github', owner: 'TLBtianhu', repo: 'Agentrans', channel: 'nightly',
+  })
+})
+
 it.each([
   ['mac-arm64', false], ['mac-arm64', true], ['mac-x64', false], ['mac-x64', true],
 ] as const)('builds unsigned %s with directory=%s without Apple credentials, notarization, or a release record', async (target, directory) => {

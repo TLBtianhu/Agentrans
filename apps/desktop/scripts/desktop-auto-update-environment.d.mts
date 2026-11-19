@@ -41,13 +41,19 @@ export function resolveDesktopAutoUpdateTarget(platform: NodeJS.Platform, arch: 
 export function desktopBuildRecordFilename(target: DesktopAutoUpdateTarget): string
 
 /**
+ * Resolve the electron-builder metadata channel from the packaged version.
+ * @param version - Desktop semantic version.
+ * @returns Metadata channel identifier before the platform suffix.
+ */
+export function desktopUpdateMetadataChannel(version: string): string
+
+/**
  * Return the electron-builder channel metadata filename for an application version.
  * @param version - Desktop semantic version.
  * @param platform - Target platform.
- * @param channel - Selected channel; omitted means nightly.
  * @returns The channel metadata filename emitted for the target.
  */
-export function desktopUpdateMetadataFilename(version: string, platform: NodeJS.Platform, channel?: 'nightly' | 'latest'): string
+export function desktopUpdateMetadataFilename(version: string, platform: NodeJS.Platform): string
 
 /**
  * Resolve the GitHub Releases feed a packaged application embeds.
@@ -65,3 +71,10 @@ export function resolveDesktopGitHubUpdateConfig(env: NodeJS.ProcessEnv): Deskto
  * @returns Feed coordinates embedded at build time.
  */
 export function resolveDesktopAgentransUpdateConfig(env: NodeJS.ProcessEnv): DesktopGitHubUpdateConfig
+
+/**
+ * Select the update feed for the identity in a supervised packaging configuration.
+ * @param env - File-owned packaging environment.
+ * @returns Feed coordinates for the selected builder.
+ */
+export function resolveDesktopPackagingUpdateConfig(env: NodeJS.ProcessEnv): DesktopGitHubUpdateConfig

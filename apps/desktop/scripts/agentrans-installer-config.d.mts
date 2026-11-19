@@ -1,6 +1,6 @@
 import type { DesktopElectronBuilderConfig } from '../electron-builder.config.mjs'
 
-/** Explicit Agentrans identity and local-only output over the shared unsigned Windows configuration. */
+/** Explicit Agentrans identity and resources over the shared Desktop configuration. */
 export interface AgentransInstallerConfig extends Omit<DesktopElectronBuilderConfig,
   'protocols' | 'extraMetadata' | 'files' | 'extraResources' | 'nsis'> {
   readonly productName: string
@@ -40,3 +40,16 @@ export function createAgentransInstallerConfig(options: {
   /** Release target; the Windows NSIS installer when omitted. */
   readonly target?: 'win-x64' | 'mac-arm64' | 'mac-x64'
 }): AgentransInstallerConfig
+
+/**
+ * Build a signed Agentrans configuration with the packaging supervisor's signing settings.
+ * @param environment - Signed packaging environment with the explicit Agentrans identity.
+ * @param hostPlatform - Platform fallback for target selection.
+ * @param hostArch - Architecture fallback for target selection.
+ * @returns Product configuration with the shared signing hooks and target-owned outputs.
+ */
+export function createAgentransSignedInstallerConfig(
+  environment?: NodeJS.ProcessEnv,
+  hostPlatform?: NodeJS.Platform,
+  hostArch?: string,
+): AgentransInstallerConfig

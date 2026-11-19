@@ -6,7 +6,7 @@ import { parseArgs } from 'node:util'
 import { join, resolve } from 'node:path'
 import {
   desktopBuildRecordFilename,
-  resolveDesktopGitHubUpdateConfig,
+  resolveDesktopPackagingUpdateConfig,
 } from './desktop-auto-update-environment.mjs'
 import { desktopArtifactOutput, desktopTargetBuildPaths } from './desktop-build-paths.mjs'
 import { packageMacOSArtifacts, type DesktopPrepackagedArtifact } from './package-macos.ts'
@@ -19,7 +19,7 @@ import { macOSDownloadEnvironment, resolveMacOSPackageSettings } from './macos-p
 import { resolveWindowsPackageSettings } from './windows-package-settings.mjs'
 import { packagingErrorDetails, packagingStep } from './packaging-step.mjs'
 import { notarizeMacOS } from './notarize-macos.mjs'
-import { resolveMacOSNotarizationEnvironment } from './desktop-release-environment.mjs'
+import { AGENTRANS_DESKTOP_APP_ID, DESKTOP_APP_ID_ENV, resolveMacOSNotarizationEnvironment } from './desktop-release-environment.mjs'
 import { DESKTOP_BUILD_VERSION_ENV, resolveDesktopBuildVersion, validateDesktopBuildVersion } from './desktop-build-version.mjs'
 import { suggestDesktopBuildVersion } from './desktop-build-version-discovery.ts'
 import { desktopBuildCommitEnvironment, readDesktopBuildCommit, resolveDesktopBuildCommit } from './desktop-build-commit.mjs'
@@ -130,7 +130,7 @@ function writeReleaseRecord(
   }
   const buildVersion = resolveDesktopBuildVersion(environment, dshVersion)
   const packaged = resolveDesktopBuildCommit(environment)
-  const update = resolveDesktopGitHubUpdateConfig(environment)
+  const update = resolveDesktopPackagingUpdateConfig(environment)
   const recordPath = join(artifactsRoot, desktopBuildRecordFilename(target.name))
   const temporaryPath = `${recordPath}.tmp`
   writeFileSync(temporaryPath, `${JSON.stringify({
@@ -246,18 +246,20 @@ export function parseDesktopPackageInvocation(
  * @param target - Supported release target.
  * @param directory - Whether to stop at an unpacked application directory.
  * @param artifact - Optional single artifact built from an existing signed application.
+ * @param signedAgentrans - Whether the build uses Agentrans's own signed installer configuration.
  * @returns Arguments that keep publishing under the separate validated upload command.
  */
 export function desktopElectronBuilderArguments(
   target: DesktopPackageTarget,
   directory: boolean,
   artifact?: DesktopPrepackagedArtifact,
+  signedAgentrans = false,
 ): readonly string[] {
   return [
     'exec',
     'electron-builder',
     '--config',
-    'electron-builder.config.mjs',
+    signedAgentrans ? 'electron-builder.agentrans-signed.config.mjs' : 'electron-builder.config.mjs',
     target.builderPlatform,
     ...(artifact === undefined ? [] : [artifact.format]),
     target.builderArch,
@@ -405,6 +407,9 @@ export async function packageTarget(
 ): Promise<void> {
   const { target } = invocation
   const execute = (args: readonly string[], env: NodeJS.ProcessEnv, cwd: string = APP_ROOT) => runPnpm(args, env, cwd, run)
+  const signedAgentrans = !invocation.unsigned && environment[DESKTOP_APP_ID_ENV]?.trim() === AGENTRANS_DESKTOP_APP_ID
+  const builderArguments = (directory: boolean, artifact?: DesktopPrepackagedArtifact): readonly string[] =>
+    desktopElectronBuilderArguments(target, directory, artifact, signedAgentrans)
   const journal = target.platform === 'darwin' ? process.env.AGENTRANS_DESKTOP_PACKAGING_RUN_DIR : undefined
   const proxyEvent = (status: string) => { if (journal) recordPackagingEvent(journal, { type: 'notarization-proxy', status }) }
   const mac = target.platform === 'darwin' ? resolveMacOSPackageSettings(environment) : undefined
@@ -519,12 +524,12 @@ export async function packageTarget(
   if (signPrimaryRuntime) await execute(['run', 'sign:primary-runtime', '--dsh'], electronBuilderEnv)
   if (invocation.prepareOnly) return
   const buildMacArtifact = (artifact: DesktopPrepackagedArtifact) => execute(
-    desktopElectronBuilderArguments(target, false, artifact), artifact.format === 'zip'
+    builderArguments(false, artifact), artifact.format === 'zip'
       ? { ...electronBuilderEnv, ELECTRON_BUILDER_COMPRESSION_LEVEL: String(mac?.zipCompressionLevel) }
       : electronBuilderEnv)
   if (target.platform === 'darwin' && !invocation.unsigned && !invocation.skipNotarization && !invocation.directory) {
     await execute([
-      ...desktopElectronBuilderArguments(target, true),
+      ...builderArguments(true),
       '--config.mac.notarize=false',
     ], electronBuilderEnv)
     await execute(['exec', 'tsx', 'scripts/smoke-packaged-runtime.ts'], targetEnv)
@@ -536,20 +541,20 @@ export async function packageTarget(
       environment: electronBuilderEnv,
     }, buildMacArtifact), undefined, undefined, proxyEvent)
   } else if (target.platform === 'darwin' && !invocation.unsigned && !invocation.skipNotarization) {
-    await execute([...desktopElectronBuilderArguments(target, true), '--config.mac.notarize=false'], electronBuilderEnv)
+    await execute([...builderArguments(true), '--config.mac.notarize=false'], electronBuilderEnv)
     await execute(['exec', 'tsx', 'scripts/smoke-packaged-runtime.ts'], targetEnv)
     const appPath = join(buildPaths.artifacts, target.arch === 'arm64' ? 'mac-arm64' : 'mac', `${DESKTOP_PRODUCT_NAME}.app`)
     await withMacOSNotarizationProxy(mac?.notarizationProxy,
       () => notarizeMacOS({ appPath, ...resolveMacOSNotarizationEnvironment(environment) }), undefined, undefined, proxyEvent)
   } else {
     if (target.platform === 'darwin' && invocation.skipNotarization && !invocation.directory) {
-      await execute(desktopElectronBuilderArguments(target, true), electronBuilderEnv)
+      await execute(builderArguments(true), electronBuilderEnv)
       const appPath = join(artifactsRoot, target.arch === 'arm64' ? 'mac-arm64' : 'mac', `${DESKTOP_PRODUCT_NAME}.app`)
       for (const format of ['dmg', 'zip'] as const) {
         await buildMacArtifact({ format, appPath, output: artifactsRoot })
       }
     } else {
-      await signedStage('artifacts', () => execute(desktopElectronBuilderArguments(target, invocation.directory), electronBuilderEnv))
+      await signedStage('artifacts', () => execute(builderArguments(invocation.directory), electronBuilderEnv))
     }
     await execute(['exec', 'tsx', 'scripts/smoke-packaged-runtime.ts',
       ...(invocation.unsigned ? ['--unsigned'] : []), ...(invocation.skipNotarization ? ['--skip-notarization'] : [])], targetEnv)

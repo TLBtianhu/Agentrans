@@ -1,9 +1,11 @@
 /** Exercise notarization overlap and artifact isolation without Apple credentials or network. */
 
+import { createHash } from 'node:crypto'
 import { cp, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
+import { dump } from 'js-yaml'
 import { describe, expect, it, vi } from 'vitest'
 import {
   packageMacOSArtifacts,
@@ -12,8 +14,10 @@ import {
 } from '../scripts/package-macos.ts'
 import { desktopElectronBuilderArguments, resolveDesktopPackageTarget } from '../scripts/package-target.ts'
 import { writeMacOSAppUpdateConfig } from '../scripts/macos-app-update-config.mjs'
+import { collectReleaseAssets } from '../scripts/release-artifacts.ts'
 
 const environment = {
+  AGENTRANS_DESKTOP_APP_ID: 'com.agentrans.app',
   AGENTRANS_DESKTOP_MACOS_SIGNING_IDENTITY: 'Example Company (TEAMID1234)',
   AGENTRANS_DESKTOP_MACOS_TEAM_ID: 'TEAMID1234',
   APPLE_KEYCHAIN_PROFILE: 'fixture-profile',
@@ -25,7 +29,16 @@ function barrier() {
   return { promise, release }
 }
 
-async function fixture(arch: 'arm64' | 'x64' = 'arm64') {
+interface MacOSFixtureOptions {
+  readonly arch: 'arm64' | 'x64'
+  readonly channel: 'latest' | 'nightly'
+  readonly version: string
+  readonly metadata: string
+}
+
+const prereleaseFixture: MacOSFixtureOptions = { arch: 'arm64', channel: 'nightly', version: '1.2.3-alpha.1', metadata: 'alpha-mac.yml' }
+
+async function fixture({ arch, channel, version, metadata }: MacOSFixtureOptions = prereleaseFixture) {
   const root = await mkdtemp(join(tmpdir(), 'desktop-parallel-notarization-'))
   const artifactsRoot = join(root, 'artifacts')
   const appPath = join(artifactsRoot, arch === 'arm64' ? 'mac-arm64' : 'mac', 'Agentrans.app')
@@ -35,11 +48,10 @@ async function fixture(arch: 'arm64' | 'x64' = 'arm64') {
     provider: 'github',
     owner: 'TLBtianhu',
     repo: 'Agentrans',
-    channel: 'nightly',
-  }, 'deepseek-harness-updater')
-  const version = '1.2.3-alpha.1'
-  const base = `deepseek-harness-${version}-mac-${arch}`
-  const request = { arch, artifactsRoot, version, environment }
+    channel,
+  }, 'agentrans-updater')
+  const base = `agentrans-${version}-mac-${arch}`
+  const request = { arch, artifactsRoot, version, environment: { ...environment, AGENTRANS_DESKTOP_UPDATE_CHANNEL: channel } }
   const apple: MacOSArtifactOperations = {
     copyApp: async (source, destination) => {
       await cp(source, destination, { recursive: true, verbatimSymlinks: true })
@@ -58,16 +70,26 @@ async function fixture(arch: 'arm64' | 'x64' = 'arm64') {
     })
     await writeFile(join(artifact.output, `${base}.${artifact.format}`), contents)
     if (artifact.format === 'zip') {
+      const path = `${base}.zip`
+      const sha512 = createHash('sha512').update(contents).digest('base64')
       await writeFile(join(artifact.output, `${base}.zip.blockmap`), 'blockmap')
-      await writeFile(join(artifact.output, 'nightly-mac.yml'), 'update metadata')
+      await writeFile(join(artifact.output, metadata), dump({
+        version, path, sha512, files: [{ url: path, sha512, size: Buffer.byteLength(contents) }],
+      }))
     }
   }
-  return { root, appPath, request, apple, build, base }
+  return { root, appPath, request, apple, build, base, metadata }
 }
 
 describe('parallel macOS artifacts', () => {
-  it.each(['arm64', 'x64'] as const)('overlaps notarization on isolated %s copies and promotes only completed payloads', async (arch) => {
-    const f = await fixture(arch)
+  const cases: readonly MacOSFixtureOptions[] = [
+    prereleaseFixture,
+    { arch: 'arm64', channel: 'nightly', version: '1.2.3', metadata: 'latest-mac.yml' },
+    { arch: 'x64', channel: 'latest', version: '1.2.3', metadata: 'latest-mac.yml' },
+  ]
+
+  it.each(cases)('overlaps notarization and promotes qualified $arch payloads for $channel $version', async (options) => {
+    const f = await fixture(options)
     const appStarted = barrier()
     const appAccepted = barrier()
     const dmgCompleted = barrier()
@@ -93,12 +115,12 @@ describe('parallel macOS artifacts', () => {
       },
     })
     try {
-      await appStarted.promise
+      await Promise.race([appStarted.promise, operation])
       await vi.waitFor(() => { expect([...starts]).toEqual(expect.arrayContaining(['app', 'dmg'])) })
       expect(new Set(copies).size).toBe(2)
       expect(copies.every(path => path !== f.appPath)).toBe(true)
       appAccepted.release()
-      await zipCompleted.promise
+      await Promise.race([zipCompleted.promise, operation])
       expect(existsSync(join(f.appPath, 'ticket'))).toBe(false)
       expect(existsSync(join(f.request.artifactsRoot, `${f.base}.zip`))).toBe(false)
       dmgCompleted.release()
@@ -110,6 +132,10 @@ describe('parallel macOS artifacts', () => {
       expect(await readFile(join(f.appPath, 'ticket'), 'utf8')).toBe('accepted')
       expect(await readFile(join(f.appPath, 'Contents', 'Resources', 'app-update.yml'), 'utf8'))
         .toContain('repo: Agentrans')
+      const assets = await collectReleaseAssets(f.request.artifactsRoot, options.version, options.channel, `mac-${options.arch}`)
+      expect(assets.map(asset => asset.name).sort()).toEqual([
+        `${f.base}.dmg`, `${f.base}.zip`, `${f.base}.zip.blockmap`, f.metadata,
+      ].sort())
       expect((await readdir(f.root)).sort()).toEqual(['artifacts'])
       expect(f.apple.verifySignature).toHaveBeenCalledTimes(4)
       expect(f.apple.verifyNotarization).toHaveBeenCalledTimes(1)
@@ -184,7 +210,7 @@ describe('parallel macOS artifacts', () => {
       await expect(packageMacOSArtifacts(f.request, async (artifact) => {
         await f.build(artifact)
         if (failure === 'metadata' && artifact.format === 'zip') {
-          await writeFile(join(artifact.output, 'nightly-mac.yml'), '')
+          await writeFile(join(artifact.output, f.metadata), '')
         }
         if (failure === 'post-update-config' && artifact.format === 'zip') {
           await writeFile(join(artifact.appPath, 'Contents', 'Resources', 'app-update.yml'), '{}')

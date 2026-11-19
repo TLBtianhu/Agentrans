@@ -88,7 +88,7 @@ pnpm --dir apps/desktop run check:package
 pnpm run package:desktop
 ```
 
-Release automation uses fixed target commands so runtime preparation, Agentrans preparation, and electron-builder receive the same platform and architecture:
+For system-signed Agentrans installers, set `AGENTRANS_DESKTOP_APP_ID=com.agentrans.app` in the selected platform configuration file or machine preset. Use the existing platform signing settings and run the fixed-target command on the matching build host.
 
 ```sh
 pnpm run package:desktop:mac:arm64
@@ -96,7 +96,9 @@ pnpm run package:desktop:mac:x64
 pnpm run package:desktop:win:x64
 ```
 
-The macOS arm64 command requires Apple Silicon. The macOS x64 command runs on Intel macOS or Apple Silicon with Rosetta. The Windows x64 command requires Windows x64. Linux is not a supported Desktop release target.
+Append `--check` to the selected command to validate the local configuration and toolchain before building. The macOS arm64 command requires Apple Silicon. The macOS x64 command runs on Intel macOS or Apple Silicon with Rosetta. The Windows x64 command requires Windows x64. Linux is not a supported Desktop release target.
+
+The automated release job currently stages the unsigned hosted packages. System-signed builds and installed-application verification are separate operations. [Hosted packaging workflow](../../../.github/workflows/agentrans-hosted-package.yml) · [Release workflow](../../../.github/workflows/desktop-release.yml)
 
 Both release and local unsigned macOS DMGs use LZMA compression (`dmg.format: 'ULMO'`) in [the electron-builder configuration](../scripts/electron-builder-config.mjs). A [build-time patch](../../../patches/app-builder-lib@26.17.0.patch) adds this format to the pinned builder's validation and TypeScript declarations.
 

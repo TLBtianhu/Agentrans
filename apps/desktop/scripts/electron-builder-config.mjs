@@ -1,7 +1,6 @@
 import { readInstallerLocales, renderInstallerStrings } from './installer-locales.mjs'
 import { officePackageDirectories } from '../../../scripts/libreoffice-packages.mjs'
 import { X509Certificate } from 'node:crypto'
-import semver from 'semver'
 import { readFileSync } from 'node:fs'
 import { readFile, writeFile } from 'node:fs/promises'
 import { join, relative, sep } from 'node:path'
@@ -22,7 +21,9 @@ import {
   resolveWindowsUpdatePublisher,
   scrubWindowsSigningEnvironment,
 } from './windows-sign.mjs'
-import { resolveDesktopAgentransUpdateConfig, resolveDesktopGitHubUpdateConfig } from './desktop-auto-update-environment.mjs'
+import {
+  desktopUpdateMetadataChannel, resolveDesktopAgentransUpdateConfig, resolveDesktopGitHubUpdateConfig,
+} from './desktop-auto-update-environment.mjs'
 import { resolveDesktopBuildCommit } from './desktop-build-commit.mjs'
 import { resolveDesktopBuildVersion } from './desktop-build-version.mjs'
 import { desktopArtifactOutput, desktopTargetBuildPaths, resolveDesktopBuildTarget } from './desktop-build-paths.mjs'
@@ -57,12 +58,12 @@ export function createElectronBuilderConfig(
 }
 
 /**
- * Create the unsigned Windows artifact configuration Agentrans ships as its own installer.
+ * Create the platform builder configuration for Agentrans's own installers.
  * The product identifier is this repository's, so the ordinary release-identity guard does not apply.
- * @param {NodeJS.ProcessEnv} env - Packaging environment with AGENTRANS_DESKTOP_UNSIGNED=1.
+ * @param {NodeJS.ProcessEnv} env - Validated signed or unsigned packaging environment.
  * @param {NodeJS.Platform} hostPlatform - Build-host platform used when no target override exists.
  * @param {string} hostArch - Build-host architecture used when no target override exists.
- * @returns {ReturnType<typeof createElectronBuilderConfig>} Unsigned Windows configuration without an update feed.
+ * @returns {ReturnType<typeof createElectronBuilderConfig>} Platform configuration for Agentrans's update feed.
  */
 export function createAgentransInstallerBuilderConfig(env = process.env, hostPlatform = process.platform, hostArch = process.arch) {
   return electronBuilderConfig(env, hostPlatform, hostArch, undefined, undefined, true)
@@ -296,7 +297,7 @@ function electronBuilderConfig(env, hostPlatform, hostArch, preparedRuntime, pre
           owner: githubUpdate.owner,
           repo: githubUpdate.repo,
           releaseType: githubUpdate.releaseType,
-          channel: semver.prerelease(buildVersion)?.[0] ?? 'latest',
+          channel: desktopUpdateMetadataChannel(buildVersion),
         }],
   }
 }

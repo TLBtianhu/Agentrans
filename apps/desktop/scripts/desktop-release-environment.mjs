@@ -18,7 +18,7 @@ export const DESKTOP_UPDATE_REPOSITORY = Object.freeze({ owner: 'TLBtianhu', rep
  */
 export function assertUpstreamDesktopReleaseIdentity(appId) {
   if (appId?.trim() === AGENTRANS_DESKTOP_APP_ID) {
-    throw new Error('desktop release: Agentrans requires its unsigned Windows installer entry; upstream release destinations are not configured for it')
+    throw new Error('desktop release: Agentrans requires its own packaging entry; upstream release destinations are not configured for it')
   }
 }
 

@@ -6,6 +6,7 @@ import { extname, join } from 'node:path'
 import { load } from 'js-yaml'
 import { parse } from 'semver'
 import { z } from 'zod'
+import { desktopUpdateMetadataChannel } from './desktop-auto-update-environment.mjs'
 import { DESKTOP_ARTIFACT_SLUG } from './desktop-product-identity.mjs'
 
 const layouts = [
@@ -165,7 +166,7 @@ export async function collectReleaseAssets(
 
   const feedNames = new Map<string, Map<string, FileHashes>>()
   // The updater's file name follows SemVer, including a stable version on nightly.
-  const feedPrefix = parsed.prerelease[0] ?? 'latest'
+  const feedPrefix = desktopUpdateMetadataChannel(version)
   for (const layout of layouts) {
     const stem = stems.get(layout.target)
     if (stem === undefined) continue
