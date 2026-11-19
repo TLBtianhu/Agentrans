@@ -32,6 +32,7 @@ const releaseAsset = 'agentrans-' + version + '-mac-' + architecture + '-unsigne
 const machArchitecture = architecture === 'arm64' ? 'arm64' : 'x86_64'
 const layoutError = 'Packaged user startup requires a platform-specific product layout'
 const exec = promisify(execFile)
+const diagnostic = process.env.AGENTRANS_MAC_LAUNCH_DIAGNOSTICS === '1'
 const report = {
   evidenceVersion: 1, version, architecture, runnerArchitecture: process.arch,
   hostRepresentation: process.env.RUNNER_ARCH, results: {}, passed: false,
@@ -60,6 +61,47 @@ async function command(executable, args, timeout = 120_000) {
     env: { PATH: '/usr/bin:/bin:/usr/sbin:/sbin', LANG: 'C', HOME: temporaryRoot, TMPDIR: temporaryRoot },
   })
   return result.stdout.trim()
+}
+
+async function probe(executable, args, timeout) {
+  try {
+    return { ok: true, output: sanitized(await command(executable, args, timeout)) }
+  } catch (error) {
+    return { ok: false, ...diagnostics(error) }
+  }
+}
+
+async function inspectStartup(owned, stage, mode, base, journal, stateRoot) {
+  const state = await lstat(join(stateRoot, '.agentrans-instance.json')).then(() => true, () => false)
+  const files = await readdir(journal).catch(() => [])
+  const eventTypes = []
+  for (const file of files.filter(name => name.endsWith('.jsonl'))) {
+    for (const line of (await readFile(join(journal, file), 'utf8')).split('\n').filter(Boolean)) {
+      try {
+        const event = JSON.parse(line)
+        if (event.pid === owned.pid && event.version === version) eventTypes.push(event.event)
+      } catch { /* A concurrent journal write may leave an incomplete final line. */ }
+    }
+  }
+  if (!Number.isSafeInteger(owned.pid)) return { state, eventTypes }
+  const pid = String(owned.pid)
+  const samplePath = join(stage, mode + '-process-sample.txt')
+  const [processState, port, loopback, systemLog] = await Promise.all([
+    probe('/bin/ps', ['-p', pid, '-o', 'pid=,state=,comm='], 4_000),
+    probe('/usr/sbin/lsof', ['-nP', '-a', '-p', pid, '-iTCP'], 4_000),
+    probe('/usr/bin/curl', ['--noproxy', '*', '--max-time', '2', '-sS', base + '/json/version'], 4_000),
+    probe('/usr/bin/log', ['show', '--last', '2m', '--style', 'compact', '--predicate',
+      'process == "Agentrans" OR ((process == "amfid" OR process == "syspolicyd") AND eventMessage CONTAINS "Agentrans")'], 12_000),
+  ])
+  const sampleCommand = owned.status === undefined
+    ? await probe('/usr/bin/sample', [pid, '2', '1', '-file', samplePath], 12_000)
+    : { ok: false }
+  const sample = await readFile(samplePath, 'utf8').then(body => {
+    const frames = body.split('\n')
+    const start = frames.findIndex(line => line.includes('Call graph:'))
+    return sanitized(frames.slice(Math.max(0, start), Math.max(0, start) + 32).join('\n'))
+  }, () => undefined)
+  return { state, eventTypes, processState, port, loopback, systemLog, sampleCommand, sample }
 }
 
 async function sha256(path) {
@@ -95,7 +137,7 @@ async function verifyBundle(appPath, result) {
   result.bundle = { bundleId, shortVersion, buildVersion, machArchitecture, asarSha256, executableSha256,
     updater: { provider: 'github', owner: 'TLBtianhu', repository: 'Agentrans', channel: 'nightly' } }
   try {
-    await command('/usr/bin/codesign', ['--verify', '--strict', executable])
+    await command('/usr/bin/codesign', ['--verify', '--strict', diagnostic ? appPath : executable])
     result.bundle.executableSignatureValid = true
   } catch (error) {
     result.bundle.executableSignatureValid = false
@@ -172,7 +214,9 @@ async function reservePort() {
 }
 
 async function json(url) {
-  const response = await fetch(url, { signal: AbortSignal.timeout(2_000) })
+  const response = await fetch(url, { signal: AbortSignal.timeout(2_000) }).catch(error => {
+    throw new Error(error.message + (error.cause?.code ? ' ' + error.cause.code : ''), { cause: error })
+  })
   assert.ok(response.ok, 'CDP endpoint returned HTTP ' + response.status)
   return response.json()
 }
@@ -270,7 +314,9 @@ async function launch(bundle, stage, mode) {
     })
   }
   const rendererState = join(stateRoot, 'data', 'settings', 'electron')
+  if (diagnostic) env.ELECTRON_ENABLE_LOGGING = '1'
   const child = spawn(bundle.executable, [
+    ...(diagnostic ? ['--enable-logging=stderr', '--log-level=0'] : []),
     '--remote-debugging-port=' + port, '--remote-debugging-address=127.0.0.1',
     '--disable-backgrounding-occluded-windows', '--no-proxy-server',
     '--host-resolver-rules=MAP github.com 127.0.0.1, MAP api.github.com 127.0.0.1',
@@ -293,7 +339,7 @@ async function launch(bundle, stage, mode) {
         if (target.type !== 'page' || !target.url.startsWith('file:') || !target.url.endsWith('/renderer/welcome.html')) continue
         if (await evaluate(target, port, "Boolean(document.querySelector('#key-input') && document.querySelector('#skip-key'))")) return target
       }
-    }, active)
+    }, active, diagnostic ? 30_000 : 75_000)
     result.nativeWelcome = true
     await evaluate(welcome, port, "setTimeout(() => document.querySelector('#skip-key').click(), 0); true")
     active = 'Desktop workspace after keyless welcome'
@@ -338,6 +384,7 @@ async function launch(bundle, stage, mode) {
   } catch (error) {
     result.stage = active
     result.failure = diagnostics(error)
+    if (diagnostic) result.nativeDiagnostics = await inspectStartup(owned, stage, mode, base, journal, stateRoot)
   } finally {
     try { await stopProcess(owned, base, port) }
     catch (error) {
@@ -358,7 +405,7 @@ async function launch(bundle, stage, mode) {
 
 report.macOSVersion = await command('/usr/bin/sw_vers', ['-productVersion'])
 await save()
-for (const format of ['dmg', 'zip']) {
+for (const format of diagnostic ? ['zip'] : ['dmg', 'zip']) {
   const result = { format, artifactIntegrityPassed: false }
   report.results[format] = result
   const stage = join(resultRoot, format)
@@ -374,6 +421,21 @@ for (const format of ['dmg', 'zip']) {
     step = 'bundle version, architecture, and payload'
     const bundle = await verifyBundle(app, result)
     result.artifactIntegrityPassed = true
+    if (diagnostic) {
+      try {
+        const child = await exec(bundle.executable, ['-p',
+          'JSON.stringify({arch:process.arch,electron:process.versions.electron})'], {
+          encoding: 'utf8', timeout: 15_000, maxBuffer: 1024 * 1024,
+          env: { PATH: '/usr/bin:/bin:/usr/sbin:/sbin', ELECTRON_RUN_AS_NODE: '1' },
+        })
+        result.packagedNodeControl = { passed: true, output: sanitized(child.stdout) }
+      } catch (error) {
+        result.packagedNodeControl = { passed: false, ...diagnostics(error) }
+      }
+      report.consoleUser = await probe('/usr/bin/stat', ['-f', '%Su', '/dev/console'], 4_000)
+      const desktopDomain = await probe('/bin/launchctl', ['print', 'gui/' + process.getuid()], 4_000)
+      report.hasGuiDomain = desktopDomain.ok
+    }
     step = 'ordinary first launch'
     result.normal = await launch(bundle, stage, 'normal')
     await save()
@@ -392,13 +454,21 @@ for (const format of ['dmg', 'zip']) {
   }))
 }
 
-const { dmg, zip } = report.results
-report.matchingBundlePayloads = Boolean(dmg.bundle && zip.bundle &&
-  dmg.bundle.asarSha256 === zip.bundle.asarSha256 &&
-  dmg.bundle.executableSha256 === zip.bundle.executableSha256)
-report.passed = report.matchingBundlePayloads && [dmg, zip].every(result => result.failure === undefined && result.normal?.passed)
-report.allPassedExceptKnownLayoutBlocker = report.matchingBundlePayloads && [dmg, zip].every(result =>
-  result.failure === undefined && (result.normal?.passed ||
-    (result.normal?.knownLayoutBlocker && result.verification?.passed)))
-await save()
-if (!report.passed) process.exitCode = report.allPassedExceptKnownLayoutBlocker ? 2 : 1
+if (diagnostic) {
+  const { zip } = report.results
+  report.diagnosticOnly = true
+  report.passed = Boolean(zip.artifactIntegrityPassed && zip.normal?.passed)
+  await save()
+  if (!report.passed) process.exitCode = 2
+} else {
+  const { dmg, zip } = report.results
+  report.matchingBundlePayloads = Boolean(dmg.bundle && zip.bundle &&
+    dmg.bundle.asarSha256 === zip.bundle.asarSha256 &&
+    dmg.bundle.executableSha256 === zip.bundle.executableSha256)
+  report.passed = report.matchingBundlePayloads && [dmg, zip].every(result => result.failure === undefined && result.normal?.passed)
+  report.allPassedExceptKnownLayoutBlocker = report.matchingBundlePayloads && [dmg, zip].every(result =>
+    result.failure === undefined && (result.normal?.passed ||
+      (result.normal?.knownLayoutBlocker && result.verification?.passed)))
+  await save()
+  if (!report.passed) process.exitCode = report.allPassedExceptKnownLayoutBlocker ? 2 : 1
+}

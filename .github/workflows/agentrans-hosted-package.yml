@@ -1,5 +1,5 @@
 name: Package Agentrans · hosted
-run-name: Verify macOS candidate .3 artifacts
+run-name: Diagnose macOS candidate .3 startup
 
 on:
   workflow_dispatch:
@@ -45,11 +45,9 @@ jobs:
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
-      - uses: pnpm/action-setup@v5.0.0
       - uses: actions/setup-node@v7.0.0
         with:
           node-version: '24'
-          cache: pnpm
       - name: Download the exact candidate package artifact
         id: download
         shell: bash
@@ -83,20 +81,13 @@ jobs:
             | jq -e '[.artifacts[] | select(.name == "agentrans-mac" and .expired == false)]
                 | select(length == 1) | .[0] | {id, name, size_in_bytes, digest}' > "$source_dir/artifact.json"
           gh run download "$mac_build" --repo "$GITHUB_REPOSITORY" --name agentrans-mac --dir "$input_dir"
-      - name: Install locked metadata-validation dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Verify update metadata and blockmaps
-        shell: bash
-        run: |
-          mkdir "$RUNNER_TEMP/agentrans-mac-metadata"
-          node scripts/verify-metadata.mjs "$RUNNER_TEMP/agentrans-mac-inputs" 0.1.0-test.20261118.3 \
-            "$RUNNER_TEMP/agentrans-mac-metadata/metadata.json"
-      - name: Mount, unzip and launch the candidate
+      - name: Diagnose startup from the original candidate ZIP
         if: ${{ !cancelled() && steps.download.outcome == 'success' }}
         timeout-minutes: 16
         shell: bash
         env:
           QA_ARCH: ${{ matrix.arch }}
+          AGENTRANS_MAC_LAUNCH_DIAGNOSTICS: '1'
         run: |
           node scripts/verify-macos.mjs "$RUNNER_TEMP/agentrans-mac-inputs" \
             "$RUNNER_TEMP/agentrans-mac-launch-report" "$QA_ARCH"
@@ -107,6 +98,5 @@ jobs:
           name: macos-candidate-${{ matrix.arch }}-qa
           path: |
             ${{ runner.temp }}/agentrans-mac-source/*.json
-            ${{ runner.temp }}/agentrans-mac-metadata/metadata.json
             ${{ runner.temp }}/agentrans-mac-launch-report/result.json
           if-no-files-found: warn
