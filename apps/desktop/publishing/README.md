@@ -13,6 +13,7 @@ Publish completed Desktop installers and their update metadata as a GitHub Relea
 ## Table of Contents
 
 - [Prerequisites](#prerequisites)
+- [Review signed installers](#review-signed-installers)
 - [Prepare a release draft](#publish-a-release)
 - [Update channel](#update-channel)
 - [Repeat publication](#repeat-publication)
@@ -21,6 +22,15 @@ Publish completed Desktop installers and their update metadata as a GitHub Relea
 ## Prerequisites
 
 Publication needs a repository token with `contents: write` in `GH_TOKEN` (or `GITHUB_TOKEN`), complete packaged files, and `AGENTRANS_UPDATE_SIGNING_KEY`. The signing key must match the Ed25519 verification key pinned by Agentrans. Installed applications download updates anonymously, so the release repository must be public.
+
+<a id="review-signed-installers"></a>
+## Review signed installers
+
+Use [Verify signed Desktop artifacts](../../../.github/workflows/desktop-signed-intake.yml) with three successful `production` packaging run IDs for Windows x64, macOS arm64 and macOS x64. Enter the shared source commit, the trusted packaging workflow commit, the version and the update channel. Use runs that include `desktop-signed-build.json`, which records the actual source checkout and the files it produced.
+
+Configure the repository variables `DESKTOP_WINDOWS_CERT_THUMBPRINT` with the Windows signing certificate's 40-digit hexadecimal thumbprint, `DESKTOP_MACOS_TEAM_ID` with the Apple Team ID, and `DESKTOP_MACOS_SIGNING_IDENTITY` with the full Developer ID Application signing identity. These are public values used to check the installers on native runners. The [packaging guide](../packaging/README.md) covers machine configuration and signing credentials for producing the inputs.
+
+The workflow has read-only repository and Actions permissions. It checks the run, archive, individual file digests and native signatures before merging the two macOS feeds. The `signed-desktop-intake-report` Actions artifact carries the report and the merged feed. This workflow requires three real production builds for an end-to-end signing and notarization check.
 
 <a id="publish-a-release"></a>
 ## Prepare a release draft

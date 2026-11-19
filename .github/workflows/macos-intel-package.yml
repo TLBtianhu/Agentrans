@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       source_ref:
-        description: '打包源码：test 支持仓库内分支或 dsh-v* tag；production 仅支持 master 或 dsh-v* tag；源码须包含 CI 适配脚本'
+        description: '打包源码：test 支持仓库内分支或 dsh-v* tag；production 仅支持 main、master 或 dsh-v* tag；源码须包含 CI 适配脚本'
         type: string
-        default: master
+        default: main
         required: true
       preset:
         description: '打包环境：选择机器上的 test 或 production 配置；同时决定后续发布环境'
@@ -74,6 +74,19 @@ jobs:
       AGENTRANS_PACKAGING_PRESET: ${{ inputs.preset }}
       PACKAGE_TEST_RELEASE_ID: ${{ inputs.test_release_id }}
     steps:
+      - name: Checkout workflow helpers
+        if: inputs.preset == 'production' && !inputs.skip_notarization
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ github.workflow_sha }}
+          sparse-checkout: apps/desktop/scripts
+      - name: Stage workflow helpers
+        if: inputs.preset == 'production' && !inputs.skip_notarization
+        run: |
+          helpers=$(mktemp -d "$RUNNER_TEMP/packaging-helpers-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-XXXXXX")
+          cp apps/desktop/scripts/retain-signed-desktop-ci.mjs "$helpers/"
+          echo "PACKAGE_CI_HELPERS=$helpers" >> "$GITHUB_ENV"
       - uses: actions/checkout@v7.0.1
         id: checkout
         with:
@@ -86,7 +99,7 @@ jobs:
           const cp=require('node:child_process'); const preset=process.env.AGENTRANS_PACKAGING_PRESET;
           if(!['test','production'].includes(preset)) throw Error('Unknown packaging preset');
           const tag=/^dsh-v[0-9][0-9A-Za-z.-]*$/.test(ref);
-          if(preset==='production' && ref!=='master' && !tag) throw Error('Production source must be master or dsh-v*');
+          if(preset==='production' && !['main','master'].includes(ref) && !tag) throw Error('Production source must be main, master or dsh-v*');
           if(tag) {
           const v=JSON.parse(fs.readFileSync('package.json','utf8')).version;
           if(ref!=='dsh-v'+v) throw Error('Source tag must match product version');
@@ -136,8 +149,15 @@ jobs:
           pnpm run package:desktop:mac:x64 --build-version "$PACKAGE_VERSION" "${args[@]}"
       # Publication reads these files from the run's artifacts, not from the machine that built them.
       - name: Collect packaged artifacts outside the checkout
+        if: inputs.preset != 'production' || inputs.skip_notarization
         id: retained
         run: node --import tsx apps/desktop/scripts/retain-desktop-ci.ts
+      - name: Collect production installers and source record
+        if: inputs.preset == 'production' && !inputs.skip_notarization
+        id: retained_production
+        env:
+          PACKAGE_VERSION: ${{ steps.settings.outputs.version }}
+        run: node "$PACKAGE_CI_HELPERS/retain-signed-desktop-ci.mjs" mac-x64
       - name: Retain packaging diagnostics
         if: always() && steps.checkout.outcome == 'success'
         uses: actions/upload-artifact@v7.0.1
@@ -153,7 +173,7 @@ jobs:
         with:
           name: macos-x64-${{ steps.settings.outputs.mode }}-${{ steps.settings.outputs.version }}-${{ github.run_id }}-${{ github.run_attempt }}
           include-hidden-files: true
-          path: ${{ steps.retained.outputs.directory }}/*
+          path: ${{ steps.retained_production.outputs.directory || steps.retained.outputs.directory }}/*
           compression-level: 0
           if-no-files-found: error
           retention-days: 14

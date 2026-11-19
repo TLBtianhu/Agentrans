@@ -1,0 +1,142 @@
+name: Verify signed Desktop artifacts
+run-name: Verify signed Desktop · ${{ inputs.channel }} · ${{ inputs.version }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      windows_run_id:
+        description: 'Windows x64 签名打包运行 ID'
+        required: true
+        type: string
+      macos_arm64_run_id:
+        description: 'macOS arm64 签名及公证打包运行 ID'
+        required: true
+        type: string
+      macos_x64_run_id:
+        description: 'macOS x64 签名及公证打包运行 ID'
+        required: true
+        type: string
+      source_sha:
+        description: '三个安装包的源码提交 SHA（40 位）'
+        required: true
+        type: string
+      packaging_workflow_sha:
+        description: '三个打包工作流运行时的可信工作流提交 SHA（40 位）'
+        required: true
+        type: string
+      version:
+        description: '三个安装包共用的版本号'
+        required: true
+        type: string
+      channel:
+        description: '三个安装包共用的更新通道'
+        required: true
+        type: choice
+        options: [nightly, latest]
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  check-target:
+    name: Verify ${{ matrix.target }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: win-x64
+            runner: windows-latest
+            run-id: ${{ inputs.windows_run_id }}
+          - target: mac-arm64
+            runner: macos-latest
+            run-id: ${{ inputs.macos_arm64_run_id }}
+          - target: mac-x64
+            runner: macos-26-intel
+            run-id: ${{ inputs.macos_x64_run_id }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v5.0.0
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: '24'
+      - name: Install locked release script dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Verify the signed package and fingerprint its assets
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DESKTOP_SIGNED_WORKFLOW_SHA: ${{ inputs.packaging_workflow_sha }}
+          DESKTOP_WINDOWS_CERT_THUMBPRINT: ${{ vars.DESKTOP_WINDOWS_CERT_THUMBPRINT }}
+          DESKTOP_MACOS_TEAM_ID: ${{ vars.DESKTOP_MACOS_TEAM_ID }}
+          DESKTOP_MACOS_SIGNING_IDENTITY: ${{ vars.DESKTOP_MACOS_SIGNING_IDENTITY }}
+          PACKAGE_TARGET: ${{ matrix.target }}
+          PACKAGE_RUN_ID: ${{ matrix.run-id }}
+          PACKAGE_SOURCE_SHA: ${{ inputs.source_sha }}
+          PACKAGE_VERSION: ${{ inputs.version }}
+          PACKAGE_CHANNEL: ${{ inputs.channel }}
+          VERIFIED_DIRECTORY: ${{ runner.temp }}/verified-signed-${{ matrix.target }}
+        run: |
+          node --import tsx apps/desktop/scripts/stage-signed-desktop-release.ts check-target `
+            $env:PACKAGE_TARGET $env:PACKAGE_RUN_ID $env:PACKAGE_SOURCE_SHA `
+            $env:PACKAGE_VERSION $env:PACKAGE_CHANNEL $env:VERIFIED_DIRECTORY
+      # Transfer the exact native-verified bytes and receipt to the assembler of this run.
+      - name: Retain verified inputs for assembly
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: verified-signed-${{ matrix.target }}
+          path: ${{ runner.temp }}/verified-signed-${{ matrix.target }}/
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 1
+          overwrite: true
+
+  assemble:
+    name: Verify combined Desktop update metadata
+    needs: check-target
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v5.0.0
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: '24'
+      - name: Install locked release script dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Download the three verified input sets
+        uses: actions/download-artifact@v8.0.1
+        with:
+          pattern: verified-signed-*
+          path: ${{ runner.temp }}/signed-intake-inputs
+      - name: Check asset fingerprints and assemble update metadata
+        shell: bash
+        env:
+          DESKTOP_SIGNED_WORKFLOW_SHA: ${{ inputs.packaging_workflow_sha }}
+          PACKAGE_SOURCE_SHA: ${{ inputs.source_sha }}
+          PACKAGE_VERSION: ${{ inputs.version }}
+          PACKAGE_CHANNEL: ${{ inputs.channel }}
+          VERIFIED_INPUTS: ${{ runner.temp }}/signed-intake-inputs
+          VERIFIED_DIRECTORY: ${{ runner.temp }}/signed-intake-report
+        run: |
+          node --import tsx apps/desktop/scripts/stage-signed-desktop-release.ts assemble \
+            "$PACKAGE_SOURCE_SHA" "$PACKAGE_VERSION" "$PACKAGE_CHANNEL" "$VERIFIED_DIRECTORY" \
+            "$VERIFIED_INPUTS/verified-signed-win-x64" \
+            "$VERIFIED_INPUTS/verified-signed-mac-arm64" \
+            "$VERIFIED_INPUTS/verified-signed-mac-x64"
+      - name: Retain verification report and merged metadata
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: signed-desktop-intake-report
+          path: |
+            ${{ runner.temp }}/signed-intake-report/signed-desktop-intake.json
+            ${{ runner.temp }}/signed-intake-report/*-mac.yml
+          if-no-files-found: error
+          retention-days: 14
+          overwrite: true

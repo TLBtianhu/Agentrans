@@ -94,7 +94,7 @@ export async function verifyMacOSAppUpdateConfig(appPath, update, updaterCacheDi
     : config.provider === 'generic' && config.url === update.publicUrl && config.channel === channel
   if (!matches) {
     const expected = update.provider === 'github' ? `${update.owner}/${update.repo}` : update.publicUrl
-    throw new Error(`desktop macOS update config: ${path} does not match ${expected}`)
+    throw new Error(`desktop macOS update config: ${path} does not match ${expected} on channel ${channel}`)
   }
   const actualCacheDirName = nonEmptyString(config.updaterCacheDirName, `${CONFIG_FILENAME}.updaterCacheDirName`)
   if (updaterCacheDirName !== undefined && actualCacheDirName !== updaterCacheDirName) {

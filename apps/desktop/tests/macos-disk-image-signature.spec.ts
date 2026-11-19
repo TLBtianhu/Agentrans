@@ -53,4 +53,7 @@ it('still requires a stapled ticket and Gatekeeper acceptance for release DMGs',
   expect(vi.mocked(spawnSync).mock.calls.map(call => call[0])).toEqual([
     '/usr/bin/codesign', '/usr/bin/codesign', '/usr/bin/xcrun', '/usr/sbin/spctl',
   ])
+  expect(spawnSync).toHaveBeenLastCalledWith('/usr/sbin/spctl', [
+    '--assess', '--type', 'open', '--context', 'context:primary-signature', '--verbose=4', '/fixture/release.dmg',
+  ], { encoding: 'utf8' })
 })

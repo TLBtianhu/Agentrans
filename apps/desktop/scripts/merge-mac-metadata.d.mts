@@ -22,6 +22,13 @@ export interface MacMetadataDocument {
 export function mergeMacMetadataDocuments(documents: readonly MacMetadataDocument[]): MacMetadataDocument & { path: string }
 
 /**
+ * Read one feed per architecture and merge the records for the common feed filename.
+ * @param inputs - Directories, one per built architecture.
+ * @returns Merged feed name and document.
+ */
+export function mergeMacReleaseMetadata(inputs: readonly string[]): { name: string; document: MacMetadataDocument & { path: string } }
+
+/**
  * Copy every architecture's artifacts into one directory and write the merged metadata beside them.
  * @param inputs - Directories, one per built architecture.
  * @param output - Directory the release uploads from.

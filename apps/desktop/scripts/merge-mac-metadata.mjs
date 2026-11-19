@@ -71,19 +71,30 @@ export function mergeMacMetadataDocuments(documents) {
 }
 
 /**
- * Copy every architecture's artifacts into one directory and write the merged metadata beside them.
+ * Read one feed per architecture and merge the records for the common feed filename.
  * @param {string[]} inputs - Directories, one per built architecture.
- * @param {string} output - Directory the release uploads from.
- * @returns {{ metadata: string, copied: number }} Written metadata path and artifact count.
+ * @returns {{ name: string, document: ReturnType<typeof mergeMacMetadataDocuments> }} Merged feed name and document.
  */
-export function assembleMacRelease(inputs, output) {
+export function mergeMacReleaseMetadata(inputs) {
   if (inputs.length === 0) throw new Error('merge-mac-metadata: at least one input directory is required')
   const reads = inputs.map(directory => readMetadata(directory))
   const names = new Set(reads.map(read => read.name))
   if (names.size !== 1) {
     throw new Error(`merge-mac-metadata: metadata names disagree: ${[...names].join(', ')}`)
   }
-  const merged = mergeMacMetadataDocuments(reads.map(read => read.document))
+  const name = reads[0]?.name
+  if (name === undefined) throw new Error('merge-mac-metadata: metadata name is missing')
+  return { name, document: mergeMacMetadataDocuments(reads.map(read => read.document)) }
+}
+
+/**
+ * Copy every architecture's artifacts into one directory and write the merged metadata beside them.
+ * @param {string[]} inputs - Directories, one per built architecture.
+ * @param {string} output - Directory the release uploads from.
+ * @returns {{ metadata: string, copied: number }} Written metadata path and artifact count.
+ */
+export function assembleMacRelease(inputs, output) {
+  const { name, document } = mergeMacReleaseMetadata(inputs)
   mkdirSync(output, { recursive: true })
   let copied = 0
   for (const directory of inputs) {
@@ -95,10 +106,8 @@ export function assembleMacRelease(inputs, output) {
       copied += 1
     }
   }
-  const name = [...names][0]
-  if (name === undefined) throw new Error('merge-mac-metadata: metadata name is missing')
   const metadata = join(output, name)
-  writeFileSync(metadata, yaml.dump(merged, { lineWidth: -1 }))
+  writeFileSync(metadata, yaml.dump(document, { lineWidth: -1 }))
   return { metadata, copied }
 }
 

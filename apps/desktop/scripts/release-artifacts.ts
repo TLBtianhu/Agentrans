@@ -67,6 +67,19 @@ function releaseFileNames(version: string): ReadonlyMap<string, MatchedFile> {
   return files
 }
 
+/**
+ * Name the exact signed distribution files for one target.
+ * @param target - Target of the original build, before any macOS merge.
+ * @param version - Exact packaged semantic version.
+ * @returns The installer files and the version-derived update feed.
+ */
+export function signedDesktopAssetNames(target: Target, version: string): string[] {
+  const layout = layouts.find(candidate => candidate.target === target)
+  if (layout === undefined) throw new Error(`desktop publish: unsupported signed target ${target}`)
+  const stem = `${DESKTOP_ARTIFACT_SLUG}-${version}-${target}`
+  return [...layout.files.map(extension => `${stem}${extension}`), `${desktopUpdateMetadataChannel(version)}${layout.feedSuffix}.yml`]
+}
+
 interface FileHashes {
   readonly size: number
   readonly sha256: string
