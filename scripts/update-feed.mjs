@@ -43,7 +43,7 @@ async function hashInstaller(path) {
 export async function startUpgradeFeed({
   tls, oldInstallerPath, newInstallerPath, metadataPath, signaturePath,
   oldBlockMapPath = `${oldInstallerPath}.blockmap`, newBlockMapPath = `${newInstallerPath}.blockmap`,
-  host = '127.0.0.1', port = 443,
+  host = '127.0.0.1', port = 443, serveBlockMaps = true,
 }) {
   if (host !== '127.0.0.1') throw new Error('The update fixture must listen on IPv4 loopback')
   if (basename(oldInstallerPath) !== fileName(oldVersion) || basename(newInstallerPath) !== fileName(newVersion)) {
@@ -51,9 +51,10 @@ export async function startUpgradeFeed({
   }
   const [installerSize, , metadata, signature, oldBlockMap, newBlockMap, sha512] = await Promise.all([
     requiredFile(newInstallerPath), requiredFile(oldInstallerPath), readFile(metadataPath), readFile(signaturePath),
-    readFile(oldBlockMapPath), readFile(newBlockMapPath), hashInstaller(newInstallerPath),
+    serveBlockMaps ? readFile(oldBlockMapPath) : undefined, serveBlockMaps ? readFile(newBlockMapPath) : undefined,
+    hashInstaller(newInstallerPath),
   ])
-  if (oldBlockMap.length === 0 || newBlockMap.length === 0 || !/^[A-Za-z0-9+/]{86}==$/u.test(signature.toString().trim())) {
+  if (oldBlockMap?.length === 0 || newBlockMap?.length === 0 || !/^[A-Za-z0-9+/]{86}==$/u.test(signature.toString().trim())) {
     throw new Error('Invalid fixture blockmap or Ed25519 signature')
   }
   const lines = metadata.toString('utf8').split(/\r?\n/u)
@@ -76,10 +77,16 @@ export async function startUpgradeFeed({
   const assets = new Map([
     [`${releases}.atom`, { kind: 'feed', type: 'application/atom+xml; charset=utf-8', body: feed }],
     [assetPath(newVersion, 'test.yml'), { kind: 'metadata', type: 'application/yaml; charset=utf-8', body: metadata }],
-    [assetPath(oldVersion, `${fileName(oldVersion)}.blockmap`), { kind: 'old-blockmap', type: 'application/octet-stream', body: oldBlockMap }],
-    [assetPath(newVersion, `${fileName(newVersion)}.blockmap`), { kind: 'new-blockmap', type: 'application/octet-stream', body: newBlockMap }],
     [assetPath(newVersion, `${fileName(newVersion)}.sig`), { kind: 'signature', type: 'text/plain; charset=utf-8', body: signature }],
   ])
+  if (serveBlockMaps) {
+    assets.set(assetPath(oldVersion, `${fileName(oldVersion)}.blockmap`), {
+      kind: 'old-blockmap', type: 'application/octet-stream', body: oldBlockMap,
+    })
+    assets.set(assetPath(newVersion, `${fileName(newVersion)}.blockmap`), {
+      kind: 'new-blockmap', type: 'application/octet-stream', body: newBlockMap,
+    })
+  }
   const requests = []
   const installerPath = assetPath(newVersion, fileName(newVersion))
   const server = createServer(tls, (request, response) => {

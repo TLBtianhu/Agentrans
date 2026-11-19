@@ -25,6 +25,7 @@ const manifest = JSON.parse((await readFile(manifestArgument, 'utf8')).replace(/
 const oldVersion = '0.1.0-test.20261118.2'
 const newVersion = '0.1.0-test.20261118.3'
 const retainedOldHash = '9a7df6518051669fc32fb425985459393deda67504be7ff4a8518f20e792f680'
+const retainedNewHash = 'b4991a118bcc902d03cab45e375f26c4481faba455d9f238a90fa385bde8aebf'
 for (const name of ['oldExe', 'newExe', 'oldBlockMap', 'newBlockMap', 'newYaml', 'newSignature', 'httpsKey', 'httpsCert', 'rootCa']) {
   assert.ok(isAbsolute(manifest[name]), `Manifest field ${name} must be an absolute path`)
   assert.ok((await stat(manifest[name])).isFile(), `Manifest field ${name} must be a file`)
@@ -96,10 +97,38 @@ function installedAppProcesses() {
   }))
 }
 
-async function sha256(path) {
-  const hash = createHash('sha256')
+async function hashFile(path, algorithm, encoding) {
+  const hash = createHash(algorithm)
   for await (const bytes of createReadStream(path)) hash.update(bytes)
-  return hash.digest('hex')
+  return hash.digest(encoding)
+}
+
+function sha256(path) {
+  return hashFile(path, 'sha256', 'hex')
+}
+
+async function tamperedCandidate(originalPath, metadataPath) {
+  const directory = join(root, 'tampered')
+  await mkdir(directory)
+  const newInstallerPath = join(directory, basename(originalPath))
+  await copyFile(originalPath, newInstallerPath, constants.COPYFILE_EXCL)
+  const file = await open(newInstallerPath, 'r+')
+  try {
+    const offset = Math.floor((await file.stat()).size / 2)
+    const byte = Buffer.alloc(1)
+    assert.equal((await file.read(byte, 0, 1, offset)).bytesRead, 1)
+    byte[0] ^= 1
+    assert.equal((await file.write(byte, 0, 1, offset)).bytesWritten, 1)
+  } finally { await file.close() }
+  const [originalSha, alteredSha, metadata] = await Promise.all([
+    hashFile(originalPath, 'sha512', 'base64'), hashFile(newInstallerPath, 'sha512', 'base64'), readFile(metadataPath, 'utf8'),
+  ])
+  assert.notEqual(alteredSha, originalSha)
+  assert.equal(metadata.split(originalSha).length, 3, 'Expected the candidate digest in both metadata entries')
+  const alteredMetadataPath = join(directory, basename(metadataPath))
+  // Match the isolated feed's transport checksum so the application reaches its Ed25519 verification.
+  await writeFile(alteredMetadataPath, metadata.replaceAll(originalSha, alteredSha), { flag: 'wx' })
+  return { newInstallerPath, metadataPath: alteredMetadataPath, sha256: await sha256(newInstallerPath) }
 }
 
 async function installedVersion() {
@@ -345,6 +374,19 @@ async function readyDialog(application) {
   }, 'genuine install-and-restart dialog', 150000)
 }
 
+async function rejectionDialog(application) {
+  return poll(application.owned, async () => {
+    const state = await evaluation(application.workspace, 'window.dshDesktop.updates.status()')
+    if (state?.phase === 'ready') return { phase: state.phase }
+    if (state?.phase !== 'error') return
+    const pages = await jsonResponse(`${application.base}/json/list`)
+    for (const page of pages.filter(target => target.url === 'dsh-app://shell/update-dialog.html')) {
+      const details = await evaluation(page, "document.querySelector('#technical-details-content')?.textContent ?? ''")
+      if (details !== '') return { phase: state.phase, details }
+    }
+  }, 'Ed25519 rejection in the native update dialog', 150000)
+}
+
 async function waitForInstalledRestart(oldPid) {
   const deadline = Date.now() + 180000
   while (Date.now() < deadline) {
@@ -390,6 +432,7 @@ try {
   assert.deepEqual(registrations(), [], 'Disposable runner already has Agentrans')
   const [oldHash, newHash] = await Promise.all([sha256(installer), sha256(manifest.newExe)])
   assert.equal(oldHash, retainedOldHash, 'Old installer bytes must be the exact retained package')
+  assert.equal(newHash, retainedNewHash, 'Successor bytes must be the exact retained package')
   await record('verified-package-inputs', { oldHash, newHash })
   currentStage = 'fresh-install'
   const version = await install()
@@ -410,24 +453,54 @@ try {
   for (const hostname of ['github.com', 'api.github.com']) {
     assert.equal((await lookup(hostname, { family: 4 })).address, '127.0.0.1', `${hostname} must resolve to the disposable runner HTTPS feed`)
   }
-  feed = await startUpgradeFeed({
+  const feedOptions = {
     tls: { key: await readFile(manifest.httpsKey), cert: await readFile(manifest.httpsCert) },
     oldInstallerPath: installer, newInstallerPath: manifest.newExe, metadataPath: manifest.newYaml,
     signaturePath: manifest.newSignature, oldBlockMapPath: manifest.oldBlockMap, newBlockMapPath: manifest.newBlockMap,
     port: manifest.port ?? 443,
+  }
+  const tampered = await tamperedCandidate(manifest.newExe, manifest.newYaml)
+  feed = await startUpgradeFeed({
+    ...feedOptions, newInstallerPath: tampered.newInstallerPath, metadataPath: tampered.metadataPath, serveBlockMaps: false,
   })
   await record(currentStage, { oldInstallerCacheSeeded, existingInstallerCacheVerified: !oldInstallerCacheSeeded, localTls: true })
   currentStage = 'first-launch'
-  const application = await launch(true)
-  await record(currentStage, { welcome: true, workspace: true, pid: application.owned.process.pid })
+  const baseline = await launch(true)
+  await record(currentStage, { welcome: true, workspace: true, pid: baseline.owned.process.pid })
   currentStage = 'create-session'
   const title = `Desktop isolated QA ${randomUUID()}`
-  const created = await call(application.workspace, 'session/create', { request: { cwd: root } })
+  const created = await call(baseline.workspace, 'session/create', { request: { cwd: root } })
   assert.equal(typeof created.sessionId, 'string')
-  const renamed = await call(application.workspace, 'session/rename', { request: { sessionId: created.sessionId, title } })
+  const renamed = await call(baseline.workspace, 'session/rename', { request: { sessionId: created.sessionId, title } })
   assert.equal(renamed.title, title)
-  await verifySession(application, created.sessionId, title)
+  await verifySession(baseline, created.sessionId, title)
   await record(currentStage, { sessionId: created.sessionId, title, sequence: renamed.seq })
+  currentStage = 'reject-altered-installer'
+  await beginUpdate(baseline)
+  const rejected = await rejectionDialog(baseline)
+  const expectedDetail = `desktop update: ${basename(manifest.newExe)} does not match its published signature`
+  assert.deepEqual(rejected, { phase: 'error', details: expectedDetail }, 'Expected the real application to stop at Ed25519 verification')
+  const rejectedEvents = await updateEvents(baseline.owned.process.pid)
+  assert.ok(rejectedEvents.some(event => event.phase === 'error' && event.failedOperation === 'download'))
+  assert.ok(rejectedEvents.every(event => !['ready', 'installing'].includes(event.phase) && event.event !== 'install-confirmed'))
+  assert.equal(await sha256(join(cacheDir, 'pending', basename(manifest.newExe))), tampered.sha256)
+  assert.equal(await installedVersion(), oldVersion)
+  assert.equal(registrations()[0]?.DisplayVersion, oldVersion)
+  assert.ok(!baseline.owned.finished(), 'The installed baseline must stay running')
+  assert.equal(feed.snapshot().signatureRequests, 1)
+  assert.equal(feed.snapshot().fullInstallerRequests, 1)
+  report.tamperedFeed = feedSummary()
+  report.tamperedUpdateEvents = rejectedEvents
+  await record(currentStage, { sha256: tampered.sha256, details: expectedDetail, installedVersion: oldVersion, installAuthorized: false })
+
+  currentStage = 'restore-genuine-feed'
+  await stopApp(baseline)
+  assert.equal(await installedVersion(), oldVersion, 'A rejected installer must not run during application shutdown')
+  await feed.close()
+  feed = await startUpgradeFeed(feedOptions)
+  const application = await launch(false)
+  await verifySession(application, created.sessionId, title)
+  await record(currentStage, { originalPackageBytes: true, sameSessionAndTitle: true })
   currentStage = 'check-and-download'
   await beginUpdate(application)
   await record('checked-successor-version', { version: newVersion })
