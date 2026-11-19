@@ -6,6 +6,7 @@ import { extname, join } from 'node:path'
 import { load } from 'js-yaml'
 import { parse } from 'semver'
 import { z } from 'zod'
+import { desktopReleaseArtifactStems } from '../src/update-release-assets.ts'
 import { DESKTOP_ARTIFACT_SLUG } from './desktop-product-identity.mjs'
 
 const layouts = [
@@ -57,9 +58,7 @@ export interface CollectedReleaseAsset {
 function releaseFileNames(version: string): ReadonlyMap<string, MatchedFile> {
   const files = new Map<string, MatchedFile>()
   for (const layout of layouts) {
-    const suffixes = layout.target === 'win-x64' ? ['', '-unsigned'] : ['', '-unsigned', '-unnotarized']
-    for (const suffix of suffixes) {
-      const stem = `${DESKTOP_ARTIFACT_SLUG}-${version}-${layout.target}${suffix}`
+    for (const stem of desktopReleaseArtifactStems(DESKTOP_ARTIFACT_SLUG, version, layout.target)) {
       for (const kind of layout.files) files.set(`${stem}${kind}`, { layout, stem, kind })
     }
   }
