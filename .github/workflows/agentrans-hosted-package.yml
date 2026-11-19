@@ -1,5 +1,5 @@
 name: Package Agentrans · hosted
-run-name: Diagnose macOS candidate .3 startup
+run-name: Capture macOS .3 startup alert
 
 on:
   workflow_dispatch:
@@ -81,15 +81,14 @@ jobs:
             | jq -e '[.artifacts[] | select(.name == "agentrans-mac" and .expired == false)]
                 | select(length == 1) | .[0] | {id, name, size_in_bytes, digest}' > "$source_dir/artifact.json"
           gh run download "$mac_build" --repo "$GITHUB_REPOSITORY" --name agentrans-mac --dir "$input_dir"
-      - name: Diagnose startup from the original candidate ZIP
+      - name: Capture the startup alert from the original ZIP
         if: ${{ !cancelled() && steps.download.outcome == 'success' }}
         timeout-minutes: 16
         shell: bash
         env:
           QA_ARCH: ${{ matrix.arch }}
-          AGENTRANS_MAC_LAUNCH_DIAGNOSTICS: '1'
         run: |
-          node scripts/verify-macos.mjs "$RUNNER_TEMP/agentrans-mac-inputs" \
+          node scripts/capture-mac-startup.mjs "$RUNNER_TEMP/agentrans-mac-inputs" \
             "$RUNNER_TEMP/agentrans-mac-launch-report" "$QA_ARCH"
       - name: Retain the verification reports
         if: always()
