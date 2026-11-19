@@ -1,23 +1,8 @@
-name: Package Agentrans · hosted
-run-name: Verify Windows installer test package
+name: Verify the Windows x64 clean installation
+run-name: Verify clean Windows x64 0.1.0-test.20261119.1 installation and session reopen
 
 on:
   workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version of the retained Windows installer'
-        type: string
-        required: true
-      channel:
-        description: 'Channel of the retained Windows installer'
-        type: choice
-        options: [nightly, latest]
-        required: true
-      target:
-        description: 'Target of the retained Windows installer'
-        type: choice
-        options: [all, win-x64, mac-arm64, mac-x64, mac]
-        required: true
 
 permissions:
   actions: read
@@ -25,50 +10,86 @@ permissions:
 
 jobs:
   windows-install:
+    if: github.repository == 'TLBtianhu/Agentrans' && github.ref == 'refs/heads/codex/windows-1-clean-qa-20261119'
     runs-on: windows-latest
-    timeout-minutes: 18
+    timeout-minutes: 25
     env:
-      AGENTRANS_TELEMETRY_DISABLED: '1'
-      AGENTRANS_DESKTOP_UPDATE_CHECK_INTERVAL_MS: '3600000'
+      QA_VERSION: '0.1.0-test.20261119.1'
+      QA_BUILD: '44517670139'
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7.0.1
         with:
+          ref: ${{ github.sha }}
           persist-credentials: false
       - uses: actions/setup-node@v7.0.0
         with:
           node-version: '24'
-      - name: Download and verify the retained installer
+      - name: Confirm the native runner and exact candidate build archive
+        id: source
         shell: pwsh
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          QA_VERSION: ${{ inputs.version }}
-          QA_CHANNEL: ${{ inputs.channel }}
-          QA_TARGET: ${{ inputs.target }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           $PSNativeCommandUseErrorActionPreference = $true
-          if ($env:QA_VERSION -ne '0.1.0-test.20261118.1' -or $env:QA_CHANNEL -ne 'nightly' -or $env:QA_TARGET -ne 'win-x64') {
-            throw 'This check accepts the exact retained Windows test package'
+          if ($env:RUNNER_ENVIRONMENT -ne 'github-hosted' -or $env:RUNNER_OS -ne 'Windows' -or
+            $env:RUNNER_ARCH -ne 'X64' -or (node -p 'process.arch') -ne 'x64') {
+            throw 'Use a disposable GitHub-hosted Windows x64 runner'
           }
-          $run = gh api repos/TLBtianhu/Agentrans/actions/runs/44268972216 | ConvertFrom-Json
-          if ($run.conclusion -ne 'success' -or $run.head_sha -ne '91fd8f2eb17467438fe8dd3e1d088a38457fdd15') {
-            throw 'Retained package source does not match its verified build'
+          $repository = $env:GITHUB_REPOSITORY
+          $build = $env:QA_BUILD
+          $run = gh api "repos/$repository/actions/runs/$build" | ConvertFrom-Json
+          $title = "Package Agentrans · win-x64 · nightly · $env:QA_VERSION"
+          if ([string]$run.id -ne $build -or $run.workflow_id -ne 413465192 -or
+            $run.path -ne '.github/workflows/agentrans-hosted-package.yml' -or
+            $run.event -ne 'workflow_dispatch' -or $run.status -ne 'completed' -or $run.conclusion -ne 'success' -or
+            $run.head_sha -ne 'bee9aaee0db28bf05061b3f7461842b6d85b1fb0' -or
+            $run.head_branch -ne 'codex/macos-session-package-fix-20261119' -or
+            $run.head_repository.full_name -ne $repository -or $run.display_title -ne $title) {
+            throw 'The successful package run must match the exact candidate and source commit'
           }
-          $download = Join-Path $env:RUNNER_TEMP 'agentrans-existing-package'
-          gh run download 44268972216 --repo TLBtianhu/Agentrans --name agentrans-win-x64 --dir $download
-          $installer = Join-Path $download 'agentrans-0.1.0-test.20261118.1-win-x64-unsigned.exe'
-          $sha = (Get-FileHash -Algorithm SHA256 -LiteralPath $installer).Hash.ToLowerInvariant()
-          if ($sha -ne '89ecc5ce9d75f67bb691cba7ce15b69288f93fe4ca6934746cd732b14b8a164c') {
-            throw 'Retained installer digest changed'
+          $listing = gh api "repos/$repository/actions/runs/$build/artifacts" | ConvertFrom-Json
+          if ($listing.total_count -ne 1 -or $listing.artifacts.Count -ne 1) { throw 'Expected one retained archive' }
+          $artifact = $listing.artifacts[0]
+          if ($artifact.id -le 0 -or $artifact.name -ne 'agentrans-win-x64' -or $artifact.expired -ne $false -or
+            $artifact.size_in_bytes -le 0 -or $artifact.digest -cnotmatch '^sha256:[0-9a-f]{64}$') {
+            throw 'Unexpected Windows archive'
           }
-          Add-Content -LiteralPath $env:GITHUB_ENV -Value "VERIFIED_INSTALLER=$installer"
-          "Verified installer SHA-256 $sha"
-      - name: Install and qualify in the disposable runner
-        shell: pwsh
-        run: node scripts/verify-existing-windows-install.mjs "$env:VERIFIED_INSTALLER" (Join-Path $env:RUNNER_TEMP 'agentrans-installed-qa')
-      - name: Retain the test report
-        if: always()
-        uses: actions/upload-artifact@v4
+          $receipts = New-Item -ItemType Directory -Path (Join-Path $env:RUNNER_TEMP 'agentrans-windows-source')
+          $run | Select-Object id,head_sha,display_title,html_url |
+            ConvertTo-Json | Set-Content (Join-Path $receipts.FullName 'build.json')
+          $artifact | Select-Object id,name,size_in_bytes,digest |
+            ConvertTo-Json | Set-Content (Join-Path $receipts.FullName 'artifact.json')
+          Add-Content -LiteralPath $env:GITHUB_OUTPUT -Value "artifact-id=$($artifact.id)"
+      - name: Download the verified Windows candidate archive
+        uses: actions/download-artifact@v8.0.1
         with:
-          name: windows-existing-package-qa
-          path: ${{ runner.temp }}/agentrans-installed-qa/result.json
+          github-token: ${{ github.token }}
+          run-id: ${{ env.QA_BUILD }}
+          artifact-ids: ${{ steps.source.outputs.artifact-id }}
+          path: ${{ runner.temp }}/agentrans-windows-input
+          digest-mismatch: error
+      - name: Install and verify first launch and session reopen
+        shell: pwsh
+        timeout-minutes: 16
+        run: |
+          $PSNativeCommandUseErrorActionPreference = $true
+          $inputs = Join-Path $env:RUNNER_TEMP 'agentrans-windows-input'
+          $name = "agentrans-$env:QA_VERSION-win-x64-unsigned.exe"
+          $installer = Get-Item -LiteralPath (Join-Path $inputs $name) -ErrorAction Stop
+          $receipt = [ordered]@{
+            name = $installer.Name
+            size = $installer.Length
+            sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $installer.FullName).Hash.ToLowerInvariant()
+          }
+          $receipt | ConvertTo-Json | Set-Content (Join-Path $env:RUNNER_TEMP 'agentrans-windows-source/installer.json')
+          node scripts/verify-existing-windows-install.mjs $installer.FullName (Join-Path $env:RUNNER_TEMP 'agentrans-installed-qa') $env:QA_VERSION
+      - name: Retain the verification report
+        if: always()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: windows-1-clean-qa
+          path: |
+            ${{ runner.temp }}/agentrans-windows-source/*.json
+            ${{ runner.temp }}/agentrans-installed-qa/result.json
           if-no-files-found: warn
+          retention-days: 14
