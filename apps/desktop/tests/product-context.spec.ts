@@ -124,9 +124,9 @@ it.each(['code', 'resources'])('rejects an unpackaged verification context with 
   expect(f.app.setPath).not.toHaveBeenCalled()
 })
 
-it('does not apply the Windows user-package layout to a macOS application bundle', () => {
+it('requires a platform-specific adapter for packaged user startup on an unsupported platform', () => {
   const f = fixture()
-  expect(() => configureDesktopProduct(f.app, f.resources, f.source, {}, 'darwin')).toThrow('platform-specific')
+  expect(() => configureDesktopProduct(f.app, f.resources, f.source, {}, 'linux')).toThrow('platform-specific')
   expect(readdirSync(f.instance)).toEqual(['app'])
   expect(f.app.setPath).not.toHaveBeenCalled()
 })

@@ -2,8 +2,7 @@
 
 import { delimiter, dirname, join, resolve } from 'node:path'
 import {
-  PRODUCT_LAUNCH_CONTEXT_ENV, ProductLaunchError,
-  applyProductLaunchEnvironment, prepareProductState, resolvePackagedLaunchContext,
+  PRODUCT_LAUNCH_CONTEXT_ENV, applyProductLaunchEnvironment, prepareProductState, resolveDesktopPackagedLaunchContext,
 } from '@agentrans/product-layout/launch-context'
 import { installOfficeEngineResolution, runtimeArchivePath } from './office-engine.ts'
 
@@ -11,13 +10,11 @@ import { installOfficeEngineResolution, runtimeArchivePath } from './office-engi
  * Run the ordinary CLI with Desktop's bundled package manager and reserved-profile plugin access.
  * @param runtimeDir - Prepared or ASAR-contained production DSH package tree.
  * @param supportDir - Physical Desktop runtime directory containing the primary-runtime payload and Node launchers.
+ * @param platform - Platform whose packaged layout applies.
  * @returns Completion of the selected CLI command; profile plugins own their process lifetime.
  */
-export async function runDesktopCli(runtimeDir: string, supportDir: string): Promise<void> {
-  const context = resolvePackagedLaunchContext(dirname(resolve(supportDir)), process.env[PRODUCT_LAUNCH_CONTEXT_ENV])
-  if (process.platform !== 'win32' && context.purpose !== 'verification') {
-    throw new ProductLaunchError('INVALID_LAUNCH_REQUEST', 'Packaged user CLI requires a platform-specific product layout')
-  }
+export async function runDesktopCli(runtimeDir: string, supportDir: string, platform: NodeJS.Platform = process.platform): Promise<void> {
+  const context = resolveDesktopPackagedLaunchContext(dirname(resolve(supportDir)), process.env[PRODUCT_LAUNCH_CONTEXT_ENV], platform)
   prepareProductState(context)
   applyProductLaunchEnvironment(context, process.env)
   installOfficeEngineResolution(runtimeDir)

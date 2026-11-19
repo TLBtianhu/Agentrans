@@ -3,8 +3,8 @@ import { realpathSync } from 'node:fs'
 import { relative } from 'node:path'
 import {
   PRODUCT_LAUNCH_CONTEXT_ENV, ProductLaunchError, applyProductLaunchEnvironment,
-  parseProductLaunchContext, prepareProductState, resolveDevelopmentLaunchContext,
-  resolvePackagedLaunchContext, type ProductLaunchContext,
+  parseProductLaunchContext, prepareProductState, resolveDesktopPackagedLaunchContext,
+  resolveDevelopmentLaunchContext, type ProductLaunchContext,
 } from '@agentrans/product-layout/launch-context'
 
 /** Electron operations available before application readiness. */
@@ -33,10 +33,7 @@ export function configureDesktopProduct(
 ): ProductLaunchContext {
   let context: ProductLaunchContext
   if (app.isPackaged) {
-    context = resolvePackagedLaunchContext(realpathSync(resourcesRoot), environment[PRODUCT_LAUNCH_CONTEXT_ENV])
-    if (platform !== 'win32' && context.purpose !== 'verification') {
-      throw new ProductLaunchError('INVALID_LAUNCH_REQUEST', 'Packaged user startup requires a platform-specific product layout')
-    }
+    context = resolveDesktopPackagedLaunchContext(realpathSync(resourcesRoot), environment[PRODUCT_LAUNCH_CONTEXT_ENV], platform)
   } else {
     const encoded = environment[PRODUCT_LAUNCH_CONTEXT_ENV]
     const candidate = encoded === undefined ? undefined : parseProductLaunchContext(encoded)

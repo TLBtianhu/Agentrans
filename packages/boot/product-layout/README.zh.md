@@ -26,7 +26,7 @@ kind: "package-reference"
 
 使用 `ProductLayout.fromRoot(root, channel)` 创建布局。根目录是唯一独立路径。Agentrans 运行数据位于 `data/dsh/home` 和 `data/dsh/agents`，它们只是内部状态路径，不是外部 DSH 集成。`ensureProductLayout()` 只创建缺失子目录，不替换已有数据。
 
-轻量的 `./launch-context` 入口在加载应用前解析代码、资源及可写实例路径。源码开发使用 worktree 外的稳定根目录；Windows 打包后的 GUI 和 CLI 使用同一个 `root/app/resources` 锚点。只有与该负载匹配的显式隔离验收上下文可以覆盖状态根目录。开发和验收根要求精确的用途标识，并拒绝已有未标识数据或 app 负载。准备阶段在创建状态前检查物理重叠与已有路径联接，绝不创建 `app`。准备失败可能留下可供重试的自有空目录。
+轻量的 `./launch-context` 入口在加载应用前解析代码、资源及可写实例路径。源码开发使用 worktree 外的稳定根目录。Windows 的 GUI 和内置 CLI 共享由 `root/app/resources` 确定的安装根目录。macOS 的 GUI 和内置 CLI 以 `Contents/Resources` 为负载锚点，共享操作系统账号主目录下的 `~/Library/Application Support/com.agentrans.app`。只有与负载匹配的显式隔离验收上下文可以覆盖状态根目录。开发和验收根要求精确的用途标识，并拒绝已有未标识数据或 app 负载。准备阶段先检查物理重叠与已有路径联接，然后只创建可写状态目录。准备失败可能留下可供重试的自有空目录。
 
 使用 `createInstallManifest()`、`writeInstallManifest()` 和 `readInstallManifest()` 管理持久安装状态。清单位于 `data/install/manifest.json`，包含 `layoutVersion`、产品身份、运行形态、根目录、应用版本、时间戳和资产记录。
 
@@ -74,7 +74,7 @@ kind: "package-reference"
 
 - [Desktop 安装程序](../../../apps/desktop/README.zh.md#windows-uninstall-rules)拥有原生卸载界面与 Windows 清理诊断，本库提供范围文件操作与注册操作。
 - 文件系统检查与 Node 按路径删除不能隔离其它进程并发替换目录；卸载前应停止写入进程，这些检查不是基于句柄相对操作的安全原语。 Registry 与 COM 归属检查也不隔离外部进程的并发替换。
-- 自动推导用户包锚点目前只覆盖 Windows 布局；其它平台需要显式适配器。源码开发与隔离验收不依赖该布局。
+- 打包应用的用户启动需要平台适配器。目前支持 Windows 安装和 macOS 应用包。
 - 1.0 前的目录变化不做迁移，不承诺旧结构备份或兼容路径。
 - 资产下载和哈希计算由调用方提供；本包负责激活顺序和状态，不提供网络客户端。
 

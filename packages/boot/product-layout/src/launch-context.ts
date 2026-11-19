@@ -1,6 +1,7 @@
 /** Explicit product-instance paths shared by application entry points. */
 import { createHash } from 'node:crypto'
 import { lstatSync, mkdirSync, readFileSync, readdirSync, realpathSync, statSync, writeFileSync, type Stats } from 'node:fs'
+import { userInfo } from 'node:os'
 import { basename, dirname, isAbsolute, join, normalize, parse, relative, sep } from 'node:path'
 
 /** Environment field carrying the validated request between product processes. */
@@ -12,7 +13,7 @@ const INSTANCE_MARKER = { schemaVersion: 1, productId: 'agentrans' } as const
 /** The reason an instance runs, independently of its distribution form. */
 export type ProductLaunchPurpose = 'development' | 'verification' | 'user'
 
-/** Launch-owned roots; no path comes from a workspace, user home, or ambient environment. */
+/** Launch-owned roots selected by the entry point, independently of the workspace and inherited Harness paths. */
 export interface ProductLaunchRequest {
   readonly purpose: ProductLaunchPurpose
   readonly instanceRoot: string
@@ -157,13 +158,56 @@ export function resolvePackagedLaunchContext(resourcesRoot: string, encoded?: st
   const resources = rootAt(resourcesRoot, 'resourcesRoot')
   const codeRoot = dirname(resources)
   const owned = resolveProductLaunchContext({ purpose: 'user', resourcesRoot: resources, codeRoot, instanceRoot: dirname(codeRoot) })
-  if (encoded === undefined) return owned
+  return packagedVerificationContext(resources, codeRoot, encoded) ?? owned
+}
+
+function packagedVerificationContext(resourcesRoot: string, codeRoot: string, encoded?: string): ProductLaunchContext | undefined {
+  if (encoded === undefined) return undefined
   const candidate = parseProductLaunchContext(encoded)
-  if (candidate.purpose !== 'verification') return owned
-  if (relative(candidate.codeRoot, owned.codeRoot) !== '' || relative(candidate.resourcesRoot, owned.resourcesRoot) !== '') {
+  if (candidate.purpose !== 'verification') return undefined
+  if (relative(candidate.codeRoot, codeRoot) !== '' || relative(candidate.resourcesRoot, resourcesRoot) !== '') {
     throw new ProductLaunchError('INVALID_LAUNCH_REQUEST', 'Verification context does not belong to the launched payload', candidate.codeRoot)
   }
   return candidate
+}
+
+/**
+ * Resolve a packaged Desktop user or verification instance for either the GUI or the bundled CLI.
+ * @param resourcesRoot - Absolute directory containing the launched payload's resources.
+ * @param encoded - Inherited context. A matching verification request can select isolated state.
+ * @param platform - Platform whose packaged layout applies.
+ * @returns A user instance anchored at the Windows installation or the macOS account's Application Support directory,
+ * or a verified isolated instance.
+ * @throws {ProductLaunchError} For a foreign verification request, an unsupported user platform, or invalid macOS bundle or state paths.
+ */
+export function resolveDesktopPackagedLaunchContext(
+  resourcesRoot: string,
+  encoded?: string,
+  platform: NodeJS.Platform = process.platform,
+): ProductLaunchContext {
+  if (platform !== 'darwin') {
+    const context = resolvePackagedLaunchContext(resourcesRoot, encoded)
+    if (platform !== 'win32' && context.purpose !== 'verification') {
+      throw new ProductLaunchError('INVALID_LAUNCH_REQUEST', 'Packaged user startup requires a platform-specific product layout')
+    }
+    return context
+  }
+
+  const resources = realpathSync(rootAt(resourcesRoot, 'resourcesRoot'))
+  const codeRoot = dirname(resources)
+  const verification = packagedVerificationContext(resources, codeRoot, encoded)
+  if (verification !== undefined) return verification
+  if (basename(resources) !== 'Resources' || basename(codeRoot) !== 'Contents'
+    || !basename(dirname(codeRoot)).toLowerCase().endsWith('.app')) {
+    throw new ProductLaunchError('INVALID_LAUNCH_REQUEST', 'Packaged macOS startup requires an application bundle', resources)
+  }
+  let accountHome: string
+  try { accountHome = realpathSync(rootAt(userInfo().homedir, 'macOS account home')) }
+  catch (error) {
+    throw new ProductLaunchError('STATE_PREPARE_FAILED', 'Cannot resolve the macOS account home', undefined, { cause: error })
+  }
+  const instanceRoot = join(accountHome, 'Library', 'Application Support', 'com.agentrans.app')
+  return resolveProductLaunchContext({ purpose: 'user', resourcesRoot: resources, codeRoot, instanceRoot })
 }
 
 /**

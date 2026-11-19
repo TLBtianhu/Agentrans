@@ -26,7 +26,7 @@ This package owns the distribution-lifecycle slices for Agentrans: one complete 
 
 Create a layout with `ProductLayout.fromRoot(root, channel)`. The root is the only independent path. Agentrans runtime data lives below `data/dsh/home` and `data/dsh/agents`; these are internal state paths, not an external DSH integration. `ensureProductLayout()` creates missing subdirectories without replacing existing data.
 
-The lightweight `./launch-context` entry resolves code, resources, and writable instance paths before application loading. Source development uses a stable root outside the worktree; Windows packaged GUI and CLI use the same `root/app/resources` anchor. Only an explicitly isolated verification context matching that payload may override its state root. Development and verification roots require an exact purpose marker and reject existing unmarked data or app payloads. Preparation checks physical overlap and existing path links before creating state; it never creates `app`. A preparation failure may leave owned empty directories for retry.
+The lightweight `./launch-context` entry resolves code, resources, and writable instance paths before application loading. Source development uses a stable root outside the worktree. The Windows GUI and bundled CLI share the installation root identified by `root/app/resources`. The macOS GUI and bundled CLI use `Contents/Resources` as their payload anchor and share `~/Library/Application Support/com.agentrans.app` under the OS account home. Only an explicitly isolated verification context matching the payload may override its state root. Development and verification roots require an exact purpose marker and reject existing unmarked data or app payloads. Preparation checks physical overlap and existing path links, then creates only writable state directories. A preparation failure may leave owned empty directories for retry.
 
 Use `createInstallManifest()`, `writeInstallManifest()`, and `readInstallManifest()` for durable installation state. The manifest belongs at `data/install/manifest.json` and carries `layoutVersion`, product identity, channel, root, app version, timestamps, and asset records.
 
@@ -74,7 +74,7 @@ No model context is created or changed.
 
 - The [Desktop installer](../../../apps/desktop/README.md#windows-uninstall-rules) owns native uninstall UI and Windows cleanup diagnostics; this library supplies scoped file and registration operations.
 - Filesystem checks and Node path-based deletion do not isolate against another process concurrently replacing directories. Stop writers before uninstall; these checks are not a handle-relative security primitive. Registry and COM ownership checks are not atomic against concurrent external replacement.
-- Automatic user-package anchoring currently covers the Windows layout; other platforms require an explicit adapter. Source development and isolated verification remain independent of that layout.
+- Packaged user startup requires a platform adapter. The supported adapters cover Windows installations and macOS application bundles.
 - Pre-1.0 layout changes are not migrated; no old-structure backup or compatibility path is promised.
 - Asset downloads and hash computation are supplied by callers; this package owns activation order and state, not a network client.
 
