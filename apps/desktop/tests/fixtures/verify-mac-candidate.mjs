@@ -17,6 +17,7 @@ const exec = promisify(execFile)
 const oldVersion = '0.1.0-test.20261119.1'
 const newVersion = '0.1.0-test.20261120.1'
 const candidateCommit = '3c6b00d9827fe49f4766fb6b4ce0139a554f0c72'
+const devtoolsTimeoutMs = 4_000
 const arch = process.env.QA_ARCH
 assert.equal(process.platform, 'darwin')
 assert.equal(process.env.GITHUB_ACTIONS, 'true')
@@ -234,7 +235,7 @@ function debuggerPipe(input, output) {
     stream.once('error', disconnect)
   }
   return {
-    send(method, params = {}, sessionId) {
+    send(method, params = {}, sessionId, timeoutMs = devtoolsTimeoutMs) {
       if (closed) return Promise.reject(closed)
       const id = ++next
       return new Promise((resolve, reject) => {
@@ -244,7 +245,7 @@ function debuggerPipe(input, output) {
           if (error) reject(error)
           else resolve(value)
         }
-        const timeout = setTimeout(() => complete(new Error(`DevTools timed out for ${method}`)), 4000)
+        const timeout = setTimeout(() => complete(new Error(`DevTools timed out for ${method}`)), timeoutMs)
         pending.set(id, { complete })
         input.write(`${JSON.stringify({ id, method, params, sessionId })}\0`, error => { if (error) complete(error) })
       })
@@ -253,8 +254,8 @@ function debuggerPipe(input, output) {
   }
 }
 
-async function evaluate(cdp, sessionId, expression) {
-  const answer = await cdp.send('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true }, sessionId)
+async function evaluate(cdp, sessionId, expression, timeoutMs = devtoolsTimeoutMs) {
+  const answer = await cdp.send('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true }, sessionId, timeoutMs)
   if (answer.exceptionDetails) throw new Error(answer.exceptionDetails.exception?.description ?? answer.exceptionDetails.text)
   return answer.result.value
 }
