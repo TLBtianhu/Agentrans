@@ -246,24 +246,33 @@ async function poll(owned, operation, label, duration = 90_000) {
   throw new Error('Timed out waiting for ' + label + (lastError === undefined ? '' : ': ' + lastError.message))
 }
 
-function signalProcessGroup(pid, signal) {
-  if (!Number.isSafeInteger(pid)) return false
-  try {
-    process.kill(-pid, signal)
-    return true
-  } catch (error) {
-    if (error.code === 'ESRCH') return false
-    throw error
-  }
+async function ownedGroupMembers(group) {
+  if (!Number.isSafeInteger(group)) return []
+  const uid = process.getuid()
+  const snapshot = await command('/bin/ps', ['-ax', '-o', 'pid=,pgid=,uid=,state='], 4_000)
+  return snapshot.split('\n').flatMap(line => {
+    const [pid, pgid, owner, processState] = line.trim().split(/\s+/u)
+    return Number(pgid) === group && Number(owner) === uid && !processState?.startsWith('Z') ? [Number(pid)] : []
+  })
 }
 
-async function waitForGroupExit(pid, milliseconds) {
+async function waitForOwnedGroupExit(group, milliseconds) {
   const end = Date.now() + milliseconds
-  while (signalProcessGroup(pid, 0)) {
-    if (Date.now() >= end) return false
+  let members = await ownedGroupMembers(group)
+  while (members.length && Date.now() < end) {
     await delay(150)
+    members = await ownedGroupMembers(group)
   }
-  return true
+  return members.length === 0
+}
+
+async function stopOwnedMembers(group, signal) {
+  for (const pid of await ownedGroupMembers(group)) {
+    // Check ownership immediately before signalling another process.
+    if (!(await ownedGroupMembers(group)).includes(pid)) continue
+    try { process.kill(pid, signal) }
+    catch (error) { if (error.code !== 'ESRCH') throw error }
+  }
 }
 
 async function stopProcess(owned, cdp) {
@@ -271,11 +280,11 @@ async function stopProcess(owned, cdp) {
     await cdp.send('Browser.close', {}, { timeout: 2_000 }).catch(() => undefined)
   }
   cdp.close()
-  if (!(await waitForGroupExit(owned.pid, 2_000))) {
-    signalProcessGroup(owned.pid, 'SIGTERM')
-    if (!(await waitForGroupExit(owned.pid, 5_000))) signalProcessGroup(owned.pid, 'SIGKILL')
+  if (!(await waitForOwnedGroupExit(owned.pid, 2_000))) {
+    await stopOwnedMembers(owned.pid, 'SIGTERM')
+    if (!(await waitForOwnedGroupExit(owned.pid, 5_000))) await stopOwnedMembers(owned.pid, 'SIGKILL')
   }
-  assert.ok(await waitForGroupExit(owned.pid, 5_000), 'Could not stop the owned packaged app process group')
+  assert.ok(await waitForOwnedGroupExit(owned.pid, 5_000), 'Could not stop the owned packaged app processes')
   assert.ok(await Promise.race([owned.closed.then(() => true), delay(3_000, false, { ref: false })]),
     'Packaged app stdio did not reach quiescence')
 }
@@ -437,7 +446,7 @@ async function launch(bundle, stage, result) {
     launch.processExit = owned.status
     if (!launch.passed) {
       const extra = await readFile(osDiagnostics, 'utf8').catch(() => '')
-      launch.output = sanitized(owned.output + '\n' + extra)
+      launch.output = sanitized(owned.output + '\n' + extra).replace(/([?&]token=)[A-Za-z0-9_-]+/giu, '$1<redacted>')
     }
   }
 }
