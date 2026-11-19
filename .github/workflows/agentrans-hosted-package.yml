@@ -1,5 +1,5 @@
 name: Package Agentrans · hosted
-run-name: Verify ordinary macOS candidate .4 first launch
+run-name: Check Agentrans macOS signing prerequisites
 
 on:
   workflow_dispatch:
@@ -25,93 +25,80 @@ permissions:
 
 jobs:
   verify:
-    name: Verify macOS ${{ matrix.arch }} / ${{ matrix.format }}
+    name: Check macOS ${{ matrix.arch }} toolchain
     strategy:
       fail-fast: false
       matrix:
         include:
           - arch: arm64
-            format: dmg
-            runner: macos-latest
-            runner_arch: ARM64
-          - arch: arm64
-            format: zip
             runner: macos-latest
             runner_arch: ARM64
           - arch: x64
-            format: dmg
-            runner: macos-26-intel
-            runner_arch: X64
-          - arch: x64
-            format: zip
             runner: macos-26-intel
             runner_arch: X64
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 35
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
+          ref: 402a3b11a38a55e712d5bdc97df96365fb209b59
       - uses: pnpm/action-setup@v5.0.0
-        if: matrix.arch == 'arm64' && matrix.format == 'dmg'
       - uses: actions/setup-node@v7.0.0
         with:
           node-version: '24'
-      - name: Download the exact macOS startup candidate
-        id: download
-        shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          QA_VERSION: ${{ inputs.version }}
-          QA_CHANNEL: ${{ inputs.channel }}
-          QA_TARGET: ${{ inputs.target }}
-          QA_RUNNER_ARCH: ${{ matrix.runner_arch }}
-        run: |
-          set -euo pipefail
-          [[ "$RUNNER_ENVIRONMENT" == 'github-hosted' && "$RUNNER_OS" == 'macOS' ]]
-          [[ "$RUNNER_ARCH" == "$QA_RUNNER_ARCH" && "$GITHUB_REPOSITORY" == 'TLBtianhu/Agentrans' ]]
-          [[ "$QA_VERSION" == '0.1.0-test.20261118.4' && "$QA_CHANNEL" == 'nightly' && "$QA_TARGET" == 'mac' ]]
-          build=44480323500
-          candidate_sha=aa52b730df40252cbe1675039f1043698148beee
-          [[ "$build" =~ ^[0-9]+$ && "$candidate_sha" =~ ^[0-9a-f]{40}$ ]]
-          input_dir="$RUNNER_TEMP/agentrans-mac-inputs"
-          source_dir="$RUNNER_TEMP/agentrans-mac-source"
-          mkdir "$input_dir" "$source_dir"
-          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$build" | jq -e \
-            --arg sha "$candidate_sha" --arg title "Package Agentrans · mac · nightly · $QA_VERSION" \
-            'select(.conclusion == "success" and .head_sha == $sha and .display_title == $title)
-              | {id, head_sha, display_title, conclusion, html_url}' > "$source_dir/mac.json"
-          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$build/artifacts?per_page=20" \
-            | jq -e '[.artifacts[] | select(.name == "agentrans-mac" and .expired == false)]
-                | select(length == 1) | .[0] | {id, name, size_in_bytes, digest}' > "$source_dir/artifact.json"
-          gh run download "$build" --repo "$GITHUB_REPOSITORY" --name agentrans-mac --dir "$input_dir"
-      - name: Install locked metadata-validation dependencies
-        if: matrix.arch == 'arm64' && matrix.format == 'dmg'
+      - name: Install locked dependencies
         run: pnpm install --frozen-lockfile
-      - name: Verify update metadata and both ZIP blockmaps
-        if: matrix.arch == 'arm64' && matrix.format == 'dmg'
-        shell: bash
-        run: |
-          mkdir "$RUNNER_TEMP/agentrans-mac-metadata"
-          node scripts/verify-metadata.mjs "$RUNNER_TEMP/agentrans-mac-inputs" 0.1.0-test.20261118.4 \
-            "$RUNNER_TEMP/agentrans-mac-metadata/metadata.json"
-      - name: Verify the normal first launch from this artifact
-        if: ${{ !cancelled() && steps.download.outcome == 'success' }}
-        timeout-minutes: 12
+      - name: Check native tools and fail closed with missing signing settings
         shell: bash
         env:
           QA_ARCH: ${{ matrix.arch }}
-          QA_FORMAT: ${{ matrix.format }}
+          QA_RUNNER_ARCH: ${{ matrix.runner_arch }}
+          QA_VERSION: ${{ inputs.version }}
+          QA_CHANNEL: ${{ inputs.channel }}
+          QA_TARGET: ${{ inputs.target }}
+          AGENTRANS_PACKAGING_CONFIG_DIR: ${{ runner.temp }}/agentrans-signing-check-config
+          AGENTRANS_PACKAGING_PRESET: test
+          AGENTRANS_DESKTOP_UPDATE_CHANNEL: nightly
         run: |
-          node scripts/verify-macos.mjs "$RUNNER_TEMP/agentrans-mac-inputs" \
-            "$RUNNER_TEMP/agentrans-mac-launch-report" "$QA_ARCH" "$QA_FORMAT" 0.1.0-test.20261118.4
-      - name: Retain the verification reports
+          set -euo pipefail
+          [[ "$RUNNER_ENVIRONMENT" == github-hosted && "$RUNNER_OS" == macOS && "$RUNNER_ARCH" == "$QA_RUNNER_ARCH" ]]
+          [[ "$QA_VERSION" == '0.1.0-test.20261118.4' && "$QA_CHANNEL" == nightly && "$QA_TARGET" == mac ]]
+          [[ "$(git rev-parse HEAD)" == 402a3b11a38a55e712d5bdc97df96365fb209b59 ]]
+          umask 077
+          report="$RUNNER_TEMP/agentrans-signing-check-output"
+          mkdir "$report" "$AGENTRANS_PACKAGING_CONFIG_DIR"
+          mkdir "$AGENTRANS_PACKAGING_CONFIG_DIR/presets" "$AGENTRANS_PACKAGING_CONFIG_DIR/secrets"
+          printf '%s\n' AGENTRANS_DESKTOP_APP_ID=com.agentrans.app > "$AGENTRANS_PACKAGING_CONFIG_DIR/presets/test.env"
+          signing="$AGENTRANS_PACKAGING_CONFIG_DIR/secrets/macos-signing.env"
+          : > "$signing"
+          {
+            node --version
+            xcodebuild -version
+            for tool in codesign security ditto hdiutil; do command -v "$tool"; done
+            xcrun --find notarytool
+            xcrun --find stapler
+          } | tee "$report/tools.txt"
+          check=(pnpm --dir apps/desktop run check:package "mac-$QA_ARCH" --build-version "$QA_VERSION")
+          "${check[@]}" --unsigned 2>&1 | tee "$report/unsigned.txt"
+          expect_rejection() {
+            local name="$1" message="$2"
+            shift 2
+            if "${check[@]}" "$@" > "$report/$name.txt" 2>&1; then
+              echo "Missing signing settings were accepted in $name" >&2
+              exit 1
+            fi
+            grep -F "$message" "$report/$name.txt"
+          }
+          expect_rejection missing-identity 'AGENTRANS_DESKTOP_MACOS_SIGNING_IDENTITY must be set'
+          printf '%s\n' 'AGENTRANS_DESKTOP_MACOS_SIGNING_IDENTITY=Preflight Placeholder' \
+            'AGENTRANS_DESKTOP_MACOS_TEAM_ID=TEST000001' > "$signing"
+          expect_rejection missing-notary 'macOS packaging requires APPLE_API_KEY'
+          expect_rejection missing-p12 'CSC_LINK must identify a readable local file' --skip-notarization
+      - name: Retain the configuration-only reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: macos-candidate-${{ matrix.arch }}-${{ matrix.format }}-qa
-          path: |
-            ${{ runner.temp }}/agentrans-mac-source/*.json
-            ${{ runner.temp }}/agentrans-mac-metadata/metadata.json
-            ${{ runner.temp }}/agentrans-mac-launch-report/result.json
+          name: macos-signing-check-${{ matrix.arch }}
+          path: ${{ runner.temp }}/agentrans-signing-check-output/*.txt
           if-no-files-found: warn
