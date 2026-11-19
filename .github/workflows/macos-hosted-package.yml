@@ -1,0 +1,121 @@
+name: Package Desktop · macOS · GitHub-hosted
+
+on:
+  workflow_call:
+    outputs:
+      version:
+        description: Checked desktop build version
+        value: ${{ jobs.check.outputs.version }}
+    inputs:
+      arch:
+        type: string
+        required: true
+      runner_mode:
+        type: string
+        required: true
+      source_ref:
+        type: string
+        required: true
+      source_sha:
+        type: string
+      preset:
+        type: string
+        required: true
+      update_channel:
+        type: string
+        required: true
+      version_mode:
+        type: string
+        required: true
+      build_version:
+        type: string
+      test_release_id:
+        type: string
+      compression_level:
+        type: string
+        required: true
+      skip_notarization:
+        type: boolean
+        required: true
+
+permissions:
+  contents: read
+
+env:
+  AGENTRANS_DESKTOP_TARGET_PLATFORM: darwin
+  AGENTRANS_DESKTOP_TARGET_ARCH: ${{ inputs.arch }}
+  AGENTRANS_PACKAGING_PRESET: production
+  AGENTRANS_DESKTOP_UPDATE_CHANNEL: ${{ inputs.update_channel }}
+  AGENTRANS_TELEMETRY_DISABLED: '1'
+  PACKAGE_MACOS_ZIP_COMPRESSION_LEVEL: ${{ inputs.compression_level }}
+  PACKAGE_SKIP_NOTARIZATION: 'false'
+  EXPECTED_RUNNER_ARCH: ${{ inputs.arch == 'arm64' && 'ARM64' || 'X64' }}
+
+jobs:
+  check:
+    name: Check native macOS ${{ inputs.arch }} packaging without credentials
+    runs-on: ${{ inputs.arch == 'arm64' && 'macos-26' || 'macos-26-intel' }}
+    timeout-minutes: 30
+    outputs:
+      version: ${{ steps.check_package.outputs.version }}
+    env:
+      PACKAGE_VERSION_MODE: ${{ inputs.version_mode }}
+      PACKAGE_BUILD_VERSION: ${{ inputs.build_version }}
+    steps:
+      - name: Check runner architecture and dispatch request
+        shell: bash
+        env:
+          HOSTED_MODE: ${{ inputs.runner_mode }}
+          REQUESTED_SOURCE_REF: ${{ inputs.source_ref }}
+          REQUESTED_SOURCE_SHA: ${{ inputs.source_sha }}
+          REQUESTED_PRESET: ${{ inputs.preset }}
+          REQUESTED_TEST_RELEASE_ID: ${{ inputs.test_release_id }}
+          REQUESTED_SKIP_NOTARIZATION: ${{ inputs.skip_notarization }}
+        run: |
+          [[ "$RUNNER_ENVIRONMENT" == github-hosted && "$RUNNER_OS" == macOS && "$RUNNER_ARCH" == "$EXPECTED_RUNNER_ARCH" ]]
+          [[ "$AGENTRANS_DESKTOP_TARGET_ARCH" == arm64 || "$AGENTRANS_DESKTOP_TARGET_ARCH" == x64 ]]
+          [[ "$GITHUB_EVENT_NAME" == workflow_dispatch && "$GITHUB_SHA" == "$GITHUB_WORKFLOW_SHA" ]]
+          if [[ -n "$REQUESTED_SOURCE_SHA" && "$REQUESTED_SOURCE_SHA" != "$GITHUB_SHA" ]]; then
+            echo 'source_sha must match the selected workflow commit.' >&2
+            exit 1
+          fi
+          case "$HOSTED_MODE" in
+            hosted-check) ;;
+            hosted-sign)
+              if [[ "$GITHUB_REF" != refs/heads/main || "$REQUESTED_SOURCE_REF" != main ||
+                    "$REQUESTED_SOURCE_SHA" != "$GITHUB_SHA" || "$REQUESTED_PRESET" != production ||
+                    "$REQUESTED_SKIP_NOTARIZATION" != false || -n "$REQUESTED_TEST_RELEASE_ID" ]]; then
+                echo 'Hosted signing requires main, its exact source_sha, production, notarization and no test_release_id.' >&2
+                exit 1
+              fi
+              if [[ "$PACKAGE_VERSION_MODE" == auto ]]; then
+                echo 'Hosted signing requires default, product or manual version mode to match other platforms.' >&2
+                exit 1
+              fi
+              ;;
+            *)
+              echo 'Select hosted-check or hosted-sign.' >&2
+              exit 1
+              ;;
+          esac
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Check the selected commit
+        run: test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+      - uses: pnpm/action-setup@v5.0.0
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: '24'
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Prepare the public production settings
+        run: node apps/desktop/scripts/prepare-hosted-macos-ci.mjs public
+      - name: Check the macOS toolchain and package configuration
+        id: check_package
+        shell: bash
+        run: |
+          node apps/desktop/scripts/prepare-hosted-macos-ci.mjs check
+          pnpm run "package:desktop:mac:$AGENTRANS_DESKTOP_TARGET_ARCH" --unsigned --check --build-version "$PACKAGE_VERSION"
+          printf 'version=%s\n' "$PACKAGE_VERSION" >> "$GITHUB_OUTPUT"

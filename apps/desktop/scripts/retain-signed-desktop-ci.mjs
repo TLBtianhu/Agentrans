@@ -92,7 +92,13 @@ export async function retainSignedDesktopCi(target, env) {
   const git = (...args) => execFileSync('git', args, { cwd: workspace, encoding: 'utf8' }).trim()
   const commit = git('rev-parse', '--verify', 'HEAD^{commit}')
   if (!shaPattern.test(commit)) throw new Error('signed Desktop retention: invalid source commit')
-  if (sourceRef.startsWith('dsh-v')) {
+  if (env.PACKAGE_SOURCE_SHA !== undefined) {
+    // Hosted jobs check out the exact approved main commit, including the workflow itself.
+    if (windows || env.RUNNER_ENVIRONMENT !== 'github-hosted' || env.GITHUB_REF !== 'refs/heads/main' || sourceRef !== 'main'
+      || env.PACKAGE_SOURCE_SHA !== commit || env.GITHUB_SHA !== commit || workflowSha !== commit) {
+      throw new Error('signed Desktop retention: hosted packaging must use the approved main workflow and source commit')
+    }
+  } else if (sourceRef.startsWith('dsh-v')) {
     const sourcePackage = JSON.parse(await readFile(join(workspace, 'package.json'), 'utf8'))
     if (sourceRef !== `dsh-v${sourcePackage.version}` || git('rev-parse', '--verify', `refs/tags/${sourceRef}^{commit}`) !== commit) {
       throw new Error('signed Desktop retention: selected tag does not match the checked-out product version and commit')

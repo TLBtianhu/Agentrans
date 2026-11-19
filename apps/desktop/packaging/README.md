@@ -16,6 +16,7 @@ Build Desktop installers locally or through Windows or macOS Actions, choose dep
 - [Release versions](#release-versions)
 - [Configuration and local builds](#configuration-and-local-builds)
 - [Windows Actions packaging](#windows-actions)
+- [macOS GitHub-hosted packaging](#macos-hosted-actions)
 - [macOS self-hosted packaging](#macos-actions)
 - [Unsigned Windows test installer](#unsigned-windows-test-installer)
 - [Local macOS DMG without release signing](#local-macos-dmg-without-release-signing)
@@ -30,7 +31,7 @@ Build Desktop installers locally or through Windows or macOS Actions, choose dep
 
 ## Choose a build path
 
-Run local commands from the repository root after installing locked dependencies. Use platform-specific commands for a local build, or platform Actions for the registered self-hosted runner. Choose test or production deployment independently from signed or unsigned mode. Read [Windows signing and runner operations](../windows-signing/README.md#trust-and-isolation) before any Windows signed build or shared-runner use. Installation is separate from packaging; [publication](../publishing/README.md) is a further explicit operation.
+Run local commands from the repository root after installing locked dependencies. Use platform-specific commands for a local build or platform Actions for a runner build. Choose test or production deployment independently from signed or unsigned mode on self-hosted runners. Read [Windows signing and runner operations](../windows-signing/README.md#trust-and-isolation) before any Windows signed build or shared-runner use. Installation and [publication](../publishing/README.md) are separate operations.
 
 Set `AGENTRANS_DESKTOP_PACKAGE_CACHE_DIR` to an absolute build-cache directory for reuse across checkouts; see [cache configuration and lifecycle](#desktop-runtime-preparation).
 
@@ -122,11 +123,33 @@ The dependency-install and packaging steps normalize their own shell to normal C
 
 Installer uploads store the already-compressed release files without ZIP recompression; this preserves installer bytes and signatures. Diagnostic uploads retain their ordinary compression.
 
+<a id="macos-hosted-actions"></a>
+
+## macOS GitHub-hosted packaging
+
+Run the [Apple Silicon workflow](../../../.github/workflows/macos-package.yml) for arm64 on `macos-26` and the [Intel workflow](../../../.github/workflows/macos-intel-package.yml) for x64 on `macos-26-intel`. Set `runner_mode` to `hosted-check` to verify the native architecture, toolchain and packaging inputs without Apple credentials. Select the pushed workflow branch in Actions when testing a change. Read the check job's logs for its result.
+
+To enable `hosted-sign`, open **Settings → Environments** in `TLBtianhu/Agentrans` and create `macos-production-signing`. Under **Deployment branches and tags**, choose **Selected branches and tags** and add `main` as the only branch rule. Set a required reviewer and enable **Prevent self-review** when a separate reviewer is available. Create these values under **Environment secrets**. [GitHub environment configuration](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments)
+
+| Environment secret | Value |
+| --- | --- |
+| `MACOS_DEVELOPER_ID_P12_BASE64` | Developer ID Application `.p12` export containing the signing certificate and its private key, encoded as standard Base64 on one line. |
+| `MACOS_DEVELOPER_ID_P12_PASSWORD` | Password used to export the `.p12`. |
+| `MACOS_NOTARIZATION_KEY_P8_BASE64` | App Store Connect team API private key `.p8`, encoded as standard Base64 on one line. |
+| `MACOS_NOTARIZATION_KEY_ID` | Key ID of that API key. |
+| `MACOS_NOTARIZATION_ISSUER_ID` | Issuer ID of the App Store Connect team. |
+
+Encode the two files locally and enter the values directly in the environment secrets form. Keep the encoded values out of terminal output and workflow logs. The job creates private files and a temporary keychain on its runner. Set the public `DESKTOP_MACOS_TEAM_ID` and `DESKTOP_MACOS_SIGNING_IDENTITY` under **Settings → Secrets and variables → Actions → Variables** in the repository. [Accepted identity formats](../publishing/README.md#review-signed-installers)
+
+For both signed runs, dispatch the workflow from `main`, use `runner_mode=hosted-sign`, `source_ref=main` and `preset=production`, and supply the full 40-character `source_sha` matching the workflow's `main` commit. Keep `skip_notarization` off and `test_release_id` empty. Use `version_mode=product` or enter the confirmed [build version](#release-versions) with `version_mode=manual`. Use the same version and update channel for both architectures. GitHub applies the environment's approval rules before each signing job runs.
+
+A successful signed run retains the DMG, ZIP, blockmap, update metadata and `desktop-signed-build.json` as a GitHub Actions artifact. Use the two macOS run IDs and the signed Windows run ID in the [read-only signed installer check](../publishing/README.md#review-signed-installers). Verify the first real Apple credential import and notarization in that signed build's results.
+
 <a id="macos-actions"></a>
 
 ## macOS self-hosted packaging
 
-The [Apple Silicon workflow](../../../.github/workflows/macos-package.yml) and [Intel workflow](../../../.github/workflows/macos-intel-package.yml) produce separate arm64 and x64 packages on the Apple Silicon runner labeled `dsh-mac-package-trial`. Both share one concurrency group. The Intel workflow checks Rosetta execution before dependency installation; its selected source must include the target-aware macOS CI adapter. Both select `test` or `production` and use the existing signing, notarization and packaged-runtime checks. Successful DMG/ZIP files and diagnostic logs are retained for 14 days without publishing a release. Installer uploads disable redundant ZIP compression. The operator must verify a complete Actions run and installation on the target architecture before release qualification. The `compression_level` dropdown defaults to `3` and also offers `7`; it overrides the machine preset for this run and affects only ZIP and automatic-update downloads, not DMG.
+With `runner_mode=self-hosted` (the default), the [Apple Silicon workflow](../../../.github/workflows/macos-package.yml) and [Intel workflow](../../../.github/workflows/macos-intel-package.yml) produce separate arm64 and x64 packages on the Apple Silicon runner labeled `dsh-mac-package-trial`. Both share one concurrency group. The Intel workflow checks Rosetta execution before dependency installation; its selected source must include the target-aware macOS CI adapter. Both select `test` or `production` and use the existing signing, notarization and packaged-runtime checks. Successful DMG/ZIP files and diagnostic logs are retained for 14 days without publishing a release. Installer uploads disable redundant ZIP compression. The operator must verify a complete Actions run and installation on the target architecture before release qualification. The `compression_level` dropdown defaults to `3` and also offers `7`; it overrides the machine preset for this run and affects only ZIP and automatic-update downloads, not DMG.
 
 All three platform forms put source, environment, update channel, version mode, manual version, test release ID and compression level first, with matching defaults. macOS notarization and Windows signing and cache measurement options follow these common fields.
 

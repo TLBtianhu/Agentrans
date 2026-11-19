@@ -16,6 +16,7 @@ description: "在本地或 Windows／macOS Actions 中生成 Desktop 安装包�
 - [发布版本](#release-versions)
 - [配置与本地构建](#configuration-and-local-builds)
 - [Windows Actions 打包](#windows-actions)
+- [macOS GitHub 托管打包](#macos-hosted-actions)
 - [macOS 自托管打包](#macos-actions)
 - [未签名 Windows 测试安装包](#unsigned-windows-test-installer)
 - [无发布签名的本地 macOS DMG](#local-macos-dmg-without-release-signing)
@@ -30,7 +31,7 @@ description: "在本地或 Windows／macOS Actions 中生成 Desktop 安装包�
 
 ## 选择打包方式
 
-安装锁定依赖后，从仓库根目录运行本地命令。本地构建使用平台命令，已注册的自托管 runner 使用对应平台的 Actions。test/production 部署与 signed/unsigned 模式分别选择。任何 Windows 签名构建或共享 runner 使用前，先阅读 [Windows 签名与 runner 运维](../windows-signing/README.zh.md#trust-and-isolation)。安装与打包分开进行；[发布](../publishing/README.zh.md)还需要单独的显式操作。
+安装锁定依赖后，从仓库根目录运行本地命令。本地构建使用对应平台的命令，runner 构建使用对应平台的 Actions。自托管 runner 分别选择 test/production 部署与 signed/unsigned 模式。进行 Windows 签名构建或使用共享 runner 前，先阅读 [Windows 签名与 runner 运维](../windows-signing/README.zh.md#trust-and-isolation)。安装和[发布](../publishing/README.zh.md)是单独的操作。
 
 将 `AGENTRANS_DESKTOP_PACKAGE_CACHE_DIR` 设为绝对构建缓存目录以跨 checkout 复用；详见[缓存配置与生命周期](#desktop-runtime-preparation)。
 
@@ -122,11 +123,33 @@ runner 的受监督启动和恢复见 [Windows runner 机器准备](../windows-s
 
 安装器上传直接存储已经压缩的发布文件，不再进行 ZIP 二次压缩；安装器字节和签名保持不变。诊断日志上传保留通常的压缩方式。
 
+<a id="macos-hosted-actions"></a>
+
+## macOS GitHub 托管打包
+
+[Apple Silicon 工作流](../../../.github/workflows/macos-package.yml)在 `macos-26` 上运行 arm64，[Intel 工作流](../../../.github/workflows/macos-intel-package.yml)在 `macos-26-intel` 上运行 x64。选择 `runner_mode=hosted-check`，可在无需 Apple 凭据的情况下核对托管 runner 的原生架构、工具链和打包输入。测试改动时，在 Actions 中选择已推送的工作流分支。检查结果见对应任务日志。
+
+启用 `hosted-sign` 前，在 `TLBtianhu/Agentrans` 仓库的 **Settings → Environments** 创建 `macos-production-signing`。在 **Deployment branches and tags** 中选择 **Selected branches and tags**，只添加 `main` 分支规则。设置必需的审批人，有独立审批人时启用 **Prevent self-review**。在 **Environment secrets** 中添加下列值。 [GitHub 环境配置](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments)
+
+| Environment secret | 值 |
+| --- | --- |
+| `MACOS_DEVELOPER_ID_P12_BASE64` | Developer ID Application `.p12` 导出文件，含签名证书和私钥，编码为单行标准 Base64。 |
+| `MACOS_DEVELOPER_ID_P12_PASSWORD` | 导出 `.p12` 时使用的密码。 |
+| `MACOS_NOTARIZATION_KEY_P8_BASE64` | App Store Connect 团队 API 私钥 `.p8`，编码为单行标准 Base64。 |
+| `MACOS_NOTARIZATION_KEY_ID` | 此 API 密钥的 Key ID。 |
+| `MACOS_NOTARIZATION_ISSUER_ID` | App Store Connect 团队的 Issuer ID。 |
+
+在本地编码两个文件，将值直接填入 Environment secrets 表单。避免将编码后的值输出到终端或工作流日志。任务在 runner 上生成私有文件和临时钥匙串。在仓库的 **Settings → Secrets and variables → Actions → Variables** 中设置公开的 `DESKTOP_MACOS_TEAM_ID` 和 `DESKTOP_MACOS_SIGNING_IDENTITY`。 [验签身份格式](../publishing/README.zh.md#review-signed-installers)
+
+两次正式签名都从 `main` 分支触发工作流，填写 `runner_mode=hosted-sign`、`source_ref=main`、`preset=production`，以及与该次工作流 `main` 提交一致的完整 40 字符 `source_sha`。关闭 `skip_notarization`，留空 `test_release_id`。选择 `version_mode=product`，或选择 `version_mode=manual` 并填入已确认的[构建版本](#release-versions)。两个架构使用相同的版本和更新通道。每个签名任务开始前，GitHub 会执行该环境的审批规则。
+
+签名成功后，GitHub Actions 产物包含 DMG、ZIP、blockmap、更新元数据和 `desktop-signed-build.json`。将两次 macOS 运行 ID 和签名 Windows 运行 ID 一起传给[只读签名安装包预检](../publishing/README.zh.md#review-signed-installers)。首次真实证书导入与 Apple 公证以正式签名运行结果为准。
+
 <a id="macos-actions"></a>
 
 ## macOS 自托管打包
 
-[Apple Silicon 工作流](../../../.github/workflows/macos-package.yml)与 [Intel 工作流](../../../.github/workflows/macos-intel-package.yml)在带有 `dsh-mac-package-trial` 标签的 Apple Silicon runner 上分别生成 arm64 和 x64 安装包，两者共用一个并发组。Intel 工作流在安装依赖前检查 Rosetta 能否执行；所选源码必须包含按目标架构校验的 macOS CI 适配脚本。两者均选择 `test` 或 `production`，并复用现有签名、公证和打包运行时检查。成功的 DMG／ZIP 与诊断日志保留 14 天，不发布 release；安装包上传关闭重复 ZIP 压缩。操作人员须验收完整 Actions 运行及目标架构上的安装，才能确认可交付。`compression_level` 下拉选项默认为 `3`，也可选择 `7`；本次运行以该选项覆盖机器预设，只影响 ZIP 和自动升级下载，不影响 DMG。
+默认的 `runner_mode=self-hosted` 模式下，[Apple Silicon 工作流](../../../.github/workflows/macos-package.yml)与 [Intel 工作流](../../../.github/workflows/macos-intel-package.yml)在带有 `dsh-mac-package-trial` 标签的 Apple Silicon runner 上分别生成 arm64 和 x64 安装包，两者共用一个并发组。Intel 工作流在安装依赖前检查 Rosetta 能否执行；所选源码必须包含按目标架构校验的 macOS CI 适配脚本。两者均选择 `test` 或 `production`，并复用现有签名、公证和打包运行时检查。成功的 DMG／ZIP 与诊断日志保留 14 天，不发布 release；安装包上传关闭重复 ZIP 压缩。操作人员须验收完整 Actions 运行及目标架构上的安装，才能确认可交付。`compression_level` 下拉选项默认为 `3`，也可选择 `7`；本次运行以该选项覆盖机器预设，只影响 ZIP 和自动升级下载，不影响 DMG。
 
 三个平台的表单均依次展示源码、环境、升级通道、版本模式、手动版本号、测试 release ID 和压缩等级，默认值一致。macOS 公证选项和 Windows 签名、缓存测量选项位于公共字段之后。
 

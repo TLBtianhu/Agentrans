@@ -125,6 +125,30 @@ describe('production signed Desktop retention', () => {
     await expect(retainSignedDesktopCi('win-x64', { ...f.env, PACKAGE_SOURCE_REF: tag })).resolves.toContain('retained-signed-win-x64')
   })
 
+  it.each(targets.slice(1).map(spec => ({ target: spec[0], spec })))('records the pinned main commit on hosted $target', async ({ target, spec }) => {
+    const f = await fixture(spec)
+    f.git('checkout', '-q', '--detach', f.commit)
+    const directory = await retainSignedDesktopCi(target, {
+      ...f.env, RUNNER_ENVIRONMENT: 'github-hosted', GITHUB_REF: 'refs/heads/main',
+      GITHUB_SHA: f.commit, GITHUB_WORKFLOW_SHA: f.commit, PACKAGE_SOURCE_SHA: f.commit,
+    })
+    const manifest: unknown = JSON.parse(await readFile(join(directory, 'desktop-signed-build.json'), 'utf8'))
+    expect(manifest).toMatchObject({ target, commit: f.commit, workflowSha: f.commit, sourceRef: 'main' })
+  })
+
+  it.each([
+    { RUNNER_ENVIRONMENT: 'self-hosted' }, { GITHUB_REF: 'refs/heads/candidate' }, { PACKAGE_SOURCE_REF: 'master' },
+    { GITHUB_SHA: workflowSha }, { GITHUB_WORKFLOW_SHA: workflowSha }, { PACKAGE_SOURCE_SHA: workflowSha },
+  ])('rejects hosted artifacts outside the pinned main checkout (%j)', async (override) => {
+    const f = await fixture(targets[2])
+    f.git('checkout', '-q', '--detach', f.commit)
+    await expect(retainSignedDesktopCi('mac-x64', {
+      ...f.env, RUNNER_ENVIRONMENT: 'github-hosted', GITHUB_REF: 'refs/heads/main',
+      GITHUB_SHA: f.commit, GITHUB_WORKFLOW_SHA: f.commit, PACKAGE_SOURCE_SHA: f.commit, ...override,
+    })).rejects.toThrow('hosted packaging must use the approved main workflow and source commit')
+    expect(await readdir(f.temporary)).toEqual([])
+  })
+
   it('rejects a qualified naming set with missing or empty files', async () => {
     const f = await fixture(targets[1])
     const file = join(f.artifacts, `agentrans-${version}-mac-arm64.dmg`)

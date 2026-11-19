@@ -47,16 +47,28 @@ on:
         type: boolean
         default: false
         required: true
+      runner_mode:
+        description: '执行方式：self-hosted 使用专用主机，hosted-check 只检查所选工作流提交，hosted-sign 正式签名并公证'
+        type: choice
+        options: [self-hosted, hosted-check, hosted-sign]
+        default: self-hosted
+        required: true
+      source_sha:
+        description: '托管任务预期的完整提交 SHA；hosted-sign 必填，须等于 main 上选定的工作流提交'
+        type: string
+        default: ''
+        required: false
 
 permissions:
   contents: read
 
 concurrency:
-  group: macos-desktop-package
+  group: ${{ inputs.runner_mode == 'self-hosted' && 'macos-desktop-package' || 'macos-hosted-arm64' }}
   cancel-in-progress: false
 
 jobs:
   package:
+    if: inputs.runner_mode == 'self-hosted'
     runs-on: [self-hosted, macOS, ARM64, dsh-mac-package-trial]
     timeout-minutes: 180
     defaults:
@@ -164,6 +176,7 @@ jobs:
           path: apps/desktop/.desktop-build/packaging-runs/
           if-no-files-found: warn
           retention-days: 14
+
       - name: Retain installers for the selected mode
         if: success()
         uses: actions/upload-artifact@v7.0.1
@@ -171,6 +184,103 @@ jobs:
           name: macos-arm64-${{ steps.settings.outputs.mode }}-${{ steps.settings.outputs.version }}-${{ github.run_id }}-${{ github.run_attempt }}
           include-hidden-files: true
           path: ${{ steps.retained_production.outputs.directory || steps.retained.outputs.directory }}/*
+          compression-level: 0
+          if-no-files-found: error
+          retention-days: 14
+
+  hosted:
+    if: inputs.runner_mode == 'hosted-check' || inputs.runner_mode == 'hosted-sign'
+    uses: ./.github/workflows/macos-hosted-package.yml
+    with:
+      arch: arm64
+      runner_mode: ${{ inputs.runner_mode }}
+      source_ref: ${{ inputs.source_ref }}
+      source_sha: ${{ inputs.source_sha }}
+      preset: ${{ inputs.preset }}
+      update_channel: ${{ inputs.update_channel }}
+      version_mode: ${{ inputs.version_mode }}
+      build_version: ${{ inputs.build_version }}
+      test_release_id: ${{ inputs.test_release_id }}
+      compression_level: ${{ inputs.compression_level }}
+      skip_notarization: ${{ inputs.skip_notarization }}
+
+  hosted_sign:
+    name: Sign and notarize macOS arm64 installers
+    needs: hosted
+    if: >-
+      inputs.runner_mode == 'hosted-sign' &&
+      github.event_name == 'workflow_dispatch' &&
+      github.ref == 'refs/heads/main' &&
+      inputs.source_ref == 'main' &&
+      inputs.source_sha == github.sha &&
+      inputs.preset == 'production' &&
+      inputs.version_mode != 'auto' &&
+      !inputs.skip_notarization &&
+      inputs.test_release_id == ''
+    runs-on: macos-26
+    timeout-minutes: 180
+    environment: macos-production-signing
+    env:
+      AGENTRANS_DESKTOP_TARGET_PLATFORM: darwin
+      AGENTRANS_DESKTOP_TARGET_ARCH: arm64
+      AGENTRANS_PACKAGING_PRESET: production
+      AGENTRANS_DESKTOP_UPDATE_CHANNEL: ${{ inputs.update_channel }}
+      AGENTRANS_TELEMETRY_DISABLED: '1'
+      PACKAGE_MACOS_ZIP_COMPRESSION_LEVEL: ${{ inputs.compression_level }}
+      PACKAGE_SKIP_NOTARIZATION: 'false'
+      EXPECTED_RUNNER_ARCH: ARM64
+      PACKAGE_SOURCE_REF: main
+      PACKAGE_SOURCE_SHA: ${{ inputs.source_sha }}
+      PACKAGE_VERSION_MODE: manual
+      PACKAGE_BUILD_VERSION: ${{ needs.hosted.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Confirm the authenticated source and native runner
+        shell: bash
+        run: |
+          [[ "$RUNNER_ENVIRONMENT" == github-hosted && "$RUNNER_OS" == macOS && "$RUNNER_ARCH" == "$EXPECTED_RUNNER_ARCH" ]]
+          [[ "$GITHUB_SHA" == "$GITHUB_WORKFLOW_SHA" && "$GITHUB_SHA" == "$PACKAGE_SOURCE_SHA" ]]
+          [[ "$(git rev-parse HEAD)" == "$GITHUB_SHA" ]]
+      - uses: pnpm/action-setup@v5.0.0
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: '24'
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Prepare the public production settings
+        id: config
+        run: node apps/desktop/scripts/prepare-hosted-macos-ci.mjs public
+      - name: Stage the temporary Apple signing credentials
+        env:
+          MACOS_DEVELOPER_ID_P12_BASE64: ${{ secrets.MACOS_DEVELOPER_ID_P12_BASE64 }}
+          MACOS_DEVELOPER_ID_P12_PASSWORD: ${{ secrets.MACOS_DEVELOPER_ID_P12_PASSWORD }}
+          MACOS_NOTARIZATION_KEY_P8_BASE64: ${{ secrets.MACOS_NOTARIZATION_KEY_P8_BASE64 }}
+          MACOS_NOTARIZATION_KEY_ID: ${{ secrets.MACOS_NOTARIZATION_KEY_ID }}
+          MACOS_NOTARIZATION_ISSUER_ID: ${{ secrets.MACOS_NOTARIZATION_ISSUER_ID }}
+          DESKTOP_MACOS_TEAM_ID: ${{ vars.DESKTOP_MACOS_TEAM_ID }}
+          DESKTOP_MACOS_SIGNING_IDENTITY: ${{ vars.DESKTOP_MACOS_SIGNING_IDENTITY }}
+        run: node apps/desktop/scripts/prepare-hosted-macos-ci.mjs credentials
+      - name: Check signed package configuration and toolchain
+        shell: bash
+        run: |
+          node apps/desktop/scripts/prepare-macos-ci.mjs
+          pnpm run "package:desktop:mac:$AGENTRANS_DESKTOP_TARGET_ARCH" --check --build-version "$PACKAGE_VERSION"
+      - name: Build and notarize signed macOS installers
+        run: pnpm run "package:desktop:mac:$AGENTRANS_DESKTOP_TARGET_ARCH" --build-version "$PACKAGE_VERSION"
+      - name: Collect installers and the signed build's source record
+        id: retained
+        run: node apps/desktop/scripts/retain-signed-desktop-ci.mjs "mac-$AGENTRANS_DESKTOP_TARGET_ARCH"
+      - name: Remove the temporary signing configuration
+        if: always() && steps.config.outcome == 'success'
+        run: node apps/desktop/scripts/prepare-hosted-macos-ci.mjs cleanup
+      - name: Retain the verified installers for this run
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: macos-arm64-signed-${{ needs.hosted.outputs.version }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ steps.retained.outputs.directory }}/*
           compression-level: 0
           if-no-files-found: error
           retention-days: 14
