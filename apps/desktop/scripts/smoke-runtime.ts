@@ -5,6 +5,7 @@ import { rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { execFile } from 'node:child_process'
+import { randomUUID } from 'node:crypto'
 import { promisify } from 'node:util'
 import { fileURLToPath } from 'node:url'
 import { readPrimaryRuntime, workspaceDependencyPaths } from '../../../packages/skill/tool-workspace-dependencies/src/index.ts'
@@ -14,7 +15,7 @@ import { createPluginProfile } from '../src/project-manager.ts'
 import type { DesktopRuntimeDescriptor } from '../src/runtime-tree.ts'
 
 /**
- * Check CLI package operations, Host startup, its frontend, external plugins and real Office-to-PDF conversion.
+ * Check CLI package operations, Host startup, frontend, session creation, external plugins and real Office-to-PDF conversion.
  * @param root - Materialized dsh resources.
  * @param node - Prepared target Electron executable.
  * @param runtime - Verified resource descriptor.
@@ -166,6 +167,24 @@ export function apply(ctx) {
     if (response.status !== 200 || !(await response.text()).includes('<html')) {
       throw new Error('desktop runtime: packaged frontend smoke failed')
     }
+    const method = 'session/create'
+    const rpcId = randomUUID()
+    const createResponse = await fetch(new URL(`/api/${method}`, ready.url), {
+      method: 'POST', headers: { cookie, 'content-type': 'application/json' }, signal: AbortSignal.timeout(120_000),
+      body: JSON.stringify({ type: 'client-request', rpcId, method, payload: { args: { request: { cwd: home } } } }),
+    })
+    if (!createResponse.ok) throw new Error(`desktop runtime: session creation returned HTTP ${createResponse.status}`)
+    const creation = await createResponse.json() as {
+      type?: unknown
+      rpcId?: unknown
+      result?: { ok?: unknown; value?: { sessionId?: unknown; agentPreset?: unknown }; error?: unknown }
+    } | null
+    const { sessionId, agentPreset } = creation?.result?.value ?? {}
+    if (creation?.type !== 'server-response' || creation.rpcId !== rpcId || creation.result?.ok !== true
+      || typeof sessionId !== 'string' || sessionId.length === 0 || typeof agentPreset !== 'string' || agentPreset.length === 0) {
+      throw new Error(`desktop runtime: default preset session creation failed: ${JSON.stringify(creation?.result?.error ?? creation)}`)
+    }
+    console.log('desktop runtime: default preset session creation passed')
     const pluginResponse = await fetch(new URL('/desktop-smoke', ready.url), { headers: { cookie } })
     if (await pluginResponse.text() !== 'plugin route ready') throw new Error('desktop runtime: plugin HTTP route failed')
     const installation = await fetch(new URL('/desktop-smoke-install', ready.url), {

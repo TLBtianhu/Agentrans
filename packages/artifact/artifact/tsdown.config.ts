@@ -9,4 +9,5 @@ export default defineConfig({
   fixedExtension: false,
   dts: false,
   clean: false,
+  outputOptions: { chunkFileNames: 'shared-[hash].js' },
 })

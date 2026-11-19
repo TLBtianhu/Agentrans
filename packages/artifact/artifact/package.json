@@ -85,6 +85,7 @@
     "lib/scene-export.js",
     "lib/scene-renderers.js",
     "lib/scene-tool.js",
+    "lib/shared-*.js",
     "skills/artifact-design/SKILL.md",
     "skills/artifact-design/parameter-explorer.html",
     "lib/types/**/*.js",

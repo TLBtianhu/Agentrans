@@ -217,7 +217,7 @@ const packageFileExtras: Readonly<Record<string, readonly string[]>> = {
   '@agentrans/artifact': [
     'lib/tool.js', 'lib/attachment-csv-tool.js', 'lib/scene.js', 'lib/particle-runtime.js', 'lib/capabilities.js',
     'lib/runtime-values.js', 'lib/observation-comparison.js', 'lib/scene-export.js',
-    'lib/scene-renderers.js', 'lib/scene-tool.js',
+    'lib/scene-renderers.js', 'lib/scene-tool.js', 'lib/shared-*.js',
     'skills/artifact-design/SKILL.md', 'skills/artifact-design/parameter-explorer.html',
   ],
   // Personalized pages ship the location guidance used by their Creator.
