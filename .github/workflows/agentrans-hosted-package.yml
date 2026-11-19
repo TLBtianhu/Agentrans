@@ -1,15 +1,16 @@
 name: Verify the retained macOS 0.1.0-test.20261119.1 clean installation
-run-name: Verify clean macOS 0.1.0-test.20261119.1 installation and session reopen
+run-name: Verify clean macOS ${{ inputs.arch }} 0.1.0-test.20261119.1 installation and session reopen
 
 on:
   workflow_dispatch:
     inputs:
-      arm64_run:
-        description: Successful macOS arm64 packaging run ID
-        type: string
+      arch:
+        description: Native macOS runner architecture
+        type: choice
+        options: [arm64, x64]
         required: true
-      x64_run:
-        description: Successful macOS x64 packaging run ID
+      build_run:
+        description: Successful packaging run ID for this architecture
         type: string
         required: true
 
@@ -20,26 +21,16 @@ permissions:
 jobs:
   verify:
     if: github.repository == 'TLBtianhu/Agentrans' && github.ref == 'refs/heads/codex/macos-5-clean-qa-20261119'
-    name: Verify macOS ${{ matrix.arch }} / ${{ matrix.format }}
+    name: Verify macOS ${{ inputs.arch }} / ${{ matrix.format }}
     strategy:
       fail-fast: false
       matrix:
-        arch: [arm64, x64]
         format: [dmg, zip]
-        include:
-          - arch: arm64
-            runner: macos-26
-            runner_arch: ARM64
-            build: ${{ inputs.arm64_run }}
-          - arch: x64
-            runner: macos-26-intel
-            runner_arch: X64
-            build: ${{ inputs.x64_run }}
-    runs-on: ${{ matrix.runner }}
+    runs-on: ${{ inputs.arch == 'arm64' && 'macos-26' || 'macos-26-intel' }}
     timeout-minutes: 30
     env:
       QA_VERSION: '0.1.0-test.20261119.1'
-      QA_ARCH: ${{ matrix.arch }}
+      QA_ARCH: ${{ inputs.arch }}
       QA_FORMAT: ${{ matrix.format }}
     steps:
       - uses: actions/checkout@v7.0.1
@@ -54,8 +45,8 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
-          QA_RUNNER_ARCH: ${{ matrix.runner_arch }}
-          QA_BUILD: ${{ matrix.build }}
+          QA_RUNNER_ARCH: ${{ inputs.arch == 'arm64' && 'ARM64' || 'X64' }}
+          QA_BUILD: ${{ inputs.build_run }}
           QA_SOURCE_SHA: bee9aaee0db28bf05061b3f7461842b6d85b1fb0
         run: |
           [[ "$RUNNER_ENVIRONMENT" == github-hosted && "$RUNNER_OS" == macOS && "$RUNNER_ARCH" == "$QA_RUNNER_ARCH" ]]
@@ -84,7 +75,7 @@ jobs:
         uses: actions/download-artifact@v8.0.1
         with:
           github-token: ${{ github.token }}
-          run-id: ${{ matrix.build }}
+          run-id: ${{ inputs.build_run }}
           artifact-ids: ${{ steps.source.outputs.artifact-id }}
           path: ${{ runner.temp }}/agentrans-mac-inputs
           digest-mismatch: error
@@ -98,7 +89,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7.0.1
         with:
-          name: macos-5-clean-${{ matrix.arch }}-${{ matrix.format }}-qa
+          name: macos-5-clean-${{ inputs.arch }}-${{ matrix.format }}-qa
           path: |
             ${{ runner.temp }}/agentrans-mac-source/*.json
             ${{ runner.temp }}/agentrans-mac-launch-report/result.json
