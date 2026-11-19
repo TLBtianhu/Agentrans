@@ -1,57 +1,157 @@
-name: Publish Desktop release
-run-name: Verify the signed Desktop draft
+name: Preflight and stage the Ed25519 nightly
+run-name: Ed25519 preflight and draft 0.1.0-test.20261119.1
 
 on:
   workflow_dispatch:
-    inputs:
-      package_run_id:
-        description: '打包运行 ID：该次运行产出的安装包、blockmap 与通道元数据将附加到 Release'
-        required: true
-        type: string
-      version:
-        description: '产物版本号：须与打包运行产出的文件名一致'
-        required: true
-        type: string
-      channel:
-        description: '更新通道：nightly 发布预发布，latest 发布正式 Release'
-        required: true
-        type: choice
-        options: [nightly, latest]
 
-permissions:
-  contents: write
-  actions: read
+permissions: {}
 
 concurrency:
-  group: agentrans-desktop-release-${{ inputs.version }}
+  group: agentrans-desktop-release-0.1.0-test.20261119.1
   cancel-in-progress: false
 
 jobs:
-  publish:
+  preflight:
+    if: github.repository == 'TLBtianhu/Agentrans' && github.ref == 'refs/heads/codex/desktop-ed25519-release-20261119'
     runs-on: ubuntu-latest
-    env:
-      PACKAGE_RUN_ID: ${{ inputs.package_run_id }}
-      PACKAGE_VERSION: ${{ inputs.version }}
-      PACKAGE_CHANNEL: ${{ inputs.channel }}
+    timeout-minutes: 18
+    permissions:
+      actions: read
+      contents: read
+    outputs:
+      proof-id: ${{ steps.proof.outputs.artifact-id }}
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
       - uses: pnpm/action-setup@v5.0.0
       - uses: actions/setup-node@v7.0.0
         with:
           node-version: '24'
+          cache: pnpm
       - name: Install locked dependencies
         run: pnpm install --frozen-lockfile
-      - name: Verify the packaging run and stage its assets
-        id: package
+      - name: Verify exact candidate builds and immutable archives
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node --import tsx apps/desktop/scripts/stage-hosted-desktop-release.ts "$PACKAGE_RUN_ID" "$PACKAGE_VERSION" "$PACKAGE_CHANNEL"
-      - name: Sign and stage the Desktop draft
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: '0.1.0-test.20261119.1'
+          RELEASE_SOURCE_SHA: bee9aaee0db28bf05061b3f7461842b6d85b1fb0
         shell: bash
+        run: |
+          receipts="$RUNNER_TEMP/agentrans-release-receipts"
+          mkdir "$receipts"
+          verify_build() {
+            local target="$1" run="$2" id="$3" digest="$4"
+            gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run" | jq -e \
+              --argjson run "$run" --arg sha "$RELEASE_SOURCE_SHA" --arg repo "$GITHUB_REPOSITORY" \
+              --arg title "Package Agentrans · $target · nightly · $RELEASE_VERSION" \
+              'select(.id == $run and .workflow_id == 413465192
+                and .path == ".github/workflows/agentrans-hosted-package.yml"
+                and .event == "workflow_dispatch" and .status == "completed" and .conclusion == "success"
+                and .head_sha == $sha and .head_branch == "codex/macos-session-package-fix-20261119"
+                and .repository.full_name == $repo and .head_repository.full_name == $repo and .display_title == $title)
+                | {id, head_sha, display_title, html_url}' > "$receipts/$target-build.json"
+            gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$id" | jq -e \
+              --argjson id "$id" --argjson run "$run" --arg name "agentrans-$target" --arg digest "$digest" \
+              'select(.id == $id and .workflow_run.id == $run and .name == $name and .digest == $digest
+                and .expired == false and .size_in_bytes > 0) | {id, name, size_in_bytes, digest}' > "$receipts/$target-archive.json"
+          }
+          verify_build win-x64 44517670139 14527796267 sha256:fe59dfe28af56b4bf87c6dddcec705f521a1cb9c7334ffce00ff10728faae31a
+          verify_build mac-arm64 44512991162 14525092844 sha256:af263f5d2da3d00f62e8e964997d4d4944d4133a6d962cfbee31705ee1078ef8
+          verify_build mac-x64 44512991180 14525363099 sha256:569c5f3d35a1f41675ae8ffdbf27ec2fd98108fbda7d805cc6b24ea6130d2593
+      - name: Download Windows x64 from its retained build
+        uses: actions/download-artifact@v8.0.1
+        with:
+          github-token: ${{ github.token }}
+          run-id: '44517670139'
+          artifact-ids: '14527796267'
+          path: ${{ runner.temp }}/agentrans-release-input/win-x64
+          digest-mismatch: error
+      - name: Download macOS arm64 from its retained build
+        uses: actions/download-artifact@v8.0.1
+        with:
+          github-token: ${{ github.token }}
+          run-id: '44512991162'
+          artifact-ids: '14525092844'
+          path: ${{ runner.temp }}/agentrans-release-input/mac-arm64
+          digest-mismatch: error
+      - name: Download macOS x64 from its retained build
+        uses: actions/download-artifact@v8.0.1
+        with:
+          github-token: ${{ github.token }}
+          run-id: '44512991180'
+          artifact-ids: '14525363099'
+          path: ${{ runner.temp }}/agentrans-release-input/mac-x64
+          digest-mismatch: error
+      - name: Check the actual packages and verify detached Ed25519 signatures
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           AGENTRANS_UPDATE_SIGNING_KEY: ${{ secrets.AGENTRANS_UPDATE_SIGNING_KEY }}
-          AGENTRANS_DESKTOP_PACKAGE_SHA: ${{ steps.package.outputs.source_sha }}
-          AGENTRANS_DESKTOP_PACKAGE_TARGET: ${{ steps.package.outputs.package_target }}
-          PACKAGE_ASSETS_DIR: ${{ steps.package.outputs.assets_dir }}
-        run: node --import tsx apps/desktop/scripts/publish-github-release.ts "$PACKAGE_ASSETS_DIR" "$PACKAGE_VERSION" "$PACKAGE_CHANNEL" --draft-only
+        run: |
+          node --import tsx apps/desktop/scripts/qualify-ed25519-candidate.mjs preflight \
+            "$RUNNER_TEMP/agentrans-release-input" "$RUNNER_TEMP/agentrans-release-proof"
+          cp "$RUNNER_TEMP"/agentrans-release-receipts/*.json "$RUNNER_TEMP/agentrans-release-proof/"
+      - name: Retain the validated signatures and read-only preflight report
+        id: proof
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: ed25519-release-preflight
+          path: ${{ runner.temp }}/agentrans-release-proof
+          if-no-files-found: error
+          retention-days: 14
+
+  stage-draft:
+    needs: preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: pnpm/action-setup@v5.0.0
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: '24'
+          cache: pnpm
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Download Windows x64 from its retained build
+        uses: actions/download-artifact@v8.0.1
+        with:
+          github-token: ${{ github.token }}
+          run-id: '44517670139'
+          artifact-ids: '14527796267'
+          path: ${{ runner.temp }}/agentrans-release-input/win-x64
+          digest-mismatch: error
+      - name: Download macOS arm64 from its retained build
+        uses: actions/download-artifact@v8.0.1
+        with:
+          github-token: ${{ github.token }}
+          run-id: '44512991162'
+          artifact-ids: '14525092844'
+          path: ${{ runner.temp }}/agentrans-release-input/mac-arm64
+          digest-mismatch: error
+      - name: Download macOS x64 from its retained build
+        uses: actions/download-artifact@v8.0.1
+        with:
+          github-token: ${{ github.token }}
+          run-id: '44512991180'
+          artifact-ids: '14525363099'
+          path: ${{ runner.temp }}/agentrans-release-input/mac-x64
+          digest-mismatch: error
+      - name: Download the successful preflight's signatures and report
+        uses: actions/download-artifact@v8.0.1
+        with:
+          artifact-ids: ${{ needs.preflight.outputs.proof-id }}
+          path: ${{ runner.temp }}/agentrans-release-proof
+          digest-mismatch: error
+      - name: Verify signed bytes again and upload the release draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node --import tsx apps/desktop/scripts/qualify-ed25519-candidate.mjs stage-draft \
+            "$RUNNER_TEMP/agentrans-release-input" "$RUNNER_TEMP/agentrans-release-proof"
