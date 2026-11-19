@@ -398,7 +398,10 @@ function launchApp(bundle, stage, tlsSpki) {
   const closed = new Promise(resolve => child.once('close', resolve))
   for (const stream of [child.stdout, child.stderr]) {
     stream.setEncoding('utf8')
-    stream.on('data', bytes => { output = (output + bytes).slice(-12_000) })
+    stream.on('data', bytes => {
+      const useful = bytes.replace(/^.*\[connection\] connection lost, retry #\d+.*$/gmu, '')
+      output = (output + useful).slice(-12_000)
+    })
   }
   const cdp = debuggerPipe(child.stdio[3], child.stdio[4])
   const sessions = new Map()
@@ -584,6 +587,9 @@ try {
   await save()
 
   stage = 'attempt real Squirrel installation'
+  const readNativeSetupError = () => baseline.output().split(/\r?\n/u).find(line =>
+    line.includes('Could not get code signature for running application'))
+  let nativeSetupError = readNativeSetupError()
   feed.stopServingPayload()
   await baseline.click(confirmation.sessionId)
   const outcome = await poll(async () => {
@@ -593,6 +599,8 @@ try {
       const view = await baseline.dialog()
       if (view?.detail) return { result: 'native-rejected', details: cleanText(view.detail), dialogId: view.sessionId }
     }
+    nativeSetupError ??= readNativeSetupError()
+    if (nativeSetupError) return { result: 'native-rejected', details: nativeSetupError.trim() }
     if (baseline.child.exitCode !== null) {
       const version = await command('/usr/bin/plutil', ['-extract', 'CFBundleShortVersionString', 'raw', '-o', '-', original.plist], 6_000)
       if (version !== newVersion) return undefined
@@ -609,10 +617,18 @@ try {
     const stillInstalled = await bundleEvidence(installedPath, oldVersion)
     assert.equal(stillInstalled.evidence.asarSha256, original.evidence.asarSha256)
     assert.equal(stillInstalled.evidence.executableSha256, original.evidence.executableSha256)
-    await baseline.click(outcome.dialogId)
-    await baseline.waitForWorkspace(oldVersion)
-    record.afterRejectedInstall = { installedVersion: oldVersion, pid: baseline.child.pid, ...session,
-      originalBundleIntact: true, ...await verifySession(baseline, session) }
+    let recovered = baseline
+    if (outcome.dialogId === undefined) {
+      await stop(baseline.child, baseline.cdp, baseline.closed)
+      restarted = launchApp(stillInstalled, originalStage, tlsSpki)
+      await restarted.openWorkspace(oldVersion)
+      recovered = restarted
+    } else {
+      await baseline.click(outcome.dialogId)
+      await baseline.waitForWorkspace(oldVersion)
+    }
+    record.afterRejectedInstall = { installedVersion: oldVersion, pid: recovered.child.pid, ...session,
+      originalBundleIntact: true, reopenedAfterTestRelaunch: recovered !== baseline, ...await verifySession(recovered, session) }
     await save()
     stage = 'attempt real Squirrel installation'
     throw new Error(outcome.details)
