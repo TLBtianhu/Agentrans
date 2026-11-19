@@ -53,9 +53,24 @@ jobs:
       # An emulated target converts far slower than a native one.
       AGENTRANS_OFFICE_TIMEOUT_MS: '240000'
       AGENTRANS_DESKTOP_BUILD_VERSION: ${{ inputs.version }}
+      AGENTRANS_DESKTOP_BUILD_COMMIT: ${{ github.sha }}
+      AGENTRANS_DESKTOP_BUILD_DIRTY: '0'
       TARGET: ${{ matrix.target }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Verify the clean packaging checkout
+        shell: pwsh
+        run: |
+          $PSNativeCommandUseErrorActionPreference = $true
+          $commit = git rev-parse HEAD
+          $changes = git status --porcelain=v1 --untracked-files=normal
+          if ($commit -cne $env:AGENTRANS_DESKTOP_BUILD_COMMIT -or $changes) {
+            throw 'Desktop packaging requires the clean commit selected by the workflow.'
+          }
 
       - uses: pnpm/action-setup@v5.0.0
 
@@ -86,8 +101,6 @@ jobs:
 
       # The installer entry packages a prepared tree; this prepares it without producing an
       # installer of its own, which is the step the signed lanes get from their full package run.
-      # The installer entry packages a prepared tree; this prepares it without producing an
-      # installer of its own, which is the step the signed lanes get from their full package run.
       - name: Prepare the packaged runtime
         if: matrix.target != 'mac'
         shell: pwsh
@@ -112,6 +125,17 @@ jobs:
           pnpm run package:desktop:mac:x64 --unsigned --prepare-only --build-version $env:AGENTRANS_DESKTOP_BUILD_VERSION
           node apps/desktop/scripts/package-agentrans-installer.mjs artifacts/mac-x64 mac-x64
           node apps/desktop/scripts/merge-mac-metadata.mjs apps/desktop/artifacts/mac-arm64 apps/desktop/artifacts/mac-x64 apps/desktop/artifacts/agentrans-installer
+
+      - name: Verify packaging did not change the source checkout
+        shell: pwsh
+        run: |
+          $PSNativeCommandUseErrorActionPreference = $true
+          $commit = git rev-parse HEAD
+          git diff --quiet HEAD --
+          $untracked = git ls-files --others --exclude-standard -- . ':(exclude)apps/desktop/artifacts/'
+          if ($commit -cne $env:AGENTRANS_DESKTOP_BUILD_COMMIT -or $untracked) {
+            throw 'Desktop packaging changed the source checkout.'
+          }
 
       - name: List the packaged files
         shell: pwsh

@@ -1,57 +1,161 @@
-name: Publish Desktop release
-run-name: Verify the signed Desktop draft
+name: Prepare and review Desktop releases
+run-name: Desktop release ${{ inputs.operation }} · ${{ inputs.version }} (${{ inputs.channel }})
 
 on:
   workflow_dispatch:
     inputs:
-      package_run_id:
-        description: '打包运行 ID：该次运行产出的安装包、blockmap 与通道元数据将附加到 Release'
+      package_run_ids:
+        description: '打包运行 ID，单次 all 或逗号分隔的 Windows、macOS 运行'
+        required: true
+        type: string
+      source_sha:
+        description: '所有打包运行的完整 40 位源码提交 SHA'
         required: true
         type: string
       version:
-        description: '产物版本号：须与打包运行产出的文件名一致'
+        description: '三个架构的完整打包版本'
         required: true
         type: string
       channel:
-        description: '更新通道：nightly 发布预发布，latest 发布正式 Release'
+        description: '内置更新通道'
         required: true
         type: choice
         options: [nightly, latest]
+      operation:
+        description: '只读预检、复核已公开版本，或显式上传并复核草稿'
+        type: choice
+        options: [preflight, review, stage-draft]
+        default: preflight
+  workflow_call:
+    inputs:
+      package_run_ids:
+        required: true
+        type: string
+      source_sha:
+        required: true
+        type: string
+      version:
+        required: true
+        type: string
+      channel:
+        required: true
+        type: string
+      operation:
+        default: preflight
+        type: string
+    secrets:
+      AGENTRANS_UPDATE_SIGNING_KEY:
+        required: true
 
-permissions:
-  contents: write
-  actions: read
+permissions: {}
 
 concurrency:
   group: agentrans-desktop-release-${{ inputs.version }}
   cancel-in-progress: false
 
 jobs:
-  publish:
+  preflight:
+    if: github.repository == 'TLBtianhu/Agentrans'
     runs-on: ubuntu-latest
-    env:
-      PACKAGE_RUN_ID: ${{ inputs.package_run_id }}
-      PACKAGE_VERSION: ${{ inputs.version }}
-      PACKAGE_CHANNEL: ${{ inputs.channel }}
+    timeout-minutes: 20
+    permissions:
+      actions: read
+      contents: read
+    outputs:
+      proof_id: ${{ steps.proof.outputs.artifact-id }}
     steps:
+      - name: Validate the operation
+        env:
+          RELEASE_OPERATION: ${{ inputs.operation }}
+        run: |
+          case "$RELEASE_OPERATION" in
+            preflight|review|stage-draft) ;;
+            *) echo "Invalid Desktop release operation"; exit 1 ;;
+          esac
       - uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
       - uses: pnpm/action-setup@v5.0.0
       - uses: actions/setup-node@v7.0.0
         with:
           node-version: '24'
+          cache: pnpm
       - name: Install locked dependencies
         run: pnpm install --frozen-lockfile
-      - name: Verify the packaging run and stage its assets
-        id: package
+      - name: Download the exact three-platform build
+        id: packages
+        uses: ./.github/actions/desktop-release-inputs
+        with:
+          package_run_ids: ${{ inputs.package_run_ids }}
+          version: ${{ inputs.version }}
+          channel: ${{ inputs.channel }}
+          source_sha: ${{ inputs.source_sha }}
+      - name: Verify the packages, update indexes and Ed25519 signatures
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node --import tsx apps/desktop/scripts/stage-hosted-desktop-release.ts "$PACKAGE_RUN_ID" "$PACKAGE_VERSION" "$PACKAGE_CHANNEL"
-      - name: Sign and stage the Desktop draft
-        shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PACKAGE_PLAN: ${{ steps.packages.outputs.plan }}
+          PACKAGE_INPUT: ${{ steps.packages.outputs.directory }}
           AGENTRANS_UPDATE_SIGNING_KEY: ${{ secrets.AGENTRANS_UPDATE_SIGNING_KEY }}
-          AGENTRANS_DESKTOP_PACKAGE_SHA: ${{ steps.package.outputs.source_sha }}
-          AGENTRANS_DESKTOP_PACKAGE_TARGET: ${{ steps.package.outputs.package_target }}
-          PACKAGE_ASSETS_DIR: ${{ steps.package.outputs.assets_dir }}
-        run: node --import tsx apps/desktop/scripts/publish-github-release.ts "$PACKAGE_ASSETS_DIR" "$PACKAGE_VERSION" "$PACKAGE_CHANNEL" --draft-only
+        run: |
+          node --import tsx apps/desktop/scripts/prepare-desktop-release.ts preflight \
+            "$PACKAGE_PLAN" "$PACKAGE_INPUT" "$RUNNER_TEMP/agentrans-release-proof"
+      - name: Compare the existing release with the verified signed inventory
+        if: inputs.operation == 'review'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PACKAGE_PLAN: ${{ steps.packages.outputs.plan }}
+          PACKAGE_INPUT: ${{ steps.packages.outputs.directory }}
+        run: |
+          node --import tsx apps/desktop/scripts/prepare-desktop-release.ts review \
+            "$PACKAGE_PLAN" "$PACKAGE_INPUT" "$RUNNER_TEMP/agentrans-release-proof"
+      - name: Retain the preflight report and detached signatures
+        id: proof
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: desktop-release-preflight
+          path: ${{ runner.temp }}/agentrans-release-proof
+          if-no-files-found: error
+          retention-days: 14
+
+  stage-draft:
+    if: inputs.operation == 'stage-draft'
+    needs: preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: pnpm/action-setup@v5.0.0
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: '24'
+          cache: pnpm
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Download the exact three-platform build
+        id: packages
+        uses: ./.github/actions/desktop-release-inputs
+        with:
+          package_run_ids: ${{ inputs.package_run_ids }}
+          version: ${{ inputs.version }}
+          channel: ${{ inputs.channel }}
+          source_sha: ${{ inputs.source_sha }}
+      - name: Download the successful preflight report and signatures
+        uses: actions/download-artifact@v8.0.1
+        with:
+          artifact-ids: ${{ needs.preflight.outputs.proof_id }}
+          path: ${{ runner.temp }}/agentrans-release-proof
+          digest-mismatch: error
+      - name: Verify the signed bytes, stage the draft and review its inventory
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PACKAGE_PLAN: ${{ steps.packages.outputs.plan }}
+          PACKAGE_INPUT: ${{ steps.packages.outputs.directory }}
+        run: |
+          node --import tsx apps/desktop/scripts/prepare-desktop-release.ts stage-draft \
+            "$PACKAGE_PLAN" "$PACKAGE_INPUT" "$RUNNER_TEMP/agentrans-release-proof"

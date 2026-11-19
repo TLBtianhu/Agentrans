@@ -1,0 +1,77 @@
+name: Download verified Desktop release inputs
+description: Resolve the full package set and verify each Actions archive as it is downloaded
+
+inputs:
+  package_run_ids:
+    description: Comma-separated hosted packaging run IDs
+    required: true
+  version:
+    description: Packaged version
+    required: true
+  channel:
+    description: Packaged update channel
+    required: true
+  source_sha:
+    description: Full packaged commit SHA
+    required: true
+
+outputs:
+  plan:
+    description: Verified source plan JSON path
+    value: ${{ steps.plan.outputs.plan }}
+  directory:
+    description: Downloaded per-target archives
+    value: ${{ steps.plan.outputs.directory }}
+
+runs:
+  using: composite
+  steps:
+    - id: plan
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+        PACKAGE_RUN_IDS: ${{ inputs.package_run_ids }}
+        PACKAGE_VERSION: ${{ inputs.version }}
+        PACKAGE_CHANNEL: ${{ inputs.channel }}
+        PACKAGE_SHA: ${{ inputs.source_sha }}
+      run: |
+        root="$(mktemp -d "$RUNNER_TEMP/agentrans-release-inputs.XXXXXX")"
+        mkdir "$root/archives"
+        node --import tsx apps/desktop/scripts/stage-hosted-desktop-release.ts resolve \
+          "$PACKAGE_RUN_IDS" "$PACKAGE_VERSION" "$PACKAGE_CHANNEL" "$PACKAGE_SHA" "$root/plan.json"
+        printf 'plan=%s\ndirectory=%s\n' "$root/plan.json" "$root/archives" >> "$GITHUB_OUTPUT"
+    - name: Download Windows x64
+      uses: actions/download-artifact@v8.0.1
+      with:
+        github-token: ${{ github.token }}
+        run-id: ${{ steps.plan.outputs.windows_run }}
+        artifact-ids: ${{ steps.plan.outputs.windows_artifact }}
+        path: ${{ steps.plan.outputs.directory }}/win-x64
+        digest-mismatch: error
+    - name: Download the combined Mac archive
+      if: steps.plan.outputs.mac_artifact != ''
+      uses: actions/download-artifact@v8.0.1
+      with:
+        github-token: ${{ github.token }}
+        run-id: ${{ steps.plan.outputs.mac_run }}
+        artifact-ids: ${{ steps.plan.outputs.mac_artifact }}
+        path: ${{ steps.plan.outputs.directory }}/mac
+        digest-mismatch: error
+    - name: Download macOS arm64
+      if: steps.plan.outputs.mac_arm64_artifact != ''
+      uses: actions/download-artifact@v8.0.1
+      with:
+        github-token: ${{ github.token }}
+        run-id: ${{ steps.plan.outputs.mac_arm64_run }}
+        artifact-ids: ${{ steps.plan.outputs.mac_arm64_artifact }}
+        path: ${{ steps.plan.outputs.directory }}/mac-arm64
+        digest-mismatch: error
+    - name: Download macOS x64
+      if: steps.plan.outputs.mac_x64_artifact != ''
+      uses: actions/download-artifact@v8.0.1
+      with:
+        github-token: ${{ github.token }}
+        run-id: ${{ steps.plan.outputs.mac_x64_run }}
+        artifact-ids: ${{ steps.plan.outputs.mac_x64_artifact }}
+        path: ${{ steps.plan.outputs.directory }}/mac-x64
+        digest-mismatch: error

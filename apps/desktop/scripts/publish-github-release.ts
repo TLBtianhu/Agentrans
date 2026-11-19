@@ -58,9 +58,91 @@ export interface GitHubReleaseResult {
   readonly skipped: string[]
 }
 
+/** Verified size and digest of one release asset. */
+export interface GitHubReleaseAssetReceipt {
+  readonly name: string
+  readonly size: number
+  readonly sha256: string
+}
+
+/** Inputs for a read-only review of a release's complete signed inventory. */
+export interface GitHubReleaseReviewRequest extends Omit<GitHubReleaseRequest, 'assets' | 'draftOnly' | 'targetCommitish'> {
+  /** Exact packaging commit. */
+  readonly targetCommitish: string
+  /** Complete list of signed assets, already verified by preflight. */
+  readonly assets: readonly GitHubReleaseAssetReceipt[]
+  /** Require the matching Release to be a draft. */
+  readonly requireDraft?: boolean
+}
+
+/** Verified identity and state of the reviewed Release. */
+export interface GitHubReleaseReviewResult {
+  readonly id: number
+  readonly tag: string
+  readonly url: string
+  readonly draft: boolean
+  readonly assetCount: number
+}
+
 /** Tag naming one Desktop release, distinct from the npm family's `dsh-v*`. */
 export function desktopGitHubReleaseTag(version: string): string {
   return `v${version}`
+}
+
+function releaseApi(token: string, owner: string, repo: string, fetchImpl: typeof globalThis.fetch) {
+  const repoPath = `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`
+  const base = `https://api.github.com${repoPath}`
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    Accept: 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28',
+    'User-Agent': 'agentrans-desktop-publish',
+  }
+  const api: GitHubApi = (path, init) => fetchImpl(`${base}${path}`, {
+    ...init, headers: { ...headers, ...init?.headers }, redirect: 'error',
+  })
+  const download = (id: number) => fetchImpl(`${base}/releases/assets/${String(id)}`, {
+    headers: { ...headers, Accept: 'application/octet-stream' },
+  })
+  return { api, download, headers, repoPath }
+}
+
+/**
+ * Read and verify a Release without creating drafts, uploading or publishing.
+ * @param request - Exact Release identity and signed asset receipts.
+ * @param fetchImpl - Fetch implementation, defaulting to the platform implementation.
+ * @returns The verified Release identity and asset count.
+ */
+export async function reviewGitHubRelease(
+  request: GitHubReleaseReviewRequest,
+  fetchImpl: typeof globalThis.fetch = globalThis.fetch,
+): Promise<GitHubReleaseReviewResult> {
+  const { token, owner, repo, version, channel, targetCommitish, requireDraft } = request
+  if (!/^[0-9a-f]{40}$/iu.test(targetCommitish)) throw new Error('desktop publish: the packaging commit must be a full Git SHA')
+  const expected = new Map<string, GitHubReleaseAssetReceipt>()
+  for (const asset of request.assets) {
+    if (!/^[a-z0-9][a-z0-9._+-]*$/iu.test(asset.name) || expected.has(asset.name)
+      || !Number.isSafeInteger(asset.size) || asset.size < 1 || !/^[0-9a-f]{64}$/u.test(asset.sha256)) {
+      throw new Error(`desktop publish: invalid or duplicate asset receipt ${asset.name}`)
+    }
+    expected.set(asset.name, asset)
+  }
+  assertPairedAssets(expected)
+  const { api, download } = releaseApi(token, owner, repo, fetchImpl)
+  const tag = desktopGitHubReleaseTag(version)
+  const release = await findRelease(api, tag)
+  if (release === undefined) throw new Error(`desktop publish: release ${tag} does not exist`)
+  if (requireDraft && !release.draft) throw new Error(`desktop publish: ${tag} is already public`)
+  const target = targetCommitish.toLowerCase()
+  assertReleaseTarget(release, tag, channel === 'nightly', target, await verifyTag(api, tag, target))
+  const path = `/releases/${String(release.id)}`
+  await verifyRemoteAssets(api, path, release, expected, true, download)
+  const current = readRelease(await responseJson(await api(path), `rechecking release ${tag}`))
+  if (current.id !== release.id || (requireDraft && !current.draft)) {
+    throw new Error(`desktop publish: ${tag} changed during review`)
+  }
+  assertReleaseTarget(current, tag, channel === 'nightly', target, await verifyTag(api, tag, target))
+  return { id: current.id, tag, url: current.html_url, draft: current.draft, assetCount: expected.size }
 }
 
 /**
@@ -80,16 +162,7 @@ export async function publishGitHubRelease(
   const assets = await prepareAssets(request.assets)
   const tag = desktopGitHubReleaseTag(version)
   const prerelease = channel === 'nightly'
-  const repoPath = `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`
-  const base = `https://api.github.com${repoPath}`
-  const headers = {
-    Authorization: `Bearer ${token}`,
-    Accept: 'application/vnd.github+json',
-    'X-GitHub-Api-Version': '2022-11-28',
-    'User-Agent': 'agentrans-desktop-publish',
-  }
-  const api = (path: string, init?: RequestInit) => fetchImpl(`${base}${path}`, { ...init,
-    headers: { ...headers, ...init?.headers }, redirect: 'error' })
+  const { api, download, headers, repoPath } = releaseApi(token, owner, repo, fetchImpl)
   const target = targetCommitish?.toLowerCase()
   const tagged = target === undefined ? false : await verifyTag(api, tag, target)
   const release = await findOrCreateDraft(api, tag, version, prerelease, target)
@@ -97,8 +170,7 @@ export async function publishGitHubRelease(
   if (draftOnly && !release.draft) throw new Error(`desktop publish: ${tag} is already public`)
   const releasePath = `/releases/${String(release.id)}`
   const verifyInventory = async (complete: boolean) => await verifyRemoteAssets(
-    api, releasePath, release, assets, complete,
-    id => fetchImpl(`${base}/releases/assets/${String(id)}`, { headers: { ...headers, Accept: 'application/octet-stream' } }),
+    api, releasePath, release, assets, complete, download,
   )
   const existing = await verifyInventory(!release.draft)
   if (!release.draft) return { tag, url: release.html_url, draft: false, uploaded: [], skipped: [...assets.keys()] }
@@ -143,14 +215,9 @@ export async function publishGitHubRelease(
   return { tag, url: published.html_url, draft: false, uploaded, skipped }
 }
 
-interface PreparedAsset extends GitHubReleaseAsset {
-  readonly name: string
-  readonly size: number
-  readonly sha256: string
-}
+type PreparedAsset = GitHubReleaseAsset & GitHubReleaseAssetReceipt
 
 async function prepareAssets(assets: readonly GitHubReleaseAsset[]): Promise<ReadonlyMap<string, PreparedAsset>> {
-  if (assets.length === 0) throw new Error('desktop publish: no signed release assets were supplied')
   const prepared = new Map<string, PreparedAsset>()
   for (const asset of assets) {
     const name = asset.name ?? basename(asset.path)
@@ -165,14 +232,19 @@ async function prepareAssets(assets: readonly GitHubReleaseAsset[]): Promise<Rea
     }
     prepared.set(name, { ...asset, name, size: file.size, sha256 })
   }
-  for (const name of prepared.keys()) {
+  assertPairedAssets(prepared)
+  return prepared
+}
+
+function assertPairedAssets(assets: ReadonlyMap<string, GitHubReleaseAssetReceipt>): void {
+  if (assets.size === 0) throw new Error('desktop publish: no signed release assets were supplied')
+  for (const name of assets.keys()) {
     const signed = name.endsWith('.sig')
     const artifact = signed ? name.slice(0, -4) : name
-    if (artifact.endsWith('.sig') || !prepared.has(signed ? artifact : signatureAssetName(artifact))) {
+    if (artifact.endsWith('.sig') || !assets.has(signed ? artifact : signatureAssetName(artifact))) {
       throw new Error(`desktop publish: ${name} has no matching artifact or detached signature`)
     }
   }
-  return prepared
 }
 
 interface GitHubRelease {
@@ -221,9 +293,7 @@ async function* listGitHub(api: GitHubApi, path: string): AsyncGenerator<unknown
   }
 }
 
-async function findOrCreateDraft(
-  api: GitHubApi, tag: string, version: string, prerelease: boolean, target: string | undefined,
-): Promise<GitHubRelease> {
+async function findRelease(api: GitHubApi, tag: string): Promise<GitHubRelease | undefined> {
   let match: GitHubRelease | undefined
   // The by-tag endpoint omits drafts, which must be recovered after interrupted uploads.
   for await (const value of listGitHub(api, '/releases')) {
@@ -232,6 +302,13 @@ async function findOrCreateDraft(
     if (match !== undefined && match.id !== current.id) throw new Error(`desktop publish: multiple Releases use tag ${tag}`)
     match = current
   }
+  return match
+}
+
+async function findOrCreateDraft(
+  api: GitHubApi, tag: string, version: string, prerelease: boolean, target: string | undefined,
+): Promise<GitHubRelease> {
+  const match = await findRelease(api, tag)
   if (match !== undefined) return match
   const release = readRelease(await responseJson(await api('/releases', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -280,7 +357,7 @@ function releaseUploadUrl(release: GitHubRelease, repoPath: string): URL {
 }
 
 async function verifyRemoteAssets(
-  api: GitHubApi, releasePath: string, release: GitHubRelease, expected: ReadonlyMap<string, PreparedAsset>, complete: boolean,
+  api: GitHubApi, releasePath: string, release: GitHubRelease, expected: ReadonlyMap<string, GitHubReleaseAssetReceipt>, complete: boolean,
   download: (id: number) => Promise<Response>,
 ): Promise<ReadonlySet<string>> {
   const present = new Set<string>()
@@ -309,7 +386,7 @@ async function verifyRemoteAssets(
   return present
 }
 
-async function downloadDigest(response: Response, asset: PreparedAsset): Promise<string> {
+async function downloadDigest(response: Response, asset: GitHubReleaseAssetReceipt): Promise<string> {
   await requireSuccess(response, `downloading ${asset.name} to check its digest`)
   const hash = createHash('sha256')
   let size = 0

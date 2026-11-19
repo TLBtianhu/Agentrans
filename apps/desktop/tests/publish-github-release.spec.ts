@@ -5,7 +5,8 @@ import { tmpdir } from 'node:os'
 import { basename, join } from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
-  collectReleaseAssets, desktopGitHubReleaseTag, publishGitHubRelease, signReleaseAssets, type GitHubReleaseRequest,
+  collectReleaseAssets, desktopGitHubReleaseTag, publishGitHubRelease, reviewGitHubRelease,
+  signReleaseAssets, type GitHubReleaseRequest,
 } from '../scripts/publish-github-release.ts'
 import { verifyFileDigest } from '../src/update-signature.ts'
 
@@ -284,6 +285,59 @@ describe('desktop GitHub release publishing', () => {
       uploaded: allNames,
     })
     expect(github.calls.some(call => call.endpoint === '/repos/o/r/git/tags/' + github.tag.annotation)).toBe(true)
+  })
+})
+
+async function reviewFixture(draft: boolean) {
+  const github = fakeGitHub({ ...release(draft), target_commitish: buildSha })
+  const { assets, request } = await fixture()
+  if (!draft) github.tag.commit = buildSha
+  const receipts = await Promise.all(assets.map(async (asset) => {
+    const name = basename(asset.path)
+    const bytes = await readFile(asset.path)
+    github.putAsset(name, bytes)
+    return { name, size: bytes.length, sha256: createHash('sha256').update(bytes).digest('hex') }
+  }))
+  return { github, request: { ...request, targetCommitish: buildSha, assets: receipts, requireDraft: draft } }
+}
+
+describe('read-only GitHub release review', () => {
+  it.each([true, false])('verifies the exact signed asset inventory with draft=%s', async (draft) => {
+    const { github, request } = await reviewFixture(draft)
+    await expect(reviewGitHubRelease(request, github.fetch)).resolves.toMatchObject({
+      id: 42, tag: 'v1.2.3', draft, assetCount: allNames.length,
+    })
+    expect(github.calls.some(call => call.endpoint === releasePath + '/assets')).toBe(true)
+    expect(github.current()?.draft).toBe(draft)
+    expect(github.mutations()).toEqual([])
+  })
+
+  it('reports an incomplete draft without trying to upload anything', async () => {
+    const { github, request } = await reviewFixture(true)
+    github.failures.omitFromListing = feed + '.sig'
+    await expect(reviewGitHubRelease(request, github.fetch)).rejects.toThrow(/missing latest\.yml\.sig/u)
+    expect(github.mutations()).toEqual([])
+  })
+
+  it('reports a changed draft asset without replacing or publishing it', async () => {
+    const { github, request } = await reviewFixture(true)
+    github.putAsset(installer, Buffer.from('different bytes'))
+    await expect(reviewGitHubRelease(request, github.fetch)).rejects.toThrow(/different bytes/u)
+    expect(github.mutations()).toEqual([])
+  })
+
+  it('requires a draft when the workflow requests a draft review', async () => {
+    const { github, request } = await reviewFixture(false)
+    await expect(reviewGitHubRelease({ ...request, requireDraft: true }, github.fetch)).rejects.toThrow(/already public/u)
+    expect(github.mutations()).toEqual([])
+  })
+
+  it('detects an external publication during a draft review', async () => {
+    const { github, request } = await reviewFixture(true)
+    github.failures.publishBeforeDraftRead = true
+    await expect(reviewGitHubRelease(request, github.fetch)).rejects.toThrow(/changed during review/u)
+    expect(github.current()?.draft).toBe(false)
+    expect(github.mutations()).toEqual([])
   })
 })
 

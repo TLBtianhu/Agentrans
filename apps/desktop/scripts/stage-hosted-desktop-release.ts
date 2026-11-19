@@ -2,10 +2,11 @@
 
 import { execFile } from 'node:child_process'
 import { constants } from 'node:fs'
-import { appendFile, copyFile, lstat, mkdir, mkdtemp, readdir } from 'node:fs/promises'
+import { appendFile, copyFile, lstat, mkdir, mkdtemp, readdir, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { isAbsolute, join } from 'node:path'
 import { promisify } from 'node:util'
+import { parse } from 'semver'
 import { DESKTOP_UPDATE_REPOSITORY } from './desktop-release-environment.mjs'
 
 const runGitHub = promisify(execFile)
@@ -22,6 +23,32 @@ const artifactsByTarget = {
 type Channel = 'nightly' | 'latest'
 type PackageTarget = keyof typeof artifactsByTarget
 type PackageArtifact = (typeof artifactsByTarget)[PackageTarget][number]
+const releaseTargets = ['win-x64', 'mac', 'mac-arm64', 'mac-x64'] as const
+type ReleaseTarget = (typeof releaseTargets)[number]
+
+/** Immutable archive identity obtained from the GitHub Actions API. */
+interface HostedDesktopReleaseArchive {
+  readonly target: ReleaseTarget
+  readonly runId: string
+  readonly artifactId: string
+  readonly name: string
+  readonly digest: string
+  readonly size: number
+}
+
+/** Complete, same-source input to Desktop release preflight. */
+export interface HostedDesktopReleasePlan {
+  readonly version: string
+  readonly channel: Channel
+  readonly sourceSha: string
+  readonly archives: readonly HostedDesktopReleaseArchive[]
+}
+
+interface HostedDesktopReleaseSource {
+  readonly runId: string
+  readonly run: unknown
+  readonly archiveList: unknown
+}
 
 interface PackageRun {
   readonly sourceSha: string
@@ -62,6 +89,83 @@ export function verifyHostedPackageRun(workflow: unknown, run: unknown, version:
   return { sourceSha: run.head_sha, target, artifacts: artifactsByTarget[target] }
 }
 
+function validateRunIds(runIds: readonly string[]): void {
+  if (runIds.length < 1 || runIds.length > 3 || runIds.some(id => !/^[1-9][0-9]*$/u.test(id)) || new Set(runIds).size !== runIds.length) {
+    throw new Error('desktop publish: provide one to three distinct numeric packaging run IDs')
+  }
+}
+
+function readHostedArchive(record: unknown, name: string, runId: string, sourceSha: string): HostedDesktopReleaseArchive {
+  if (!isRecord(record) || record.name !== name || typeof record.id !== 'number' || !Number.isSafeInteger(record.id) || record.id <= 0
+    || record.expired !== false || (record.state !== undefined && record.state !== 'uploaded')
+    || typeof record.size_in_bytes !== 'number' || !Number.isSafeInteger(record.size_in_bytes) || record.size_in_bytes <= 0
+    || typeof record.digest !== 'string' || !/^sha256:[a-f0-9]{64}$/u.test(record.digest)) {
+    throw new Error(`desktop publish: invalid or expired ${name} archive in packaging run ${runId}`)
+  }
+  const linkedRun = record.workflow_run
+  if ((record.run_id !== undefined && String(record.run_id) !== runId)
+    || (linkedRun != null && (!isRecord(linkedRun)
+      || (linkedRun.id !== undefined && String(linkedRun.id) !== runId)
+      || (linkedRun.head_sha !== undefined && linkedRun.head_sha !== sourceSha)))) {
+    throw new Error(`desktop publish: ${name} archive does not belong to packaging run ${runId} at ${sourceSha}`)
+  }
+  const target = releaseTargets.find(candidate => name === `agentrans-${candidate}`)
+  if (target === undefined) throw new Error(`desktop publish: unsupported packaging archive ${name}`)
+  return { target, runId, artifactId: String(record.id), name, digest: record.digest, size: record.size_in_bytes }
+}
+
+/**
+ * Plan a complete Windows and macOS release without downloading archives or writing a Release.
+ * @param workflow - GitHub Actions metadata for the repository's packaging workflow.
+ * @param sources - Records fetched by run ID and their archive listings.
+ * @param version - Exact canonical desktop installer version.
+ * @param channel - Requested update channel.
+ * @param sourceSha - Full commit shared by every packaging run.
+ * @returns The verified archive identities in canonical platform order.
+ */
+export function planHostedDesktopRelease(
+  workflow: unknown, sources: readonly HostedDesktopReleaseSource[], version: string, channel: Channel, sourceSha: string,
+): HostedDesktopReleasePlan {
+  const parsed = parse(version)
+  if (parsed === null || parsed.version !== version || parsed.build.length !== 0
+    || (channel !== 'nightly' && channel !== 'latest') || (channel === 'latest' && parsed.prerelease.length !== 0)
+    || !/^[a-f0-9]{40}$/u.test(sourceSha)) {
+    throw new Error('desktop publish: provide a canonical Desktop version, channel, and full source commit')
+  }
+  validateRunIds(sources.map(source => source.runId))
+  const byTarget = new Map<ReleaseTarget, HostedDesktopReleaseArchive>()
+  const artifactIds = new Set<string>()
+  for (const { runId, run, archiveList } of sources) {
+    if (!isRecord(run) || typeof run.id !== 'number' || !Number.isSafeInteger(run.id) || String(run.id) !== runId) {
+      throw new Error(`desktop publish: unexpected response for packaging run ${runId}`)
+    }
+    const packageRun = verifyHostedPackageRun(workflow, run, version, channel)
+    if (packageRun.sourceSha !== sourceSha) throw new Error(`desktop publish: packaging run ${runId} did not use ${sourceSha}`)
+    if (!isRecord(archiveList) || !Array.isArray(archiveList.artifacts) || archiveList.total_count !== packageRun.artifacts.length
+      || archiveList.artifacts.length !== packageRun.artifacts.length) {
+      throw new Error(`desktop publish: packaging run ${runId} must contain exactly ${packageRun.artifacts.join(', ')}`)
+    }
+    const records: unknown[] = archiveList.artifacts
+    for (const name of packageRun.artifacts) {
+      const archive = readHostedArchive(records.find(record => isRecord(record) && record.name === name), name, runId, sourceSha)
+      if (byTarget.has(archive.target) || artifactIds.has(archive.artifactId)) {
+        throw new Error(`desktop publish: overlapping or duplicate packaging archive ${name}`)
+      }
+      byTarget.set(archive.target, archive)
+      artifactIds.add(archive.artifactId)
+    }
+  }
+  const completeMac = byTarget.has('mac') ? byTarget.size === 2 : byTarget.has('mac-arm64') && byTarget.has('mac-x64')
+  if (!byTarget.has('win-x64') || !completeMac) {
+    throw new Error('desktop publish: use one all run or combine Windows x64 with both macOS architectures exactly once')
+  }
+  const archives = releaseTargets.flatMap((target) => {
+    const archive = byTarget.get(target)
+    return archive === undefined ? [] : [archive]
+  })
+  return { version, channel, sourceSha, archives }
+}
+
 /**
  * Stage regular files from separate artifact directories without overwriting a basename.
  * @param downloads - Directories produced by the trusted packaging run.
@@ -95,6 +199,42 @@ async function githubRecord(endpoint: string): Promise<unknown> {
   return JSON.parse(stdout)
 }
 
+async function resolveReleasePlan(args: readonly string[]): Promise<void> {
+  const [ids, version, channel, sourceSha, destination, ...extra] = args
+  const output = process.env.GITHUB_OUTPUT
+  if (ids === undefined || version === undefined || (channel !== 'latest' && channel !== 'nightly') || sourceSha === undefined
+    || destination === undefined || !isAbsolute(destination) || extra.length !== 0 || output === undefined
+    || !isProductRepository(process.env.GITHUB_REPOSITORY)) {
+    throw new Error('desktop publish: resolve <run IDs> <version> <channel> <source SHA> <absolute plan path>')
+  }
+  const runIds = ids.split(',').map(id => id.trim())
+  validateRunIds(runIds)
+  const [workflow, sources] = await Promise.all([
+    githubRecord(`actions/workflows/${packageWorkflow}`),
+    Promise.all(runIds.map(async (runId) => {
+      const [run, archiveList] = await Promise.all([
+        githubRecord(`actions/runs/${runId}`),
+        githubRecord(`actions/runs/${runId}/artifacts?per_page=100`),
+      ])
+      return { runId, run, archiveList }
+    })),
+  ])
+  const plan = planHostedDesktopRelease(workflow, sources, version, channel, sourceSha)
+  await Promise.all(plan.archives.map(async (archive) => {
+    const current = readHostedArchive(await githubRecord(`actions/artifacts/${archive.artifactId}`),
+      archive.name, archive.runId, plan.sourceSha)
+    if (current.artifactId !== archive.artifactId || current.digest !== archive.digest || current.size !== archive.size) {
+      throw new Error(`desktop publish: ${archive.name} archive changed while resolving the plan`)
+    }
+  }))
+  await writeFile(destination, JSON.stringify(plan, null, 2) + '\n', { flag: 'wx' })
+  const values = plan.archives.map(({ target, runId, artifactId }) => {
+    const key = target === 'win-x64' ? 'windows' : target.replaceAll('-', '_')
+    return `${key}_run=${runId}\n${key}_artifact=${artifactId}\n`
+  })
+  await appendFile(output, values.join(''))
+}
+
 async function main(): Promise<void> {
   const [runId, version, channel] = process.argv.slice(2)
   const output = process.env.GITHUB_OUTPUT
@@ -119,4 +259,7 @@ async function main(): Promise<void> {
   await appendFile(output, `source_sha=${sourceSha}\npackage_target=${target}\nassets_dir=${destination}\n`)
 }
 
-if (import.meta.main) await main()
+if (import.meta.main) {
+  if (process.argv[2] === 'resolve') await resolveReleasePlan(process.argv.slice(3))
+  else await main()
+}
