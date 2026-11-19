@@ -40,6 +40,10 @@ The Release tag is `v<version>`. The npm release family uses `dsh-v*`.
 
 `latest` publishes a release; `nightly` publishes a prerelease. The packaged application maps the same two channels onto that release type, so a nightly build never offers a latest build to its users.
 
+The release must include a detached Ed25519 signature (`*.yml.sig`) beside every channel index under the same tag. The application verifies the raw YAML bytes with that signature and its pinned public key before it parses the index, offers the update, or downloads an installer.
+
+If GitHub returns HTTP 404 for the YAML, the application can try an earlier compatible release. A missing or invalid signature stops the update check. The application also verifies the downloaded installer's own signature before allowing installation.
+
 <a id="repeat-publication"></a>
 ## Repeat publication
 

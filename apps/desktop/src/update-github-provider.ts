@@ -6,10 +6,15 @@ import { parseUpdateInfo, type ProviderRuntimeOptions } from 'electron-updater/o
 import { gt, parse, rcompare, type SemVer } from 'semver'
 import { z } from 'zod'
 import type { DesktopUpdateChannel } from './update-channel.ts'
+import { requestUpdateBytes } from './update-http-executor.ts'
 import { desktopReleaseArtifactStems, type DesktopReleaseTarget } from './update-release-assets.ts'
+import { publicKeyFromBase64, signatureAssetName, verifyBytesDigest } from './update-signature.ts'
+import { UPDATE_SIGNING_PUBLIC_KEY } from './update-signing-key.ts'
 import { readUpdateReleaseCoordinates } from './update-verification.ts'
 
 const PAGE_SIZE = 100
+const MAX_INDEX_BYTES = 1024 * 1024
+const MAX_SIGNATURE_BYTES = 1024
 const releaseAsset = z.object({ name: z.string(), state: z.string(), size: z.int().nonnegative() })
 const releaseList = z.array(z.object({
   tag_name: z.string(),
@@ -36,11 +41,24 @@ function updateTarget(platform: ProviderRuntimeOptions['platform'], architecture
   if (platform === 'win32' && architecture === 'x64') return 'win-x64'
 }
 
+function isMissingAsset(error: unknown): boolean {
+  return typeof error === 'object' && error !== null && 'statusCode' in error && error.statusCode === 404
+}
+
+class UntrustedUpdateIndexError extends Error {
+  readonly code = 'ERR_UPDATER_UNTRUSTED_INDEX'
+
+  constructor(file: string, tag: string, reason: 'has no published signature' | 'does not match its published signature') {
+    super(`desktop update: ${file} for ${tag} ${reason}`)
+  }
+}
+
 /** Keep electron-updater's GitHub asset resolution and restrict its release discovery. */
 class DesktopGitHubProvider extends GitHubProvider {
   private readonly currentVersion: SemVer
   private readonly releaseChannel: DesktopUpdateChannel
   private readonly target: DesktopReleaseTarget | undefined
+  private readonly signingKey = publicKeyFromBase64(UPDATE_SIGNING_PUBLIC_KEY)
 
   constructor(
     options: unknown,
@@ -91,14 +109,29 @@ class DesktopGitHubProvider extends GitHubProvider {
       if (!uploaded.has(file) || !installers.some(installer => uploaded.has(installer))) continue
 
       const url = new URL(`/${this.options.owner}/${this.options.repo}/releases/download/${encodeURIComponent(tag)}/${file}`, this.baseUrl)
-      let rawData: string | null
+      let bytes: Buffer
       try {
-        rawData = await this.httpRequest(url)
+        bytes = await requestUpdateBytes(this.executor, this.createRequestOptions(url), MAX_INDEX_BYTES)
       } catch (error) {
-        if (typeof error === 'object' && error !== null && 'statusCode' in error && error.statusCode === 404) continue
+        if (isMissingAsset(error)) continue
         throw error
       }
-      const info = parseUpdateInfo(rawData, file, url)
+      const signatureName = signatureAssetName(file)
+      if (!uploaded.has(signatureName)) throw new UntrustedUpdateIndexError(file, tag, 'has no published signature')
+      const signatureUrl = new URL(signatureName, url)
+      let signature: string
+      try {
+        const signatureBytes = await requestUpdateBytes(this.executor, this.createRequestOptions(signatureUrl), MAX_SIGNATURE_BYTES)
+        signature = signatureBytes.toString('utf8')
+      } catch (error) {
+        if (isMissingAsset(error)) throw new UntrustedUpdateIndexError(file, tag, 'has no published signature')
+        throw error
+      }
+      if (signature.length !== 88 || !/^[A-Za-z0-9+/]{86}==$/u.test(signature) || !verifyBytesDigest(bytes, signature, this.signingKey)) {
+        throw new UntrustedUpdateIndexError(file, tag, 'does not match its published signature')
+      }
+      const text = new TextDecoder('utf-8', { fatal: true }).decode(bytes)
+      const info = parseUpdateInfo(text, file, url)
       if (info?.version !== version.version) throw new Error(`desktop update: ${file} version does not match release ${tag}`)
       const installer = updateFiles.parse(info.files).find(entry =>
         installers.includes(entry.url) && uploaded.get(entry.url) === entry.size)

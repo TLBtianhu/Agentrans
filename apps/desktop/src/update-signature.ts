@@ -1,5 +1,5 @@
 /**
- * Detached Ed25519 signatures over a downloaded update artifact.
+ * Detached Ed25519 signatures over update indexes and artifacts.
  *
  * The signature covers the artifact's SHA-256 digest rather than the file, so a
  * 150 MB installer is verified by streaming it once and only the 32-byte digest
@@ -73,6 +73,21 @@ export async function signFileDigest(path: string, privateKey: KeyObject): Promi
  */
 export async function verifyFileDigest(path: string, signatureBase64: string, publicKey: KeyObject): Promise<boolean> {
   const digest = Buffer.from(await sha256File(path), 'hex')
+  return verifySha256Digest(digest, signatureBase64, publicKey)
+}
+
+/**
+ * Verify the exact response bytes of an update index against its detached signature.
+ * @param bytes - Response bytes before text decoding.
+ * @param signatureBase64 - Signature published beside the index.
+ * @param publicKey - The pinned verification key.
+ * @returns Whether the signature matches the response's SHA-256 digest.
+ */
+export function verifyBytesDigest(bytes: Buffer, signatureBase64: string, publicKey: KeyObject): boolean {
+  return verifySha256Digest(createHash('sha256').update(bytes).digest(), signatureBase64, publicKey)
+}
+
+function verifySha256Digest(digest: Buffer, signatureBase64: string, publicKey: KeyObject): boolean {
   try {
     return verify(null, digest, publicKey, Buffer.from(signatureBase64, 'base64'))
   } catch {

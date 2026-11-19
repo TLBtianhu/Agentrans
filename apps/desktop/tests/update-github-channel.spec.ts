@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto'
+import { createHash, sign } from 'node:crypto'
 import { mkdtemp, rm, rmdir, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -6,13 +6,18 @@ import { NsisUpdater } from 'electron-updater/out/NsisUpdater.js'
 import { dump } from 'js-yaml'
 import { prerelease } from 'semver'
 import { expect, it, onTestFinished, vi } from 'vitest'
+import type { DesktopUpdateState } from '../src/ipc.ts'
 import type { DesktopUpdateChannel } from '../src/update-channel.ts'
 import { configureDesktopGitHubUpdateFeed } from '../src/update-github-provider.ts'
-import { DesktopUpdateHttpExecutor } from '../src/update-http-executor.ts'
+import * as updateTransport from '../src/update-http-executor.ts'
 
 // Avoid initializing Electron's process singleton in Node. The fixture injects a real updater instance.
 vi.mock('electron', () => ({ app: { isPackaged: false } }))
 vi.mock('electron-updater', () => ({ default: { autoUpdater: {} } }))
+const signingKeys = await vi.hoisted(async () => (await import('node:crypto')).generateKeyPairSync('ed25519'))
+vi.mock('../src/update-signing-key.ts', () => ({
+  UPDATE_SIGNING_PUBLIC_KEY: signingKeys.publicKey.export({ format: 'der', type: 'spki' }).toString('base64'),
+}))
 
 const { DesktopUpdateCoordinator } = await import('../src/update-coordinator.ts')
 const repository = '/TLBtianhu/Agentrans'
@@ -32,6 +37,9 @@ interface ReleaseOptions {
   readonly metadataSize?: number
   readonly metadataPackages?: Readonly<Record<string, { path: string; sha512: string; size: number }>>
   readonly metadataStatus?: 404 | 503
+  readonly signatureStatus?: 'unlisted' | 404
+  readonly serveMetadata?: (bytes: Buffer) => Buffer
+  readonly serveSignature?: (bytes: Buffer) => Buffer | Promise<Buffer>
 }
 
 function platform(target: Target): 'win32' | 'darwin' {
@@ -58,7 +66,11 @@ function release(version: string, isPrerelease: boolean, options: ReleaseOptions
   const availableTargets = options.targets ?? targets
   const names = new Set(availableTargets.map(target => updateFile(version, target).url))
   if (options.omitMetadata !== true) {
-    for (const target of availableTargets) names.add(channelMetadataName(version, target))
+    for (const target of availableTargets) {
+      const metadata = channelMetadataName(version, target)
+      names.add(metadata)
+      if (options.signatureStatus !== 'unlisted') names.add(`${metadata}.sig`)
+    }
   }
   return {
     version,
@@ -72,6 +84,22 @@ function release(version: string, isPrerelease: boolean, options: ReleaseOptions
       assets: [...names].map(name => ({ name, state: 'uploaded', size: 1024 })),
     },
   }
+}
+
+function metadataBytes(source: ReturnType<typeof release>, target: Target): Buffer {
+  const { metadataTargets, metadataVersion, metadataSize, metadataPackages } = source.options
+  const files = (metadataTargets ?? source.options.targets ?? targets)
+    .filter(fileTarget => platform(fileTarget) === platform(target))
+    .map(fileTarget => updateFile(source.version, fileTarget, metadataSize))
+  const [first] = files
+  return Buffer.from(dump({
+    version: metadataVersion ?? source.version,
+    files,
+    path: first?.url,
+    sha512: first?.sha512,
+    packages: metadataPackages,
+    releaseNotes: '更新说明',
+  }).replaceAll('\n', '\r\n'))
 }
 
 async function fixture(
@@ -90,7 +118,7 @@ async function fixture(
     releaseType: channel === 'nightly' ? 'prerelease' : 'release', updaterCacheDirName: 'agentrans-updater',
   }))
 
-  const unexpectedLifecycle = () => { throw new Error('Update checks must not install or restart') }
+  const unexpectedLifecycle = () => { throw new Error('Update checks must not download, install or restart') }
   const updater = new NsisUpdater(undefined, {
     version: currentVersion, name: 'Agentrans', isPackaged: true, appUpdateConfigPath: config,
     userDataPath: directory, baseCachePath: directory, whenReady: async () => {},
@@ -98,7 +126,8 @@ async function fixture(
   })
   updater.logger = null
   const requestedMetadata: string[] = []
-  const executor = new DesktopUpdateHttpExecutor(1_000)
+  const requestedSignatures: string[] = []
+  const executor = new updateTransport.DesktopUpdateHttpExecutor(1_000)
   vi.spyOn(executor, 'request').mockImplementation(async (options) => {
     const { pathname, searchParams } = new URL(options.path ?? '', `https://${options.hostname}`)
     if (options.hostname === 'api.github.com' && pathname === `/repos${releasesPath}`) {
@@ -106,42 +135,51 @@ async function fixture(
       const page = Number(searchParams.get('page') ?? '1')
       return JSON.stringify(releases.slice((page - 1) * size, page * size).map(item => item.record))
     }
-    if (options.hostname === 'github.com' && pathname.startsWith(assetsPath)) {
-      requestedMetadata.push(pathname)
-      const source = releases.find(item => pathname === channelMetadataPath(item.version, target))
-      if (source === undefined) throw new Error(`Unexpected update metadata ${pathname}`)
-      const { metadataStatus, metadataTargets, metadataVersion, metadataSize, metadataPackages } = source.options
-      if (metadataStatus !== undefined) {
-        throw Object.assign(new Error(`Metadata request failed (${metadataStatus})`), { statusCode: metadataStatus })
-      }
-      const files = (metadataTargets ?? source.options.targets ?? targets)
-        .filter(fileTarget => platform(fileTarget) === platform(target))
-        .map(fileTarget => updateFile(source.version, fileTarget, metadataSize))
-      const [first] = files
-      return dump({
-        version: metadataVersion ?? source.version,
-        files,
-        path: first?.url,
-        sha512: first?.sha512,
-        packages: metadataPackages,
-      })
-    }
     throw new Error(`Unexpected update request ${options.hostname}${pathname}`)
   })
+  const requestBytes = vi.spyOn(updateTransport, 'requestUpdateBytes').mockImplementation(async (transport, options) => {
+    const { pathname } = new URL(options.path ?? '', `https://${options.hostname}`)
+    const isSignature = pathname.endsWith('.sig')
+    const metadataPath = isSignature ? pathname.slice(0, -4) : pathname
+    const source = releases.find(item => metadataPath === channelMetadataPath(item.version, target))
+    if (transport !== executor || options.hostname !== 'github.com' || source === undefined) {
+      throw new Error(`Unexpected update asset request ${options.hostname}${pathname}`)
+    }
+    const { metadataStatus, signatureStatus, serveMetadata, serveSignature } = source.options
+    const bytes = metadataBytes(source, target)
+    if (isSignature) {
+      requestedSignatures.push(pathname)
+      if (signatureStatus !== undefined) throw Object.assign(new Error('Signature request failed (404)'), { statusCode: 404 })
+      const digest = createHash('sha256').update(bytes).digest()
+      const signature = Buffer.from(sign(null, digest, signingKeys.privateKey).toString('base64'))
+      return serveSignature?.(signature) ?? signature
+    }
+    requestedMetadata.push(pathname)
+    if (metadataStatus !== undefined) {
+      throw Object.assign(new Error(`Metadata request failed (${metadataStatus})`), { statusCode: metadataStatus })
+    }
+    return serveMetadata?.(bytes) ?? bytes
+  })
+  onTestFinished(() => { requestBytes.mockRestore() })
   // electron-updater accepts a custom AppAdapter and leaves its transport uninitialized in that case.
   // Its per-instance test platform also keeps the provider's channel filenames independent of the host.
   Object.assign(updater, { httpExecutor: executor, _testOnlyOptions: { platform: platform(target) } })
   const appArchitecture = target === 'mac-arm64' ? 'arm64' : 'x64'
   await configureDesktopGitHubUpdateFeed(updater, channel, directory, appArchitecture)
   const onAvailable = vi.fn()
+  const onError = vi.fn()
+  const downloadUpdate = vi.spyOn(updater, 'downloadUpdate').mockImplementation(unexpectedLifecycle)
+  const publish = vi.fn((state: DesktopUpdateState) => state)
   updater.on('update-available', onAvailable)
-  const coordinator = new DesktopUpdateCoordinator(state => state, async () => true, updater,
+  updater.on('error', onError)
+  const coordinator = new DesktopUpdateCoordinator(publish, async () => true, updater,
     () => true, () => currentVersion, undefined, channel, { verify: unexpectedLifecycle })
   onTestFinished(() => {
     coordinator.dispose()
     updater.off('update-available', onAvailable)
+    updater.off('error', onError)
   })
-  return { coordinator, requestedMetadata, onAvailable }
+  return { coordinator, requestedMetadata, requestedSignatures, onAvailable, onError, downloadUpdate, publish }
 }
 
 it('selects the newest nightly version when a stable release is first', async () => {
@@ -156,7 +194,7 @@ it('selects the newest nightly version when a stable release is first', async ()
 
 it.each(targets)('stays in the installed test series despite a higher alpha release (%s)', async (target) => {
   const next = '0.1.0-test.20261119.2'
-  const { coordinator, requestedMetadata, onAvailable } = await fixture('nightly', [
+  const { coordinator, requestedMetadata, requestedSignatures, onAvailable, downloadUpdate } = await fixture('nightly', [
     release('0.2.2-alpha.2', true, { targets: ['win-x64', 'mac-arm64'] }),
     release('0.1.0', false),
     release(testVersion, true),
@@ -165,7 +203,9 @@ it.each(targets)('stays in the installed test series despite a higher alpha rele
 
   await expect(coordinator.check(true)).resolves.toEqual({ phase: 'available', version: next })
   expect(requestedMetadata).toEqual([channelMetadataPath(next, target)])
-  expect(onAvailable).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ tag: `v${next}` }))
+  expect(requestedSignatures).toEqual([`${channelMetadataPath(next, target)}.sig`])
+  expect(onAvailable).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ tag: `v${next}`, releaseNotes: '更新说明' }))
+  expect(downloadUpdate).not.toHaveBeenCalled()
 })
 
 it('keeps a nightly alpha install in the alpha series without pinning its alpha number', async () => {
@@ -298,4 +338,113 @@ it('rejects metadata for a version other than the chosen release tag', async () 
 
   await expect(coordinator.check(true)).resolves.toMatchObject({ phase: 'error', failedOperation: 'check' })
   expect(requestedMetadata).toEqual([channelMetadataPath('2.0.0')])
+})
+
+it.each([
+  {
+    description: 'an unlisted Windows sidecar', channel: 'latest', target: 'win-x64', fetchSignature: false,
+    options: { signatureStatus: 'unlisted' },
+  },
+  {
+    description: 'a listed macOS sidecar that returns 404', channel: 'nightly', target: 'mac-arm64', fetchSignature: true,
+    options: { signatureStatus: 404 },
+  },
+  {
+    description: 'a modified but base64-encoded signature', channel: 'latest', target: 'win-x64', fetchSignature: true,
+    options: { serveSignature: signature => Buffer.concat([Buffer.from(signature[0] === 65 ? 'B' : 'A'), signature.subarray(1)]) },
+  },
+  {
+    description: 'YAML whose line endings changed', channel: 'nightly', target: 'mac-x64', fetchSignature: true,
+    options: { serveMetadata: bytes => Buffer.from(bytes.toString('utf8').replaceAll('\r\n', '\n')) },
+  },
+  {
+    description: 'metadata with invalid UTF-8 bytes', channel: 'latest', target: 'win-x64', fetchSignature: true,
+    options: { serveMetadata: bytes => Buffer.concat([Buffer.from([0xff]), bytes]) },
+  },
+  {
+    description: 'metadata with invalid YAML syntax', channel: 'nightly', target: 'mac-arm64', fetchSignature: true,
+    options: { serveMetadata: bytes => Buffer.concat([bytes, Buffer.from('unterminated: [')]) },
+  },
+] satisfies readonly {
+  description: string
+  channel: DesktopUpdateChannel
+  target: Target
+  fetchSignature: boolean
+  options: ReleaseOptions
+}[])('rejects $description before offering an update', async ({ channel, target, fetchSignature, options }) => {
+  const nightly = channel === 'nightly'
+  const version = nightly ? '2.0.0-test.1' : '2.0.0'
+  const older = nightly ? '1.5.0-test.1' : '1.5.0'
+  const { coordinator, requestedMetadata, requestedSignatures, onAvailable, onError, downloadUpdate } = await fixture(channel, [
+    release(version, nightly, options), release(older, nightly),
+  ], { target })
+
+  await expect(coordinator.check(true)).resolves.toMatchObject({ phase: 'error', failedOperation: 'check' })
+  expect(onError).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ code: 'ERR_UPDATER_UNTRUSTED_INDEX' }), expect.any(String))
+  const path = channelMetadataPath(version, target)
+  expect(requestedMetadata).toEqual([path])
+  expect(requestedSignatures).toEqual(fetchSignature ? [`${path}.sig`] : [])
+  expect(onAvailable).not.toHaveBeenCalled()
+  await expect(coordinator.download(version)).rejects.toThrow('no checked update is available')
+  expect(downloadUpdate).not.toHaveBeenCalled()
+})
+
+it('joins automatic and manual checks while waiting for one index signature', async () => {
+  const version = '2.0.0'
+  const signatureStarted = Promise.withResolvers<undefined>()
+  const allowSignature = Promise.withResolvers<undefined>()
+  const { coordinator, requestedMetadata, requestedSignatures, onAvailable, downloadUpdate, publish } = await fixture('latest', [
+    release(version, false, {
+      async serveSignature(signature) {
+        signatureStarted.resolve(undefined)
+        await allowSignature.promise
+        return signature
+      },
+    }),
+  ])
+  const automatic = coordinator.check()
+  const manual = coordinator.check(true)
+  try {
+    await Promise.race([signatureStarted.promise, automatic.then(() => {
+      throw new Error('The update check completed before requesting its index signature')
+    })])
+    expect(onAvailable).not.toHaveBeenCalled()
+    expect(publish).not.toHaveBeenCalled()
+    expect(downloadUpdate).not.toHaveBeenCalled()
+  } finally {
+    allowSignature.resolve(undefined)
+  }
+  const available = { phase: 'available', version }
+  await expect(Promise.all([automatic, manual])).resolves.toEqual([available, available])
+  expect(requestedMetadata).toEqual([channelMetadataPath(version)])
+  expect(requestedSignatures).toEqual([`${channelMetadataPath(version)}.sig`])
+  expect(onAvailable).toHaveBeenCalledOnce()
+  expect(publish).toHaveBeenCalledExactlyOnceWith(available)
+  expect(downloadUpdate).not.toHaveBeenCalled()
+})
+
+it.each(['manual', 'automatic'] as const)('withdraws the prior offer when a %s recheck rejects the index', async (mode) => {
+  const version = '2.0.0'
+  let tampered = false
+  const { coordinator, requestedSignatures, onAvailable, downloadUpdate, publish } = await fixture('latest', [
+    release(version, false, { serveMetadata: bytes => tampered ? Buffer.concat([bytes, Buffer.from('# changed\n')]) : bytes }),
+  ])
+
+  await expect(coordinator.check(true)).resolves.toEqual({ phase: 'available', version })
+  tampered = true
+  const failure = await coordinator.check(mode === 'manual')
+  expect(failure).toMatchObject({ phase: 'error', failedOperation: 'check' })
+  const state = mode === 'manual' ? failure : { phase: 'idle' }
+  expect(coordinator.state).toEqual(state)
+  expect(publish).toHaveBeenLastCalledWith(state)
+  const signature = `${channelMetadataPath(version)}.sig`
+  expect(requestedSignatures).toEqual([signature, signature])
+  expect(onAvailable).toHaveBeenCalledOnce()
+  await expect(coordinator.download(version)).rejects.toThrow('no checked update is available')
+  expect(downloadUpdate).not.toHaveBeenCalled()
+
+  tampered = false
+  await expect(coordinator.check(true)).resolves.toEqual({ phase: 'available', version })
+  expect(requestedSignatures).toEqual([signature, signature, signature])
+  expect(onAvailable).toHaveBeenCalledTimes(2)
 })

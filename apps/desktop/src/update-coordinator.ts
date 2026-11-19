@@ -91,7 +91,7 @@ export class DesktopUpdateCoordinator {
   get state(): DesktopUpdateState { return this.current }
 
   /**
-   * Check metadata without downloading, joining any current check.
+   * Check metadata without downloading, joining any current check. A failed check withdraws any prior candidate.
    * @param manual - Whether a failed check must remain visible in the status indicator.
    * @returns The check result, including a silent automatic failure when applicable.
    */
@@ -102,7 +102,10 @@ export class DesktopUpdateCoordinator {
     this.checkOperation ??= Promise.resolve().then(() => this.doCheck())
       .finally(() => { this.checkOperation = undefined })
     const result = await this.checkOperation
-    if (manual && result.phase === 'error') this.setState(result)
+    if (result.phase === 'error') {
+      if (manual) this.setState(result)
+      else if (this.current.phase === 'available') this.setState({ phase: 'idle' })
+    }
     return result
   }
 
@@ -215,6 +218,8 @@ export class DesktopUpdateCoordinator {
       this.releaseTag = this.candidate === undefined ? undefined : (result.updateInfo as UpdateInfo & { tag?: string }).tag
       return this.setState(this.candidate === undefined ? { phase: 'idle' } : { phase: 'available', version })
     } catch (error) {
+      this.candidate = undefined
+      this.releaseTag = undefined
       return this.failure(error, 'check')
     }
   }
