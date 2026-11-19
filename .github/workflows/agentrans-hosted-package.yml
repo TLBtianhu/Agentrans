@@ -1,156 +1,225 @@
 name: Package Agentrans · hosted
-run-name: Package Agentrans · ${{ inputs.target }} · ${{ inputs.channel }} · ${{ inputs.version }}
-
-# Hosted-runner packaging for the unsigned Agentrans application.
-#
-# The self-hosted lanes exist for signed release builds, which need a hardware
-# token, a signing environment, and an Apple Developer ID. This lane builds the
-# same application without any of them so the packaging, publishing, and update
-# chain can be exercised without that hardware. Its artifacts are unsigned:
-# Windows warns on first install and macOS warns on first open, and those
-# warnings are the certificates' problem, not this workflow's.
+run-name: Verify Windows differential update · ${{ inputs.version }} · build ${{ inputs.build_run_id }}
 
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: '项目版本或基于该版本的测试构建号，例如 0.1.0-test.20261118.1。latest 要求稳定版本。'
+        description: 'Version of the Windows successor'
         type: string
         required: true
       channel:
-        description: '更新通道：nightly 读取预发布，latest 读取正式版本'
+        description: 'Channel of the Windows successor'
         type: choice
         options: [nightly, latest]
-        default: nightly
         required: true
       target:
-        description: '打包目标（mac = 两种 macOS 架构合并元数据；all = Windows 与 macOS 一并产出，供同一个 Release 使用）'
+        description: 'Target of the Windows successor'
         type: choice
         options: [all, win-x64, mac-arm64, mac-x64, mac]
-        default: win-x64
+        required: true
+      build_run_id:
+        description: 'Successful GitHub Actions packaging run for this candidate'
+        type: string
         required: true
 
 permissions:
+  actions: read
   contents: read
 
-concurrency:
-  group: agentrans-hosted-package-${{ inputs.target }}
-  cancel-in-progress: false
-
 jobs:
-  package:
-    # A release attaches every platform from one packaging run, so `all` fans out here rather than
-    # asking the release workflow to merge separate runs.
-    strategy:
-      fail-fast: false
-      matrix:
-        target: ${{ fromJSON(inputs.target == 'all' && '["win-x64","mac"]' || format('["{0}"]', inputs.target)) }}
-    runs-on: ${{ startsWith(matrix.target, 'win') && 'windows-latest' || 'macos-latest' }}
-    timeout-minutes: 150
+  windows-upgrade:
+    if: github.repository == 'TLBtianhu/Agentrans'
+    runs-on: windows-latest
+    timeout-minutes: 30
     env:
-      AGENTRANS_DESKTOP_UPDATE_CHANNEL: ${{ inputs.channel }}
       AGENTRANS_TELEMETRY_DISABLED: '1'
-      # An emulated target converts far slower than a native one.
-      AGENTRANS_OFFICE_TIMEOUT_MS: '240000'
-      AGENTRANS_DESKTOP_BUILD_VERSION: ${{ inputs.version }}
-      AGENTRANS_DESKTOP_BUILD_COMMIT: ${{ github.sha }}
-      AGENTRANS_DESKTOP_BUILD_DIRTY: '0'
-      TARGET: ${{ matrix.target }}
+      AGENTRANS_DESKTOP_UPDATE_CHECK_INTERVAL_MS: '3600000'
+      QA_BUILD_COMMIT: '3c6b00d9827fe49f4766fb6b4ce0139a554f0c72'
+      QA_OLD_VERSION: '0.1.0-test.20261119.1'
+      QA_NEW_VERSION: '0.1.0-test.20261120.1'
     steps:
       - uses: actions/checkout@v7.0.1
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
-
-      - name: Verify the clean packaging checkout
-        shell: pwsh
-        run: |
-          $PSNativeCommandUseErrorActionPreference = $true
-          $commit = git rev-parse HEAD
-          $changes = git status --porcelain=v1 --untracked-files=normal
-          if ($commit -cne $env:AGENTRANS_DESKTOP_BUILD_COMMIT -or $changes) {
-            throw 'Desktop packaging requires the clean commit selected by the workflow.'
-          }
-
-      - uses: pnpm/action-setup@v5.0.0
-
       - uses: actions/setup-node@v7.0.0
         with:
           node-version: '24'
-          cache: pnpm
-
-      - name: Install locked dependencies
-        run: pnpm install --frozen-lockfile
-
-      # Packaging reads its settings from a git-ignored file, so the lane writes only the
-      # settings it needs rather than copying the template's stale release credentials.
-      # PowerShell runs on both images, so the same step serves either platform.
-      - name: Write the packaging settings this lane uses
+      - name: Verify the exact successful Windows package run
+        id: candidate
         shell: pwsh
-        run: |
-          $lines = @('AGENTRANS_DESKTOP_APP_ID=com.agentrans.app')
-          if ($env:TARGET -like 'win-*') { $lines += 'AGENTRANS_DESKTOP_WINDOWS_COMPRESSION_LEVEL=3' }
-          $file = if ($env:TARGET -like 'win-*') { 'apps/desktop/.env.windows' } else { 'apps/desktop/.env.macos' }
-          Set-Content -Path $file -Value $lines -Encoding utf8
-
-      # The preparation starts the packaged application once to prove it runs. An Intel build on an
-      # arm64 runner needs Rosetta before that check can pass.
-      - name: Install Rosetta for the Intel build
-        if: matrix.target == 'mac-x64' || matrix.target == 'mac'
-        run: sudo softwareupdate --install-rosetta --agree-to-license
-
-      # The installer entry packages a prepared tree; this prepares it without producing an
-      # installer of its own, which is the step the signed lanes get from their full package run.
-      - name: Prepare the packaged runtime
-        if: matrix.target != 'mac'
-        shell: pwsh
-        run: |
-          $script = if ($env:TARGET -eq 'win-x64') { 'package:desktop:win:x64' } else { 'package:desktop:mac:' + ($env:TARGET -replace '^mac-', '') }
-          pnpm run $script --unsigned --prepare-only --build-version $env:AGENTRANS_DESKTOP_BUILD_VERSION
-
-      - name: Build the unsigned application
-        if: matrix.target != 'mac'
-        shell: pwsh
-        run: node apps/desktop/scripts/package-agentrans-installer.mjs artifacts/agentrans-installer $env:TARGET
-
-      # One release needs one metadata file per platform, and each macOS architecture produces its
-      # own, so both architectures are built here and assembled into a single upload directory.
-      - name: Package both macOS architectures
-        if: matrix.target == 'mac'
-        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PACKAGE_RUN_ID: ${{ inputs.build_run_id }}
+          PACKAGE_VERSION: ${{ inputs.version }}
+          PACKAGE_CHANNEL: ${{ inputs.channel }}
+          PACKAGE_TARGET: ${{ inputs.target }}
         run: |
           $PSNativeCommandUseErrorActionPreference = $true
-          pnpm run package:desktop:mac:arm64 --unsigned --prepare-only --build-version $env:AGENTRANS_DESKTOP_BUILD_VERSION
-          node apps/desktop/scripts/package-agentrans-installer.mjs artifacts/mac-arm64 mac-arm64
-          pnpm run package:desktop:mac:x64 --unsigned --prepare-only --build-version $env:AGENTRANS_DESKTOP_BUILD_VERSION
-          node apps/desktop/scripts/package-agentrans-installer.mjs artifacts/mac-x64 mac-x64
-          node apps/desktop/scripts/merge-mac-metadata.mjs apps/desktop/artifacts/mac-arm64 apps/desktop/artifacts/mac-x64 apps/desktop/artifacts/agentrans-installer
-
-      - name: Verify packaging did not change the source checkout
+          if ($env:PACKAGE_VERSION -cne $env:QA_NEW_VERSION -or $env:PACKAGE_CHANNEL -cne 'nightly' -or
+              $env:PACKAGE_TARGET -cne 'win-x64' -or $env:PACKAGE_RUN_ID -cnotmatch '^[1-9][0-9]{5,15}$') {
+            throw 'Expected the selected Windows x64 nightly candidate and a packaging run ID'
+          }
+          $run = gh api "repos/$env:GITHUB_REPOSITORY/actions/runs/$env:PACKAGE_RUN_ID" | ConvertFrom-Json
+          $title = "Package Agentrans · win-x64 · nightly · $env:QA_NEW_VERSION"
+          if ([string]$run.id -cne $env:PACKAGE_RUN_ID -or $run.status -cne 'completed' -or
+              $run.conclusion -cne 'success' -or $run.head_sha -cne $env:QA_BUILD_COMMIT -or
+              $run.event -cne 'workflow_dispatch' -or $run.display_title -cne $title -or
+              $run.path -cne '.github/workflows/agentrans-hosted-package.yml' -or
+              $run.repository.full_name -cne $env:GITHUB_REPOSITORY -or
+              $run.head_repository.full_name -cne $env:GITHUB_REPOSITORY) {
+            throw 'The packaging run does not match the authorized build'
+          }
+          $inventory = gh api "repos/$env:GITHUB_REPOSITORY/actions/runs/$env:PACKAGE_RUN_ID/artifacts?per_page=100" | ConvertFrom-Json
+          $artifacts = @($inventory.artifacts | Where-Object { $_.name -ceq 'agentrans-win-x64' })
+          if ($artifacts.Count -ne 1 -or $artifacts[0].expired -or $artifacts[0].size_in_bytes -le 0 -or
+              [string]$artifacts[0].id -cnotmatch '^[1-9][0-9]+$' -or $artifacts[0].digest -cnotmatch '^sha256:[0-9a-f]{64}$') {
+            throw 'The verified package run lacks one live Windows x64 artifact with an archive SHA-256'
+          }
+          Add-Content -LiteralPath $env:GITHUB_OUTPUT -Value @(
+            "artifact_id=$($artifacts[0].id)", "artifact_bytes=$($artifacts[0].size_in_bytes)", "artifact_sha256=$($artifacts[0].digest)"
+          )
+      - name: Download the verified candidate archive
+        uses: actions/download-artifact@v8.0.1
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.build_run_id }}
+          artifact-ids: ${{ steps.candidate.outputs.artifact_id }}
+          path: ${{ runner.temp }}/agentrans-upgrade-inputs/new
+          digest-mismatch: error
+      - name: Prepare the public baseline and pin installer inputs
         shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUILD_RUN_ID: ${{ inputs.build_run_id }}
+          BUILD_ARTIFACT_ID: ${{ steps.candidate.outputs.artifact_id }}
+          BUILD_ARTIFACT_BYTES: ${{ steps.candidate.outputs.artifact_bytes }}
+          BUILD_ARTIFACT_SHA256: ${{ steps.candidate.outputs.artifact_sha256 }}
         run: |
           $PSNativeCommandUseErrorActionPreference = $true
-          $commit = git rev-parse HEAD
-          git diff --quiet HEAD --
-          $untracked = git ls-files --others --exclude-standard -- . ':(exclude)apps/desktop/artifacts/'
-          if ($commit -cne $env:AGENTRANS_DESKTOP_BUILD_COMMIT -or $untracked) {
-            throw 'Desktop packaging changed the source checkout.'
+          $root = Join-Path $env:RUNNER_TEMP 'agentrans-upgrade-inputs'
+          $oldDir = Join-Path $root 'old'
+          $newDir = Join-Path $root 'new'
+          New-Item -Path $oldDir -ItemType Directory | Out-Null
+
+          $tag = "v$env:QA_OLD_VERSION"
+          $release = gh api "repos/$env:GITHUB_REPOSITORY/releases/tags/$tag" | ConvertFrom-Json
+          if ($release.id -ne 451310439 -or $release.tag_name -cne $tag -or $release.draft -or -not $release.prerelease) {
+            throw 'The public baseline Release does not match its known identity'
+          }
+          $oldName = "agentrans-$env:QA_OLD_VERSION-win-x64-unsigned.exe"
+          $expectedAssets = @(
+            @{ Name=$oldName; Id=767599632; Size=290869954; SHA256='802bd688f4c77a72ff524a0cc0b96a2144264483ba521450c44b3f0a8b83f33b' },
+            @{ Name="$oldName.blockmap"; Id=767600161; Size=303391; SHA256='8cd74e96a561cf6c4baf57fa4fde8263393f1b093c536ddf2ac5ae1d8dba4d39' },
+            @{ Name="$oldName.blockmap.sig"; Id=767600552; Size=88; SHA256='bf3c2b9601fec050dd71c6788ce361c785d053f1b85ca27bc4b464fbee785b89' },
+            @{ Name="$oldName.sig"; Id=767600505; Size=88; SHA256='593bb5d22e9d5dbf8e21aa1773fb88ef2a8418c435d47e393c7ee303d30a39a4' },
+            @{ Name='test.yml'; Id=767600192; Size=417; SHA256='d02c9a05f44cc02c015b61f38fdfc359e9614097b5482888c59a31f275d40ed0' },
+            @{ Name='test.yml.sig'; Id=767600589; Size=88; SHA256='b3f1508120787b9fb9a7cb1d482c9097e832184ddefec0e755e0c58729c6a280' }
+          )
+          foreach ($expected in $expectedAssets) {
+            $asset = @($release.assets | Where-Object { $_.name -ceq $expected.Name })
+            $url = "https://github.com/$env:GITHUB_REPOSITORY/releases/download/$tag/$($expected.Name)"
+            if ($asset.Count -ne 1 -or $asset[0].id -ne $expected.Id -or $asset[0].state -cne 'uploaded' -or
+                $asset[0].size -ne $expected.Size -or $asset[0].digest -cne "sha256:$($expected.SHA256)" -or
+                $asset[0].browser_download_url -cne $url) {
+              throw "The public baseline asset inventory changed for $($expected.Name)"
+            }
+            $path = Join-Path $oldDir $expected.Name
+            curl.exe --fail --silent --show-error --location --retry 3 --connect-timeout 20 --max-time 400 --output $path $url
+            if ((Get-Item -LiteralPath $path).Length -ne $expected.Size -or
+                (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash -ine $expected.SHA256) {
+              throw "Downloaded public baseline bytes differ for $($expected.Name)"
+            }
           }
 
-      - name: List the packaged files
+          $old = Join-Path $oldDir $oldName
+          $new = Join-Path $newDir "agentrans-$env:QA_NEW_VERSION-win-x64-unsigned.exe"
+          $newIndex = Join-Path $newDir 'test.yml'
+          foreach ($path in @($new, "$new.blockmap", $newIndex)) {
+            if (-not (Test-Path -LiteralPath $path -PathType Leaf) -or (Get-Item -LiteralPath $path).Length -eq 0) {
+              throw "The candidate archive is missing $(Split-Path -Leaf $path)"
+            }
+          }
+          $newHash = (Get-FileHash -LiteralPath $new -Algorithm SHA256).Hash.ToLowerInvariant()
+          Add-Content -LiteralPath $env:GITHUB_ENV -Value @(
+            "QA_OLD_EXE=$old", "QA_NEW_EXE=$new", "QA_INPUTS_ROOT=$root", "QA_NEW_SHA256=$newHash"
+          )
+          $proof = [ordered]@{
+            baselineReleaseId = $release.id
+            baselineTag = $tag
+            baselineAssets = $expectedAssets
+            candidateVersion = $env:QA_NEW_VERSION
+            candidateBuildCommit = $env:QA_BUILD_COMMIT
+            candidateBuildRun = $env:BUILD_RUN_ID
+            candidateArtifactId = $env:BUILD_ARTIFACT_ID
+            candidateArtifactBytes = [long]$env:BUILD_ARTIFACT_BYTES
+            candidateArchiveSha256 = $env:BUILD_ARTIFACT_SHA256
+            candidateInstallerBytes = (Get-Item -LiteralPath $new).Length
+            candidateInstallerSha256 = $newHash
+            candidateIndexSha256 = (Get-FileHash -LiteralPath $newIndex -Algorithm SHA256).Hash.ToLowerInvariant()
+            candidateBlockmapSha256 = (Get-FileHash -LiteralPath "$new.blockmap" -Algorithm SHA256).Hash.ToLowerInvariant()
+          }
+          $proof | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $env:RUNNER_TEMP 'windows-candidate-inputs.json') -Encoding utf8NoBOM
+          "Verified Windows candidate SHA-256 $newHash"
+      - name: Verify the baseline and sign candidate update assets for the isolated feed
+        id: sign
         shell: pwsh
-        run: Get-ChildItem -Recurse apps/desktop/artifacts/agentrans-installer | Select-Object -ExpandProperty FullName
+        env:
+          AGENTRANS_UPDATE_SIGNING_KEY: ${{ secrets.AGENTRANS_UPDATE_SIGNING_KEY }}
+        run: |
+          $PSNativeCommandUseErrorActionPreference = $true
+          $source = @'
+          import assert from 'node:assert/strict'
+          import { createHash, createPublicKey } from 'node:crypto'
+          import { readFile, writeFile } from 'node:fs/promises'
+          import { dirname, join } from 'node:path'
+          import { publicKeyFromBase64, privateKeyFromBase64, sha256File, signFileDigest, verifyFileDigest } from './apps/desktop/src/update-signature.ts'
+          import { UPDATE_SIGNING_PUBLIC_KEY } from './apps/desktop/src/update-signing-key.ts'
 
-      - name: Publish the packaged files for this run
-        uses: actions/upload-artifact@v4
+          const encodedKey = process.env.AGENTRANS_UPDATE_SIGNING_KEY
+          assert.ok(encodedKey, 'Expected the repository update-signing key')
+          const privateKey = privateKeyFromBase64(encodedKey)
+          const publicKey = publicKeyFromBase64(UPDATE_SIGNING_PUBLIC_KEY)
+          const fingerprint = createHash('sha256').update(publicKey.export({ format: 'der', type: 'spki' })).digest('hex')
+          assert.equal(fingerprint, '098885a5447f876f616ecd3cbdb156737cc6f4c00601958b1c78088842a81753', 'Candidate must retain the published updater verification key')
+          assert.ok(createPublicKey(privateKey).equals(publicKey), 'The repository signer must match the installed updater key')
+          const old = process.env.QA_OLD_EXE
+          const next = process.env.QA_NEW_EXE
+          assert.equal(await sha256File(next), process.env.QA_NEW_SHA256, 'Candidate installer changed after archive validation')
+          for (const path of [old, old + '.blockmap', join(dirname(old), 'test.yml')]) {
+            assert.ok(await verifyFileDigest(path, await readFile(path + '.sig', 'utf8'), publicKey),
+              'A public baseline asset failed Ed25519 verification')
+          }
+          for (const path of [next, join(dirname(next), 'test.yml')]) {
+            const signature = await signFileDigest(path, privateKey)
+            assert.ok(await verifyFileDigest(path, signature, publicKey), 'An isolated-feed asset failed Ed25519 verification')
+            await writeFile(path + '.sig', signature, { flag: 'wx' })
+          }
+          console.log('Verified the public baseline signatures and two isolated-feed candidate signatures')
+          '@
+          $source | node --input-type=module
+      - name: Verify the true installed update using the isolated feed
+        shell: pwsh
+        timeout-minutes: 16
+        run: pwsh -NoLogo -NoProfile -NonInteractive -File apps/desktop/tests/fixtures/run-win-candidate.ps1
+      - name: Retain the input and installed upgrade reports
+        if: always()
+        uses: actions/upload-artifact@v7.0.1
         with:
-          name: agentrans-${{ matrix.target }}
+          name: windows-cross-version-upgrade-qa
           path: |
-            apps/desktop/artifacts/agentrans-installer/*.exe
-            apps/desktop/artifacts/agentrans-installer/*.dmg
-            apps/desktop/artifacts/agentrans-installer/*.zip
-            apps/desktop/artifacts/agentrans-installer/*.blockmap
-            apps/desktop/artifacts/agentrans-installer/*.yml
-            !apps/desktop/artifacts/agentrans-installer/builder-debug.yml
+            ${{ runner.temp }}/windows-candidate-inputs.json
+            ${{ runner.temp }}/agentrans-upgrade-qa/result.json
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Retain the candidate update signatures for this Actions build
+        if: always() && steps.sign.outcome == 'success'
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: windows-candidate-update-signatures
+          path: |
+            ${{ runner.temp }}/agentrans-upgrade-inputs/new/agentrans-0.1.0-test.20261120.1-win-x64-unsigned.exe.sig
+            ${{ runner.temp }}/agentrans-upgrade-inputs/new/test.yml.sig
           if-no-files-found: error
-          compression-level: 0
+          retention-days: 14
