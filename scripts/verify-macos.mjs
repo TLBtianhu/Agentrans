@@ -424,13 +424,14 @@ async function launch(bundle, stage, launch, checkSession) {
       const info = await evaluate(cdp, workspaceSession, 'window.dshDesktop.deviceInfo()')
       const sessions = await callSession(cdp, workspaceSession, 'session/list', { _request: {} })
       assert.ok(Array.isArray(sessions.items), 'Session catalog is not ready')
-      return { info, count: sessions.items.length }
+      return { info, count: sessions.items.length, saved: sessions.items.filter(row => !row.blank).length }
     }, active)
     const runtimeArch = details.info.split('; ').find(value => value.startsWith('app_arch='))?.slice('app_arch='.length)
     assert.equal(runtimeArch, architecture, 'The running Electron shell must use the packaged architecture')
     launch.runtimeArchitecture = runtimeArch
     launch.sessionServiceReady = true
     launch.initialSessionCount = details.count
+    launch.initialSavedSessionCount = details.saved
 
     active = 'ordinary macOS product instance and runtime version'
     await poll(owned, async () => {
@@ -536,7 +537,8 @@ try {
   }
   await launch(bundle, stage, result.normal, async (owned, cdp, workspaceSession, setStage) => {
     setStage('creating a new keyless Session')
-    assert.equal(result.normal.initialSessionCount, 0, 'Expected an empty first-launch Session catalog')
+    // The clean Desktop can open a blank draft for its default workspace.
+    assert.equal(result.normal.initialSavedSessionCount, 0, 'Expected no prior saved Sessions on first launch')
     const created = await callSession(cdp, workspaceSession, 'session/create', { request: { cwd: workspace } })
     assert.match(created.sessionId, /^[a-z0-9_-]+$/iu)
     assert.equal(created.agentPreset, 'standard', 'Expected the default Desktop Session preset')
