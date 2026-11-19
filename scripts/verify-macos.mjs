@@ -536,9 +536,12 @@ try {
   }
   await launch(bundle, stage, result.normal, async (owned, cdp, workspaceSession, setStage) => {
     setStage('creating a new keyless Session')
+    assert.equal(result.normal.initialSessionCount, 0, 'Expected an empty first-launch Session catalog')
     const created = await callSession(cdp, workspaceSession, 'session/create', { request: { cwd: workspace } })
     assert.match(created.sessionId, /^[a-z0-9_-]+$/iu)
+    assert.equal(created.agentPreset, 'standard', 'Expected the default Desktop Session preset')
     fixture.sessionId = created.sessionId
+    fixture.agentPreset = created.agentPreset
     fixture.created = true
 
     // A local turn makes the Session addressable in the sidebar. The persisted title is the test content.
@@ -561,6 +564,8 @@ try {
   })
   if (result.normal.passed) {
     step = 'ordinary restart of the same bundle and product instance'
+    assert.equal(result.normal.shutdown, 'browser-close', 'Expected the normal application shutdown path')
+    assert.deepEqual(result.normal.processExit, { code: 0, signal: null }, 'Expected a clean exit before reopening')
     assert.equal((await lstat(stateRoot)).isDirectory(), true)
     result.restart = { freshRunnerInstance: false }
     await launch(bundle, stage, result.restart, (owned, cdp, workspaceSession, setStage) =>

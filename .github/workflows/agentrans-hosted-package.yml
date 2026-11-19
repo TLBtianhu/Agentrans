@@ -1,8 +1,17 @@
-name: Verify the retained macOS .5 clean installation
-run-name: Verify clean macOS .5 installation and session reopen
+name: Verify the retained macOS 0.1.0-test.20261119.1 clean installation
+run-name: Verify clean macOS 0.1.0-test.20261119.1 installation and session reopen
 
 on:
   workflow_dispatch:
+    inputs:
+      arm64_run:
+        description: Successful macOS arm64 packaging run ID
+        type: string
+        required: true
+      x64_run:
+        description: Successful macOS x64 packaging run ID
+        type: string
+        required: true
 
 permissions:
   actions: read
@@ -21,21 +30,15 @@ jobs:
           - arch: arm64
             runner: macos-26
             runner_arch: ARM64
-            build: '44501717503'
-            artifact: '14518623117'
-            archive_digest: 'sha256:044cf7c5ddfed2086ce1d9c86b0a274f00177ea2daa3b124dcf7986c46482fed'
-            zip_sha256: '8bc4135bc251b9ac7bb8b0e8598ffc1f8fe05be7f3e14aab26355651766c7deb'
+            build: ${{ inputs.arm64_run }}
           - arch: x64
             runner: macos-26-intel
             runner_arch: X64
-            build: '44501723293'
-            artifact: '14519683627'
-            archive_digest: 'sha256:2f23f5632ea2ca3742e7ef69ddb216670b1bfba34e2a96d6c7d76719e6a3098d'
-            zip_sha256: '17604c95a6fb916216a55c2829fc94022032424afaf3801a1bfd6a3f85e28a66'
+            build: ${{ inputs.x64_run }}
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 30
     env:
-      QA_VERSION: '0.1.0-test.20261118.5'
+      QA_VERSION: '0.1.0-test.20261119.1'
       QA_ARCH: ${{ matrix.arch }}
       QA_FORMAT: ${{ matrix.format }}
     steps:
@@ -46,49 +49,50 @@ jobs:
       - uses: actions/setup-node@v7.0.0
         with:
           node-version: '24'
-      - name: Confirm the native runner and exact .5 build archive
+      - name: Confirm the native runner and exact candidate build archive
+        id: source
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
           QA_RUNNER_ARCH: ${{ matrix.runner_arch }}
           QA_BUILD: ${{ matrix.build }}
-          QA_ARTIFACT: ${{ matrix.artifact }}
-          QA_ARCHIVE_DIGEST: ${{ matrix.archive_digest }}
+          QA_SOURCE_SHA: bee9aaee0db28bf05061b3f7461842b6d85b1fb0
         run: |
           [[ "$RUNNER_ENVIRONMENT" == github-hosted && "$RUNNER_OS" == macOS && "$RUNNER_ARCH" == "$QA_RUNNER_ARCH" ]]
           [[ "$(node -p 'process.arch')" == "$QA_ARCH" ]]
+          [[ "$QA_BUILD" =~ ^[1-9][0-9]*$ ]]
           source="$RUNNER_TEMP/agentrans-mac-source"
           mkdir "$source"
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$QA_BUILD" | jq -e \
-            --argjson run "$QA_BUILD" --arg sha 'aa52b730df40252cbe1675039f1043698148beee' \
+            --arg run "$QA_BUILD" --arg sha "$QA_SOURCE_SHA" \
             --arg title "Package Agentrans · mac-$QA_ARCH · nightly · $QA_VERSION" \
-            'select(.id == $run and .path == ".github/workflows/agentrans-hosted-package.yml"
-              and .event == "workflow_dispatch" and .conclusion == "success" and .head_sha == $sha
-              and .head_repository.full_name == "TLBtianhu/Agentrans" and .display_title == $title)
+            'select((.id | tostring) == $run and .workflow_id == 413465192
+              and .path == ".github/workflows/agentrans-hosted-package.yml"
+              and .event == "workflow_dispatch" and .status == "completed" and .conclusion == "success"
+              and .head_sha == $sha and .head_branch == "codex/macos-session-package-fix-20261119"
+              and .repository.full_name == "TLBtianhu/Agentrans" and .head_repository.full_name == "TLBtianhu/Agentrans"
+              and .display_title == $title)
               | {id, head_sha, display_title, html_url}' > "$source/build.json"
-          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$QA_ARTIFACT" | jq -e \
-            --argjson id "$QA_ARTIFACT" --argjson run "$QA_BUILD" \
-            --arg name "agentrans-mac-$QA_ARCH" --arg digest "$QA_ARCHIVE_DIGEST" \
-            'select(.id == $id and .workflow_run.id == $run and .name == $name and .digest == $digest and .expired == false)
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$QA_BUILD/artifacts" | jq -e \
+            --arg name "agentrans-mac-$QA_ARCH" \
+            'select(.total_count == 1 and (.artifacts | length) == 1) | .artifacts[0]
+              | select((.id | type) == "number" and .id > 0 and .name == $name and .expired == false
+                and .size_in_bytes > 0 and (.digest // "" | test("^sha256:[0-9a-f]{64}$")))
               | {id, name, size_in_bytes, digest}' > "$source/artifact.json"
-      - name: Download the exact retained .5 archive
+          printf 'artifact-id=%s\n' "$(jq -er .id "$source/artifact.json")" >> "$GITHUB_OUTPUT"
+      - name: Download the verified candidate archive
         uses: actions/download-artifact@v8.0.1
         with:
           github-token: ${{ github.token }}
           run-id: ${{ matrix.build }}
-          artifact-ids: ${{ matrix.artifact }}
+          artifact-ids: ${{ steps.source.outputs.artifact-id }}
           path: ${{ runner.temp }}/agentrans-mac-inputs
           digest-mismatch: error
-      - name: Verify clean installation and session persistence in .5
+      - name: Verify clean installation and session persistence
         shell: bash
         timeout-minutes: 16
-        env:
-          QA_ZIP_SHA256: ${{ matrix.zip_sha256 }}
         run: |
           input="$RUNNER_TEMP/agentrans-mac-inputs"
-          if [[ "$QA_FORMAT" == zip ]]; then
-            printf '%s  %s\n' "$QA_ZIP_SHA256" "$input/agentrans-$QA_VERSION-mac-$QA_ARCH-unsigned.zip" | /usr/bin/shasum -a 256 -c -
-          fi
           node scripts/verify-macos.mjs "$input" "$RUNNER_TEMP/agentrans-mac-launch-report" "$QA_ARCH" "$QA_FORMAT" "$QA_VERSION"
       - name: Retain the verification report
         if: always()
