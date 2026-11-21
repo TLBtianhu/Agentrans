@@ -97,6 +97,34 @@ describe('desktop update coordinator', () => {
     expect(f.coordinator.state).toMatchObject({ phase: 'error', failedOperation: 'install', message: 'installer could not start' })
   })
 
+  it('refuses readiness when the native updater fails while the package is being prepared', async () => {
+    const f = fixture()
+    f.downloadUpdate.mockImplementationOnce(async () => {
+      // macOS reports the Squirrel feed failure as an event, then still dispatches the download.
+      f.events.emit('error', new Error('Could not get code signature for running application'))
+      f.events.emit('update-downloaded', { version: '1.1.0-rc.2' })
+      return ['verified-package']
+    })
+    await f.coordinator.check()
+    expect(await f.coordinator.download('1.1.0-rc.2')).toMatchObject({ phase: 'error', failedOperation: 'download',
+      message: 'Could not get code signature for running application' })
+    expect(f.downloadResult).toHaveBeenCalledWith(false, 'download_failed')
+    await expect(f.coordinator.install('1.1.0-rc.2')).rejects.toThrow(/not ready/u)
+    expect(f.beforeRestart).not.toHaveBeenCalled()
+    expect(await f.coordinator.download('1.1.0-rc.2')).toEqual({ phase: 'ready', version: '1.1.0-rc.2' })
+  })
+
+  it('withdraws readiness when the native updater fails before installation is confirmed', async () => {
+    const f = fixture()
+    await f.coordinator.check()
+    await f.coordinator.download('1.1.0-rc.2')
+    f.events.emit('error', new Error('code has no resources but signature indicates they must be present'))
+    expect(f.coordinator.state).toMatchObject({ phase: 'error', failedOperation: 'download' })
+    await expect(f.coordinator.install('1.1.0-rc.2')).rejects.toThrow(/not ready/u)
+    expect(f.beforeRestart).not.toHaveBeenCalled()
+    expect(f.quitAndInstall).not.toHaveBeenCalled()
+  })
+
   it('waits for platform preparation after its downloaded event and rejects stale download approval', async () => {
     const f = fixture()
     const prepared = Promise.withResolvers<string[]>()

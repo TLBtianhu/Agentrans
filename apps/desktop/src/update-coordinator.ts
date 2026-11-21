@@ -21,6 +21,8 @@ export class DesktopUpdateCoordinator {
   private candidate: string | undefined
   private releaseTag: string | undefined
   private downloaded = false
+  /** First native updater error reported while the current download was preparing. */
+  private platformFailure: Error | undefined
   private disposed = false
   private feedConfigured = false
   private checkOperation: Promise<DesktopUpdateState> | undefined
@@ -39,9 +41,20 @@ export class DesktopUpdateCoordinator {
   }
 
   private readonly onError = (error: Error): void => {
-    // Check/download promises own their failures. Installation can fail after quitAndInstall returns.
+    // Check promises own their failures. Installation can fail after quitAndInstall returns.
     if (this.current.phase === 'installing') {
       this.setState(this.failure(error, 'install'))
+      return
+    }
+    // On macOS the native updater reports feed setup and code-signature failures as events
+    // while the download promise still resolves; such a package is not installable.
+    if (this.downloadOperation !== undefined && this.current.phase !== 'ready') {
+      this.platformFailure ??= error
+      return
+    }
+    if (this.downloaded) {
+      this.downloaded = false
+      this.setState(this.failure(error, 'download'))
     }
   }
 
@@ -122,11 +135,13 @@ export class DesktopUpdateCoordinator {
       if (this.candidate === undefined) throw new Error('desktop update: no checked update is available')
       if (version !== this.candidate) throw new Error('desktop update: download confirmation is stale')
       this.setState({ phase: 'downloading', version, percent: 0 })
+      this.platformFailure = undefined
       try {
         const downloaded = await this.updater.downloadUpdate()
         // electron-updater proves the bytes match the channel metadata; the
         // published signature is what proves who wrote them.
         await this.verification.verify(downloaded, this.releaseTag)
+        if (this.platformFailure !== undefined) throw this.platformFailure
         if (!this.downloaded) throw new Error('desktop update: platform preparation did not report readiness')
         this.downloadResult?.(true)
         return this.setState({ phase: 'ready', version })

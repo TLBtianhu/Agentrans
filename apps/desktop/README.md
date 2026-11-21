@@ -300,7 +300,7 @@ Packaging embeds one GitHub release feed and the channel the build serves: `late
 
 Earlier releases consulted a hosted mandatory-update policy and could offer a test-only sign-in window. Both belonged to the hosted download service this product no longer runs, and the product carries no account login.
 
-Every published artifact carries a detached Ed25519 signature, and the application verifies the downloaded installer against a public key pinned in its source before the update may install. The private key exists only in the release environment as AGENTRANS_UPDATE_SIGNING_KEY; publishing without it fails instead of producing an unsigned release. A signature that is missing or does not match ends the download with a visible failure, because the alternative is installing bytes nobody vouched for. Rotating the key means publishing one build that carries the next public key.
+Every published artifact carries a detached Ed25519 signature, and the application verifies the downloaded installer against a public key pinned in its source before the update may install. The private key exists only in the release environment as AGENTRANS_UPDATE_SIGNING_KEY; publishing without it fails instead of producing an unsigned release. A signature that is missing or does not match ends the download with a visible failure, because the alternative is installing bytes nobody vouched for. Rotating the key means publishing one build that carries the next public key. On macOS the native updater can report a failure, such as a code-signature rejection, while the package is being prepared or after it is ready; either ends the download with a visible failure and withdraws Install and Restart before the workspace Host stops.
 
 ### Local updater qualification
 
