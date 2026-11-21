@@ -508,6 +508,10 @@ function ArtifactCardInstance({
         <div className={css.pending}>
           <div>
             <p className={css.pendingAction}>{t('pending.action', { action: pending.action })}</p>
+            {/* The model receives this exact payload as user input, so the user reviews it rather than only the program-chosen name. */}
+            <p className={css.pendingPayloadLabel}>{t('pending.payload')}</p>
+            <pre className={css.pendingPayload} tabIndex={0} aria-label={t('pending.payload')}
+              data-artifact-pending-payload>{JSON.stringify(pending.payload, null, 2)}</pre>
             {pendingActions.length > 1 && <p className={css.pendingCount}>{t('pending.more', { count: String(pendingActions.length) })}</p>}
           </div>
           {overflow && <p className={css.error} role="alert">{t('pending.overflow')}</p>}

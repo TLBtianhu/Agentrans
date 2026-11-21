@@ -197,6 +197,27 @@
   font: var(--dsw-font-xs-13);
 }
 
+.pendingPayloadLabel {
+  margin: 6px 0 2px;
+  color: var(--dsw-alias-label-tertiary);
+  font: var(--dsw-font-xs-13);
+}
+
+/* Bounded so a 16 KiB payload scrolls inside the confirmation instead of pushing the send button away. */
+.pendingPayload {
+  max-height: 160px;
+  margin: 0;
+  padding: 6px 8px;
+  overflow: auto;
+  border-radius: var(--dsw-radius-xs);
+  background: var(--dsw-alias-bg-base);
+  color: var(--dsw-alias-label-secondary);
+  font: var(--dsw-font-xs-13);
+  font-family: var(--ds-font-family-code);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
 .error {
   color: var(--dsw-alias-state-error-primary);
 }
