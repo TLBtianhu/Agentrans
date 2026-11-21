@@ -20,7 +20,7 @@ def display(result: RunResult) -> None:
 def main() -> None:
     """Create conversation history, compact it, and ask a follow-up question."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--dsh-home", required=True, type=Path)
+    parser.add_argument("--agentrans-home", required=True, type=Path)
     parser.add_argument("--workspace", type=Path, default=Path.cwd())
     parser.add_argument("--session-id")
     parser.add_argument("--provider", default="deepseek-official")

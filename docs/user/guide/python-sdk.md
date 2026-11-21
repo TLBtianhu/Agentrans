@@ -76,7 +76,7 @@ Run one task with explicit workspace and home paths:
 ```sh [Linux/macOS]
 python python/sdk/examples/minimal.py \
   --workspace /absolute/path/to/disposable-workspace \
-  --dsh-home /absolute/path/to/example-dsh-home \
+  --agentrans-home /absolute/path/to/example-agentrans-home \
   --session-id example-001 \
   "Inspect the repository and fix the failing tests."
 ```
@@ -84,7 +84,7 @@ python python/sdk/examples/minimal.py \
 ```powershell [Windows PowerShell]
 python python/sdk/examples/minimal.py `
   --workspace C:\work\disposable-workspace `
-  --dsh-home C:\work\example-dsh-home `
+  --agentrans-home C:\work\example-agentrans-home `
   --session-id example-001 `
   "Inspect the repository and fix the failing tests."
 ```

@@ -11,7 +11,7 @@ Install `deepseek-harness-sdk`, export a model credential, then supply an isolat
 ```sh
 export DEEPSEEK_API_KEY=sk-your-key-here
 python python/sdk/examples/minimal.py \
-  --dsh-home /absolute/path/to/example-dsh-home \
+  --agentrans-home /absolute/path/to/example-agentrans-home \
   --workspace /absolute/path/to/disposable-workspace \
   --session-id example-001 \
   "Inspect the repository and fix the failing tests."
@@ -36,7 +36,7 @@ The [compaction example](compact.py) uses the full `sdk` profile. It reads `READ
 
 ```sh
 python python/sdk/examples/compact.py \
-  --dsh-home /absolute/path/to/compact-dsh-home \
+  --agentrans-home /absolute/path/to/compact-agentrans-home \
   --workspace /absolute/path/to/disposable-workspace
 ```
 
@@ -49,7 +49,7 @@ The [permission example](permission.py) starts the full `sdk` profile with a `wo
 
 ```sh
 python python/sdk/examples/permission.py \
-  --dsh-home /absolute/path/to/permission-dsh-home \
+  --agentrans-home /absolute/path/to/permission-agentrans-home \
   --workspace /absolute/path/to/disposable-workspace \
   --preset read-only
 ```
@@ -63,7 +63,7 @@ The [plan example](plan.py) sends `/plan <task>` through `run()` and keeps the S
 
 ```sh
 python python/sdk/examples/plan.py \
-  --dsh-home /absolute/path/to/plan-dsh-home \
+  --agentrans-home /absolute/path/to/plan-agentrans-home \
   --workspace /absolute/path/to/disposable-workspace \
   "Plan the requested change and present it for review."
 ```
@@ -79,7 +79,7 @@ The [goal example](goal.py) submits `/goal <objective>`, prints goal changes and
 
 ```sh
 python python/sdk/examples/goal.py \
-  --dsh-home /absolute/path/to/goal-dsh-home \
+  --agentrans-home /absolute/path/to/goal-agentrans-home \
   --workspace /absolute/path/to/disposable-workspace \
   "Calculate 17 * 19, verify the result, and complete the goal without changing files."
 ```
@@ -92,7 +92,7 @@ python python/sdk/examples/goal.py \
 
 ```sh
 python python/sdk/examples/manage_plugins.py \
-  --dsh-home /absolute/path/to/example-dsh-home \
+  --agentrans-home /absolute/path/to/example-agentrans-home \
   --workspace /absolute/path/to/disposable-workspace \
   "Install and enable the bundle at /absolute/path/to/my-plugin-bundle."
 ```

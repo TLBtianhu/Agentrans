@@ -15,7 +15,7 @@ def main() -> None:
     """Prepare package tools, answer stdio approvals, and print the final response."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("prompt")
-    parser.add_argument("--dsh-home", type=Path, required=True)
+    parser.add_argument("--agentrans-home", type=Path, required=True)
     parser.add_argument("--dsh-bin", type=Path)
     parser.add_argument("--workspace", type=Path, default=Path.cwd())
     args = parser.parse_args()

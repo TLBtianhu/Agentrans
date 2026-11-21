@@ -18419,6 +18419,12 @@ importers:
       '@agentrans/app-boot':
         specifier: workspace:*
         version: link:../../packages/boot/app-boot
+      '@agentrans/artifact':
+        specifier: workspace:*
+        version: link:../../packages/artifact/artifact
+      '@agentrans/artifact-runtime':
+        specifier: workspace:*
+        version: link:../../packages/artifact/artifact-runtime
       '@agentrans/atomic-write':
         specifier: workspace:*
         version: link:../../packages/util/atomic-write
@@ -18503,6 +18509,9 @@ importers:
       '@agentrans/deepseek-account':
         specifier: workspace:*
         version: link:../../packages/credentials/deepseek-account
+      '@agentrans/deepseek-issuer':
+        specifier: workspace:*
+        version: link:../../packages/credentials/deepseek-issuer
       '@agentrans/deepseek-llm-api-extensions':
         specifier: workspace:*
         version: link:../../packages/llm/deepseek-llm-api-extensions
@@ -18638,9 +18647,15 @@ importers:
       '@agentrans/session':
         specifier: workspace:*
         version: link:../../packages/core/session
+      '@agentrans/session-branch':
+        specifier: workspace:*
+        version: link:../../packages/session/session-branch
       '@agentrans/session-checkpoint-policy':
         specifier: workspace:*
         version: link:../../packages/session/session-checkpoint-policy
+      '@agentrans/session-input':
+        specifier: workspace:*
+        version: link:../../packages/session/session-input
       '@agentrans/session-log-deepseek':
         specifier: workspace:*
         version: link:../../packages/session/session-log-deepseek
@@ -18749,6 +18764,9 @@ importers:
       '@agentrans/tool-cordis':
         specifier: workspace:*
         version: link:../../packages/extensions/tool-cordis
+      '@agentrans/tool-executor-native':
+        specifier: workspace:*
+        version: link:../../packages/core/tool-executor-native
       '@agentrans/tool-executor-ptc':
         specifier: workspace:*
         version: link:../../packages/core/tool-executor-ptc

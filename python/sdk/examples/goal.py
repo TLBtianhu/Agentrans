@@ -32,7 +32,7 @@ def display(notification: Notification) -> dict | None:
 def main() -> None:
     """Observe goal state before waiting for the final activity interval."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--dsh-home", required=True, type=Path)
+    parser.add_argument("--agentrans-home", required=True, type=Path)
     parser.add_argument("--workspace", type=Path, default=Path.cwd())
     parser.add_argument("--model", default=os.environ.get("AGENTRANS_MODEL", "deepseek-v4-flash"))
     parser.add_argument("--timeout-seconds", type=float, default=300)

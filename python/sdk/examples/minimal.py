@@ -17,7 +17,7 @@ def main() -> None:
     parser.add_argument("prompt", help="Task for the minimal agent")
     parser.add_argument("--workspace", type=Path, default=Path.cwd())
     parser.add_argument(
-        "--dsh-home",
+        "--agentrans-home",
         type=Path,
         default=Path(configured_home) if configured_home.strip() else None,
     )
@@ -28,7 +28,7 @@ def main() -> None:
     parser.add_argument("--max-tokens", type=int)
     args = parser.parse_args()
     if args.agentrans_home is None:
-        parser.error("--dsh-home or a non-empty AGENTRANS_HOME is required")
+        parser.error("--agentrans-home or a non-empty AGENTRANS_HOME is required")
 
     workspace = args.workspace.resolve()
     agentrans_home = args.agentrans_home.resolve()
