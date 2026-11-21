@@ -19,6 +19,7 @@ import type {
 import { ArtifactCard } from './runtime-harness.tsx'
 import { ArtifactCard as ArtifactCardView } from '../src/client/ArtifactNodeView.tsx'
 import { en } from '../src/client/locales.ts'
+import { inputActionsWith, promptDockDefaults, selectorOf, sessionStandardProps } from './standard-props.client.ts'
 
 const t = makeTranslate(en)
 const artifact: SceneArtifactSnapshot = {
@@ -55,6 +56,7 @@ it('sends a chat focus request only for a verified sent question and does not ch
   const recordedMessage = { eventSeq: 12, messageId: MessageId('exact-question') }
   const session = sessionSnapshot('test-session' as SessionId)
   const props = {
+    ...sessionStandardProps('artifact-spec-session' as SessionId), ...promptDockDefaults(),
     openView, t, useAccess: () => true,
     session, input: { phase: 'plain', draft: 'A new question', draftRev: 3, attachmentIds: [], occurrences: [], queue: [] },
     useSession: bindSnapshotSelector(createSnapshotStore(session)),
@@ -62,12 +64,12 @@ it('sends a chat focus request only for a verified sent question and does not ch
     useCsvComparisonDraft: bindSnapshotSelector(createSnapshotStore<CsvComparisonDraftPhase>('ready')),
     useCsvComparisonDraftOutcome: bindSnapshotSelector(status),
     useCsvComparisonDraftCleanupFailed: bindSnapshotSelector(createSnapshotStore(false)),
-    usePendingCsvComparisonSourceTrail: () => undefined,
-    useCsvComparisonSourceRecovery: () => undefined,
+    usePendingCsvComparisonSourceTrail: selectorOf(undefined),
+    useCsvComparisonSourceRecovery: selectorOf(undefined),
     dismissCsvComparisonDraftOutcome: dismiss, selectCsvSentQuestion, clearArtifactPromptContext: clear,
     restoreCsvComparisonDraft: vi.fn(), retryCsvComparisonDraftCleanup: vi.fn(),
     visitCsvDraftSource: vi.fn(), restoreCsvSourceTrail: vi.fn(),
-  } as unknown as ComponentProps<typeof ArtifactPromptContextDock>
+  } satisfies ComponentProps<typeof ArtifactPromptContextDock>
   const view = render(<ArtifactPromptContextDock {...props} />)
   const selector = { name: 'View sent question' }
   expect(screen.queryByRole('button', selector)).toBeNull()
@@ -100,13 +102,14 @@ it('previews a chosen comparison and discards a late file preview when the compo
   const load = vi.fn<ComponentProps<typeof ArtifactPromptContextDock>['loadCsvComparisonImport']>()
     .mockResolvedValueOnce(imported).mockReturnValueOnce(late.promise)
   const props = {
+    ...sessionStandardProps('artifact-spec-session' as SessionId), ...promptDockDefaults(),
     t, session, useAccess: () => true, loadCsvComparisonImport: load,
     useSession: bindSnapshotSelector(createSnapshotStore(session)),
-    useArtifactPromptContext: () => null, useCsvComparisonDraft: () => 'ready',
-    useCsvComparisonDraftOutcome: () => undefined, useCsvComparisonDraftCleanupFailed: () => false,
-    usePendingCsvComparisonSourceTrail: () => undefined, useCsvComparisonSourceRecovery: () => undefined,
+    useArtifactPromptContext: selectorOf(null), useCsvComparisonDraft: selectorOf('ready'),
+    useCsvComparisonDraftOutcome: selectorOf(undefined), useCsvComparisonDraftCleanupFailed: selectorOf(false),
+    usePendingCsvComparisonSourceTrail: selectorOf(undefined), useCsvComparisonSourceRecovery: selectorOf(undefined),
     clearArtifactPromptContext: vi.fn(),
-  } as unknown as ComponentProps<typeof ArtifactPromptContextDock>
+  } satisfies ComponentProps<typeof ArtifactPromptContextDock>
   const view = render(<ArtifactPromptContextDock {...props} />)
   const picker = (): HTMLInputElement => view.container.querySelector<HTMLInputElement>('[data-csv-import-comparison-input]')!
   fireEvent.change(picker(), { target: { files: [new File(['x'.repeat(65_537)], 'too-large.json')] } })
@@ -166,22 +169,24 @@ it('previews the restored comparison’s source chain before opening an exact qu
   const visitCsvDraftSource = vi.fn<OpenDraftSource>((_source, _receiptId, _selection, open) => { open() })
   type OpenDraftChain = ComponentProps<typeof ArtifactPromptContextDock>['visitCsvDraftSourceChain']
   const visitCsvDraftSourceChain = vi.fn<OpenDraftChain>((_sources, _receiptId, _selection, open) => { open() })
-  const loadCsvSourceChain = vi.fn<CsvSourceChainLoader>().mockResolvedValue({ sources: [source, earlier], status: 'complete' })
+  const loadCsvSourceChain = vi.fn<ComponentProps<typeof ArtifactPromptContextDock>['loadCsvSourceChain']>().mockResolvedValue({ sources: [source, earlier], status: 'complete' })
   const props = {
+    ...sessionStandardProps('artifact-spec-session' as SessionId), ...promptDockDefaults(),
     t, openView, session, clearArtifactPromptContext: clear, useArtifactPromptContext: bindSnapshotSelector(selection),
     input: { phase: 'plain', draft: 'An unsent draft', draftRev: caret.draftRev, attachmentIds: [], occurrences: [], queue: [] },
     useSession: bindSnapshotSelector(createSnapshotStore(session)),
-    useAccess: () => true, inputActions: { captureInsertion }, visitCsvDraftSource, visitCsvDraftSourceChain, loadCsvSourceChain,
+    useAccess: () => true, inputActions: inputActionsWith({ captureInsertion }), visitCsvDraftSource, visitCsvDraftSourceChain,
+    loadCsvSourceChain,
     sourceQuestionLabel: (question: typeof source) => question.messageId === source.messageId ? 'Check the most recent comparison' : undefined,
     useCsvComparisonDraft: bindSnapshotSelector(createSnapshotStore<CsvComparisonDraftPhase>('ready')),
-    useCsvComparisonDraftOutcome: () => undefined,
-    useCsvComparisonDraftCleanupFailed: () => false,
-    usePendingCsvComparisonSourceTrail: () => undefined,
-    useCsvComparisonSourceRecovery: () => undefined,
+    useCsvComparisonDraftOutcome: selectorOf(undefined),
+    useCsvComparisonDraftCleanupFailed: selectorOf(false),
+    usePendingCsvComparisonSourceTrail: selectorOf(undefined),
+    useCsvComparisonSourceRecovery: selectorOf(undefined),
     restoreCsvSourceTrail: vi.fn(),
     restoreCsvComparisonDraft: vi.fn(), retryCsvComparisonDraftCleanup: vi.fn(),
     dismissCsvComparisonDraftOutcome: vi.fn(), selectCsvSentQuestion: vi.fn(),
-  } as unknown as ComponentProps<typeof ArtifactPromptContextDock>
+  } satisfies ComponentProps<typeof ArtifactPromptContextDock>
   const view = render(<ArtifactPromptContextDock {...props} />)
   const label = { name: 'View source question' }
   fireEvent.click(screen.getByRole('button', label))
@@ -239,12 +244,13 @@ it('opens each original return from the expanded draft comparison with the same 
     .mockImplementation((_source, _receipt, _selection, open) => { open() })
   const context = createSnapshotStore<ArtifactPromptBinding | null>(binding)
   const props = {
-    session, t, openView, visitCsvDraftReturn, inputActions: { captureInsertion }, useAccess: () => true,
+    ...sessionStandardProps('artifact-spec-session' as SessionId), ...promptDockDefaults(),
+    session, t, openView, visitCsvDraftReturn, inputActions: inputActionsWith({ captureInsertion }), useAccess: () => true,
     useSession: bindSnapshotSelector(createSnapshotStore(session)), useArtifactPromptContext: bindSnapshotSelector(context),
-    clearArtifactPromptContext: clear, useCsvComparisonDraft: () => 'ready', useCsvComparisonDraftOutcome: () => undefined,
-    useCsvComparisonDraftCleanupFailed: () => false, usePendingCsvComparisonSourceTrail: () => undefined,
-    useCsvComparisonSourceRecovery: () => undefined,
-  } as unknown as ComponentProps<typeof ArtifactPromptContextDock>
+    clearArtifactPromptContext: clear, useCsvComparisonDraft: selectorOf('ready'), useCsvComparisonDraftOutcome: selectorOf(undefined),
+    useCsvComparisonDraftCleanupFailed: selectorOf(false), usePendingCsvComparisonSourceTrail: selectorOf(undefined),
+    useCsvComparisonSourceRecovery: selectorOf(undefined),
+  } satisfies ComponentProps<typeof ArtifactPromptContextDock>
   const view = render(<ArtifactPromptContextDock {...props} />)
   const sourceButton = { name: 'View original return' }
   expect(screen.queryByRole('button', sourceButton)).toBeNull()
@@ -395,12 +401,14 @@ it.each(['comparison', 'draft'] as const)('opens the verified %s trail destinati
   })
   const session = sessionSnapshot(sessionId)
   const props = {
+    ...sessionStandardProps('artifact-spec-session' as SessionId), ...promptDockDefaults(),
     t, session: { ...session, openState: 'loading' }, openView, restoreCsvSourceTrail, useAccess: () => true,
     useSession: bindSnapshotSelector(createSnapshotStore(session)),
-    useArtifactPromptContext: () => null, useCsvComparisonDraftOutcome: () => undefined, useCsvComparisonDraftCleanupFailed: () => false,
+    useArtifactPromptContext: selectorOf(null), useCsvComparisonDraftOutcome: selectorOf(undefined),
+    useCsvComparisonDraftCleanupFailed: selectorOf(false),
     usePendingCsvComparisonSourceTrail: bindSnapshotSelector(pending), useCsvComparisonDraft: bindSnapshotSelector(phase),
-    useCsvComparisonSourceRecovery: () => undefined,
-  } as unknown as ComponentProps<typeof ArtifactPromptContextDock>
+    useCsvComparisonSourceRecovery: selectorOf(undefined),
+  } satisfies ComponentProps<typeof ArtifactPromptContextDock>
   const view = render(<ArtifactPromptContextDock {...props} />)
   expect(restoreCsvSourceTrail).not.toHaveBeenCalled()
   view.rerender(<ArtifactPromptContextDock {...props} session={{ ...session, openState: 'open' }} />)
@@ -425,12 +433,14 @@ it('renders a retry in the composer only when refresh has no verified fallback c
   type Retry = ComponentProps<typeof ArtifactPromptContextDock>['retryCsvSourceRecovery']
   const retryCsvSourceRecovery = vi.fn<Retry>((_value, open) => { open(target) })
   const props = {
+    ...sessionStandardProps('artifact-spec-session' as SessionId), ...promptDockDefaults(),
     t, session, openView, retryCsvSourceRecovery, useAccess: (action: string) => action === 'session/events',
     useSession: bindSnapshotSelector(createSnapshotStore(session)),
-    useArtifactPromptContext: () => null, useCsvComparisonDraftOutcome: () => undefined, useCsvComparisonDraftCleanupFailed: () => false,
-    usePendingCsvComparisonSourceTrail: () => undefined, useCsvComparisonDraft: () => 'ready',
+    useArtifactPromptContext: selectorOf(null), useCsvComparisonDraftOutcome: selectorOf(undefined),
+    useCsvComparisonDraftCleanupFailed: selectorOf(false),
+    usePendingCsvComparisonSourceTrail: selectorOf(undefined), useCsvComparisonDraft: selectorOf('ready'),
     useCsvComparisonSourceRecovery: bindSnapshotSelector(recovery),
-  } as unknown as ComponentProps<typeof ArtifactPromptContextDock>
+  } satisfies ComponentProps<typeof ArtifactPromptContextDock>
   render(<ArtifactPromptContextDock {...props} />)
   expect(screen.getByRole('status').textContent).toBe('Could not load the full source chain.')
   fireEvent.click(screen.getByRole('button', { name: 'Retry' }))

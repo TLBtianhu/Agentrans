@@ -313,7 +313,7 @@ describe('the shipped Web composition', () => {
     const request = adapter.requests.find(request => request.purpose === undefined)
     expect(request?.tools?.map(tool => tool.name).sort()).toEqual(tools)
     const userInput = request?.messages.find(message => message.role === 'user' && message.source?.kind === 'user')
-    expect(userInput?.content).toContainEqual({ type: 'text', text: expect.stringContaining(`attachment ID "${attachment.attachmentId}"`) })
+    expect(userInput?.content.some(block => block.type === 'text' && block.text.includes(`attachment ID "${attachment.attachmentId}"`))).toBe(true)
     expect(JSON.stringify(userInput?.content)).not.toContain('saved at')
   })
 

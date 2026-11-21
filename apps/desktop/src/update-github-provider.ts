@@ -132,7 +132,7 @@ class DesktopGitHubProvider extends GitHubProvider {
       }
       const text = new TextDecoder('utf-8', { fatal: true }).decode(bytes)
       const info = parseUpdateInfo(text, file, url)
-      if (info?.version !== version.version) throw new Error(`desktop update: ${file} version does not match release ${tag}`)
+      if (info.version !== version.version) throw new Error(`desktop update: ${file} version does not match release ${tag}`)
       const installer = updateFiles.parse(info.files).find(entry =>
         installers.includes(entry.url) && uploaded.get(entry.url) === entry.size)
       if (installer === undefined) continue

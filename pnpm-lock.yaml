@@ -4135,6 +4135,9 @@ importers:
       '@agentrans/cordis':
         specifier: workspace:~
         version: link:../../../vendor/cordis
+      '@agentrans/llm':
+        specifier: workspace:*
+        version: link:../../llm/llm
       '@agentrans/schemastery':
         specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
@@ -17943,6 +17946,10 @@ importers:
       '@agentrans/util-values':
         specifier: workspace:*
         version: link:../values
+    devDependencies:
+      '@agentrans/cordis':
+        specifier: workspace:~
+        version: link:../../../vendor/cordis
 
   packages/util/time:
     dependencies:

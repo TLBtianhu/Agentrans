@@ -141,7 +141,8 @@ export class DesktopUpdateCoordinator {
         // electron-updater proves the bytes match the channel metadata; the
         // published signature is what proves who wrote them.
         await this.verification.verify(downloaded, this.releaseTag)
-        if (this.platformFailure !== undefined) throw this.platformFailure
+        const platformFailure = this.recordedPlatformFailure()
+        if (platformFailure !== undefined) throw platformFailure
         if (!this.downloaded) throw new Error('desktop update: platform preparation did not report readiness')
         this.downloadResult?.(true)
         return this.setState({ phase: 'ready', version })
@@ -185,6 +186,11 @@ export class DesktopUpdateCoordinator {
     // Pending updater promises can still emit EventEmitter errors during shutdown.
     void Promise.allSettled([this.checkOperation, this.downloadOperation, this.installOperation])
       .then(() => { this.updater.off('error', this.onError) })
+  }
+
+  /** The native error recorded during preparation; read through a call because listeners assign it between awaits. */
+  private recordedPlatformFailure(): Error | undefined {
+    return this.platformFailure
   }
 
   private assertLive(): void {

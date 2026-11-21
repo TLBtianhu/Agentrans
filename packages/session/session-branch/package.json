@@ -11,12 +11,12 @@
     "directory": "packages/session/session-branch"
   },
   "type": "module",
-  "main": "lib/types/index.js",
+  "main": "lib/index.js",
   "types": "lib/types/index.d.ts",
   "exports": {
     ".": {
       "types": "./lib/types/index.d.ts",
-      "default": "./lib/types/index.js"
+      "default": "./lib/index.js"
     },
     "./types": {
       "types": "./lib/types/types.d.ts",
@@ -24,17 +24,21 @@
     },
     "./admission": {
       "types": "./lib/types/admission.d.ts",
-      "default": "./lib/types/admission.js"
+      "default": "./lib/admission.js"
     },
     "./src/*": "./src/*",
     "./package.json": "./package.json"
   },
   "files": [
+    "lib/index.js",
+    "lib/admission.js",
+    "lib/shared-*.js",
     "lib/types/**/*.js",
     "lib/types/**/*.d.ts"
   ],
   "license": "MIT",
   "peerDependencies": {
+    "@agentrans/cordis": "workspace:~",
     "@agentrans/agent": "workspace:*",
     "@agentrans/llm": "workspace:*",
     "@agentrans/session": "workspace:*"

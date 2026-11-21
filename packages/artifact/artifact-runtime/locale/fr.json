@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Rapports d’exécution",
+    "description": "Enregistre l’état d’exécution de l’Artifact lié à sa source pour que le modèle l’inspecte."
+  }
+}

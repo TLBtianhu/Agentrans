@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "実行可能な Artifact",
+    "description": "対話型 HTML と SceneSpec の Artifact をセッションに保存し、モデル向けツールを提供します。"
+  }
+}

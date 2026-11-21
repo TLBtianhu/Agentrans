@@ -64,6 +64,7 @@
     "@agentrans/client-ui-renderer": "workspace:*",
     "@agentrans/client-ui-session": "workspace:*",
     "@agentrans/client-ui-slots": "workspace:*",
+    "@agentrans/llm": "workspace:*",
     "@agentrans/session": "workspace:*",
     "@agentrans/util-crypto": "workspace:*",
     "@agentrans/util-values": "workspace:*",

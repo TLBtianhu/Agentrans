@@ -30,13 +30,13 @@ describe('CLAUDE mirror', () => {
     })
     expect(requiredMirrors(root).map(check => check.mirror)).toEqual(['CLAUDE.md', 'packages/CLAUDE.md'])
     expect(claudeMirrorViolations(root)).toEqual([])
-    expect(() => assertClaudeMirrors(root)).not.toThrow()
+    expect(() => { assertClaudeMirrors(root) }).not.toThrow()
   })
 
   it('reports a drifted copy with both paths', () => {
     const root = fixture({ 'AGENTS.md': 'root rules\n', 'CLAUDE.md': 'root rules\nand one more\n' })
     expect(claudeMirrorViolations(root)).toEqual(['CLAUDE.md differs from AGENTS.md; edit one and copy it over the other'])
-    expect(() => assertClaudeMirrors(root)).toThrow('CLAUDE.md differs from AGENTS.md')
+    expect(() => { assertClaudeMirrors(root) }).toThrow('CLAUDE.md differs from AGENTS.md')
   })
 
   it('reports a mirror that lost its original', () => {

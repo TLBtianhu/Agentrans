@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-artifact"
+    "title": "ui-artifact",
+    "description": "Exibe Artifacts HTML isolados na conversa e envia ações após a confirmação do usuário."
   }
 }

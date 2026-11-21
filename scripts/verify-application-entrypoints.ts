@@ -27,7 +27,7 @@ interface LauncherPolicy {
 
 /** Public product launcher plus the build-only WebWorker packer. */
 const MANIFEST_BIN_ALLOWLIST = new Map<string, ManifestBin>([
-  ['apps/cli/package.json', { dsh: 'lib/bin.js' }],
+  ['apps/cli/package.json', { agentrans: 'lib/bin.js' }],
   ['packages/experimental/webworker-packer/package.json', { 'dsh-pack-vfs-image': './bin.js' }],
 ])
 
@@ -56,7 +56,7 @@ const EXECUTABLE_SOURCE_ALLOWLIST = new Map<string, string>([
  * by name.
  */
 const ROOT_LAUNCHER_POLICIES = new Map<string, LauncherPolicy>([
-  ['dsh', { kind: 'dsh-direct', productBootstrap: true }],
+  ['agentrans', { kind: 'dsh-direct', productBootstrap: true }],
   ['demo:ptc', { kind: 'dsh-wrapper', wrapper: 'scripts/demo-ptc.mjs' }],
   ['demo:inspector', { kind: 'dsh-direct' }],
   ['start:web', { kind: 'dsh-direct', productBootstrap: true }],

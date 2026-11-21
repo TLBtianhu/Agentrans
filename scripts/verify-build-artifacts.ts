@@ -52,8 +52,13 @@ export function declaredRuntimePaths(manifest: unknown): string[] {
   while (pending.length > 0) {
     const value = pending.pop()
     if (typeof value === 'string') admit(value)
-    else if (Array.isArray(value)) pending.push(...value)
-    else if (typeof value === 'object' && value !== null) pending.push(...Object.values(value))
+    else if (Array.isArray(value)) {
+      const items: readonly unknown[] = value
+      pending.push(...items)
+    } else if (typeof value === 'object' && value !== null) {
+      const values: readonly unknown[] = Object.values(value)
+      pending.push(...values)
+    }
   }
   return [...paths].sort()
 }

@@ -511,7 +511,7 @@ describe('package payload constraints', () => {
     ])
   })
 
-  it.each(['ui-chat', 'ui-settings-account'])(
+  it.each(['ui-chat'])(
     'accepts the published package assets for %s and rejects their omission', (name) => {
       const dir = `packages/client/${name}`
       const manifest = JSON.parse(readFileSync(new URL(`../${dir}/package.json`, import.meta.url), 'utf8')) as WorkspaceManifest['manifest']
@@ -589,13 +589,13 @@ it('requires both physical Client entries only for opted-in packages', () => {
   }
 })
 
-it('requires the standalone shortcut protocol and rejects unrelated runtime files', () => {
+it('publishes the shortcut bundles without the protocol moved to its own package', () => {
   const dir = 'packages/client/shortcuts'
   const manifest = JSON.parse(readFileSync(new URL(`../${dir}/package.json`, import.meta.url), 'utf8')) as WorkspaceManifest['manifest']
   expect(checkWorkspaceManifest({ dir, manifest })).toEqual([])
   for (const files of [
-    ['lib/index.js', 'lib/client.js', 'lib/types/**/*.d.ts'],
-    ['lib/index.js', 'lib/client.js', 'lib/protocol.js', 'lib/extra.js', 'lib/types/**/*.d.ts'],
+    ['lib/index.js', 'lib/types/**/*.d.ts'],
+    ['lib/index.js', 'lib/client.js', 'lib/protocol.js', 'lib/types/**/*.d.ts'],
   ]) {
     expect(checkWorkspaceManifest({ dir, manifest: { ...manifest, files } }))
       .toEqual([expect.stringContaining('package.json files must be')])

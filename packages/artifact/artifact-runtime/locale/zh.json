@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Artifact 运行报告",
+    "description": "记录与源码绑定的 Artifact 运行状态，并供模型检查。"
+  }
+}

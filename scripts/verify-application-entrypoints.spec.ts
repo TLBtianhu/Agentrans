@@ -129,14 +129,14 @@ describe('application entrypoints', () => {
   it('accepts the product initializer before the ordinary dsh source entry', () => {
     const root = fixture()
     write(root, 'package.json', JSON.stringify({ scripts: {
-      dsh: 'node --import tsx/esm --import ./scripts/agentrans-bootstrap.ts apps/cli/src/bin.ts',
+      agentrans: 'node --import tsx/esm --import ./scripts/agentrans-bootstrap.ts apps/cli/src/bin.ts',
       'start:web': 'node --import tsx/esm --import ./scripts/agentrans-bootstrap.ts apps/cli/src/bin.ts web',
     } }))
     write(root, 'scripts/agentrans-bootstrap.ts', "import { prepareProductState } from '../packages/boot/product-layout/src/launch-context.ts'\n")
     expect(applicationEntrypointViolations(root)).toEqual([])
   })
 
-  it.each(['dsh', 'start:web'])('rejects %s when its product initialization is absent', (name) => {
+  it.each(['agentrans', 'start:web'])('rejects %s when its product initialization is absent', (name) => {
     const root = fixture()
     write(root, 'package.json', JSON.stringify({ scripts: { [name]: 'node --import tsx/esm apps/cli/src/bin.ts web' } }))
     expect(applicationEntrypointViolations(root)).toEqual([
@@ -147,18 +147,18 @@ describe('application entrypoints', () => {
   it('rejects initialization placed after the application entry', () => {
     const root = fixture()
     write(root, 'package.json', JSON.stringify({ scripts: {
-      dsh: 'node --import tsx/esm apps/cli/src/bin.ts --import ./scripts/agentrans-bootstrap.ts',
+      agentrans: 'node --import tsx/esm apps/cli/src/bin.ts --import ./scripts/agentrans-bootstrap.ts',
     } }))
     write(root, 'scripts/agentrans-bootstrap.ts', '// Instance initialization.\n')
     expect(applicationEntrypointViolations(root)).toEqual([
-      'package.json scripts.dsh: product launch must preload ./scripts/agentrans-bootstrap.ts before the dsh entry',
+      'package.json scripts.agentrans: product launch must preload ./scripts/agentrans-bootstrap.ts before the dsh entry',
     ])
   })
 
   it('rejects a product command whose initializer is missing on disk', () => {
     const root = fixture()
     write(root, 'package.json', JSON.stringify({ scripts: {
-      dsh: 'node --import tsx/esm --import ./scripts/agentrans-bootstrap.ts apps/cli/src/bin.ts',
+      agentrans: 'node --import tsx/esm --import ./scripts/agentrans-bootstrap.ts apps/cli/src/bin.ts',
     } }))
     expect(applicationEntrypointViolations(root)).toEqual([
       './scripts/agentrans-bootstrap.ts: product bootstrap is missing',
