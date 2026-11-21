@@ -24,9 +24,13 @@ type StoredDraft = z.infer<typeof draftSchema>
 type DraftBinding = Pick<StoredDraft, 'facts' | 'savedAfterSeq' | 'requestId'>
 type DraftAdmission = 'accepted' | 'pending' | 'absent'
 
-/** The only durable draft table; Session IDs are hashed for safe per-record filenames. */
+/**
+ * The only durable draft table; Session IDs are hashed for safe per-record filenames.
+ * A draft that fails the current schema, such as one saved before the `attribution` field rename,
+ * is moved aside and skipped so the Host still opens; the user selects the comparison again.
+ */
 export const artifactCsvComparisonDraftDomain = defineDomain({
-  name: 'artifact_csv_drafts', version: 1, layout: 'per-record',
+  name: 'artifact_csv_drafts', version: 1, layout: 'per-record', invalidRecords: 'backup-and-skip',
   tables: { drafts: domainTable<string, StoredDraft>(draftSchema) },
 })
 
@@ -36,7 +40,11 @@ export const artifactCsvComparisonAdmissionsDomain = defineDomain({
   tables: { requests: domainTable<string, string>(z.string().regex(/^[a-f0-9]{64}$/u)) },
 })
 
-/** Refuse a draft operation without exposing data from another receipt or Session. */
+/**
+ * Refuse a draft operation without exposing data from another receipt or Session.
+ * @param reason - Wire reason reported as `artifact-followup/csv-draft-unavailable` details.
+ * @returns Never; always throws a `RemoteError`.
+ */
 export function csvComparisonDraftUnavailable(reason: ArtifactCsvComparisonDraftFailure): never {
   throw new RemoteError('artifact-followup/csv-draft-unavailable', 'The selected CSV comparison draft is unavailable', { reason })
 }
@@ -55,7 +63,11 @@ interface DraftStore {
 
 const stores = new WeakMap<Context, DraftStore>()
 
-/** Open the private draft table before the synchronous prompt context provider starts accepting receipts. */
+/**
+ * Open the private draft table before the synchronous prompt context provider starts accepting receipts.
+ * @param ctx - Host context whose root owns the store; both storage domains close when it disposes.
+ * @returns The draft store registered for this Host root.
+ */
 export async function registerCsvComparisonDrafts(ctx: Context): Promise<DraftStore> {
   const domain = await ctx.storageDomain.open(artifactCsvComparisonDraftDomain)
   ctx.effect(() => async () => { await domain.close() }, 'CSV comparison draft storage')
@@ -169,7 +181,11 @@ export async function registerCsvComparisonDrafts(ctx: Context): Promise<DraftSt
   return owner
 }
 
-/** Access the mounted Host's private draft scope without publishing it as a Cordis tool service. */
+/**
+ * Access the mounted Host's private draft scope without publishing it as a Cordis tool service.
+ * @param ctx - Any context under the Host root.
+ * @returns The registered draft store, or `undefined` before registration or after disposal.
+ */
 export function csvComparisonDrafts(ctx: Context): DraftStore | undefined {
   return stores.get(ctx.root)
 }

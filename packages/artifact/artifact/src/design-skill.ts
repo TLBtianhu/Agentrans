@@ -5,7 +5,10 @@ import type { Context } from '@agentrans/cordis'
 import { BUNDLED_SKILL_RANK, type SkillCandidate } from '@agentrans/skill'
 import { parse as parseYaml } from 'yaml'
 
-/** @param ctx - The HTML tool's scope with a skill registry. */
+/**
+ * Register the bundled `artifact-design` skill; loading it returns the instructions and the parameter explorer template.
+ * @param ctx - The HTML tool's scope with a skill registry.
+ */
 export function registerArtifactDesignSkill(ctx: Context): void {
   const skillRoot = new URL('../skills/artifact-design/', import.meta.url)
   const manifest = readFileSync(new URL('SKILL.md', skillRoot), 'utf8')

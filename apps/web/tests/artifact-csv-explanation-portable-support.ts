@@ -73,7 +73,7 @@ function verifyImportedExplanationSend(history: PersistedHistory, initial: Persi
   if (sent?.type !== 'user/message') throw new Error('The imported explanation question was not recorded')
   const context = sent.data.content[1]
   if (context?.type !== 'text' || !context.text.startsWith(IMPORTED_CSV_COMPARISON_EXPLANATION_PREFIX)) {
-    throw new Error('The sent explanation lost its imported provenance')
+    throw new Error('The sent explanation lost its imported attribution')
   }
   const canonical = { kind: 'artifact-question-context', sessionId: facts.sessionId, facts }
   expect(JSON.parse(context.text.slice(IMPORTED_CSV_COMPARISON_EXPLANATION_PREFIX.length))).toEqual(canonical)
@@ -123,8 +123,8 @@ function portableReload({ page, console }: CsvExplanationBrowser) {
 /** Compare both imported transitions and independently inspect their exact stored originals. */
 export async function inspectImportedPair(scope: Locator, capture: (details: Locator, step: string) => Promise<void>,
   allowReuseSource = false): Promise<void> {
-  const provenance = scope.locator('[data-csv-comparison-provenance="user-imported"]')
-  await expect.poll(() => provenance.textContent()).toBe('User imported')
+  const attribution = scope.locator('[data-csv-comparison-attribution="user-imported"]')
+  await expect.poll(() => attribution.textContent()).toBe('User imported')
   expect(await scope.locator('[data-csv-explanation-source]').count()).toBe(0)
   if (!allowReuseSource) expect(await scope.locator('[data-csv-view-source-question], [data-csv-view-full-source-chain]').count()).toBe(0)
   const steps = scope.locator('[data-csv-explanation-step]')
@@ -190,7 +190,7 @@ export async function exercisePortableCsvExplanation(live: CsvExplanationBrowser
     const destination = await openFreshCsvChat(page, world, sessionId)
     const conversation = page.locator(`[data-conversation-session="${destination}"]`)
     const initial = await readPersistedEvents(world, destination)
-    const facts = { kind: 'csv-question-comparison', sessionId: destination, provenance: 'user-imported', comparison,
+    const facts = { kind: 'csv-question-comparison', sessionId: destination, attribution: 'user-imported', comparison,
       explanation: { aggregation: { comparison: alternateComparison } } } as const
     const imported = await openCsvImportFile(page, conversation, portableFile)
     expect(await imported.json()).toMatchObject({ result: { ok: true, value: { facts } } })

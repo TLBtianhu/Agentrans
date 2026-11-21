@@ -237,16 +237,16 @@ export function ArtifactPromptContext({
       {context.draft.facts.explanation === undefined && <CsvComparisonReadings summary={context.draft.facts.comparison}
         sideLabels={context.draft.facts.returns !== undefined || context.draft.facts.returnCards !== undefined
           ? csvReturnComparisonSideLabels(t) : undefined}
-        userImported={context.draft.facts.provenance === 'user-imported'} t={t} />}
+        userImported={context.draft.facts.attribution === 'user-imported'} t={t} />}
       <CsvAttachedComparison key={context.draft.receiptId} page={context.draft.facts.comparison} draft t={t}
-        explanation={context.draft.facts.explanation} userImported={context.draft.facts.provenance === 'user-imported'}
+        explanation={context.draft.facts.explanation} userImported={context.draft.facts.attribution === 'user-imported'}
         returnCards={context.draft.facts.returnCards}
         openReturnedSource={sourceReturns !== undefined && viewCsvReturn !== undefined
           ? (side) => {
             const { eventSeq, messageId } = sourceReturns[side]
             viewCsvReturn({ eventSeq, messageId }, context.draft.receiptId, side)
           } : undefined}
-        openExplanationSource={context.draft.facts.provenance === undefined && context.draft.facts.sessionId === sessionId
+        openExplanationSource={context.draft.facts.attribution === undefined && context.draft.facts.sessionId === sessionId
           && viewCsvSource !== undefined
           ? (target, step) => { viewCsvSource(target, context.draft.receiptId, step) } : undefined}
         viewSourceQuestion={sourceQuestion !== undefined && viewCsvSource !== undefined

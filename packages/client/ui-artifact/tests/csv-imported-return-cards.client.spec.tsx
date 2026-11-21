@@ -93,7 +93,7 @@ it('keeps the two imported cards in draft and sent replay without local return l
   const snapshot = sessionSnapshot(sessionId)
   const view = render(<ArtifactPromptContext t={t} useSession={selector => selector(snapshot)} clearArtifactPromptContext={vi.fn()}
     useArtifactPromptContext={selector => selector({ kind: 'csv-question-comparison', draft: { receiptId: 'confirmed-import', facts: {
-      kind: 'csv-question-comparison', sessionId, provenance: 'user-imported', comparison: page, returnCards,
+      kind: 'csv-question-comparison', sessionId, attribution: 'user-imported', comparison: page, returnCards,
     } } })} />)
   readAttribution()
   expect(document.querySelector('[data-csv-imported-return-card]')).toBeNull()
@@ -140,7 +140,7 @@ it('opens the exact sent imported comparison source only with history access and
   const messageRef = { eventSeq: 30, messageId: MessageId('reused-comparison') }
   const raw = IMPORTED_CSV_COMPARISON_QUESTION_PREFIX + JSON.stringify({
     kind: 'artifact-question-context', sessionId,
-    facts: { kind: 'csv-question-comparison', sessionId, provenance: 'user-imported', comparison: page, returnCards, reusedFrom },
+    facts: { kind: 'csv-question-comparison', sessionId, attribution: 'user-imported', comparison: page, returnCards, reusedFrom },
   })
   const node = csvComparisonContextTextRule.match(raw, 0, { read: () => undefined })
   if (node?.id !== 'artifact-csv-comparison-context') throw new Error('Missing imported comparison text')
@@ -177,7 +177,7 @@ it('requires history access to preview or restore an imported return draft sourc
   const receiptId = 'imported-return-draft'
   const selection = { start: 4, end: 4, draftRev: -1 }
   const binding = { kind: 'csv-question-comparison', draft: { receiptId, facts: {
-    kind: 'csv-question-comparison', sessionId, provenance: 'user-imported', comparison: page, returnCards, reusedFrom: source,
+    kind: 'csv-question-comparison', sessionId, attribution: 'user-imported', comparison: page, returnCards, reusedFrom: source,
   } } } as const satisfies ArtifactPromptBinding
   const trail: CsvComparisonSourceTrail = [
     { source, origin: { kind: 'draft', receiptId, selection }, sourceKind: 'imported-return-comparison' },

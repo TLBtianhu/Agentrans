@@ -43,7 +43,7 @@ changes:
 <a id="compatibility"></a>
 ## Compatibility
 
-Existing snapshots omit the optional `csvContinuation` field and retain their behavior. The new snapshot contains a complete CSV chart revision. Older readers that support CSV charts can render its values and retain the new question attachment as text. The marker supplies provenance and locks the group for new readers. They reserve the parent-local identity and refuse attempts to write a second revision. The Session envelope and the original evidence remain unchanged.
+Existing snapshots omit the optional `csvContinuation` field and retain their behavior. The new snapshot contains a complete CSV chart revision. Older readers that support CSV charts can render its values and retain the new question attachment as text. The marker records the returned source and locks the group for new readers. They reserve the parent-local identity and refuse attempts to write a second revision. The Session envelope and the original evidence remain unchanged.
 
 <a id="verification"></a>
 ## Verification

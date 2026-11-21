@@ -211,7 +211,11 @@ const translations = {
   },
 } satisfies Record<'en' | 'zh' | 'ja' | 'es' | 'fr' | 'de' | 'ru' | 'pt', CsvComparisonHtmlLabels>
 
-/** Resolve a request language to fixed labels, using English for an unsupported language pack. */
+/**
+ * Resolve a request language to fixed labels, using English for an unsupported language pack.
+ * @param locale - BCP 47 language tag from the request; only its primary subtag selects a pack.
+ * @returns Labels of the matching pack, or English for a missing, malformed or unsupported tag.
+ */
 export function csvComparisonHtmlLabels(locale?: string): CsvComparisonHtmlLabels {
   if (typeof locale !== 'string' || !/^[a-z]{2,8}(?:-[a-z0-9]{1,8})*$/iu.test(locale)) return en
   const [base] = locale.toLowerCase().split('-', 1)

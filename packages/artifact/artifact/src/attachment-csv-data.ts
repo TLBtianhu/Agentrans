@@ -19,6 +19,7 @@ const FILTER_VALUES = 100
 const PARTICIPATING_ROWS_PER_PAGE = 8
 const DECIMAL = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/u
 
+/** Column names, record count and up to five preview records of one CSV attachment. */
 export interface CsvInspection {
   attachmentId: string
   columns: string[]
@@ -33,12 +34,14 @@ interface GroupOptions {
   filter?: CsvExactFilter
 }
 
+/** Column names and up to 100 distinct values of the requested filter column. */
 export interface CsvFilterOptions {
   readonly columns: readonly string[]
   readonly values: readonly string[]
   readonly hasMore: boolean
 }
 
+/** One record counted by a group, numbered from 1 after the header row. */
 export interface CsvParticipatingRow {
   readonly record: number
   readonly filterValue?: string
@@ -52,13 +55,16 @@ interface CsvRecordPage<Row> {
   readonly nextOffset?: number
 }
 
+/** One page of at most eight participating records and the total that matched. */
 export type CsvParticipatingRows = CsvRecordPage<CsvParticipatingRow>
 
+/** Group, optional value column and filter, and record offset of one participating-record page. */
 export interface CsvParticipantsRequest extends Omit<GroupOptions, 'aggregate'> {
   readonly groupKey: string
   readonly offset: number
 }
 
+/** Group, optional value column, the original and current filters, and record offset of one comparison page. */
 export interface CsvCompareParticipantsRequest extends Omit<CsvParticipantsRequest, 'filter'> {
   readonly originalFilter?: CsvExactFilter
   readonly currentFilter?: CsvExactFilter
@@ -70,6 +76,7 @@ interface CsvComparisonRow extends Omit<CsvParticipatingRow, 'filterValue'> {
   readonly currentFilterValue?: string
 }
 
+/** One page of records kept, excluded or added by the current filter, with the totals of each status. */
 export interface CsvComparedParticipants extends CsvRecordPage<CsvComparisonRow> {
   readonly kept: number
   readonly excluded: number
@@ -82,15 +89,23 @@ interface GroupReading {
   count: number
 }
 
+/** Grouped readings calculated from one CSV attachment and the options that produced them. */
 export interface CsvGrouping extends GroupOptions {
   attachmentId: AttachmentId
   rowCount: number
   groups: GroupReading[]
 }
 
+/** CSV encoding, size, column or result-limit failure, reported with a `CSV_*` code. */
 export class CsvAttachmentError extends HarnessError {}
 
-/** Consume the entire integrity-checked store read before returning any data. */
+/**
+ * Consume the entire integrity-checked store read before returning any data.
+ * @param attachments - Host attachment store that verifies the stored bytes.
+ * @param ref - Authorized file reference of at most 1 MiB.
+ * @param signal - Caller cancellation for the streamed read.
+ * @returns The complete file decoded as strict UTF-8.
+ */
 export async function readCsvText(
   attachments: AttachmentStore,
   ref: FileAttachmentRef,
@@ -174,6 +189,12 @@ function fitsResult(result: CsvInspection | CsvGrouping): boolean {
   return Buffer.byteLength(JSON.stringify(result), 'utf8') <= MAX_RESULT_BYTES
 }
 
+/**
+ * Parse one CSV and keep as many preview records as fit the 32 KiB result limit.
+ * @param attachmentId - Attachment identity echoed in the result.
+ * @param text - Complete decoded CSV text.
+ * @returns Column names, record count and the retained preview records.
+ */
 export function inspectCsv(attachmentId: string, text: string): CsvInspection {
   const result: CsvInspection = { attachmentId, columns: [], rowCount: 0, preview: [] }
   result.rowCount = parseCsv(text, (columns) => { result.columns = columns }, (fields) => {
@@ -194,6 +215,12 @@ function csvFilterIndex(columns: string[], filter: CsvExactFilter | undefined): 
   return filter === undefined ? undefined : columnIndex(columns, filter.column, 'filter column')
 }
 
+/**
+ * List column names and, for one column, distinct values within the value-count and byte limits.
+ * @param text - Complete decoded CSV text.
+ * @param column - Column whose distinct values are listed, or `undefined` for names only.
+ * @returns Column names, the retained values and whether more values were omitted.
+ */
 export function filterOptionsCsv(text: string, column: string | undefined): CsvFilterOptions {
   let columnNames: readonly string[] = []
   let index: number | undefined
@@ -246,6 +273,12 @@ function csvRecordPage<Row>(offset: number) {
   }
 }
 
+/**
+ * Read one page of the records that a group and optional filter count.
+ * @param text - Complete decoded CSV text.
+ * @param options - Group, value column, filter and record offset.
+ * @returns The page of matching records and the total that matched.
+ */
 export function participatingRowsCsv(text: string, options: CsvParticipantsRequest): CsvParticipatingRows {
   const { groupBy, groupKey, valueColumn, filter, offset } = options
   const page = csvRecordPage<CsvParticipatingRow>(offset)
@@ -264,6 +297,12 @@ export function participatingRowsCsv(text: string, options: CsvParticipantsReque
   return page.value()
 }
 
+/**
+ * Classify one group's records as kept, excluded or added between an original and a current filter.
+ * @param text - Complete decoded CSV text.
+ * @param options - Group, value column, both filters and record offset.
+ * @returns One page of classified records and the totals of each status.
+ */
 export function compareParticipatingRowsCsv(text: string, options: CsvCompareParticipantsRequest): CsvComparedParticipants {
   const { groupBy, groupKey, valueColumn, originalFilter, currentFilter, offset } = options
   const page = csvRecordPage<CsvComparisonRow>(offset)

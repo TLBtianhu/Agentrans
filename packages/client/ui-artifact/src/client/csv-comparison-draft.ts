@@ -26,7 +26,9 @@ export interface CsvSentQuestion {
   readonly messageId: MessageId
 }
 
+/** One page of a two-step explanation: the aggregation change or the filter change. */
 export type CsvExplanationStep = 'aggregation' | 'filtering'
+/** Imported evidence carried by a source message whose pages open from history. */
 export type CsvComparisonSourceKind = 'imported-explanation' | 'imported-return-comparison'
 
 /** Which side of a confirmed comparison opened an original returned reading. */
@@ -50,12 +52,20 @@ export type CsvComparisonSourceOrigin = (CsvDraftSourceDeparture & { readonly st
   | { readonly kind: 'explanation'; readonly message: CsvSentQuestion; readonly step: CsvExplanationStep }
   | CsvReturnedSourceOrigin
 
-/** @param origin - Recorded departure. @returns Whether the destination is an original returned reading. */
+/**
+ * Distinguish a departure to an original returned reading from other source visits.
+ * @param origin - Recorded departure.
+ * @returns Whether the destination is an original returned reading.
+ */
 export function isCsvReturnedSourceOrigin(origin: CsvComparisonSourceOrigin): origin is CsvReturnedSourceOrigin {
   return origin.kind === 'returned-comparison' || (origin.kind === 'draft' && origin.returnSide !== undefined)
 }
 
-/** @param origin - Departure to an original returned reading. @returns Its selected comparison side. */
+/**
+ * Read which comparison side opened an original returned reading.
+ * @param origin - Departure to an original returned reading.
+ * @returns Its selected comparison side.
+ */
 export function csvReturnedSourceSide(origin: CsvReturnedSourceOrigin): CsvReturnComparisonSide {
   return origin.kind === 'draft' ? origin.returnSide : origin.side
 }
@@ -74,6 +84,7 @@ export type CsvComparisonSourceTrail = readonly [CsvComparisonSourceVisit, ...Cs
 export type CsvComparisonDraftCheck = { readonly status: 'pending' | 'unconfirmed' }
   | { readonly status: 'accepted'; readonly message?: CsvSentQuestion; readonly queuedMessageId?: MessageId }
 
+/** Feedback for the previous question: accepted with its durable target, or not confirmed. */
 export type CsvComparisonDraftOutcome = Extract<CsvComparisonDraftCheck, { status: 'accepted' }>
   | { readonly status: 'unconfirmed' }
 
@@ -86,9 +97,13 @@ const QUEUED_QUESTION_POLL_LIMIT = 15
 
 /** Synchronize exact receipts and keep out-of-order reads/acceptances from replacing the current choice. */
 export class CsvComparisonDraftOwner {
+  /** Current synchronization phase with the Host. */
   readonly phase = createSnapshotStore<CsvComparisonDraftPhase>('idle')
+  /** Whether deleting an accepted receipt failed and awaits `retryCleanup`. */
   readonly cleanupFailed = createSnapshotStore(false)
+  /** Feedback for the previous question, cleared when the user submits another. */
   readonly outcome = createSnapshotStore<CsvComparisonDraftOutcome | undefined>(undefined)
+  /** Accepted message selected by the composer shortcut, offering a return to the draft. */
   readonly returnToDraftTarget = createSnapshotStore<CsvSentQuestion | undefined>(undefined)
   private active: ArtifactCsvComparisonDraft | null = null
   private awaitingRequest: SessionRequestId | undefined
@@ -106,6 +121,7 @@ export class CsvComparisonDraftOwner {
   constructor(private readonly sessionId: SessionId, private readonly commands: CsvComparisonDraftCommands,
     private readonly publish: (draft: ArtifactCsvComparisonDraft | null, explicit: boolean) => void) {}
 
+  /** Whether a read, save, removal or pending confirmation must finish before the composer submits. */
   get blocksSubmission(): boolean {
     const phase = this.phase.getSnapshot()
     return phase !== 'idle' && phase !== 'ready'
@@ -120,7 +136,10 @@ export class CsvComparisonDraftOwner {
     void this.run('restoring', async () => await this.read())
   }
 
-  /** Bound polling to the life of the retained Session route and its read access. */
+  /**
+   * Bound polling to the life of the retained Session route and its read access.
+   * @param allowed - Whether the route currently retains the Session with read access.
+   */
   allowConfirmationPolling(allowed: boolean): void {
     this.pollingAllowed = allowed
     if (allowed) this.scheduleConfirmationCheck()
@@ -130,7 +149,11 @@ export class CsvComparisonDraftOwner {
     }
   }
 
-  /** Save only a deliberately confirmed review against the receipt currently present. */
+  /**
+   * Save only a deliberately confirmed review against the receipt currently present.
+   * @param attachment - Reviewed attachment for this owner's Session.
+   * @returns Whether the Host draft now holds this attachment.
+   */
   async save(attachment: ArtifactCsvComparisonAttachment): Promise<boolean> {
     if (this.disposed || attachment.facts.sessionId !== this.sessionId || this.operation !== undefined) return false
     if (this.phase.getSnapshot() !== 'ready') { this.restore(); return false }
@@ -156,7 +179,10 @@ export class CsvComparisonDraftOwner {
     })
   }
 
-  /** Remove the exact active receipt. A conflicting newer draft is adopted only after rereading the Host. */
+  /**
+   * Remove the exact active receipt. A conflicting newer draft is adopted only after rereading the Host.
+   * @param receiptId - Receipt to delete; defaults to the active draft's receipt.
+   */
   async remove(receiptId = this.active?.receiptId): Promise<void> {
     if (receiptId === undefined || this.disposed || this.operation !== undefined
       || this.phase.getSnapshot() === 'awaiting-confirmation') return
@@ -172,7 +198,11 @@ export class CsvComparisonDraftOwner {
     })
   }
 
-  /** Respond to admission of the captured receipt, leaving any newer local selection alone. */
+  /**
+   * Respond to admission of the captured receipt, leaving any newer local selection alone.
+   * @param receiptId - Receipt captured when the question was sent.
+   * @param requestId - Client request ID of the admitted prompt.
+   */
   accept(receiptId: string, requestId: SessionRequestId): void {
     if (this.disposed) return
     this.accepted.add(receiptId)
@@ -180,6 +210,7 @@ export class CsvComparisonDraftOwner {
     void this.clearAccepted(receiptId, requestId)
   }
 
+  /** Retry deleting every accepted receipt whose earlier deletion failed. */
   retryCleanup(): void {
     for (const [receiptId, requestId] of this.pendingCleanup) void this.clearAccepted(receiptId, requestId)
   }
@@ -192,7 +223,11 @@ export class CsvComparisonDraftOwner {
     this.returnToDraftTarget.set(undefined)
   }
 
-  /** Retain only the accepted message selected by the composer shortcut. */
+  /**
+   * Retain only the accepted message selected by the composer shortcut.
+   * @param target - Durable message the user opened.
+   * @returns Whether it matches the accepted outcome and became the return target.
+   */
   selectSentQuestion(target: CsvSentQuestion): boolean {
     const outcome = this.outcome.getSnapshot()
     if (this.disposed || outcome?.status !== 'accepted' || !sameCsvSentQuestion(outcome.message, target)) return false
@@ -200,12 +235,18 @@ export class CsvComparisonDraftOwner {
     return true
   }
 
-  /** Consume the return action only for the same durable question. */
+  /**
+   * Consume the return action only for the same durable question.
+   * @param target - Durable message whose return action was used.
+   */
   clearReturnToDraft(target: CsvSentQuestion): void {
     if (sameCsvSentQuestion(this.returnToDraftTarget.getSnapshot(), target)) this.returnToDraftTarget.set(undefined)
   }
 
-  /** Restart exact lookup when the queued question's own Chat event is observed after the bounded checks. */
+  /**
+   * Restart exact lookup when the queued question's own Chat event is observed after the bounded checks.
+   * @param messageId - Message ID of the observed Chat event.
+   */
   observeSentQuestion(messageId: MessageId): void {
     const outcome = this.outcome.getSnapshot()
     if (outcome?.status !== 'accepted' || outcome.message !== undefined || outcome.queuedMessageId !== messageId
@@ -214,6 +255,7 @@ export class CsvComparisonDraftOwner {
     this.scheduleConfirmationCheck()
   }
 
+  /** Stop polling, clear the return target and ignore later Host responses. */
   dispose(): void {
     this.disposed = true
     this.returnToDraftTarget.set(undefined)
@@ -355,12 +397,22 @@ export class CsvComparisonDraftOwner {
   }
 }
 
-/** Compare both parts of the durable chat message identity. */
+/**
+ * Compare both parts of the durable chat message identity.
+ * @param left - First message identity, if any.
+ * @param right - Second message identity, if any.
+ * @returns Whether both are present with equal event sequence and message ID.
+ */
 export function sameCsvSentQuestion(left: CsvSentQuestion | undefined, right: CsvSentQuestion | undefined): boolean {
   return left !== undefined && right !== undefined && left.eventSeq === right.eventSeq && left.messageId === right.messageId
 }
 
-/** Address the comparison disclosure on an exact Chat history message. */
+/**
+ * Address the comparison disclosure on an exact Chat history message.
+ * @param target - Durable message carrying the comparison.
+ * @param step - Explanation page to expand inside the comparison disclosure, if any.
+ * @returns JSON focus request naming the message and the control to open.
+ */
 export function csvSentQuestionFocus(target: CsvSentQuestion, step?: CsvExplanationStep): string {
   const focus = { kind: 'message', eventSeq: target.eventSeq, messageId: target.messageId }
   const disclosure = 'artifact-csv-comparison'

@@ -57,7 +57,7 @@ function combinedSource() {
   return { combined, win, mac }
 }
 
-describe('hosted Desktop archive provenance', () => {
+describe('hosted Desktop archive source', () => {
   it.each([
     { label: 'one all run', sources: inputCases['one all run'], expected: [['win-x64', '11', '111'], ['mac', '11', '112']] },
     {

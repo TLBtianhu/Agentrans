@@ -14,7 +14,12 @@ function initialConversationState(): ConversationStoreState {
   return { draft: '', view: null, viewRequest: null }
 }
 
-/** Prepare a new Session's draft before a composer or View binds to it. An empty saved draft is a deliberate state. */
+/**
+ * Prepare a new Session's draft before a composer or View binds to it. An empty saved draft is a deliberate state.
+ * @param sessionId - Session whose Conversation store entry receives the draft.
+ * @param draft - Draft to save when the entry has none.
+ * @returns `saved`, `preserved` when the entry already has a draft, or `unavailable` without usable browser storage.
+ */
 export function writeInitialConversationDraft(sessionId: SessionId, draft: DraftSnapshot): 'saved' | 'preserved' | 'unavailable' {
   if (typeof localStorage === 'undefined') return 'unavailable'
   try {
@@ -39,7 +44,11 @@ function contextSubmissionKey(sessionId: SessionId, kind: string): string {
   return `${CONTEXT_SUBMISSION_KEY}.${sessionId}.${kind}`
 }
 
-/** Fingerprint the semantic draft without saving a second copy of its text or references. */
+/**
+ * Fingerprint the semantic draft without saving a second copy of its text or references.
+ * @param draft - Draft whose object keys are sorted before hashing.
+ * @returns Lowercase hexadecimal SHA-256 digest, or `undefined` without Web Crypto.
+ */
 export async function draftFingerprint(draft: DraftSnapshot): Promise<string | undefined> {
   if (typeof crypto === 'undefined' || typeof crypto.subtle === 'undefined') return undefined
   const normalized = JSON.stringify(draft, (_key, value: unknown) => {
@@ -50,7 +59,12 @@ export async function draftFingerprint(draft: DraftSnapshot): Promise<string | u
   return Array.from(new Uint8Array(hash), value => value.toString(16).padStart(2, '0')).join('')
 }
 
-/** Save the request correlation before dispatch, without putting attachment data in browser storage. */
+/**
+ * Save the request correlation before dispatch, without putting attachment data in browser storage.
+ * @param sessionId - Session receiving the prompt.
+ * @param kind - Context provider that owns the marker.
+ * @param marker - Request ID and draft digest of the dispatched prompt.
+ */
 export function recordContextSubmission(sessionId: SessionId, kind: string, marker: ContextSubmissionMarker): void {
   if (typeof localStorage === 'undefined') return
   try { localStorage.setItem(contextSubmissionKey(sessionId, kind), JSON.stringify(marker)) } catch (_error) {
@@ -58,7 +72,12 @@ export function recordContextSubmission(sessionId: SessionId, kind: string, mark
   }
 }
 
-/** Read a previous submission marker scoped to one context provider and Session. */
+/**
+ * Read a previous submission marker scoped to one context provider and Session.
+ * @param sessionId - Session that received the prompt.
+ * @param kind - Context provider that owns the marker.
+ * @returns The stored marker, or `undefined` when absent, malformed or unreadable.
+ */
 export function readContextSubmission(sessionId: SessionId, kind: string): ContextSubmissionMarker | undefined {
   if (typeof localStorage === 'undefined') return undefined
   try {
@@ -71,7 +90,14 @@ export function readContextSubmission(sessionId: SessionId, kind: string): Conte
   } catch (_error) { return undefined }
 }
 
-/** Finish a confirmed recovery without clearing another tab's edited draft or newer submission. */
+/**
+ * Finish a confirmed recovery without clearing another tab's edited draft or newer submission.
+ * @param sessionId - Session that received the prompt.
+ * @param kind - Context provider that owns the marker.
+ * @param marker - Marker of the confirmed prompt; a different stored marker is left in place.
+ * @param matchingDraft - Draft that was sent; the stored draft is cleared only while it still equals this value.
+ * @returns Whether the stored draft was cleared.
+ */
 export function finishContextSubmission(sessionId: SessionId, kind: string, marker: ContextSubmissionMarker,
   matchingDraft: DraftSnapshot | undefined): boolean {
   try {

@@ -294,7 +294,9 @@ interface HtmlQuestionLease {
 export class ArtifactInteractionOwner {
   /** Transient explicit choice for an ordinary question; source and calculation remain separately owned. */
   readonly selection = createSnapshotStore<ArtifactPromptBinding | null>(null)
+  /** Host-synchronized CSV comparison draft, absent when the Session offers no draft commands. */
   readonly csvDraft: CsvComparisonDraftOwner | undefined
+  /** Pair of sent comparisons selected for a two-step explanation review. */
   readonly csvExplanation = new CsvExplanationSelectionOwner()
   /** Active return route displayed only on its current source. */
   readonly csvComparisonSourceTrail = createSnapshotStore<CsvComparisonSourceTrail | undefined>(undefined)
@@ -466,6 +468,7 @@ export class ArtifactInteractionOwner {
   }
 
   /**
+   * Check whether an open source visit can still return to the place that opened it.
    * @param visit - Source and return location to verify.
    * @returns Whether the source precedes the origin or the same draft attachment is still present.
    */
@@ -618,7 +621,11 @@ export class ArtifactInteractionOwner {
     return this.bindFunctionPlot(key, artifact.title, request, sourceSeq === undefined ? undefined : { key, sourceSeq, request })
   }
 
-  /** Keep the saved selection visible and non-sendable while its exact source is read. */
+  /**
+   * Keep the saved selection visible and non-sendable while its exact source is read.
+   * @param draft - Saved function-plot lock restored after reload.
+   * @param title - Title shown until the source revision is read.
+   */
   stageFunctionPlotDraft(draft: FunctionPlotDraft, title: string): void {
     if (this.disposed || this.selection.getSnapshot() !== null) return
     this.selection.set({ kind: draft.request.kind, request: draft.request, draft, title, available: false, restoration: 'reading' })
@@ -641,7 +648,11 @@ export class ArtifactInteractionOwner {
     this.selection.set({ ...selected, restoration: 'reading' })
   }
 
-  /** Recover the existing source lease only for the same pending lock. */
+  /**
+   * Recover the existing source lease only for the same pending lock.
+   * @param draft - Pending lock whose source read finished.
+   * @param artifact - Snapshot read for the locked revision, or `undefined` when history lacks it.
+   */
   restoreFunctionPlotDraft(draft: FunctionPlotDraft, artifact: ArtifactSnapshot | undefined): void {
     const selected = this.selection.getSnapshot()
     if (this.disposed || selected?.kind !== 'current-function-plot' || selected.draft !== draft) return
@@ -654,7 +665,10 @@ export class ArtifactInteractionOwner {
     this.selection.set({ kind: request.kind, request, draft, title, available: false })
   }
 
-  /** Consume the locked draft only if the accepted attachment still matches it. */
+  /**
+   * Consume the locked draft only if the accepted attachment still matches it.
+   * @param submitted - Function-plot request carried by the accepted prompt.
+   */
   acceptFunctionPlot(submitted: unknown): void {
     const selected = this.selection.getSnapshot()
     if (selected?.kind === 'current-function-plot' && selected.draft !== undefined && deepEqualJson(submitted, selected.request)) this.clear()
@@ -708,7 +722,12 @@ export class ArtifactInteractionOwner {
     return true
   }
 
-  /** Attach the immutable parent-local snapshot returned by an explicit Host lock. */
+  /**
+   * Attach the immutable parent-local snapshot returned by an explicit Host lock.
+   * @param artifact - Continued CSV chart snapshot returned by the lock.
+   * @param groupKey - Locked group, which must match the snapshot's continuation.
+   * @returns Whether the group was found and selected.
+   */
   chooseLockedCsvGroup(artifact: SceneArtifactSnapshot, groupKey: string): boolean {
     if (this.disposed || artifact.spec.kind !== 'csv-bar-chart' || artifact.csvContinuation?.groupKey !== groupKey) return false
     const group = artifact.spec.groups.find(row => row.key === groupKey)
@@ -720,7 +739,11 @@ export class ArtifactInteractionOwner {
     return true
   }
 
-  /** Persist the reviewed comparison before making it the next question's attachment. */
+  /**
+   * Persist the reviewed comparison before making it the next question's attachment.
+   * @param attachment - Reviewed comparison with its Host proof.
+   * @returns Whether the Host draft now holds it; `false` without draft support.
+   */
   async chooseCsvComparison(attachment: ArtifactCsvComparisonAttachment): Promise<boolean> {
     return await this.csvDraft?.save(attachment) ?? false
   }

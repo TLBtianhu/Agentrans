@@ -194,7 +194,7 @@ function facts(artifacts: ArtifactService, agent: Agent, selection: ArtifactProm
       }
       case 'csv-question-comparison':
         if (selection.facts.sessionId !== agent.session.id) return rejected('SESSION_MISMATCH')
-        if (selection.facts.provenance !== undefined || selection.facts.explanation !== undefined || selection.facts.returns !== undefined
+        if (selection.facts.attribution !== undefined || selection.facts.explanation !== undefined || selection.facts.returns !== undefined
           || !csvComparison.verify(selection)) return rejected('INVALID_SELECTION')
         return selection.facts
       case 'csv-comparison-draft': {

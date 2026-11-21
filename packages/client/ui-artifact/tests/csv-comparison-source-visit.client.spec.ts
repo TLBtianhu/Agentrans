@@ -56,7 +56,7 @@ describe('CSV source navigation storage', () => {
       ...(kind === undefined ? {} : { sourceKind: kind }) }
     const reading = { groupKey: 'Warm', aggregate: 'mean', valueColumn: 'LatencyMs', value: 30, count: 2 } as const
     const card = { title: 'Trial latency', revision: 1, conclusion: ['Mean 30 ms.'], groupBy: 'Trial', groups: [{ key: 'Warm', value: 30, count: 2 }] }
-    const draft: ArtifactCsvComparisonDraft = { receiptId, facts: { kind: 'csv-question-comparison', sessionId, provenance: 'user-imported',
+    const draft: ArtifactCsvComparisonDraft = { receiptId, facts: { kind: 'csv-question-comparison', sessionId, attribution: 'user-imported',
       returnCards: { first: card, second: card }, reusedFrom: source,
       comparison: { original: reading, current: reading, kept: 2, excluded: 0, added: 0, total: 2, offset: 0, rows: [] } } }
     writeCsvComparisonSourceTrail(sessionId, [visit])

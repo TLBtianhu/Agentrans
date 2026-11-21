@@ -11,6 +11,7 @@ import type { ArtifactCsvContinuation, ArtifactSnapshot, HtmlArtifactSnapshot, S
 import {
   BRANCH_BFS_QUESTION_PREFIX, BRANCH_HALF_ADDER_QUESTION_PREFIX, resolveReturnedHtmlSource, returnedReadingNotice,
 } from '@agentrans/artifact-followup'
+import type { NativeArtifactQuestionReadings } from '@agentrans/artifact-followup/types'
 import type { MessageId } from '@agentrans/llm'
 import type { SessionSeq } from '@agentrans/session/types'
 import type { SessionObservation } from '@agentrans/session-query'
@@ -185,7 +186,7 @@ function ownedSentAttachment(session: SessionObservation, questionSeq: SessionSe
  */
 export function resolveSentNativeQuestion(
   session: SessionObservation, questionSeq: SessionSeq, messageId: MessageId, kind: 'function-plot' | 'particle-system',
-) {
+): Extract<NativeArtifactQuestionReadings, { readonly kind: 'current-function-plot' | 'current-particle' }> | undefined {
   const prefixes = kind === 'particle-system' ? [PARTICLE_PREFIX, ADJUSTED_PARTICLE_PREFIX] : [PLOT_PREFIX]
   const attachment = ownedSentAttachment(session, questionSeq, messageId, ...prefixes)
   if (attachment === undefined) return undefined
@@ -228,7 +229,13 @@ export function resolveSentHtmlQuestion(
   return { artifact: returned.artifact, checkpoint }
 }
 
-/** Match the single continued CSV attachment to its previously committed lock in this exact question. */
+/**
+ * Match the single continued CSV attachment to its previously committed lock in this exact question.
+ * @param session - Fixed history of the Session that owns the question.
+ * @param questionSeq - Sequence of the exact sent follow-up.
+ * @param messageId - ID of that follow-up.
+ * @returns The continuation source, the locked chart revision and its locked group.
+ */
 export function resolveContinuedCsvQuestion(session: SessionObservation, questionSeq: SessionSeq, messageId: string): {
   readonly source: ArtifactCsvContinuation['source']
   readonly spec: CsvBarChartSpec

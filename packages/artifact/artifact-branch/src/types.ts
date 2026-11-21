@@ -2,9 +2,10 @@
 import type { SessionId } from '@agentrans/session/types'
 import type { SessionRequestId } from '@agentrans/api-session-controller/types'
 import type {
-  SavedParticleObservationRef, ParticleObservationComparisonErrorCode, ArtifactId, HtmlArtifactSnapshot, SceneArtifactSnapshot,
+  SavedParticleObservationRef, ParticleObservationComparisonErrorCode, ArtifactCsvContinuation, ArtifactId, HtmlArtifactSnapshot,
+  SceneArtifactSnapshot,
 } from '@agentrans/artifact/types'
-import type { CsvAggregate, CsvExactFilter } from '@agentrans/artifact/scene'
+import type { CsvAggregate, CsvBarChartSpec, CsvExactFilter } from '@agentrans/artifact/scene'
 import type { ArtifactBfsCheckpoint, ArtifactHalfAdderCheckpoint } from '@agentrans/artifact/runtime-values'
 import type {
   ArtifactCsvComparisonAttachment, ArtifactCsvComparisonPage, ArtifactCsvComparisonReading, ArtifactCsvComparisonRow,
@@ -101,6 +102,16 @@ export interface ArtifactBranchCsvEvidenceRef {
 export interface ArtifactBranchRecalculateCsvRequest extends ArtifactBranchCsvEvidenceRef {
   readonly aggregate: CsvAggregate
   readonly filter?: CsvExactFilter
+}
+
+/** Host recalculation of one returned CSV chart from its original authorized attachment. */
+export interface ArtifactBranchRecalculatedCsv {
+  /** Chart calculated for the requested aggregation and filter. */
+  readonly spec: CsvBarChartSpec
+  /** Title of the returned chart Artifact. */
+  readonly title: string
+  /** Receiving-Session message and chart revision that carried the returned reading. */
+  readonly source: ArtifactCsvContinuation['source']
 }
 
 /** Confirm one group in the Host result calculated from the returned CSV. */

@@ -6193,7 +6193,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'ArtifactCsvComparisonReturnedFacts',
-    declaration: 'export type ArtifactCsvComparisonReturnedFacts = CsvComparisonFactsBase & {\n    readonly returns: {\n        readonly branchSessionId: SessionId;\n        readonly first: CsvComparisonReturnRef;\n        readonly second: CsvComparisonReturnRef;\n    };\n    readonly reusedFrom?: CsvComparisonMessageRef;\n    readonly question?: never;\n    readonly source?: never;\n    readonly provenance?: never;\n    readonly explanation?: never;\n    readonly returnCards?: never;\n};',
+    declaration: 'export type ArtifactCsvComparisonReturnedFacts = CsvComparisonFactsBase & {\n    readonly returns: {\n        readonly branchSessionId: SessionId;\n        readonly first: CsvComparisonReturnRef;\n        readonly second: CsvComparisonReturnRef;\n    };\n    readonly reusedFrom?: CsvComparisonMessageRef;\n    readonly question?: never;\n    readonly source?: never;\n    readonly attribution?: never;\n    readonly explanation?: never;\n    readonly returnCards?: never;\n};',
   },
   {
     name: 'ArtifactCsvComparisonRow',

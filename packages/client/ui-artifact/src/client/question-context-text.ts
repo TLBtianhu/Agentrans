@@ -155,7 +155,7 @@ interface CsvComparisonContextSummary {
   readonly sessionId: SessionId
   readonly page: ArtifactCsvComparisonPage
   readonly explanation?: CsvComparisonExplanation
-  readonly provenance?: 'user-imported'
+  readonly attribution?: 'user-imported'
   readonly reusedFrom?: NonNullable<ArtifactCsvComparisonQuestionFacts['reusedFrom']>
   readonly invalidReuseSource?: true
   readonly returnedPair?: CsvReturnedPair
@@ -375,19 +375,19 @@ function csvComparisonSummary(
   if (!isBoundedArtifactJson(input, ARTIFACT_JSON_MAX_DEPTH, ARTIFACT_JSON_MAX_NODES)
     || !record(input) || input.kind !== 'artifact-question-context' || typeof input.sessionId !== 'string' || input.sessionId === ''
     || !record(input.facts) || input.facts.kind !== 'csv-question-comparison' || input.facts.sessionId !== input.sessionId) return undefined
-  const { question, source, comparison, reusedFrom, provenance, explanation, returns, returnCards } = input.facts
+  const { question, source, comparison, reusedFrom, attribution, explanation, returns, returnCards } = input.facts
   const imported = prefix === IMPORTED_CSV_COMPARISON_QUESTION_PREFIX || prefix === IMPORTED_CSV_COMPARISON_EXPLANATION_PREFIX
   const returnedPair = recordedReturnPair(returns)
   if (returns !== undefined) {
-    if (prefix !== CSV_COMPARISON_QUESTION_PREFIX || provenance !== undefined || explanation !== undefined
+    if (prefix !== CSV_COMPARISON_QUESTION_PREFIX || attribution !== undefined || explanation !== undefined
       || question !== undefined || source !== undefined || returnedPair === undefined) return undefined
-  } else if (imported ? provenance !== 'user-imported' || question !== undefined || source !== undefined
-    : provenance !== undefined || !recordedComparisonOrigins(question, source)) return undefined
+  } else if (imported ? attribution !== 'user-imported' || question !== undefined || source !== undefined
+    : attribution !== undefined || !recordedComparisonOrigins(question, source)) return undefined
   const page = csvComparisonPage(comparison)
   if (page === undefined) return undefined
   const embeddedReturns = csvImportedReturnCards(returnCards, page)
   if (returnCards !== undefined && (prefix !== IMPORTED_CSV_COMPARISON_QUESTION_PREFIX || embeddedReturns === undefined)) return undefined
-  const origin = imported ? { provenance: 'user-imported' as const } : {}
+  const origin = imported ? { attribution: 'user-imported' as const } : {}
   const reuseSource = csvComparisonSource(reusedFrom)
   const reuse = reuseSource === undefined ? reusedFrom === undefined ? {} : { invalidReuseSource: true as const }
     : { reusedFrom: reuseSource }

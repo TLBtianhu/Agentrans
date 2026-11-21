@@ -145,7 +145,7 @@ it.skipIf(webSnapshotMode() === 'record')('replays one imported locked CSV compa
   await reload(async () => {
     await toggle(replay).click()
     await expectSource(replay, true)
-    expect(await replay.locator('[data-csv-comparison-provenance="user-imported"]').textContent()).toBe('User imported')
+    expect(await replay.locator('[data-csv-comparison-attribution="user-imported"]').textContent()).toBe('User imported')
     expect(await raw.textContent()).toContain(IMPORTED_CSV_SINGLE_SOURCE_TEXT)
     expect(await raw.isVisible()).toBe(false)
   })
@@ -160,7 +160,7 @@ const importedLabels = {
 type ImportedCsvKind = keyof typeof importedLabels
 
 async function expectImportedAttribution(scope: Locator, kind: ImportedCsvKind): Promise<void> {
-  const badge = scope.locator('[data-csv-comparison-provenance="user-imported"]')
+  const badge = scope.locator('[data-csv-comparison-attribution="user-imported"]')
   await badge.waitFor({ state: 'visible' })
   expect(await badge.textContent()).toBe('User imported')
   const notes = scope.locator('[data-csv-import-source]')

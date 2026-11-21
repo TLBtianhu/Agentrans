@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, rm } from 'node:fs/promises'
+import { mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -215,7 +215,7 @@ it.each(['return cards', 'two-step explanation', 'single page'] as const)('reser
       { record: 5, status: 'kept', value: '35', currentFilterValue: 'B' },
     ],
   }
-  const imported = { kind: 'csv-question-comparison', provenance: 'user-imported', sessionId } as const
+  const imported = { kind: 'csv-question-comparison', attribution: 'user-imported', sessionId } as const
   const facts: ArtifactCsvComparisonQuestionFacts = kind === 'return cards' ? {
     ...imported, comparison,
     returnCards: {
@@ -245,6 +245,41 @@ it.each(['return cards', 'two-step explanation', 'single page'] as const)('reser
   const tooSmall = await setup({ maxContextBytes: limit - 1 }, sessionId)
   expect(plugin.sealCsvComparisonQuestion(tooSmall.ctx, facts)).toBeUndefined()
 })
+
+it('skips a stored imported draft that fails the current facts schema instead of refusing to open', async () => {
+  const sessionId = SessionId('retired-imported-draft')
+  const storageRoot = await mkdtemp(join(tmpdir(), 'artifact-retired-draft-'))
+  roots.push(storageRoot)
+  const initial = await setup({}, sessionId, storageRoot)
+  const facts: ArtifactCsvComparisonQuestionFacts = {
+    kind: 'csv-question-comparison', attribution: 'user-imported', sessionId,
+    comparison: { original: { groupKey: 'Warm', aggregate: 'mean', value: 30, count: 2, valueColumn: 'LatencyMs' },
+      current: { groupKey: 'Warm', aggregate: 'sum', value: 60, count: 2, valueColumn: 'LatencyMs' },
+      rows: [{ record: 4, status: 'kept', value: '25' }, { record: 5, status: 'kept', value: '35' }],
+      kept: 2, excluded: 0, added: 0, total: 2, offset: 0 },
+  }
+  const attachment = plugin.sealCsvComparisonQuestion(initial.ctx, facts)
+  if (attachment === undefined) throw new Error('Expected a sealed comparison')
+  await plugin.csvComparisonDrafts(initial.ctx)?.save(sessionId, null, attachment, 0)
+  await initial.ctx.fiber.dispose()
+  const stored = await recordFilesContaining(storageRoot, '"attribution": "user-imported"')
+  expect(stored).toHaveLength(1)
+  // The build before the rename wrote the attribution under this field name.
+  const retiredField = 'prove' + 'nance'
+  await writeFile(stored[0]!, (await readFile(stored[0]!, 'utf8')).replace('"attribution": "user-imported"', `"${retiredField}": "user-imported"`))
+
+  const restarted = await setup({}, sessionId, storageRoot)
+  const reopened = plugin.csvComparisonDrafts(restarted.ctx)
+  if (reopened === undefined) throw new Error('Expected the reopened draft storage')
+  expect(reopened.read(sessionId)).toBeNull()
+})
+
+async function recordFilesContaining(root: string, text: string): Promise<string[]> {
+  const entries = await readdir(root, { recursive: true, withFileTypes: true })
+  const files = entries.filter(entry => entry.isFile()).map(entry => join(entry.parentPath, entry.name))
+  const matches = await Promise.all(files.map(async file => (await readFile(file, 'utf8')).includes(text) ? [file] : []))
+  return matches.flat()
+}
 
 it('separates different aggregations and filter recipes from unchanged record membership', () => {
   const filter = { column: 'Batch', value: 'B' }

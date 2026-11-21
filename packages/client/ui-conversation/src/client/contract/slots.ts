@@ -405,9 +405,10 @@ export interface ConversationHeaderLineageOwnerProps {
   openTitle?: () => void
 }
 
-/** Point-in-time owner values for composer extension entries. */
+/** Open a Conversation View with a target-owned focus address. */
 type OpenConversationView = (view: string, focus: string) => void
 
+/** Point-in-time owner values for composer extension entries. */
 export interface InputZone {
   readonly session: SessionSnapshot
   readonly input: InputState

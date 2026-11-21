@@ -25,21 +25,29 @@ const questionPrefixes = [
 
 function questionPrefix(facts: ArtifactCsvComparisonQuestionFacts): string {
   if (facts.explanation !== undefined) {
-    return facts.provenance === 'user-imported' ? IMPORTED_CSV_COMPARISON_EXPLANATION_PREFIX : CSV_COMPARISON_EXPLANATION_PREFIX
+    return facts.attribution === 'user-imported' ? IMPORTED_CSV_COMPARISON_EXPLANATION_PREFIX : CSV_COMPARISON_EXPLANATION_PREFIX
   }
-  return facts.provenance === 'user-imported' ? IMPORTED_CSV_COMPARISON_QUESTION_PREFIX : CSV_COMPARISON_QUESTION_PREFIX
+  return facts.attribution === 'user-imported' ? IMPORTED_CSV_COMPARISON_QUESTION_PREFIX : CSV_COMPARISON_QUESTION_PREFIX
 }
 
-/** Construct the durable question block and exclude the transient proof from model input. */
+/**
+ * Construct the durable question block and exclude the transient proof from model input.
+ * @param facts - Sealed comparison facts.
+ * @returns One text block: the prefix for the facts' kind and source, followed by the JSON question context.
+ */
 export function csvComparisonQuestionBlock(facts: ArtifactCsvComparisonQuestionFacts): TextBlock {
   const context = { kind: 'artifact-question-context', sessionId: facts.sessionId, facts }
   return { type: 'text', text: questionPrefix(facts) + JSON.stringify(context) }
 }
 
-/** Keep the canonical comparison for draft verification and credit the source of its imported evidence. */
+/**
+ * Keep the canonical comparison for draft verification and credit the source of its imported evidence.
+ * @param facts - Sealed comparison facts.
+ * @returns The question block, followed by the attribution text for user-imported evidence.
+ */
 export function csvComparisonRequiredBlocks(facts: ArtifactCsvComparisonQuestionFacts): readonly TextBlock[] {
   const comparison = csvComparisonQuestionBlock(facts)
-  if (facts.provenance === 'user-imported') {
+  if (facts.attribution === 'user-imported') {
     const source = facts.explanation !== undefined ? IMPORTED_CSV_EXPLANATION_SOURCE_TEXT
       : facts.returnCards !== undefined ? IMPORTED_CSV_RETURN_SOURCE_TEXT : IMPORTED_CSV_SINGLE_SOURCE_TEXT
     return [comparison, { type: 'text', text: source }]
@@ -90,7 +98,12 @@ function createCsvComparisonSigner(maxContextBytes: number): ArtifactCsvComparis
   }
 }
 
-/** Register comparison proof handling within one mounted Host prompt provider. */
+/**
+ * Register comparison proof handling within one mounted Host prompt provider.
+ * @param ctx - Provider context; the signer is removed when this context disposes.
+ * @param maxContextBytes - UTF-8 byte limit of the required blocks that a sealed comparison may produce.
+ * @returns A signer with a fresh random HMAC key.
+ */
 export function registerCsvComparisonSigner(ctx: Context, maxContextBytes: number): ArtifactCsvComparisonSigner {
   const signer = createCsvComparisonSigner(maxContextBytes)
   ctx.effect(() => {
@@ -101,13 +114,23 @@ export function registerCsvComparisonSigner(ctx: Context, maxContextBytes: numbe
   return signer
 }
 
-/** Seal one authorized comparison for admission through the ordinary prompt provider. */
+/**
+ * Seal one authorized comparison for admission through the ordinary prompt provider.
+ * @param ctx - Context whose root carries the mounted signer.
+ * @param facts - Authorized comparison facts.
+ * @returns The facts with their proof, or `undefined` without a signer or above the byte limit.
+ */
 export function sealCsvComparisonQuestion(ctx: Context,
   facts: ArtifactCsvComparisonQuestionFacts): ArtifactCsvComparisonAttachment | undefined {
   return signers.get(ctx.root)?.seal(facts)
 }
 
-/** Verify a review capability before saving its bounded, exact comparison as a draft. */
+/**
+ * Verify a review capability before saving its bounded, exact comparison as a draft.
+ * @param ctx - Context whose root carries the mounted signer.
+ * @param attachment - Facts and hexadecimal proof to check.
+ * @returns Whether the proof matches the facts under the current signer.
+ */
 export function verifyCsvComparisonQuestion(ctx: Context, attachment: ArtifactCsvComparisonAttachment): boolean {
   return signers.get(ctx.root)?.verify(attachment) ?? false
 }

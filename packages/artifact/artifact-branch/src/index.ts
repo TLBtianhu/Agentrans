@@ -521,11 +521,11 @@ export class ArtifactBranchResults extends TypertRemoteService {
   @Remote({ resources: { session: (request: ArtifactBranchExportSentCsvComparisonRequest) => request.sessionId } })
   async exportSentCsvComparison(request: ArtifactBranchExportSentCsvComparisonRequest): Promise<Uint8Array> {
     const signal = this.ctx.invocation?.signal ?? new AbortController().signal
-    const { facts: { comparison, explanation, provenance }, returnCards } = await resolveSentCsvComparisonExport(this.ctx, request, signal)
+    const { facts: { comparison, explanation, attribution }, returnCards } = await resolveSentCsvComparisonExport(this.ctx, request, signal)
     signal.throwIfAborted()
-    if (returnCards !== undefined) return renderCsvReturnedComparisonHtml(comparison, returnCards, provenance, request.locale)
-    return explanation === undefined ? renderCsvComparisonHtml(comparison, provenance, request.locale)
-      : renderCsvComparisonExplanationHtml(explanation.aggregation.comparison, comparison, provenance, request.locale)
+    if (returnCards !== undefined) return renderCsvReturnedComparisonHtml(comparison, returnCards, attribution, request.locale)
+    return explanation === undefined ? renderCsvComparisonHtml(comparison, attribution, request.locale)
+      : renderCsvComparisonExplanationHtml(explanation.aggregation.comparison, comparison, attribution, request.locale)
   }
 
   /**

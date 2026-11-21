@@ -14,6 +14,7 @@ interface BridgeLimits {
   readonly nodes: number
 }
 
+/** Checkpoint restored into an isolated replay and whether later readings of the same kind are reported. */
 export interface ArtifactDocumentReplay {
   readonly checkpoint: ArtifactHtmlCheckpoint
   readonly reportState?: boolean

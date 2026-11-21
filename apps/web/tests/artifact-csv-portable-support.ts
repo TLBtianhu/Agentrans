@@ -72,9 +72,9 @@ function expectImportedSingleAnswer(answer: string): void {
 }
 
 async function expectImportedPage(scope: Locator): Promise<void> {
-  const provenance = scope.locator('[data-csv-comparison-provenance="user-imported"]')
-  await provenance.waitFor({ state: 'visible' })
-  expect(await provenance.textContent()).toBe('User imported')
+  const attribution = scope.locator('[data-csv-comparison-attribution="user-imported"]')
+  await attribution.waitFor({ state: 'visible' })
+  expect(await attribution.textContent()).toBe('User imported')
   await compareReading(scope, 'original', { key: 'Warm', aggregate: 'Mean of LatencyMs', filter: 'No filter', value: '30', count: '2' })
   await compareReading(scope, 'locked', { key: 'Warm', aggregate: 'Sum of LatencyMs', filter: 'Batch = B', value: '35', count: '1' })
   await scope.getByText('Showing 1–2 of 2 records', { exact: true }).waitFor({ state: 'visible' })
@@ -214,7 +214,7 @@ export async function exercisePortableCsvComparison(live: CsvPortableBrowser): P
 
     stage('csv-portable-import-preview')
     const importResponse = await openCsvImportFile(page, conversation, portableFile)
-    const importedFacts = { kind: 'csv-question-comparison', sessionId: destination, provenance: 'user-imported', comparison }
+    const importedFacts = { kind: 'csv-question-comparison', sessionId: destination, attribution: 'user-imported', comparison }
     expect(await importResponse.json()).toMatchObject({ result: { ok: true, value: { facts: importedFacts } } })
     expect(browserRequests.get(IMPORT_ENDPOINT)?.map(requestData)).toEqual([{ sessionId: destination, json }])
     const review = page.locator('[data-csv-import-review]')
@@ -257,7 +257,7 @@ export async function exercisePortableCsvComparison(live: CsvPortableBrowser): P
     const [prompt, context, sourceDescription, changes] = selected.data.content
     expect(prompt).toEqual({ type: 'text', text: QUESTION })
     if (context?.type !== 'text' || !context.text.startsWith(IMPORTED_CSV_COMPARISON_QUESTION_PREFIX)) {
-      throw new Error('Missing imported CSV comparison provenance on the prompt')
+      throw new Error('Missing imported CSV comparison attribution on the prompt')
     }
     const envelope = { kind: 'artifact-question-context', sessionId: destination, facts: importedFacts }
     expect(JSON.parse(context.text.slice(IMPORTED_CSV_COMPARISON_QUESTION_PREFIX.length))).toEqual(envelope)

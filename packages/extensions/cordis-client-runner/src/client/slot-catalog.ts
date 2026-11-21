@@ -1442,7 +1442,7 @@ export const CLIENT_SLOT_API: readonly ClientSlotEntry[] = [
       },
     ],
     ownerProps: [
-      'export interface InputZone {\n  readonly session: SessionSnapshot\n  readonly input: InputState\n  /** Open a history view with a target-owned focus address. */\n  readonly openView?: OpenConversationView\n}',
+      '/** Point-in-time owner values for composer extension entries. */\nexport interface InputZone {\n  readonly session: SessionSnapshot\n  readonly input: InputState\n  /** Open a history view with a target-owned focus address. */\n  readonly openView?: OpenConversationView\n}',
     ],
     ownerPropsReferences: [
       'InputState',

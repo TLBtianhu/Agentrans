@@ -133,8 +133,8 @@ it('selects a distinct source kind only for an imported comparison with embedded
   const card = { title: 'Trial latency', revision: 1, conclusion: ['Mean 30 ms.'], groupBy: 'Trial',
     groups: [{ key: 'Warm', value: 30, count: 2 }] }
   const returnCards = { first: card, second: card }
-  expect(csvComparisonSourceKind({ provenance: 'user-imported', returnCards })).toBe('imported-return-comparison')
-  expect(csvComparisonSourceKind({ provenance: 'user-imported' })).toBeUndefined()
+  expect(csvComparisonSourceKind({ attribution: 'user-imported', returnCards })).toBe('imported-return-comparison')
+  expect(csvComparisonSourceKind({ attribution: 'user-imported' })).toBeUndefined()
   expect(csvComparisonSourceKind({ returnCards })).toBeUndefined()
 })
 

@@ -160,13 +160,13 @@ CsvChangesBrowser): Promise<void> {
       const conversation = conversationFor(destination)
       const input = conversation.locator('[data-composer-input]')
       const chip = conversation.locator('[data-artifact-prompt-context="csv-question-comparison"]')
-      const facts = { kind: 'csv-question-comparison', sessionId: destination, provenance: 'user-imported', comparison: scenario.page }
+      const facts = { kind: 'csv-question-comparison', sessionId: destination, attribution: 'user-imported', comparison: scenario.page }
       const imported = await openCsvImportFile(page, conversation, portableFile)
       expect(rpcRequest(imported.request())).toEqual({ sessionId: destination, json })
       expect(await imported.json()).toMatchObject({ result: { ok: true, value: { facts } } })
       const review = conversation.locator('[data-csv-import-review]')
       await expectChangedComparison(review, scenario.page, scenario.filtered)
-      await expect.poll(() => review.locator('[data-csv-comparison-provenance="user-imported"]').textContent()).toBe('User imported')
+      await expect.poll(() => review.locator('[data-csv-comparison-attribution="user-imported"]').textContent()).toBe('User imported')
       await review.screenshot({ path: join(evidence, `csv-changes-${scenario.key}-review.png`) })
       expectReadOnly(index)
       expect(requestsFor(SAVE_ENDPOINT)).toHaveLength(index)

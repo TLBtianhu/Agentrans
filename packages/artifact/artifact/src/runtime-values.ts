@@ -85,7 +85,8 @@ export interface CsvComparisonChanges {
  * @param page - The two recorded recipes, full membership counters and reviewed rows.
  * @returns Changes without recalculating measurements or accessing source records.
  */
-export function csvComparisonChanges({ original, current, kept, excluded, added, rows }: CsvComparisonChangeInput): CsvComparisonChanges {
+export function csvComparisonChanges(page: CsvComparisonChangeInput): CsvComparisonChanges {
+  const { original, current, kept, excluded, added, rows } = page
   return {
     aggregation: { original: original.aggregate, current: current.aggregate, changed: original.aggregate !== current.aggregate },
     filterChanged: original.filter?.column !== current.filter?.column || original.filter?.value !== current.filter?.value,

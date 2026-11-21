@@ -820,7 +820,7 @@ describe('Artifact branch-result evidence', () => {
     const beforeImport = destination.snapshotEvents()
     const imported = await replayed.service.importCsvComparison(importRequest)
     if (imported.facts.returnCards === undefined) throw new Error('Expected both imported return cards')
-    expect(imported.facts).toEqual({ kind: 'csv-question-comparison', provenance: 'user-imported', sessionId: destination.id,
+    expect(imported.facts).toEqual({ kind: 'csv-question-comparison', attribution: 'user-imported', sessionId: destination.id,
       comparison: page, returnCards })
     expect(destination.snapshotEvents()).toEqual(beforeImport)
     await expect(replayed.service.readCsvComparisonDraft({ sessionId: destination.id })).resolves.toBeNull()
@@ -1241,11 +1241,11 @@ describe('Artifact branch-result evidence', () => {
     const importRequest = { sessionId: destination.id, json }
     const beforeImport = destination.snapshotEvents()
     const imported = await replayed.service.importCsvComparison(importRequest)
-    if (imported.facts.provenance !== 'user-imported' || imported.facts.explanation !== undefined || imported.facts.returnCards !== undefined) {
+    if (imported.facts.attribution !== 'user-imported' || imported.facts.explanation !== undefined || imported.facts.returnCards !== undefined) {
       throw new Error('Expected a user-imported page')
     }
     expect(imported.facts).toEqual({
-      kind: 'csv-question-comparison', sessionId: destination.id, provenance: 'user-imported', comparison: saved.facts.comparison,
+      kind: 'csv-question-comparison', sessionId: destination.id, attribution: 'user-imported', comparison: saved.facts.comparison,
     })
     expect(destination.snapshotEvents()).toEqual(beforeImport)
     await expect(replayed.service.readCsvComparisonDraft({ sessionId: destination.id })).resolves.toBeNull()
@@ -1288,7 +1288,7 @@ describe('Artifact branch-result evidence', () => {
     const reexported = await replayed.service.exportSentCsvComparisonJson(importedHistory)
     expect(JSON.parse(new TextDecoder().decode(reexported))).toEqual(snapshot)
     const importedHtml = new TextDecoder().decode(await replayed.service.exportSentCsvComparison(importedHistory))
-    expect(importedHtml).toContain('<p data-csv-compare-provenance>User-imported readings and records</p>')
+    expect(importedHtml).toContain('<p data-csv-compare-attribution>User-imported readings and records</p>')
     expect(importedHtml).toContain('<p data-csv-import-source="single-page">JSON comparison with one locked page</p>')
     const localizedHtml = new TextDecoder().decode(await replayed.service.exportSentCsvComparison({ ...importedHistory, locale: 'zh' }))
     expect(localizedHtml).toContain('<html lang="zh-CN">')
@@ -1351,7 +1351,7 @@ describe('Artifact branch-result evidence', () => {
       .rejects.toMatchObject({ details: { reason: 'INCOMPATIBLE_PAIR' } })
 
     const sumFacts = alternate.attachment.facts
-    if (sumFacts.provenance !== undefined || sumFacts.explanation !== undefined || sumFacts.returns !== undefined) {
+    if (sumFacts.attribution !== undefined || sumFacts.explanation !== undefined || sumFacts.returns !== undefined) {
       throw new Error('Expected a local single page')
     }
     const differentRevision = ArtifactFollowup.sealCsvComparisonQuestion(replayed.ctx,
@@ -1401,7 +1401,7 @@ describe('Artifact branch-result evidence', () => {
       .rejects.toMatchObject(unverified)
     await expect(replayed.service.exportSentCsvComparison({ ...pairedExportRequest, sessionId: childSession.id }))
       .rejects.toMatchObject(unverified)
-    if (pair.facts.explanation === undefined || pair.facts.provenance !== undefined) {
+    if (pair.facts.explanation === undefined || pair.facts.attribution !== undefined) {
       throw new Error('Expected the exact local pair in the reviewed explanation')
     }
     const wrongPage = ArtifactFollowup.sealCsvComparisonQuestion(replayed.ctx, {
@@ -1425,7 +1425,7 @@ describe('Artifact branch-result evidence', () => {
     const beforeImportPair = destination.snapshotEvents()
     const importedPair = await replayed.service.importCsvComparison({ ...importRequest, json: pairJson })
     expect(importedPair.facts).toEqual({
-      kind: 'csv-question-comparison', sessionId: destination.id, provenance: 'user-imported', comparison: page,
+      kind: 'csv-question-comparison', sessionId: destination.id, attribution: 'user-imported', comparison: page,
       explanation: { aggregation: { comparison: sumFacts.comparison } },
     })
     expect(destination.snapshotEvents()).toEqual(beforeImportPair)
@@ -1449,7 +1449,7 @@ describe('Artifact branch-result evidence', () => {
     const importedPairRequest = { sessionId: destination.id, ...sentImportedPair.address }
     await expect(replayed.service.exportSentCsvComparisonJson(importedPairRequest)).resolves.toEqual(pairBytes)
     const importedPairHtml = new TextDecoder().decode(await replayed.service.exportSentCsvComparison(importedPairRequest))
-    expect(importedPairHtml).toContain('<p data-csv-compare-provenance>User-imported readings and records</p>')
+    expect(importedPairHtml).toContain('<p data-csv-compare-attribution>User-imported readings and records</p>')
     expect(importedPairHtml).toContain('<p data-csv-import-source="two-step-explanation">'
       + 'JSON two-step explanation with two original locked pages</p>')
     const beforePairReview = destination.snapshotEvents()

@@ -157,7 +157,11 @@ export function fileHandleText(ref: FileAttachmentRef, readonlyPath: string | un
   return `[${identity}: verbatim read-only copy saved at ${quoted(readonlyPath)}. Read that path with your file tools when its contents are needed; copy it to a writable location before modifying it. When delegating file work, include this saved path in the delegation prompt; only subagents sharing this execution environment can read it.]`
 }
 
-/** Model-facing handle for a file accessible only through the session tool. */
+/**
+ * Model-facing handle for a file accessible only through the session tool.
+ * @param ref - Uploaded file reference.
+ * @returns Bracketed text naming the file, its size and attachment ID; CSV files also name `attachment_csv`.
+ */
 export function sessionFileHandleText(ref: FileAttachmentRef): string {
   const identity = `File ${quoted(ref.name)} (${ref.bytes} bytes, attachment ID ${quoted(ref.attachmentId)})`
   if (!ref.name.toLowerCase().endsWith('.csv')) return `[${identity} was uploaded. The session file tool supports CSV files.]`
@@ -220,7 +224,11 @@ export function projectFilesToText(
   })
 }
 
-/** Session-only file handles are used when the session CSV capability is declared. */
+/**
+ * Session-only file handles are used when the session CSV capability is declared.
+ * @param tools - Tool schemas of the request.
+ * @returns Whether the request declares `attachment_csv`.
+ */
 export function usesSessionFileHandles(tools: readonly ToolSchema[] | undefined): boolean {
   return tools?.some(tool => tool.name === 'attachment_csv') === true
 }

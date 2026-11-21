@@ -19,6 +19,7 @@ export const name = 'attachment-csv-tool'
 /** Host attachments authorize reads, and the Artifact service owns chart revisions. */
 export const inject = ['tools', 'attachments', 'sessionProjections', 'artifacts']
 
+/** Empty CSV tool configuration; file, record and result limits are fixed by the CSV parser. */
 export type Config = Record<never, never>
 export const Config: z<Config> = z.object({})
 
@@ -52,19 +53,40 @@ export async function groupCsvAttachment(store: AttachmentStore, ref: FileAttach
   return { kind: 'csv-bar-chart', ...groupCsv(ref.attachmentId, await readCsvText(store, ref, signal), options) }
 }
 
-/** Return bounded column names and value suggestions for an already authorized file reference. */
+/**
+ * Return bounded column names and value suggestions for an already authorized file reference.
+ * @param store - Host attachment store, which verifies the stored bytes.
+ * @param ref - Previously authorized reference from a committed upload.
+ * @param column - Column whose distinct values are listed, or `undefined` for names only.
+ * @param signal - Caller cancellation for the bounded file read.
+ * @returns Column names, the retained values and whether more values were omitted.
+ */
 export async function readCsvFilterOptions(store: AttachmentStore, ref: FileAttachmentRef, column: string | undefined,
   signal: AbortSignal): Promise<CsvFilterOptions> {
   return filterOptionsCsv(await readCsvText(store, ref, signal), column)
 }
 
-/** Return a page of exact contributing records from an already authorized file reference. */
+/**
+ * Return a page of exact contributing records from an already authorized file reference.
+ * @param store - Host attachment store, which verifies the stored bytes.
+ * @param ref - Previously authorized reference from a committed upload.
+ * @param options - Group, value column, filter and record offset.
+ * @param signal - Caller cancellation for the bounded file read.
+ * @returns The page of matching records and the total that matched.
+ */
 export async function readCsvParticipatingRows(store: AttachmentStore, ref: FileAttachmentRef, options: CsvParticipantsRequest,
   signal: AbortSignal): Promise<CsvParticipatingRows> {
   return participatingRowsCsv(await readCsvText(store, ref, signal), options)
 }
 
-/** Compare record membership between two approved recipes for one group of an authorized CSV. */
+/**
+ * Compare record membership between two approved recipes for one group of an authorized CSV.
+ * @param store - Host attachment store, which verifies the stored bytes.
+ * @param ref - Previously authorized reference from a committed upload.
+ * @param options - Group, value column, both filters and record offset.
+ * @param signal - Caller cancellation for the bounded file read.
+ * @returns One page of classified records and the totals of each status.
+ */
 export async function compareCsvParticipatingRows(store: AttachmentStore, ref: FileAttachmentRef, options: CsvCompareParticipantsRequest,
   signal: AbortSignal): Promise<CsvComparedParticipants> {
   return compareParticipatingRowsCsv(await readCsvText(store, ref, signal), options)

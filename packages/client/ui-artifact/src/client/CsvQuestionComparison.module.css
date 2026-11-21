@@ -161,8 +161,8 @@
 
 .explanationStepContent { margin-block: 8px; }
 
-.importedProvenance { overflow-wrap: anywhere; }
-.importedProvenance p { margin: 0; }
+.importedAttribution { overflow-wrap: anywhere; }
+.importedAttribution p { margin: 0; }
 
 .importedReturnCards, .importedReturnContent {
   display: grid;

@@ -51,7 +51,7 @@ const returnedFacts = z.strictObject({
   ...commonFacts, reusedFrom,
   returns: z.strictObject({ branchSessionId: text, first: returnRef, second: returnRef }),
 })
-const importedFacts = z.strictObject({ ...commonFacts, reusedFrom, provenance: z.literal('user-imported') })
+const importedFacts = z.strictObject({ ...commonFacts, reusedFrom, attribution: z.literal('user-imported') })
 const importedReturnedFacts = importedFacts.extend({ returnCards: returnCardsSchema })
 const portableExplanation = z.strictObject({ aggregation: pageSchema, filtering: pageSchema })
 const explanationFacts = z.strictObject({
@@ -63,7 +63,7 @@ const explanationFacts = z.strictObject({
 })
 const importedExplanationFacts = z.strictObject({
   ...commonFacts,
-  provenance: z.literal('user-imported'),
+  attribution: z.literal('user-imported'),
   reusedFrom,
   explanation: z.strictObject({ aggregation: z.strictObject({ comparison: pageSchema }) }),
 })

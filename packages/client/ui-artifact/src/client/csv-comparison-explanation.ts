@@ -4,9 +4,12 @@ import type {
 import { createSnapshotStore } from '@agentrans/client-store'
 import { sameCsvSentQuestion, type CsvSentQuestion } from './csv-comparison-draft.ts'
 
+/** Aggregation and filtering steps recorded on a two-step comparison. */
 export type CsvComparisonExplanation = NonNullable<ArtifactCsvComparisonQuestionFacts['explanation']>
+/** Why reviewing a selected pair failed: incompatible pages, a sealed result above the byte limit, or another failure. */
 export type CsvExplanationFailure = 'incompatible' | 'too-large' | 'failed'
 
+/** Reviewed filtering page, both recorded steps, and whether confirming replaces the current question context. */
 export interface CsvExplanationPreview {
   readonly page: ArtifactCsvComparisonPage
   readonly explanation: CsvComparisonExplanation
@@ -15,6 +18,7 @@ export interface CsvExplanationPreview {
 
 type CsvExplanationPair = { readonly first: CsvSentQuestion; readonly second: CsvSentQuestion }
 type CsvExplanationReview = CsvExplanationPair & { readonly phase: 'review' | 'saving'; readonly preview: CsvExplanationPreview }
+/** Progress of choosing two sent comparisons: first pick, review loading or failure, review, or saving. */
 export type CsvExplanationSelection = { readonly phase: 'first'; readonly first: CsvSentQuestion }
   | (CsvExplanationPair & ({ readonly phase: 'loading' } | { readonly phase: 'error'; readonly failure: CsvExplanationFailure }))
   | CsvExplanationReview
@@ -28,14 +32,21 @@ interface CsvExplanationCommands {
 
 /** One transient selection shared by all eligible comparison cards in a Session. */
 export class CsvExplanationSelectionOwner {
+  /** Current selection progress, or `undefined` when no comparison is selected. */
   readonly state = createSnapshotStore<CsvExplanationSelection | undefined>(undefined)
   private review: { readonly state: CsvExplanationReview; readonly save: () => Promise<boolean> } | undefined
 
+  /** Abandon the selection and any review awaiting confirmation. */
   clear(): void {
     this.review = undefined
     this.state.set(undefined)
   }
 
+  /**
+   * Pick the first comparison, deselect it, or pick the second and request a Host review of the pair.
+   * @param target - Sent comparison the user chose.
+   * @param commands - Session-scoped liveness check, context replacement flag, review and save operations.
+   */
   async select(target: CsvSentQuestion, commands: CsvExplanationCommands): Promise<void> {
     const previous = this.state.getSnapshot()
     if (!commands.current() || previous?.phase === 'saving') return
@@ -62,6 +73,10 @@ export class CsvExplanationSelectionOwner {
     this.state.set(state)
   }
 
+  /**
+   * Save the reviewed pair as the next question draft; a failed save returns the pair to the error phase.
+   * @param target - Second comparison of the reviewed pair, confirming the review shown on it.
+   */
   async confirm(target: CsvSentQuestion): Promise<void> {
     const review = this.review
     if (review === undefined || review.state !== this.state.getSnapshot() || !sameCsvSentQuestion(review.state.second, target)) return

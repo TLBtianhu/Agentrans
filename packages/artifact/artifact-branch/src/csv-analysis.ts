@@ -31,7 +31,7 @@ import type {
   ArtifactBranchCsvFilterOptionsValue, ArtifactBranchCsvQuestionComparisonRequest, ArtifactBranchCsvQuestionComparisonValue,
   ArtifactBranchCsvQuestionRowsRequest, ArtifactBranchCsvQuestionRowsValue, ArtifactBranchCsvReturnedComparisonRequest,
   ArtifactBranchCsvReturnedComparisonValue, ArtifactBranchCsvReturnedRowsRequest, ArtifactBranchCsvRowsRequest, ArtifactBranchCsvRowsValue,
-  ArtifactBranchRecalculateCsvRequest,
+  ArtifactBranchRecalculateCsvRequest, ArtifactBranchRecalculatedCsv,
   ArtifactBranchBindCsvComparisonDraftRequest, ArtifactBranchBindCsvComparisonDraftValue,
   ArtifactBranchCheckCsvComparisonDraftRequest, ArtifactBranchCheckCsvComparisonDraftValue,
   ArtifactBranchClearCsvComparisonDraftRequest, ArtifactBranchClearCsvComparisonDraftValue, ArtifactBranchReadCsvComparisonDraftRequest,
@@ -39,7 +39,12 @@ import type {
   ArtifactBranchReviewSentCsvComparisonRequest, ArtifactBranchSaveCsvComparisonDraftRequest,
 } from './types.ts'
 
-/** Reject one CSV operation with its wire reason and an optional underlying failure. */
+/**
+ * Reject one CSV operation with its wire reason and an optional underlying failure.
+ * @param reason - Wire reason reported as `artifact-branch/csv-analysis-unavailable` details.
+ * @param cause - Underlying attachment, CSV or Scene validation failure, when one caused the refusal.
+ * @returns Never; always throws a `RemoteError`.
+ */
 export function csvAnalysisUnavailable(reason: ArtifactBranchCsvFailure, cause?: Error): never {
   throw new RemoteError('artifact-branch/csv-analysis-unavailable', 'The selected returned CSV analysis is unavailable',
     { reason }, cause === undefined ? undefined : { cause })
@@ -152,8 +157,15 @@ function selectedFilter(request: ArtifactBranchRecalculateCsvRequest) {
   }
 }
 
-/** Resolve and recalculate an exact returned chart, with access limited to its original authorized CSV. */
-export async function recalculateReturnedCsv(ctx: Context, request: ArtifactBranchRecalculateCsvRequest, signal: AbortSignal) {
+/**
+ * Resolve and recalculate an exact returned chart, with access limited to its original authorized CSV.
+ * @param ctx - Host context of the owner's invocation.
+ * @param request - Returned-message address, aggregation and optional exact-match filter.
+ * @param signal - Lifetime of the Session observations and the CSV read.
+ * @returns The recalculated chart, the returned chart title and its exact source revision.
+ */
+export async function recalculateReturnedCsv(ctx: Context, request: ArtifactBranchRecalculateCsvRequest,
+  signal: AbortSignal): Promise<ArtifactBranchRecalculatedCsv> {
   const filter = selectedFilter(request)
   const { aggregate } = request
   const csv = await resolveReturnedCsv(ctx, request, signal)
@@ -169,7 +181,13 @@ export async function recalculateReturnedCsv(ctx: Context, request: ArtifactBran
   })
 }
 
-/** Read headings and bounded distinct options from the exact returned chart's CSV. */
+/**
+ * Read headings and bounded distinct options from the exact returned chart's CSV.
+ * @param ctx - Host context of the owner's invocation.
+ * @param request - Returned-message address and an optional column of at most 128 UTF-8 bytes.
+ * @param signal - Lifetime of the Session observations and the CSV read.
+ * @returns Column headings, or the bounded distinct values of the requested column.
+ */
 export async function filterOptionsForReturnedCsv(ctx: Context, request: ArtifactBranchCsvFilterOptionsRequest,
   signal: AbortSignal): Promise<ArtifactBranchCsvFilterOptionsValue> {
   const { column } = request
@@ -180,7 +198,13 @@ export async function filterOptionsForReturnedCsv(ctx: Context, request: Artifac
   return await readAuthorizedCsv(csv, ({ store, ref }) => readCsvFilterOptions(store, ref, column, signal))
 }
 
-/** Read one bounded page of the records used by the selected group and filter. */
+/**
+ * Read one bounded page of the records used by the selected group and filter.
+ * @param ctx - Host context of the owner's invocation.
+ * @param request - Returned-message address, aggregation, group key, optional filter and record offset.
+ * @param signal - Lifetime of the Session observations and the CSV read.
+ * @returns One page of participating records and their total count.
+ */
 export async function readReturnedCsvRows(ctx: Context, request: ArtifactBranchCsvRowsRequest,
   signal: AbortSignal): Promise<ArtifactBranchCsvRowsValue> {
   const filter = selectedFilter(request)
@@ -191,7 +215,13 @@ export async function readReturnedCsvRows(ctx: Context, request: ArtifactBranchC
   return await readCsvRows(csv, { aggregate, groupKey, offset, filter }, signal)
 }
 
-/** Resolve and read only the records used by the adopted CSV reading. */
+/**
+ * Resolve and read only the records used by the adopted CSV reading.
+ * @param ctx - Host context of the owner's invocation.
+ * @param request - Returned-message address and record offset.
+ * @param signal - Lifetime of the Session observations and the CSV read.
+ * @returns One page of the recorded group's records; a total that differs from the recorded count is refused.
+ */
 export async function readReturnedCsvEvidenceRows(ctx: Context, request: ArtifactBranchCsvReturnedRowsRequest,
   signal: AbortSignal): Promise<ArtifactBranchCsvRowsValue> {
   const offset = rowsOffset(request.offset)
@@ -245,7 +275,13 @@ async function resolveCsvQuestionAndReturn(ctx: Context, request: ArtifactBranch
   return { csv, spec, group }
 }
 
-/** Resolve and read only the records used by the group locked on one sent question. */
+/**
+ * Resolve and read only the records used by the group locked on one sent question.
+ * @param ctx - Host context of the owner's invocation.
+ * @param request - Sent question address and record offset.
+ * @param signal - Lifetime of the Session observations and the CSV read.
+ * @returns One page of the locked group's records and the value column when the chart has one.
+ */
 export async function readCsvQuestionRows(ctx: Context, request: ArtifactBranchCsvQuestionRowsRequest,
   signal: AbortSignal): Promise<ArtifactBranchCsvQuestionRowsValue> {
   const offset = rowsOffset(request.offset)
@@ -282,7 +318,13 @@ async function compareRecordedCsvReadings(csv: ResolvedCsv, spec: CsvBarChartSpe
   return { original, current, ...page }
 }
 
-/** Compare the two saved calculations against one verified read of the original CSV. */
+/**
+ * Compare the two saved calculations against one verified read of the original CSV.
+ * @param ctx - Host context of the owner's invocation.
+ * @param request - Sent question address and record offset.
+ * @param signal - Lifetime of the Session observations and the CSV read.
+ * @returns One comparison page, with a sealed attachment when the draft store is available.
+ */
 export async function compareCsvQuestionToReturn(ctx: Context, request: ArtifactBranchCsvQuestionComparisonRequest,
   signal: AbortSignal): Promise<ArtifactBranchCsvQuestionComparisonValue> {
   const offset = rowsOffset(request.offset)
@@ -296,7 +338,13 @@ export async function compareCsvQuestionToReturn(ctx: Context, request: Artifact
   return attachment === undefined ? comparison : { ...comparison, attachment }
 }
 
-/** Read one comparison page from two exact returned CSV readings in the same inquiry. */
+/**
+ * Read one comparison page from two exact returned CSV readings in the same inquiry.
+ * @param ctx - Host context of the owner's invocation.
+ * @param request - Receiving Session, the earlier and later returned messages, and record offset.
+ * @param signal - Lifetime of the Session observations and the CSV read.
+ * @returns One comparison page, with a sealed attachment for an owner call that satisfies the portable page limits.
+ */
 export async function compareCsvReturns(ctx: Context, request: ArtifactBranchCsvReturnedComparisonRequest,
   signal: AbortSignal): Promise<ArtifactBranchCsvReturnedComparisonValue> {
   const offset = rowsOffset(request.offset)
@@ -333,7 +381,13 @@ function requireDraftOwner(ctx: Context): void {
   if (principalOf(ctx.invocation) !== undefined) csvComparisonDraftUnavailable('UNAVAILABLE')
 }
 
-/** Read a private current draft without resuming an Agent. */
+/**
+ * Read a private current draft without resuming an Agent.
+ * @param ctx - Host context of the owner's invocation.
+ * @param request - Receiving Session.
+ * @param signal - Lifetime of the Session observations.
+ * @returns The reconciled draft, or `null` when no draft store is mounted or no draft remains.
+ */
 export async function readCsvComparisonDraft(ctx: Context, request: ArtifactBranchReadCsvComparisonDraftRequest,
   signal: AbortSignal): Promise<ArtifactCsvComparisonDraft | null> {
   requireDraftOwner(ctx)
@@ -353,7 +407,13 @@ export async function readCsvComparisonDraft(ctx: Context, request: ArtifactBran
   })
 }
 
-/** Preserve a reviewed page apart from the receiving Session event log. */
+/**
+ * Preserve a reviewed page apart from the receiving Session event log.
+ * @param ctx - Host context of the owner's invocation.
+ * @param request - Receiving Session, expected receipt and reviewed attachment.
+ * @param signal - Lifetime of the Session observation.
+ * @returns The saved draft bound to the current Session cursor.
+ */
 export async function saveCsvComparisonDraft(ctx: Context, request: ArtifactBranchSaveCsvComparisonDraftRequest,
   signal: AbortSignal): Promise<ArtifactCsvComparisonDraft> {
   requireDraftOwner(ctx)
@@ -416,7 +476,13 @@ async function flushComparisonPrompt(ctx: Context, session: SessionObservation):
   return live !== undefined && await ctx.sessions.flush(live)
 }
 
-/** Persist the exact request identity before the client dispatches its ordinary prompt. */
+/**
+ * Persist the exact request identity before the client dispatches its ordinary prompt.
+ * @param ctx - Host context of the owner's invocation.
+ * @param request - Receiving Session, draft receipt and the client request ID of at most 128 characters.
+ * @param signal - Lifetime of the Session observations.
+ * @returns `{ bound: true }`; a previous request still in flight or already accepted is refused.
+ */
 export async function bindCsvComparisonDraftRequest(ctx: Context, request: ArtifactBranchBindCsvComparisonDraftRequest,
   signal: AbortSignal): Promise<ArtifactBranchBindCsvComparisonDraftValue> {
   requireDraftOwner(ctx)
@@ -458,7 +524,13 @@ async function comparisonPromptStatus(ctx: Context, sessionId: SessionId, reques
   return { accepted: false, pending: true }
 }
 
-/** Resolve acceptance or ongoing admission for one exact comparison request without resuming the Agent. */
+/**
+ * Resolve acceptance or ongoing admission for one exact comparison request without resuming the Agent.
+ * @param ctx - Host context of the owner's invocation.
+ * @param request - Receiving Session and client request ID.
+ * @param signal - Lifetime of the Session observation.
+ * @returns Acceptance with the durable message address, or whether admission is still pending.
+ */
 export async function checkCsvComparisonDraftRequest(ctx: Context, request: ArtifactBranchCheckCsvComparisonDraftRequest,
   signal: AbortSignal): Promise<ArtifactBranchCheckCsvComparisonDraftValue> {
   requireDraftOwner(ctx)
@@ -540,7 +612,7 @@ export async function resolveSentCsvComparisonExport(
   requireDraftOwner(ctx)
   using session = await observeReceivingSession(ctx, request.sessionId, signal)
   const facts = witnessedSentCsvComparison(ctx, session, request)
-  if (facts.explanation !== undefined && facts.provenance === undefined) {
+  if (facts.explanation !== undefined && facts.attribution === undefined) {
     const { aggregation, filtering } = facts.explanation
     if (aggregation.message.eventSeq >= request.eventSeq || filtering.eventSeq >= request.eventSeq
       || !isDeepStrictEqual(facts, readCsvComparisonExplanation(ctx, session, aggregation.message, filtering))) {
@@ -552,14 +624,20 @@ export async function resolveSentCsvComparisonExport(
   return returnCards === undefined ? { facts } : { facts, returnCards }
 }
 
-/** Seal a witnessed comparison or imported explanation from the selected own history message. */
+/**
+ * Seal a witnessed comparison or imported explanation from the selected own history message.
+ * @param ctx - Host context of the owner's invocation.
+ * @param request - Receiving Session, event sequence and matching message ID.
+ * @param signal - Lifetime of the Session observation.
+ * @returns A new attachment whose facts record the reused message.
+ */
 export async function reviewSentCsvComparison(ctx: Context, request: ArtifactBranchReviewSentCsvComparisonRequest,
   signal: AbortSignal): Promise<ArtifactCsvComparisonAttachment> {
   requireDraftOwner(ctx)
   const { sessionId, eventSeq, messageId } = request
   using session = await observeReceivingSession(ctx, sessionId, signal)
   const facts = witnessedSentCsvComparison(ctx, session, request)
-  if (facts.explanation !== undefined && facts.provenance !== 'user-imported') return csvComparisonDraftUnavailable('HISTORY_UNVERIFIED')
+  if (facts.explanation !== undefined && facts.attribution !== 'user-imported') return csvComparisonDraftUnavailable('HISTORY_UNVERIFIED')
   if (!await flushComparisonPrompt(ctx, session)) return csvComparisonDraftUnavailable('PROMPT_NOT_DURABLE')
   signal.throwIfAborted()
   return sealCsvComparisonQuestion(ctx, { ...facts, reusedFrom: { eventSeq, messageId } }) ?? csvComparisonDraftUnavailable('UNAVAILABLE')
@@ -592,7 +670,7 @@ function readCsvComparisonExplanation(
   const firstFacts = witnessedSentCsvSingleComparison(ctx, session, first)
   const secondFacts = witnessedSentCsvSingleComparison(ctx, session, second)
   if (first.eventSeq === second.eventSeq || first.messageId === second.messageId
-    || firstFacts.provenance !== undefined || secondFacts.provenance !== undefined
+    || firstFacts.attribution !== undefined || secondFacts.attribution !== undefined
     || !isDeepStrictEqual(firstFacts.source, secondFacts.source)) return undefined
   const choices = [
     { message: { eventSeq: first.eventSeq, messageId: first.messageId }, facts: firstFacts },
@@ -627,7 +705,7 @@ export async function importCsvComparison(ctx: Context, request: ArtifactBranchI
   if (session.header.origin === 'subagent' || csvComparisonDrafts(ctx) === undefined) return csvComparisonDraftUnavailable('UNAVAILABLE')
   signal.throwIfAborted()
   const snapshot = readCsvComparisonSnapshot(json)
-  const facts = { kind: 'csv-question-comparison', sessionId, provenance: 'user-imported' } as const
+  const facts = { kind: 'csv-question-comparison', sessionId, attribution: 'user-imported' } as const
   let imported: ArtifactCsvComparisonQuestionFacts
   if ('returnCards' in snapshot) imported = { ...facts, comparison: snapshot.comparison, returnCards: snapshot.returnCards }
   else if ('comparison' in snapshot) imported = { ...facts, comparison: snapshot.comparison }
@@ -636,7 +714,13 @@ export async function importCsvComparison(ctx: Context, request: ArtifactBranchI
   return attachment ?? csvComparisonImportInvalid('PROMPT_LIMIT')
 }
 
-/** Compare-and-delete a draft after deliberate removal or verified durable prompt acceptance. */
+/**
+ * Compare-and-delete a draft after deliberate removal or verified durable prompt acceptance.
+ * @param ctx - Host context of the owner's invocation.
+ * @param request - Receiving Session, draft receipt and, after sending, the bound request ID.
+ * @param signal - Lifetime of the Session observations.
+ * @returns Whether a draft matching the receipt was deleted.
+ */
 export async function clearCsvComparisonDraft(ctx: Context, request: ArtifactBranchClearCsvComparisonDraftRequest,
   signal: AbortSignal): Promise<ArtifactBranchClearCsvComparisonDraftValue> {
   requireDraftOwner(ctx)

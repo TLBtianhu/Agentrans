@@ -166,7 +166,7 @@ function readCsvComparisonSource(binding: SessionBinding, sessionId: SessionId, 
   if (sessionEventAt(binding, target.eventSeq) !== undefined) {
     const comparison = readCsvComparisonContext(binding, sessionId, target)
     if (comparison === undefined) return 'invalid'
-    if (kind === 'explanation') return comparison.explanation !== undefined && comparison.provenance === undefined ? comparison : 'invalid'
+    if (kind === 'explanation') return comparison.explanation !== undefined && comparison.attribution === undefined ? comparison : 'invalid'
     if (kind !== undefined) return csvComparisonSourceKind(comparison) === kind ? comparison : 'invalid'
     return comparison.explanation === undefined ? comparison : 'invalid'
   }
@@ -382,7 +382,7 @@ export function apply(ctx: ClientContext, config: Config = {}): void {
         selectCsvExplanationStep: (target) => {
           if (binding === undefined || owner === undefined || draft === undefined) return
           const candidate = readCsvComparison(binding, sessionId, target)
-          if (candidate === undefined || candidate.provenance !== undefined || candidate.returnedPair) return
+          if (candidate === undefined || candidate.attribution !== undefined || candidate.returnedPair) return
           const previous = owner.selection.getSnapshot()
           const active = (): boolean => current() && artifactHostRouteAvailable(binding.session.getSnapshot())
             && draft.phase.getSnapshot() === 'ready' && owner.selection.getSnapshot() === previous
@@ -506,7 +506,7 @@ export function apply(ctx: ClientContext, config: Config = {}): void {
                 if (facts.sessionId !== sessionId || facts.explanation !== undefined || facts.returnCards !== undefined
                   || !deepEqualJson(facts.comparison, page)) return 'unavailable'
               } else if (!deepEqualJson(facts, { kind: 'csv-question-comparison', sessionId,
-                provenance: 'user-imported', comparison: page, ...importedContents, reusedFrom: target })) return 'unavailable'
+                attribution: 'user-imported', comparison: page, ...importedContents, reusedFrom: target })) return 'unavailable'
               if (!canConfirm() || !await owner.chooseCsvComparison(attachment)) return false
               if (ctx.sessions.binding(sessionId) === binding) ctx.conversation.input.for(binding.ctx).focus()
               return true
@@ -1128,7 +1128,7 @@ export function apply(ctx: ClientContext, config: Config = {}): void {
             && csvDraft.phase.getSnapshot() === 'ready' && selection.getSnapshot() === previous
           if (!canConfirm()) throw new Error(t('csvCompare.importFailed'))
           const attachment = await csvDraftRemote().importComparison({ sessionId, json })
-          if (!canConfirm() || attachment.facts.sessionId !== sessionId || attachment.facts.provenance !== 'user-imported'
+          if (!canConfirm() || attachment.facts.sessionId !== sessionId || attachment.facts.attribution !== 'user-imported'
             || attachment.facts.reusedFrom !== undefined) throw new Error(t('csvCompare.importFailed'))
           return {
             page: attachment.facts.comparison,

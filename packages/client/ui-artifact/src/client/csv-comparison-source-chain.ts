@@ -1,4 +1,4 @@
-/** Follow the comparison provenance recorded on sent questions. */
+/** Follow the comparison sources recorded on sent questions. */
 import type { ArtifactCsvComparisonQuestionFacts } from '@agentrans/artifact-followup/types'
 import {
   isCsvReturnedSourceOrigin, sameCsvSentQuestion, type CsvComparisonSourceKind, type CsvComparisonSourceTrail,
@@ -24,6 +24,7 @@ export type CsvComparisonSourceChain = {
 
 /** Result of resolving one historical comparison against the Session event window. */
 export type CsvComparisonSourceRead = CsvSourceLink | 'unavailable' | 'invalid'
+/** Imported source kind of a resolved link, or `explanation` for a Host-reviewed two-step source. */
 export type CsvComparisonSourceReadKind = CsvComparisonSourceKind | 'explanation'
 
 /** Verify the exact returned reading tied to the selected comparison side. */
@@ -56,7 +57,8 @@ interface CsvSourceHistoryRange {
  * @param history - Current durable event range and paging state.
  * @returns Whether the missing source could still arrive or its reference is invalid.
  */
-export function classifyMissingCsvSource(seq: number, { open, hasMore, firstSeq, lastSeq }: CsvSourceHistoryRange): 'unavailable' | 'invalid' {
+export function classifyMissingCsvSource(seq: number, history: CsvSourceHistoryRange): 'unavailable' | 'invalid' {
+  const { open, hasMore, firstSeq, lastSeq } = history
   if (!open) return 'unavailable'
   if (hasMore && (firstSeq === undefined || seq < firstSeq)) return 'unavailable'
   return lastSeq !== undefined && seq > lastSeq ? 'unavailable' : 'invalid'
@@ -66,21 +68,35 @@ function isEarlierSource(source: CsvSentQuestion, from: CsvSentQuestion): boolea
   return source.eventSeq < from.eventSeq && source.messageId !== from.messageId
 }
 
-/** Get the exact historical question recorded for one explanation step. */
+/**
+ * Get the exact historical question recorded for one explanation step.
+ * @param explanation - Recorded explanation steps, if the link has them.
+ * @param step - Step whose source question is requested.
+ * @returns The recorded question, or `undefined` without an explanation.
+ */
 export function csvExplanationSource(explanation: CsvSourceLink['explanation'], step: CsvExplanationStep): CsvSentQuestion | undefined {
   return step === 'aggregation' ? explanation?.aggregation.message : explanation?.filtering
 }
 
-/** Get the one saved source selected from a single comparison or from a step of an explanation. */
+/**
+ * Get the one saved source selected from a single comparison or from a step of an explanation.
+ * @param facts - Facts of the draft attachment.
+ * @param step - Explanation step, or `undefined` for the reused single comparison.
+ * @returns The selected source question, if recorded.
+ */
 export function csvDraftSource(facts: ArtifactCsvComparisonQuestionFacts, step?: CsvExplanationStep): CsvSentQuestion | undefined {
   return step === undefined ? facts.reusedFrom : csvExplanationSource(facts.explanation, step)
 }
 
-/** Select the persisted source kind for a draft's immediate reference. */
+/**
+ * Select the persisted source kind for a draft's immediate reference.
+ * @param facts - Attribution, explanation and return cards of the draft facts.
+ * @returns The imported source kind, or `undefined` for evidence that was not user-imported.
+ */
 export function csvComparisonSourceKind(
-  facts?: Pick<ArtifactCsvComparisonQuestionFacts, 'provenance' | 'explanation' | 'returnCards'>,
+  facts?: Pick<ArtifactCsvComparisonQuestionFacts, 'attribution' | 'explanation' | 'returnCards'>,
 ): CsvComparisonSourceKind | undefined {
-  if (facts?.provenance !== 'user-imported') return undefined
+  if (facts?.attribution !== 'user-imported') return undefined
   if (facts.returnCards !== undefined) return 'imported-return-comparison'
   return facts.explanation === undefined ? undefined : 'imported-explanation'
 }

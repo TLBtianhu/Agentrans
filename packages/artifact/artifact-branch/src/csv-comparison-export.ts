@@ -9,9 +9,9 @@ type SectionHeading = 'h2' | 'h3'
 type ReturnSide = 'first' | 'second'
 
 function importedNotice(labels: CsvComparisonHtmlLabels, source: keyof CsvComparisonHtmlLabels['importSource'],
-  provenance: 'user-imported' | undefined): string {
-  if (provenance === undefined) return ''
-  return `<p data-csv-compare-provenance>${labels.imported}</p>\n`
+  attribution: 'user-imported' | undefined): string {
+  if (attribution === undefined) return ''
+  return `<p data-csv-compare-attribution>${labels.imported}</p>\n`
     + `<p data-csv-import-source="${source}">${labels.importSource[source]}</p>\n`
 }
 
@@ -184,13 +184,13 @@ ${body}
 /**
  * Render one frozen comparison page as a standalone, script-free document.
  * @param page - The witnessed readings, full membership counts and reviewed records in their saved order.
- * @param provenance - Whether the readings and records were supplied by the user in an imported file.
+ * @param attribution - Whether the readings and records were supplied by the user in an imported file.
  * @param locale - Preferred language for document labels.
  * @returns UTF-8 HTML with the exact reviewed range and no external resources.
  */
-export function renderCsvComparisonHtml(page: ArtifactCsvComparisonPage, provenance?: 'user-imported', locale?: string): Uint8Array {
+export function renderCsvComparisonHtml(page: ArtifactCsvComparisonPage, attribution?: 'user-imported', locale?: string): Uint8Array {
   const labels = csvComparisonHtmlLabels(locale)
-  const notice = importedNotice(labels, 'single-page', provenance)
+  const notice = importedNotice(labels, 'single-page', attribution)
   return document(labels.lang, labels.lockedComparison, notice + comparisonPage(labels, page, 'h2'))
 }
 
@@ -198,16 +198,16 @@ export function renderCsvComparisonHtml(page: ArtifactCsvComparisonPage, provena
  * Export a saved comparison and the two verified original return cards it addresses.
  * @param page - The exact reviewed page and full comparison membership totals.
  * @param returns - Original chart revisions and conclusions recovered from history or saved with a portable file.
- * @param provenance - Whether the comparison and cards came from a user-provided file.
+ * @param attribution - Whether the comparison and cards came from a user-provided file.
  * @param locale - Preferred language for document labels.
  * @returns UTF-8 HTML with separate native disclosures and no external resources.
  */
 export function renderCsvReturnedComparisonHtml(
-  page: ArtifactCsvComparisonPage, returns: ArtifactCsvComparisonReturnCards, provenance?: 'user-imported', locale?: string,
+  page: ArtifactCsvComparisonPage, returns: ArtifactCsvComparisonReturnCards, attribution?: 'user-imported', locale?: string,
 ): Uint8Array {
   const labels = csvComparisonHtmlLabels(locale)
   const sides = [labels.earlierReturn, labels.laterReturn] as const
-  const notice = importedNotice(labels, 'return-comparison', provenance)
+  const notice = importedNotice(labels, 'return-comparison', attribution)
   return document(labels.lang, labels.lockedComparison, `${notice}${comparisonPage(labels, page, 'h2', sides)}
 <section class="originalReturns" aria-label="${escapeAttribute(labels.originalReturns)}">
 <h2>${labels.originalReturns}</h2>
@@ -220,18 +220,18 @@ ${originalReturn(labels, 'second', sides[1], returns.second, page)}
  * Explain the ordered recipe changes and retain both original reviewed pages.
  * @param aggregation - The witnessed comparison of the unfiltered mean and sum.
  * @param filtering - The witnessed comparison whose current reading is the filtered sum.
- * @param provenance - Whether both readings and records were supplied by the user in an imported file.
+ * @param attribution - Whether both readings and records were supplied by the user in an imported file.
  * @param locale - Preferred language for document labels.
  * @returns UTF-8 HTML with two independent keyboard-accessible disclosures and no external resources.
  */
 export function renderCsvComparisonExplanationHtml(
   aggregation: ArtifactCsvComparisonPage,
   filtering: ArtifactCsvComparisonPage,
-  provenance?: 'user-imported',
+  attribution?: 'user-imported',
   locale?: string,
 ): Uint8Array {
   const labels = csvComparisonHtmlLabels(locale)
-  const notice = importedNotice(labels, 'two-step-explanation', provenance)
+  const notice = importedNotice(labels, 'two-step-explanation', attribution)
   return document(labels.lang, labels.explanation, `${notice}<ol class="explanation">
 <li data-csv-explanation-step="aggregation">
 <h2>${labels.changeAggregation}</h2>

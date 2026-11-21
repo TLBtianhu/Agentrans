@@ -331,11 +331,11 @@ function importedReturnCards(): ArtifactCsvComparisonReturnCards {
 it('recognizes only the two imported cards that match the stored comparison readings', () => {
   const { facts: { comparison, sessionId } } = csvComparisonAttachment()
   const returnCards = importedReturnCards()
-  const facts = { kind: 'csv-question-comparison', provenance: 'user-imported', sessionId, comparison, returnCards }
+  const facts = { kind: 'csv-question-comparison', attribution: 'user-imported', sessionId, comparison, returnCards }
   const block = (value: unknown) => IMPORTED_CSV_COMPARISON_QUESTION_PREFIX
     + JSON.stringify({ kind: 'artifact-question-context', sessionId, facts: value })
   expect(setup()({ text: block(facts), facts: {} })[0]).toMatchObject({
-    id: 'artifact-csv-comparison-context', data: { sessionId, page: comparison, returnCards, provenance: 'user-imported' },
+    id: 'artifact-csv-comparison-context', data: { sessionId, page: comparison, returnCards, attribution: 'user-imported' },
   })
   const wrong = { ...facts, returnCards: { ...returnCards, second: { ...returnCards.second, groups: returnCards.first.groups } } }
   const invalid = block(wrong) + IMPORTED_CSV_RETURN_SOURCE_TEXT
@@ -346,7 +346,7 @@ it('recognizes only the two imported cards that match the stored comparison read
 it('folds the exact imported-return source note and optional changes into the replay while retaining legacy text', () => {
   const { facts: { comparison, sessionId } } = csvComparisonAttachment()
   const returnCards = importedReturnCards()
-  const facts = { kind: 'csv-question-comparison', provenance: 'user-imported', sessionId, comparison }
+  const facts = { kind: 'csv-question-comparison', attribution: 'user-imported', sessionId, comparison }
   const block = (value: unknown) => IMPORTED_CSV_COMPARISON_QUESTION_PREFIX
     + JSON.stringify({ kind: 'artifact-question-context', sessionId, facts: value })
   const canonical = block({ ...facts, returnCards })
@@ -846,7 +846,7 @@ it('downloads only the opened owned comparison and lets a failed download retry 
 
 it('uses only the imported prefix for user-provided replay and offers JSON independently of HTML access', async () => {
   const { facts: recorded } = csvComparisonAttachment()
-  const facts = { kind: recorded.kind, sessionId: recorded.sessionId, comparison: recorded.comparison, provenance: 'user-imported' }
+  const facts = { kind: recorded.kind, sessionId: recorded.sessionId, comparison: recorded.comparison, attribution: 'user-imported' }
   const json = JSON.stringify({ ...body, facts })
   const raw = IMPORTED_CSV_COMPARISON_QUESTION_PREFIX + json
   const evaluate = setup()
@@ -868,7 +868,7 @@ it('uses only the imported prefix for user-provided replay and offers JSON indep
   const sourceLabel = 'JSON comparison with one locked page'
   expect(screen.getByText(sourceLabel).getAttribute('data-csv-import-source')).toBe('single-page')
   fireEvent.click(screen.getByRole('button', { name: 'Replay attached comparison' }))
-  expect(screen.getByText('User imported').getAttribute('data-csv-comparison-provenance')).toBe('user-imported')
+  expect(screen.getByText('User imported').getAttribute('data-csv-comparison-attribution')).toBe('user-imported')
   expect(within(screen.getByRole('region', { name: 'Replay attached comparison' })).getByText(sourceLabel)).toBeDefined()
   expect(screen.getByText('Original reading from file')).toBeDefined()
   expect(screen.getByRole('row', { name: '5 Kept B 35' })).toBeDefined()
@@ -898,7 +898,7 @@ it.each(['native', 'imported legacy', 'imported with source note'])('keeps exact
   const imported = kind !== 'native'
   const { facts: recorded } = csvComparisonAttachment()
   const facts = imported ? {
-    kind: recorded.kind, sessionId: recorded.sessionId, comparison: recorded.comparison, provenance: 'user-imported',
+    kind: recorded.kind, sessionId: recorded.sessionId, comparison: recorded.comparison, attribution: 'user-imported',
   } : recorded
   const prefix = imported ? IMPORTED_CSV_COMPARISON_QUESTION_PREFIX : CSV_COMPARISON_QUESTION_PREFIX
   const canonical = prefix + JSON.stringify({ ...body, facts })
@@ -936,7 +936,7 @@ it.each(['native', 'imported legacy', 'imported with source note'])('keeps exact
 it('folds the exact single-page source note even without changes and leaves other text readable', () => {
   const { facts: recorded } = csvComparisonAttachment()
   const { kind, sessionId, comparison } = recorded
-  const facts = { kind, sessionId, comparison, provenance: 'user-imported' }
+  const facts = { kind, sessionId, comparison, attribution: 'user-imported' }
   const canonical = IMPORTED_CSV_COMPARISON_QUESTION_PREFIX + JSON.stringify({ ...body, facts })
   const native = CSV_COMPARISON_QUESTION_PREFIX + JSON.stringify({ ...body, facts: recorded })
   const source = IMPORTED_CSV_SINGLE_SOURCE_TEXT

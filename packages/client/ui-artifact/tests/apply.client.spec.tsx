@@ -595,7 +595,7 @@ describe('Artifact plugin registration', () => {
     const sessionId = await h.sessions.add({ id: 'blank-csv-import', snapshot: { blank: true } })
     const record = { groupKey: 'Warm', aggregate: 'sum', value: 35, count: 1, valueColumn: 'LatencyMs' } as const
     const attachment: ArtifactCsvComparisonAttachment = { proof: 'proof', facts: { kind: 'csv-question-comparison',
-      sessionId, provenance: 'user-imported', comparison: { original: record, current: record,
+      sessionId, attribution: 'user-imported', comparison: { original: record, current: record,
         kept: 1, excluded: 0, added: 0, total: 1, offset: 0, rows: [{ record: 5, status: 'kept', value: '35' }] } } }
     const restored: ArtifactCsvComparisonDraft = { receiptId: 'restored-import', facts: attachment.facts }
     const saved: ArtifactCsvComparisonDraft = { receiptId: 'chosen-import', facts: attachment.facts }
@@ -655,7 +655,7 @@ describe('Artifact plugin registration', () => {
       first: { ...savedCard, revision: 1, conclusion: ['Mean 30.'], groups: [{ key: 'Warm', value: 30, count: 2 }] },
       second: { ...savedCard, revision: 2, conclusion: ['Sum 60.'], groups: [{ key: 'Warm', value: 60, count: 2 }] },
     }
-    const common = { kind: 'csv-question-comparison', sessionId, provenance: 'user-imported', reusedFrom: target } as const
+    const common = { kind: 'csv-question-comparison', sessionId, attribution: 'user-imported', reusedFrom: target } as const
     const paired = { ...common, comparison: second, explanation }
     const returned = { ...common, comparison: first, returnCards }
     const facts = kind === 'explanation' ? paired : returned

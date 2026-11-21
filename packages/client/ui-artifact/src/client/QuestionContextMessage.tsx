@@ -169,7 +169,7 @@ export function CsvComparisonContextMessage({
       <pre className={css.raw} data-artifact-question-context-raw>{raw}</pre>
     </details>
     {interactive && messageRef !== undefined && <div className={css.replayAction}>
-      <CsvAttachedComparison page={node.data.page} userImported={node.data.provenance === 'user-imported'}
+      <CsvAttachedComparison page={node.data.page} userImported={node.data.attribution === 'user-imported'}
         returnCards={node.data.returnCards}
         sideLabels={node.data.returnedPair ? csvReturnComparisonSideLabels(t) : undefined}
         openReturnedSource={openReturnedSource}
@@ -217,7 +217,7 @@ export function CsvComparisonContextNode({
   const returnCards = props.node.data.returnCards
   const returnedPair = ownComparison ? props.node.data.returnedPair : undefined
   const single = explanation === undefined
-  const canReuse = single || props.node.data.provenance === 'user-imported'
+  const canReuse = single || props.node.data.attribution === 'user-imported'
   const canAttach = hostRoute && canPrompt && canReadDraft && canSaveDraft && canReview && ownComparison
   const source = ownComparison ? props.node.data.reusedFrom : undefined
   const sourceKind = csvComparisonSourceKind(props.node.data)
@@ -265,13 +265,13 @@ export function CsvComparisonContextNode({
       ? () => downloadSentCsvComparison(messageRef, 'html') : undefined}
     downloadJson={hostRoute && canDownloadJson && ownComparison && messageRef !== undefined
       ? () => downloadSentCsvComparison(messageRef, 'json') : undefined}
-    explanationActions={single && !props.node.data.returnedPair && props.node.data.provenance === undefined
+    explanationActions={single && !props.node.data.returnedPair && props.node.data.attribution === undefined
       && canReviewExplanation && messageRef !== undefined
       && (canAttach || choice?.phase === 'saving' && ownComparison && hostRoute && canPrompt && canReadDraft && canSaveDraft) ? {
         target: messageRef, choice, select: () => { selectCsvExplanationStep(messageRef) }, cancel: cancelCsvExplanation,
         confirm: () => { confirmCsvExplanation(messageRef) },
       } : undefined}
-    openExplanationSource={!single && props.node.data.provenance === undefined && ownComparison && canReadHistory
+    openExplanationSource={!single && props.node.data.attribution === undefined && ownComparison && canReadHistory
       && openView !== undefined && messageRef !== undefined
       && [props.node.data.explanation?.aggregation.message, props.node.data.explanation?.filtering].every(sourceRef =>
         sourceRef !== undefined && sourceRef.eventSeq < messageRef.eventSeq && sourceRef.messageId !== messageRef.messageId)

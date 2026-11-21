@@ -235,7 +235,11 @@ function csvColumnAt(value: unknown, path: string): string {
   return name
 }
 
-/** Validate the complete one-column filter used for preview, lock and replay. */
+/**
+ * Validate the complete one-column filter used for preview, lock and replay.
+ * @param input - Candidate object with exactly `column` and `value`.
+ * @returns The filter with a non-blank column of at most 128 UTF-8 bytes and a value of at most 1024.
+ */
 export function normalizeCsvExactFilter(input: unknown): CsvExactFilter {
   if (!isRecord(input) || Object.keys(input).length !== 2) throw new SceneValidationError('/filter', 'must contain column and value')
   const column = csvColumnAt(input.column, '/filter/column')

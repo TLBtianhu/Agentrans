@@ -186,7 +186,11 @@ export interface AssistantInquirySelection {
   readonly inquiry: SessionInquiry
 }
 
-/** Resolve only literal, contiguous text with known canonical Markdown offsets. */
+/**
+ * Resolve only literal, contiguous text with known canonical Markdown offsets.
+ * @param selection - Browser text selection inside one rendered assistant answer.
+ * @returns The inquiry cut and selected Markdown span, or `null` for any other selection.
+ */
 export function selectedAssistantInquiry(selection: TextSelection): AssistantInquirySelection | null {
   const { source, range } = selection
   const answer = source.closest<HTMLElement>('[data-chat-inquiry-cut]')

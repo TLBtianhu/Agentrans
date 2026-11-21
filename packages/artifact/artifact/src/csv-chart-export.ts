@@ -12,7 +12,13 @@ function jsonData(value: object): string {
   return JSON.stringify(value).replaceAll('<', '\\u003c')
 }
 
-/** Render the frozen recipe and results as offline bars with selectable readouts. */
+/**
+ * Render the frozen recipe and results as offline bars with selectable readouts.
+ * @param spec - Calculated chart revision being exported.
+ * @param title - Chart title shown in the page.
+ * @param origin - Source revision recorded in the exported page, when known.
+ * @returns A self-contained HTML document with script-safe embedded JSON.
+ */
 export function buildCsvChartHtml(spec: CsvBarChartSpec, title: string, origin?: SceneExportOrigin): string {
   const groups = spec.groups
   const magnitude = Math.max(0, ...groups.map(group => Math.abs(group.value))) || 1

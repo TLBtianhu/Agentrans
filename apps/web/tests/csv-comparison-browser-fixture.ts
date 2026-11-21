@@ -49,7 +49,7 @@ async function appendWitnessedComparison(
   const writer = await world.ctx.sessionPersistence.open(sessionId, 'write')
   const source = { kind: 'user', rpcId: requestId } as const
   const content = [{ type: 'text' as const, text: question }, csvComparisonQuestionBlock(attachment.facts)]
-  if (attachment.facts.provenance === 'user-imported') {
+  if (attachment.facts.attribution === 'user-imported') {
     const text = attachment.facts.explanation !== undefined ? IMPORTED_CSV_EXPLANATION_SOURCE_TEXT
       : attachment.facts.returnCards !== undefined ? IMPORTED_CSV_RETURN_SOURCE_TEXT : IMPORTED_CSV_SINGLE_SOURCE_TEXT
     content.push({ type: 'text', text })
@@ -276,7 +276,7 @@ export async function seedSentImportedCsvSingle(world: WebScaffold, id: string) 
   const bytes = await world.ctx.artifactBranchResults.exportSentCsvComparisonJson(native.filtered)
   const sessionId = await seedCsvImportChat(world, id)
   const attachment = await world.ctx.artifactBranchResults.importCsvComparison({ sessionId, json: new TextDecoder().decode(bytes) })
-  expect(attachment.facts).toEqual({ kind: 'csv-question-comparison', sessionId, provenance: 'user-imported', comparison: native.comparison })
+  expect(attachment.facts).toEqual({ kind: 'csv-question-comparison', sessionId, attribution: 'user-imported', comparison: native.comparison })
   const sent = await appendWitnessedComparison(world, sessionId, 'Explain my imported comparison.', attachment)
   return { sessionId, sent }
 }
@@ -290,7 +290,7 @@ async function seedSentImportedCsvExplanation(world: WebScaffold, id: string) {
     aggregation: native.alternateComparison, filtering: native.comparison })
   const sessionId = await seedCsvImportChat(world, id)
   const attachment = await world.ctx.artifactBranchResults.importCsvComparison({ sessionId, json })
-  expect(attachment.facts).toEqual({ kind: 'csv-question-comparison', sessionId, provenance: 'user-imported',
+  expect(attachment.facts).toEqual({ kind: 'csv-question-comparison', sessionId, attribution: 'user-imported',
     comparison: native.comparison, explanation: { aggregation: { comparison: native.alternateComparison } },
   })
   const sent = await appendWitnessedComparison(world, sessionId, 'Keep this imported two-step explanation for a later question.', attachment)
@@ -305,10 +305,10 @@ export async function seedSentImportedCsvReturnComparison(world: WebScaffold, id
   const sessionId = await seedCsvImportChat(world, id)
   const attachment = await world.ctx.artifactBranchResults.importCsvComparison({ sessionId, json })
   const { facts } = attachment
-  if (facts.provenance !== 'user-imported' || facts.returnCards === undefined) throw new Error('The portable package lost its return cards')
+  if (facts.attribution !== 'user-imported' || facts.returnCards === undefined) throw new Error('The portable package lost its return cards')
   expect(JSON.parse(json)).toEqual({ format: 'agentrans-csv-return-comparison', version: 1,
     comparison: native.comparison, returnCards: facts.returnCards })
-  expect(facts).toEqual({ kind: 'csv-question-comparison', sessionId, provenance: 'user-imported', comparison: native.comparison,
+  expect(facts).toEqual({ kind: 'csv-question-comparison', sessionId, attribution: 'user-imported', comparison: native.comparison,
     returnCards: facts.returnCards })
   const sent = await appendWitnessedComparison(world, sessionId, keepImportedReturns, attachment)
   return { sessionId, sent, facts, native, json }

@@ -41,8 +41,8 @@ function groupRows({ warm, cold }: Original) { return [{ key: 'Warm', value: war
 /** Inspect the immutable readings and original records of both imported return cards. */
 export async function inspectImportedReturns(scope: Locator, capture: (details: Locator, side: Original['side']) => Promise<void>,
   reused = false): Promise<void> {
-  const provenance = scope.locator('[data-csv-comparison-provenance="user-imported"]')
-  await expect.poll(() => provenance.textContent()).toBe('User imported')
+  const attribution = scope.locator('[data-csv-comparison-attribution="user-imported"]')
+  await expect.poll(() => attribution.textContent()).toBe('User imported')
   expect(await scope.locator('[data-csv-return-source]').count()).toBe(0)
   if (!reused) expect(await scope.locator('[data-csv-view-source-question], [data-csv-view-full-source-chain]').count()).toBe(0)
   await expectWarmReturnComparison(scope)
@@ -127,7 +127,7 @@ function verifyReusedReturnSend(history: PersistedHistory, initial: PersistedHis
   if (sent?.type !== 'user/message') throw new Error('The comparison reuse did not become a recorded question')
   const context = sent.data.content[1]
   if (context?.type !== 'text' || !context.text.startsWith(IMPORTED_CSV_COMPARISON_QUESTION_PREFIX)) {
-    throw new Error('The reused comparison lost its imported provenance')
+    throw new Error('The reused comparison lost its imported attribution')
   }
   const canonical = { kind: 'artifact-question-context', sessionId: facts.sessionId, facts }
   expect(JSON.parse(context.text.slice(IMPORTED_CSV_COMPARISON_QUESTION_PREFIX.length))).toEqual(canonical)
@@ -211,7 +211,7 @@ export async function exercisePortableCsvReturns(live: CsvExplanationBrowser): P
     const destination = await openFreshCsvChat(page, world, sessionId)
     const conversation = page.locator(`[data-conversation-session="${destination}"]`)
     const initial = await readPersistedEvents(world, destination)
-    const facts = { kind: 'csv-question-comparison', sessionId: destination, provenance: 'user-imported', comparison, returnCards }
+    const facts = { kind: 'csv-question-comparison', sessionId: destination, attribution: 'user-imported', comparison, returnCards }
     const imported = await openCsvImportFile(page, conversation, portableFile)
     expect(await imported.json()).toMatchObject({ result: { ok: true, value: { facts } } })
     expect(at(IMPORT).map(requestBody)).toEqual([{ sessionId: destination, json }])
@@ -252,7 +252,7 @@ export async function exercisePortableCsvReturns(live: CsvExplanationBrowser): P
     if (question?.type !== 'user/message') throw new Error('The imported return comparison question was not recorded')
     const context = question.data.content[1]
     if (context?.type !== 'text' || !context.text.startsWith(IMPORTED_CSV_COMPARISON_QUESTION_PREFIX)) {
-      throw new Error('The imported comparison lost its canonical context and provenance')
+      throw new Error('The imported comparison lost its canonical context and attribution')
     }
     const canonical = { kind: 'artifact-question-context', sessionId: destination, facts }
     expect(JSON.parse(context.text.slice(IMPORTED_CSV_COMPARISON_QUESTION_PREFIX.length))).toEqual(canonical)
@@ -403,7 +403,7 @@ export async function exerciseImportedCsvReturnDraftChain(live: CsvExplanationBr
     stage('csv-return-chain-open-previously-confirmed-unsent-comparison')
     const { sessionId, first, middle, decoy, draft, native, json } = await seedImportedCsvReturnDraftChain(world, 'csv-live-imported-return-chain')
     const source = { eventSeq: middle.eventSeq, messageId: middle.messageId }
-    expect(draft.facts).toMatchObject({ provenance: 'user-imported', reusedFrom: source })
+    expect(draft.facts).toMatchObject({ attribution: 'user-imported', reusedFrom: source })
     await writeFile(join(evidence, 'csv-imported-return-chain-source.json'), json)
     const workspace = await world.ctx.workspaceRegistry.create(world.workspaceCwd)
     await workspace.attachSession(sessionId)

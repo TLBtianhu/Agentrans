@@ -141,7 +141,7 @@ it('replays ordered readings, opens their exact originals, and downloads the sen
 
 it('reviews imported transitions and exact pages, preserving the same data in draft and immutable sent replay', async () => {
   const portableExplanation = { aggregation: { comparison: aggregatePage } }
-  const facts = { kind: 'csv-question-comparison', sessionId, provenance: 'user-imported', comparison: filteredPage,
+  const facts = { kind: 'csv-question-comparison', sessionId, attribution: 'user-imported', comparison: filteredPage,
     explanation: portableExplanation } as const
   const context = { kind: 'artifact-question-context', sessionId, facts }
   const canonical = IMPORTED_CSV_COMPARISON_EXPLANATION_PREFIX + JSON.stringify(context)

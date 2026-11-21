@@ -262,7 +262,10 @@ export class DraftEditorRuntime {
     return { start: at, end: at }
   }
 
-  /** Restore a captured editor position without modifying draft content. @param span - Detect-coordinate selection. */
+  /**
+   * Restore a captured editor position without modifying draft content.
+   * @param span - Detect-coordinate selection.
+   */
   selectSpan(span: DetectSpan): void {
     this.applyEdit(() => { $selectDetectSpan(span) }, SKIP_SCROLL_INTO_VIEW_TAG)
   }

@@ -101,10 +101,12 @@ interface MessageFocusInput extends Pick<ChatViewSlotProps, 'viewRequest' | 'com
   readonly reveal: (row: HTMLElement, target: HTMLElement | Range) => boolean
 }
 
-/** Reveal a control or source passage when its addressed message becomes available. */
-export function useMessageFocusRequest({
-  viewRequest, completeViewRequest, loadThrough, ready, order, firstSeq, lastSeq, hasMore, loadingOlder, columnRef, reveal,
-}: MessageFocusInput): void {
+/**
+ * Reveal a control or source passage when its addressed message becomes available.
+ * @param input - Pending View request, history window and paging state, and the reveal callback.
+ */
+export function useMessageFocusRequest(input: MessageFocusInput): void {
+  const { viewRequest, completeViewRequest, loadThrough, ready, order, firstSeq, lastSeq, hasMore, loadingOlder, columnRef, reveal } = input
   const request = useMemo(() => viewRequest?.view === 'chat' ? parseMessageFocus(viewRequest.focus) : undefined, [viewRequest])
   const requestedPage = useRef<{ request: MessageFocus; firstSeq: number | null }>()
   const clearInquiry = useRef<() => void>()

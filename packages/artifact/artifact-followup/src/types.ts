@@ -86,14 +86,14 @@ type CsvComparisonFactsBase = {
 }
 
 type LocalCsvComparisonSource = {
-  readonly provenance?: never
+  readonly attribution?: never
   readonly returns?: never
   readonly question: CsvComparisonMessageRef
   readonly source: CsvComparisonReturnRef
 }
 
 type ImportedCsvComparisonSource = {
-  readonly provenance: 'user-imported'
+  readonly attribution: 'user-imported'
   readonly returns?: never
   readonly question?: never
   readonly source?: never
@@ -125,7 +125,7 @@ export type ArtifactCsvComparisonReturnedFacts = CsvComparisonFactsBase & {
   readonly reusedFrom?: CsvComparisonMessageRef
   readonly question?: never
   readonly source?: never
-  readonly provenance?: never
+  readonly attribution?: never
   readonly explanation?: never
   readonly returnCards?: never
 }

@@ -122,13 +122,13 @@ export function CsvComparisonReadings({
   </>
 }
 
-function CsvImportedProvenance({ explanation, returnCards, t }: PropsLocale<'artifact'> & {
+function CsvImportedAttribution({ explanation, returnCards, t }: PropsLocale<'artifact'> & {
   readonly explanation?: CsvComparisonExplanation | undefined
   readonly returnCards?: ArtifactCsvComparisonReturnCards | undefined
 }) {
   const kind = explanation !== undefined ? 'two-step-explanation' : returnCards !== undefined ? 'return-comparison' : 'single-page'
-  return <div className={css.importedProvenance}>
-    <p data-csv-comparison-provenance="user-imported">{t('csvCompare.userImported')}</p>
+  return <div className={css.importedAttribution}>
+    <p data-csv-comparison-attribution="user-imported">{t('csvCompare.userImported')}</p>
     <p data-csv-import-source={kind}>{t(`csvCompare.importSource.${kind}`)}</p>
   </div>
 }
@@ -269,7 +269,7 @@ export function CsvComparisonReviewContents({
   const labels = sideLabels ?? (returnCards === undefined ? undefined : csvReturnComparisonSideLabels(t))
   return <>
     <strong>{t('csvCompare.review')}</strong>
-    {userImported && <CsvImportedProvenance explanation={explanation} returnCards={returnCards} t={t} />}
+    {userImported && <CsvImportedAttribution explanation={explanation} returnCards={returnCards} t={t} />}
     {explanation === undefined ? <>
       <CsvComparisonReadings summary={page} userImported={userImported} sideLabels={labels} t={t} />
       <ComparisonRecords page={page} t={t} />
@@ -338,7 +338,7 @@ export function ComparisonPage({
   }
   return <>
     {review === undefined && <>
-      {userImported && <CsvImportedProvenance explanation={explanation} returnCards={returnCards} t={t} />}
+      {userImported && <CsvImportedAttribution explanation={explanation} returnCards={returnCards} t={t} />}
       {explanation === undefined ? <>
         <CsvComparisonReadings summary={page} userImported={userImported} sideLabels={sideLabels}
           openReturnedSource={returnCards === undefined ? openReturnedSource : undefined} t={t} />
@@ -508,7 +508,7 @@ export function CsvAttachedComparison({
   }
   return <div className={rowsCss.csvParticipants} data-csv-compare-attached={!draft || undefined}
     data-csv-compare-draft-page={draft || undefined}>
-    {userImported && (draft || !open) && <CsvImportedProvenance explanation={explanation} returnCards={returnCards} t={t} />}
+    {userImported && (draft || !open) && <CsvImportedAttribution explanation={explanation} returnCards={returnCards} t={t} />}
     <div className={rowsCss.csvAnalysisFailure}>
       <Button size="sm" variant="outline" className={css.toggle} aria-controls={panelId} aria-expanded={open}
         data-chat-message-control={draft ? undefined : 'artifact-csv-comparison'}

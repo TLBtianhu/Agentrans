@@ -76,7 +76,7 @@ const importedSourceCopy = {
   },
 } as const
 
-const importedProvenance = { en: 'User-imported readings and records', zh: '用户导入的读数和记录' } as const
+const importedAttribution = { en: 'User-imported readings and records', zh: '用户导入的读数和记录' } as const
 
 async function switchExportLocale(page: Page, current: ExportLocale, next: ExportLocale): Promise<void> {
   const before = languageSettings[current]
@@ -1423,7 +1423,7 @@ async function checkImportedOfflineExport(
   expect(await attribution.count()).toBe(1)
   expect(await attribution.getAttribute('data-csv-import-source')).toBe(kind)
   expect(await attribution.textContent()).toBe(label)
-  expect(await offlinePage.locator('[data-csv-compare-provenance]').textContent()).toBe(importedProvenance[locale])
+  expect(await offlinePage.locator('[data-csv-compare-attribution]').textContent()).toBe(importedAttribution[locale])
   if (kind === 'single-page') await checkOfflineComparison(offlinePage, locale)
   else if (kind === 'two-step-explanation') await checkOfflineExplanation(offlinePage, capture, locale)
   else {

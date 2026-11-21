@@ -4,10 +4,10 @@ import { expect, it } from 'vitest'
 import { renderCsvComparisonExplanationHtml, renderCsvComparisonHtml, renderCsvReturnedComparisonHtml } from '../src/csv-comparison-export.ts'
 
 function expectImportSource(native: string, imported: string, kind: string, label: string): void {
-  const notice = '<p data-csv-compare-provenance>User-imported readings and records</p>\n'
+  const notice = '<p data-csv-compare-attribution>User-imported readings and records</p>\n'
     + `<p data-csv-import-source="${kind}">${label}</p>\n`
   expect(native).not.toContain('data-csv-import-source')
-  expect(native).not.toContain('data-csv-compare-provenance')
+  expect(native).not.toContain('data-csv-compare-attribution')
   expect(imported).toContain(notice)
   expect(imported.replace(notice, '')).toBe(native)
 }
@@ -45,7 +45,7 @@ it('exports only the reviewed record range with original values escaped as text'
   const chinese = new TextDecoder().decode(renderCsvComparisonHtml(page, 'user-imported', 'ZH-cn'))
   expect(chinese).toContain('<html lang="zh-CN">')
   expect(chinese).toContain('<title>已锁定的 CSV 对照</title>')
-  expect(chinese).toContain('<p data-csv-compare-provenance>用户导入的读数和记录</p>')
+  expect(chinese).toContain('<p data-csv-compare-attribution>用户导入的读数和记录</p>')
   expect(chinese).toContain('<p data-csv-import-source="single-page">含一页已锁定结果的 JSON 对照</p>')
   expect(chinese).toContain('data-csv-compare-range>第 10–11 条，共 20 条</p>')
   expect(chinese).toContain('aria-label="已核对记录"')
