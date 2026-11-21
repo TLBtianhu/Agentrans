@@ -13,6 +13,7 @@ import ts from 'typescript'
 import { WorkspaceTypertGenerator } from '../packages/typert/generator/src/workspace.ts'
 import { PACKAGE_ASSET_EXPORT } from '../packages/client/modules/src/assets.ts'
 import { writeModuleGraph } from './gen-module-graph.ts'
+import { ensureSceneBundles } from './generate-scene-bundles.ts'
 import {
   hasClientDeclaration,
   PACKAGE_DEPENDENCY_POLICY,
@@ -357,6 +358,7 @@ function hasGeneratedHostExport(pkg: WorkspacePackageManifest): boolean {
 function generatedHostSources(root: string, packages: readonly WorkspacePackageManifest[]): ReadonlyMap<string, string> {
   const selected = packages.filter(hasGeneratedHostExport)
   if (selected.length === 0) return new Map()
+  ensureSceneBundles(root)
   const artifacts = new WorkspaceTypertGenerator(root).generate(selected.map(pkg => pkg.name), ['host'])
   const sources = new Map(artifacts.map(artifact => [artifact.package, artifact.js]))
   for (const pkg of selected) {

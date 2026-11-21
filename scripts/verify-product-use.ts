@@ -13,6 +13,7 @@ import { assertNever } from '../packages/util/values/src/index.ts'
 import { isAgentPresetEntry, isCordisGroupEntry, loadCordisYaml } from './cordis-yaml.ts'
 import { PRODUCT_PACKAGE_POLICY, type ProductPackagePolicy } from './product-package-policy.ts'
 import { collectRuntimeLocalSourceSpecifiers, collectRuntimeSourceSpecifiers } from './verify-client-packages.ts'
+import { sceneBindingPaths } from './generate-scene-bundles.ts'
 
 const PROFILE_SOURCE = 'packages/util/official-bundles/src/bundles.ts'
 const PROFILES = ['acp', 'web', 'headless', 'sdk', 'sdk-minimal']
@@ -105,6 +106,8 @@ export function verifyProductUse(
     if (/(?:^|\/)lib\//.test(display(path)) || path.endsWith('.d.ts')) return undefined
     return path
   }
+  // Static gates run on a clean tree; generated bindings may be absent and contribute no imports.
+  const generatedBindings = new Set(sceneBindingPaths(root).map(path => resolve(path)))
   const scanSource = (path: string, reach: Reachability): void => {
     if (reach.sources.has(path)) return
     if (!existsSync(path)) { failures.push(`${display(path)}: missing product source entry`); return }
@@ -117,6 +120,7 @@ export function verifyProductUse(
       const resolved = specifier.startsWith('/')
         ? sourceFile(resolve(root, 'apps/web', `.${specifier}`)) : resolveModule(specifier, path)
       if (resolved !== undefined) scanSource(resolved, reach)
+      else if (generatedBindings.has(resolve(dirname(path), specifier))) continue
       else if (/\.[cm]?[jt]sx?$/.test(specifier)) failures.push(`${display(path)}: source import ${specifier} does not resolve to source`)
     }
     const file = ts.createSourceFile(path, source, ts.ScriptTarget.Latest, true)

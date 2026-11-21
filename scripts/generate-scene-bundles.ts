@@ -1,5 +1,5 @@
 /** Generate the framework-free programs embedded in exported SceneSpec animations. */
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { parseArgs } from 'node:util'
@@ -7,6 +7,20 @@ import { buildSync, context, type BuildOptions, type BuildResult, type BuildCont
 
 type SceneBundleKind = 'expression' | 'renderers'
 const KINDS: readonly SceneBundleKind[] = ['expression', 'renderers']
+
+function programPath(root: string, kind: SceneBundleKind): string {
+  return join(root, 'packages/artifact/artifact/src', kind === 'expression'
+    ? 'scene-expr.generated.js' : 'scene-renderers.generated.js')
+}
+
+/**
+ * List the TypeScript bindings generation writes; each holds one string constant and imports nothing.
+ * @param root - Repository or fixture root containing the source entry points.
+ * @returns Absolute binding paths, whether or not generation has written them yet.
+ */
+export function sceneBindingPaths(root: string): string[] {
+  return KINDS.map(kind => programPath(root, kind).replace(/\.js$/u, '.ts'))
+}
 
 function bundleOptions(root: string, kind: SceneBundleKind): BuildOptions {
   return {
@@ -16,15 +30,17 @@ function bundleOptions(root: string, kind: SceneBundleKind): BuildOptions {
       : 'packages/artifact/artifact/src/scene-renderers.ts')],
     bundle: true, format: 'iife', platform: 'browser', target: 'es2020', write: false,
     globalName: kind === 'expression' ? 'SceneExpr' : 'SceneRenderers',
-    outfile: join(root, 'packages/artifact/artifact/src', kind === 'expression'
-      ? 'scene-expr.generated.js' : 'scene-renderers.generated.js'),
+    outfile: programPath(root, kind),
   }
 }
 
+// Concurrent gates read these files; a rename publishes each one complete.
 function writeChanged(path: string, contents: string): void {
   if (existsSync(path) && readFileSync(path, 'utf8') === contents) return
   mkdirSync(dirname(path), { recursive: true })
-  writeFileSync(path, contents, 'utf8')
+  const pending = `${path}.${process.pid}.tmp`
+  writeFileSync(pending, contents, 'utf8')
+  renameSync(pending, path)
 }
 
 function bindingOf(kind: SceneBundleKind): string {
@@ -90,6 +106,17 @@ export function staleSceneBundles(root: string, kinds: readonly SceneBundleKind[
  */
 export function unbuiltSceneBundles(root: string, kinds: readonly SceneBundleKind[] = KINDS): string[] {
   return [...expectedSceneBundles(root, kinds).keys()].filter(path => !existsSync(path)).sort()
+}
+
+/**
+ * Generate the programs only when a binding is absent, so TypeScript passes see every import on a clean tree.
+ * Present files stay untouched, leaving hand edits and stale output to `--check`.
+ * @param root - Repository or fixture root; a root without the Artifact package needs no programs.
+ */
+export function ensureSceneBundles(root: string): void {
+  if (!existsSync(join(root, 'packages/artifact/artifact/package.json'))) return
+  if (sceneBindingPaths(root).every(path => existsSync(path))) return
+  generateSceneBundles(root)
 }
 
 function publish(result: BuildResult, options: BuildOptions, kind: SceneBundleKind): void {
