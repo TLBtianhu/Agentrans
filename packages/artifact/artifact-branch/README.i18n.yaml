@@ -3,23 +3,23 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/artifact/artifact-branch/README.md
 /:
-  en: affaa8a1010182f3
-  zh: c7d630a3c74d36b7
+  en: c76583466fd2a99c
+  zh: b1d61c0fa0cda2fc
 /agentrans-artifact-branch:
   en: 67ab1cb7473b67ef
   zh: b5dfcdcde62799f9
 /agentrans-artifact-branch/summary:
-  en: d71bd23bb786cdab
-  zh: 9aeb47bec04e183a
+  en: 4c0291b8f424cc14
+  zh: 3451f12e0ccfe79b
 /agentrans-artifact-branch/table-of-contents:
   en: d152484eb41ac6b4
   zh: f0f7f88fe2f53b05
 /agentrans-artifact-branch/use-this-package:
-  en: 175766cbff0545c4
-  zh: c10d198c8520285c
+  en: 74d1a22d74df6614
+  zh: b93d5b732a1002d8
 /agentrans-artifact-branch/understand-the-implementation:
-  en: 884bf1d1daaaa537
-  zh: 8891566df261b3b4
+  en: 38a6a9638d3c335b
+  zh: 1b7d16170a4cd477
 /agentrans-artifact-branch/further-exploration:
   en: dd25bcdd6bf7b863
   zh: 873f0573e843cb2b
@@ -30,8 +30,8 @@
   en: 3a4bbae34908e0cc
   zh: cb1c3b9387392f75
 /agentrans-artifact-branch/model-experience/confirmed-evidence-bearing-result/what-the-model-sees:
-  en: 2af41071dc8b6f27
-  zh: ba1b56dc6e71cedf
+  en: 0d82bda7ccc46f59
+  zh: ab333458c07e6392
 /agentrans-artifact-branch/model-experience/confirmed-evidence-bearing-result/token-effect:
   en: ec288d1bf28a1fc8
   zh: a902b87ff154146b
@@ -41,9 +41,12 @@
 /agentrans-artifact-branch/model-experience/confirmed-evidence-bearing-result/kv-cache-effect/evidence-attribution:
   en: 43942d08393a6bea
   zh: 52813df595e2b1ab
+/agentrans-artifact-branch/model-experience/confirmed-evidence-bearing-result/kv-cache-effect/branch-question-attribution:
+  en: 89c3d1ed806fa795
+  zh: 24653e2c67e8c089
 /agentrans-artifact-branch/known-limitations-and-deferred-work:
-  en: 386d31144a47b777
-  zh: 7a45b3aeec8da2e6
+  en: 3373a107e09eb445
+  zh: 4dcd8d508daac565
 /agentrans-artifact-branch/known-limitations-and-deferred-work/dev-note:
   en: 3408957ec7d1c7aa
   zh: 0cf2e111184eb446

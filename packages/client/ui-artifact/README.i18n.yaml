@@ -18,8 +18,8 @@
   en: 7191cfb82905b42c
   zh: 0b5617b55b0b4c59
 /agentrans-client-ui-artifact/use-this-package/reading-and-acting-on-an-artifact:
-  en: 9df654c5d0b96e6d
-  zh: c526015a0f861617
+  en: 97b0a1b831bb159d
+  zh: d9f064fe9b70b6d5
 /agentrans-client-ui-artifact/use-this-package/isolation-and-input-limits:
   en: 5f2bdb73710d163b
   zh: dc846ad963327756
@@ -30,17 +30,17 @@
   en: 659ed02c82ceec83
   zh: b0d12fba6e22868d
 /agentrans-client-ui-artifact/use-this-package/scenespec-primitives:
-  en: 5ddad39bf6d5d4d5
-  zh: 30f68a78f7c91bc0
+  en: 5ead347265ec42fd
+  zh: 1e710bd1bc39a3fd
 /agentrans-client-ui-artifact/use-this-package/fixed-source-html-export:
-  en: e7efc3209d68176a
-  zh: d97ca41b44e8c214
+  en: 6c92b1c1f9b56c5d
+  zh: 0b623caa1302b7d8
 /agentrans-client-ui-artifact/use-this-package/asking-about-the-selected-experiment:
-  en: 3b9fb37236099bbd
-  zh: b6df954a9ca0c72e
+  en: 790bc38368881635
+  zh: c012b8e55f438670
 /agentrans-client-ui-artifact/use-this-package/returning-a-branch-conclusion-with-evidence:
-  en: d5b5c4a3a25a1651
-  zh: 054c7a3a63396164
+  en: c9f2cc77589cb98a
+  zh: 0ce95c578e900b3c
 /agentrans-client-ui-artifact/understand-the-implementation:
   en: de1ef4674d745512
   zh: 59c5dae73b0987d8

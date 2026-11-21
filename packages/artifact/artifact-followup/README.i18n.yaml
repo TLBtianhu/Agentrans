@@ -3,23 +3,23 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/artifact/artifact-followup/README.md
 /:
-  en: 5aa382c62cdcdf3b
-  zh: cba64f4fcaad6a86
+  en: 50ebb6f0f464c6be
+  zh: fadfea64423c9655
 /agentrans-artifact-followup:
   en: 129747be9e7803fd
   zh: 3d2206960e01226c
 /agentrans-artifact-followup/summary:
-  en: 38d0eade5672b083
-  zh: 80932c16dbbb2831
+  en: ac0cf7a4dbc71859
+  zh: 2f30f61e4b1c462e
 /agentrans-artifact-followup/table-of-contents:
   en: d152484eb41ac6b4
   zh: 87d7d2dbd7777429
 /agentrans-artifact-followup/use-this-package:
-  en: 3b63a485a2e110ec
-  zh: 6b37efe511347db1
+  en: c6fa78099c6e01b0
+  zh: 33d851cbb0a2d3ae
 /agentrans-artifact-followup/understand-the-implementation:
-  en: 8e61b67c0a7054a4
-  zh: 955654709e171a4c
+  en: 52e02768cc4d1348
+  zh: de7dece43558442a
 /agentrans-artifact-followup/further-exploration:
   en: e3903373a37c357e
   zh: e296714c6462cd96
@@ -30,23 +30,29 @@
   en: 9e0a28548ad1b521
   zh: e2e7d2ceb5293377
 /agentrans-artifact-followup/model-experience/a-question-about-an-experiment/what-the-model-sees:
-  en: 50e945f873bf103e
-  zh: 253ad0c7e698bb9d
+  en: bfc8b28829aa8431
+  zh: 5ef100d0c65a2db6
 /agentrans-artifact-followup/model-experience/a-question-about-an-experiment/what-the-model-sees/experiment-context-attribution:
   en: a532f15e88c04024
   zh: 8d67e83264b4923b
+/agentrans-artifact-followup/model-experience/a-question-about-an-experiment/what-the-model-sees/function-plot-attribution:
+  en: 44a24138f4c4a0c8
+  zh: 631032440e99c23f
+/agentrans-artifact-followup/model-experience/a-question-about-an-experiment/what-the-model-sees/returned-branch-evidence-attribution:
+  en: 0d2b3122af69f6e5
+  zh: 901d83512b481f15
 /agentrans-artifact-followup/model-experience/a-question-about-an-experiment/what-the-model-sees/program-report-attribution:
   en: 9ca23007662fe079
   zh: 795d48988295780f
 /agentrans-artifact-followup/model-experience/a-question-about-an-experiment/token-effect:
-  en: b18ed85cf90be788
-  zh: 415e27c7daf2d30b
+  en: 11d5bdee2f60ece1
+  zh: d9666e1ae77c2ed4
 /agentrans-artifact-followup/model-experience/a-question-about-an-experiment/kv-cache-effect:
   en: a3aea917c19ab93f
   zh: 81d3c42f8360c983
 /agentrans-artifact-followup/known-limitations-and-deferred-work:
-  en: 0c6a99a5045a2b6f
-  zh: ca2adfeb755b7931
+  en: 4a45610322b265a4
+  zh: d865791b97a86222
 /agentrans-artifact-followup/known-limitations-and-deferred-work/dev-note:
   en: 1773afd0fe10993d
   zh: 8cbd5109db289f5e

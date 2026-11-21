@@ -37,7 +37,7 @@ Mount the plugin with Artifact, the Agent registry, Session projections and an a
 | `maxInputBytes` | `262144` | Maximum UTF-8 bytes of the complete pending record, including original source, Session identity and request |
 | `maxOutputBytes` | `2097152` | Maximum UTF-8 bytes of the complete generated HTML, including embedded renderers and source identity |
 
-Call `artifactExports.create` with a stable `exportId`, `format: 'html'`, and either a current Artifact id, revision and particle checkpoint, or a saved observation reference. A current particle source requires a checkpoint. Other Scene kinds explicitly use source defaults; local sliders, selections and view state are not captured. The browser supplies neither source bytes nor computed coordinates.
+Call `artifactExports.create` with a stable `exportId`, `format: 'html'`, and a current revision, a historical revision, or a saved observation reference. A current particle source requires a checkpoint. A historical particle revision uses its original start or continuation checkpoint. A continued function plot freezes the saved function, parameters, probe position and readings. The standalone file opens and resets at those conditions. Other Scene sources use source defaults. The browser supplies references and, for a current particle source, the checkpoint.
 
 Keep the complete request unchanged after an unknown response. Repeating a ready or failed request returns its existing receipt after a durability flush. Repeating a pending request explicitly continues its frozen input. Existing identities bypass a subsequently reduced input or retained-count budget. A failed request needs a new export identity for a new attempt. Reusing an identity with different intent is rejected, even if the first request failed. Oversized new inputs are rejected before appending a record or storing a file; reduce the source and start a new request.
 
@@ -48,7 +48,7 @@ Call `artifactExports.read` with the owning Session and ready export id to retri
 <a id="understand-the-implementation"></a>
 ## Understand the implementation
 
-The Artifact owner resolves the exact current revision or saved observation. Particle checkpoints are recomputed against their original source. The export owner appends a complete pending `artifact/export` record and flushes before generation. It uses the shared browser-safe `artifact/scene-export` generator, whose version, original Session identity and source identity are embedded in the output. Inherited records retain the Session that originally admitted the export. Attachment storage commits the complete immutable file before the ready record is appended and flushed. Generation or storage failures retain a failed record and its original input; an append or flush failure keeps an unknown outcome instead of claiming rollback.
+The Artifact owner resolves the exact source from the Session, including its inherited prefix. Particle checkpoints are recomputed against their original source. The export owner appends a complete pending `artifact/export` record and flushes before generation. It uses the shared browser-safe `artifact/scene-export` generator, whose version, original Session identity and source identity are embedded in the output. Inherited records retain the Session that originally admitted the export. Attachment storage commits the complete immutable file before the ready record is appended and flushed. Generation or storage failures retain a failed record and its original input. An append or flush failure leaves the outcome unknown.
 
 The private awaited `artifactExports` Projection restores complete current records without file I/O, rendering or Agent input. Its potentially large source copies are excluded from Session summaries. A pending record after restart means incomplete or unknown work; restoring it never starts a producer. Explicit continuation can finish that exact input. Process-local concurrent identical requests share one operation, and plugin disposal waits for admitted operations to settle.
 
@@ -87,7 +87,7 @@ Export records do not rewrite model history or invalidate its existing prefix.
 <a id="known-limitations-and-deferred-work"></a>
 
 - Only native Scene HTML is supported. Free-form HTML runtime state, video and batch rendering are outside this operation.
-- Particle exports retain the selected fixed step. Other Scene exports use source defaults and do not replay unsaved local view changes.
+- Particle exports retain the selected fixed step. Continued function plots retain their saved baseline. Local view adjustments made after that baseline are temporary.
 - Pending work does not resume automatically. Expensive future producers should use the existing Jobs capability and keep result files separate from process-local job state.
 - Result deletion, retention cleanup and attachment garbage collection are not provided. A full result index refuses new identities without evicting earlier facts.
 

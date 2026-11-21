@@ -35,6 +35,10 @@ Mount the service as `@agentrans/artifact`, the HTML tool as `@agentrans/artifac
 
 A create starts at revision 1. An update supplies `baseRevision` and succeeds only when it equals the current durable revision. A prepared snapshot reserves the Artifact until it commits or is discarded, so a second `prepare` for the same Artifact fails with `ARTIFACT_BUSY`, and `commit` appends only while the snapshot still follows the committed revision (`STALE_REVISION` otherwise). Every `artifact/upsert` contains the complete `ArtifactSnapshot`, never a delta.
 
+The Web and Desktop Chat preset mounts `@agentrans/artifact/attachment-csv-tool` to inspect UTF-8 CSV, compute grouped statistics and create native bar charts. For `create_chart` or `update_chart` the model supplies the upload ID, recipe and Artifact identity. The Host resolves the upload against committed user messages in the active Session and its inherited prefix, then stores the computed groups as the chart revision. Updates supply the current `baseRevision`.
+
+Grouped sums and means round the exact result of the parsed binary64 numbers once. This preserves small contributions when larger values cancel and allows a finite mean even when the sum would overflow.
+
 -----
 
 <a id="understand-the-implementation"></a>
@@ -46,9 +50,9 @@ An Artifact can post `{ kind: 'artifact-action', artifactId, revision, action, p
 
 Stable submission requires Session input and the exact live root Agent. Remote calls require the owner principal; the request cannot supply caller attribution. Known refusal, identity conflict, service unavailability and unconfirmed dispatch are distinct. Source creation does not activate Session input; every action submission goes through the admitted path.
 
-Scene snapshots use `format: 'scene'` and a complete `spec`. The catalog validates function plots, flowcharts, particle systems, timelines, network graphs, and maps. Invalid expressions, parameter ranges, and references are rejected before commit.
+Scene snapshots use `format: 'scene'` and a complete `spec`. The catalog validates function plots, flowcharts, particle systems, timelines, network graphs, and maps. Invalid expressions, parameter ranges, and references are rejected before commit. New function plots and revisions require a unique ID for each function. Previously stored plots and continuations retain their original sources and ID resolution.
 
-The DOM-free `capabilities` entry exposes `getArtifactSourceCapabilities(snapshot)`. The SceneCatalog owns the source declaration for each primitive: particles support Host-recomputed observations, saving, restoration, fixed saved-pair comparison and question context; other native scenes support HTML export from source defaults. Particle export can preserve a checkpoint or use source defaults. HTML question context retains program-reported state or errors; it does not gain Host-calculated observations, saved checkpoints, restoration, fixed comparison or HTML export. These declarations neither enable optional services nor grant permission, report renderer readiness or verify a result. Each operation still validates its source and inputs.
+The DOM-free `capabilities` entry exposes `getArtifactSourceCapabilities(snapshot)`. The SceneCatalog declares source support for each primitive. Particles support Host-recomputed observations, saving, restoration, fixed saved-pair comparison and question context. Function plots support question context with Host-recomputed readings. Native scenes support HTML export from source defaults, and particle exports can preserve a checkpoint. HTML question context retains program-reported state or errors. Services validate availability, permissions, readiness and inputs for each operation.
 
 The `runtime-values` entry supplies shared JSON traversal and diagnostic limits. Its bounded lossless plain-data subset rejects negative zero, sparse arrays, accessors, symbols, extra array properties and non-plain objects instead of changing or discarding reported data. Browser parsing, the isolated program bridge and Host question admission use this validator; it neither executes getters nor verifies the values reported by a program.
 
@@ -78,11 +82,11 @@ The browser-safe `observation-comparison` entry resolves a fixed control/variant
 
 #### What the model sees
 
-The `scene` tool accepts `action`, `kind`, `sceneId`, `title`, a complete `spec`, `presentation`, and update-only `baseRevision`. Its result repeats only `sceneId`, `revision`, `title`, `kind`, and `presentation`. SceneSpec JSON is validated before commit; it is not HTML and does not execute model-generated JavaScript.
+The `scene` system guidance asks the model to answer in text when sufficient and offer an inline experiment when varying an input, testing a prediction, or comparing outcomes helps the user verify an explanation. It directs the model to function plots for mathematical relationships, particle systems for motion, and workspace tools for work on files or implementation. The tool includes examples and accepts `action`, `kind`, `sceneId`, `title`, a complete `spec`, `presentation`, and update-only `baseRevision`. An omitted `spec.kind` inherits the outer `kind`, and an explicit value must match it. On a follow-up that changes an experiment, use confirmed readings and update the same `sceneId` at the current `baseRevision`. Results contain only `sceneId`, `revision`, `title`, `kind`, and `presentation`. The Host validates SceneSpec before commit, and the Client renders it as a declarative scene.
 
 #### Token effect
 
-The scene tool adds one bounded JSON schema per selected preset. Results are short and contain no source.
+An available `scene` tool adds one bounded JSON schema and one fixed system prompt paragraph. Results are short and contain no source.
 
 #### KV Cache effect
 
@@ -92,11 +96,11 @@ Creating or updating a scene appends a log-only event and does not rewrite the m
 
 #### What the model sees
 
-The `artifact` tool accepts `action`, `artifactId`, `title`, `source`, `presentation`, optional `comparison`, and update-only `baseRevision`. `comparison` is an optional `{ group, role: 'control' | 'variant' }` relation; it does not merge the two snapshots. Its result repeats only `artifactId`, `revision`, `title`, and `presentation`, not the HTML source. The tool description carries the iframe message format and the rule that actions are input rather than authorization.
+The `artifact` tool provides self-contained HTML for interactive behavior beyond `scene`. It accepts `action`, `artifactId`, `title`, `source`, `presentation`, optional `comparison`, and update-only `baseRevision`. `comparison` assigns `{ group, role: 'control' | 'variant' }` to each independent snapshot. Its result contains only `artifactId`, `revision`, `title`, and `presentation`. The tool description carries the iframe message format and limits actions to user input. When a skill registry is available, the HTML tool contributes the bundled `artifact-design` skill to its scope. Loading it returns instructions and a complete parameter explorer template with keyboard input and a draggable probe. The model can adapt the returned HTML directly. For a lockable BFS or half-adder experiment, the tool directs the model to share one checkpoint reader between the initial `ready` call and `reportState` after each step or input change. A BFS checkpoint includes `kind: "bfs-checkpoint"`, `current`, `queue`, and `visited`. A half-adder checkpoint includes `kind: "half-adder-checkpoint"` and the numeric bits `a`, `b`, `sum`, and `carry`. After restoring and redrawing the saved state, the same reader returns the locked checkpoint.
 
 #### Token effect
 
-One tool schema is mounted per selected preset. Create/update results add only a short JSON value. Action messages contain one bounded JSON text block and can be reconstructed as ordinary user input.
+One tool schema is mounted per selected preset. Create/update results add only a short JSON value. Action messages contain one bounded JSON text block and can be reconstructed as ordinary user input. The skill catalog includes the routing description, and loading the skill adds the full template to that turn.
 
 #### KV Cache effect
 

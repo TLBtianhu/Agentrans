@@ -15,11 +15,11 @@
   en: d152484eb41ac6b4
   zh: 0bfab96e4723c4cc
 /agentrans-artifact/use-this-package:
-  en: 5b001610f60c1a4e
-  zh: d7d646c5bf6f8a33
+  en: 9ecdbf625759bba8
+  zh: 80dc5d31eb214cd9
 /agentrans-artifact/understand-the-implementation:
-  en: 280a890a1e4f0832
-  zh: 82eddbd3782b233d
+  en: 474607a3b1d0eba6
+  zh: d470bc4c10eaf0a2
 /agentrans-artifact/further-exploration:
   en: 512a3f7c5296bac8
   zh: 8c5ab75f797471a7
@@ -30,11 +30,11 @@
   en: e60e50e682a04f31
   zh: e60e50e682a04f31
 /agentrans-artifact/model-experience/scene/what-the-model-sees:
-  en: 07d0f9355675c705
-  zh: 734695afaed5fbef
+  en: db43a20caaf4f737
+  zh: 365ec6e235534d0b
 /agentrans-artifact/model-experience/scene/token-effect:
-  en: 95423d8c44bbed25
-  zh: 5acc414466e3aacf
+  en: 3d0bac89964ced31
+  zh: 2b0c62110a100c6e
 /agentrans-artifact/model-experience/scene/kv-cache-effect:
   en: 6ff4a731fcfa075a
   zh: 339c371f13679cfe
@@ -42,11 +42,11 @@
   en: b10efad9bb61e0e2
   zh: b10efad9bb61e0e2
 /agentrans-artifact/model-experience/artifact/what-the-model-sees:
-  en: a02f5dd7c39f1919
-  zh: 9e2dea5a6b13a636
+  en: e0ea710653c33f98
+  zh: 3df98895beecced5
 /agentrans-artifact/model-experience/artifact/token-effect:
-  en: 5df0824f7ff4df10
-  zh: 101875fc97b3db35
+  en: 561ce6c0b8a4e993
+  zh: ffa7e282beda4fe9
 /agentrans-artifact/model-experience/artifact/kv-cache-effect:
   en: 498c828a8bab4137
   zh: ff5f0709167f6dec

@@ -1,0 +1,19 @@
+# Bilingual-pair consistency record for 2026-11-14-verified-csv-comparison-reuse.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-11-14-verified-csv-comparison-reuse.md
+/agent-note-verified-reuse-of-sent-csv-comparisons:
+  en: 4fc9e2d3860273d5
+  zh: acc041eca7f66e03
+/agent-note-verified-reuse-of-sent-csv-comparisons/problem:
+  en: 7898d81aef1f749f
+  zh: 16e769e51dedc51c
+/agent-note-verified-reuse-of-sent-csv-comparisons/decision:
+  en: 7aa1cfc9e791a5cc
+  zh: 2f13e3c80951e0d5
+/agent-note-verified-reuse-of-sent-csv-comparisons/alternatives-considered:
+  en: 48ef2094c0c84272
+  zh: 4822dc378a5fdab9
+/agent-note-verified-reuse-of-sent-csv-comparisons/consequences:
+  en: 5f7aac0a59c94a80
+  zh: a097aed626692a2c

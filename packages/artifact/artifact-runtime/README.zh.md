@@ -42,7 +42,9 @@ kind: "package-reference"
 
 `attach(sessionId, identity, signal)` 返回双工 Remote 流。身份固定 Artifact id、源码修订、唯一挂载运行 id 与原生/HTML 渲染器。初始确认为 `{kind:'attached'}`；每个已接受的替换报告收到从一开始的 `{kind:'accepted',sequence}`。报告为 `starting`、带所声明状态/命令支持的 `ready`，或带稳定错误码与信息的 `error`。重复运行身份不能替换另一个流。无效、超大或超出容量的登记以 `artifact-runtime/rejected` 结束，不保留被拒绝的报告。
 
-登记记录 Client 声明，不证明所指源码存在。检查通过已准备的 Projection 读取权威当前 Artifact，仅选取 Session、Artifact、修订与渲染器均相符的报告。源码缺失或修订变化会明确失败。多个物理运行保持独立，一个标签页的 ready 不覆盖另一个标签页的 error。没有活跃报告表示缺少证据，不证明所有浏览器均已关闭。
+登记记录 Client 声明。检查通过已准备的 Projection 读取权威当前 Artifact，仅选取 Session、Artifact、修订与渲染器均相符的报告。源码缺失或修订变化会明确失败。各标签页的物理运行分别上报。没有活跃报告时，也就没有已连接运行的报告可查。
+
+HTML 的 ready 报告同时声明支持上报状态时，可以包含 `restore:'bfs-checkpoint'`。这项能力允许 Client 提供 BFS 状态核对和恢复。恢复后的预览独立于报告流运行。
 
 `wait(agent, artifactId, revision, waitMs, signal)` 等待当前匹配的 ready/error 报告，包含源码提交后的首次附加。返回所有匹配运行，不推导整体成功。到期区分仍在启动的报告（`timeout`）与没有活跃报告（`no-active-report`）；此前观察到的匹配报告全部消失则返回 `disconnected`。源码替换按过期修订拒绝，Session/服务关闭与容量失败均为明确的等待错误。调用方取消保留原始原因。等待不运行代码、不发送命令或重试操作。
 
