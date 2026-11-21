@@ -33,6 +33,7 @@ import { ArtifactInteractionOwner } from '../src/client/particle-runtime-owner.t
 import type { CsvComparisonSourceTrail, CsvComparisonSourceVisit, CsvSentQuestion } from '../src/client/csv-comparison-draft.ts'
 import type { CsvComparisonSourceRecovery } from '../src/client/csv-comparison-source-chain.ts'
 import { en } from '../src/client/locales.ts'
+import { csvContextCallbacks, csvDraftPhase, noCsvReturnTarget, selectorOf, sessionStandardProps } from './standard-props.client.ts'
 
 const t = makeTranslate(en)
 const body = {
@@ -489,9 +490,10 @@ it.each([
     node, raw, interactive: true, t, sessionId, openView, reviewSentCsvComparison,
     messageRef: { eventSeq: 24, messageId: MessageId('current-message') },
     useSession: bindSnapshotSelector(createSnapshotStore(sessionSnapshot(sessionId))),
-    useAccess: () => false, useReturnToCsvDraft: () => false, useCsvHistoryDraftPhase: () => false, returnToCsvDraft: vi.fn(),
-    useCsvComparisonSourceTrail: () => undefined, useCsvComparisonSourceRecovery: () => undefined, visitCsvComparisonSource: () => true,
-    useCsvExplanationSelection: () => undefined,
+    useAccess: () => false, useReturnToCsvDraft: noCsvReturnTarget, useCsvHistoryDraftPhase: csvDraftPhase('idle'), returnToCsvDraft: vi.fn(),
+    useCsvComparisonSourceTrail: selectorOf(undefined), useCsvComparisonSourceRecovery: selectorOf(undefined),
+    visitCsvComparisonSource: () => true,
+    useCsvExplanationSelection: selectorOf(undefined),
   } as ComponentProps<typeof CsvComparisonContextNode>} />)
   const label = { name: 'View source question' }
   expect(screen.queryByRole('button', label)).toBeNull()
@@ -526,15 +528,16 @@ it('offers a return only on the exact visited question and clears a visit on clo
     return origin
   })
   const props = {
+    ...sessionStandardProps('artifact-spec-session' as SessionId), ...csvContextCallbacks(),
     node, raw, interactive: true, t, sessionId: facts.sessionId, openView, returnFromCsvComparisonSource,
     useSession: bindSnapshotSelector(createSnapshotStore(sessionSnapshot(facts.sessionId))), useAccess: () => false,
-    useReturnToCsvDraft: () => false, useCsvHistoryDraftPhase: () => false,
+    useReturnToCsvDraft: noCsvReturnTarget, useCsvHistoryDraftPhase: csvDraftPhase('idle'),
     useCsvComparisonSourceTrail: bindSnapshotSelector(owner.csvComparisonSourceTrail),
-    useCsvComparisonSourceRecovery: () => undefined,
-    useCsvExplanationSelection: () => undefined,
+    useCsvComparisonSourceRecovery: selectorOf(undefined),
+    useCsvExplanationSelection: selectorOf(undefined),
     clearCsvComparisonSourceVisit: (current: CsvComparisonSourceVisit) => { owner.clearCsvComparisonSourceVisit(current) },
     sourceQuestionLabel: () => undefined,
-  } as unknown as ComponentProps<typeof CsvComparisonContextNode>
+  } satisfies ComponentProps<typeof CsvComparisonContextNode>
   const view = render(<>
     <div data-testid="source"><CsvComparisonContextNode {...props} messageRef={source} /></div>
     <div data-testid="distractor"><CsvComparisonContextNode {...props} messageRef={{ ...source, messageId: MessageId('another') }} /></div>
@@ -577,13 +580,14 @@ it.each(['draft', 'comparison'] as const)('labels and opens exact earlier stops 
     target.origin.kind === 'comparison' ? target.origin.message : undefined)
   const sourceQuestionLabel = (question: CsvSentQuestion) => question.messageId === middle.messageId ? 'Check the filtered reading' : undefined
   const props = {
+    ...sessionStandardProps('artifact-spec-session' as SessionId), ...csvContextCallbacks(),
     node, raw, interactive: true, t, sessionId: facts.sessionId, openView, jumpInSourceTrail, sourceQuestionLabel,
     useSession: bindSnapshotSelector(createSnapshotStore(sessionSnapshot(facts.sessionId))), useAccess: () => false,
-    useReturnToCsvDraft: () => false, useCsvHistoryDraftPhase: () => false,
+    useReturnToCsvDraft: noCsvReturnTarget, useCsvHistoryDraftPhase: csvDraftPhase('idle'),
     useCsvComparisonSourceTrail: bindSnapshotSelector(createSnapshotStore<CsvComparisonSourceTrail | undefined>(trail)),
-    useCsvComparisonSourceRecovery: () => undefined,
-    useCsvExplanationSelection: () => undefined,
-  } as unknown as ComponentProps<typeof CsvComparisonContextNode>
+    useCsvComparisonSourceRecovery: selectorOf(undefined),
+    useCsvExplanationSelection: selectorOf(undefined),
+  } satisfies ComponentProps<typeof CsvComparisonContextNode>
   const view = render(<CsvComparisonContextNode {...props} messageRef={current} />)
   const pathLabel = { name: 'Source path' }
   expect(screen.queryByRole('navigation', pathLabel)).toBeNull()
@@ -626,15 +630,16 @@ it('previews a sent comparison source chain while recovery is retrying, with onl
     source: messageRef, status: 'unavailable', pending: true,
   })
   const props = {
+    ...sessionStandardProps('artifact-spec-session' as SessionId), ...csvContextCallbacks(),
     node, raw, t, messageRef, openView, sessionId: facts.sessionId, interactive: true,
     loadCsvHistorySourceChain, visitCsvHistorySourceChain, visitCsvComparisonSource,
     useSession: bindSnapshotSelector(createSnapshotStore(sessionSnapshot(facts.sessionId))),
     useAccess: (action: string) => action === 'session/events',
-    useReturnToCsvDraft: () => false, useCsvHistoryDraftPhase: () => false, useCsvComparisonSourceTrail: () => undefined,
+    useReturnToCsvDraft: noCsvReturnTarget, useCsvHistoryDraftPhase: csvDraftPhase('idle'), useCsvComparisonSourceTrail: selectorOf(undefined),
     useCsvComparisonSourceRecovery: bindSnapshotSelector(recovery),
-    useCsvExplanationSelection: () => undefined,
+    useCsvExplanationSelection: selectorOf(undefined),
     sourceQuestionLabel: (target: CsvSentQuestion) => target.messageId === oldest.messageId ? 'First comparison' : undefined,
-  } as unknown as ComponentProps<typeof CsvComparisonContextNode>
+  } satisfies ComponentProps<typeof CsvComparisonContextNode>
   const view = render(<CsvComparisonContextNode {...props} />)
   const previewLabel = { name: 'View full source chain' }
   const dialogLabel = { name: 'Source chain' }
@@ -678,14 +683,15 @@ it('lets a recorded malformed first source show the broken level without exposin
   const loadCsvHistorySourceChain = vi.fn<LoadHistory>().mockResolvedValue({ sources: [], status: 'invalid', level: 1 })
   const openView = vi.fn()
   const props = {
+    ...sessionStandardProps('artifact-spec-session' as SessionId), ...csvContextCallbacks(),
     node, raw, t, interactive: true, messageRef, openView, sessionId: facts.sessionId, loadCsvHistorySourceChain,
     useSession: bindSnapshotSelector(createSnapshotStore(sessionSnapshot(facts.sessionId))),
     useAccess: (action: string) => action === 'session/events',
-    useReturnToCsvDraft: () => false, useCsvHistoryDraftPhase: () => false, useCsvComparisonSourceTrail: () => undefined,
-    useCsvComparisonSourceRecovery: () => undefined,
-    useCsvExplanationSelection: () => undefined,
+    useReturnToCsvDraft: noCsvReturnTarget, useCsvHistoryDraftPhase: csvDraftPhase('idle'), useCsvComparisonSourceTrail: selectorOf(undefined),
+    useCsvComparisonSourceRecovery: selectorOf(undefined),
+    useCsvExplanationSelection: selectorOf(undefined),
     sourceQuestionLabel: () => undefined,
-  } as unknown as ComponentProps<typeof CsvComparisonContextNode>
+  } satisfies ComponentProps<typeof CsvComparisonContextNode>
   render(<CsvComparisonContextNode {...props} />)
   fireEvent.click(screen.getByRole('button', { name: 'Replay attached comparison' }))
   expect(screen.queryByRole('button', { name: 'View source question' })).toBeNull()
@@ -710,13 +716,14 @@ it('renders refresh recovery only in the exact expanded fallback and retries wit
   const retryCsvSourceRecovery = vi.fn<Retry>().mockImplementationOnce(() => { recovery.set({ source, status: 'unavailable', pending: true }) })
     .mockImplementationOnce((_value, open) => { open(desired) })
   const props = {
+    ...sessionStandardProps('artifact-spec-session' as SessionId), ...csvContextCallbacks(),
     node, raw, t, sessionId: facts.sessionId, openView, interactive: true, retryCsvSourceRecovery,
     useSession: bindSnapshotSelector(createSnapshotStore(sessionSnapshot(facts.sessionId))),
     useAccess: (action: string) => action === 'session/events',
-    useReturnToCsvDraft: () => false, useCsvHistoryDraftPhase: () => false, useCsvComparisonSourceTrail: () => undefined,
+    useReturnToCsvDraft: noCsvReturnTarget, useCsvHistoryDraftPhase: csvDraftPhase('idle'), useCsvComparisonSourceTrail: selectorOf(undefined),
     useCsvComparisonSourceRecovery: bindSnapshotSelector(recovery), sourceQuestionLabel: () => undefined,
-    useCsvExplanationSelection: () => undefined,
-  } as unknown as ComponentProps<typeof CsvComparisonContextNode>
+    useCsvExplanationSelection: selectorOf(undefined),
+  } satisfies ComponentProps<typeof CsvComparisonContextNode>
   render(<>
     <div data-testid="exact-fallback"><CsvComparisonContextNode {...props} messageRef={source} /></div>
     <div data-testid="other-replay"><CsvComparisonContextNode {...props} messageRef={{ ...source, messageId: MessageId('other') }} /></div>
@@ -764,15 +771,16 @@ it('keeps both exact draft return controls available while refresh recovery is r
   const retryCsvSourceRecovery = vi.fn()
   const openView = vi.fn()
   const props = {
+    ...sessionStandardProps('artifact-spec-session' as SessionId), ...csvContextCallbacks(),
     node, raw, t, sessionId: facts.sessionId, messageRef: source, openView, interactive: true,
     retryCsvSourceRecovery, returnFromCsvComparisonSource, jumpInSourceTrail,
     useSession: bindSnapshotSelector(createSnapshotStore(sessionSnapshot(facts.sessionId))),
     useAccess: (action: string) => action === 'session/events',
-    useReturnToCsvDraft: () => false, useCsvHistoryDraftPhase: () => false,
+    useReturnToCsvDraft: noCsvReturnTarget, useCsvHistoryDraftPhase: csvDraftPhase('idle'),
     useCsvComparisonSourceTrail: bindSnapshotSelector(trail), useCsvComparisonSourceRecovery: bindSnapshotSelector(recovery),
-    useCsvExplanationSelection: () => undefined,
+    useCsvExplanationSelection: selectorOf(undefined),
     sourceQuestionLabel: () => undefined,
-  } as unknown as ComponentProps<typeof CsvComparisonContextNode>
+  } satisfies ComponentProps<typeof CsvComparisonContextNode>
   render(<CsvComparisonContextNode {...props} />)
   fireEvent.click(screen.getByRole('button', { name: 'Replay attached comparison' }))
   expect(screen.getByRole('status').textContent).toBe('Loading the source chain…')
@@ -802,13 +810,14 @@ it('downloads only the opened owned comparison and lets a failed download retry 
   const downloadSentCsvComparison = vi.fn<ComponentProps<typeof CsvComparisonContextNode>['downloadSentCsvComparison']>()
     .mockReturnValueOnce(request.promise).mockResolvedValueOnce({ status: 'requested' }).mockResolvedValueOnce('unavailable')
   const props = {
+    ...sessionStandardProps('artifact-spec-session' as SessionId), ...csvContextCallbacks(),
     node, raw, t, sessionId: facts.sessionId, messageRef: sent, interactive: true, downloadSentCsvComparison,
     useSession: bindSnapshotSelector(createSnapshotStore(sessionSnapshot(facts.sessionId))),
     useAccess: (action: string) => action === 'artifactBranchResults/exportSentCsvComparison',
-    useReturnToCsvDraft: () => false, useCsvHistoryDraftPhase: () => false,
-    useCsvComparisonSourceTrail: () => undefined, useCsvComparisonSourceRecovery: () => undefined,
-    useCsvExplanationSelection: () => undefined,
-  } as unknown as ComponentProps<typeof CsvComparisonContextNode>
+    useReturnToCsvDraft: noCsvReturnTarget, useCsvHistoryDraftPhase: csvDraftPhase('idle'),
+    useCsvComparisonSourceTrail: selectorOf(undefined), useCsvComparisonSourceRecovery: selectorOf(undefined),
+    useCsvExplanationSelection: selectorOf(undefined),
+  } satisfies ComponentProps<typeof CsvComparisonContextNode>
   const view = render(<>
     <div data-testid="sent"><CsvComparisonContextNode {...props} /></div>
     <div data-testid="other"><CsvComparisonContextNode {...props} sessionId={SessionId('other-session')} /></div>
@@ -857,13 +866,14 @@ it('uses only the imported prefix for user-provided replay and offers JSON indep
   const downloadSentCsvComparison = vi.fn<ComponentProps<typeof CsvComparisonContextNode>['downloadSentCsvComparison']>()
     .mockResolvedValue({ status: 'requested' })
   const props = {
+    ...sessionStandardProps('artifact-spec-session' as SessionId), ...csvContextCallbacks(),
     node, raw, t, sessionId: facts.sessionId, messageRef: sent, interactive: true, downloadSentCsvComparison,
     useSession: bindSnapshotSelector(createSnapshotStore(sessionSnapshot(facts.sessionId))),
     useAccess: (action: string) => action === 'artifactBranchResults/exportSentCsvComparisonJson',
-    useReturnToCsvDraft: () => false, useCsvHistoryDraftPhase: () => false,
-    useCsvComparisonSourceTrail: () => undefined, useCsvComparisonSourceRecovery: () => undefined,
-    useCsvExplanationSelection: () => undefined,
-  } as unknown as ComponentProps<typeof CsvComparisonContextNode>
+    useReturnToCsvDraft: noCsvReturnTarget, useCsvHistoryDraftPhase: csvDraftPhase('idle'),
+    useCsvComparisonSourceTrail: selectorOf(undefined), useCsvComparisonSourceRecovery: selectorOf(undefined),
+    useCsvExplanationSelection: selectorOf(undefined),
+  } satisfies ComponentProps<typeof CsvComparisonContextNode>
   render(<CsvComparisonContextNode {...props} />)
   const sourceLabel = 'JSON comparison with one locked page'
   expect(screen.getByText(sourceLabel).getAttribute('data-csv-import-source')).toBe('single-page')

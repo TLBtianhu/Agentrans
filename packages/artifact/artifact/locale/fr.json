@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Artifacts exécutables",
+    "description": "Enregistre des Artifacts interactifs HTML et SceneSpec dans la session et fournit des outils au modèle."
+  }
+}

@@ -2,24 +2,41 @@
   "name": "@agentrans/artifact-followup",
   "description": "Host-validated experimental context attached to ordinary questions",
   "version": "0.1.0",
-  "publishConfig": { "access": "public" },
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/deepseek-ai/deepseek-harness.git",
     "directory": "packages/artifact/artifact-followup"
   },
   "type": "module",
-  "main": "lib/types/index.js",
+  "main": "lib/index.js",
   "types": "lib/types/index.d.ts",
   "exports": {
-    ".": { "types": "./lib/types/index.d.ts", "default": "./lib/types/index.js" },
-    "./types": { "types": "./lib/types/types.d.ts", "default": "./lib/types/types.js" },
+    ".": {
+      "types": "./lib/types/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./types": {
+      "types": "./lib/types/types.d.ts",
+      "default": "./lib/types/types.js"
+    },
     "./src/*": "./src/*",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json"
   },
-  "files": ["lib/types/**/*.js", "lib/types/**/*.d.ts"],
+  "files": [
+    "locale/*.json",
+    "lib/index.js",
+    "lib/types/**/*.js",
+    "lib/types/**/*.d.ts"
+  ],
   "license": "MIT",
-  "dependencies": { "@agentrans/schemastery": "workspace:~", "zod": "4.4.3" },
+  "dependencies": {
+    "@agentrans/schemastery": "workspace:~",
+    "zod": "4.4.3"
+  },
   "peerDependencies": {
     "@agentrans/cordis": "workspace:~",
     "@agentrans/api-session-controller": "workspace:*",

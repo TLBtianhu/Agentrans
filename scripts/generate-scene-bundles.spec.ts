@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it, onTestFinished } from 'vitest'
-import { generateSceneBundles, staleSceneBundles, unbuiltSceneBundles, watchSceneBundles } from './generate-scene-bundles.ts'
+import { ensureSceneBundles, generateSceneBundles, sceneBindingPaths, staleSceneBundles, unbuiltSceneBundles, watchSceneBundles } from './generate-scene-bundles.ts'
 import { StageSupervisor } from './dev-web.ts'
 import { compileReferencedProjects } from './compile-referenced-projects.ts'
 
@@ -89,6 +89,20 @@ describe('scene export program generation', () => {
     expect(unbuiltSceneBundles(root)).toEqual([])
     writeFileSync(join(artifact, 'scene-expr.generated.js'), 'stale\n')
     expect(staleSceneBundles(root)).toEqual([join(artifact, 'scene-expr.generated.js')])
+  })
+
+  it('fills absent bindings for TypeScript passes and leaves present stale output to the check', () => {
+    const { root, artifact } = fixture()
+    expect(sceneBindingPaths(root)).toEqual([join(artifact, 'scene-expr.generated.ts'), join(artifact, 'scene-renderers.generated.ts')])
+    ensureSceneBundles(root)
+    expect(unbuiltSceneBundles(root)).toEqual([])
+    writeFileSync(join(artifact, 'scene-expr.generated.ts'), 'stale\n')
+    ensureSceneBundles(root)
+    expect(staleSceneBundles(root)).toEqual([join(artifact, 'scene-expr.generated.ts')])
+    const empty = mkdtempSync(join(tmpdir(), 'agentrans-scene-none-'))
+    onTestFinished(() => { rmSync(empty, { recursive: true, force: true }) })
+    ensureSceneBundles(empty)
+    expect(existsSync(join(empty, 'packages'))).toBe(false)
   })
 
   it('stops both source watchers after a generation error', async () => {

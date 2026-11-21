@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Conclusões de ramo",
+    "description": "Retorna conclusões de ramo confirmadas pelo usuário com as evidências salvas do Artifact."
+  }
+}

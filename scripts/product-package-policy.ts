@@ -65,4 +65,5 @@ export const PRODUCT_PACKAGE_POLICY: Readonly<Record<string, ProductPackagePolic
   // Web access through the API-key issuer. Enabling sign-in means mounting these rows,
   // not rebuilding the clients.
   'packages/llm/llm-deepseek-account': { category: 'disabled', reason: 'Model provider admitting account credentials; the shipped compositions admit the API-key provider only.' },
+  'packages/credentials/deepseek-account': { category: 'disabled', reason: 'Service definition for the account seam whose provider rows the shipped compositions do not mount.' },
 }

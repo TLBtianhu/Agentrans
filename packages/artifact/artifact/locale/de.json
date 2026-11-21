@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Ausführbare Artifacts",
+    "description": "Speichert interaktive HTML- und SceneSpec-Artifacts in der Sitzung und stellt Werkzeuge für das Modell bereit."
+  }
+}

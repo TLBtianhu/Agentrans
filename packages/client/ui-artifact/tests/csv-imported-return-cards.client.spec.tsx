@@ -16,6 +16,7 @@ import { csvSentQuestionFocus, type CsvComparisonSourceTrail } from '../src/clie
 import { en } from '../src/client/locales.ts'
 import type { ArtifactPromptBinding } from '../src/client/particle-runtime-owner.ts'
 import { csvComparisonContextTextRule } from '../src/client/question-context-text.ts'
+import { csvContextCallbacks, csvDraftPhase, inputActionsWith, noCsvReturnTarget, promptDockDefaults, selectorOf, sessionStandardProps } from './standard-props.client.ts'
 
 const original = { groupKey: 'Warm', aggregate: 'mean', value: 30, count: 2, valueColumn: 'LatencyMs' } as const
 const page: ArtifactCsvComparisonPage = {
@@ -147,11 +148,12 @@ it('opens the exact sent imported comparison source only with history access and
   expect(node.data.reusedFrom).toEqual(reusedFrom)
   const openView = vi.fn()
   const visitCsvComparisonSource = vi.fn(() => false).mockReturnValueOnce(false).mockReturnValueOnce(true)
-  const props = { node, raw, sessionId, interactive: true, messageRef, openView, t, visitCsvComparisonSource,
+  const props = {
+    ...sessionStandardProps('artifact-spec-session' as SessionId), ...csvContextCallbacks(), node, raw, sessionId, interactive: true, messageRef, openView, t, visitCsvComparisonSource,
     useAccess: () => false, useSession: bindSnapshotSelector(createSnapshotStore(sessionSnapshot(sessionId))),
-    useReturnToCsvDraft: () => false, useCsvHistoryDraftPhase: () => true, useCsvExplanationSelection: () => undefined,
-    useCsvComparisonSourceTrail: () => undefined, useCsvComparisonSourceRecovery: () => undefined,
-  } as unknown as ComponentProps<typeof CsvComparisonContextNode>
+    useReturnToCsvDraft: noCsvReturnTarget, useCsvHistoryDraftPhase: csvDraftPhase('ready'), useCsvExplanationSelection: selectorOf(undefined),
+    useCsvComparisonSourceTrail: selectorOf(undefined), useCsvComparisonSourceRecovery: selectorOf(undefined),
+  } satisfies ComponentProps<typeof CsvComparisonContextNode>
   const view = render(<CsvComparisonContextNode {...props} />)
   const source = { name: 'View source question' }
   fireEvent.click(screen.getByRole('button', { name: 'Replay attached comparison' }))
@@ -190,15 +192,16 @@ it('requires history access to preview or restore an imported return draft sourc
   const loadCsvSourceChain = vi.fn<ComponentProps<typeof ArtifactPromptContextDock>['loadCsvSourceChain']>()
     .mockResolvedValue({ status: 'complete', sources: [source, earlier] })
   const props = {
+    ...sessionStandardProps('artifact-spec-session' as SessionId), ...promptDockDefaults(),
     t, openView, session, restoreCsvSourceTrail, loadCsvSourceChain,
     useSession: bindSnapshotSelector(createSnapshotStore(session)),
     usePendingCsvComparisonSourceTrail: bindSnapshotSelector(createSnapshotStore(trail)),
     useArtifactPromptContext: bindSnapshotSelector(createSnapshotStore(binding)),
     useAccess: (method: string) => method !== 'session/events',
-    useCsvComparisonDraft: () => 'ready', useCsvComparisonDraftOutcome: () => undefined,
-    useCsvComparisonDraftCleanupFailed: () => false, useCsvComparisonSourceRecovery: () => undefined,
-    inputActions: { captureInsertion: () => selection }, sourceQuestionLabel: () => undefined,
-  } as unknown as ComponentProps<typeof ArtifactPromptContextDock>
+    useCsvComparisonDraft: selectorOf('ready'), useCsvComparisonDraftOutcome: selectorOf(undefined),
+    useCsvComparisonDraftCleanupFailed: selectorOf(false), useCsvComparisonSourceRecovery: selectorOf(undefined),
+    inputActions: inputActionsWith({ captureInsertion: () => selection }), sourceQuestionLabel: () => undefined,
+  } satisfies ComponentProps<typeof ArtifactPromptContextDock>
   const view = render(<ArtifactPromptContextDock {...props} />)
   const preview = { name: 'View full source chain' }
   expect(screen.queryByRole('button', preview)).toBeNull()

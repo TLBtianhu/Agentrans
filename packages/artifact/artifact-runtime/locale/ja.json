@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Artifact の実行レポート",
+    "description": "ソースに結び付いた Artifact の実行状態を記録し、モデルが確認できるようにします。"
+  }
+}

@@ -1145,8 +1145,8 @@ async function interceptCsvDraftSubmit(page: Page, composer: Locator, sessionId:
         const { host: _host, 'content-length': _contentLength, ...headers } = incomingHeaders
         const data = request.postDataBuffer()
         if (data === null) throw new Error('The intercepted prompt is missing its body')
-        upstream = page.context().request.post(request.url(), { data, headers, maxRetries: 0 }).then(async (response) => {
-          try { return await response.json() as unknown } finally { await response.dispose() }
+        upstream = page.context().request.post(request.url(), { data, headers, maxRetries: 0 }).then(async (response): Promise<unknown> => {
+          try { return await response.json() } finally { await response.dispose() }
         })
         forwarded++
         void upstream.catch((error: unknown) => { submitted.reject(error) })

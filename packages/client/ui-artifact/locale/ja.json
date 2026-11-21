@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-artifact"
+    "title": "ui-artifact",
+    "description": "会話内で HTML Artifact を隔離して表示し、ユーザーの確認後に操作を送信します。"
   }
 }

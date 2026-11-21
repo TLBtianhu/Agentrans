@@ -32,5 +32,11 @@
     "@agentrans/brand": "workspace:*",
     "@agentrans/util-crypto": "workspace:*",
     "@agentrans/util-values": "workspace:*"
+  },
+  "peerDependencies": {
+    "@agentrans/cordis": "workspace:~"
+  },
+  "devDependencies": {
+    "@agentrans/cordis": "workspace:~"
   }
 }

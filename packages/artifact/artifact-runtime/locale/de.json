@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Laufzeitberichte",
+    "description": "Erfasst den quellgebundenen Laufzeitzustand eines Artifacts, damit das Modell ihn prüfen kann."
+  }
+}

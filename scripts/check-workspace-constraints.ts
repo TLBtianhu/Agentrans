@@ -203,8 +203,6 @@ const packageFileExtras: Readonly<Record<string, readonly string[]>> = {
   '@agentrans/client-ui-sidebar-terminal': ['lib/client.*.js'],
   '@agentrans/client-web': ['lib/**/*.css', 'lib/apply-injections.js'],
   '@agentrans/client-ui-theme': ['lib/styles'],
-  // The physical-key protocol is a public entry usable without the browser service.
-  '@agentrans/client-shortcuts': ['lib/protocol.js'],
   // The CPython side ships as source .py files, published as-is rather than built.
   '@agentrans/experimental-ptc-runtime-python': ['py/**/*.py'],
   '@agentrans/experimental-speech-to-text-sensevoice': ['runtime/assets.json'],
@@ -220,6 +218,9 @@ const packageFileExtras: Readonly<Record<string, readonly string[]>> = {
     'lib/scene-renderers.js', 'lib/scene-tool.js', 'lib/shared-*.js',
     'skills/artifact-design/SKILL.md', 'skills/artifact-design/parameter-explorer.html',
   ],
+  '@agentrans/artifact-runtime': ['lib/tool.js', 'lib/shared-*.js'],
+  '@agentrans/product-layout': ['lib/launch-context.js'],
+  '@agentrans/session-branch': ['lib/admission.js', 'lib/shared-*.js'],
   // Personalized pages ship the location guidance used by their Creator.
   '@agentrans/creation-recommendations': ['references/*.md', 'skills/*.md'],
   // Official-plugin recommendations ship the skill text their provider loads.
@@ -453,6 +454,8 @@ export function checkExperimentalNameExceptions(manifests: readonly WorkspaceMan
 function isReleaseMemberDirectory(dir: string): boolean {
   // The SSH carrier is distributed as executable archives, never as an npm application.
   if (dir === 'packages/ssh/ssh-helper-runtime') return false
+  // The launch-context layout ships only inside the Desktop application with the private Host.
+  if (dir === 'packages/boot/product-layout') return false
   return standardReleaseMemberDirectory.test(dir) || isPublicExperimentalPackageDirectory(dir)
 }
 
@@ -471,7 +474,9 @@ function isReleaseMemberDirectory(dir: string): boolean {
  */
 export function checkDshFamilyVersion(manifest: PackageManifest, expected: string | undefined): string | undefined {
   const name = manifest.name
-  if (name !== '@agentrans/cli' && name?.startsWith('@agentrans/') !== true) return undefined
+  // Vendored Cordis shares the scope after the rescope but keeps its pinned upstream versions.
+  if (name === undefined || vendoredPackages.has(name)) return undefined
+  if (name !== '@agentrans/cli' && !name.startsWith('@agentrans/')) return undefined
   if (manifest.version !== expected) {
     return `${name}: package.json version must match root version ${expected ?? '(missing)'}`
   }
@@ -690,9 +695,9 @@ export function checkWorkspaceProtocol(manifests: readonly WorkspaceManifest[]):
     for (const section of dependencySections) {
       for (const [name, range] of Object.entries(manifest[section] ?? {})) {
         if (!members.has(name)) continue
-        const expected = name === '@agentrans/cli' || name.startsWith('@agentrans/')
-          ? 'workspace:*'
-          : vendors.has(name) ? 'workspace:~' : undefined
+        // Vendored and native packages share the scope after the rescope; their directory decides the range.
+        const expected = vendors.has(name) ? 'workspace:~'
+          : name === '@agentrans/cli' || name.startsWith('@agentrans/') ? 'workspace:*' : undefined
         if (expected !== undefined ? range === expected : range.startsWith('workspace:')) continue
         errors.push(`${manifest.name ?? dir}: ${section}.${name} must use ${expected ?? 'the workspace: protocol'}, got ${range}`)
       }

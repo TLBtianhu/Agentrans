@@ -121,6 +121,18 @@ describe('product package use', () => {
     expect(failures(root)).toBe('')
   })
 
+  it('accepts ungenerated scene bindings and still rejects other unresolved local imports', () => {
+    const root = fixture()
+    const artifact = 'packages/artifact/artifact'
+    pkg(root, artifact, '@agentrans/artifact')
+    write(root, 'apps/cli/src/bin.ts', "import '@agentrans/artifact'")
+    write(root, `${artifact}/src/index.ts`,
+      "import './scene-expr.generated.ts'\nimport './scene-renderers.generated.ts'\nexport {}\n")
+    expect(failures(root)).toBe('')
+    write(root, `${artifact}/src/index.ts`, "import './scene-other.generated.ts'\nexport {}\n")
+    expect(failures(root)).toContain('source import ./scene-other.generated.ts does not resolve to source')
+  })
+
   it.each(['apps/desktop/src/main.ts', 'apps/web/src/main.ts'])('reaches the %s entrypoint', (entry) => {
     const root = fixture()
     pkg(root, candidateDir, candidate)

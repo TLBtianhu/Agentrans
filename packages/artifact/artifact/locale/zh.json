@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "可执行 Artifact",
+    "description": "在会话中保存交互式 HTML 与 SceneSpec Artifact，并提供面向模型的工具。"
+  }
+}

@@ -59,14 +59,14 @@ function combinedSource() {
 
 describe('hosted Desktop archive source', () => {
   it.each([
-    { label: 'one all run', sources: inputCases['one all run'], expected: [['win-x64', '11', '111'], ['mac', '11', '112']] },
+    { label: 'one all run', sources: inputCases['one all run'], expected: [['win-x64', '11', '111'], ['mac', '11', '112']] as const },
     {
       label: 'Windows and combined Mac', sources: inputCases['Windows and combined Mac'],
-      expected: [['win-x64', '12', '121'], ['mac', '18', '181']],
+      expected: [['win-x64', '12', '121'], ['mac', '18', '181']] as const,
     },
     {
       label: 'three platform runs', sources: inputCases['three platform runs'],
-      expected: [['win-x64', '12', '121'], ['mac-arm64', '14', '141'], ['mac-x64', '15', '151']],
+      expected: [['win-x64', '12', '121'], ['mac-arm64', '14', '141'], ['mac-x64', '15', '151']] as const,
     },
   ])('plans $label in platform order from a single intended commit', ({ sources, expected }) => {
     const result = plan(sources)
