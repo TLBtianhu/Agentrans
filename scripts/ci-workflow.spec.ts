@@ -15,6 +15,24 @@ const runnerPrivatePnpmDestination = /^\$\{\{ runner\.temp \}\}\/setup-pnpm-\$\{
 const nativeWindowsPnpmDestination = '${{ runner.temp }}/setup-pnpm-js-${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}'
 
 describe('CI workflow', () => {
+  it('admits only repository-owned, non-Dependabot PR code wherever a PR workflow selects the self-hosted pool', () => {
+    const owned = 'github.event.pull_request.head.repo.full_name == github.repository'
+    const notFork = 'github.event.pull_request.head.repo.fork == false'
+    const human = "github.event.pull_request.user.login != 'dependabot[bot]'"
+    const complement = "!= 'selfhosted' || github.event.pull_request.head.repo.full_name != github.repository"
+      + " || github.event.pull_request.head.repo.fork != false || github.event.pull_request.user.login == 'dependabot[bot]'"
+    for (const file of ['.github/workflows/ci.yml', '.github/workflows/ci-windows.yml', '.github/workflows/ci-python.yml']) {
+      const text = readFileSync(resolve(root, file), 'utf8')
+      // Each selection reads as one expression whose next three conditions guard the pool.
+      const selections = [...text.matchAll(/== 'selfhosted'((?:\s*&&\s*[^&\n]+){3})/gu)].map(match => match[1]!.replace(/\s+/gu, ' ').trimEnd())
+      expect(selections.length, `${file} selects the self-hosted pool`).toBeGreaterThan(0)
+      expect(text.split("== 'selfhosted'").length - 1, `${file} has an unguarded self-hosted selection`).toBe(selections.length)
+      for (const guard of selections) expect(guard, file).toBe(` && ${owned} && ${notFork} && ${human}`)
+      const hostedOnly = text.split("!= 'selfhosted'").length - 1
+      expect(text.split(complement).length - 1, `${file} hosted-only conditions must be the exact complement`).toBe(hostedOnly)
+    }
+  })
+
   it('keeps at most eleven worker jobs active across PR workflows while Python runtime targets follow the SDK suite', () => {
     const ci = loadWorkflow('.github/workflows/ci.yml')
     const ciWindows = loadWorkflow('.github/workflows/ci-windows.yml')
@@ -407,7 +425,7 @@ describe('CI workflow', () => {
       expect(job['runs-on'], `${jobName} runs-on must not use the Linux failover switch`).not.toContain('AGENTRANS_CI_FAILOVER_LINUX')
       expect(job['runs-on']).toContain('self-hosted')
       expect(job['runs-on']).toContain('dsh-win-ci')
-      expect(job['runs-on']).toContain('dsh-windows-2025-16core')
+      expect(job['runs-on']).toContain('windows-2025')
       const cores = jobName === 'windows-native-tests' ? 2 : 16
       expect(evaluateRunsOn(job['runs-on'], { vars: { AGENTRANS_CI_FAILOVER_WINDOWS: 'blacksmith' } }))
         .toBe(`blacksmith-${cores}vcpu-windows-2025`)
@@ -452,7 +470,7 @@ describe('CI workflow', () => {
     }
 
     expect(windowsCoverage.name).toBe('windows node 24 / coverage')
-    expect(windowsCoverage.env).toMatchObject({ AGENTRANS_COVERAGE_PARTITIONS: "${{ vars.AGENTRANS_CI_FAILOVER_WINDOWS == 'selfhosted' && github.event.pull_request.user.login != 'dependabot[bot]' && '4' || '' }}" })
+    expect(windowsCoverage.env).toMatchObject({ AGENTRANS_COVERAGE_PARTITIONS: "${{ vars.AGENTRANS_CI_FAILOVER_WINDOWS == 'selfhosted' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.repo.fork == false && github.event.pull_request.user.login != 'dependabot[bot]' && '4' || '' }}" })
     const coverageSteps = windowsCoverage.steps as unknown[]
     const coverageCommands = coverageSteps.filter((step): step is Record<string, unknown> & { run: string } => (
       isRecord(step) && typeof step.run === 'string'
@@ -489,7 +507,7 @@ describe('CI workflow', () => {
       'timeout-minutes': 15,
       env: {
         AGENTRANS_GATE_FAIL_FAST: '',
-        AGENTRANS_PUBLINT_CONCURRENCY: "${{ vars.AGENTRANS_CI_FAILOVER_WINDOWS == 'selfhosted' && github.event.pull_request.user.login != 'dependabot[bot]' && '8' || '' }}",
+        AGENTRANS_PUBLINT_CONCURRENCY: "${{ vars.AGENTRANS_CI_FAILOVER_WINDOWS == 'selfhosted' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.repo.fork == false && github.event.pull_request.user.login != 'dependabot[bot]' && '8' || '' }}",
       },
     })
     expect(observational?.if).toBeUndefined()
@@ -586,23 +604,29 @@ describe('CI workflow', () => {
       linuxAggregate: aggregate['runs-on'] as string,
       windows: windowsBuild['runs-on'] as string,
     }
-    const evaluate = (expression: string, vars: Record<string, string>, login = 'maintainer'): unknown => {
+    const evaluate = (expression: string, vars: Record<string, string>, login = 'maintainer',
+      head: { full_name: string; fork: boolean } = { full_name: 'TLBtianhu/Agentrans', fork: false }): unknown => {
       return evaluateRunsOn(expression, {
         vars,
         fromJSON: JSON.parse,
-        github: { event: { pull_request: { user: { login } } } },
+        github: { repository: 'TLBtianhu/Agentrans', event: { pull_request: { user: { login }, head: { repo: head } } } },
       })
     }
     for (const [name, selector, variable, pool, hosted] of [
-      ['linux gates', selectors.linux, 'AGENTRANS_CI_FAILOVER_LINUX', ['self-hosted', 'linux', 'x64', 'vm-backup'], 'dsh-ubuntu-24-04-16core'],
+      ['linux gates', selectors.linux, 'AGENTRANS_CI_FAILOVER_LINUX', ['self-hosted', 'linux', 'x64', 'vm-backup'], 'ubuntu-24.04'],
       ['linux aggregate', selectors.linuxAggregate, 'AGENTRANS_CI_FAILOVER_LINUX', ['self-hosted', 'linux', 'x64', 'vm-backup'], 'ubuntu-latest'],
-      ['windows lanes', selectors.windows, 'AGENTRANS_CI_FAILOVER_WINDOWS', ['self-hosted', 'dsh-win-ci', 'windows'], 'dsh-windows-2025-16core'],
+      ['windows lanes', selectors.windows, 'AGENTRANS_CI_FAILOVER_WINDOWS', ['self-hosted', 'dsh-win-ci', 'windows'], 'windows-2025'],
     ] as const) {
       expect(evaluate(selector, { [variable]: 'blacksmith' }), `${name} blacksmith value`).toMatch(/^blacksmith-/)
       expect(evaluate(selector, { [variable]: 'selfhosted' }), `${name} selfhosted value`).toEqual(pool)
       // The blacksmith branch must not capture the selfhosted pool, and the
       // dependabot exclusion applies to the pool, not to the blacksmith tier.
       expect(evaluate(selector, { [variable]: 'selfhosted' }, 'dependabot[bot]'), `${name} dependabot on selfhosted`).toBe(hosted)
+      // Code from a fork or another repository never reaches the persistent self-hosted pool.
+      expect(evaluate(selector, { [variable]: 'selfhosted' }, 'outsider', { full_name: 'outsider/Agentrans', fork: true }),
+        `${name} fork on selfhosted`).toBe(hosted)
+      expect(evaluate(selector, { [variable]: 'selfhosted' }, 'outsider', { full_name: 'outsider/Agentrans', fork: false }),
+        `${name} foreign repository on selfhosted`).toBe(hosted)
       for (const mode of ['', 'hosted', 'unexpected']) {
         expect(evaluate(selector, { [variable]: mode }), `${name} default on ${mode}`).toBe(hosted)
       }

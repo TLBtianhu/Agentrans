@@ -26,7 +26,8 @@ jobs:
   #
   # FAILOVER (Linux): each Linux enterprise job resolves its pool through the
   # AGENTRANS_CI_FAILOVER_LINUX repository variable. Unset (normal), the expressions
-  # pick the hosted enterprise pools below. Setting the variable to
+  # pick GitHub-hosted ubuntu-24.04 runners. The selfhosted leg admits only
+  # repository-owned, non-Dependabot PR code. Setting the variable to
   # 'selfhosted' (repo Settings → Actions → Variables; writer-manageable
   # repository state — not PR-editable, no merge required) retargets all
   # three onto the in-house
@@ -43,13 +44,15 @@ jobs:
     runs-on: >-
       ${{ vars.AGENTRANS_CI_FAILOVER_LINUX == 'blacksmith' && 'blacksmith-8vcpu-ubuntu-2404'
           || vars.AGENTRANS_CI_FAILOVER_LINUX == 'selfhosted'
+          && github.event.pull_request.head.repo.full_name == github.repository
+          && github.event.pull_request.head.repo.fork == false
           && github.event.pull_request.user.login != 'dependabot[bot]'
           && fromJSON('["self-hosted", "linux", "x64", "vm-backup"]')
-          || 'dsh-ubuntu-24-04-16core' }}
+          || 'ubuntu-24.04' }}
     name: node 24 / static
     env:
       # Shared hosts expose host CPUs, not an isolated allocation.
-      AGENTRANS_GATE_CONCURRENCY: ${{ vars.AGENTRANS_CI_FAILOVER_LINUX == 'selfhosted' && github.event.pull_request.user.login != 'dependabot[bot]' && '8' || '' }}
+      AGENTRANS_GATE_CONCURRENCY: ${{ vars.AGENTRANS_CI_FAILOVER_LINUX == 'selfhosted' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.repo.fork == false && github.event.pull_request.user.login != 'dependabot[bot]' && '8' || '' }}
       # Stop the aggregate at the first blocking gate failure so a red run
       # does not keep burning enterprise runner time on the remaining gates.
       AGENTRANS_GATE_FAIL_FAST: '1'
@@ -90,7 +93,7 @@ jobs:
       # compression and upload on the paid latency-critical path. Skipped
       # under failover — see the coverage lane's identical rationale.
       - uses: actions/cache/restore@v6.1.0
-        if: vars.AGENTRANS_CI_FAILOVER_LINUX != 'selfhosted' || github.event.pull_request.user.login == 'dependabot[bot]'
+        if: vars.AGENTRANS_CI_FAILOVER_LINUX != 'selfhosted' || github.event.pull_request.head.repo.full_name != github.repository || github.event.pull_request.head.repo.fork != false || github.event.pull_request.user.login == 'dependabot[bot]'
         with:
           path: ${{ steps.pnpm-store.outputs.path }}
           key: ${{ runner.os }}-node-${{ env.PRIMARY_NODE_VERSION }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
@@ -110,15 +113,17 @@ jobs:
     runs-on: >-
       ${{ vars.AGENTRANS_CI_FAILOVER_LINUX == 'blacksmith' && 'blacksmith-16vcpu-ubuntu-2404'
           || vars.AGENTRANS_CI_FAILOVER_LINUX == 'selfhosted'
+          && github.event.pull_request.head.repo.full_name == github.repository
+          && github.event.pull_request.head.repo.fork == false
           && github.event.pull_request.user.login != 'dependabot[bot]'
           && fromJSON('["self-hosted", "linux", "x64", "vm-backup"]')
-          || 'dsh-ubuntu-24-04-16core' }}
+          || 'ubuntu-24.04' }}
     name: node 24 / coverage
     env:
       # Shared hosts expose host CPUs, not an isolated allocation.
-      AGENTRANS_COVERAGE_MAX_WORKERS: ${{ vars.AGENTRANS_CI_FAILOVER_LINUX == 'selfhosted' && github.event.pull_request.user.login != 'dependabot[bot]' && '6' || '' }}
-      AGENTRANS_COVERAGE_PARTITIONS: ${{ vars.AGENTRANS_CI_FAILOVER_LINUX == 'selfhosted' && github.event.pull_request.user.login != 'dependabot[bot]' && '4' || '' }}
-      AGENTRANS_GATE_CONCURRENCY: ${{ vars.AGENTRANS_CI_FAILOVER_LINUX == 'selfhosted' && github.event.pull_request.user.login != 'dependabot[bot]' && '3' || '' }}
+      AGENTRANS_COVERAGE_MAX_WORKERS: ${{ vars.AGENTRANS_CI_FAILOVER_LINUX == 'selfhosted' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.repo.fork == false && github.event.pull_request.user.login != 'dependabot[bot]' && '6' || '' }}
+      AGENTRANS_COVERAGE_PARTITIONS: ${{ vars.AGENTRANS_CI_FAILOVER_LINUX == 'selfhosted' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.repo.fork == false && github.event.pull_request.user.login != 'dependabot[bot]' && '4' || '' }}
+      AGENTRANS_GATE_CONCURRENCY: ${{ vars.AGENTRANS_CI_FAILOVER_LINUX == 'selfhosted' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.repo.fork == false && github.event.pull_request.user.login != 'dependabot[bot]' && '3' || '' }}
       # Managed-scope teardown cases run past the default per-test budget when
       # this lane's partitions, workers, and sibling gates share one host: the
       # disposal cases in subprocess-local and bash-sandbox exceeded 5000ms on
@@ -172,7 +177,7 @@ jobs:
       # Self-hosted runners reuse the shared persistent pnpm store.
       # Hosted runners restore the remote cache into their ephemeral store.
       - uses: actions/cache/restore@v6.1.0
-        if: vars.AGENTRANS_CI_FAILOVER_LINUX != 'selfhosted' || github.event.pull_request.user.login == 'dependabot[bot]'
+        if: vars.AGENTRANS_CI_FAILOVER_LINUX != 'selfhosted' || github.event.pull_request.head.repo.full_name != github.repository || github.event.pull_request.head.repo.fork != false || github.event.pull_request.user.login == 'dependabot[bot]'
         with:
           path: ${{ steps.pnpm-store.outputs.path }}
           key: ${{ runner.os }}-node-${{ env.PRIMARY_NODE_VERSION }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
@@ -211,14 +216,16 @@ jobs:
     runs-on: >-
       ${{ vars.AGENTRANS_CI_FAILOVER_LINUX == 'blacksmith' && 'blacksmith-8vcpu-ubuntu-2404'
           || vars.AGENTRANS_CI_FAILOVER_LINUX == 'selfhosted'
+          && github.event.pull_request.head.repo.full_name == github.repository
+          && github.event.pull_request.head.repo.fork == false
           && github.event.pull_request.user.login != 'dependabot[bot]'
           && fromJSON('["self-hosted", "linux", "x64", "vm-backup"]')
-          || 'dsh-ubuntu-24-04-16core' }}
+          || 'ubuntu-24.04' }}
     name: node 24 / lint
     env:
       # Shared hosts expose host CPUs, not an isolated allocation.
-      AGENTRANS_GATE_CONCURRENCY: ${{ vars.AGENTRANS_CI_FAILOVER_LINUX == 'selfhosted' && github.event.pull_request.user.login != 'dependabot[bot]' && '8' || '' }}
-      AGENTRANS_OXLINT_THREADS: ${{ vars.AGENTRANS_CI_FAILOVER_LINUX == 'selfhosted' && github.event.pull_request.user.login != 'dependabot[bot]' && '8' || '' }}
+      AGENTRANS_GATE_CONCURRENCY: ${{ vars.AGENTRANS_CI_FAILOVER_LINUX == 'selfhosted' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.repo.fork == false && github.event.pull_request.user.login != 'dependabot[bot]' && '8' || '' }}
+      AGENTRANS_OXLINT_THREADS: ${{ vars.AGENTRANS_CI_FAILOVER_LINUX == 'selfhosted' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.repo.fork == false && github.event.pull_request.user.login != 'dependabot[bot]' && '8' || '' }}
     steps:
       # Runner cleanup owns tool caches and fixtures, including cancelled runs.
       - name: Use runner-owned temporary storage
@@ -249,7 +256,7 @@ jobs:
           echo "path=$store_path" >> "$GITHUB_OUTPUT"
 
       - uses: actions/cache/restore@v6.1.0
-        if: vars.AGENTRANS_CI_FAILOVER_LINUX != 'selfhosted' || github.event.pull_request.user.login == 'dependabot[bot]'
+        if: vars.AGENTRANS_CI_FAILOVER_LINUX != 'selfhosted' || github.event.pull_request.head.repo.full_name != github.repository || github.event.pull_request.head.repo.fork != false || github.event.pull_request.user.login == 'dependabot[bot]'
         with:
           path: ${{ steps.pnpm-store.outputs.path }}
           key: ${{ runner.os }}-node-${{ env.PRIMARY_NODE_VERSION }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
@@ -336,17 +343,19 @@ jobs:
     runs-on: >-
       ${{ vars.AGENTRANS_CI_FAILOVER_LINUX == 'blacksmith' && 'blacksmith-16vcpu-ubuntu-2404'
           || vars.AGENTRANS_CI_FAILOVER_LINUX == 'selfhosted'
+          && github.event.pull_request.head.repo.full_name == github.repository
+          && github.event.pull_request.head.repo.fork == false
           && github.event.pull_request.user.login != 'dependabot[bot]'
           && fromJSON('["self-hosted", "linux", "x64", "vm-backup"]')
-          || 'dsh-ubuntu-24-04-16core' }}
+          || 'ubuntu-24.04' }}
     name: node 24 / snapshots and artifacts
     env:
       # Shared hosts expose host CPUs, not an isolated allocation.
-      AGENTRANS_GATE_CONCURRENCY: ${{ vars.AGENTRANS_CI_FAILOVER_LINUX == 'selfhosted' && github.event.pull_request.user.login != 'dependabot[bot]' && '10' || '' }}
-      AGENTRANS_OXLINT_THREADS: ${{ vars.AGENTRANS_CI_FAILOVER_LINUX == 'selfhosted' && github.event.pull_request.user.login != 'dependabot[bot]' && '8' || '' }}
-      AGENTRANS_PUBLINT_CONCURRENCY: ${{ vars.AGENTRANS_CI_FAILOVER_LINUX == 'selfhosted' && github.event.pull_request.user.login != 'dependabot[bot]' && '8' || '' }}
-      AGENTRANS_WEB_SNAPSHOT_WORKERS: ${{ vars.AGENTRANS_CI_FAILOVER_LINUX == 'selfhosted' && github.event.pull_request.user.login != 'dependabot[bot]' && '6' || '' }}
-      AGENTRANS_SNAPSHOT_MAX_CONCURRENCY: ${{ vars.AGENTRANS_CI_FAILOVER_LINUX == 'selfhosted' && github.event.pull_request.user.login != 'dependabot[bot]' && '12' || '' }}
+      AGENTRANS_GATE_CONCURRENCY: ${{ vars.AGENTRANS_CI_FAILOVER_LINUX == 'selfhosted' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.repo.fork == false && github.event.pull_request.user.login != 'dependabot[bot]' && '10' || '' }}
+      AGENTRANS_OXLINT_THREADS: ${{ vars.AGENTRANS_CI_FAILOVER_LINUX == 'selfhosted' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.repo.fork == false && github.event.pull_request.user.login != 'dependabot[bot]' && '8' || '' }}
+      AGENTRANS_PUBLINT_CONCURRENCY: ${{ vars.AGENTRANS_CI_FAILOVER_LINUX == 'selfhosted' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.repo.fork == false && github.event.pull_request.user.login != 'dependabot[bot]' && '8' || '' }}
+      AGENTRANS_WEB_SNAPSHOT_WORKERS: ${{ vars.AGENTRANS_CI_FAILOVER_LINUX == 'selfhosted' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.repo.fork == false && github.event.pull_request.user.login != 'dependabot[bot]' && '6' || '' }}
+      AGENTRANS_SNAPSHOT_MAX_CONCURRENCY: ${{ vars.AGENTRANS_CI_FAILOVER_LINUX == 'selfhosted' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.repo.fork == false && github.event.pull_request.user.login != 'dependabot[bot]' && '12' || '' }}
       AGENTRANS_NODE_COMPAT_SKIP_TYPECHECK: '1'
       # A failing gate aborts its running siblings: a failing build stops the
       # independent Node compatibility smoke, and a failing reader (e.g.
@@ -390,7 +399,7 @@ jobs:
       # entry until it evicts, after which the store is cold. Self-hosted runners
       # reuse the shared persistent store instead of restoring the remote archive.
       - uses: actions/cache/restore@v6.1.0
-        if: vars.AGENTRANS_CI_FAILOVER_LINUX != 'selfhosted' || github.event.pull_request.user.login == 'dependabot[bot]'
+        if: vars.AGENTRANS_CI_FAILOVER_LINUX != 'selfhosted' || github.event.pull_request.head.repo.full_name != github.repository || github.event.pull_request.head.repo.fork != false || github.event.pull_request.user.login == 'dependabot[bot]'
         with:
           path: ${{ steps.pnpm-store.outputs.path }}
           key: ${{ runner.os }}-node-${{ env.PRIMARY_NODE_VERSION }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
@@ -399,7 +408,7 @@ jobs:
 
       # Self-hosted runners retain their own browser cache between jobs.
       - uses: actions/cache/restore@v6.1.0
-        if: vars.AGENTRANS_CI_FAILOVER_LINUX != 'selfhosted' || github.event.pull_request.user.login == 'dependabot[bot]'
+        if: vars.AGENTRANS_CI_FAILOVER_LINUX != 'selfhosted' || github.event.pull_request.head.repo.full_name != github.repository || github.event.pull_request.head.repo.fork != false || github.event.pull_request.user.login == 'dependabot[bot]'
         with:
           path: ${{ env.PLAYWRIGHT_BROWSERS_PATH }}
           key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
@@ -439,7 +448,7 @@ jobs:
           PY
 
       - name: Install Playwright Chromium, WebKit, and hosted dependencies
-        if: vars.AGENTRANS_CI_FAILOVER_LINUX != 'selfhosted' || github.event.pull_request.user.login == 'dependabot[bot]'
+        if: vars.AGENTRANS_CI_FAILOVER_LINUX != 'selfhosted' || github.event.pull_request.head.repo.full_name != github.repository || github.event.pull_request.head.repo.fork != false || github.event.pull_request.user.login == 'dependabot[bot]'
         # Ephemeral runner images can carry Ubuntu mirrors whose HTTP endpoints are unreachable.
         run: |
           sudo find /etc/apt -maxdepth 2 -type f \( -name '*.list' -o -name '*.sources' \) -exec sed -i -E 's@http://([a-z]{2}\.)?archive\.ubuntu\.com/ubuntu@https://archive.ubuntu.com/ubuntu@g; s@http://security\.ubuntu\.com/ubuntu@https://security.ubuntu.com/ubuntu@g' {} +
@@ -448,7 +457,7 @@ jobs:
       # The persistent VM image owns Playwright's Linux system packages; do
       # not mutate the shared host with apt on every failover run.
       - name: Install Playwright Chromium and WebKit on the failover VM
-        if: vars.AGENTRANS_CI_FAILOVER_LINUX == 'selfhosted' && github.event.pull_request.user.login != 'dependabot[bot]'
+        if: vars.AGENTRANS_CI_FAILOVER_LINUX == 'selfhosted' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.repo.fork == false && github.event.pull_request.user.login != 'dependabot[bot]'
         run: pnpm --filter @agentrans/web-frontend exec playwright install chromium webkit
 
       - name: Build and execute the Linux Office runtime
@@ -569,6 +578,8 @@ jobs:
     runs-on: >-
       ${{ vars.AGENTRANS_CI_FAILOVER_LINUX == 'blacksmith' && 'blacksmith-4vcpu-ubuntu-2404'
           || vars.AGENTRANS_CI_FAILOVER_LINUX == 'selfhosted'
+          && github.event.pull_request.head.repo.full_name == github.repository
+          && github.event.pull_request.head.repo.fork == false
           && github.event.pull_request.user.login != 'dependabot[bot]'
           && fromJSON('["self-hosted", "linux", "x64", "vm-backup"]')
           || 'ubuntu-latest' }}

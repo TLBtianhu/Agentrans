@@ -72,6 +72,8 @@ jobs:
     runs-on: >-
       ${{ vars.AGENTRANS_CI_FAILOVER_LINUX == 'blacksmith' && 'blacksmith-4vcpu-ubuntu-2404'
           || vars.AGENTRANS_CI_FAILOVER_LINUX == 'selfhosted'
+          && github.event.pull_request.head.repo.full_name == github.repository
+          && github.event.pull_request.head.repo.fork == false
           && github.event.pull_request.user.login != 'dependabot[bot]'
           && fromJSON('["self-hosted", "linux", "x64", "vm-backup"]')
           || 'ubuntu-latest' }}

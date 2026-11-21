@@ -34,9 +34,11 @@ jobs:
     runs-on: >-
       ${{ vars.AGENTRANS_CI_FAILOVER_WINDOWS == 'blacksmith' && 'blacksmith-16vcpu-windows-2025'
           || vars.AGENTRANS_CI_FAILOVER_WINDOWS == 'selfhosted'
+          && github.event.pull_request.head.repo.full_name == github.repository
+          && github.event.pull_request.head.repo.fork == false
           && github.event.pull_request.user.login != 'dependabot[bot]'
           && fromJSON('["self-hosted", "dsh-win-ci", "windows"]')
-          || 'dsh-windows-2025-16core' }}
+          || 'windows-2025' }}
     name: windows node 24 / build & observational
     timeout-minutes: 60
     env:
@@ -101,7 +103,7 @@ jobs:
         shell: pwsh
         env:
           AGENTRANS_GATE_FAIL_FAST: ''
-          AGENTRANS_PUBLINT_CONCURRENCY: ${{ vars.AGENTRANS_CI_FAILOVER_WINDOWS == 'selfhosted' && github.event.pull_request.user.login != 'dependabot[bot]' && '8' || '' }}
+          AGENTRANS_PUBLINT_CONCURRENCY: ${{ vars.AGENTRANS_CI_FAILOVER_WINDOWS == 'selfhosted' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.repo.fork == false && github.event.pull_request.user.login != 'dependabot[bot]' && '8' || '' }}
         run: pnpm run check:ci:windows-observational-ready
       - name: Report Windows observational failures
         continue-on-error: true
@@ -117,16 +119,18 @@ jobs:
     runs-on: >-
       ${{ vars.AGENTRANS_CI_FAILOVER_WINDOWS == 'blacksmith' && 'blacksmith-16vcpu-windows-2025'
           || vars.AGENTRANS_CI_FAILOVER_WINDOWS == 'selfhosted'
+          && github.event.pull_request.head.repo.full_name == github.repository
+          && github.event.pull_request.head.repo.fork == false
           && github.event.pull_request.user.login != 'dependabot[bot]'
           && fromJSON('["self-hosted", "dsh-win-ci", "windows"]')
-          || 'dsh-windows-2025-16core' }}
+          || 'windows-2025' }}
     name: windows node 24 / coverage
     timeout-minutes: 120
     env:
       # Shared hosts expose host CPUs, not an isolated allocation.
-      AGENTRANS_COVERAGE_MAX_WORKERS: ${{ vars.AGENTRANS_CI_FAILOVER_WINDOWS == 'selfhosted' && github.event.pull_request.user.login != 'dependabot[bot]' && '6' || '' }}
-      AGENTRANS_COVERAGE_PARTITIONS: ${{ vars.AGENTRANS_CI_FAILOVER_WINDOWS == 'selfhosted' && github.event.pull_request.user.login != 'dependabot[bot]' && '4' || '' }}
-      AGENTRANS_GATE_CONCURRENCY: ${{ vars.AGENTRANS_CI_FAILOVER_WINDOWS == 'selfhosted' && github.event.pull_request.user.login != 'dependabot[bot]' && '3' || '' }}
+      AGENTRANS_COVERAGE_MAX_WORKERS: ${{ vars.AGENTRANS_CI_FAILOVER_WINDOWS == 'selfhosted' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.repo.fork == false && github.event.pull_request.user.login != 'dependabot[bot]' && '6' || '' }}
+      AGENTRANS_COVERAGE_PARTITIONS: ${{ vars.AGENTRANS_CI_FAILOVER_WINDOWS == 'selfhosted' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.repo.fork == false && github.event.pull_request.user.login != 'dependabot[bot]' && '4' || '' }}
+      AGENTRANS_GATE_CONCURRENCY: ${{ vars.AGENTRANS_CI_FAILOVER_WINDOWS == 'selfhosted' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.repo.fork == false && github.event.pull_request.user.login != 'dependabot[bot]' && '3' || '' }}
       AGENTRANS_COVERAGE_TEST_TIMEOUT_MS: '90000'
       # A gate failure aborts the sibling gate instead of waiting out its
       # multi-minute instrumented run.
@@ -195,9 +199,11 @@ jobs:
     runs-on: >-
       ${{ vars.AGENTRANS_CI_FAILOVER_WINDOWS == 'blacksmith' && 'blacksmith-2vcpu-windows-2025'
           || vars.AGENTRANS_CI_FAILOVER_WINDOWS == 'selfhosted'
+          && github.event.pull_request.head.repo.full_name == github.repository
+          && github.event.pull_request.head.repo.fork == false
           && github.event.pull_request.user.login != 'dependabot[bot]'
           && fromJSON('["self-hosted", "dsh-win-ci", "windows"]')
-          || 'dsh-windows-2025-16core' }}
+          || 'windows-2025' }}
     name: windows node 24 / native tests
     timeout-minutes: 60
     steps:
@@ -249,6 +255,8 @@ jobs:
     runs-on: >-
       ${{ vars.AGENTRANS_CI_FAILOVER_LINUX == 'blacksmith' && 'blacksmith-4vcpu-ubuntu-2404'
           || vars.AGENTRANS_CI_FAILOVER_LINUX == 'selfhosted'
+          && github.event.pull_request.head.repo.full_name == github.repository
+          && github.event.pull_request.head.repo.fork == false
           && github.event.pull_request.user.login != 'dependabot[bot]'
           && fromJSON('["self-hosted", "linux", "x64", "vm-backup"]')
           || 'ubuntu-latest' }}
