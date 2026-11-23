@@ -8,6 +8,7 @@
   - button "More conversation views"
 - text: Show the Markdown image policy. {{clock}}
 - button "Copy"
+- button "Branch into a new conversation"
 - status: Completed
 - button "Completed in {{duration}}" [disabled]
 - heading "Markdown images" [level=2]
@@ -38,14 +39,19 @@
 - paragraph: Image preview unavailable · Missing image
 - paragraph: Image preview unavailable · {{cwd}}/corrupt.png
 - paragraph: REMOTE_IMAGE_DONE
+- button "Explore a sentence"
+- button "Branch into a new conversation"
+- text: {{clock}}
 - button "Copy"
 - button "Good response"
 - button "Bad response"
 - button "Branch into a new conversation"
 - text: {{clock}}
+- button "Import CSV comparison"
 - textbox "Message or run a task, / commands, @ files or sessions"
 - button "Add files or run commands"
 - 'button "Access mode, current: Workspace Write"': Workspace Write
+- button "Insert formula"
 - button "Select model, current DeepSeek-V4-Flash": DeepSeek-V4-Flash
 - button "Send message" [disabled]
 - button "1 turns 1 steps"

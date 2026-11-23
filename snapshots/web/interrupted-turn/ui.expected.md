@@ -8,19 +8,24 @@
   - button "More conversation views"
 - text: "Use the read tool twice in one assistant message: read a.txt and b.txt. Then reply with the single word DONE and stop. {{clock}}"
 - button "Copy"
+- button "Branch into a new conversation"
 - status: Stopped
 - button "Stopped" [disabled] [expanded]
 - button "Read files"
 - paragraph: DONE
+- button "Branch into a new conversation"
+- text: {{clock}}
 - status: Task stoppedThe DSH process exited before this turn finished (for example, it was killed, crashed, or timed out while shutting down), so the turn was closed when DSH restarted. Unfinished tool calls have unknown outcomes.
 - button "Copy"
 - button "Good response"
 - button "Bad response"
 - button "Branch into a new conversation" [disabled]
 - text: Available only on the last message of a completed turn {{clock}}
+- button "Import CSV comparison"
 - textbox "Message or run a task, / commands, @ files or sessions"
 - button "Add files or run commands"
 - 'button "Access mode, current: Workspace Write"': Workspace Write
+- button "Insert formula"
 - button "Select model, current DeepSeek-V4-Flash": DeepSeek-V4-Flash
 - button "Send message" [disabled]
 - button "1 turns 2 steps · {{throughput}} tok/s": 1 turns 2 steps{{throughput}} tok/s

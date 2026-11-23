@@ -17,6 +17,7 @@
 - text: Deep diving for {{duration}} ···
 - region "To-dos":
   - button "To-dos 1 completed · 1 in progress"
+- button "Import CSV comparison"
 - text: Ongoing Goal Keep the composer context panels aligned
 - button "Pause goal"
 - button "Edit goal"
@@ -25,5 +26,6 @@
 - textbox "Cmd/Ctrl+Enter steers all queued messages"
 - button "Add files or run commands"
 - 'button "Access mode, current: Workspace Write"': Workspace Write
+- button "Insert formula"
 - button "Select model, current DeepSeek-V4-Flash": DeepSeek-V4-Flash
 - button "Stop generating"
