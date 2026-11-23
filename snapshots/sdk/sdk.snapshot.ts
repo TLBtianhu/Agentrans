@@ -13,7 +13,7 @@ import { existsSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
 import { cp, mkdir, mkdtemp, readFile, readdir, realpath, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { basename, delimiter, join } from 'node:path'
+import { basename, delimiter, isAbsolute, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it, onTestFinished } from 'vitest'
 import { execa } from 'execa'
@@ -1348,7 +1348,10 @@ describe('TypeScript SDK snapshots over the jsonrpc runtime', () => {
       const source = await readFile(join(corpusRoot, 'sdk/session-title-after-turn/session.v4.jsonl'), 'utf8')
       expect(() => parseSessionLog(source.replaceAll('{{cwd}}', cwd))).toThrow('session snapshot line 1 contains invalid JSON')
       const materialized = materializeSessionFixtureCwd(source, cwd)
-      expect(deriveReplayScript(parseSessionLog(materialized))).toEqual(deriveReplayScript(parseSessionLog(source)))
+      expect(records(materialized)[0]).toMatchObject({ cwd })
+      // The persisted Session validator expects an absolute path on the host OS.
+      const local = isAbsolute(cwd) ? materialized : materializeSessionFixtureCwd(source, join(tmpdir(), 'sdk-replay'))
+      expect(deriveReplayScript(parseSessionLog(local))).toEqual(deriveReplayScript(parseSessionLog(source)))
     },
   )
 
