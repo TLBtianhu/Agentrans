@@ -379,8 +379,11 @@ describe('web e2e: seeded history renders through cold resume', () => {
     await process.waitFor({ state: 'visible', timeout: 10_000 })
     expect(await process.getAttribute('aria-expanded')).toBe('false')
     const processBottom = await process.evaluate(element => element.getBoundingClientRect().bottom)
-    const answerTop = await page.getByText('DONE', { exact: true }).evaluate(element =>
-      element.getBoundingClientRect().top)
+    const answerTop = await page.getByText('DONE', { exact: true }).evaluate((element) => {
+      const seat = element.closest<HTMLElement>('[data-chat-flow-kind="assistant-step"]')
+      if (seat === null) throw new Error('recorded final answer has no Chat seat')
+      return seat.getBoundingClientRect().top
+    })
     // Hidden process rows separate the folded control from the answer, so it keeps the 12px reply gap.
     expect(answerTop).toBe(processBottom + 12)
     expect(await page.getByText('Context compacted', { exact: true }).count()).toBe(0)
@@ -534,7 +537,9 @@ describe('web e2e: seeded history renders through cold resume', () => {
       await expect.poll(() => column.locator('[data-textpreview-line="1"]').textContent()).toBe('alpha\n')
       await column.getByRole('button', { name: 'Show file location', exact: true }).waitFor({ timeout: 5_000 })
       await expect.poll(() => column.locator('[data-open-path-open]').isEnabled()).toBe(true)
-      const preview = await captureStableAria(page, '[data-textpreview-state="text"]', scaffold.workspaceCwd)
+      const preview = await captureStableAria(page, '[data-textpreview-state="text"]', scaffold.workspaceCwd, {
+        replacements: [[absolutePath, '{{cwd}}/a.txt']],
+      })
       await compareOrRefreshGolden(FILE_PREVIEW_EXPECTED, preview, MODE)
     } finally {
       // Later cases share this page and require the sidebar closed even after a failed assertion.

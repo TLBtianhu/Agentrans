@@ -8,22 +8,30 @@
   - button "More conversation views"
 - text: "plan Plan mode on. Use /plan off to leave. Plan a small change: add a --greeting flag to a CLI. Do not read or write any files. Call exit_plan_mode with a short plan of at most five bullet points. Once the plan is approved, reply with the single word DONE and stop. {{clock}}"
 - button "Copy"
+- button "Branch into a new conversation"
 - status: Completed
 - button "Completed in {{duration}}"
 - paragraph:
   - text: Since the user has explicitly asked me not to read or write any files and to go straight to planning, I'll proceed with
   - code: exit_plan_mode
   - text: .
+- button "Branch into a new conversation"
+- text: {{clock}}
 - paragraph: DONE
+- button "Explore a sentence"
+- button "Branch into a new conversation"
+- text: {{clock}}
 - 'button "Open plan: Add `--greeting` flag to CLI"': "Add `--greeting` flag to CLI Plan · Markdown Open"
 - button "Copy"
 - button "Good response"
 - button "Bad response"
 - button "Branch into a new conversation"
 - text: {{clock}}
+- button "Import CSV comparison"
 - textbox "Message or run a task, / commands, @ files or sessions"
 - button "Add files or run commands"
 - 'button "Access mode, current: Workspace Write"': Workspace Write
+- button "Insert formula"
 - button "Select model, current DeepSeek-V4-Flash": DeepSeek-V4-Flash
 - button "Send message" [disabled]
 - button "1 turns 2 steps · {{throughput}} tok/s": 1 turns 2 steps{{throughput}} tok/s
