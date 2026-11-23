@@ -189,12 +189,12 @@ export function initializeProfileFromDefault(
  * @param userLayer - `false` skips parsing `cordis.patch.yml` (the default dump).
  * @param fromDefaultProfile - shipped template that replaces the profile before loading it.
  * @returns the loaded profile.
- * @throws when explicit initialization names an unknown template or a shipped target.
+ * @throws when a custom profile is missing or explicit initialization names an unknown template or a shipped target.
  */
 export function prepareProfile(name: string, userLayer = true, fromDefaultProfile?: string): Profile {
   if (fromDefaultProfile !== undefined) initializeProfileFromDefault(name, fromDefaultProfile)
-  const profile = loadProfile(NAME, name, INSTALL_ANCHOR, undefined, { userLayer })
-  reportSkippedBundles(NAME, profile)
+  const profile = loadProfile('agentrans', name, INSTALL_ANCHOR, undefined, { userLayer })
+  reportSkippedBundles('agentrans', profile)
   writeFileSync(join(profile.dir, PROFILE_ROOT_FILENAME), PROFILE_ROOT_CONFIG)
   return profile
 }

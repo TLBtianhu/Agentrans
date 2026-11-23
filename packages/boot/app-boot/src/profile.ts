@@ -724,6 +724,7 @@ export function loadProfileDirectory(
  * bundles-only consumer (`--dump-default-config`, a recovery diagnostic)
  * cannot fail on a broken user layer.
  * @returns the loaded profile (empty `patches` when the user layer is skipped).
+ * @throws when a custom profile is missing, with the Agentrans command that can create it.
  */
 export function loadProfile(
   binName: string, name: string, installAnchor: string, home: string = resolveDshHome(),
@@ -734,7 +735,7 @@ export function loadProfile(
     const template = PROFILE_TEMPLATES[name]
     if (template === undefined) {
       throw new Error(
-        `${binName}: profile ${JSON.stringify(name)} does not exist; create it with 'dsh plugin --profile ${name} add <package>'`,
+        `${binName}: profile ${JSON.stringify(name)} does not exist; create it with 'agentrans plugin --profile ${name} add <package>'`,
       )
     }
     initProfile(dir, template.bundles)

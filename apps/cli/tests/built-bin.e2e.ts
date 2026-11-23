@@ -665,7 +665,7 @@ describe.skipIf(!existsSync(dshBin))('dsh BUILT bin (node lib/bin.js, no tsx)', 
     try {
       const result = await runBuiltBin(['nope'], { AGENTRANS_HOME: home })
       expect(result.code).toBe(1)
-      expect(result.stderr).toContain('profile "nope" does not exist')
+      expect(result.stderr).toContain('agentrans: profile "nope" does not exist')
       expect(result.stderr).toContain('agentrans plugin --profile nope add')
     } finally {
       rmSync(home, { recursive: true, force: true })

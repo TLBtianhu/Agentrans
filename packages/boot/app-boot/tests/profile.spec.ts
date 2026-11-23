@@ -358,7 +358,7 @@ describe('loadProfile', () => {
     const anchor = stageInstallation({})
     const home = tmp()
     expect(() => loadProfile('t', 'custom', anchor, home))
-      .toThrow('profile "custom" does not exist')
+      .toThrow('t: profile "custom" does not exist; create it with \'agentrans plugin --profile custom add <package>\'')
     loadProfile('t', 'web', anchor, home)
     expect(readProfileManifest('t', resolveProfileDir('web', home)).agentrans?.profile?.bundles)
       .toEqual([...PROFILE_TEMPLATES.web?.bundles ?? []])
