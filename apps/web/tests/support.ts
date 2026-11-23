@@ -359,20 +359,18 @@ export function conversationContextKey(kind: string, id: string): string {
   return `${kind.length}:${kind}${id}`
 }
 
-/** Open Settings through the sidebar account menu.
+/** Open Settings through its sidebar button.
  * @param page - browser page with the mounted sidebar.
  * @param locale - current UI language.
  */
 export async function openSettings(page: Page, locale: 'en' | 'zh' | 'ja'): Promise<void> {
-  const labels = { en: ['Account menu', 'Settings'], zh: ['账号菜单', '设置'], ja: ['アカウントメニュー', '設定'] } as const
   const trigger = page.getByRole('button', {
-    name: labels[locale][0], exact: true, includeHidden: true,
-  })
+    name: { en: 'Settings', zh: '设置', ja: '設定' }[locale], exact: true, includeHidden: true,
+  }).and(page.locator('[aria-haspopup="dialog"]'))
   await trigger.waitFor({ state: 'attached' })
   await revealNavigationDrawer(page, locale)
   if (!await trigger.isVisible()) {
     await page.getByRole('button', { name: { en: 'Open sidebar', zh: '打开侧边栏', ja: 'サイドバーを開く' }[locale], exact: true }).click()
   }
   await trigger.click()
-  await page.getByRole('menuitem', { name: labels[locale][1], exact: true }).click()
 }
