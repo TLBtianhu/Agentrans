@@ -9,9 +9,11 @@
   - button "More conversation views"
 - text: Reply with a one-sentence description of event sourcing, then stop. {{clock}}
 - button "Copy"
+- button "Branch into a new conversation"
 - paragraph: partial
 - status: Deep diving
 - text: Deep diving for {{duration}} ···
+- button "Import CSV comparison"
 - button "2 queued messages" [disabled] [expanded]
 - list:
   - listitem:
@@ -26,5 +28,6 @@
 - textbox "Cmd/Ctrl+Enter steers all queued messages"
 - button "Add files or run commands"
 - 'button "Access mode, current: Workspace Write"': Workspace Write
+- button "Insert formula"
 - button "Select model, current DeepSeek-V4-Flash": DeepSeek-V4-Flash
 - button "Stop generating"
