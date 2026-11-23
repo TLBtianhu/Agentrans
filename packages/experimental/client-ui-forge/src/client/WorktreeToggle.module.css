@@ -58,7 +58,7 @@
 
 .base:focus-visible,
 .current:focus-visible,
-.toggle:has(.checkbox:focus-visible) {
+html:not([data-input-modality='pointer']) .toggle:has(.checkbox:focus-visible) {
   outline: var(--dsw-focus-ring-width) solid var(--dsw-focus-ring-color, var(--dsw-alias-state-business-primary));
   outline-offset: 2px;
 }

@@ -1,6 +1,6 @@
 /** Real assembled UI plus source-compiled browser regressions for focus-ring paint. */
 import { join } from 'node:path'
-import { build } from 'vite'
+import { build, normalizePath } from 'vite'
 import { chromium, type Locator, type Page } from 'playwright'
 import { beforeAll, describe, expect, it, onTestFinished } from 'vitest'
 import { launchWebScaffold, watchConsole } from './scaffold.ts'
@@ -198,8 +198,8 @@ it.each(['light', 'dark'] as const)('assembled app (%s): the sidebar toggle keep
  * state ownership belong to the fixture; no test writes the modality attribute.
  */
 async function compileFixture(): Promise<{ script: string; css: string }> {
-  const source = (relative: string): string => JSON.stringify(join(REPO_ROOT, 'packages/client', relative).replaceAll('\\', '/'))
-  const entry = join(REPO_ROOT, 'apps/web/focus-rings-fixture.tsx').replaceAll('\\', '/')
+  const source = (relative: string, group = 'client'): string => JSON.stringify(normalizePath(join(REPO_ROOT, 'packages', group, relative)))
+  const entry = normalizePath(join(REPO_ROOT, 'apps/web/focus-rings-fixture.tsx'))
   const code = `
     import React, { useState } from 'react'
     import { createRoot } from 'react-dom/client'
@@ -216,14 +216,14 @@ async function compileFixture(): Promise<{ script: string; css: string }> {
     import cardCss from ${source('ui-primitives/src/HoverCard.module.css')}
     import pillCss from ${source('ui-primitives/src/Pill.module.css')}
     import trajectoryCss from ${source('ui-trajectory/src/client/TrajectoryTable.module.css')}
-    import onboardingCss from ${source('ui-settings-account/src/client/DesktopOnboarding.module.css')}
+    import worktreeCss from ${source('client-ui-forge/src/client/WorktreeToggle.module.css', 'experimental')}
     function Fixture() {
       const [checked, setChecked] = useState(false)
       const [open, setOpen] = useState(false)
       return <main style={{ padding: 40, display: 'grid', gap: 24, width: 420 }}>
-        <div data-onboarding-card className={onboardingCss.card}>
-          <label><input type="checkbox" aria-label="Onboarding purpose" />Purpose</label>
-        </div>
+        <label data-worktree-toggle className={worktreeCss.toggle}>
+          <input type="checkbox" className={worktreeCss.checkbox} />New worktree
+        </label>
         <Switch label="Toggle" checked={checked} onChange={setChecked} />
         <button id="default-outline">Default browser outline</button>
         <button id="outline-none" aria-label="Outline disabled" style={{ outline: 'none' }}>No outline</button>
@@ -255,7 +255,7 @@ async function compileFixture(): Promise<{ script: string; css: string }> {
     logLevel: 'error',
     plugins: [{
       name: 'focus-rings-fixture',
-      resolveId(id) { if (id === entry) return entry },
+      resolveId(id) { if (normalizePath(id) === entry) return entry },
       load(id) { if (id === entry) return code },
     }],
     esbuild: { jsx: 'automatic', jsxDev: false },
@@ -338,18 +338,18 @@ describe('source-compiled supplementary focus paint', () => {
     return page
   }
 
-  it.each(['light', 'dark'])('keeps ancestor card rings silent after pointer input in %s mode', async (theme) => {
+  it.each(['light', 'dark'])('paints the worktree checkbox wrapper outline only on keyboard focus in %s mode', async (theme) => {
     const page = await openFixture()
     await page.evaluate(dark => document.body.toggleAttribute('data-ds-dark-theme', dark), theme === 'dark')
-    const checkbox = page.getByRole('checkbox', { name: 'Onboarding purpose' })
-    const card = page.locator('[data-onboarding-card]')
+    const checkbox = page.getByRole('checkbox', { name: 'New worktree' })
+    const wrapper = page.locator('[data-worktree-toggle]')
     await checkbox.click()
     await page.keyboard.press('Shift')
     expect((await paint(checkbox)).active).toBe(true)
-    expect((await paint(card)).outlineStyle).toBe('none')
+    expect((await paint(wrapper)).outlineStyle).toBe('none')
     await page.keyboard.press('Tab')
     await page.keyboard.press('Shift+Tab')
-    const ring = await paint(card)
+    const ring = await paint(wrapper)
     expect((await paint(checkbox)).active).toBe(true)
     expect(ring.outlineStyle).toBe('solid')
     expect(ring.outline).toBe(ring.focusColor)
