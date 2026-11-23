@@ -349,7 +349,6 @@ async function bootPreview(site: Site, manifest: ImageManifest, browser: Browser
     const continueButton = page.getByRole('button', { name: 'Continue' })
     await continueButton.waitFor({ timeout: HERO_TIMEOUT_MS })
     await continueButton.click()
-    await page.getByRole('button', { name: 'Add API Key', exact: true }).click()
     const configureLater = page.getByRole('button', { name: 'Configure later' })
     await configureLater.waitFor({ timeout: 30_000 })
     await configureLater.click()
