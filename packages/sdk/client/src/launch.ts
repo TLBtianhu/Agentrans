@@ -47,10 +47,10 @@ function manifest(url: string): PackageManifest {
 }
 
 /**
- * Resolve and version-check a dsh executable from package manifests.
- * @param dshManifestUrl - resolved URL of the dsh package manifest.
+ * Resolve and version-check the `agentrans` executable from package manifests.
+ * @param dshManifestUrl - resolved URL of the CLI package manifest.
  * @param clientManifestUrl - resolved URL of the SDK client manifest.
- * @returns the absolute dsh executable path.
+ * @returns the absolute CLI executable path.
  */
 export function resolveDshBinFromManifests(dshManifestUrl: string, clientManifestUrl: string): string {
   const dshManifest = manifest(dshManifestUrl)
@@ -59,14 +59,14 @@ export function resolveDshBinFromManifests(dshManifestUrl: string, clientManifes
     throw new Error(`dsh SDK client ${String(clientManifest.version)} requires the same dsh version, got ${String(dshManifest.version)}`)
   }
   const bin = typeof dshManifest.bin === 'object' && dshManifest.bin !== null
-    ? (dshManifest.bin as Record<string, unknown>).dsh
+    ? (dshManifest.bin as Record<string, unknown>).agentrans
     : dshManifest.bin
-  if (typeof bin !== 'string' || bin === '') throw new Error('@agentrans/cli declares no dsh executable')
+  if (typeof bin !== 'string' || bin === '') throw new Error('@agentrans/cli declares no agentrans executable')
   return resolve(dirname(fileURLToPath(dshManifestUrl)), bin)
 }
 
 /**
- * Resolve and version-check the built dsh executable installed with this SDK.
+ * Resolve and version-check the built `agentrans` executable installed with this SDK.
  * @returns the absolute built executable path, whether or not it exists in a source checkout.
  */
 export function installedDshBin(): string {

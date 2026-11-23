@@ -110,7 +110,7 @@ describe('SDK dsh launch resolution', () => {
   })
 
   it('launches built artifacts without source files, source patches, or a TypeScript loader', () => {
-    const pair = manifestPair({ version: '1.0.0', bin: 'lib/bin.js' }, { version: '1.0.0' })
+    const pair = manifestPair({ version: '1.0.0', bin: { agentrans: 'lib/bin.js' } }, { version: '1.0.0' })
     const bin = join(pair.root, 'lib/bin.js')
     mkdirSync(join(pair.root, 'lib'))
     writeFileSync(bin, '')
@@ -177,12 +177,12 @@ describe('SDK dsh launch resolution', () => {
     expect(resolveDshBinFromManifests(pair.dshUrl, pair.clientUrl)).toBe(join(pair.root, 'bin.js'))
   })
 
-  it.each([null, {}, ''])(
-    'rejects a manifest without a usable dsh executable (%j)',
+  it.each([null, {}, '', { dsh: './bin.js' }])(
+    'rejects a manifest without a usable agentrans executable (%j)',
     (bin) => {
       const pair = manifestPair({ version: '1.0.0', bin }, { version: '1.0.0' })
       expect(() => resolveDshBinFromManifests(pair.dshUrl, pair.clientUrl))
-        .toThrow('declares no dsh executable')
+        .toThrow('declares no agentrans executable')
     },
   )
 })

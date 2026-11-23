@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-`@agentrans/sdk-client` lets TypeScript programs drive a complete DeepSeek Harness runtime over stdio JSON-RPC. Use `run()` for ordinary text, supported slash commands, and image content blocks, and `onNotification` to observe its notifications. `HarnessClient` provides direct protocol access. Callers may provide `dshBin`; otherwise the client resolves the same-version `@agentrans/cli` executable. The client owns the subprocess, reports typed failures, and reaps it on `close()` or `await using`.
+`@agentrans/sdk-client` lets TypeScript programs drive a complete DeepSeek Harness runtime over stdio JSON-RPC. Use `run()` for ordinary text, supported slash commands, and image content blocks, and `onNotification` to observe its notifications. `HarnessClient` provides direct protocol access. Callers may provide `dshBin`; otherwise the client resolves the `agentrans` executable from the same-version `@agentrans/cli` package. The client owns the subprocess, reports typed failures, and reaps it on `close()` or `await using`.
 
 ## Table of Contents
 
