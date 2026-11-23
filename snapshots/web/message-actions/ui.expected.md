@@ -13,10 +13,13 @@
 - text: "Use the read tool twice in one assistant message: read a.txt and b.txt. Then reply with the single word DONE and stop. {{clock}}"
 - button "Copy"
 - tooltip "Copy"
+- button "Branch into a new conversation"
 - status: Stopped
 - button "Stopped" [disabled] [expanded]
 - button "Analysis completed"
 - paragraph: I will read both files before answering.
+- button "Branch into a new conversation"
+- text: {{clock}}
 - button "Read files"
 - button "Copy"
 - button "Good response"
@@ -24,26 +27,36 @@
 - button "Branch into a new conversation" [disabled]
 - text: Available only on the last message of a completed turn {{clock}} Now give the final answer. {{clock}}
 - button "Copy"
+- button "Branch into a new conversation"
 - status: Completed
 - button "Completed in {{duration}}" [disabled]
 - paragraph: DONE
+- button "Explore a sentence"
+- button "Branch into a new conversation"
+- text: {{clock}}
 - button "Copy"
 - button "Good response"
 - button "Bad response"
 - button "Branch into a new conversation"
 - text: {{clock}} Keep this later input in the original conversation. {{clock}}
 - button "Copy"
+- button "Branch into a new conversation"
 - status: Completed
 - button "Completed in {{duration}}" [disabled]
 - paragraph: ORIGINAL ONLY
+- button "Explore a sentence"
+- button "Branch into a new conversation"
+- text: {{clock}}
 - button "Copy"
 - button "Good response"
 - button "Bad response"
 - button "Branch into a new conversation"
 - text: {{clock}}
+- button "Import CSV comparison"
 - textbox "Message or run a task, / commands, @ files or sessions"
 - button "Add files or run commands"
 - 'button "Access mode, current: Workspace Write"': Workspace Write
+- button "Insert formula"
 - button "Select model, current DeepSeek-V4-Flash": DeepSeek-V4-Flash
 - button "Send message" [disabled]
 - button "3 turns 4 steps · {{throughput}} tok/s": 3 turns 4 steps{{throughput}} tok/s

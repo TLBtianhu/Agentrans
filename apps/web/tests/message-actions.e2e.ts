@@ -247,12 +247,12 @@ describe('web e2e: message IconActions and clocks on settled history', () => {
     ).toBe(0)
 
     // Focus-reveal the footers (hover:hover keeps them opacity-hidden until
-    // hover/focus-within). Branch renders only under assistant answers — user
-    // bubbles carry none — and only a completed transcript tail enables it.
+    // hover/focus-within). Check the turn-tail action independently of the
+    // branch actions that cut at individual message boundaries.
     const copyButtons = page.getByRole('button', { name: 'Copy' })
     await expect.poll(() => copyButtons.count(), { timeout: 10_000 }).toBeGreaterThanOrEqual(4)
     await copyButtons.first().focus()
-    const branchButtons = page.getByRole('button', { name: 'Branch into a new conversation' })
+    const branchButtons = page.locator('[data-turn-tail]').getByRole('button', { name: 'Branch into a new conversation' })
     await expect.poll(() => branchButtons.count(), { timeout: 5_000 }).toBe(3)
     await expect.poll(
       () => branchButtons.evaluateAll(buttons => buttons.map(button => button.getAttribute('aria-disabled'))),
@@ -372,14 +372,15 @@ describe('web e2e: message IconActions and clocks on settled history', () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-message-fork'))
     // The second answer is followed by another completed user turn in the source.
     const existing = new Set(scaffold.ctx.agents.list().map(agent => agent.id))
-    await page.getByRole('button', { name: 'Branch into a new conversation' }).nth(1).click()
+    await page.locator('[data-turn-tail]').getByRole('button', { name: 'Branch into a new conversation' }).nth(1).click()
     await expect.poll(
       () => scaffold.ctx.agents.list().find(agent => !existing.has(agent.id)),
       { timeout: 15_000 },
     ).toBeDefined()
     const child = scaffold.ctx.agents.list().find(agent =>
       !existing.has(agent.id))!
-    expect(child.session.header.parentSession).toBeUndefined()
+    expect(child.session.header.parentSession).toBe(SEED_ID)
+    expect(child.session.header.origin).toBeUndefined()
     expect(child.inbox.nextTurn).toEqual([])
     expect(child.session.snapshotEvents().some(event => event.type === 'agent/inbox/spliced'
       && event.data.inserted.some(message => message.content.some(part =>
@@ -413,7 +414,9 @@ describe('web e2e: message IconActions and clocks on settled history', () => {
       () => scaffold.ctx.agents.list().filter(agent => !beforeNested.has(agent.id)).length,
       { timeout: 15_000 },
     ).toBe(1)
-    expect(scaffold.ctx.agents.list().find(agent => !beforeNested.has(agent.id))!.session.header.parentSession).toBeUndefined()
+    const nested = scaffold.ctx.agents.list().find(agent => !beforeNested.has(agent.id))!
+    expect(nested.session.header.parentSession).toBe(child.id)
+    expect(nested.session.header.origin).toBeUndefined()
     await expect.poll(
       () => page.locator('[role="treeitem"]').count(),
       { timeout: 10_000 },
@@ -452,7 +455,9 @@ describe('web e2e: message IconActions and clocks on settled history', () => {
     const existing = new Set(scaffold.ctx.agents.list().map(agent => agent.id))
     await page.getByRole('menuitem', { name: 'Fork session', exact: true }).click()
     await expect.poll(() => scaffold.ctx.agents.list().some(agent => !existing.has(agent.id))).toBe(true)
-    expect(scaffold.ctx.agents.list().find(agent => !existing.has(agent.id))!.session.header.parentSession).toBeUndefined()
+    const child = scaffold.ctx.agents.list().find(agent => !existing.has(agent.id))!
+    expect(child.session.header.parentSession).toBe(id)
+    expect(child.session.header.origin).toBeUndefined()
     expect(scaffold.ctx.agents.get(id)).toBeUndefined()
     expect(await row.getAttribute('aria-selected')).not.toBe('true')
   })

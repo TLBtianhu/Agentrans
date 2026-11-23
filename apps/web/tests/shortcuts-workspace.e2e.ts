@@ -97,13 +97,13 @@ describe.skipIf(mode === 'record')('web e2e: workspace shortcuts', () => {
     await page.keyboard.press('Meta+Shift+Comma')
     await expect.poll(() => scaffold.ctx.agents.list().find(agent => !existing.has(agent.id))).toBeDefined()
     const child = scaffold.ctx.agents.list().find(agent => !existing.has(agent.id))!
-    expect(child.session.header.parentSession).toBeUndefined()
+    expect(child.session.header.parentSession).toBe(sourceId)
+    expect(child.session.header.origin).toBeUndefined()
     const childId = child.session.header.id
     await expect.poll(async () => (await readPersistedEvents(scaffold, childId)).some(event => event.type === 'session/title' && event.data.title === 'T4 source (1)')).toBe(true)
     const copied = await readPersistedEvents(scaffold, childId)
     expect(copied.slice(0, lastEnd + 1)).toEqual(original.slice(0, lastEnd + 1))
     const sourceRow = page.getByRole('treeitem').filter({ has: page.getByText('T4 source', { exact: true }) })
-    expect(child.session.header.parentSession).toBeUndefined()
     const childRow = page.getByRole('treeitem').filter({ has: page.getByText('T4 source (1)', { exact: true }) })
     await childRow.waitFor()
     expect(await sourceRow.getAttribute('aria-selected')).toBe('true')
@@ -259,7 +259,8 @@ it.skipIf(mode === 'record')('explains a first-turn fork refusal and retries fro
     await page.keyboard.press('Meta+Shift+Comma')
     await expect.poll(() => scaffold.ctx.agents.list().find(agent => !existing.has(agent.id))).toBeDefined()
     const child = scaffold.ctx.agents.list().find(agent => !existing.has(agent.id))!
-    expect(child.session.header.parentSession).toBeUndefined()
+    expect(child.session.header.parentSession).toBe(source.id)
+    expect(child.session.header.origin).toBeUndefined()
     const childRow = page.getByRole('treeitem').filter({ has: page.getByText('First turn (1)', { exact: true }) })
     await childRow.waitFor()
     expect(await childRow.getAttribute('aria-selected')).toBe('false')

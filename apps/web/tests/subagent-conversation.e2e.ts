@@ -618,8 +618,13 @@ describe('web e2e: persisted subagent conversation and human continuation', () =
     const forkResponse = page.waitForResponse(response =>
       new URL(response.url()).pathname === '/api/session/fork')
     await page.getByRole('button', { name: 'Branch into a new conversation' }).last().click()
-    const forkReceipt = await (await forkResponse).json() as { result: { ok: boolean } }
-    expect(forkReceipt.result).toMatchObject({ ok: true })
+    const forkReceipt = await (await forkResponse).json() as {
+      result: { ok: true; value: { sessionId: string } } | { ok: false }
+    }
+    if (!forkReceipt.result.ok) throw new Error('subagent fork failed')
+    const fork = scaffold.ctx.sessions.get(sessionId(forkReceipt.result.value.sessionId))
+    expect(fork?.header.parentSession).toBe(childId)
+    expect(fork?.header.origin).toBeUndefined()
     await expect.poll(
       () => page.getByRole('tree', { name: 'Sessions' }).getByRole('treeitem').count(),
       { timeout: 15_000 },
@@ -627,9 +632,10 @@ describe('web e2e: persisted subagent conversation and human continuation', () =
     expect(await page.getByRole('tree', { name: 'Sessions' })
       .getByRole('treeitem', { name: 'Ungrouped', exact: true }).count()).toBe(0)
     const hierarchy = page.getByRole('navigation', { name: 'Session hierarchy' })
-    // The current crumb is plain text; the fork sits at the root, so no ancestor crumb buttons remain.
+    // The workspace row is top-level while the breadcrumb exposes its branch history.
     await expect.poll(() => hierarchy.getByText(`${CHILD_TITLE} (1)`, { exact: true }).count()).toBe(1)
-    expect(await hierarchy.getByRole('button').count()).toBe(0)
+    await expect.poll(() => hierarchy.getByRole('button').allTextContents())
+      .toEqual([expect.stringContaining('Ask a research subagent to'), LABEL])
     await compareOrRefreshGolden(
       FORK_EXPECTED,
       await captureStableAria(page, '[role="tree"][aria-label="Sessions"]', scaffold.workspaceCwd),
