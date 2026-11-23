@@ -65,6 +65,7 @@ import {
 } from '@agentrans/session-snapshot'
 import {
   DeepSeekHarness,
+  validatedSessionEvent,
   type HarnessNotification,
   type NotificationSubscription,
   type RunResult,
@@ -728,7 +729,6 @@ const legacySdkCompositions = new Set([
   'dynamic-tool-updates',
   'image',
   'ptc',
-  'sdk-account-provider-signout',
   'sdk-default',
   'sdk-dsh-sdk-diagnostic',
   'sdk-dsh-sdk-dynamic-route',
@@ -1397,6 +1397,33 @@ describe('TypeScript SDK snapshots over the jsonrpc runtime', () => {
   })
 
   for (const scenario of sdkScenarios) {
+    if (scenario.name === 'account-provider-signout') {
+      it('projects historical account-provider-signout Session and SDK notifications', async () => {
+        const history = await Promise.all([3, 4].map(async (version) => {
+          const filename = `session.v${version}.jsonl`
+          const source = await readFile(join(scenario.dir, filename), 'utf8')
+          assertSessionFixtureVersion(filename, source)
+          const events = parseSessionLog(source)
+          expect(() => deriveReplayScript(events)).toThrow('ended without a finish chunk')
+          return events
+        }))
+        const notifications = records(await readFile(join(scenario.dir, 'notifications.expected.jsonl'), 'utf8'))
+        const wireEvents = notifications.filter(record => record.method === 'session.event')
+          .map(record => validatedSessionEvent((record.params as JsonObject).event))
+        for (const events of [...history, wireEvents]) {
+          expect(events.findLast(event => event.type === 'assistant/message')?.data).toMatchObject({
+            interrupted: true,
+            message: { content: [{ type: 'text', text: 'Before sign-out' }], source: { provider: 'deepseek-account' } },
+          })
+          expect(events.at(-1)).toMatchObject({
+            type: 'turn/end', data: { turn: 1, reason: { kind: 'aborted', reason: { kind: 'hook', reason: 'deepseek-account/signed-out' } } },
+          })
+        }
+        expect(JSON.parse(await readFile(join(scenario.dir, 'result.expected.json'), 'utf8')))
+          .toEqual({ sessionId: '{{sessionId}}', finalResponse: 'Before sign-out' })
+      })
+      continue
+    }
     const skipped = scenario.manifest.platform === 'posix' && process.platform === 'win32'
       || scenario.manifest.platform === 'pwsh' && !hasPwsh
       || recording && (scenario.manifest.recording === 'authored' || scenario.manifest.sessionFormat !== undefined)
