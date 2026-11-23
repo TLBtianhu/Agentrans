@@ -185,10 +185,11 @@ describe('web e2e: Goal keeps one assistant action row per completed turn', () =
     expect(await page.locator(
       '[data-chat-flow-kind="system-prompt"]',
     ).count()).toBe(0)
-    const branchButtons = page.getByRole('button', { name: 'Branch into a new conversation' })
+    const branchButtons = page.locator('[data-turn-tail]').getByRole('button', { name: 'Branch into a new conversation', exact: true })
     await expect.poll(() => branchButtons.count(), { timeout: 15_000 }).toBe(2)
-    expect(await branchButtons.evaluateAll(buttons => buttons.map(button => button.getAttribute('aria-disabled'))))
-      .toEqual([null, null])
+    expect(await branchButtons.evaluateAll(buttons => buttons.map(button => [
+      button.closest('[data-turn-tail]')?.getAttribute('data-turn-tail'), button.getAttribute('aria-disabled'),
+    ]))).toEqual([['1', null], ['2', null]])
     await branchButtons.last().focus()
     const snapshot = await captureStableAria(page, '[class*="centerCol"]', scaffold!.workspaceCwd)
     await compareOrRefreshGolden(UI_EXPECTED, snapshot, MODE)

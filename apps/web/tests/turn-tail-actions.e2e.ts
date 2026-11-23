@@ -169,11 +169,13 @@ describe('web e2e: assistant IconActions wait for the turn to end', () => {
     await page.locator('[data-streaming="true"]')
       .getByText('partial', { exact: true })
       .waitFor({ timeout: 10_000 })
-    // Only the user bubble owns a footer (clock + copy; user bubbles carry no
-    // branch action): the narration is not the answer yet.
-    const copyButtons = page.getByRole('button', { name: 'Copy' })
+    // The user message owns the only Copy action; the running narration has no turn footer.
+    const copyButtons = page.getByRole('button', { name: 'Copy', exact: true })
+    const tail = page.locator('[data-turn-tail]')
+    const tailCopy = tail.getByRole('button', { name: 'Copy', exact: true })
     await expect.poll(() => copyButtons.count(), { timeout: 10_000 }).toBe(1)
-    expect(await page.getByRole('button', { name: 'Branch into a new conversation' }).count()).toBe(0)
+    expect(await tailCopy.count()).toBe(0)
+    expect(await tail.getByRole('button', { name: 'Branch into a new conversation', exact: true }).count()).toBe(0)
     await expectFocusTooltip(page, copyButtons.first())
     const running = await captureStableAria(page, '[class*="centerCol"]', scaffold!.workspaceCwd)
     await compareOrRefreshGolden(RUNNING_EXPECTED, running, MODE)
@@ -186,10 +188,11 @@ describe('web e2e: assistant IconActions wait for the turn to end', () => {
     expect(sessionEvents.filter(e => e.type === 'turn/end').map(e => e.data.reason.kind)).toEqual(['aborted'])
     await page.locator('[data-turn-process]').waitFor({ timeout: 10_000 })
     await expect.poll(() => copyButtons.count(), { timeout: 10_000 }).toBe(2)
+    expect(await tailCopy.count()).toBe(1)
     await expect.poll(() => page.locator('[data-streaming="true"]').count(), { timeout: 10_000 }).toBe(0)
     // The settled golden records no bubble: this focus follows the Stop click,
     // which leaves the pointer owning the last input.
-    await copyButtons.last().focus()
+    await tailCopy.focus()
     const settledAria = await captureStableAria(page, '[class*="centerCol"]', scaffold!.workspaceCwd)
     await compareOrRefreshGolden(SETTLED_EXPECTED, settledAria, MODE)
     expect(tripwire.pageErrors).toEqual([])

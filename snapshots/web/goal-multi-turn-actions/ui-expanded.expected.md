@@ -19,17 +19,29 @@
 - button "Completed in {{duration}}" [expanded]
 - button "Ran commands and updated the plan" [expanded]
 - 'button "Think The user''s goal is: \"做两个turn，每个turn输出随机一个包的文件结构。注意你做完一个turn之后，直接输出内容，停止，我们的系统会帮你再开一个turn，你看着做一个类似的\" — which translates to: \"Do two turns, each turn output the file structure of a random package. Note that after you finish one turn, directly output the content and stop; our system will help you open another turn, and you just do something similar.\""'
+- button "Branch into a new conversation"
+- text: {{clock}}
 - button "Bash List package directories deterministically"
 - button "View goal 做两个turn，每个turn输出随机一个包的文件结构。注意你做完一个turn之后，直接输出内容，停止，我们的系统会帮你再开一个turn，你看着做一个类似的"
 - 'button "Think There''s a `packages` directory. Let me look inside to see what packages are available."'
+- button "Branch into a new conversation"
+- text: {{clock}}
 - button "Bash List packages directory contents"
 - button "Think There are 4 packages:"
+- button "Branch into a new conversation"
+- text: {{clock}}
 - button "Failed Bash Randomly pick one package directory exit code 127"
 - 'button "Think shuf is not available on macOS. I''ll use a different approach for random selection. Let me use $RANDOM in bash or use `sort -R` or Python."'
+- button "Branch into a new conversation"
+- text: {{clock}}
 - button "Bash Randomly select one package with Python"
 - 'button "Think The random pick for turn 1 is `packages/context/session-reference`. Now I''ll output its file structure. Let me get the file tree."'
+- button "Branch into a new conversation"
+- text: {{clock}}
 - button "Bash List all files in session-reference package"
 - 'button "Think Turn 1 is done. Per the objective: \"你做完一个turn之后，直接输出内容，停止\" — after finishing a turn, directly output the content and stop. The system will open another turn."'
+- button "Branch into a new conversation"
+- text: {{clock}}
 - paragraph:
   - strong: Turn 1 / 2
   - text: — 随机选中的包：
@@ -44,6 +56,9 @@
 - button "Copy"
 - code: "session-reference/ ├── README.md # 包说明文档 ├── package.json # 包元数据与依赖声明 ├── src/ │ ├── index.ts # 入口，导出公共 API │ └── uri.ts # 会话引用 URI 相关实现 └── tests/ └── session-reference.spec.ts # 单元测试"
 - paragraph: 这是一个很典型的轻量 TypeScript 包结构：入口 + 实现 + 测试。这一轮到此结束，等系统开启下一个 turn。
+- button "Explore a sentence"
+- button "Branch into a new conversation"
+- text: {{clock}}
 - button "Copy"
 - button "Good response"
 - button "Bad response"
@@ -56,11 +71,17 @@
 - button "Completed in {{duration}}" [expanded]
 - button "Ran commands" [expanded]
 - 'button "Think This is turn 2 of 2. I need to randomly pick another package and output its file structure. In the first turn I picked `packages/context/session-reference`. Let me pick a different one randomly this time."'
+- button "Branch into a new conversation"
+- text: {{clock}}
 - button "Bash Randomly select another package with Python"
 - 'button "Think The random pick returned the same package as turn 1. Since turn 1 already covered `session-reference`, it would be better to pick a different one for variety. Let me re-roll, excluding the already-covered package."'
+- button "Branch into a new conversation"
+- text: {{clock}}
 - button "Bash Re-roll excluding the package from turn 1"
 - button "Bash List all files in token-meter package"
 - 'button "Think This is turn 2 of 2. I''ve output the file structure for `packages/llm/token-meter`. Both turns are done. I should output the content, stop, and then mark the goal as complete since both turns are finished."'
+- button "Branch into a new conversation"
+- text: {{clock}}
 - paragraph:
   - strong: Turn 2 / 2
   - text: — 随机选中的包：
@@ -80,9 +101,13 @@
   - text: ，turn 2：
   - code: token-meter
   - text: ）。这一轮到此结束。
+- button "Branch into a new conversation"
+- text: {{clock}}
 - button "Updated the plan" [expanded]
 - button "View goal 做两个turn，每个turn输出随机一个包的文件结构。注意你做完一个turn之后，直接输出内容，停止，我们的系统会帮你再开一个turn，你看着做一个类似的"
 - paragraph: 两个 turn 均已完成，目标达成，标记 goal 为完成。
+- button "Branch into a new conversation"
+- text: {{clock}}
 - button "Updated the plan" [expanded]
 - button "Update goal 做两个turn，每个turn输出随机一个包的文件结构。注意你做完一个turn之后，直接输出内容，停止，我们的系统会帮你再开一个turn，你看着做一个类似的"
 - paragraph: 两个 turn 都完成了 ✅
@@ -135,15 +160,20 @@
   - text: 、
   - code: skill-filesystem
   - text: ）的结构，或者其他格式的输出（比如带文件大小的树形图），随时告诉我。
+- button "Explore a sentence"
+- button "Branch into a new conversation"
+- text: {{clock}}
 - button "Copy"
 - button "Good response"
 - button "Bad response"
 - button "Branch into a new conversation"
 - text: {{clock}}
 - button "Back to bottom"
+- button "Import CSV comparison"
 - textbox "Message or run a task, / commands, @ files or sessions"
 - button "Add files or run commands"
 - 'button "Access mode, current: Workspace Write"': Workspace Write
+- button "Insert formula"
 - button "Select model, current DeepSeek-V4-Flash": DeepSeek-V4-Flash
 - button "Send message" [disabled]
 - button "2 turns 12 steps · {{throughput}} tok/s": 2 turns 12 steps{{throughput}} tok/s
