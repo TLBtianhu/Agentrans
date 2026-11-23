@@ -29,7 +29,9 @@ describe('web e2e: preset roster guidance', () => {
 
   it('shows the shipped roster with mode help and a read-only view, and no editing actions', async () => {
     onTestFailed(() => saveFailureShot(page, 'preset-roster-section'))
-    await expect.poll(() => page.locator('[data-agent-preset-id]').count()).toBe(4)
+    await expect.poll(() => page.locator('[data-agent-preset-id]')
+      .evaluateAll(cards => cards.map(card => card.getAttribute('data-agent-preset-id'))))
+      .toEqual(['standard', 'ptc', 'minimal', 'cordis', 'chat'])
     const snapshot = await captureStableAria(page, '[role="dialog"]', scaffold.workspaceCwd)
     await compareOrRefreshGolden(join(EXPECTED, 'section.expected.md'), snapshot, mode)
     expect(snapshot).toContain('让 Agent 帮我创建预设模式')

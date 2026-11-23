@@ -288,13 +288,14 @@ describe('web e2e: agent-preset selection', () => {
     await menu.waitFor({ timeout: 10_000 })
 
     const snapshot = await captureStableAria(page, '[role="menu"]', scaffold.workspaceCwd)
+    await page.keyboard.press('Escape')
 
     await compareOrRefreshGolden(MENU_EXPECTED, snapshot, MODE)
     // Every shipped preset, each with the sentence saying what it composes —
     // the id alone never said what a preset does.
     expect(snapshot).toContain('Minimal mode')
     expect(snapshot).toContain('Creator mode')
-    await page.keyboard.press('Escape')
+    expect(snapshot).toContain('Chat')
   })
 
   it('applies the staged pick to the blank session, and the host honors it', async () => {
@@ -375,9 +376,12 @@ describe('web e2e: agent-preset selection', () => {
 
     await expect.poll(() => livePreset(scaffold), { timeout: 15_000 }).toBe('minimal')
     await page.getByRole('button', { name: 'Minimal mode', exact: true }).click()
-    await page.getByRole('menu').waitFor()
-    expect(await page.getByRole('menuitem', { name: /^PTC mode|^Minimal mode/ }).count()).toBe(0)
-    expect(await page.getByRole('menuitem', { name: /^Standard mode|^Creator mode/ }).count()).toBe(2)
+    const menu = page.getByRole('menu')
+    await menu.waitFor()
+    expect(await menu.getByRole('menuitem').count()).toBe(3)
+    expect(await menu.getByRole('menuitem', { name: /^PTC mode|^Minimal mode/ }).count()).toBe(0)
+    expect(await menu.getByRole('menuitem', { name: /^Standard mode|^Creator mode/ }).count()).toBe(2)
+    expect(await menu.getByRole('menuitem', { name: /^Chat\b/ }).count()).toBe(1)
     await page.keyboard.press('Escape')
     await expect.poll(async () => (await scaffold.ctx.agentPresets.remoteExportList()).presets.find(preset => preset.isDefault)?.id).toBe('standard')
 

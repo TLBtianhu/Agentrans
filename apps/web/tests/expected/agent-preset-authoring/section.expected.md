@@ -43,5 +43,11 @@
       - 'button "模式说明: 创造模式"': 模式说明
       - 'button "如何使用: 创造模式"': 如何使用
       - 'button "查看配置: 创造模式"': 查看配置
+    - listitem:
+      - 'button "设为新任务默认: 对话"':
+        - text: 对话 内置
+        - code: chat
+        - text: 在对话中讨论问题、探索交互式回答，并分析上传的 CSV 文件。
+      - 'button "查看配置: 对话"': 查看配置
   - heading "自定义" [level=3]
   - button "让 Agent 帮我创建预设模式"
