@@ -1,4 +1,4 @@
-// Web e2e scenario for the shipped default search composition. A real browser
+// Web e2e scenario for the opt-in Search and Fetch API. A real browser
 // drives `web_search`; the model stream is replayed while the real DeepSeek
 // provider calls a deterministic local Search API endpoint through
 // the real credentials service.
@@ -8,7 +8,7 @@ import type { AddressInfo } from 'node:net'
 import { fileURLToPath } from 'node:url'
 import type { Browser, Page } from 'playwright'
 import { chromium } from 'playwright'
-import { afterAll, beforeAll, describe, expect, it, onTestFailed } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it, onTestFailed, vi } from 'vitest'
 import { credentialRef } from '@agentrans/credentials'
 import type { SessionEvent } from '@agentrans/session'
 import { WEB_SEARCH_MAX_RESULTS } from '@agentrans/tool-web'
@@ -21,11 +21,17 @@ import { connectFreshWorkspace, expandOwningTurnProcess, newEnglishPage, saveFai
 const SNAPSHOT_DIR = fileURLToPath(new URL('../../../snapshots/web/web-search-round', import.meta.url))
 const FIXTURE = fileURLToPath(new URL('../../../snapshots/web/web-search-round/session.v3.jsonl', import.meta.url))
 const UI_EXPECTED = fileURLToPath(new URL('../../../snapshots/web/web-search-round/ui.expected.md', import.meta.url))
+const SEARCH_API_PACKAGE = fileURLToPath(new URL('../../../packages/web/web-deepseek-api/package.json', import.meta.url))
 const MODE = webSnapshotMode()
 const QUERIES = ['DeepSeek Harness snapshot search', 'DeepSeek Harness multi-query search'] as const
 const PROMPT = `Use web_search once with queries ${JSON.stringify(QUERIES)}. Then reply exactly SEARCH_DONE and stop.`
 const SEARCH_CREDENTIAL_REF = credentialRef('AGENTRANS_WEB_SEARCH_E2E_KEY')
 const SEARCH_CREDENTIAL = 'snapshot-search-key'
+const LOOPBACK_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]'])
+
+function isExternalHttp(url: URL): boolean {
+  return (url.protocol === 'http:' || url.protocol === 'https:') && !LOOPBACK_HOSTS.has(url.hostname)
+}
 
 /**
  * Provider results the double returns per query. The combined result exceeds
@@ -146,14 +152,29 @@ describe('web e2e: opt-in Search API web search', () => {
   let page: Page
   let searchServer: Server | undefined
   let tripwire: ReturnType<typeof watchConsole>
+  let restoreHostFetch: (() => void) | undefined
+  const externalRequests: string[] = []
   const searchRequests: CapturedSearchRequest[] = []
   const sessionEvents: SessionEvent[] = []
 
   beforeAll(async () => {
+    if (MODE !== 'record') {
+      const fetch = globalThis.fetch
+      const guard = vi.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
+        const url = new URL(typeof input === 'string' || input instanceof URL ? input : input.url)
+        if (isExternalHttp(url)) {
+          externalRequests.push(`host ${url.origin}`)
+          throw new Error(`Search API replay blocked external fetch to ${url.origin}`)
+        }
+        return fetch(input, init)
+      })
+      restoreHostFetch = () => { guard.mockRestore() }
+    }
     const search = await startSearchServer(searchRequests)
     searchServer = search.server
     scaffold = await launchWebScaffold({
       extraOverlayPath: fileURLToPath(new URL('./pin-browse-picker.overlay.yml', import.meta.url)),
+      extraInstallAnchors: [SEARCH_API_PACKAGE],
       compareReplaySession: true,
       deepSeekWebApi: {
         baseURL: `${search.baseURL}/api/v1/tools`,
@@ -166,6 +187,17 @@ describe('web e2e: opt-in Search API web search', () => {
     scaffold.ctx.on('session/event', (_session, event: SessionEvent) => { sessionEvents.push(event) })
     browser = await chromium.launch()
     page = await newEnglishPage(browser)
+    if (MODE !== 'record') {
+      await page.route('**/*', async (route) => {
+        const url = new URL(route.request().url())
+        if (isExternalHttp(url)) {
+          externalRequests.push(`browser ${url.origin}`)
+          await route.abort()
+          return
+        }
+        await route.continue()
+      })
+    }
     tripwire = watchConsole(page)
     await page.goto(scaffold.authenticatedUrl, { waitUntil: 'load' })
     await page.waitForSelector('[class*="frame"]', { timeout: 30_000 })
@@ -173,18 +205,23 @@ describe('web e2e: opt-in Search API web search', () => {
   }, 120_000)
 
   afterAll(async () => {
-    await browser?.close()
-    await scaffold?.close()
-    await new Promise<void>((resolve, reject) => {
-      if (searchServer === undefined) {
-        resolve()
-        return
-      }
-      searchServer.close((error) => {
-        if (error === undefined) resolve()
-        else reject(error)
+    try {
+      await browser?.close()
+      await scaffold?.close()
+    } finally {
+      restoreHostFetch?.()
+      await new Promise<void>((resolve, reject) => {
+        if (searchServer === undefined) {
+          resolve()
+          return
+        }
+        searchServer.close((error) => {
+          if (error === undefined) resolve()
+          else reject(error)
+        })
       })
-    })
+      expect(externalRequests).toEqual([])
+    }
   })
 
   it('drives the recorded search to a settled turn (all modes)', async () => {

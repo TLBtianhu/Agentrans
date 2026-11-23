@@ -9,19 +9,25 @@
   - button "More conversation views"
 - text: Use web_search once with queries ["DeepSeek Harness snapshot search","DeepSeek Harness multi-query search"]. Then reply exactly SEARCH_DONE and stop. {{clock}}
 - button "Copy"
+- button "Branch into a new conversation"
 - status: Completed
 - button "Completed in {{duration}}" [expanded]
 - button "Searched the web" [expanded]
 - button "Search DeepSeek Harness snapshot search, DeepSeek Harness multi-query search"
 - paragraph: SEARCH_DONE
+- button "Explore a sentence"
+- button "Branch into a new conversation"
+- text: {{clock}}
 - button "Copy"
 - button "Good response"
 - button "Bad response"
 - button "Branch into a new conversation"
 - text: {{clock}}
+- button "Import CSV comparison"
 - textbox "Message or run a task, / commands, @ files or sessions"
 - button "Add files or run commands"
 - 'button "Access mode, current: Workspace Write"': Workspace Write
+- button "Insert formula"
 - button "Select model, current DeepSeek-V4-Flash": DeepSeek-V4-Flash
 - button "Send message" [disabled]
 - button "1 turns 2 steps · {{throughput}} tok/s": 1 turns 2 steps{{throughput}} tok/s
