@@ -327,7 +327,9 @@ describe('web e2e: plugin manager', () => {
       await probe.getByRole('menu').waitFor()
       await probe.keyboard.press('Escape')
       await probe.getByRole('menu').waitFor({ state: 'hidden' })
-      await add.click()
+      // The registry read starts a pnpm child in the profile directory.
+      // Let it finish before the scaffold removes that directory on Windows.
+      await Promise.all([probe.waitForResponse('**/api/pluginManager/registries'), add.click()])
       await probe.getByRole('dialog').waitFor()
     } finally {
       await context.close()
