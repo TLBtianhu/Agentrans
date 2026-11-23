@@ -9,6 +9,7 @@
   - button "More conversation views"
 - text: Use the ask_user_question tool to ask me exactly one question with id "checkpoint", question "Ready to continue?", header "Checkpoint", and options labeled "Yes" and "No". After I answer, reply with one short sentence acknowledging my answer and stop. {{clock}}
 - button "Copy"
+- button "Branch into a new conversation"
 - status: Completed
 - button "Completed in {{duration}}" [disabled]
 - button "Asked questions"
@@ -19,17 +20,24 @@
   - button "Copy"
 - text: "Interjection: include the word BANANA in your final reply. {{clock}}"
 - button "Copy"
+- button "Branch into a new conversation"
 - text: "Interjection: include the word ORANGE in your final reply. {{clock}}"
 - button "Copy"
+- button "Branch into a new conversation"
 - paragraph: "Got it: BANANA and ORANGE."
+- button "Explore a sentence"
+- button "Branch into a new conversation"
+- text: {{clock}}
 - button "Copy"
 - button "Good response"
 - button "Bad response"
 - button "Branch into a new conversation"
 - text: {{clock}}
+- button "Import CSV comparison"
 - textbox "Message or run a task, / commands, @ files or sessions"
 - button "Add files or run commands"
 - 'button "Access mode, current: Workspace Write"': Workspace Write
+- button "Insert formula"
 - button "Select model, current DeepSeek-V4-Flash": DeepSeek-V4-Flash
 - button "Send message" [disabled]
 - button "1 turns 2 steps · {{throughput}} tok/s": 1 turns 2 steps{{throughput}} tok/s
