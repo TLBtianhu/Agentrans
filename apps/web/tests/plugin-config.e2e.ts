@@ -9,7 +9,7 @@ import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import type { Browser, Locator, Page } from 'playwright'
 import { chromium } from 'playwright'
-import { afterAll, beforeAll, describe, expect, it, onTestFailed } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it, onTestFailed, onTestFinished } from 'vitest'
 import { join } from 'node:path'
 import {
   assertFixtureInventory, captureStableAria, compareOrRefreshGolden,
@@ -22,6 +22,7 @@ const OFFICIAL_EXPECTED = join(SNAPSHOT_DIR, 'official.expected.md')
 const ROW_EXPECTED = join(SNAPSHOT_DIR, 'row.expected.md')
 const BUNDLE_EXPECTED = join(SNAPSHOT_DIR, 'bundle.expected.md')
 const FIXTURE_PLUGINS = fileURLToPath(new URL('./fixtures/plugins', import.meta.url))
+const SEARCH_API_PACKAGE = fileURLToPath(new URL('../../../packages/web/web-deepseek-api/package.json', import.meta.url))
 const MODE = webSnapshotMode()
 
 describe('web e2e: plugin configuration pages', () => {
@@ -35,7 +36,6 @@ describe('web e2e: plugin configuration pages', () => {
     // below, that half registers its row's configuration into the page.
     scaffold = await launchWebScaffold({
       extraOverlayPath: fileURLToPath(new URL('./pin-browse-picker.overlay.yml', import.meta.url)),
-      deepSeekSearch: { apiKeyEnv: 'AGENTRANS_PLUGIN_CONFIG_E2E_UNUSED_KEY' },
       profile: { packages: [{ dir: join(FIXTURE_PLUGINS, 'fixture-live-client') }] },
     })
     browser = await chromium.launch()
@@ -57,13 +57,13 @@ describe('web e2e: plugin configuration pages', () => {
    * settings document accumulates across them, so this closes any settings
    * dialog a previous scenario left open and leaves whatever page it opened.
    */
-  async function openPlugins(): Promise<Locator> {
-    if (await page.getByRole('dialog', { name: '设置' }).count() > 0) {
-      await page.keyboard.press('Escape')
-      await expect.poll(() => page.getByRole('dialog', { name: '设置' }).count(), { timeout: 5_000 }).toBe(0)
+  async function openPlugins(target = page): Promise<Locator> {
+    if (await target.getByRole('dialog', { name: '设置' }).count() > 0) {
+      await target.keyboard.press('Escape')
+      await expect.poll(() => target.getByRole('dialog', { name: '设置' }).count(), { timeout: 5_000 }).toBe(0)
     }
-    await page.getByRole('navigation', { name: '全局面板' }).getByRole('button', { name: '插件', exact: true }).click()
-    const panel = page.locator('[data-plugin-panel]')
+    await target.getByRole('navigation', { name: '全局面板' }).getByRole('button', { name: '插件', exact: true }).click()
+    const panel = target.locator('[data-plugin-panel]')
     await panel.waitFor({ timeout: 10_000 })
     while (await panel.getByRole('button', { name: /^返回/ }).count() > 0) {
       await panel.getByRole('button', { name: /^返回/ }).first().click()
@@ -79,8 +79,8 @@ describe('web e2e: plugin configuration pages', () => {
   }
 
   /** The settings document as the Host has written it so far. */
-  async function settingsDocument(): Promise<string> {
-    return readFile(join(scaffold.harnessHome, 'profiles', 'scaffold', 'cordis.patch.yml'), 'utf8').catch(() => '')
+  async function settingsDocument(target = scaffold): Promise<string> {
+    return readFile(join(target.harnessHome, 'profiles', 'scaffold', 'cordis.patch.yml'), 'utf8').catch(() => '')
   }
 
   it('keeps configuration pages first and opens the full experimental plugin list separately', async () => {
@@ -143,8 +143,19 @@ describe('web e2e: plugin configuration pages', () => {
   }, 60_000)
 
   it('switches search and fetch to the Search and Fetch APIs together and preserves each API’s endpoint', async () => {
-    onTestFailed(() => saveFailureShot(page, 'web-e2e-search-api-settings'))
-    const panel = await openPlugins()
+    const searchScaffold = await launchWebScaffold({
+      extraInstallAnchors: [SEARCH_API_PACKAGE],
+      deepSeekSearch: { apiKeyEnv: 'AGENTRANS_PLUGIN_CONFIG_E2E_UNUSED_KEY' },
+      profile: { packages: [{ dir: join(FIXTURE_PLUGINS, 'fixture-web-search-api'), enabled: true }] },
+    })
+    onTestFinished(() => searchScaffold.close())
+    const searchPage = await browser.newPage({ viewport: { width: 1680, height: 1000 }, locale: ZH_BROWSER_LOCALE })
+    onTestFinished(() => searchPage.close())
+    onTestFailed(() => saveFailureShot(searchPage, 'web-e2e-search-api-settings'))
+    const searchConsole = watchConsole(searchPage)
+    const searchDocument = () => settingsDocument(searchScaffold)
+    await searchPage.goto(searchScaffold.authenticatedUrl, { waitUntil: 'load' })
+    const panel = await openPlugins(searchPage)
     await openPage(panel, '网页搜索')
     const toggle = panel.getByRole('switch', { name: '启用新版 Web 搜索 API', exact: true })
     const endpoint = panel.locator('#plugin-config-web-search-endpoint')
@@ -161,7 +172,7 @@ describe('web e2e: plugin configuration pages', () => {
     await save.click()
     await expect.poll(() => save.isDisabled()).toBe(true)
     await toggle.focus()
-    await page.keyboard.press('Space')
+    await searchPage.keyboard.press('Space')
     expect(await panel.getByLabel('Search / Fetch API 基础地址', { exact: true }).count()).toBe(1)
     expect(await endpoint.inputValue()).toBe('https://api.deepseek.com/v1/tools')
     expect(await maxUses.count()).toBe(0)
@@ -172,34 +183,34 @@ describe('web e2e: plugin configuration pages', () => {
     expect(await save.isDisabled()).toBe(true)
     expect(await toggle.isDisabled()).toBe(true)
     await count.fill('10')
-    expect(await settingsDocument()).not.toContain('searchProvider: deepseek-search-api')
+    expect(await searchDocument()).not.toContain('searchProvider: deepseek-search-api')
     await endpoint.fill('https://search-api.test/api/v1/tools')
     await save.click()
     await expect.poll(() => save.isDisabled()).toBe(true)
-    await expect.poll(settingsDocument).toContain('searchProvider: deepseek-search-api')
-    await expect.poll(settingsDocument).toContain('fetchProvider: deepseek-fetch-api')
-    await expect.poll(settingsDocument).toContain('baseURL: https://search-api.test/api/v1/tools')
-    await page.reload({ waitUntil: 'load' })
-    await page.waitForSelector('[class*="frame"]', { timeout: 30_000 })
-    await openPlugins()
+    await expect.poll(searchDocument).toContain('searchProvider: deepseek-search-api')
+    await expect.poll(searchDocument).toContain('fetchProvider: deepseek-fetch-api')
+    await expect.poll(searchDocument).toContain('baseURL: https://search-api.test/api/v1/tools')
+    await searchPage.reload({ waitUntil: 'load' })
+    await searchPage.waitForSelector('[class*="frame"]', { timeout: 30_000 })
+    await openPlugins(searchPage)
     await openPage(panel, '网页搜索')
     expect(await toggle.getAttribute('aria-checked')).toBe('true')
     expect(await endpoint.inputValue()).toBe('https://search-api.test/api/v1/tools')
-    const snapshot = await captureStableAria(page, '[data-plugin-panel]', scaffold.workspaceCwd)
+    const snapshot = await captureStableAria(searchPage, '[data-plugin-panel]', searchScaffold.workspaceCwd)
     await compareOrRefreshGolden(join(SNAPSHOT_DIR, 'web-search.expected.md'), snapshot, MODE)
     await panel.getByRole('button', { name: '恢复默认', exact: true }).click()
     expect(await endpoint.inputValue()).toBe('https://api.deepseek.com/v1/tools')
     await save.click()
     await expect.poll(() => save.isDisabled()).toBe(true)
-    await expect.poll(settingsDocument).not.toContain('https://search-api.test/api/v1/tools')
+    await expect.poll(searchDocument).not.toContain('https://search-api.test/api/v1/tools')
     await toggle.click()
     expect(await endpoint.inputValue()).toBe('https://messages.test/anthropic/v1')
     await save.click()
     await expect.poll(() => save.isDisabled()).toBe(true)
-    await expect.poll(settingsDocument).not.toContain('searchProvider: deepseek-search-api')
-    await expect.poll(settingsDocument).not.toContain('fetchProvider: deepseek-fetch-api')
-    expect(await settingsDocument()).toContain('baseURL: https://messages.test/anthropic/v1')
-    expect(tripwire.pageErrors).toEqual([])
+    await expect.poll(searchDocument).not.toContain('searchProvider: deepseek-search-api')
+    await expect.poll(searchDocument).not.toContain('fetchProvider: deepseek-fetch-api')
+    expect(await searchDocument()).toContain('baseURL: https://messages.test/anthropic/v1')
+    expect(searchConsole.pageErrors).toEqual([])
   })
 
   it('saves subagent limits and resets them to the deployment defaults', async () => {

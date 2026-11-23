@@ -1,0 +1,6 @@
+{
+  "name": "@fixture/web-search-api",
+  "version": "0.0.1",
+  "private": true,
+  "agentrans": { "bundle": { "patch": "./cordis.patch.yml" } }
+}

@@ -1,0 +1,5 @@
+- insert:
+    - id: web-deepseek-api
+      name: '@agentrans/web-deepseek-api'
+      config:
+        apiKeyEnv: AGENTRANS_PLUGIN_CONFIG_E2E_UNUSED_KEY
