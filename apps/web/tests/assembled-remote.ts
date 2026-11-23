@@ -158,6 +158,7 @@ export function createAssembledRemote(options: AssembledRemoteOptions = {}): Ass
       'agentPresets/list': structuredClone(fixture.agentPresets),
       'commands/list': structuredClone(fixture.commands),
       'settings/openSettingsDocument': ok({ opened: true }),
+      'artifactBranchResults/readCsvComparisonDraft': ok(null),
       'subagents/list': ok({ entries: [], parentAvailable: true }),
       'terminal/list': ok([]),
       'skills/list': ok({ skills: [] }),
