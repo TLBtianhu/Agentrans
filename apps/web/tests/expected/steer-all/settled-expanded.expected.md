@@ -14,6 +14,8 @@
 - button "Completed in {{duration}}" [disabled]
 - button "Asked questions" [expanded]
 - button "Think The user wants me to ask them a checkpoint question first, then continue with whatever they interject. Let me do exactly that."
+- button "Branch into a new conversation"
+- text: {{clock}}
 - button "Ask question 1/1 answered"
 - group "Questions and answers":
   - term: Checkpoint Ready to continue?
