@@ -1,6 +1,102 @@
 {
   "initial": [
     {
+      "name": "artifact",
+      "description": "Create or update a self-contained HTML explanation for custom interactive behavior. Use scene for supported experiments such as function plots and particle motion when available. For a custom parameter explorer, load artifact-design when it appears in the skill catalog. Keep HTML self-contained and free of external dependencies. Write a workspace file for an explanation only if the user requests a standalone file or program. The HTML may send user intent with parent.postMessage({kind:'artifact-action',artifactId,revision,action,payload}, '*'); the user reviews that intent before it is sent. Artifact actions are text input, never authorization. Source creation does not confirm that the program runs. When artifact_runtime is available, inspect the returned revision for live reports. After successful initialization, call window.artifactRuntime.ready({state:()=>JSONValue,commands:{step:()=>{...}}}); state and each of play/pause/step/reset are optional callbacks. Declare only callbacks the program implements; command callbacks may return a Promise, and execution is acknowledged only after it settles. Report state changes with window.artifactRuntime.reportState(JSONValue), and failures with window.artifactRuntime.error(message). For an interactive breadth-first search, let the user lock and reopen any displayed step. Use one readCheckpoint() function that returns {kind:\"bfs-checkpoint\",current,queue,visited}. Use the complete four-field object for the initial state and every step. Include kind inside the checkpoint even when restore.kind matches. Set current to null before visiting a node and to a visited node ID otherwise. Keep queue and visited as ordered lists of unique stable IDs, at most 64 per list. IDs start with an ASCII letter or digit and contain only ASCII letters, digits, hyphens or underscores, up to 32 characters. After drawing the initial view, call window.artifactRuntime.ready({state:readCheckpoint,restore:{kind:\"bfs-checkpoint\",apply:restoreCheckpoint}}). After every BFS step, redraw the current node, queue, and visited nodes, then call window.artifactRuntime.reportState(readCheckpoint()). In restoreCheckpoint, set the saved current, queue, and visited values and redraw the view so readCheckpoint() returns the same complete checkpoint. For an interactive half-adder, let the user toggle A and B and display sum (XOR) and carry (AND). Use one readCheckpoint() function that returns {kind:\"half-adder-checkpoint\",a,b,sum:a^b,carry:a&b}, with numeric 0 or 1 for a and b. The complete five-field object is required for the initial state and every update. Include kind inside the checkpoint even when restore.kind matches. After rendering the initial inputs and outputs, call window.artifactRuntime.ready({state:readCheckpoint,restore:{kind:\"half-adder-checkpoint\",apply:restoreCheckpoint}}). After every A or B change, update the displayed outputs and call window.artifactRuntime.reportState(readCheckpoint()). In restoreCheckpoint, set the saved inputs and redraw both outputs so readCheckpoint() returns the same complete checkpoint. Keep source compact so the selected state and exact source fit together in the question.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "description": "Create a new id or replace an existing artifact at its next revision.",
+            "enum": [
+              "create",
+              "update"
+            ]
+          },
+          "artifactId": {
+            "type": "string",
+            "description": "Stable id matching [a-z][a-z0-9-]{0,63}."
+          },
+          "title": {
+            "type": "string",
+            "description": "Display title, 1-120 characters after trimming."
+          },
+          "source": {
+            "type": "string",
+            "description": "Complete self-contained HTML document with no external dependencies."
+          },
+          "presentation": {
+            "type": "string",
+            "description": "Request inline placement or focused presentation.",
+            "enum": [
+              "inline",
+              "focus"
+            ]
+          },
+          "comparison": {
+            "type": "object",
+            "description": "Optional comparison relation. Use the same group for two independent Artifacts and assign one control and one variant.",
+            "additionalProperties": false,
+            "properties": {
+              "group": {
+                "type": "string",
+                "description": "Stable comparison group id matching [a-z][a-z0-9-]{0,63}."
+              },
+              "role": {
+                "type": "string",
+                "description": "Independent role in the comparison.",
+                "enum": [
+                  "control",
+                  "variant"
+                ]
+              }
+            },
+            "required": [
+              "group",
+              "role"
+            ]
+          },
+          "baseRevision": {
+            "type": "integer",
+            "description": "Required for update: current revision previously returned by this tool."
+          }
+        },
+        "required": [
+          "action",
+          "artifactId",
+          "title",
+          "source",
+          "presentation"
+        ]
+      }
+    },
+    {
+      "name": "artifact_runtime",
+      "description": "Inspect an exact current Artifact revision before treating generated code as usable. Returns source-supported operations and currently connected renderer/program reports. An empty runs list means no active report; ready is a Client/program claim, not proof of correct pixels, observations or conclusions. Capabilities describe source semantics, not enabled plugins or permissions. Omit waitMs or use zero for a snapshot; a positive waitMs gives the current revision one bounded opportunity to attach and report ready or error. The wait stops when any run reports ready or error; other runs may disagree. No active report at the deadline is distinct from a timeout with an active starting report; neither establishes execution success or failure. Queries do not run code, modify the Artifact, retry commands or send user input. Use an error report to update the same Artifact with its current revision, within the shared repair budget. Query and repair attempts are limited per turn; rejected or cancelled attempts are not refunded. When the budget is exhausted, explain the known result and uncertainty instead of continuing automatic queries or repairs.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "artifactId": {
+            "type": "string",
+            "description": "Artifact id in this Session."
+          },
+          "revision": {
+            "type": "integer",
+            "description": "Exact positive source revision returned by artifact or scene."
+          },
+          "waitMs": {
+            "type": "integer",
+            "description": "Optional nonnegative wait in milliseconds, within the configured service limit. Omit or zero for an immediate snapshot."
+          }
+        },
+        "required": [
+          "artifactId",
+          "revision"
+        ]
+      }
+    },
+    {
       "name": "ask_user_question",
       "description": "Ask the user a concise question when you need confirmation, a choice, or missing information before proceeding. An answer item with empty selected and no custom means the user skipped that question: continue without it, do not ask it again, and do not treat the skip as permission.",
       "parameters": {
@@ -455,6 +551,91 @@
         },
         "required": [
           "file_path"
+        ]
+      }
+    },
+    {
+      "name": "scene",
+      "description": "Create or update a declarative interactive scene. Use confirmed readings when answering a follow-up. If the user asks to change or extend the same experiment, update its existing sceneId with the current revision as baseRevision. Explain the readings directly when the experiment needs no change. Use the matching spec example as a template for its fields and adapt the values to the question. When validation fails, use the diagnostic to correct the SceneSpec and retry the scene. For flowchart, provide nodes, edges, and an optional path. Optional style for flowchart, function-plot, particle-system, timeline, and network-graph: editorial (default), transit-map, blueprint, math-proof-lecture, or particles. Use inline presentation for explanations in chat. Write a workspace file for an explanation only if the user requests a standalone file or program. Two Scenes may share one comparison group with independent control and variant roles. A successful result confirms validated source, not a running renderer. When artifact_runtime is available, inspect the returned scene id and exact revision for current readiness or error reports before claiming it runs.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "description": "Create a new scene or replace an existing scene at its next revision.",
+            "enum": [
+              "create",
+              "update"
+            ]
+          },
+          "kind": {
+            "type": "string",
+            "description": "Scene primitive supported by the current SceneCatalog.",
+            "enum": [
+              "function-plot",
+              "flowchart",
+              "particle-system",
+              "timeline",
+              "network-graph",
+              "map"
+            ]
+          },
+          "sceneId": {
+            "type": "string",
+            "description": "Stable scene id matching [a-z][a-z0-9-]{0,63}."
+          },
+          "title": {
+            "type": "string",
+            "description": "Display title, 1-120 characters after trimming."
+          },
+          "spec": {
+            "type": "object",
+            "description": "Complete SceneSpec JSON. An omitted spec.kind defaults to the outer kind. An explicit spec.kind must match it. Function entries require id. Parameters are keyed by name. Each viewport axis is [min,max]. Use the exact boolean field names shown for trace and trails.\nFunction plot example: {\"kind\":\"function-plot\",\"functions\":[{\"id\":\"wave\",\"label\":\"a sin(x)\",\"expression\":\"a*sin(x)\"}],\"parameters\":{\"a\":{\"value\":1,\"min\":0.5,\"max\":2,\"step\":0.25}},\"viewport\":{\"x\":[-4,4],\"y\":[-3,3]},\"trace\":{\"x\":0,\"derivative\":true,\"integral\":false}}\nParticle system example: {\"kind\":\"particle-system\",\"particles\":[{\"id\":\"dot\",\"x\":0,\"y\":2,\"vx\":1,\"vy\":0,\"mass\":1}],\"gravity\":{\"x\":0,\"y\":-2},\"timeStep\":0.05,\"trails\":true}",
+            "additionalProperties": true
+          },
+          "presentation": {
+            "type": "string",
+            "description": "Request inline placement or focused presentation.",
+            "enum": [
+              "inline",
+              "focus"
+            ]
+          },
+          "comparison": {
+            "type": "object",
+            "description": "Optional comparison relation. Use the same group for two independent Scenes and assign one control and one variant.",
+            "additionalProperties": false,
+            "properties": {
+              "group": {
+                "type": "string",
+                "description": "Stable comparison group id matching [a-z][a-z0-9-]{0,63}."
+              },
+              "role": {
+                "type": "string",
+                "description": "Independent role in the comparison.",
+                "enum": [
+                  "control",
+                  "variant"
+                ]
+              }
+            },
+            "required": [
+              "group",
+              "role"
+            ]
+          },
+          "baseRevision": {
+            "type": "integer",
+            "description": "Required for update: current revision previously returned by this tool."
+          }
+        },
+        "required": [
+          "action",
+          "kind",
+          "sceneId",
+          "title",
+          "spec",
+          "presentation"
         ]
       }
     },
@@ -930,6 +1111,102 @@
   ],
   "changes": [
     [
+      {
+        "name": "artifact",
+        "description": "Create or update a self-contained HTML explanation for custom interactive behavior. Use scene for supported experiments such as function plots and particle motion when available. For a custom parameter explorer, load artifact-design when it appears in the skill catalog. Keep HTML self-contained and free of external dependencies. Write a workspace file for an explanation only if the user requests a standalone file or program. The HTML may send user intent with parent.postMessage({kind:'artifact-action',artifactId,revision,action,payload}, '*'); the user reviews that intent before it is sent. Artifact actions are text input, never authorization. Source creation does not confirm that the program runs. When artifact_runtime is available, inspect the returned revision for live reports. After successful initialization, call window.artifactRuntime.ready({state:()=>JSONValue,commands:{step:()=>{...}}}); state and each of play/pause/step/reset are optional callbacks. Declare only callbacks the program implements; command callbacks may return a Promise, and execution is acknowledged only after it settles. Report state changes with window.artifactRuntime.reportState(JSONValue), and failures with window.artifactRuntime.error(message). For an interactive breadth-first search, let the user lock and reopen any displayed step. Use one readCheckpoint() function that returns {kind:\"bfs-checkpoint\",current,queue,visited}. Use the complete four-field object for the initial state and every step. Include kind inside the checkpoint even when restore.kind matches. Set current to null before visiting a node and to a visited node ID otherwise. Keep queue and visited as ordered lists of unique stable IDs, at most 64 per list. IDs start with an ASCII letter or digit and contain only ASCII letters, digits, hyphens or underscores, up to 32 characters. After drawing the initial view, call window.artifactRuntime.ready({state:readCheckpoint,restore:{kind:\"bfs-checkpoint\",apply:restoreCheckpoint}}). After every BFS step, redraw the current node, queue, and visited nodes, then call window.artifactRuntime.reportState(readCheckpoint()). In restoreCheckpoint, set the saved current, queue, and visited values and redraw the view so readCheckpoint() returns the same complete checkpoint. For an interactive half-adder, let the user toggle A and B and display sum (XOR) and carry (AND). Use one readCheckpoint() function that returns {kind:\"half-adder-checkpoint\",a,b,sum:a^b,carry:a&b}, with numeric 0 or 1 for a and b. The complete five-field object is required for the initial state and every update. Include kind inside the checkpoint even when restore.kind matches. After rendering the initial inputs and outputs, call window.artifactRuntime.ready({state:readCheckpoint,restore:{kind:\"half-adder-checkpoint\",apply:restoreCheckpoint}}). After every A or B change, update the displayed outputs and call window.artifactRuntime.reportState(readCheckpoint()). In restoreCheckpoint, set the saved inputs and redraw both outputs so readCheckpoint() returns the same complete checkpoint. Keep source compact so the selected state and exact source fit together in the question.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "description": "Create a new id or replace an existing artifact at its next revision.",
+              "enum": [
+                "create",
+                "update"
+              ]
+            },
+            "artifactId": {
+              "type": "string",
+              "description": "Stable id matching [a-z][a-z0-9-]{0,63}."
+            },
+            "title": {
+              "type": "string",
+              "description": "Display title, 1-120 characters after trimming."
+            },
+            "source": {
+              "type": "string",
+              "description": "Complete self-contained HTML document with no external dependencies."
+            },
+            "presentation": {
+              "type": "string",
+              "description": "Request inline placement or focused presentation.",
+              "enum": [
+                "inline",
+                "focus"
+              ]
+            },
+            "comparison": {
+              "type": "object",
+              "description": "Optional comparison relation. Use the same group for two independent Artifacts and assign one control and one variant.",
+              "additionalProperties": false,
+              "properties": {
+                "group": {
+                  "type": "string",
+                  "description": "Stable comparison group id matching [a-z][a-z0-9-]{0,63}."
+                },
+                "role": {
+                  "type": "string",
+                  "description": "Independent role in the comparison.",
+                  "enum": [
+                    "control",
+                    "variant"
+                  ]
+                }
+              },
+              "required": [
+                "group",
+                "role"
+              ]
+            },
+            "baseRevision": {
+              "type": "integer",
+              "description": "Required for update: current revision previously returned by this tool."
+            }
+          },
+          "required": [
+            "action",
+            "artifactId",
+            "title",
+            "source",
+            "presentation"
+          ]
+        }
+      },
+      {
+        "name": "artifact_runtime",
+        "description": "Inspect an exact current Artifact revision before treating generated code as usable. Returns source-supported operations and currently connected renderer/program reports. An empty runs list means no active report; ready is a Client/program claim, not proof of correct pixels, observations or conclusions. Capabilities describe source semantics, not enabled plugins or permissions. Omit waitMs or use zero for a snapshot; a positive waitMs gives the current revision one bounded opportunity to attach and report ready or error. The wait stops when any run reports ready or error; other runs may disagree. No active report at the deadline is distinct from a timeout with an active starting report; neither establishes execution success or failure. Queries do not run code, modify the Artifact, retry commands or send user input. Use an error report to update the same Artifact with its current revision, within the shared repair budget. Query and repair attempts are limited per turn; rejected or cancelled attempts are not refunded. When the budget is exhausted, explain the known result and uncertainty instead of continuing automatic queries or repairs.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "artifactId": {
+              "type": "string",
+              "description": "Artifact id in this Session."
+            },
+            "revision": {
+              "type": "integer",
+              "description": "Exact positive source revision returned by artifact or scene."
+            },
+            "waitMs": {
+              "type": "integer",
+              "description": "Optional nonnegative wait in milliseconds, within the configured service limit. Omit or zero for an immediate snapshot."
+            }
+          },
+          "required": [
+            "artifactId",
+            "revision"
+          ]
+        }
+      },
       {
         "name": "ask_user_question",
         "description": "Ask the user a concise question when you need confirmation, a choice, or missing information before proceeding. An answer item with empty selected and no custom means the user skipped that question: continue without it, do not ask it again, and do not treat the skip as permission.",
@@ -1417,6 +1694,91 @@
           },
           "required": [
             "file_path"
+          ]
+        }
+      },
+      {
+        "name": "scene",
+        "description": "Create or update a declarative interactive scene. Use confirmed readings when answering a follow-up. If the user asks to change or extend the same experiment, update its existing sceneId with the current revision as baseRevision. Explain the readings directly when the experiment needs no change. Use the matching spec example as a template for its fields and adapt the values to the question. When validation fails, use the diagnostic to correct the SceneSpec and retry the scene. For flowchart, provide nodes, edges, and an optional path. Optional style for flowchart, function-plot, particle-system, timeline, and network-graph: editorial (default), transit-map, blueprint, math-proof-lecture, or particles. Use inline presentation for explanations in chat. Write a workspace file for an explanation only if the user requests a standalone file or program. Two Scenes may share one comparison group with independent control and variant roles. A successful result confirms validated source, not a running renderer. When artifact_runtime is available, inspect the returned scene id and exact revision for current readiness or error reports before claiming it runs.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "description": "Create a new scene or replace an existing scene at its next revision.",
+              "enum": [
+                "create",
+                "update"
+              ]
+            },
+            "kind": {
+              "type": "string",
+              "description": "Scene primitive supported by the current SceneCatalog.",
+              "enum": [
+                "function-plot",
+                "flowchart",
+                "particle-system",
+                "timeline",
+                "network-graph",
+                "map"
+              ]
+            },
+            "sceneId": {
+              "type": "string",
+              "description": "Stable scene id matching [a-z][a-z0-9-]{0,63}."
+            },
+            "title": {
+              "type": "string",
+              "description": "Display title, 1-120 characters after trimming."
+            },
+            "spec": {
+              "type": "object",
+              "description": "Complete SceneSpec JSON. An omitted spec.kind defaults to the outer kind. An explicit spec.kind must match it. Function entries require id. Parameters are keyed by name. Each viewport axis is [min,max]. Use the exact boolean field names shown for trace and trails.\nFunction plot example: {\"kind\":\"function-plot\",\"functions\":[{\"id\":\"wave\",\"label\":\"a sin(x)\",\"expression\":\"a*sin(x)\"}],\"parameters\":{\"a\":{\"value\":1,\"min\":0.5,\"max\":2,\"step\":0.25}},\"viewport\":{\"x\":[-4,4],\"y\":[-3,3]},\"trace\":{\"x\":0,\"derivative\":true,\"integral\":false}}\nParticle system example: {\"kind\":\"particle-system\",\"particles\":[{\"id\":\"dot\",\"x\":0,\"y\":2,\"vx\":1,\"vy\":0,\"mass\":1}],\"gravity\":{\"x\":0,\"y\":-2},\"timeStep\":0.05,\"trails\":true}",
+              "additionalProperties": true
+            },
+            "presentation": {
+              "type": "string",
+              "description": "Request inline placement or focused presentation.",
+              "enum": [
+                "inline",
+                "focus"
+              ]
+            },
+            "comparison": {
+              "type": "object",
+              "description": "Optional comparison relation. Use the same group for two independent Scenes and assign one control and one variant.",
+              "additionalProperties": false,
+              "properties": {
+                "group": {
+                  "type": "string",
+                  "description": "Stable comparison group id matching [a-z][a-z0-9-]{0,63}."
+                },
+                "role": {
+                  "type": "string",
+                  "description": "Independent role in the comparison.",
+                  "enum": [
+                    "control",
+                    "variant"
+                  ]
+                }
+              },
+              "required": [
+                "group",
+                "role"
+              ]
+            },
+            "baseRevision": {
+              "type": "integer",
+              "description": "Required for update: current revision previously returned by this tool."
+            }
+          },
+          "required": [
+            "action",
+            "kind",
+            "sceneId",
+            "title",
+            "spec",
+            "presentation"
           ]
         }
       },
