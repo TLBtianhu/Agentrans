@@ -455,15 +455,12 @@ export interface LaunchOptions {
     default: string
     definitions?: import('@agentrans/agent-preset-registry').PresetDefinition[]
   }
-  /**
-   * Patch the telemetry exporter URL while preserving the shipped enabled
-   * setting. A scenario-owned loopback collector contains all fixture uploads.
-   */
-  telemetryUrl?: string
-  /** Mode when telemetryUrl is supplied; defaults to FEEDBACK_ONLY without enabling a disabled row. */
-  telemetryMode?: 'FEEDBACK_ONLY'
-  /** SDK batch cadence for a scenario-owned collector; omitted to retain the SDK default. */
-  telemetryScheduledDelayMillis?: number
+  /** Opt this scenario into feedback-only uploads to a loopback collector. */
+  feedbackCollector?: {
+    port: number
+    /** SDK batch cadence; omitted to retain the SDK default. */
+    scheduledDelayMillis?: number
+  }
   /**
    * Browse through a trusted non-loopback hostname that the browser resolves
    * to loopback (for example `*.localhost`). The test server stays bound to
@@ -519,6 +516,11 @@ export async function launchWebScaffold(options: LaunchOptions = {}): Promise<We
 
 async function bootWebScaffold(options: LaunchOptions, reused?: RestartedScaffoldRoots): Promise<WebScaffold> {
   const mode = webSnapshotMode()
+  const feedbackCollector = options.feedbackCollector
+  if (feedbackCollector !== undefined
+    && (!Number.isInteger(feedbackCollector.port) || feedbackCollector.port < 1 || feedbackCollector.port > 65_535)) {
+    throw new Error('Web scaffold feedback collector requires a valid loopback port')
+  }
   if (options.restartable === true && (options.publicMount !== undefined || (mode !== 'record' && options.replayFixture !== undefined))) {
     throw new Error('Restartable Web scaffold requires a direct listener and no replay fixture outside record mode')
   }
@@ -683,19 +685,18 @@ async function bootWebScaffold(options: LaunchOptions, reused?: RestartedScaffol
     // workspace, keeping the composition untouched.
     { id: 'agent-instructions', disabled: true },
     { id: 'session-title-llm', disabled: true },
-    // Fixture sessions must never leave the process: the shipped row defaults
-    // to the production OTLP endpoint (or whatever AGENTRANS_TELEMETRY_OTLP_URL
-    // names in the ambient environment). A scenario with a local collector
-    // preserves the shipped disabled setting instead of overriding it.
-    options.telemetryUrl === undefined
+    // Fixture uploads are disabled by default. The opt-in accepts only the
+    // port of a local collector, so an ambient OTLP URL cannot receive fixture uploads.
+    feedbackCollector === undefined
       ? { id: 'session-telemetry-otel', disabled: true }
       : {
         id: 'session-telemetry-otel',
+        disabled: false,
         config: {
-          mode: options.telemetryMode ?? 'FEEDBACK_ONLY',
-          exporter: { url: options.telemetryUrl },
-          ...(options.telemetryScheduledDelayMillis === undefined ? {} : {
-            processor: { scheduledDelayMillis: options.telemetryScheduledDelayMillis },
+          mode: 'FEEDBACK_ONLY',
+          exporter: { url: `http://127.0.0.1:${feedbackCollector.port}/v1/logs` },
+          ...(feedbackCollector.scheduledDelayMillis === undefined ? {} : {
+            processor: { scheduledDelayMillis: feedbackCollector.scheduledDelayMillis },
           }),
           shutdownTimeoutMillis: 1_000,
         },

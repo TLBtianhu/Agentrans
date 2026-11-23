@@ -46,6 +46,7 @@ describe.each(MODE === 'record' ? ['deepseek-official'] : ['deepseek-official', 
   let releasedCount = 0
   const suffixes: string[][] = []
   const uploads: string[] = []
+  const unexpectedCollectorRequests: string[] = []
   let headerlessExpected: [string, number, string][] = []
 
   function captured(): [string | undefined, number, string | undefined][] {
@@ -96,6 +97,11 @@ describe.each(MODE === 'record' ? ['deepseek-official'] : ['deepseek-official', 
 
   beforeAll(async () => {
     collector = createServer((request, response) => {
+      if (request.method !== 'POST' || request.url !== '/v1/logs') {
+        unexpectedCollectorRequests.push(`${request.method} ${request.url}`)
+        response.writeHead(404).end()
+        return
+      }
       const chunks: Buffer[] = []
       request.on('data', chunk => chunks.push(chunk as Buffer))
       request.on('end', () => {
@@ -109,9 +115,7 @@ describe.each(MODE === 'record' ? ['deepseek-official'] : ['deepseek-official', 
     const address = collector.address()
     if (address === null || typeof address === 'string') throw new Error('collector has no port')
     scaffold = await launchWebScaffold({
-      telemetryUrl: `http://127.0.0.1:${address.port}/v1/logs`,
-      telemetryMode: 'FEEDBACK_ONLY',
-      telemetryScheduledDelayMillis: 10,
+      feedbackCollector: { port: address.port, scheduledDelayMillis: 10 },
       replayProviders: [
         { id: 'deepseek-official', name: 'DeepSeek', models: [
           { id: 'deepseek-v4-flash', name: 'DeepSeek-V4-Flash', contextWindow: 128_000 },
@@ -127,6 +131,7 @@ describe.each(MODE === 'record' ? ['deepseek-official'] : ['deepseek-official', 
       compareReplaySession: false,
       ...(MODE === 'record' ? {} : { replayFixture: FIXTURE, paceMs: 5 }),
     })
+    expect(scaffold.ctx.sessionTelemetry.sharing).toBe('feedback-only')
     browser = await chromium.launch()
     page = await newEnglishPage(browser)
     tripwire = watchConsole(page)
@@ -139,6 +144,7 @@ describe.each(MODE === 'record' ? ['deepseek-official'] : ['deepseek-official', 
     try {
       await browser?.close()
       await scaffold?.close()
+      expect(unexpectedCollectorRequests).toEqual([])
       // Shutdown drains any illicitly queued tail too; delivery assertions run in the tests.
       expect(captured()).toEqual([...authorized.map(event => [sessionId, event.seq, event.type]), ...headerlessExpected])
     } finally {
