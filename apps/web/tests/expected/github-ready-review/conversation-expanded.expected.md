@@ -23,14 +23,19 @@
 - status: Completed
 - button "Completed in {{duration}}" [disabled]
 - paragraph: "Review complete: no actionable findings."
+- button "Explore a sentence"
+- button "Branch into a new conversation"
+- text: {{clock}}
 - button "Copy"
 - button "Good response"
 - button "Bad response"
 - button "Branch into a new conversation"
 - text: {{clock}}
+- button "Import CSV comparison"
 - textbox "Message or run a task, / commands, @ files or sessions"
 - button "Add files or run commands"
 - 'button "Access mode, current: Read Only"': Read Only
+- button "Insert formula"
 - button "Select model, current github-webhook-review-test/reply": github-webhook-review-test/reply
 - button "Send message" [disabled]
 - button "1 turns 1 steps"

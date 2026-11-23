@@ -9,16 +9,20 @@
   - button "More conversation views"
 - text: "Use one run_code program to do the following in order. Call present for missing.txt and catch its error without creating that file. Use bash to run exactly `printf \"DELIVERED_REPORT\\n\" > report.txt; printf \"DELIVERED_NOTE\\n\" > 说明.txt`. Call present for report.txt and 说明.txt. After present succeeds, deliberately throw the string \"AFTER_PRESENT\" (not an Error object) from that same run_code program. Do not retry the program or create any other files. Finish by mentioning `report.txt` and `说明.txt` in inline code, and put PRESENT_DONE in a separate paragraph. {{clock}}"
 - button "Copy"
+- button "Branch into a new conversation"
 - status: Completed
 - button "Completed in {{duration}}" [expanded]
 - button "Called tools, ran code, ran commands" [expanded]
 - button "Think The user wants one run_code program that:"
-- text: Failed
+- button "Branch into a new conversation"
+- text: {{clock}} Failed
 - 'button "Code Error: code run failed (exception): AFTER_PRESENT"'
 - button "Present files Delivery failed missing.txt"
 - button "Bash Write DELIVERED_REPORT and DELIVERED_NOTE to files"
 - button "Present files Delivered report.txt, 说明.txt"
 - button "Think The program ran as intended:"
+- button "Branch into a new conversation"
+- text: {{clock}}
 - paragraph:
   - text: "The single program ran exactly as ordered:"
   - code: present
@@ -36,6 +40,9 @@
   - code: AFTER_PRESENT
   - text: — no retries, no extra files.
 - paragraph: PRESENT_DONE
+- button "Explore a sentence"
+- button "Branch into a new conversation"
+- text: {{clock}}
 - button "Preview {{cwd}}/workspace/report.txt in sidebar"
 - text: report.txt delivered report
 - button "Open in Test Editor"
@@ -50,9 +57,11 @@
 - button "Branch into a new conversation"
 - button "Usage 19K tok"
 - text: {{clock}}
+- button "Import CSV comparison"
 - textbox "Message or run a task, / commands, @ files or sessions"
 - button "Add files or run commands"
 - 'button "Access mode, current: Workspace Write"': Workspace Write
+- button "Insert formula"
 - button "Select model, current DeepSeek-V4-Flash": DeepSeek-V4-Flash
 - button "Send message" [disabled]
 - button "1 turns 2 steps · {{throughput}} tok/s": 1 turns 2 steps{{throughput}} tok/s
