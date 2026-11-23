@@ -77,7 +77,7 @@ describe('dsh badge assembled snapshot', () => {
       </skill_resources>
 
       <skill_instructions>
-      # dsh Badge
+      # Agentrans Badge
 
       Add the official “powered by dsh” badge without recreating or restyling it.
 
@@ -116,7 +116,7 @@ describe('dsh badge assembled snapshot', () => {
           ],
           "isError": false,
           "value": {
-            "content": "# dsh Badge
+            "content": "# Agentrans Badge
 
       Add the official “powered by dsh” badge without recreating or restyling it.
 
