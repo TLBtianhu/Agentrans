@@ -1,4 +1,4 @@
-/** Account and Session menus share material and keep macOS backings aligned and scoped. */
+/** Session menus keep their material and macOS backings aligned across palettes. */
 import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { join } from 'node:path'
@@ -6,6 +6,7 @@ import { chromium, type Locator } from 'playwright'
 import sharp from 'sharp'
 import { expect, it, onTestFinished } from 'vitest'
 import { captureStableAria, compareOrRefreshGolden, launchWebScaffold, seedSession, webSnapshotMode } from './scaffold.ts'
+import { openSettings } from './support.ts'
 
 const expected = fileURLToPath(new URL('./expected/menu-material', import.meta.url))
 const seed = new URL('../../../snapshots/web/seeded-history/session.v3.jsonl', import.meta.url)
@@ -29,8 +30,13 @@ it('shares menu transparency and blur across palettes and follows native menu bo
     Object.defineProperty(globalThis, 'dshDesktop', { value: { protocolVersion: 1 } })
   })
   await page.goto(scaffold.authenticatedUrl, { waitUntil: 'load' })
-  const account = page.getByRole('button', { name: 'Account menu', exact: true })
-  await account.waitFor()
+  const ungrouped = page.getByText('Ungrouped', { exact: true })
+  const group = ungrouped.locator('xpath=ancestor::*[@aria-expanded][1]')
+  await group.waitFor()
+  if (await group.getAttribute('aria-expanded') !== 'true') await ungrouped.click()
+  const action = page.locator('button[aria-label^="Session actions for "]').first()
+  const row = action.locator('xpath=ancestor::*[@role="treeitem"][1]')
+  const sessionMenu = page.getByRole('menu').filter({ has: page.getByRole('menuitem', { name: 'Rename', exact: true }) })
 
   const results: Record<string, Awaited<ReturnType<typeof material>>> = {}
   const masks: Record<string, { fill: string; blur: string }> = {}
@@ -50,10 +56,10 @@ it('shares menu transparency and blur across palettes and follows native menu bo
       expect(overlayFill).toBe(platform === 'darwin'
         ? dark ? 'rgba(48, 49, 54, 0.94)' : 'rgba(248, 249, 250, 0.94)'
         : dark ? 'rgba(48, 49, 54, 0.64)' : 'rgba(252, 253, 254, 0.7)')
-      await account.click()
-      const menu = page.getByRole('menu').filter({ has: page.getByRole('menuitem', { name: 'Settings', exact: true }) })
-      await menu.waitFor()
-      const appearance = await material(menu)
+      await row.hover()
+      await action.click()
+      await sessionMenu.waitFor()
+      const appearance = await material(sessionMenu)
       expect(appearance).toMatchObject({
         fill: dark ? 'rgba(48, 49, 54, 0.64)' : 'rgba(252, 253, 254, 0.7)',
         blur: 'blur(40px) saturate(1.5)',
@@ -66,7 +72,7 @@ it('shares menu transparency and blur across palettes and follows native menu bo
         for (const height of [950, 1000]) {
           await page.setViewportSize({ width: 1440, height })
           await expect.poll(async () => {
-            const card = await menu.boundingBox()
+            const card = await sessionMenu.boundingBox()
             const base = await backing.boundingBox()
             return card !== null && base !== null
               && Math.abs(card.x - base.x) < 1 && Math.abs(card.y - base.y) < 1
@@ -79,8 +85,7 @@ it('shares menu transparency and blur across palettes and follows native menu bo
       }
       await page.keyboard.press('Escape')
       await expect.poll(() => backing.count()).toBe(0)
-      await account.click()
-      await page.getByRole('menuitem', { name: 'Settings', exact: true }).click()
+      await openSettings(page, 'en')
       const settings = page.getByRole('dialog', { name: 'Settings', exact: true })
       await settings.waitFor()
       const mask = await settings.locator('..').locator(':scope > [aria-hidden="true"]').evaluate((node) => {
@@ -96,14 +101,8 @@ it('shares menu transparency and blur across palettes and follows native menu bo
   await compareOrRefreshGolden(join(expected, 'materials.expected.json'), JSON.stringify(results, null, 2), webSnapshotMode())
   await compareOrRefreshGolden(join(expected, 'modal-masks.expected.json'), JSON.stringify(masks, null, 2), webSnapshotMode())
 
-  const ungrouped = page.getByText('Ungrouped', { exact: true })
-  const group = ungrouped.locator('xpath=ancestor::*[@aria-expanded][1]')
-  await group.waitFor()
-  if (await group.getAttribute('aria-expanded') !== 'true') await ungrouped.click()
-  const action = page.locator('button[aria-label^="Session actions for "]').first()
-  await action.locator('xpath=ancestor::*[@role="treeitem"][1]').hover()
+  await row.hover()
   await action.click()
-  const sessionMenu = page.getByRole('menu').filter({ has: page.getByRole('menuitem', { name: 'Rename', exact: true }) })
   await sessionMenu.waitFor()
   expect(await material(sessionMenu)).toEqual(results['darwin-dark'])
   await compareOrRefreshGolden(join(expected, 'session-menu.expected.md'),
@@ -111,7 +110,7 @@ it('shares menu transparency and blur across palettes and follows native menu bo
   await page.keyboard.press('Escape')
   await expect.poll(() => page.locator('[data-menu-backing]').count()).toBe(0)
 
-  await action.locator('xpath=ancestor::*[@role="treeitem"][1]').click({ button: 'right' })
+  await row.click({ button: 'right' })
   await sessionMenu.waitFor()
   const popup = page.locator('[data-context-menu]')
   const stripes = await page.evaluateHandle(() => {
