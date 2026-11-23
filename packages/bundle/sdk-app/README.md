@@ -78,6 +78,6 @@ Enabling `plugin_manager` changes the tool-schema prefix from earlier SDK versio
 <details>
 <summary>Working context for maintainers — click to expand</summary>
 
-The [SDK/Desktop tool comparison](../../../apps/cli/tests/profiles/sdk/desktop-tools.expected.e2e.ts) runs without API credentials in `test:expected`, included in the required PR consumer job. It covers standard/PTC root sessions with Team disabled; Team parity is deferred to #7172. After building, run `CI=true pnpm run test:expected apps/cli/tests/profiles/sdk/desktop-tools.expected.e2e.ts`. Maintain exact, reasoned differences in the adjacent `tool-parity.ts`; resolved differences invalidate their exceptions. Existing SDK session snapshots and installed-runtime smokes independently check model output and packaging.
+The [SDK/Desktop tool comparison](../../../apps/cli/tests/profiles/sdk/desktop-tools.expected.e2e.ts) runs without API credentials in `test:expected`, included in the required PR consumer job. It covers standard/PTC root sessions with Team disabled. Team parity is deferred to #7172. After building, run `CI=true pnpm run test:expected apps/cli/tests/profiles/sdk/desktop-tools.expected.e2e.ts`. Maintain exact, reasoned differences in [tool-parity.ts](../../../apps/cli/tests/profiles/sdk/tool-parity.ts). Resolved differences invalidate their exceptions. Existing SDK session snapshots and installed-runtime smokes independently check model output and packaging.
 
 </details>

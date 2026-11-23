@@ -16,6 +16,16 @@ it('reports unexpected differences in both directions without hiding shared addi
   )
 })
 
+it.for(['standard', 'ptc'] as const)('keeps the Artifact exceptions specific to Desktop in %s', (mode) => {
+  const sdk = mode === 'ptc' ? ['read', 'plugin_manager', 'workflow'] : ['read']
+  const desktop = ['read', 'list_subagent_models', 'artifact', 'artifact_runtime', 'scene']
+  expect(() => { assertToolParity(mode, sdk, desktop) }).not.toThrow()
+  expect(() => { assertToolParity(mode, sdk, desktop.filter(tool => tool !== 'artifact_runtime')) })
+    .toThrow('Stale exceptions: desktop:artifact_runtime')
+  expect(() => { assertToolParity(mode, [...sdk, 'scene'], desktop) })
+    .toThrow('Stale exceptions: desktop:scene')
+})
+
 it('rejects empty observations, undocumented exceptions and duplicate exceptions', () => {
   expect(() => { assertToolParity('standard', [], [], []) }).toThrow('Empty tool inventory')
   expect(() => { assertToolParity('standard', ['read'], ['read'], [

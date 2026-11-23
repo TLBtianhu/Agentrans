@@ -7,11 +7,21 @@ interface Exception {
   reason: string
 }
 
+const desktopArtifactExceptions: readonly Exception[] = [
+  { tool: 'artifact', side: 'desktop', reason: 'Web and Desktop presets offer interactive HTML Artifacts in chat.' },
+  { tool: 'scene', side: 'desktop', reason: 'Web and Desktop presets offer interactive SceneSpec renderers in chat.' },
+  { tool: 'artifact_runtime', side: 'desktop', reason: 'Web and Desktop attach renderer reports that this tool inspects.' },
+]
+
 /** Intentional product differences; obsolete entries fail alongside undeclared differences. */
 export const toolParityExceptions: Record<ToolMode, readonly Exception[]> = {
-  standard: [{ tool: 'list_subagent_models', side: 'desktop',
-    reason: 'Desktop enables subagent model discovery; SDK delegation inherits the caller model by default.' }],
+  standard: [
+    ...desktopArtifactExceptions,
+    { tool: 'list_subagent_models', side: 'desktop',
+      reason: 'Desktop enables subagent model discovery; SDK delegation inherits the caller model by default.' },
+  ],
   ptc: [
+    ...desktopArtifactExceptions,
     { tool: 'list_subagent_models', side: 'desktop',
       reason: 'Desktop enables subagent model discovery; SDK delegation inherits the caller model by default.' },
     { tool: 'plugin_manager', side: 'sdk',
