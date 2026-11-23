@@ -474,6 +474,7 @@ function assertLeanChildRecord(agent: Agent): void {
  */
 const EXPECTED_TOOLS = [
   'artifact',
+  'artifact_runtime',
   'ask_user_question',
   'bash',
   'create_goal',
@@ -490,6 +491,7 @@ const EXPECTED_TOOLS = [
   'present',
   'read',
   'read_image',
+  'scene',
   'schedule_create',
   'schedule_edit',
   'schedule_list',
