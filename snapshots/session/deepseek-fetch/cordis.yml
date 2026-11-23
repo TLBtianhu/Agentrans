@@ -2,17 +2,17 @@
     - id: deepseek-fetch-fixture
       name: './deepseek-fetch-fixture.mjs'
 
+    - id: web-deepseek-api
+      name: '@agentrans/web-deepseek-api'
+      config:
+        apiKeyEnv: AGENTRANS_SNAPSHOT_WEB_API_KEY
+        baseURL: http://127.0.0.1:43118/api/v1/tools
+
 - id: web
   name: '@agentrans/web'
   config:
     searchProvider: deepseek-official
     fetchProvider: deepseek-fetch-api
-
-- id: web-deepseek-api
-  name: '@agentrans/web-deepseek-api'
-  config:
-    apiKey: snapshot-key
-    baseURL: http://127.0.0.1:43118/api/v1/tools
 
 - id: tool-web
   name: '@agentrans/tool-web'

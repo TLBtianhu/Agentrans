@@ -4,6 +4,8 @@ profile: headless
 composition: deepseek-fetch
 recording: authored
 permission: workspace-write
+environment:
+  AGENTRANS_SNAPSHOT_WEB_API_KEY: snapshot-key
 header:
   class: deepseek-fetch
   pin: true
