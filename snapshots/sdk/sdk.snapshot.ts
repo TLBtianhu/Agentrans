@@ -744,6 +744,7 @@ const legacySdkCompositions = new Set([
   'system-prompt-in-history',
 ])
 const legacySdkContextPatch = fileURLToPath(new URL('./legacy-context.patch.yml', import.meta.url))
+const sessionLogReceiptReplayPatch = fileURLToPath(new URL('./session-log-receipt.replay.patch.yml', import.meta.url))
 
 function authoredPatches(scenario: CorpusScenario, replaying: boolean): string[] {
   const owner = compositionOwner(scenario)
@@ -870,11 +871,14 @@ async function runScenario(scenario: CorpusScenario): Promise<{
   await mkdir(patchRoot, { recursive: true })
   const networkAudit = join(patchRoot, 'network-audit.jsonl')
   const assertions = SDK_ASSERTIONS[scenario.name] ?? {}
+  const replaySessionLogReceipt = (mode === 'replay' || refreshing)
+    && fixtureContents.some(log => records(log).some(record => record.type === 'session-log-deepseek/delivery-accepted'))
   const patches = [
     ...legacySdkCompositions.has(scenario.manifest.composition) ? [legacySdkContextPatch] : [],
     ...authoredPatches(scenario, !recording),
     ...assertions.patches ?? [],
     ...scenario.name === 'session-resume' && !recording ? [join(scenario.dir, 'replay.cordis.yml')] : [],
+    ...replaySessionLogReceipt ? [sessionLogReceiptReplayPatch] : [],
   ]
     .map((patch, index) => materializeProfilePatch(patch, cwd, scenario.manifest.profile, patchRoot, index))
   let childSessionsRoot: string | undefined

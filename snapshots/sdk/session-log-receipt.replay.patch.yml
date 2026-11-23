@@ -1,0 +1,4 @@
+# Reproduce a recorded acceptance receipt through the keyless replay adapter.
+# The adapter accepts the contribution in process without sending it.
+- id: session-log-deepseek
+  disabled: false

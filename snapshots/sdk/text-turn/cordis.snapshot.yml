@@ -4,11 +4,6 @@
   name: '@agentrans/llm-deepseek-api-key'
   disabled: true
 
-# The historical Session and SDK notifications contain an acceptance receipt.
-# The replay adapter accepts the contribution in process, without sending it.
-- id: session-log-deepseek
-  disabled: false
-
 - insert:
     - id: llm-replay
       name: '@agentrans/llm-replay'
