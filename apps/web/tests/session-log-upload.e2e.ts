@@ -10,7 +10,7 @@ import { startMockLlmServer } from '@agentrans/llm-mock-server'
 import { launchWebScaffold, webSnapshotMode } from './scaffold.ts'
 import { connectFreshWorkspace, newEnglishPage, openSettings } from './support.ts'
 
-it.skipIf(webSnapshotMode() === 'record')('persists the upload switch and omits or resumes session logs on subsequent API requests', async () => {
+it.skipIf(webSnapshotMode() === 'record')('persists the opt-in upload switch and omits or resumes session logs on subsequent API requests', async () => {
   const root = await mkdtemp(join(tmpdir(), 'dsh-upload-browser-'))
   onTestFinished(() => rm(root, { recursive: true, force: true }))
   const server = await startMockLlmServer({ sequence: ['success', 'success', 'success'], successText: 'UPLOAD_SETTING_DONE' })
@@ -19,7 +19,8 @@ it.skipIf(webSnapshotMode() === 'record')('persists the upload switch and omits 
   const overlay = join(root, 'upload.yml')
   await writeFile(overlay, JSON.stringify([
     { id: 'llm-deepseek', config: { baseURL: server.baseURL, apiKeyEnv: key } },
-    { id: 'session-log-deepseek', config: { enabled: true } },
+    { id: 'session-log-deepseek', disabled: false, config: { enabled: true } },
+    { id: 'ui-settings-session-log', disabled: false },
     { id: 'agent-default-model', config: { provider: 'deepseek-official', model: 'deepseek-v4-flash' } },
   ]))
   const scaffold = await launchWebScaffold({ deepSeekMissingCredential: true, extraOverlayPath: overlay })
