@@ -234,7 +234,7 @@ export function apply(ctx: Context, config: Config): void {
           console.log('agentrans web: opening the default browser; pass --no-open to disable')
           void internals.openBrowser(authenticatedUrl).catch((error: unknown) => {
             const reason = error instanceof Error ? error.message : String(error)
-            console.error(`web-app: could not open the default browser because ${reason}; use the dsh web URL printed at startup`)
+            console.error(`web-app: could not open the default browser because ${reason}; use the agentrans web URL printed at startup`)
           })
         }
       }
