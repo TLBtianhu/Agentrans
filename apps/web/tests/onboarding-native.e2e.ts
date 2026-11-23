@@ -11,7 +11,7 @@ import {
 import { openSettings, ZH_BROWSER_LOCALE, saveFailureShot } from './support.ts'
 
 const SNAPSHOT_DIR = fileURLToPath(new URL('./expected/onboarding-native', import.meta.url))
-const SIGNED_OUT_MENU_EXPECTED = join(SNAPSHOT_DIR, 'signed-out-menu.expected.md')
+const SETTINGS_TRIGGER_EXPECTED = join(SNAPSHOT_DIR, 'settings-trigger.expected.md')
 const MODE = webSnapshotMode()
 
 describe.skipIf(MODE === 'record').each([false, true])('web e2e: native credential onboarding (desktop marker: %s)', (desktop) => {
@@ -28,7 +28,7 @@ describe.skipIf(MODE === 'record').each([false, true])('web e2e: native credenti
     })
     browser = await chromium.launch()
     page = await browser.newPage({ viewport: { width: 1440, height: 960 }, locale: ZH_BROWSER_LOCALE })
-    // The shared menu golden uses the Linux shortcut profile on every test host.
+    // The Settings trigger golden uses the Linux shortcut profile on every test host.
     await page.addInitScript(() => { Object.defineProperty(navigator, 'platform', { value: 'Linux x86_64' }) })
     if (desktop) await page.addInitScript(() => { Object.defineProperty(globalThis, 'dshDesktop', { value: { protocolVersion: 1 } }) })
     tripwire = watchConsole(page)
@@ -57,34 +57,12 @@ describe.skipIf(MODE === 'record').each([false, true])('web e2e: native credenti
         await page.reload({ waitUntil: 'load' })
         acknowledgeReloadConnectionLoss(tripwire, warningsBefore)
       }
-      const accountMenu = page.getByRole('button', { name: '账号菜单', exact: true })
-      await accountMenu.waitFor()
-      expect(await accountMenu.textContent()).toBe('更多')
-      const triggerBox = (await accountMenu.boundingBox())!
-      expect(Math.abs(triggerBox.height - 32)).toBeLessThan(1)
-      await accountMenu.click()
-      const menu = page.getByRole('menu')
-      await menu.waitFor()
-      expect(await menu.getByRole('menuitem').count()).toBe(3)
-      for (const name of ['设置', '意见反馈', '登录']) {
-        expect(await menu.getByRole('menuitem', { name, exact: true }).count()).toBe(1)
-      }
-      const menuBox = (await menu.boundingBox())!
-      expect(Math.abs(menuBox.width - 124)).toBeLessThan(1)
-      expect(Math.abs(menuBox.height - 128)).toBeLessThan(1)
-      expect(Math.abs(triggerBox.y - (menuBox.y + menuBox.height) - 4)).toBeLessThan(1)
-      for (const row of await menu.getByRole('menuitem').all()) {
-        const rowBox = (await row.boundingBox())!
-        expect(Math.abs(rowBox.height - 40)).toBeLessThan(1)
-        expect(Math.abs(menuBox.width - rowBox.width - 8)).toBeLessThan(1)
-        const glyph = (await row.locator('svg').first().boundingBox())!
-        expect(Math.abs(glyph.width - 16)).toBeLessThan(1)
-        expect(Math.abs(glyph.height - 16)).toBeLessThan(1)
-      }
-      const menuAria = await captureStableAria(page, '[role="menu"]', scaffold.workspaceCwd)
-      await compareOrRefreshGolden(SIGNED_OUT_MENU_EXPECTED, menuAria, MODE)
-      await page.keyboard.press('Escape')
-      await menu.waitFor({ state: 'detached' })
+      const settingsTrigger = page.getByRole('button', { name: '设置', exact: true })
+      await settingsTrigger.waitFor()
+      expect(await settingsTrigger.getAttribute('aria-haspopup')).toBe('dialog')
+      expect(await settingsTrigger.getAttribute('aria-expanded')).toBe('false')
+      expect(await page.getByRole('button', { name: '账号菜单', exact: true }).count()).toBe(0)
+      await compareOrRefreshGolden(SETTINGS_TRIGGER_EXPECTED, await settingsTrigger.ariaSnapshot(), MODE)
       expect(await page.getByRole('dialog', { name: '开始使用', exact: true }).count()).toBe(0)
       await openSettings(page, 'zh')
       const settings = page.getByRole('dialog', { name: '设置', exact: true })
@@ -99,6 +77,6 @@ describe.skipIf(MODE === 'record').each([false, true])('web e2e: native credenti
     }
     expect(tripwire.warnings).toEqual([])
     expect(tripwire.pageErrors).toEqual([])
-    await assertFixtureInventory(SNAPSHOT_DIR, ['models.expected.md', 'signed-out-menu.expected.md'])
+    await assertFixtureInventory(SNAPSHOT_DIR, ['models.expected.md', 'settings-trigger.expected.md'])
   })
 })
