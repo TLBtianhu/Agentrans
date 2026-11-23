@@ -9,7 +9,7 @@ import {
 } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { createRequire } from 'node:module'
-import { dirname, join } from 'node:path'
+import { basename, dirname, join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { afterAll, describe, expect, it, onTestFinished, vi } from 'vitest'
 import {
@@ -262,7 +262,10 @@ describe('resolveBundleDir', () => {
     writeFileSync(join(profileDir, 'node_modules', 'local-only', 'package.json'), JSON.stringify({ name: 'local-only', version: '0.0.0' }))
     expect(resolveBundleDir('t', 'in-box', anchor, profileDir)).toContain('in-box')
     expect(resolveBundleDir('t', 'local-only', anchor, profileDir)).toContain('local-only')
-    expect(() => resolveBundleDir('t', 'absent', anchor, profileDir)).toThrow('cannot resolve profile bundle')
+    expect(() => resolveBundleDir('t', 'absent', anchor, profileDir)).toThrow(new Error(
+      `t: cannot resolve profile bundle "absent" from the Agentrans installation or ${profileDir}; `
+      + `run 'agentrans plugin --profile ${basename(profileDir)} install' if its dependency is not installed`,
+    ))
   })
 
   it('resolves a package whose exports map omits ./package.json', () => {

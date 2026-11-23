@@ -647,6 +647,7 @@ function packageDirFromAnchor(anchor: string, packageName: string): string | und
  * @param installAnchor - absolute path of a file inside the dsh app package (its package.json).
  * @param profileDir - the profile directory (second anchor).
  * @returns the bundle package's absolute directory.
+ * @throws when neither anchor supplies the bundle, with the Agentrans command that can install its dependency.
  */
 export function resolveBundleDir(
   binName: string, packageName: string, installAnchor: string, profileDir: string,
@@ -656,8 +657,8 @@ export function resolveBundleDir(
     if (dir !== undefined) return dir
   }
   throw new Error(
-    `${binName}: cannot resolve profile bundle ${JSON.stringify(packageName)} from the dsh installation or ${profileDir}; `
-    + `run 'dsh plugin --profile ${basename(profileDir)} install' if its dependency is not installed`,
+    `${binName}: cannot resolve profile bundle ${JSON.stringify(packageName)} from the Agentrans installation or ${profileDir}; `
+    + `run 'agentrans plugin --profile ${basename(profileDir)} install' if its dependency is not installed`,
   )
 }
 

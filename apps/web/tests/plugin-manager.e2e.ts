@@ -758,16 +758,18 @@ describe('web e2e: plugin manager', () => {
     await panel.getByText(/cannot resolve profile bundle/).waitFor({ timeout: 10_000 })
     expect((await scaffold.ctx.pluginManager.listBundles()).find(row => row.name === '@fixture/missing-bundle'))
       .toMatchObject({ enabled: true, installed: false, removable: true, error: { code: 'operation-error' }, rows: [] })
-    await compareOrRefreshGolden(join(SNAPSHOT_DIR, 'missing-bundle.expected.md'),
-      await captureStableAria(page, '[data-plugin-panel]', scaffold.workspaceCwd, {
-        replacements: [[scaffold.harnessHome, '{{home}}']],
-      }), MODE)
+    const profileDir = join(scaffold.harnessHome, 'profiles', 'scaffold')
+    const snapshot = await captureStableAria(page, '[data-plugin-panel]', scaffold.workspaceCwd, {
+      // The ARIA status is a quoted scalar, so Playwright escapes Windows paths.
+      replacements: [[profileDir.replaceAll('\\', '\\\\'), '{{home}}/profiles/scaffold']],
+    })
     await toggle.click()
     await expect.poll(async () => (JSON.parse(await homeFile('profiles', 'scaffold', 'package.json')) as {
       agentrans: { profile: { bundles: string[] } }
     }).agentrans.profile.bundles, { timeout: 10_000 }).toEqual(SCAFFOLD_BUNDLES)
     await expect.poll(() => panel.getByText(/cannot resolve profile bundle/).count(), { timeout: 10_000 }).toBe(0)
     expect((await scaffold.ctx.pluginManager.listBundles()).some(row => row.name === '@fixture/missing-bundle')).toBe(false)
+    await compareOrRefreshGolden(join(SNAPSHOT_DIR, 'missing-bundle.expected.md'), snapshot, MODE)
     expect(tripwire.pageErrors).toEqual([])
   }, 60_000)
 
@@ -1079,8 +1081,9 @@ describe('web e2e: plugin manager', () => {
     const readmeHeading = panel.locator('[data-detail-document]').getByRole('heading', { name: 'Fixture bundle', exact: true })
     await readmeHeading.waitFor()
     expect([...scaffold.ctx.loader.entries()].some(entry => entry.options.name.startsWith('@fixture/bundle'))).toBe(false)
+    const replacements = [[join(FIXTURE_PLUGINS, 'fixture-bundle'), '{{fixtures}}/fixture-bundle']] as const
     await compareOrRefreshGolden(EXPORTS_EXPECTED, await captureStableAria(page, '[data-plugin-panel]', scaffold.workspaceCwd, {
-      replacements: [[FIXTURE_PLUGINS, '{{fixtures}}']],
+      replacements,
     }), MODE)
     try {
       await setLanguage('en')
@@ -1090,7 +1093,7 @@ describe('web e2e: plugin manager', () => {
       expect(await review.getByText('审查工作区中的改动。', { exact: true }).count()).toBe(0)
       await readmeHeading.waitFor()
       await compareOrRefreshGolden(EXPORTS_EN_EXPECTED, await captureStableAria(page, '[data-plugin-panel]', scaffold.workspaceCwd, {
-        replacements: [[FIXTURE_PLUGINS, '{{fixtures}}']],
+        replacements,
       }), MODE)
       expect(await panel.locator('[data-plugin-name]').textContent()).toBe('@fixture/bundle')
     } finally {
