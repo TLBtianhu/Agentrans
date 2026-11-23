@@ -9,10 +9,13 @@
   - button "More conversation views"
 - text: "Using ONE run_code program: run bash `echo CODE_ROUND_OK`, then read the file missing.txt catching its error in the program. Return an object with both outcomes. Then reply DONE and stop. {{clock}}"
 - button "Copy"
+- button "Branch into a new conversation"
 - status: Completed
 - button "Completed in {{duration}}" [expanded]
 - button "Ran code, ran commands, read files" [expanded]
 - 'button "Think The user wants me to write a single `run_code` program that:"'
+- button "Branch into a new conversation"
+- text: {{clock}}
 - button "Code Run bash echo and catch missing file read"
 - button "Bash Echo CODE_ROUND_OK" [expanded]
 - text: Done workspace echo CODE_ROUND_OK
@@ -22,15 +25,22 @@
 - text: Failed
 - 'button "Read Error: cannot read \"{{cwd}}/workspace/missing.txt\": not found"'
 - button "Think The program ran successfully. Let me now reply DONE as instructed."
+- button "Branch into a new conversation"
+- text: {{clock}}
 - paragraph: DONE
+- button "Explore a sentence"
+- button "Branch into a new conversation"
+- text: {{clock}}
 - button "Copy"
 - button "Good response"
 - button "Bad response"
 - button "Branch into a new conversation"
 - text: {{clock}}
+- button "Import CSV comparison"
 - textbox "Message or run a task, / commands, @ files or sessions"
 - button "Add files or run commands"
 - 'button "Access mode, current: Workspace Write"': Workspace Write
+- button "Insert formula"
 - button "Select model, current DeepSeek-V4-Flash": DeepSeek-V4-Flash
 - button "Send message" [disabled]
 - button "1 turns 2 steps · {{throughput}} tok/s": 1 turns 2 steps{{throughput}} tok/s

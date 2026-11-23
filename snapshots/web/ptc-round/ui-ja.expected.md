@@ -9,10 +9,13 @@
   - button "その他の会話ビュー"
 - text: "Using ONE run_code program: run bash `echo CODE_ROUND_OK`, then read the file missing.txt catching its error in the program. Return an object with both outcomes. Then reply DONE and stop. {{clock}}"
 - button "コピー"
+- button "新しい会話に分岐"
 - status: 完了
 - button "完了まで {{duration}}" [expanded]
 - button "コードを実行しました、コマンドを実行しました、ファイルを読み取りました" [expanded]
 - 'button "思考 The user wants me to write a single `run_code` program that:"'
+- button "新しい会話に分岐"
+- text: {{clock}}
 - button "コード Run bash echo and catch missing file read"
 - button "Bash Echo CODE_ROUND_OK" [expanded]
 - text: 完了 workspace echo CODE_ROUND_OK
@@ -22,15 +25,22 @@
 - text: 失敗
 - 'button "読み取り Error: cannot read \"{{cwd}}/workspace/missing.txt\": not found"'
 - button "思考 The program ran successfully. Let me now reply DONE as instructed."
+- button "新しい会話に分岐"
+- text: {{clock}}
 - paragraph: DONE
+- button "一文を選んで探究"
+- button "新しい会話に分岐"
+- text: {{clock}}
 - button "コピー"
 - button "良い回答"
 - button "悪い回答"
 - button "新しい会話に分岐"
 - text: {{clock}}
+- button "CSV 比較をインポート"
 - textbox "メッセージを送信するかタスクを実行、/ コマンド、@ ファイルやセッション"
 - button "ファイルを追加またはコマンドを実行"
 - 'button "アクセスモード、現在: ワークスペース書き込み"': ワークスペース書き込み
+- button "数式を挿入"
 - button "モデルを選択、現在 DeepSeek-V4-Flash": DeepSeek-V4-Flash
 - button "メッセージを送信" [disabled]
 - button "1ターン 2ステップ · {{throughput}} tok/s": 1ターン 2ステップ{{throughput}} tok/s
