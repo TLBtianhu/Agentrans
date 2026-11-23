@@ -9,6 +9,7 @@
   - button "More conversation views"
 - text: Use read_image to inspect red.png. Then reply exactly MINIMAL_IMAGE_OK and stop. {{clock}}
 - button "Copy"
+- button "Branch into a new conversation"
 - status: Completed
 - button "Completed in {{duration}}" [expanded]
 - button "Read images" [expanded]
@@ -20,14 +21,19 @@
 - text: {{cwd}}/red.png 1x1px, 69 bytes
 - button "Inspect"
 - paragraph: MINIMAL_IMAGE_OK
+- button "Explore a sentence"
+- button "Branch into a new conversation"
+- text: {{clock}}
 - button "Copy"
 - button "Good response"
 - button "Bad response"
 - button "Branch into a new conversation"
 - text: {{clock}}
+- button "Import CSV comparison"
 - textbox "Message or run a task, / commands, @ files or sessions"
 - button "Add files or run commands"
 - 'button "Access mode, current: Workspace Write"': Workspace Write
+- button "Insert formula"
 - button "Select model, current DeepSeek-V4-Flash-Vision-Exp, reasoning effort high": DeepSeek-V4-Flash-Vision-Exp high
 - button "Send message" [disabled]
 - button "1 turns 2 steps · {{throughput}} tok/s": 1 turns 2 steps{{throughput}} tok/s

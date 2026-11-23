@@ -3,9 +3,7 @@ import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import type { Browser, Locator, Page } from 'playwright'
 import { chromium } from 'playwright'
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, onTestFailed, vi } from 'vitest'
-import type { AccountView } from '@agentrans/deepseek-account/types'
-import type {} from '@agentrans/deepseek-account'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, onTestFailed } from 'vitest'
 import type {} from '@agentrans/api-session-controller'
 import {
   compareOrRefreshGolden, launchWebScaffold, seedSession, watchConsole,
@@ -261,7 +259,9 @@ describe('web e2e: sidebar search alignment and row action targets', () => {
       else await input.press('Escape')
     }
     await page.getByRole('button', { name: 'Collapse sidebar', exact: true }).click()
-    await expect.poll(() => page.getByRole('button', { name: 'Account menu', exact: true }).getAttribute('data-collapsed')).toBe('true')
+    await page.getByRole('button', { name: 'Open sidebar', exact: true }).waitFor()
+    // The wide content stays mounted until the sidebar finishes collapsing.
+    await expect.poll(async () => (await page.locator('button[class*="newSession"]').boundingBox())?.width).toBe(36)
     const add = page.getByRole('button', { name: 'Add workspace', exact: true })
     const samples = await add.evaluate(async (button, entry) => {
       const header = button.closest<HTMLElement>('[class*="sectionHeader"]')
@@ -415,72 +415,45 @@ describe('web e2e: sidebar search alignment and row action targets', () => {
     expect(tripwire.pageErrors).toEqual([])
   })
 
-  it.each([false, true])('keeps account footer geometry in wide and rail layouts (signed in: %s)', async (signedIn) => {
-    onTestFailed(() => saveFailureShot(page, `web-e2e-sidebar-account-${String(signedIn)}`))
-    const account = scaffold.ctx.deepseekAccount
-    const state: AccountView = {
-      status: 'credential-stored', attempt: null,
-      links: { usageUrl: 'https://platform.deepseek.com/usage', topUpUrl: 'https://platform.deepseek.com/top_up' },
-    }
-    // Only Platform identity is synthetic; the account provider's RPC and client renderer remain composed.
-    const mocks = signedIn ? [
-      vi.spyOn(account, 'getState').mockResolvedValue(state),
-      vi.spyOn(account, 'getProfile').mockResolvedValue({
-        status: 'ready', value: { id: null, name: 'Sidebar account', contact: null, avatarUrl: null },
-      }),
-      vi.spyOn(account, 'getBalance').mockResolvedValue({ status: 'ready', value: [], bonusWallets: [] }),
-      vi.spyOn(account, 'watch').mockImplementation(async function* (signal) {
-        yield state
-        if (signal.aborted) return
-        await new Promise<void>((resolve) => { signal.addEventListener('abort', () => { resolve() }, { once: true }) })
-      }),
-    ] : []
-    try {
-      if (signedIn) await page.reload({ waitUntil: 'load' })
-      const accountButton = page.getByRole('button', { name: 'Account menu', exact: true })
-      await expect.poll(() => accountButton.getAttribute('data-signed-out')).toBe(String(!signedIn))
-      const measure = () => accountButton.evaluate((element) => {
-        const button = element.getBoundingClientRect()
-        const style = getComputedStyle(element)
-        const newSession = document.querySelector('button[class*="newSession"]')
-        if (newSession === null) throw new Error('New session reference is missing')
-        const reference = newSession.getBoundingClientRect()
-        const footer = element.closest('[class*="footArea"]')?.getBoundingClientRect()
-        if (footer === undefined) throw new Error('Account footer is missing')
-        return {
-          height: button.height, width: button.width,
-          footerCenterOffset: (button.left + button.right - footer.left - footer.right) / 2,
-          leftOffset: button.left - reference.left, rightOffset: button.right - reference.right,
-          paintedLeftOffset: button.left + Number.parseFloat(style.borderLeftWidth) - reference.left,
-          paintedRightOffset: button.right - Number.parseFloat(style.borderRightWidth) - reference.right,
-        }
-      })
-      const wide = await measure()
-      expect(wide.height).toBe(signedIn ? 44 : 32)
-      expect(wide.leftOffset).toBe(signedIn ? -2 : -4)
-      expect(wide.rightOffset).toBe(signedIn ? 2 : 4)
-      expect(wide.paintedLeftOffset).toBe(signedIn ? -2 : -1)
-      expect(wide.paintedRightOffset).toBe(signedIn ? 2 : 1)
-      await page.getByRole('button', { name: 'Collapse sidebar', exact: true }).click()
-      await expect.poll(() => accountButton.getAttribute('data-collapsed')).toBe('true')
-      await expect.poll(async () => {
-        const rect = await accountButton.boundingBox()
-        return rect === null ? null : { width: rect.width, height: rect.height }
-      }).toEqual({ width: 36, height: 36 })
-      await page.locator('button[class*="newSession"]').evaluate(async (element) => {
-        await Promise.all(element.getAnimations().map(animation => animation.finished))
-      })
-      const rail = await measure()
-      expect(rail.footerCenterOffset).toBe(0)
-      await compareOrRefreshGolden(
-        fileURLToPath(new URL(`./expected/sidebar-alignment/account-${signedIn ? 'signed-in' : 'signed-out'}.expected.md`, import.meta.url)),
-        JSON.stringify({ wide, rail }, null, 2), MODE,
-      )
-      expect(tripwire.pageErrors).toEqual([])
-    } finally {
-      await page.close()
-      mocks.forEach((mock) => { mock.mockRestore() })
-    }
+  it('keeps Settings footer geometry in wide and rail layouts', async () => {
+    onTestFailed(() => saveFailureShot(page, 'web-e2e-sidebar-settings-footer'))
+    const settings = page.getByRole('button', { name: 'Settings', exact: true })
+    await settings.waitFor()
+    expect(await settings.getAttribute('aria-haspopup')).toBe('dialog')
+    expect(await page.getByRole('button', { name: 'Account menu', exact: true }).count()).toBe(0)
+    const measure = () => settings.evaluate((element) => {
+      const button = element.getBoundingClientRect()
+      const style = getComputedStyle(element)
+      const newSession = document.querySelector('button[class*="newSession"]')
+      if (newSession === null) throw new Error('New session reference is missing')
+      const reference = newSession.getBoundingClientRect()
+      const footer = element.closest('[class*="footArea"]')?.getBoundingClientRect()
+      if (footer === undefined) throw new Error('Settings footer is missing')
+      return {
+        height: button.height, width: button.width,
+        footerCenterOffset: (button.left + button.right - footer.left - footer.right) / 2,
+        leftOffset: button.left - reference.left, rightOffset: button.right - reference.right,
+        paintedLeftOffset: button.left + Number.parseFloat(style.borderLeftWidth) - reference.left,
+        paintedRightOffset: button.right - Number.parseFloat(style.borderRightWidth) - reference.right,
+        backgroundClip: style.backgroundClip,
+      }
+    })
+    await expect.poll(measure).toMatchObject({
+      height: 42, footerCenterOffset: 0, leftOffset: -4, rightOffset: 4,
+      paintedLeftOffset: -1, paintedRightOffset: 1, backgroundClip: 'padding-box',
+    })
+    const wide = await measure()
+    await page.getByRole('button', { name: 'Collapse sidebar', exact: true }).click()
+    await expect.poll(measure).toMatchObject({ width: 36, height: 36, footerCenterOffset: 0, backgroundClip: 'border-box' })
+    await page.locator('button[class*="newSession"]').evaluate(async (element) => {
+      await Promise.all(element.getAnimations().map(animation => animation.finished))
+    })
+    const rail = await measure()
+    await compareOrRefreshGolden(
+      fileURLToPath(new URL('./expected/sidebar-alignment/settings-footer.expected.md', import.meta.url)),
+      JSON.stringify({ wide, rail }, null, 2), MODE,
+    )
+    expect(tripwire.pageErrors).toEqual([])
   })
 
   it.each(['session', 'workspace'] as const)('keeps %s action glyphs in 16px layout space with 24px buttons', async (kind) => {
