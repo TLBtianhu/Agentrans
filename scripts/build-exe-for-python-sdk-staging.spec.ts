@@ -1,10 +1,9 @@
 import { existsSync } from 'node:fs'
 import { mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { join, relative } from 'node:path'
-import { createRequire } from 'node:module'
+import { join } from 'node:path'
 import { afterEach, expect, it } from 'vitest'
-import { deduplicateStagedWorkspacePackages, materializeStagedLinks } from './build-exe-for-python-sdk-staging.ts'
+import { assertSingleWorkspaceCopies, materializeStagedLinks } from './build-exe-for-python-sdk-staging.ts'
 
 const temporaryDirectories: string[] = []
 const directoryLinkType = process.platform === 'win32' ? 'junction' : 'dir'
@@ -66,56 +65,34 @@ it('copies workspace package links as files and removes command shims', async ()
   expect(await listSymlinks(staging)).toEqual([])
 })
 
-it('shares an identical workspace package while retaining different peers and third-party copies', async () => {
-  const workspace = await fixture('dsh-python-staging-dedupe-')
-  const staging = join(workspace, 'payload')
+it('accepts one staged copy of each workspace package beside repeated third-party copies', async () => {
+  const staging = await fixture('dsh-python-staging-single-')
   const modules = join(staging, 'node_modules')
-  const root = join(modules, '@fixture', 'tools')
-  const duplicate = join(modules, 'app', 'node_modules', '@fixture', 'tools')
-  const differentPeers = join(modules, 'other', 'node_modules', '@fixture', 'tools')
-  const external = join(modules, 'external')
-  const externalCopy = join(modules, 'app', 'node_modules', 'external')
-  for (const directory of [root, duplicate, differentPeers, external, externalCopy]) {
-    await mkdir(directory, { recursive: true })
-    await writeFile(join(directory, 'index.js'), 'exports.scheduler = Symbol("scheduler")\n')
-  }
-  const locations = (paths: string[]) => paths.map(path => relative(workspace, path))
+  for (const directory of ['@fixture/tools', 'app', 'app/node_modules/external', 'external']) await mkdir(join(modules, directory), { recursive: true })
   await writeFile(join(modules, '.modules.yaml'), JSON.stringify({ hoistedLocations: {
-    '@fixture/tools@file:packages/tools(peer@1)': locations([root, duplicate]),
-    '@fixture/tools@file:packages/tools(peer@2)': locations([differentPeers]),
-    'external@1.0.0(@fixture/tools@file:packages/tools)': locations([external, externalCopy]),
+    '@fixture/tools@file:///workspace/packages/tools': [join('node_modules', '@fixture', 'tools')],
+    'app@file:///workspace/packages/app': [join('node_modules', 'app')],
+    'external@1.0.0': [join('node_modules', 'external'), join('node_modules', 'app', 'node_modules', 'external')],
   } }))
 
-  await deduplicateStagedWorkspacePackages(staging, workspace)
-
-  expect(existsSync(duplicate)).toBe(false)
-  for (const directory of [root, differentPeers, external, externalCopy]) {
-    expect(existsSync(join(directory, 'index.js'))).toBe(true)
-  }
-  const fromRoot = createRequire(join(staging, 'entry.cjs'))
-  const fromApp = createRequire(join(modules, 'app', 'entry.cjs'))
-  const fromOther = createRequire(join(modules, 'other', 'entry.cjs'))
-  expect(fromApp('@fixture/tools')).toBe(fromRoot('@fixture/tools'))
-  expect(fromOther('@fixture/tools')).not.toBe(fromRoot('@fixture/tools'))
+  await expect(assertSingleWorkspaceCopies(staging)).resolves.toBeUndefined()
 })
 
-it('rejects invalid deployment metadata before removing any package', async () => {
-  const workspace = await fixture('dsh-python-staging-metadata-')
-  const staging = join(workspace, 'payload')
+it('rejects a second copy or peer variant of a workspace package and invalid metadata', async () => {
+  const staging = await fixture('dsh-python-staging-duplicate-')
   const modules = join(staging, 'node_modules')
-  const root = join(modules, 'tools')
-  const duplicate = join(modules, 'app', 'node_modules', 'tools')
-  const outside = join(workspace, 'source')
-  for (const directory of [root, duplicate, outside]) await mkdir(directory, { recursive: true })
-  const valid = { 'tools@file:packages/tools': [root, duplicate].map(path => relative(workspace, path)) }
-  for (const invalid of [
-    {},
-    { hoistedLocations: { invalid: [42] } },
-    { hoistedLocations: { ...valid, 'other@file:packages/other': [relative(workspace, outside)] } },
-  ]) {
-    await writeFile(join(modules, '.modules.yaml'), JSON.stringify(invalid))
-    await expect(deduplicateStagedWorkspacePackages(staging, workspace)).rejects.toThrow('hoistedLocations')
-    expect(existsSync(duplicate)).toBe(true)
-    expect(existsSync(outside)).toBe(true)
+  for (const directory of ['tools', 'app/node_modules/tools']) await mkdir(join(modules, directory), { recursive: true })
+  const root = join('node_modules', 'tools')
+  const nested = join('node_modules', 'app', 'node_modules', 'tools')
+  for (const [metadata, message] of [
+    [{ hoistedLocations: { 'tools@file:packages/tools': [root, nested] } }, 'exactly one staged copy: tools'],
+    [{ hoistedLocations: { 'tools@file:packages/tools(peer@1)': [root], 'tools@file:packages/tools(peer@2)': [nested] } }, 'exactly one staged copy: tools'],
+    [{}, 'hoistedLocations must map'],
+    [{ hoistedLocations: { invalid: [42] } }, 'hoistedLocations must map'],
+    [{ hoistedLocations: { 'tools@file:packages/tools': [join('..', 'source')] } }, 'outside deployed node_modules'],
+    [{ hoistedLocations: { 'external@1.0.0': [root] } }, 'records no workspace packages'],
+  ] as const) {
+    await writeFile(join(modules, '.modules.yaml'), JSON.stringify(metadata))
+    await expect(assertSingleWorkspaceCopies(staging)).rejects.toThrow(message)
   }
 })
