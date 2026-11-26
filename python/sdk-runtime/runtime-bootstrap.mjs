@@ -68,7 +68,7 @@ if (office !== undefined) {
     },
   })
   process.env.AGENTRANS_BUNDLED_OFFICE_NODE = join(office, 'node', 'bin', process.platform === 'win32' ? 'node.exe' : 'node')
-  process.env.AGENTRANS_BUNDLED_OFFICE_CLI = join(office, 'node_modules', '@agentrans', 'libreoffice-kit', 'lib', 'cli.js')
+  process.env.AGENTRANS_BUNDLED_OFFICE_CLI = join(office, 'node_modules', '@deepseek-ai', 'libreoffice-kit', 'lib', 'cli.js')
 } else if (isSea()) {
   process.env.AGENTRANS_BUNDLED_OFFICE_CLI = ''
 }
