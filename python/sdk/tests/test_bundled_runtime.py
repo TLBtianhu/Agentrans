@@ -55,7 +55,7 @@ def test_bundled_runtime_boots_the_sdk_profile(
     assert init.serverInfo is not None
     assert init.serverInfo.name == "deepseek-harness-sdk-runtime"
     profile = json.loads((tmp_path / "home" / "profiles" / "sdk" / "package.json").read_text())
-    assert profile["dsh"]["profile"]["bundles"] == [
+    assert profile["agentrans"]["profile"]["bundles"] == [
         "@agentrans/base",
         "@agentrans/sdk-app",
     ]

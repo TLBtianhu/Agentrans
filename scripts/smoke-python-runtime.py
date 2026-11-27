@@ -1083,7 +1083,7 @@ def smoke_sdk_plugin_manager(base_url: str, executable: Path, cache: Path) -> No
                         assert manifest_path.read_bytes() == before
                 manifest = json.loads(manifest_path.read_text())
                 assert "dsh-sdk-managed-fixture" in manifest["dependencies"], manifest
-                assert "dsh-sdk-managed-fixture" in manifest["dsh"]["profile"]["bundles"], manifest
+                assert "dsh-sdk-managed-fixture" in manifest["agentrans"]["profile"]["bundles"], manifest
             finally:
                 harness.close()
         with DeepSeekHarness(**config) as restarted:
@@ -1718,7 +1718,7 @@ def smoke_sdk_profile_plugin(base_url: str) -> None:
         manifest = json.loads((agentrans_home / "profiles" / "sdk" / "package.json").read_text())
         if "dsh-python-blackbox-plugin" not in manifest.get("dependencies", {}):
             raise AssertionError(f"dsh plugin did not record the external dependency: {manifest}")
-        if "dsh-python-blackbox-plugin" not in manifest["dsh"]["profile"]["bundles"]:
+        if "dsh-python-blackbox-plugin" not in manifest["agentrans"]["profile"]["bundles"]:
             raise AssertionError(f"dsh plugin did not activate the external bundle: {manifest}")
 
         harness = DeepSeekHarness(
