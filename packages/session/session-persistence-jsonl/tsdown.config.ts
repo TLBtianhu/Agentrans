@@ -16,7 +16,8 @@ export default defineConfig(({ env }) => env?.AGENTRANS_BUILD_FACE === 'client' 
     entry: ['lib/types/worker.js'],
     // Fresh verifiers need no host singleton identity. Inline their JavaScript
     // closure to avoid resolving and compiling workspace packages on every open.
-    deps: { alwaysBundle: [/^@deepseek-ai\/(?!node-addon-system)/] },
+    // The native addon package keeps its upstream scope and stays external.
+    deps: { alwaysBundle: [/^@agentrans\//] },
     outDir: 'lib',
     format: ['cjs'],
     platform: 'node',
