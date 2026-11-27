@@ -14,9 +14,11 @@ export function apply(ctx) {
     if (agent.session.header.origin !== 'subagent') {
       const fork = ctx.sessions.fork(agent.session)
       const nested = ctx.sessions.fork(fork)
-      for (const independent of [fork, nested]) {
-        if (independent.header.parentSession !== undefined || independent.header.origin !== undefined
-          || !independent.header.isSeeded) throw new Error('ordinary fork retained a creator relationship')
+      for (const [branch, parent] of [[fork, agent.session], [nested, fork]]) {
+        if (branch.header.origin !== undefined || !branch.header.isSeeded) {
+          throw new Error('ordinary fork retained a creator relationship')
+        }
+        if (branch.header.parentSession !== parent.id) throw new Error('ordinary fork did not record its direct parent')
       }
       ctx.sessions.create(undefined, {
         seed: agent.session.snapshotEvents(), inheritedEventCount: agent.session.seq,
