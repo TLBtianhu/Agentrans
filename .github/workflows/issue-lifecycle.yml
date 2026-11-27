@@ -33,7 +33,10 @@ concurrency:
 jobs:
   lifecycle:
     name: Issue lifecycle
+    # The board, its GitHub App and its Project live in the upstream repository
+    # (see the token step below); other repositories skip the job.
     if: >-
+      github.repository == 'deepseek-harness/deepseek-harness' &&
       (github.event_name != 'pull_request_review' || github.event.review.state == 'changes_requested') &&
       (github.event_name != 'pull_request' || github.event.action != 'edited' || github.event.changes.body != null)
     runs-on: ubuntu-latest
