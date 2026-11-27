@@ -75,8 +75,23 @@ function inquiryRange(row: HTMLElement, request: InquiryFocus): { range: Range; 
 
 const inquiryHighlight = 'agentrans-inquiry'
 
+/**
+ * Style the inquiry highlight only while one is shown. A stylesheet rule for any
+ * `::highlight()` makes Chromium resolve highlight styles in every style
+ * recalculation, which nearly doubles recalculation time on a long conversation.
+ * @param document - document that shows the highlight.
+ * @returns removes the rule again.
+ */
+function styleInquiryHighlight(document: Document): () => void {
+  const style = document.createElement('style')
+  style.textContent = `::highlight(${inquiryHighlight}) { background-color: Highlight; color: HighlightText; }`
+  document.head.append(style)
+  return () => { style.remove() }
+}
+
 function showInquiryRange(range: Range, focus: HTMLElement): () => void {
   const highlight = typeof Highlight === 'function' ? new Highlight(range) : undefined
+  const unstyle = highlight === undefined ? undefined : styleInquiryHighlight(focus.ownerDocument)
   if (highlight !== undefined) CSS.highlights.set(inquiryHighlight, highlight)
   const originalTabIndex = focus.getAttribute('tabindex')
   focus.tabIndex = -1
@@ -84,6 +99,7 @@ function showInquiryRange(range: Range, focus: HTMLElement): () => void {
   focus.focus({ preventScroll: true })
   return () => {
     if (highlight !== undefined && CSS.highlights.get(inquiryHighlight) === highlight) CSS.highlights.delete(inquiryHighlight)
+    unstyle?.()
     focus.removeAttribute('data-inquiry-anchor')
     if (originalTabIndex === null) focus.removeAttribute('tabindex')
     else focus.setAttribute('tabindex', originalTabIndex)

@@ -433,8 +433,3 @@
     background: var(--dsw-alias-button-floating-hover);
   }
 }
-
-.column :global(::highlight(agentrans-inquiry)) {
-  background-color: Highlight;
-  color: HighlightText;
-}

@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react'
 import { render, waitFor } from '@testing-library/react'
-import { expect, it, vi } from 'vitest'
+import { expect, it, onTestFinished, vi } from 'vitest'
 import { useMessageFocusRequest } from '../src/client/chat/use-message-focus-request.ts'
 
 function Disclosure({ id, seq }: { id: string; seq: number }) {
@@ -69,4 +69,32 @@ it('opens a closed disclosure and focuses only the addressed button inside it', 
   await waitFor(() => { expect(document.activeElement).toBe(filtering) })
   expect(reveal).toHaveBeenCalledExactlyOnceWith(filtering.parentElement, filtering)
   expect(completeViewRequest).toHaveBeenCalledOnce()
+})
+
+it('styles the inquiry highlight only while the addressed passage is shown', () => {
+  const highlights = new Map<string, unknown>()
+  vi.stubGlobal('Highlight', class { constructor(readonly range: Range) {} })
+  vi.stubGlobal('CSS', { highlights })
+  onTestFinished(() => { vi.unstubAllGlobals() })
+  const viewRequest = { view: 'chat', focus: JSON.stringify({ kind: 'inquiry', eventSeq: 7, messageId: 'answer', start: 6, end: 11, excerpt: 'world' }) }
+  const completeViewRequest = vi.fn()
+  const highlightRules = () => [...document.head.querySelectorAll('style')].filter(style => style.textContent?.includes('::highlight(agentrans-inquiry)'))
+
+  function Answer() {
+    const columnRef = useRef<HTMLDivElement>(null)
+    useMessageFocusRequest({ viewRequest, completeViewRequest, loadThrough: async () => {}, ready: true, order: ['answer'],
+      firstSeq: 7, lastSeq: 7, hasMore: false, loadingOlder: false, columnRef, reveal: () => true })
+    return <div ref={columnRef}><div data-chat-message-id="answer" data-chat-message-seq={7}>
+      <span data-markdown-source-start={0} data-markdown-source-end={11}>hello world</span>
+    </div></div>
+  }
+
+  expect(highlightRules()).toEqual([])
+  const view = render(<Answer />)
+  expect(completeViewRequest).toHaveBeenCalledOnce()
+  expect(highlights.has('agentrans-inquiry')).toBe(true)
+  expect(highlightRules()).toHaveLength(1)
+  view.unmount()
+  expect(highlights.has('agentrans-inquiry')).toBe(false)
+  expect(highlightRules()).toEqual([])
 })
