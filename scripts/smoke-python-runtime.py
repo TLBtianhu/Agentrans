@@ -1093,7 +1093,7 @@ def smoke_sdk_plugin_manager(base_url: str, executable: Path, cache: Path) -> No
         example_home = root / "example-home"
         example_environment = {**os.environ, **environment, "DEEPSEEK_BASE_URL": base_url,
                                "DEEPSEEK_API_KEY": "sk-keyless-smoke"}
-        example_args = [sys.executable, str(example), "--dsh-home", str(example_home),
+        example_args = [sys.executable, str(example), "--agentrans-home", str(example_home),
                         "--workspace", str(root), "--dsh-bin", str(executable)]
         for decision, expected in (("n", "plugin installation rejected"), ("y", "plugin installation saved")):
             run = subprocess.run([*example_args, PLUGIN_INSTALL_PROMPT + json.dumps(str(plugin)) + "\n"],
