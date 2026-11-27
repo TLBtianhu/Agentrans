@@ -3,7 +3,7 @@ import { Context } from '@agentrans/cordis'
 import type { Agent } from '@agentrans/agent'
 import { MessageId } from '@agentrans/llm'
 import SessionStore, { SessionId, SessionSeq, type SessionEvent } from '@agentrans/session'
-import { admitBranchResult, BranchResultAdmissionBusy, BranchResultAdmissionConflict } from '../src/admission.ts'
+import { admitBranchResult, BranchResultAdmissionBusy, BranchResultAdmissionConflict, branchResultAdmissionRefusal } from '../src/admission.ts'
 import type { BranchResultSelection } from '../src/types.ts'
 
 const contexts: Context[] = []
@@ -137,5 +137,21 @@ describe('branch-result admission', () => {
     const receipt = await admitBranchResult(fixture.parent, selection, fixture.capabilities)
     expect(await admitBranchResult(fixture.parent, selection, { ...fixture.capabilities, validateMessage: policy })).toEqual(receipt)
     expect(policy).toHaveBeenCalledOnce()
+  })
+})
+
+describe('branchResultAdmissionRefusal', () => {
+  const identity = { parentSessionId: 'parent', branchSessionId: 'child', resultSeq: 4 }
+
+  it('reports a busy parent and a conflicting return as their remote failures and leaves other errors alone', () => {
+    const busy = new BranchResultAdmissionBusy(new Error('running'))
+    expect(branchResultAdmissionRefusal(busy, identity)).toEqual({
+      code: 'session/agent-busy', message: busy.message, details: { reason: 'branch-result-parent-busy' },
+    })
+    const conflict = new BranchResultAdmissionConflict()
+    expect(branchResultAdmissionRefusal(conflict, identity)).toEqual({
+      code: 'session/branch-result-conflict', message: conflict.message, details: identity,
+    })
+    expect(branchResultAdmissionRefusal(new Error('flush failed'), identity)).toBeUndefined()
   })
 })

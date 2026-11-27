@@ -10,7 +10,8 @@ import type { CsvRowsLoader } from './CsvParticipatingRows.tsx'
 import {
   CsvAttachedComparison, csvReturnComparisonSideLabels,
   type ChooseCsvComparison, type CsvComparisonDownloadFormat, type CsvComparisonLoader,
-  type CsvExplanationActions, type DownloadSentCsvComparison, type OpenCsvExplanationSource, type ReviewSentCsvComparison,
+  type CsvExplanationActions, type CsvSentComparisonActions, type DownloadSentCsvComparison,
+  type OpenCsvExplanationSource, type ReviewSentCsvComparison,
 } from './CsvQuestionComparison.tsx'
 import type { CsvComparisonExplanation, CsvExplanationSelection } from './csv-comparison-explanation.ts'
 import type { CsvSourceChainOptions } from './CsvSourceChain.tsx'
@@ -143,16 +144,7 @@ export function CsvComparisonContextMessage({
   explanationActions, openExplanationSource, openReturnedSource,
 }:
   Pick<PropsRuntime<'conversation.user.text.node', 'artifact-csv-comparison-context'>, 'node' | 'raw' | 'interactive' | 'messageRef'>
-  & PropsLocale<'artifact'> & {
-    readonly returnToDraft?: (() => void) | undefined
-    readonly returnToComparison?: (() => void) | undefined
-    readonly returnToExplanation?: (() => void) | undefined
-    readonly reviewSent?: ReviewSentCsvComparison | undefined
-    readonly downloadSent?: DownloadSentCsvComparison | undefined
-    readonly downloadJson?: DownloadSentCsvComparison | undefined
-    readonly viewSourceQuestion?: (() => void) | undefined
-    readonly closeSourceVisit?: (() => void) | undefined
-    readonly sourceTrail?: CsvComparisonSourceTrail | undefined
+  & PropsLocale<'artifact'> & CsvSentComparisonActions & {
     readonly jumpInSourceTrail?: ((target: CsvComparisonSourceVisit) => void) | undefined
     readonly sourceQuestionLabel?: ((target: CsvSentQuestion) => string | undefined) | undefined
     readonly sourceChain?: CsvSourceChainOptions | undefined

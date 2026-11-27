@@ -10,11 +10,11 @@ import {
   CSV_COMPARISON_CHANGES_PREFIX, CSV_COMPARISON_EXPLANATION_PREFIX, CSV_COMPARISON_QUESTION_PREFIX, csvComparisonChangesText,
   IMPORTED_CSV_COMPARISON_EXPLANATION_PREFIX, IMPORTED_CSV_COMPARISON_QUESTION_PREFIX,
   IMPORTED_CSV_EXPLANATION_SOURCE_TEXT, IMPORTED_CSV_RETURN_SOURCE_TEXT, IMPORTED_CSV_SINGLE_SOURCE_TEXT,
-  isArtifactHtmlCheckpoint, isBoundedArtifactJson, type ArtifactHtmlCheckpoint,
+  isArtifactHtmlCheckpoint, isBoundedArtifactJson, recordedComparison, type ArtifactHtmlCheckpoint,
 } from '@agentrans/artifact/runtime-values'
 import { CSV_AGGREGATES, normalizeSceneSpec, type CsvBarChartSpec, type FunctionPlotSpec } from '@agentrans/artifact/scene'
 import type { FunctionAnalysis } from '@agentrans/artifact/scene-renderers'
-import type { ArtifactComparison, ArtifactId, HtmlArtifactSnapshot, SceneArtifactSnapshot } from '@agentrans/artifact/types'
+import type { ArtifactId, HtmlArtifactSnapshot, SceneArtifactSnapshot } from '@agentrans/artifact/types'
 import { SessionId, SessionSeq } from '@agentrans/session/types'
 import type { CsvComparisonExplanation } from './csv-comparison-explanation.ts'
 
@@ -422,12 +422,8 @@ function replaySource(artifact: Record<string, unknown>): SceneArtifactSnapshot 
     || title !== title.trim() || title.length === 0 || title.length > 120 || !integer(revision, 1)
     || (presentation !== 'inline' && presentation !== 'focus') || !record(spec)) return undefined
   if (spec.kind === 'function-plot' && record(spec.parameters) && Object.hasOwn(spec.parameters, '__proto__')) return undefined
-  let relation: ArtifactComparison | undefined
-  if (comparison !== undefined) {
-    if (!record(comparison) || typeof comparison.group !== 'string' || !ARTIFACT_ID.test(comparison.group)
-      || (comparison.role !== 'control' && comparison.role !== 'variant')) return undefined
-    relation = { group: comparison.group, role: comparison.role }
-  }
+  const relation = recordedComparison(comparison)
+  if (relation === false) return undefined
   try {
     const source = normalizeSceneSpec(spec)
     const continued = csvContinuation(artifact.csvContinuation)

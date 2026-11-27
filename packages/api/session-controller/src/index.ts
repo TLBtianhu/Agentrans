@@ -13,7 +13,6 @@ import { canOpenNativePath, nativeFileManager, nativeFileApplications, openNativ
 import type { SessionId } from '@agentrans/session'
 import { SessionSeq } from '@agentrans/session'
 import { selectBranchResult } from '@agentrans/session-branch'
-import { admitBranchResult, BranchResultAdmissionBusy, BranchResultAdmissionConflict } from '@agentrans/session-branch/admission'
 import type { BranchResultSelectionFailure } from '@agentrans/session-branch/types'
 import type {} from '@agentrans/session-projection-cache'
 import { SessionQueryError, type SessionObservation } from '@agentrans/session-query'
@@ -28,6 +27,7 @@ import {
 import type {} from '@agentrans/session-input'
 import { SessionCommandController, hasPromptContent, type SessionForkPreparation } from './commands.ts'
 import { SessionControlController } from './control.ts'
+import { admitRemoteBranchResult } from './branch-result.ts'
 import { HistoryController } from './history/controller.ts'
 import { StateController } from './state/controller.ts'
 import { WebController } from './web/controller.ts'
@@ -76,6 +76,7 @@ import type {
 
 export type * from './types.ts'
 export { ApiSessionNotFound } from './agent.ts'
+export { admitRemoteBranchResult, type RemoteBranchResultOptions } from './branch-result.ts'
 export { SessionFileReferences } from './file-references.ts'
 export { SessionSkillCatalog } from './skill-catalog.ts'
 
@@ -604,23 +605,9 @@ export class SessionController extends TypertRemoteService {
     const resolved = await this.agents.resolveAgent(request.sessionId)
     if ('error' in resolved) throw resolved.error
     const parent = resolved.agent
-    try {
-      const receipt = await admitBranchResult(parent, selection.value, {
-        observeParent: signal => this.ctx.sessionQuery.observeSession(parent.id, { projectionMode: 'none', signal }),
-        flushParent: () => this.ctx.sessions.flush(parent.session),
-      })
-      return { parentSessionId: parent.id, ...receipt }
-    } catch (error) {
-      if (error instanceof BranchResultAdmissionBusy) {
-        throw new RemoteError('session/agent-busy', error.message, { reason: 'branch-result-parent-busy' }, { cause: error })
-      }
-      if (error instanceof BranchResultAdmissionConflict) {
-        throw new RemoteError('session/branch-result-conflict', error.message, {
-          parentSessionId: request.sessionId, branchSessionId: request.branchSessionId, resultSeq,
-        }, { cause: error })
-      }
-      throw error
-    }
+    return admitRemoteBranchResult(this.ctx, parent, selection.value, {
+      parentSessionId: request.sessionId, branchSessionId: request.branchSessionId, resultSeq,
+    })
   }
 
   /**

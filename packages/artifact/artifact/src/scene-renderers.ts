@@ -19,4 +19,5 @@ export {
 export { renderTimeline, type TimelineRenderState } from './renderers/timeline.ts'
 export { renderNetworkGraph, type NetworkGraphRenderState } from './renderers/network-graph.ts'
 export { renderMap, type MapRenderState } from './renderers/map.ts'
+export { pointBounds, type PointBounds } from './renderers/layout.ts'
 export { scenePrimitives, type ScenePrimitiveEntry } from './scene-primitives.ts'

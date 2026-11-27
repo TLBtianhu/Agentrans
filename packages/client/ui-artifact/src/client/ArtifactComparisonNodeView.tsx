@@ -9,7 +9,7 @@ import {
 } from '@agentrans/artifact/observation-comparison'
 import { useArtifactActionSubmission } from './action-submission.ts'
 import { ActionSubmissionFeedback } from './ActionSubmissionFeedback.tsx'
-import { ArtifactCard, type SceneOrigin } from './ArtifactNodeView.tsx'
+import { ArtifactCard, sceneOrigin } from './ArtifactNodeView.tsx'
 import { observationsFor } from './ObservationControls.tsx'
 import type { ArtifactRuntimeSnapshot } from './runtime-owner.ts'
 import { ArtifactComparisonRequestError, type ArtifactCommand, type ArtifactNodeInjected } from './protocol.ts'
@@ -68,12 +68,7 @@ function ComparisonInstance({
   const commandVariant = useCallback((command: ParticleRunCommand): void => {
     commandParticleRuntime(variantKey, command)
   }, [variantKey, commandParticleRuntime])
-  const origin = useSessions((state): SceneOrigin => {
-    const current = state.byId[sessionId]
-    if (current?.parentId === undefined) return { kind: 'current' }
-    const parent = state.byId[current.parentId]
-    return { kind: 'branch', title: parent?.displayTitle ?? current.parentId }
-  })
+  const origin = useSessions(state => sceneOrigin(state.byId, sessionId))
   const observations = useProjection('artifactObservations')
   const projectedExports = useProjection('artifactExports')
   const canExport = useAccess('artifactExports/create')

@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { snapshotJsonValue } from '@agentrans/util-values'
 import {
   ARTIFACT_JSON_MAX_DEPTH, ARTIFACT_JSON_MAX_NODES, isArtifactBfsCheckpoint, isArtifactHalfAdderCheckpoint,
-  isArtifactHtmlCheckpoint, isBoundedArtifactJson,
+  isArtifactHtmlCheckpoint, isBoundedArtifactJson, isNumericParameters, recordedComparison,
 } from '../src/runtime-values.ts'
 
 const valid = (value: unknown) => isBoundedArtifactJson(value, ARTIFACT_JSON_MAX_DEPTH, ARTIFACT_JSON_MAX_NODES)
@@ -100,5 +100,23 @@ describe('half-adder checkpoint', () => {
     expect(isArtifactHtmlCheckpoint({ ...state, sum: 1 - sum })).toBe(false)
     expect(isArtifactHtmlCheckpoint({ ...state, a: String(a) })).toBe(false)
     expect(isArtifactHtmlCheckpoint({ ...state, extra: 0 })).toBe(false)
+  })
+})
+
+describe('recorded source fields', () => {
+  it('reads an absent, valid, or malformed comparison relation', () => {
+    expect(recordedComparison(undefined)).toBeUndefined()
+    expect(recordedComparison({ group: 'pair-a', role: 'variant' })).toEqual({ group: 'pair-a', role: 'variant' })
+    for (const value of [null, [], { group: 'Pair', role: 'control' }, { group: 7, role: 'control' }, { group: 'pair', role: 'other' }]) {
+      expect(recordedComparison(value)).toBe(false)
+    }
+  })
+
+  it('accepts finite numeric parameters and rejects other maps', () => {
+    expect(isNumericParameters({ a: 1, b: -0.5 })).toBe(true)
+    expect(isNumericParameters({})).toBe(true)
+    for (const value of [null, [], { a: '1' }, { a: Number.NaN }, { a: Infinity }, JSON.parse('{"__proto__":1}')]) {
+      expect(isNumericParameters(value)).toBe(false)
+    }
   })
 })

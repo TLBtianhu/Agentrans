@@ -28,3 +28,26 @@ export function buildForkSeed(events: readonly SessionEvent[], boundary: Session
   })
   return prefix.concat(openTurnClosers(prefix, { kind: 'forked' }))
 }
+
+/** The tree facts {@link branchReturnParent} reads from one listed Session. */
+export interface BranchTreeEntry<Id extends string> {
+  readonly id: Id
+  readonly origin?: string
+  readonly parentId?: Id
+}
+
+/**
+ * Find the Session a branch conclusion returns to: the direct parent of a
+ * non-subagent Session, when that parent is not a subagent either.
+ * @param byId - Listed Sessions by id.
+ * @param sessionId - Branch whose conclusion would return.
+ * @returns The parent id, or `undefined` when this Session has no eligible parent.
+ */
+export function branchReturnParent<Id extends string>(
+  byId: Readonly<Partial<Record<Id, BranchTreeEntry<Id>>>>, sessionId: Id,
+): Id | undefined {
+  const current = byId[sessionId]
+  if (current?.origin === 'subagent' || current?.parentId === undefined) return undefined
+  const parent = byId[current.parentId]
+  return parent?.origin === 'subagent' ? undefined : parent?.id
+}

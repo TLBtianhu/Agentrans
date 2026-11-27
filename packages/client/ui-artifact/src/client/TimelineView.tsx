@@ -1,28 +1,10 @@
 /** Native timeline renderer for validated SceneSpec values. */
 import { useEffect, useRef, useState } from 'react'
-import type { PropsLocale } from '@agentrans/client-ui-slots'
-import { Button } from '@agentrans/client-ui-primitives'
-import type { RuntimeReport } from '@agentrans/artifact-runtime/types'
 import { drawNativeScene, scenePaletteFor } from './native-runtime.ts'
-import type { JsonValue } from '@agentrans/util-values'
 import type { TimelineSpec } from '@agentrans/artifact/scene'
-import type { ArtifactId } from '@agentrans/artifact/types'
-import type { ArtifactPlacement, RecordArtifactAction } from './protocol.ts'
 import { renderTimeline } from './renderers/timeline.ts'
+import { canvasPoint, SceneButton, SceneControls, SceneStage, ScenePlayButton, type SceneViewProps } from './SceneViewParts.tsx'
 import css from './FunctionPlotView.module.css'
-
-interface TimelineViewProps {
-  readonly spec: TimelineSpec
-  readonly artifactId: ArtifactId
-  readonly revision: number
-  readonly placement: ArtifactPlacement
-  readonly recordAction: RecordArtifactAction
-  readonly canRecord?: boolean
-  readonly recordPending?: boolean
-  readonly onRuntimeReport?: ((report: RuntimeReport) => void) | undefined
-  readonly onStateChange?: ((state: JsonValue) => void) | undefined
-  readonly t: PropsLocale<'artifact'>['t']
-}
 
 /**
  * Render a validated Timeline SceneSpec with a movable playhead.
@@ -31,7 +13,7 @@ interface TimelineViewProps {
  */
 export function TimelineView({
   spec, artifactId, revision, placement, recordAction, canRecord = true, recordPending = false, onRuntimeReport, onStateChange, t,
-}: TimelineViewProps) {
+}: SceneViewProps<TimelineSpec>) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const times = spec.events.map(event => event.time)
   const minTime = Math.min(...times)
@@ -79,36 +61,22 @@ export function TimelineView({
 
   return (
     <div className={css.workspace} data-placement={placement}>
-      <div className={css.stage}>
-        <div className={css.legend}>
-          <span className={css.legendItem} data-current="true"><i className={css.swatchAccent} aria-hidden="true" />{currentEvent?.label ?? '—'}</span>
-        </div>
-        <div className={css.plot}>
-          <canvas ref={canvasRef} className={css.chart} role="img" aria-label={t('scene.timeline')}
-            onClick={(event) => {
-              const canvas = canvasRef.current
-              if (!canvas) return
-              const rect = canvas.getBoundingClientRect()
-              const ratio = (event.clientX - rect.left - 60) / (rect.width - 120)
-              setPlayhead(minTime + Math.max(0, Math.min(1, ratio)) * (maxTime - minTime))
-            }} />
-        </div>
-        <div className={css.readout} role="status" aria-live="polite">
-          <div className={css.readoutItem}><span className={css.readoutLabel}>{t('scene.playhead')}</span><span className={css.readoutValue}>{playhead.toFixed(2)}</span></div>
-          <div className={css.readoutItem}><span className={css.readoutLabel}>{t('scene.events')}</span><span className={css.readoutValue}>{spec.events.length}</span></div>
-          <div className={css.readoutItem}><span className={css.readoutLabel}>{t('scene.currentEvent')}</span><span className={css.readoutValue}>{currentEvent?.label ?? '—'}</span></div>
-        </div>
-      </div>
-      <aside className={css.panel} aria-label={t('scene.controls')}>
-        <div className={css.buttonRow}>
-          <Button size="sm" variant="ghost" className={css.toggle} onClick={() => { step(-1) }}>{t('scene.previous')}</Button>
-          <Button size="sm" variant="ghost" className={css.toggle} onClick={() => { step(1) }}>{t('scene.next')}</Button>
-          <Button size="sm" variant="ghost" className={css.toggle} data-selected={playing ? '' : undefined}
-            aria-pressed={playing} onClick={() => { setPlaying(value => !value) }}>{playing ? t('scene.pause') : t('scene.play')}</Button>
-        </div>
-        {canRecord && <Button size="sm" variant="outline" disabled={recordPending} onClick={() => { void confirm() }}>{t('scene.confirm')}</Button>}
-        <p className={css.hint}>{t('scene.timelineHint')}</p>
-      </aside>
+      <SceneStage legend={currentEvent?.label ?? '—'} canvasRef={canvasRef} label={t('scene.timeline')}
+        onCanvasClick={(event) => {
+          const { x, width } = canvasPoint(event)
+          const ratio = (x - 60) / (width - 120)
+          setPlayhead(minTime + Math.max(0, Math.min(1, ratio)) * (maxTime - minTime))
+        }}
+        readout={[
+          [t('scene.playhead'), playhead.toFixed(2)],
+          [t('scene.events'), spec.events.length],
+          [t('scene.currentEvent'), currentEvent?.label ?? '—'],
+        ]} />
+      <SceneControls canRecord={canRecord} recordPending={recordPending} onConfirm={confirm} hint={t('scene.timelineHint')} t={t}>
+        <SceneButton onClick={() => { step(-1) }}>{t('scene.previous')}</SceneButton>
+        <SceneButton onClick={() => { step(1) }}>{t('scene.next')}</SceneButton>
+        <ScenePlayButton playing={playing} onToggle={() => { setPlaying(value => !value) }} t={t} />
+      </SceneControls>
     </div>
   )
 }

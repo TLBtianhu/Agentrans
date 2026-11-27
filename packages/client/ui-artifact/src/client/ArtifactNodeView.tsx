@@ -42,6 +42,24 @@ export type SceneOrigin =
   | { readonly kind: 'current' }
   | { readonly kind: 'branch'; readonly title: string }
 
+/** Listed Session facts {@link sceneOrigin} reads. */
+interface OriginEntry {
+  readonly parentId?: string
+  readonly displayTitle?: string
+}
+
+/**
+ * Name where a scene was created: the current Session, or the parent a branch came from.
+ * @param byId - Listed Sessions by id.
+ * @param sessionId - Session that owns the scene.
+ * @returns The scene origin shown on its card.
+ */
+export function sceneOrigin(byId: Readonly<Partial<Record<string, OriginEntry>>>, sessionId: string): SceneOrigin {
+  const current = byId[sessionId]
+  if (current?.parentId === undefined) return { kind: 'current' }
+  return { kind: 'branch', title: byId[current.parentId]?.displayTitle ?? current.parentId }
+}
+
 type ArtifactCardProps = Pick<ArtifactNodeViewProps, 'recordAction' | 't'> & {
   readonly snapshot: ArtifactSnapshot
   readonly origin: SceneOrigin
@@ -558,12 +576,7 @@ export const ArtifactNodeView = memo(function ArtifactNodeView({
   const projectedExports = useProjection('artifactExports')
   const canExport = useAccess('artifactExports/create')
   const canReadExport = useAccess('artifactExports/read')
-  const origin = useSessions((state): SceneOrigin => {
-    const current = state.byId[sessionId]
-    if (current?.parentId === undefined) return { kind: 'current' }
-    const parent = state.byId[current.parentId]
-    return { kind: 'branch', title: parent?.displayTitle ?? current.parentId }
-  })
+  const origin = useSessions(state => sceneOrigin(state.byId, sessionId))
   const placement = useStore((state): ArtifactPlacement => {
     if (state.focusId === artifactId) return 'focus'
     if (state.floatId === artifactId) return 'pip'

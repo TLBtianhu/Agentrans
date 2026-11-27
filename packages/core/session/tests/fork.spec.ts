@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { Context } from '@agentrans/cordis'
 import { createUserMessage, ToolCallId, createMessage } from '@agentrans/llm'
 import type { MessageSource } from '@agentrans/llm'
-import SessionStore, { Session, SessionForkError, SessionId, SessionLogOffset, SessionSeq, TOOL_NOT_STARTED, TOOL_OUTCOME_UNKNOWN } from '@agentrans/session'
+import SessionStore, { branchReturnParent, Session, SessionForkError, SessionId, SessionLogOffset, SessionSeq, TOOL_NOT_STARTED, TOOL_OUTCOME_UNKNOWN } from '@agentrans/session'
 import type { SessionEvent, SurfaceEvent, TurnEndReason } from '@agentrans/session'
 
 declare module '@agentrans/session/types' {
@@ -481,5 +481,23 @@ describe('fork boundaries around a surface replacement', () => {
       type: 'turn/end',
       data: { turn: 2, reason: { kind: 'forked' } },
     })
+  })
+})
+
+describe('branchReturnParent', () => {
+  it('returns the direct parent only when neither the branch nor the parent is a subagent', () => {
+    const byId = {
+      root: { id: 'root' },
+      branch: { id: 'branch', parentId: 'root' },
+      orphan: { id: 'orphan', parentId: 'missing' },
+      worker: { id: 'worker', origin: 'subagent', parentId: 'root' },
+      underWorker: { id: 'underWorker', parentId: 'worker' },
+    }
+    expect(branchReturnParent(byId, 'branch')).toBe('root')
+    expect(branchReturnParent(byId, 'root')).toBeUndefined()
+    expect(branchReturnParent(byId, 'unknown')).toBeUndefined()
+    expect(branchReturnParent(byId, 'orphan')).toBeUndefined()
+    expect(branchReturnParent(byId, 'worker')).toBeUndefined()
+    expect(branchReturnParent(byId, 'underWorker')).toBeUndefined()
   })
 })

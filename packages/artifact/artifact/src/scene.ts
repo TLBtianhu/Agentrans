@@ -227,6 +227,37 @@ function rangeAt(value: unknown, path: string): readonly [number, number] {
   return [min, max]
 }
 
+/** Optional playback timeline shared by every animated SceneSpec. */
+type SceneTimelineSpec = { readonly duration: number; readonly fps: number }
+
+function timelineAt(value: unknown): SceneTimelineSpec | undefined {
+  if (value === undefined) return undefined
+  if (!isRecord(value)) throw new SceneValidationError('/timeline', 'must be an object')
+  const duration = numberAt(value.duration, '/timeline/duration')
+  const fps = numberAt(value.fps, '/timeline/fps')
+  if (duration <= 0) throw new SceneValidationError('/timeline/duration', 'must be > 0')
+  if (!Number.isSafeInteger(fps) || fps < 1 || fps > 120) throw new SceneValidationError('/timeline/fps', 'must be an integer in [1,120]')
+  return { duration, fps }
+}
+
+/** One scene item's object shape and stable identifier. */
+function identifiedAt(item: unknown, path: string): { readonly record: Record<string, unknown>; readonly id: string } {
+  if (!isRecord(item)) throw new SceneValidationError(path, 'must be an object')
+  if (typeof item.id !== 'string' || !/^[a-z][a-z0-9-]{0,31}$/.test(item.id)) {
+    throw new SceneValidationError(`${path}/id`, 'must match [a-z][a-z0-9-]{0,31}')
+  }
+  return { record: item, id: item.id }
+}
+
+/** One scene item's identifier and trimmed, non-empty display label. */
+function labeledAt(item: unknown, path: string): { readonly record: Record<string, unknown>; readonly id: string; readonly label: string } {
+  const { record, id } = identifiedAt(item, path)
+  if (typeof record.label !== 'string' || record.label.trim().length === 0) {
+    throw new SceneValidationError(`${path}/label`, 'must be a non-empty label')
+  }
+  return { record, id, label: record.label.trim() }
+}
+
 const utf8 = new TextEncoder()
 
 function csvColumnAt(value: unknown, path: string): string {
@@ -333,15 +364,7 @@ export function normalizeFunctionPlot(value: unknown): FunctionPlotSpec {
   if (x < viewport.x[0] || x > viewport.x[1]) throw new SceneValidationError('/trace/x', 'must be within viewport.x')
   if (typeof value.trace.derivative !== 'boolean') throw new SceneValidationError('/trace/derivative', 'must be boolean')
   if (typeof value.trace.integral !== 'boolean') throw new SceneValidationError('/trace/integral', 'must be boolean')
-  let timeline: FunctionPlotSpec['timeline']
-  if (value.timeline !== undefined) {
-    if (!isRecord(value.timeline)) throw new SceneValidationError('/timeline', 'must be an object')
-    const duration = numberAt(value.timeline.duration, '/timeline/duration')
-    const fps = numberAt(value.timeline.fps, '/timeline/fps')
-    if (duration <= 0) throw new SceneValidationError('/timeline/duration', 'must be > 0')
-    if (!Number.isSafeInteger(fps) || fps < 1 || fps > 120) throw new SceneValidationError('/timeline/fps', 'must be an integer in [1,120]')
-    timeline = { duration, fps }
-  }
+  const timeline = timelineAt(value.timeline)
   return { kind: 'function-plot', functions, parameters, viewport, trace: { x, derivative: value.trace.derivative, integral: value.trace.integral }, ...timeline === undefined ? {} : { timeline }, style: value.style === undefined ? 'editorial' : normalizeStyle(value.style) }
 }
 
@@ -358,14 +381,8 @@ export function normalizeFlowchart(value: unknown): FlowchartSpec {
   }
   const nodes = value.nodes.map((item, index) => {
     const path = `/nodes/${index}`
-    if (!isRecord(item)) throw new SceneValidationError(path, 'must be an object')
-    if (typeof item.id !== 'string' || !/^[a-z][a-z0-9-]{0,31}$/.test(item.id)) {
-      throw new SceneValidationError(`${path}/id`, 'must match [a-z][a-z0-9-]{0,31}')
-    }
-    if (typeof item.label !== 'string' || item.label.trim().length === 0) {
-      throw new SceneValidationError(`${path}/label`, 'must be a non-empty label')
-    }
-    return { id: item.id, label: item.label.trim(), x: numberAt(item.x, `${path}/x`), y: numberAt(item.y, `${path}/y`) }
+    const { record, id, label } = labeledAt(item, path)
+    return { id, label, x: numberAt(record.x, `${path}/x`), y: numberAt(record.y, `${path}/y`) }
   })
   const ids = new Set(nodes.map(node => node.id))
   if (!Array.isArray(value.edges)) throw new SceneValidationError('/edges', 'must be an array')
@@ -387,15 +404,7 @@ export function normalizeFlowchart(value: unknown): FlowchartSpec {
     }
     path = value.path as readonly string[]
   }
-  let timeline: FlowchartSpec['timeline']
-  if (value.timeline !== undefined) {
-    if (!isRecord(value.timeline)) throw new SceneValidationError('/timeline', 'must be an object')
-    const duration = numberAt(value.timeline.duration, '/timeline/duration')
-    const fps = numberAt(value.timeline.fps, '/timeline/fps')
-    if (duration <= 0) throw new SceneValidationError('/timeline/duration', 'must be > 0')
-    if (!Number.isSafeInteger(fps) || fps < 1 || fps > 120) throw new SceneValidationError('/timeline/fps', 'must be an integer in [1,120]')
-    timeline = { duration, fps }
-  }
+  const timeline = timelineAt(value.timeline)
   return { kind: 'flowchart', nodes, edges, ...(path === undefined ? {} : { path }), ...(timeline === undefined ? {} : { timeline }), style: value.style === undefined ? 'editorial' : normalizeStyle(value.style) }
 }
 
@@ -420,16 +429,13 @@ export function normalizeParticleSystem(value: unknown): ParticleSystemSpec {
   }
   const particles = value.particles.map((item, index) => {
     const path = `/particles/${index}`
-    if (!isRecord(item)) throw new SceneValidationError(path, 'must be an object')
-    if (typeof item.id !== 'string' || !/^[a-z][a-z0-9-]{0,31}$/.test(item.id)) {
-      throw new SceneValidationError(`${path}/id`, 'must match [a-z][a-z0-9-]{0,31}')
-    }
-    const mass = numberAt(item.mass, `${path}/mass`)
+    const { record, id } = identifiedAt(item, path)
+    const mass = numberAt(record.mass, `${path}/mass`)
     if (mass <= 0) throw new SceneValidationError(`${path}/mass`, 'must be > 0')
     return {
-      id: item.id,
-      x: numberAt(item.x, `${path}/x`), y: numberAt(item.y, `${path}/y`),
-      vx: numberAt(item.vx, `${path}/vx`), vy: numberAt(item.vy, `${path}/vy`), mass,
+      id,
+      x: numberAt(record.x, `${path}/x`), y: numberAt(record.y, `${path}/y`),
+      vx: numberAt(record.vx, `${path}/vx`), vy: numberAt(record.vy, `${path}/vy`), mass,
     }
   })
   if (!isRecord(value.gravity)) throw new SceneValidationError('/gravity', 'must be an object')
@@ -437,15 +443,7 @@ export function normalizeParticleSystem(value: unknown): ParticleSystemSpec {
   const timeStep = numberAt(value.timeStep, '/timeStep')
   if (timeStep <= 0) throw new SceneValidationError('/timeStep', 'must be > 0')
   if (typeof value.trails !== 'boolean') throw new SceneValidationError('/trails', 'must be a boolean')
-  let timeline: ParticleSystemSpec['timeline']
-  if (value.timeline !== undefined) {
-    if (!isRecord(value.timeline)) throw new SceneValidationError('/timeline', 'must be an object')
-    const duration = numberAt(value.timeline.duration, '/timeline/duration')
-    const fps = numberAt(value.timeline.fps, '/timeline/fps')
-    if (duration <= 0) throw new SceneValidationError('/timeline/duration', 'must be > 0')
-    if (!Number.isSafeInteger(fps) || fps < 1 || fps > 120) throw new SceneValidationError('/timeline/fps', 'must be an integer in [1,120]')
-    timeline = { duration, fps }
-  }
+  const timeline = timelineAt(value.timeline)
   return { kind: 'particle-system', particles, gravity, timeStep, trails: value.trails, ...(timeline === undefined ? {} : { timeline }), style: value.style === undefined ? 'editorial' : normalizeStyle(value.style) }
 }
 
@@ -462,16 +460,10 @@ export function normalizeTimeline(value: unknown): TimelineSpec {
   }
   const events = value.events.map((item, index) => {
     const path = `/events/${index}`
-    if (!isRecord(item)) throw new SceneValidationError(path, 'must be an object')
-    if (typeof item.id !== 'string' || !/^[a-z][a-z0-9-]{0,31}$/.test(item.id)) {
-      throw new SceneValidationError(`${path}/id`, 'must match [a-z][a-z0-9-]{0,31}')
-    }
-    if (typeof item.label !== 'string' || item.label.trim().length === 0) {
-      throw new SceneValidationError(`${path}/label`, 'must be a non-empty label')
-    }
+    const { record, id, label } = labeledAt(item, path)
     return {
-      id: item.id, label: item.label.trim(), time: numberAt(item.time, `${path}/time`),
-      ...(item.description === undefined ? {} : { description: stringAt(item.description, `${path}/description`) }),
+      id, label, time: numberAt(record.time, `${path}/time`),
+      ...(record.description === undefined ? {} : { description: stringAt(record.description, `${path}/description`) }),
     }
   }).sort((a, b) => a.time - b.time)
   let playhead: number | undefined
@@ -484,15 +476,7 @@ export function normalizeTimeline(value: unknown): TimelineSpec {
       throw new SceneValidationError('/playhead', 'must be within the event time range')
     }
   }
-  let timeline: TimelineSpec['timeline']
-  if (value.timeline !== undefined) {
-    if (!isRecord(value.timeline)) throw new SceneValidationError('/timeline', 'must be an object')
-    const duration = numberAt(value.timeline.duration, '/timeline/duration')
-    const fps = numberAt(value.timeline.fps, '/timeline/fps')
-    if (duration <= 0) throw new SceneValidationError('/timeline/duration', 'must be > 0')
-    if (!Number.isSafeInteger(fps) || fps < 1 || fps > 120) throw new SceneValidationError('/timeline/fps', 'must be an integer in [1,120]')
-    timeline = { duration, fps }
-  }
+  const timeline = timelineAt(value.timeline)
   return { kind: 'timeline', events, ...(playhead === undefined ? {} : { playhead }), ...(timeline === undefined ? {} : { timeline }), style: value.style === undefined ? 'editorial' : normalizeStyle(value.style) }
 }
 
@@ -535,17 +519,11 @@ function normalizeMap(value: unknown): MapSpec {
   }
   const markers = value.markers.map((item, index) => {
     const path = `/markers/${index}`
-    if (!isRecord(item)) throw new SceneValidationError(path, 'must be an object')
-    if (typeof item.id !== 'string' || !/^[a-z][a-z0-9-]{0,31}$/.test(item.id)) {
-      throw new SceneValidationError(`${path}/id`, 'must match [a-z][a-z0-9-]{0,31}')
-    }
-    if (typeof item.label !== 'string' || item.label.trim().length === 0) {
-      throw new SceneValidationError(`${path}/label`, 'must be a non-empty label')
-    }
+    const { record, id, label } = labeledAt(item, path)
     return {
-      id: item.id, label: item.label.trim(),
-      x: numberAt(item.x, `${path}/x`), y: numberAt(item.y, `${path}/y`),
-      ...(item.description === undefined ? {} : { description: stringAt(item.description, `${path}/description`) }),
+      id, label,
+      x: numberAt(record.x, `${path}/x`), y: numberAt(record.y, `${path}/y`),
+      ...(record.description === undefined ? {} : { description: stringAt(record.description, `${path}/description`) }),
     }
   })
   const ids = new Set(markers.map(marker => marker.id))
@@ -557,15 +535,7 @@ function normalizeMap(value: unknown): MapSpec {
     }
     path = value.path as readonly string[]
   }
-  let timeline: MapSpec['timeline']
-  if (value.timeline !== undefined) {
-    if (!isRecord(value.timeline)) throw new SceneValidationError('/timeline', 'must be an object')
-    const duration = numberAt(value.timeline.duration, '/timeline/duration')
-    const fps = numberAt(value.timeline.fps, '/timeline/fps')
-    if (duration <= 0) throw new SceneValidationError('/timeline/duration', 'must be > 0')
-    if (!Number.isSafeInteger(fps) || fps < 1 || fps > 120) throw new SceneValidationError('/timeline/fps', 'must be an integer in [1,120]')
-    timeline = { duration, fps }
-  }
+  const timeline = timelineAt(value.timeline)
   return { kind: 'map', markers, ...(path === undefined ? {} : { path }), ...(timeline === undefined ? {} : { timeline }), style: value.style === undefined ? 'editorial' : normalizeStyle(value.style) }
 }
 

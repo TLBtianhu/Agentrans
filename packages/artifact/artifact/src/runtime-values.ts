@@ -2,6 +2,36 @@
 import type { JsonValue } from '@agentrans/util-values'
 import type { CsvComparedParticipants } from './attachment-csv-data.ts'
 import type { CsvBarChartSpec } from './scene.ts'
+import type { ArtifactComparison } from './types.ts'
+
+/** Stable Artifact and comparison-group identifier. */
+export const ARTIFACT_ID_PATTERN = /^[a-z][a-z0-9-]{0,63}$/
+
+function plainRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+/**
+ * Read the optional comparison relation recorded with an Artifact source.
+ * @param value - Recorded `comparison` field.
+ * @returns `undefined` when absent, the relation when valid, and `false` when malformed.
+ */
+export function recordedComparison(value: unknown): ArtifactComparison | undefined | false {
+  if (value === undefined) return undefined
+  if (!plainRecord(value) || typeof value.group !== 'string' || !ARTIFACT_ID_PATTERN.test(value.group)
+    || (value.role !== 'control' && value.role !== 'variant')) return false
+  return { group: value.group, role: value.role }
+}
+
+/**
+ * Check recorded function-plot parameter values: finite numbers keyed by plain names.
+ * @param value - Recorded parameter map.
+ * @returns Whether every entry is a finite number and no key is `__proto__`.
+ */
+export function isNumericParameters(value: unknown): value is Record<string, number> {
+  return plainRecord(value) && !Object.hasOwn(value, '__proto__')
+    && Object.values(value).every(entry => typeof entry === 'number' && Number.isFinite(entry))
+}
 
 /** Maximum nested protocol values, including the root. */
 export const ARTIFACT_JSON_MAX_DEPTH = 32

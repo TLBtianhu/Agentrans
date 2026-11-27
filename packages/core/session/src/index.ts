@@ -24,7 +24,7 @@ import type { ToolHistory } from '@agentrans/llm'
 
 import { buildForkSeed } from './fork.ts'
 
-export { buildForkSeed } from './fork.ts'
+export { branchReturnParent, buildForkSeed, type BranchTreeEntry } from './fork.ts'
 export * from './types.ts'
 export { SessionPreparation } from './preparation.ts'
 export type { SessionPreparationOptions } from './preparation.ts'
