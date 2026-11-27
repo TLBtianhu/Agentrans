@@ -1533,6 +1533,9 @@ describe('Weighted approval workflow', () => {
   })
 })
 
+/** Issue jobs run only where their GitHub App and Project live; other repositories skip them. */
+const UPSTREAM_ISSUE_REPOSITORY = "github.repository == 'deepseek-harness/deepseek-harness'"
+
 describe('Issue lifecycle workflow', () => {
   it('allocates lifecycle runners only for events that can change the board', () => {
     const lifecycle = loadWorkflow('.github/workflows/issue-lifecycle.yml')
@@ -1542,6 +1545,7 @@ describe('Issue lifecycle workflow', () => {
 
     expect(lifecycle.on).toHaveProperty('pull_request')
     expect(lifecycle.on).toHaveProperty('pull_request_review')
+    expect(String(lifecycleJob.if).startsWith(`${UPSTREAM_ISSUE_REPOSITORY} && `)).toBe(true)
     expect(lifecycleJob.if).toContain("github.event.review.state == 'changes_requested'")
     expect(lifecycleJob.if).toContain('github.event.changes.body != null')
     // Keep the subscription-type gates: issue-lifecycle does not re-subscribe
@@ -1584,7 +1588,7 @@ describe('Issue lifecycle workflow', () => {
     expect(preflightStep?.run).toContain('if [ -f .github/issue-management/selective-preflight.json ]; then')
     expect(preflightStep?.run).toContain('node .github/issue-management/policy.mjs pr-preflight')
     expect(preflightStep?.if).toBeUndefined()
-    expect(policyJob.if).toBeUndefined()
+    expect(policyJob.if).toBe(UPSTREAM_ISSUE_REPOSITORY)
     expect(validateStep?.if).toBe("${{ steps.preflight.outputs.legacy-automated != 'true' }}")
 
     expect(tokenStep).toMatchObject({
