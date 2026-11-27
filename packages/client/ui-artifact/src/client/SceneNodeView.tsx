@@ -1,11 +1,8 @@
 /** SceneSpec renderer dispatch: one place that maps a SceneSpec kind to its native component. */
-import type { PropsLocale } from '@agentrans/client-ui-slots'
-import type { RuntimeReport } from '@agentrans/artifact-runtime/types'
-import type { JsonValue } from '@agentrans/util-values'
 import type { SceneSpec } from '@agentrans/artifact/scene'
-import type { ArtifactId, ArtifactParticleContinuation } from '@agentrans/artifact/types'
+import type { ArtifactParticleContinuation } from '@agentrans/artifact/types'
 import type { FunctionPlotQuestionConditions } from '@agentrans/artifact-followup/types'
-import type { ArtifactPlacement, RecordArtifactAction } from './protocol.ts'
+import type { SceneViewProps } from './SceneViewParts.tsx'
 import { FunctionPlotView, type FunctionPlotBaseline, type RecordedFunctionPlot } from './FunctionPlotView.tsx'
 import { CsvBarChartView } from './CsvBarChartView.tsx'
 import { FlowchartView } from './FlowchartView.tsx'
@@ -15,16 +12,7 @@ import { NetworkGraphView } from './NetworkGraphView.tsx'
 import { MapView } from './MapView.tsx'
 import type { ParticleRun, ParticleRunCommand } from './particle-run.ts'
 
-interface SceneNodeViewProps {
-  readonly spec: SceneSpec
-  readonly artifactId: ArtifactId
-  readonly revision: number
-  readonly placement: ArtifactPlacement
-  readonly recordAction: RecordArtifactAction
-  readonly canRecord?: boolean
-  readonly recordPending?: boolean
-  readonly onRuntimeReport?: ((report: RuntimeReport) => void) | undefined
-  readonly onStateChange?: ((state: JsonValue) => void) | undefined
+interface SceneNodeViewProps extends SceneViewProps<SceneSpec> {
   readonly onAttachPlotQuestion?: ((conditions: FunctionPlotQuestionConditions) => boolean) | undefined
   readonly onAttachCsvQuestion?: ((groupKey: string) => boolean) | undefined
   readonly replayPlot?: RecordedFunctionPlot | undefined
@@ -35,7 +23,6 @@ interface SceneNodeViewProps {
   readonly particleRun: ParticleRun | null
   readonly onParticleCommand: (command: ParticleRunCommand) => void
   readonly readOnly?: boolean
-  readonly t: PropsLocale<'artifact'>['t']
 }
 
 /**

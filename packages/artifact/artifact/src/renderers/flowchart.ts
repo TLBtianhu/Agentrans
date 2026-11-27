@@ -1,6 +1,7 @@
 /** Framework-free flowchart renderer shared by the conversation preview and the animation exporter. */
 import type { FlowchartSpec } from '../scene.ts'
 import type { ScenePalette } from '../scene-palette.ts'
+import { pointBounds } from './layout.ts'
 
 /** Mutable view state for a flowchart render. */
 export interface FlowchartRenderState {
@@ -30,14 +31,7 @@ export function renderFlowchart(
   const { selected, pathIndex } = state
   const path = spec.path ?? []
   const currentId = path[pathIndex] ?? selected
-  const xs = spec.nodes.map(node => node.x)
-  const ys = spec.nodes.map(node => node.y)
-  const minX = Math.min(...xs)
-  const maxX = Math.max(...xs)
-  const minY = Math.min(...ys)
-  const maxY = Math.max(...ys)
-  const spanX = maxX - minX || 1
-  const spanY = maxY - minY || 1
+  const { minX, minY, spanX, spanY } = pointBounds(spec.nodes)
   const nodes = spec.nodes.map(node => ({
     ...node,
     nx: (node.x - minX) / spanX,

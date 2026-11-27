@@ -16,11 +16,10 @@ import {
 } from '@agentrans/artifact/scene-export'
 import { resolveReturnedHtmlSource, resolveReturnedReadings, returnedReadingNotice } from '@agentrans/artifact-followup'
 import type { ArtifactCsvComparisonAttachment, ArtifactCsvComparisonDraft, NativeArtifactQuestionReadings } from '@agentrans/artifact-followup/types'
-import type { SessionBranchResultValue } from '@agentrans/api-session-controller'
+import { admitRemoteBranchResult, type SessionBranchResultValue } from '@agentrans/api-session-controller'
 import { brandString } from '@agentrans/brand'
 import { SessionId, SessionSeq } from '@agentrans/session'
 import { selectBranchResult } from '@agentrans/session-branch'
-import { admitBranchResult, BranchResultAdmissionBusy, BranchResultAdmissionConflict } from '@agentrans/session-branch/admission'
 import { SessionQueryError, type SessionObservation } from '@agentrans/session-query'
 import { principalOf, Remote, RemoteError, TypertRemoteService } from '@agentrans/typert-protocol'
 import {
@@ -642,25 +641,29 @@ export class ArtifactBranchResults extends TypertRemoteService {
     }
   }
 
-  private async observeSentNativeQuestion(request: ArtifactBranchExportReturnedPlotRequest, kind: ContinuationKind) {
+  /** Resolve one sent question inside a single observed cut of the Session that owns it; remote callers get none. */
+  private async observeSentQuestion<T>(
+    request: ArtifactBranchExportReturnedPlotRequest, kind: ReturnedExperimentKind,
+    resolve: (session: SessionObservation, eventSeq: ReturnType<typeof SessionSeq>, messageId: ArtifactBranchExportReturnedPlotRequest['messageId']) => T,
+  ): Promise<T> {
     if (principalOf(this.ctx.invocation) !== undefined) return sentExperimentUnavailable(kind)
     const { sessionId, messageId } = request
     const eventSeq = evidenceEventSeq(request.eventSeq)
     const signal = this.ctx.invocation?.signal ?? new AbortController().signal
     using session = await this.observeEvidenceSession(sessionId, signal)
-    const readings = resolveSentNativeQuestion(session, eventSeq, messageId, kind)
+    const resolved = resolve(session, eventSeq, messageId)
     signal.throwIfAborted()
-    return readings
+    return resolved
+  }
+
+  private observeSentNativeQuestion(request: ArtifactBranchExportReturnedPlotRequest, kind: ContinuationKind) {
+    return this.observeSentQuestion(request, kind,
+      (session, eventSeq, messageId) => resolveSentNativeQuestion(session, eventSeq, messageId, kind))
   }
 
   private async observeSentHtmlQuestion(request: ArtifactBranchExportReturnedPlotRequest, kind: ArtifactHtmlCheckpointKind) {
-    if (principalOf(this.ctx.invocation) !== undefined) return sentExperimentUnavailable(kind)
-    const { sessionId, messageId } = request
-    const eventSeq = evidenceEventSeq(request.eventSeq)
-    const signal = this.ctx.invocation?.signal ?? new AbortController().signal
-    using session = await this.observeEvidenceSession(sessionId, signal)
-    const evidence = resolveSentHtmlQuestion(session, eventSeq, messageId, kind)
-    signal.throwIfAborted()
+    const evidence = await this.observeSentQuestion(request, kind,
+      (session, eventSeq, messageId) => resolveSentHtmlQuestion(session, eventSeq, messageId, kind))
     return evidence ?? sentExperimentUnavailable(kind)
   }
 
@@ -785,30 +788,18 @@ export class ArtifactBranchResults extends TypertRemoteService {
     const resolved = await this.ctx.sessionController.resolveAgent(request.sessionId)
     if ('error' in resolved) throw resolved.error
     const parent = resolved.agent
-    try {
-      const receipt = await admitBranchResult(parent, selected.selection, {
-        observeParent: signal => this.ctx.sessionQuery.observeSession(parent.id, { projectionMode: 'none', signal }),
-        flushParent: () => this.ctx.sessions.flush(parent.session),
-        validateMessage: (message) => {
-          if (Buffer.byteLength(JSON.stringify(message), 'utf8') > this.maxActionBytes) {
-            throw new RemoteError('artifact-branch/result-too-large', 'The complete conclusion and evidence exceed the return limit', {
-              limit: this.maxActionBytes,
-            })
-          }
-        },
-      }, [selected.evidence])
-      return { parentSessionId: parent.id, ...receipt }
-    } catch (error) {
-      if (error instanceof BranchResultAdmissionBusy) {
-        throw new RemoteError('session/agent-busy', error.message, { reason: 'branch-result-parent-busy' }, { cause: error })
-      }
-      if (error instanceof BranchResultAdmissionConflict) {
-        throw new RemoteError('session/branch-result-conflict', error.message, {
-          parentSessionId: request.sessionId, branchSessionId: request.branchSessionId, resultSeq,
-        }, { cause: error })
-      }
-      throw error
-    }
+    return admitRemoteBranchResult(this.ctx, parent, selected.selection, {
+      parentSessionId: request.sessionId, branchSessionId: request.branchSessionId, resultSeq,
+    }, {
+      validateMessage: (message) => {
+        if (Buffer.byteLength(JSON.stringify(message), 'utf8') > this.maxActionBytes) {
+          throw new RemoteError('artifact-branch/result-too-large', 'The complete conclusion and evidence exceed the return limit', {
+            limit: this.maxActionBytes,
+          })
+        }
+      },
+      additionalContent: [selected.evidence],
+    })
   }
 }
 

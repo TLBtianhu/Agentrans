@@ -1,17 +1,14 @@
 /** Native FunctionPlot renderer for validated SceneSpec values. */
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
-import type { RuntimeReport } from '@agentrans/artifact-runtime/types'
 import { drawNativeScene, scenePaletteFor } from './native-runtime.ts'
-import type { PropsLocale } from '@agentrans/client-ui-slots'
 import { Button } from '@agentrans/client-ui-primitives'
-import { parseExpression, type JsonValue } from '@agentrans/util-values'
+import { parseExpression } from '@agentrans/util-values'
 import { recordSceneVideo } from './scene-video.ts'
 import { renderFunctionPlot } from './renderers/function-plot.ts'
 import { analyzeFunction, type FunctionAnalysis } from './renderers/function-analysis.ts'
 import type { FunctionPlotQuestionConditions } from '@agentrans/artifact-followup/types'
 import type { FunctionPlotSpec } from '@agentrans/artifact/scene'
-import type { ArtifactId } from '@agentrans/artifact/types'
-import type { ArtifactPlacement, RecordArtifactAction } from './protocol.ts'
+import type { SceneViewProps } from './SceneViewParts.tsx'
 import { formatReadingDifference } from './format-reading-difference.ts'
 import css from './FunctionPlotView.module.css'
 
@@ -21,21 +18,11 @@ export type RecordedFunctionPlot = FunctionPlotQuestionConditions & { readonly v
 /** Confirmed source revision and readings for an editable one-parameter comparison. */
 export type FunctionPlotBaseline = RecordedFunctionPlot & { readonly sourceRevision: number }
 
-interface FunctionPlotViewProps {
-  readonly spec: FunctionPlotSpec
-  readonly artifactId: ArtifactId
-  readonly revision: number
-  readonly placement: ArtifactPlacement
-  readonly recordAction: RecordArtifactAction
-  readonly canRecord?: boolean
-  readonly recordPending?: boolean
-  readonly onRuntimeReport?: ((report: RuntimeReport) => void) | undefined
-  readonly onStateChange?: ((state: JsonValue) => void) | undefined
+interface FunctionPlotViewProps extends SceneViewProps<FunctionPlotSpec> {
   readonly onAttachPlotQuestion?: ((conditions: FunctionPlotQuestionConditions) => boolean) | undefined
   readonly replayPlot?: RecordedFunctionPlot | undefined
   readonly baselinePlot?: FunctionPlotBaseline | undefined
   readonly readOnly?: boolean
-  readonly t: PropsLocale<'artifact'>['t']
 }
 
 interface ParsedFunction {

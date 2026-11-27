@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { createParticleCheckpoint, observeParticleState, ParticleRuntimeError, particleSpecAtGravity, restoreParticleCheckpoint } from '@agentrans/artifact/particle-runtime'
 import {
   ARTIFACT_JSON_MAX_DEPTH, ARTIFACT_JSON_MAX_NODES, isArtifactHtmlCheckpoint, isBoundedArtifactJson,
-  type ArtifactHtmlCheckpoint, type ArtifactHtmlCheckpointKind,
+  isNumericParameters, recordedComparison, type ArtifactHtmlCheckpoint, type ArtifactHtmlCheckpointKind,
 } from '@agentrans/artifact/runtime-values'
 import { analyzeFunctionPlotSelection } from '@agentrans/artifact/scene-renderers'
 import { normalizeSceneSpec } from '@agentrans/artifact/scene'
@@ -94,12 +94,8 @@ function canonicalNativeSource(value: unknown): SceneArtifactSnapshot | undefine
     || (presentation !== 'inline' && presentation !== 'focus') || !record(spec)
     || (spec.kind !== 'function-plot' && spec.kind !== 'particle-system' && spec.kind !== 'csv-bar-chart')
     || (record(spec.parameters) && Object.hasOwn(spec.parameters, '__proto__'))) return undefined
-  let relation: SceneArtifactSnapshot['comparison']
-  if (comparison !== undefined) {
-    if (!record(comparison) || typeof comparison.group !== 'string' || !ARTIFACT_ID.test(comparison.group)
-      || (comparison.role !== 'control' && comparison.role !== 'variant')) return undefined
-    relation = { group: comparison.group, role: comparison.role }
-  }
+  const relation = recordedComparison(comparison)
+  if (relation === false) return undefined
   try {
     return { artifactId: brandString<ArtifactId>(artifactId), revision, title, presentation, format: 'scene',
       spec: normalizeSceneSpec(spec), ...(relation === undefined ? {} : { comparison: relation }) }
@@ -110,11 +106,6 @@ function agreesWithRecorded(recorded: unknown, computed: object): boolean {
   // Both admitted records are JSON text, where signed zero is stored as zero.
   const normalized: unknown = JSON.parse(JSON.stringify(computed))
   return isDeepStrictEqual(recorded, normalized)
-}
-
-function numericParameters(value: unknown): value is Record<string, number> {
-  return record(value) && !Object.hasOwn(value, '__proto__')
-    && Object.values(value).every(entry => typeof entry === 'number' && Number.isFinite(entry))
 }
 
 function readingsFrom(value: unknown): NativeArtifactQuestionReadings | undefined {
@@ -130,7 +121,7 @@ function readingsFrom(value: unknown): NativeArtifactQuestionReadings | undefine
   }
   if (artifact.spec.kind === 'function-plot' && value.kind === 'current-function-plot') {
     const { kind, functionId, x, parameters } = value
-    if (typeof functionId !== 'string' || typeof x !== 'number' || !numericParameters(parameters)) return undefined
+    if (typeof functionId !== 'string' || typeof x !== 'number' || !isNumericParameters(parameters)) return undefined
     const values = analyzeFunctionPlotSelection(artifact.spec, { functionId, x, parameters })
     return values !== undefined && agreesWithRecorded(value.values, values)
       ? { kind, artifact, functionId, x, parameters, values } : undefined

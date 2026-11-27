@@ -3,7 +3,7 @@ import { isDeepStrictEqual } from 'node:util'
 import { createParticleCheckpoint, observeParticleState, ParticleRuntimeError, particleSpecAtGravity, restoreParticleCheckpoint } from '@agentrans/artifact/particle-runtime'
 import {
   ARTIFACT_JSON_MAX_DEPTH, ARTIFACT_JSON_MAX_NODES, CONTINUED_CSV_QUESTION_PREFIX,
-  isArtifactHtmlCheckpoint, isBoundedArtifactJson, type ArtifactHtmlCheckpoint, type ArtifactHtmlCheckpointKind,
+  isArtifactHtmlCheckpoint, isBoundedArtifactJson, isNumericParameters, type ArtifactHtmlCheckpoint, type ArtifactHtmlCheckpointKind,
 } from '@agentrans/artifact/runtime-values'
 import { analyzeFunctionPlotSelection } from '@agentrans/artifact/scene-renderers'
 import type { CsvBarChartSpec } from '@agentrans/artifact/scene'
@@ -48,11 +48,6 @@ function record(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
-function numericParameters(value: unknown): value is Record<string, number> {
-  return record(value) && !Object.hasOwn(value, '__proto__')
-    && Object.values(value).every(entry => typeof entry === 'number' && Number.isFinite(entry))
-}
-
 function matchesRecordedJson(recorded: unknown, computed: object): boolean {
   // Both the question and the return travel as JSON text, where signed zero is stored as zero.
   return isDeepStrictEqual(recorded, JSON.parse(JSON.stringify(computed)))
@@ -95,7 +90,7 @@ function nativeFacts(artifact: SceneArtifactSnapshot, facts: Record<string, unkn
   }
   if (artifact.spec.kind !== 'function-plot' || facts.kind !== 'current-function-plot') return undefined
   const { kind, functionId, x, parameters } = facts
-  if (typeof functionId !== 'string' || typeof x !== 'number' || !numericParameters(parameters)) return undefined
+  if (typeof functionId !== 'string' || typeof x !== 'number' || !isNumericParameters(parameters)) return undefined
   const values = analyzeFunctionPlotSelection(artifact.spec, { functionId, x, parameters })
   return values !== undefined && matchesRecordedJson(facts.values, values)
     ? { kind, artifact, functionId, x, parameters, values } as const : undefined

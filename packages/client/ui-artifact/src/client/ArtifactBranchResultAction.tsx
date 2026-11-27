@@ -2,6 +2,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import type { InjectFace, PropsLocale, PropsRuntime } from '@agentrans/client-ui-slots'
 import { Button } from '@agentrans/client-ui-primitives'
+import { branchReturnParent } from '@agentrans/session'
 import type { SessionId } from '@agentrans/session/types'
 import type { UserMessageNode } from '@agentrans/client-ui-conversation/client'
 import type { ObservableSnapshot } from '@agentrans/client-store'
@@ -87,12 +88,7 @@ export function ArtifactBranchResultAction(props: ActionProps) {
 function BranchResultOwner(props: ActionProps) {
   const { sessionId, text, useSessions, useAccess, useSessionAccess, t } = props
   const [open, setOpen] = useState(false)
-  const parentId = useSessions((state) => {
-    const current = state.byId[sessionId]
-    if (current?.origin === 'subagent' || current?.parentId === undefined) return undefined
-    const parent = state.byId[current.parentId]
-    return parent?.origin === 'subagent' ? undefined : parent?.id
-  })
+  const parentId = useSessions(state => branchReturnParent(state.byId, sessionId))
   const childAllowed = useAccess('artifactBranchResults/returnResult')
   const parentAllowed = useSessionAccess(parentId ?? sessionId, 'artifactBranchResults/returnResult')
   if (parentId === undefined || !childAllowed || !parentAllowed || text.trim() === '') return null

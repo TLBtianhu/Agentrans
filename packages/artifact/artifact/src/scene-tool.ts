@@ -1,10 +1,10 @@
 /** Model-facing SceneSpec create/update tool with compare-and-set revisions. */
 import type { Context } from '@agentrans/cordis'
 import z from '@agentrans/schemastery'
-import type { Agent } from '@agentrans/agent'
 import type {} from '@agentrans/system-prompt'
-import { defineTool, type ToolExecution } from '@agentrans/tools'
+import { defineTool } from '@agentrans/tools'
 import { ArtifactError } from './index.ts'
+import { presentationOutputProperty, revisionAgent, revisionOutputProperties, revisionParameters, stagePreparedRevisions } from './prepared-revision.ts'
 import type { FunctionPlotSpec, ParticleSystemSpec } from './scene.ts'
 import type { ArtifactSnapshot } from './types.ts'
 
@@ -13,11 +13,6 @@ export const inject = ['tools', 'systemPrompt']
 /** Empty SceneSpec tool configuration; validation and limits belong to ArtifactService. */
 export type Config = Record<never, never>
 export const Config: z<Config> = z.object({})
-
-interface PendingScene {
-  readonly agent: Agent
-  readonly snapshot: ArtifactSnapshot
-}
 
 interface SceneToolResult {
   readonly sceneId: ArtifactSnapshot['artifactId']
@@ -61,7 +56,7 @@ const PARTICLE_SYSTEM_EXAMPLE = {
 export function apply(ctx: Context): void {
   const artifacts = ctx.get('artifacts')
   if (artifacts === undefined) throw new ArtifactError('scene tool requires the Host ArtifactService', 'ARTIFACT_SERVICE_UNAVAILABLE')
-  const pending = new WeakMap<ToolExecution, PendingScene>()
+  const stage = stagePreparedRevisions(ctx, artifacts)
   ctx.systemPrompt.section({
     name: 'artifact:interactive-explanations',
     order: ctx.systemPrompt.getSectionOrder('TOOL_SCENE'),
@@ -93,38 +88,28 @@ export function apply(ctx: Context): void {
           + `Function plot example: ${JSON.stringify(FUNCTION_PLOT_EXAMPLE)}\n`
           + `Particle system example: ${JSON.stringify(PARTICLE_SYSTEM_EXAMPLE)}`,
       },
-      presentation: { type: 'string', required: true, enum: ['inline', 'focus'], description: 'Request inline placement or focused presentation.' },
-      comparison: {
-        type: 'object', additionalProperties: false,
-        description: 'Optional comparison relation. Use the same group for two independent Scenes and assign one control and one variant.',
-        properties: {
-          group: { type: 'string', required: true, description: 'Stable comparison group id matching [a-z][a-z0-9-]{0,63}.' },
-          role: { type: 'string', required: true, enum: ['control', 'variant'], description: 'Independent role in the comparison.' },
-        },
-      },
-      baseRevision: { type: 'integer', description: 'Required for update: current revision previously returned by this tool.' },
+      ...revisionParameters('Scenes'),
     },
     output: {
       schema: {
         type: 'object', additionalProperties: false,
         properties: {
           sceneId: { type: 'string', required: true },
-          revision: { type: 'integer', required: true },
-          title: { type: 'string', required: true },
+          ...revisionOutputProperties,
           kind: { type: 'string', required: true },
-          presentation: { type: 'string', required: true, enum: ['inline', 'focus'] },
+          presentation: presentationOutputProperty,
         },
       },
       render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }],
     },
     execute(args, exec): Promise<SceneToolResult> {
-      if (exec.agent === undefined) throw new ArtifactError('scene requires an agent Session', 'BAD_INPUT')
+      const agent = revisionAgent(exec, 'scene')
       const kind: string = args.kind
       if (kind !== 'function-plot' && kind !== 'flowchart' && kind !== 'particle-system' && kind !== 'timeline' && kind !== 'network-graph' && kind !== 'map') throw new ArtifactError(`unsupported scene kind: ${kind}`, 'BAD_SCENE_SPEC')
       if (Object.hasOwn(args.spec, 'kind') && Reflect.get(args.spec, 'kind') !== kind) {
         throw new ArtifactError(`/kind: spec.kind must match the outer kind ${kind}`, 'BAD_SCENE_SPEC')
       }
-      const snapshot = artifacts.prepare(exec.agent, {
+      const snapshot = artifacts.prepare(agent, {
         action: args.action,
         artifactId: args.sceneId,
         title: args.title,
@@ -134,13 +119,7 @@ export function apply(ctx: Context): void {
         ...args.comparison === undefined ? {} : { comparison: args.comparison },
         ...args.baseRevision === undefined ? {} : { baseRevision: args.baseRevision },
       })
-      try {
-        exec.signal.throwIfAborted()
-      } catch (error) {
-        artifacts.discard(exec.agent, snapshot.artifactId)
-        throw error
-      }
-      pending.set(exec, { agent: exec.agent, snapshot })
+      stage(exec, agent, snapshot)
       return Promise.resolve({
         sceneId: snapshot.artifactId,
         revision: snapshot.revision,
@@ -150,20 +129,4 @@ export function apply(ctx: Context): void {
       })
     },
   }))
-  ctx.on('tools/result', (exec, result) => {
-    const prepared = pending.get(exec)
-    pending.delete(exec)
-    if (prepared === undefined) return
-    if (result.isError) {
-      artifacts.discard(prepared.agent, prepared.snapshot.artifactId)
-      return
-    }
-    try {
-      artifacts.commit(prepared.agent, prepared.snapshot)
-    } catch (error) {
-      // The result already named a revision, so a snapshot that can no longer follow the log is a
-      // contract violation for the host log rather than a user-facing failure.
-      ctx.logger.error(error)
-    }
-  })
 }

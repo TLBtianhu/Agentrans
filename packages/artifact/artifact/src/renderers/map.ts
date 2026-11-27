@@ -1,26 +1,11 @@
 /** Framework-free map renderer shared by the conversation preview and the animation exporter. */
 import type { MapSpec } from '../scene.ts'
 import type { ScenePalette } from '../scene-palette.ts'
+import { pointBounds, wrapText } from './layout.ts'
 
 /** Mutable view state for a map render. */
 export interface MapRenderState {
   readonly selected?: string
-}
-
-function wrapText(context: CanvasRenderingContext2D, text: string, maxWidth: number): readonly string[] {
-  const lines: string[] = []
-  let current = ''
-  for (const character of text) {
-    const next = current + character
-    if (context.measureText(next).width > maxWidth && current.length > 0) {
-      lines.push(current)
-      current = character
-    } else {
-      current = next
-    }
-  }
-  if (current.length > 0) lines.push(current)
-  return lines
 }
 
 function pinPath(context: CanvasRenderingContext2D, x: number, y: number, radius: number): void {
@@ -54,14 +39,7 @@ export function renderMap(
   const context = canvas.getContext('2d')
   if (!context) return
   const { selected } = state
-  const xs = spec.markers.map(marker => marker.x)
-  const ys = spec.markers.map(marker => marker.y)
-  const minX = Math.min(...xs)
-  const maxX = Math.max(...xs)
-  const minY = Math.min(...ys)
-  const maxY = Math.max(...ys)
-  const spanX = maxX - minX || 1
-  const spanY = maxY - minY || 1
+  const { minX, minY, spanX, spanY } = pointBounds(spec.markers)
   const { ink, inkMuted: muted, accent, surface, grid: border } = palette
   const xToPixel = (value: number): number => 60 + ((value - minX) / spanX) * (width - 120)
   const yToPixel = (value: number): number => 60 + ((value - minY) / spanY) * (height - 120)

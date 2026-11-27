@@ -1,28 +1,11 @@
 /** Native Flowchart renderer for validated SceneSpec values. */
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { PropsLocale } from '@agentrans/client-ui-slots'
-import { Button } from '@agentrans/client-ui-primitives'
-import type { RuntimeReport } from '@agentrans/artifact-runtime/types'
 import { drawNativeScene, scenePaletteFor } from './native-runtime.ts'
-import type { JsonValue } from '@agentrans/util-values'
 import type { FlowchartSpec } from '@agentrans/artifact/scene'
-import type { ArtifactId } from '@agentrans/artifact/types'
+import { pointBounds } from '@agentrans/artifact/scene-renderers'
 import { renderFlowchart } from './renderers/flowchart.ts'
-import type { ArtifactPlacement, RecordArtifactAction } from './protocol.ts'
+import { canvasPoint, SceneButton, SceneControls, SceneStage, ScenePlayButton, type SceneViewProps } from './SceneViewParts.tsx'
 import css from './FunctionPlotView.module.css'
-
-interface FlowchartViewProps {
-  readonly spec: FlowchartSpec
-  readonly artifactId: ArtifactId
-  readonly revision: number
-  readonly placement: ArtifactPlacement
-  readonly recordAction: RecordArtifactAction
-  readonly canRecord?: boolean
-  readonly recordPending?: boolean
-  readonly onRuntimeReport?: ((report: RuntimeReport) => void) | undefined
-  readonly onStateChange?: ((state: JsonValue) => void) | undefined
-  readonly t: PropsLocale<'artifact'>['t']
-}
 
 interface LayoutNode {
   readonly id: string
@@ -38,20 +21,13 @@ interface LayoutNode {
  */
 export function FlowchartView({
   spec, artifactId, revision, placement, recordAction, canRecord = true, recordPending = false, onRuntimeReport, onStateChange, t,
-}: FlowchartViewProps) {
+}: SceneViewProps<FlowchartSpec>) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [selected, setSelected] = useState(spec.path?.[0] ?? spec.nodes[0]?.id ?? '')
   const [pathIndex, setPathIndex] = useState(0)
   const [playing, setPlaying] = useState(false)
   const nodes = useMemo<readonly LayoutNode[]>(() => {
-    const xs = spec.nodes.map(node => node.x)
-    const ys = spec.nodes.map(node => node.y)
-    const minX = Math.min(...xs)
-    const maxX = Math.max(...xs)
-    const minY = Math.min(...ys)
-    const maxY = Math.max(...ys)
-    const spanX = maxX - minX || 1
-    const spanY = maxY - minY || 1
+    const { minX, minY, spanX, spanY } = pointBounds(spec.nodes)
     return spec.nodes.map(node => ({
       id: node.id,
       label: node.label,
@@ -98,51 +74,30 @@ export function FlowchartView({
 
   return (
     <div className={css.workspace} data-placement={placement}>
-      <div className={css.stage}>
-        <div className={css.legend}>
-          <span className={css.legendItem} data-current="true"><i className={css.swatchAccent} aria-hidden="true" />{currentNode?.label ?? currentId}</span>
-        </div>
-        <div className={css.plot}>
-          <canvas ref={canvasRef} className={css.chart} role="img" aria-label={t('scene.flowchart')}
-            onClick={(event) => {
-              const canvas = canvasRef.current
-              if (!canvas) return
-              const rect = canvas.getBoundingClientRect()
-              const x = event.clientX - rect.left
-              const y = event.clientY - rect.top
-              for (const node of nodes) {
-                const centerX = 70 + node.x * (900 - 140)
-                const centerY = 60 + node.y * (420 - 120)
-                if (Math.abs(x - centerX) < 60 && Math.abs(y - centerY) < 26) {
-                  setSelected(node.id)
-                  const index = path.indexOf(node.id)
-                  if (index >= 0) setPathIndex(index)
-                  break
-                }
-              }
-            }} />
-        </div>
-        <div className={css.readout} role="status" aria-live="polite">
-          <div className={css.readoutItem}><span className={css.readoutLabel}>{t('scene.selectedNode')}</span><span className={css.readoutValue}>{selectedNode?.label ?? '—'}</span></div>
-          <div className={css.readoutItem}><span className={css.readoutLabel}>{t('scene.pathStep')}</span><span className={css.readoutValue}>{path.length > 0 ? `${pathIndex + 1}/${path.length}` : '—'}</span></div>
-          <div className={css.readoutItem}><span className={css.readoutLabel}>{t('scene.nodes')}</span><span className={css.readoutValue}>{spec.nodes.length}</span></div>
-          <div className={css.readoutItem}><span className={css.readoutLabel}>{t('scene.edges')}</span><span className={css.readoutValue}>{spec.edges.length}</span></div>
-        </div>
-      </div>
-      <aside className={css.panel} aria-label={t('scene.controls')}>
-        <div className={css.buttonRow}>
-          <Button size="sm" variant="ghost" className={css.toggle} onClick={() => {
-            if (path.length === 0) return
-            const next = (pathIndex + 1) % path.length
-            setPathIndex(next)
-            setSelected(path[next] ?? selected)
-          }}>{t('scene.next')}</Button>
-          <Button size="sm" variant="ghost" className={css.toggle} data-selected={playing ? '' : undefined}
-            aria-pressed={playing} onClick={() => { setPlaying(value => !value) }}>{playing ? t('scene.pause') : t('scene.play')}</Button>
-        </div>
-        {canRecord && <Button size="sm" variant="outline" disabled={recordPending} onClick={() => { void confirm() }}>{t('scene.confirm')}</Button>}
-        <p className={css.hint}>{t('scene.flowchartHint')}</p>
-      </aside>
+      <SceneStage legend={currentNode?.label ?? currentId} canvasRef={canvasRef} label={t('scene.flowchart')}
+        onCanvasClick={(event) => {
+          const { x, y } = canvasPoint(event)
+          const hit = nodes.find(node => Math.abs(x - (70 + node.x * (900 - 140))) < 60 && Math.abs(y - (60 + node.y * (420 - 120))) < 26)
+          if (hit === undefined) return
+          setSelected(hit.id)
+          const index = path.indexOf(hit.id)
+          if (index >= 0) setPathIndex(index)
+        }}
+        readout={[
+          [t('scene.selectedNode'), selectedNode?.label ?? '—'],
+          [t('scene.pathStep'), path.length > 0 ? `${pathIndex + 1}/${path.length}` : '—'],
+          [t('scene.nodes'), spec.nodes.length],
+          [t('scene.edges'), spec.edges.length],
+        ]} />
+      <SceneControls canRecord={canRecord} recordPending={recordPending} onConfirm={confirm} hint={t('scene.flowchartHint')} t={t}>
+        <SceneButton onClick={() => {
+          if (path.length === 0) return
+          const next = (pathIndex + 1) % path.length
+          setPathIndex(next)
+          setSelected(path[next] ?? selected)
+        }}>{t('scene.next')}</SceneButton>
+        <ScenePlayButton playing={playing} onToggle={() => { setPlaying(value => !value) }} t={t} />
+      </SceneControls>
     </div>
   )
 }

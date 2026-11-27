@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import type { ISessions } from '@agentrans/api-session-controller/client'
 import type { InjectFace, PropsLocale, PropsRuntime } from '@agentrans/client-ui-slots'
 import { Button } from '@agentrans/client-ui-primitives'
+import { branchReturnParent } from '@agentrans/session'
 import type { SessionId } from '@agentrans/session/types'
 import css from './BranchResultAction.module.css'
 
@@ -34,12 +35,7 @@ export function BranchResultAction({
   const [phase, setPhase] = useState<Phase>('idle')
   const inFlight = useRef(false)
   const allowed = useAccess('session/returnBranchResult')
-  const parentId = useSessions((state) => {
-    const current = state.byId[sessionId]
-    if (current?.origin === 'subagent' || current?.parentId === undefined) return undefined
-    const parent = state.byId[current.parentId]
-    return parent?.origin === 'subagent' ? undefined : parent?.id
-  })
+  const parentId = useSessions(state => branchReturnParent(state.byId, sessionId))
   if (!allowed || parentId === undefined || text.trim() === '') return null
 
   const confirm = async (): Promise<void> => {

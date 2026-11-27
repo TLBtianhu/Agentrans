@@ -1274,57 +1274,39 @@ export function apply(ctx: ClientContext, config: Config = {}): void {
       },
     }, ArtifactBranchResultAction))
   })
+  // Single and comparison Artifact nodes reach the same Host operations through the Session's route.
+  const nodeInjected = (sessionId: SessionId): ArtifactNodeInjected => ({
+    ...runtimeCommands(sessionId),
+    exports: { create: async (request) => { requireHostRoute(sessionId); return createArtifactExport(ctx, sessionId, request) },
+      download: async (record) => { requireHostRoute(sessionId); return downloadArtifactExport(ctx, sessionId, record) } },
+    recordAction: async (artifactId, revision, action, payload, wake, requestId) => {
+      requireHostRoute(sessionId)
+      return recordArtifactAction(ctx, sessionId, artifactId, revision, action, payload, wake, requestId)
+    },
+    saveObservation: async (artifactId, revision, observationId, label, checkpoint) => {
+      requireHostRoute(sessionId)
+      return saveArtifactObservation(ctx, sessionId, artifactId, revision, observationId, label, checkpoint)
+    },
+    sendObservation: async (artifactId, observationId, wake) => {
+      requireHostRoute(sessionId)
+      return sendArtifactObservation(ctx, sessionId, artifactId, observationId, wake)
+    },
+    confirmObservationComparison: async (group, control, variant, wake) => {
+      requireHostRoute(sessionId)
+      return confirmArtifactObservationComparison(ctx, sessionId, group, control, variant, wake)
+    },
+  })
   ctx.slots.inject('conversation.chat.node', () => ctx.slots.register({
     name: 'conversation.chat.node',
     key: 'artifact',
     locale: NS,
     store: artifactPresentationStore,
-    inject: (sessionId: SessionId): ArtifactNodeInjected => ({
-      ...runtimeCommands(sessionId),
-      exports: { create: async (request) => { requireHostRoute(sessionId); return createArtifactExport(ctx, sessionId, request) },
-        download: async (record) => { requireHostRoute(sessionId); return downloadArtifactExport(ctx, sessionId, record) } },
-      recordAction: async (artifactId, revision, action, payload, wake, requestId) => {
-        requireHostRoute(sessionId)
-        return recordArtifactAction(ctx, sessionId, artifactId, revision, action, payload, wake, requestId)
-      },
-      saveObservation: async (artifactId, revision, observationId, label, checkpoint) => {
-        requireHostRoute(sessionId)
-        return saveArtifactObservation(ctx, sessionId, artifactId, revision, observationId, label, checkpoint)
-      },
-      sendObservation: async (artifactId, observationId, wake) => {
-        requireHostRoute(sessionId)
-        return sendArtifactObservation(ctx, sessionId, artifactId, observationId, wake)
-      },
-      confirmObservationComparison: async (group, control, variant, wake) => {
-        requireHostRoute(sessionId)
-        return confirmArtifactObservationComparison(ctx, sessionId, group, control, variant, wake)
-      },
-    }),
+    inject: nodeInjected,
   }, ArtifactNodeView))
   ctx.slots.inject('conversation.chat.node', () => ctx.slots.register({
     name: 'conversation.chat.node',
     key: 'artifact-comparison',
     locale: NS,
-    inject: (sessionId: SessionId): ArtifactNodeInjected => ({
-      ...runtimeCommands(sessionId),
-      exports: { create: async (request) => { requireHostRoute(sessionId); return createArtifactExport(ctx, sessionId, request) },
-        download: async (record) => { requireHostRoute(sessionId); return downloadArtifactExport(ctx, sessionId, record) } },
-      recordAction: async (artifactId, revision, action, payload, wake, requestId) => {
-        requireHostRoute(sessionId)
-        return recordArtifactAction(ctx, sessionId, artifactId, revision, action, payload, wake, requestId)
-      },
-      saveObservation: async (artifactId, revision, observationId, label, checkpoint) => {
-        requireHostRoute(sessionId)
-        return saveArtifactObservation(ctx, sessionId, artifactId, revision, observationId, label, checkpoint)
-      },
-      sendObservation: async (artifactId, observationId, wake) => {
-        requireHostRoute(sessionId)
-        return sendArtifactObservation(ctx, sessionId, artifactId, observationId, wake)
-      },
-      confirmObservationComparison: async (group, control, variant, wake) => {
-        requireHostRoute(sessionId)
-        return confirmArtifactObservationComparison(ctx, sessionId, group, control, variant, wake)
-      },
-    }),
+    inject: nodeInjected,
   }, ArtifactComparisonNodeView))
 }

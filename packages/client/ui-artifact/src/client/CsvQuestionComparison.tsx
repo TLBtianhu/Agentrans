@@ -425,6 +425,19 @@ export function CsvQuestionComparison({ loadPage, onAttach, t }: PropsLocale<'ar
   </div>
 }
 
+/** Navigation and download actions a CSV comparison page offers once it has been sent. */
+export interface CsvSentComparisonActions {
+  readonly returnToDraft?: (() => void) | undefined
+  readonly returnToComparison?: (() => void) | undefined
+  readonly returnToExplanation?: (() => void) | undefined
+  readonly reviewSent?: ReviewSentCsvComparison | undefined
+  readonly downloadSent?: DownloadSentCsvComparison | undefined
+  readonly downloadJson?: DownloadSentCsvComparison | undefined
+  readonly viewSourceQuestion?: (() => void) | undefined
+  readonly closeSourceVisit?: (() => void) | undefined
+  readonly sourceTrail?: CsvComparisonSourceTrail | undefined
+}
+
 interface CsvSourcePathActions {
   readonly jumpInSourceTrail?: ((target: CsvComparisonSourceVisit) => void) | undefined
   readonly sourceQuestionLabel?: ((target: CsvSentQuestion) => string | undefined) | undefined
@@ -463,7 +476,7 @@ export function CsvAttachedComparison({
   downloadSent, downloadJson,
   viewSourceQuestion, closeSourceVisit, explanation, explanationActions, openExplanationSource, sideLabels, openReturnedSource, t,
   sourceTrail, jumpInSourceTrail, sourceQuestionLabel, sourceChain, sourceRecovery, retrySourceRecovery,
-}: PropsLocale<'artifact'> & CsvSourcePathActions & {
+}: PropsLocale<'artifact'> & CsvSourcePathActions & CsvSentComparisonActions & {
   readonly page: ArtifactCsvComparisonPage
   readonly draft?: boolean
   readonly userImported?: boolean
@@ -473,15 +486,6 @@ export function CsvAttachedComparison({
   readonly explanation?: CsvComparisonExplanation | undefined
   readonly explanationActions?: CsvExplanationActions | undefined
   readonly openExplanationSource?: OpenCsvExplanationSource | undefined
-  readonly returnToDraft?: (() => void) | undefined
-  readonly returnToComparison?: (() => void) | undefined
-  readonly returnToExplanation?: (() => void) | undefined
-  readonly reviewSent?: ReviewSentCsvComparison | undefined
-  readonly downloadSent?: DownloadSentCsvComparison | undefined
-  readonly downloadJson?: DownloadSentCsvComparison | undefined
-  readonly viewSourceQuestion?: (() => void) | undefined
-  readonly closeSourceVisit?: (() => void) | undefined
-  readonly sourceTrail?: CsvComparisonSourceTrail | undefined
   readonly sourceChain?: CsvSourceChainOptions | undefined
   readonly sourceRecovery?: CsvComparisonSourceRecovery | undefined
   readonly retrySourceRecovery?: (() => void) | undefined

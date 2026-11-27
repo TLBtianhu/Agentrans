@@ -1,26 +1,11 @@
 /** Framework-free timeline renderer shared by the conversation preview and the animation exporter. */
 import type { TimelineSpec } from '../scene.ts'
 import type { ScenePalette } from '../scene-palette.ts'
+import { wrapText } from './layout.ts'
 
 /** Mutable view state for a timeline render. */
 export interface TimelineRenderState {
   readonly playhead: number
-}
-
-function wrapText(context: CanvasRenderingContext2D, text: string, maxWidth: number): readonly string[] {
-  const lines: string[] = []
-  let current = ''
-  for (const character of text) {
-    const next = current + character
-    if (context.measureText(next).width > maxWidth && current.length > 0) {
-      lines.push(current)
-      current = character
-    } else {
-      current = next
-    }
-  }
-  if (current.length > 0) lines.push(current)
-  return lines
 }
 
 /**

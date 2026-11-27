@@ -33,6 +33,36 @@ export class BranchResultAdmissionBusy extends Error {
   }
 }
 
+/** Identity of one branch-result return, as remote failures report it. */
+export interface BranchResultReturnIdentity<Id, Seq> {
+  readonly parentSessionId: Id
+  readonly branchSessionId: Id
+  readonly resultSeq: Seq
+}
+
+/** Transport-neutral remote failure for an admission refusal; callers wrap it in their own error type. */
+export type BranchResultAdmissionRefusal<Id, Seq> =
+  | { readonly code: 'session/agent-busy'; readonly message: string; readonly details: { readonly reason: 'branch-result-parent-busy' } }
+  | { readonly code: 'session/branch-result-conflict'; readonly message: string; readonly details: BranchResultReturnIdentity<Id, Seq> }
+
+/**
+ * Describe an admission refusal as the remote failure every branch-result endpoint reports.
+ * @param error - Failure thrown by {@link admitBranchResult}.
+ * @param identity - The returned conclusion's parent, branch, and result sequence.
+ * @returns The refusal, or `undefined` for any other failure, which callers rethrow unchanged.
+ */
+export function branchResultAdmissionRefusal<Id, Seq>(
+  error: unknown, identity: BranchResultReturnIdentity<Id, Seq>,
+): BranchResultAdmissionRefusal<Id, Seq> | undefined {
+  if (error instanceof BranchResultAdmissionBusy) {
+    return { code: 'session/agent-busy', message: error.message, details: { reason: 'branch-result-parent-busy' } }
+  }
+  if (error instanceof BranchResultAdmissionConflict) {
+    return { code: 'session/branch-result-conflict', message: error.message, details: identity }
+  }
+  return undefined
+}
+
 /**
  * Append one confirmed branch conclusion, or acknowledge the identical earlier parent message.
  * @param parent - Agent whose maintenance phase serializes the parent-local append.
