@@ -44,8 +44,9 @@ allowBuilds:
   # optional prebuilts are omitted. Upgrade all consumers together after the
   # replacement passes that build and the release packed-install check.
   koffi: true
-  # The Python runtime deploy includes the reviewed workspace postinstall that
-  # restores the executable bit on node-pty's macOS spawn helper.
+  # Executable deploys run this reviewed workspace postinstall themselves,
+  # because pnpm keys injected workspace copies by absolute path. It restores
+  # the executable bit on node-pty's macOS spawn helper.
   '@agentrans/subprocess-local@file:packages/subprocess/subprocess-local': true
   # electron-builder pulls in the optional Squirrel.Windows helper, whose
   # install script only selects its bundled 7-Zip executable. Desktop ships

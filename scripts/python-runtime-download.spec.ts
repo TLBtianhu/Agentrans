@@ -148,8 +148,12 @@ it('starts without downloading, independently downloads either resource, and reu
     const office = await run('office').done
     expect(office.code, office.stderr).toBe(0)
     const location = JSON.parse(office.stdout) as string
-    expect(await readFile(join(location, 'node_modules/@deepseek-ai/libreoffice-kit/lib/cli.js'), 'utf8')).toBe('cli')
+    const cli = join(location, 'node_modules/@deepseek-ai/libreoffice-kit/lib/cli.js')
+    expect(await readFile(cli, 'utf8')).toBe('cli')
     expect(await run('office', { AGENTRANS_FIXTURE_FAIL: '1' }).done).toMatchObject({ code: 0, stdout: office.stdout })
+    const launched = await run().done
+    expect(launched.code, launched.stderr).toBe(0)
+    expect(JSON.parse(launched.stdout)).toEqual({ primary: JSON.parse(primary.stdout) as string, office: cli })
   } finally { await rm(root, { recursive: true, force: true }) }
 })
 

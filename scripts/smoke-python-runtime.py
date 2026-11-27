@@ -269,7 +269,7 @@ def write_advanced_profile_patch(
                 "persona": "You are a coding agent powered by the {{model}} model. Your working directory is {{cwd}}.",
             },
         },
-        {"id": "session-log-deepseek", "config": {"enabled": True}},
+        {"id": "session-log-deepseek", "disabled": False, "config": {"enabled": True}},
         *({"id": row_id, "disabled": True} for row_id in LEGACY_CUSTOM_DISABLED_ROWS),
         {"id": "tool-bash", "disabled": True},
         {"id": "tool-pwsh", "disabled": True},
@@ -1083,7 +1083,7 @@ def smoke_sdk_plugin_manager(base_url: str, executable: Path, cache: Path) -> No
                         assert manifest_path.read_bytes() == before
                 manifest = json.loads(manifest_path.read_text())
                 assert "dsh-sdk-managed-fixture" in manifest["dependencies"], manifest
-                assert "dsh-sdk-managed-fixture" in manifest["dsh"]["profile"]["bundles"], manifest
+                assert "dsh-sdk-managed-fixture" in manifest["agentrans"]["profile"]["bundles"], manifest
             finally:
                 harness.close()
         with DeepSeekHarness(**config) as restarted:
@@ -1093,7 +1093,7 @@ def smoke_sdk_plugin_manager(base_url: str, executable: Path, cache: Path) -> No
         example_home = root / "example-home"
         example_environment = {**os.environ, **environment, "DEEPSEEK_BASE_URL": base_url,
                                "DEEPSEEK_API_KEY": "sk-keyless-smoke"}
-        example_args = [sys.executable, str(example), "--dsh-home", str(example_home),
+        example_args = [sys.executable, str(example), "--agentrans-home", str(example_home),
                         "--workspace", str(root), "--dsh-bin", str(executable)]
         for decision, expected in (("n", "plugin installation rejected"), ("y", "plugin installation saved")):
             run = subprocess.run([*example_args, PLUGIN_INSTALL_PROMPT + json.dumps(str(plugin)) + "\n"],
@@ -1718,7 +1718,7 @@ def smoke_sdk_profile_plugin(base_url: str) -> None:
         manifest = json.loads((agentrans_home / "profiles" / "sdk" / "package.json").read_text())
         if "dsh-python-blackbox-plugin" not in manifest.get("dependencies", {}):
             raise AssertionError(f"dsh plugin did not record the external dependency: {manifest}")
-        if "dsh-python-blackbox-plugin" not in manifest["dsh"]["profile"]["bundles"]:
+        if "dsh-python-blackbox-plugin" not in manifest["agentrans"]["profile"]["bundles"]:
             raise AssertionError(f"dsh plugin did not activate the external bundle: {manifest}")
 
         harness = DeepSeekHarness(

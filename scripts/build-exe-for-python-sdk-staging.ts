@@ -1,4 +1,4 @@
-/** Prepare a symlink-free executable runtime payload with shared workspace module instances. */
+/** Prepare a symlink-free executable runtime payload with one instance of each workspace module. */
 import { cp, lstat, readFile, readdir, realpath, rm, unlink } from 'node:fs/promises'
 import { isAbsolute, join, relative, resolve, sep } from 'node:path'
 import { load } from 'js-yaml'
@@ -10,13 +10,12 @@ function isHoistedLocations(value: unknown): value is Record<string, string[]> {
 }
 
 /**
- * Share root workspace packages with nested consumers of the same pnpm dependency identity.
- * Different peer resolutions and third-party packages keep their installed locations.
- * All metadata paths are checked before deletion; the caller first materializes links.
+ * Require one staged copy of every workspace package, so each Cordis service class loads once.
+ * A locked deploy places injected workspace packages at their recorded locations; a second location or a second
+ * peer-specialized identity for the same package would give that package two module instances.
  * @param staging - Symlink-free deployed payload root.
- * @param workspace - Workspace root relative to which pnpm records hoisted locations.
  */
-export async function deduplicateStagedWorkspacePackages(staging: string, workspace: string): Promise<void> {
+export async function assertSingleWorkspaceCopies(staging: string): Promise<void> {
   const modules = resolve(staging, 'node_modules')
   const file = join(modules, '.modules.yaml')
   const manifest: unknown = load(await readFile(file, 'utf8'))
@@ -24,25 +23,29 @@ export async function deduplicateStagedWorkspacePackages(staging: string, worksp
     || !isHoistedLocations(manifest.hoistedLocations)) {
     throw new Error(`${file}: hoistedLocations must map dependency identities to path lists`)
   }
-  const duplicates: string[] = []
+  const copies = new Map<string, string[]>()
   for (const [identity, locations] of Object.entries(manifest.hoistedLocations)) {
-    const paths = locations.map((location) => {
-      const path = resolve(workspace, location)
-      const local = relative(modules, path)
+    const name = /^((?:@[^/]+\/)?[^@()]+)@file:/u.exec(identity)?.[1]
+    if (name === undefined) continue
+    for (const location of locations) {
+      const local = relative(modules, resolve(staging, location))
       if (local === '' || local === '..' || local.startsWith(`..${sep}`) || isAbsolute(local)) {
         throw new Error(`${file}: hoistedLocations path is outside deployed node_modules: ${location}`)
       }
-      return { path, parts: local.split(sep) }
-    })
-    if (!/^(?:@[^/]+\/)?[^@()]+@file:/.test(identity)) continue
-    const root = paths.find(({ parts }) => parts.length === (parts[0]?.startsWith('@') === true ? 2 : 1))
-    if (root === undefined) continue
-    if (!(await lstat(root.path)).isDirectory()) {
-      throw new Error(`${file}: hoistedLocations root package is not a directory: ${root.path}`)
+      copies.set(name, [...copies.get(name) ?? [], local.split(sep).join('/')])
     }
-    duplicates.push(...paths.filter(({ path }) => path !== root.path).map(({ path }) => path))
   }
-  for (const path of duplicates) await rm(path, { recursive: true, force: true })
+  if (copies.size === 0) throw new Error(`${file}: hoistedLocations records no workspace packages`)
+  const duplicated = [...copies].filter(([, paths]) => paths.length !== 1)
+  if (duplicated.length > 0) {
+    throw new Error(`${file}: workspace packages must have exactly one staged copy: ${
+      duplicated.map(([name, paths]) => `${name} (${paths.join(', ')})`).join('; ')}`)
+  }
+  for (const [name, paths] of copies) {
+    for (const path of paths) {
+      if (!(await lstat(join(modules, path))).isDirectory()) throw new Error(`${file}: staged ${name} is not a directory: ${path}`)
+    }
+  }
 }
 
 /** Return the first symbolic link below a directory, if one exists. */
@@ -62,8 +65,8 @@ async function findSymlink(directory: string): Promise<string | undefined> {
 /**
  * Replace every deploy-time package link below the staged payload with real files.
  *
- * Legacy deploy links workspace packages into the target's `node_modules`, and
- * those links must survive packaging as files. One link is not a package: when
+ * A deploy can link packages into the target's `node_modules`, and those links
+ * must survive packaging as files. One link is not a package: when
  * the deploy target sits inside the deployed project, pnpm links that project
  * into its own `node_modules`. Dereferencing it would copy the payload into
  * itself, and the packaged payload never carries the project source, so the
