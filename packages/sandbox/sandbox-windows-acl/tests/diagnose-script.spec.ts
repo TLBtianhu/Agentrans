@@ -19,7 +19,7 @@
  * Cleanup restores full control on the fixture directories before removing them.
  */
 
-import { execFileSync } from 'node:child_process'
+import { execFileSync, spawnSync } from 'node:child_process'
 import { mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
@@ -27,6 +27,11 @@ import { fileURLToPath } from 'node:url'
 import { beforeAll, describe, expect, it } from 'vitest'
 
 const isWin32 = process.platform === 'win32'
+
+// An elevated (High integrity) token holds WRITE_DAC and backup rights through Administrators, so the
+// standard-user denials these cases build cannot occur there; hosted CI runners run elevated.
+const elevated = isWin32 && (spawnSync('whoami', ['/groups'], { encoding: 'utf8' }).stdout ?? '').includes('S-1-16-12288')
+const itStandardUser = it.skipIf(elevated)
 
 function pwshAvailable(): boolean {
   try {
@@ -241,7 +246,7 @@ describe.skipIf(!isWin32 || !pwshAvailable())('diagnose-windows-sandbox-acl scri
     }
   }, timeout)
 
-  it('grants full control to a directory that lacks WRITE_DAC and WRITE_OWNER, preserving owner and label', () => {
+  itStandardUser('grants full control to a directory that lacks WRITE_DAC and WRITE_OWNER, preserving owner and label', () => {
     const scratch = newScratch()
     try {
       const target = makeDir(scratch, 'missing-write-owner')
@@ -268,7 +273,7 @@ describe.skipIf(!isWin32 || !pwshAvailable())('diagnose-windows-sandbox-acl scri
     }
   }, timeout)
 
-  it('repairs a missing grant and a package ACE in the same invocation', () => {
+  itStandardUser('repairs a missing grant and a package ACE in the same invocation', () => {
     const scratch = newScratch()
     try {
       const target = makeDir(scratch, 'both')
@@ -335,7 +340,7 @@ describe.skipIf(!isWin32 || !pwshAvailable())('diagnose-windows-sandbox-acl scri
     }
   }, timeout)
 
-  it('repairs the whole subtree in one run when only the workspace root is named', () => {
+  itStandardUser('repairs the whole subtree in one run when only the workspace root is named', () => {
     const scratch = newScratch()
     try {
       // The sandbox reports its provisioning failure on the workspace root while the
@@ -374,7 +379,7 @@ describe.skipIf(!isWin32 || !pwshAvailable())('diagnose-windows-sandbox-acl scri
     }
   }, timeout)
 
-  it('keeps an inherit-only ACE when it grants the missing right', () => {
+  itStandardUser('keeps an inherit-only ACE when it grants the missing right', () => {
     const scratch = newScratch()
     try {
       const target = makeDir(scratch, 'inherit-only')
@@ -561,7 +566,7 @@ describe.skipIf(!isWin32 || !pwshAvailable())('diagnose-windows-sandbox-acl scri
     }
   }, timeout)
 
-  it('restores every attempted change in reverse order when a later path fails', () => {
+  itStandardUser('restores every attempted change in reverse order when a later path fails', () => {
     const scratch = newScratch()
     try {
       const out = join(scratch, 'out')
@@ -583,7 +588,7 @@ describe.skipIf(!isWin32 || !pwshAvailable())('diagnose-windows-sandbox-acl scri
     }
   }, timeout)
 
-  it('prints the pending recovery command and reports restore_pending_then_stop when rollback fails', () => {
+  itStandardUser('prints the pending recovery command and reports restore_pending_then_stop when rollback fails', () => {
     const scratch = newScratch()
     try {
       const out = join(scratch, 'out')
@@ -801,7 +806,7 @@ function icacls { throw [System.IO.IOException]::new('icacls unavailable') }
     }
   }, timeout)
 
-  it('repairs its own workspace root when -AllowRoot is the object itself', () => {
+  itStandardUser('repairs its own workspace root when -AllowRoot is the object itself', () => {
     const scratch = newScratch()
     try {
       const out = join(scratch, 'out')
@@ -823,7 +828,7 @@ function icacls { throw [System.IO.IOException]::new('icacls unavailable') }
     }
   }, timeout)
 
-  it('is idempotent: a second repair run changes nothing', () => {
+  itStandardUser('is idempotent: a second repair run changes nothing', () => {
     const scratch = newScratch()
     try {
       const target = makeDir(scratch, 'idempotent')

@@ -59,9 +59,9 @@ export function resolveDshBinFromManifests(dshManifestUrl: string, clientManifes
     throw new Error(`dsh SDK client ${String(clientManifest.version)} requires the same dsh version, got ${String(dshManifest.version)}`)
   }
   const bin = typeof dshManifest.bin === 'object' && dshManifest.bin !== null
-    ? (dshManifest.bin as Record<string, unknown>).dsh
+    ? (dshManifest.bin as Record<string, unknown>).agentrans
     : dshManifest.bin
-  if (typeof bin !== 'string' || bin === '') throw new Error('@agentrans/cli declares no dsh executable')
+  if (typeof bin !== 'string' || bin === '') throw new Error('@agentrans/cli declares no agentrans executable')
   return resolve(dirname(fileURLToPath(dshManifestUrl)), bin)
 }
 

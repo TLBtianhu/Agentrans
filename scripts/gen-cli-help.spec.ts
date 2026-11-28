@@ -46,8 +46,8 @@ describe('CLI help discovery', () => {
     }, ['web'])
     expect(visited).toEqual(['', 'plugin', 'web', 'web nested', '--profile web'])
     expect(pages.map(page => page.invocations)).toEqual([
-      ['agentrans'], ['dsh plugin'], ['dsh web', 'dsh --profile web'],
-      ['dsh web nested', 'dsh --profile web nested'],
+      ['agentrans'], ['agentrans plugin'], ['agentrans web', 'agentrans --profile web'],
+      ['agentrans web nested', 'agentrans --profile web nested'],
     ])
   })
 
@@ -63,8 +63,8 @@ describe('CLI help discovery', () => {
     }, ['web'])
     expect(visited).toEqual(['', 'plugin', 'web', 'web serve', 'web s', 'web help', '--profile web'])
     expect(pages.map(page => page.invocations)).toEqual([
-      ['agentrans'], ['dsh plugin'], ['dsh web', 'dsh web help', 'dsh --profile web', 'dsh --profile web help'],
-      ['dsh web serve', 'dsh web s', 'dsh --profile web serve', 'dsh --profile web s'],
+      ['agentrans'], ['agentrans plugin'], ['agentrans web', 'agentrans web help', 'agentrans --profile web', 'agentrans --profile web help'],
+      ['agentrans web serve', 'agentrans web s', 'agentrans --profile web serve', 'agentrans --profile web s'],
     ])
   })
 

@@ -172,6 +172,11 @@ describe('SDK dsh launch resolution', () => {
     },
   )
 
+  it('reads the agentrans entry of the object npm bin form', () => {
+    const pair = manifestPair({ version: '1.0.0', bin: { agentrans: './bin.js', dsh: './other.js' } }, { version: '1.0.0' })
+    expect(resolveDshBinFromManifests(pair.dshUrl, pair.clientUrl)).toBe(join(pair.root, 'bin.js'))
+  })
+
   it('accepts the string npm bin form', () => {
     const pair = manifestPair({ version: '1.0.0', bin: './bin.js' }, { version: '1.0.0' })
     expect(resolveDshBinFromManifests(pair.dshUrl, pair.clientUrl)).toBe(join(pair.root, 'bin.js'))
@@ -182,7 +187,7 @@ describe('SDK dsh launch resolution', () => {
     (bin) => {
       const pair = manifestPair({ version: '1.0.0', bin }, { version: '1.0.0' })
       expect(() => resolveDshBinFromManifests(pair.dshUrl, pair.clientUrl))
-        .toThrow('declares no dsh executable')
+        .toThrow('declares no agentrans executable')
     },
   )
 })

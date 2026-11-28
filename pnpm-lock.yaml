@@ -13790,6 +13790,12 @@ importers:
       '@agentrans/session-projection':
         specifier: workspace:*
         version: link:../../session/session-projection
+      '@agentrans/system-prompt':
+        specifier: workspace:*
+        version: link:../../core/system-prompt
+      '@agentrans/tools':
+        specifier: workspace:*
+        version: link:../../core/tools
 
   packages/llm/token-meter:
     dependencies:

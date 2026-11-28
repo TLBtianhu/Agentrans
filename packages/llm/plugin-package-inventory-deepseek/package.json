@@ -60,6 +60,8 @@
     "@agentrans/deepseek-llm-api-extensions": "workspace:*",
     "@agentrans/scope": "workspace:*",
     "@agentrans/session": "workspace:*",
-    "@agentrans/session-projection": "workspace:*"
+    "@agentrans/session-projection": "workspace:*",
+    "@agentrans/system-prompt": "workspace:*",
+    "@agentrans/tools": "workspace:*"
   }
 }

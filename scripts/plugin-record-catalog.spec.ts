@@ -119,7 +119,7 @@ describe('plugin record declarations', () => {
 
   it('requires the types module augmentation and verifiable package ownership', () => {
     expect(() => collectPluginRecords(fixture({
-      [RECORDS]: augmentation(ENTRY).replace("dsh-session/types'", "dsh-session'"),
+      [RECORDS]: augmentation(ENTRY).replace("@agentrans/session/types'", "@agentrans/session'"),
     }))).toThrow("must augment declare module '@agentrans/session/types'")
     for (const manifest of ['{}', 'broken json', '{"name":"@external/bridge"}']) {
       expect(() => collectPluginRecords(fixture({

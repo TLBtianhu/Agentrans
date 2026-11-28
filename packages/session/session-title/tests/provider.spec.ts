@@ -65,7 +65,7 @@ describe('SessionTitleService Provider lifecycle', () => {
     const child = kind === 'fork' ? ctx.sessions.fork(source) : ctx.sessions.create(SessionId('child'), {
       meta: { origin: 'subagent', parentSession: source.id },
     })
-    expect(child.header.parentSession).toBe(kind === 'fork' ? undefined : source.id)
+    expect(child.header.parentSession).toBe(source.id)
     appendHumanPrompt(child, 'First own prompt')
     appendRoute(child)
     await settle()

@@ -85,7 +85,7 @@ it.skipIf(process.platform === 'win32')('keeps npm tarball bytes when reusing a 
     expect(result.isCanceled).toBe(false)
     expect(result.signal).toBeUndefined()
     expect(result.exitCode, result.stderr).toBe(0)
-    const tarball = join(output, 'deepseek-ai-dsh-experimental-cua-macos-1.0.0.tgz')
+    const tarball = join(output, 'agentrans-experimental-cua-macos-1.0.0.tgz')
     await verifyCuaHelperTarball(tarball, identity)
     return readFileSync(tarball)
   }

@@ -112,6 +112,8 @@ async function bench(snapshot: ChatSnapshot) {
   const events = new ConversationEventRegistry(ctx)
   const views = new ConversationViewRegistry(ctx)
   ctx.provide('connection', { state: createSnapshotStore('connected') } as never)
+  // Chat prefills an inquiry branch's draft through the composer; these sub-call cases never fork.
+  ctx.provide('conversation', { input: { prefillQuoteDraft: () => {} } } as never)
   ctx.provide('configForms', { developerTools: { enabled: createSnapshotStore(true) }, get: () => stubConfigForm().scope } as never)
   ctx.provide('uiConversation', {
     events,

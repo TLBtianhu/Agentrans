@@ -100,7 +100,10 @@ it('starts Host qualification with an external verification instance and ignores
   expect(existsSync(join(root, 'project'))).toBe(false)
 })
 
-it('passes an Electron-bound verification context whose prepared profile survives main-process validation', async () => {
+// The runner resolves this host's Desktop build target; Desktop ships for macOS and Windows only.
+const desktopHost = process.platform === 'darwin' || process.platform === 'win32'
+
+it.skipIf(!desktopHost)('passes an Electron-bound verification context whose prepared profile survives main-process validation', async () => {
   const current = await isolateEnvironment()
   const executable = process.platform === 'darwin'
     ? join(current.root, 'Electron.app/Contents/MacOS/Electron') : join(current.root, 'electron/electron.exe')

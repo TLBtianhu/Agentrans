@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest'
+import { existsSync } from 'node:fs'
 import { execFile, spawn } from 'node:child_process'
 import { promisify } from 'node:util'
 import { generateKeyPairSync } from 'node:crypto'
@@ -69,7 +70,10 @@ async function failedUninstall(root: string, registration: WindowsRegistrationPl
   throw new Error('Expected uninstall refusal')
 }
 
-describe.skipIf(process.platform !== 'win32')('agentrans-installer CLI', { timeout: 30_000 }, () => {
+// The shipped installer script runs against the built product layout; lanes that build first exercise it.
+const productLayoutBuilt = existsSync(fileURLToPath(new URL('../../../packages/boot/product-layout/lib/index.js', import.meta.url)))
+
+describe.skipIf(process.platform !== 'win32' || !productLayoutBuilt)('agentrans-installer CLI', { timeout: 30_000 }, () => {
   it('installs a signed release and silently uninstalls app-only scope', async () => {
     const { root, releasePath, manifestPath, publicKeyPath, registration } = await setupRelease('0.1.0')
     await execFileAsync(process.execPath, [installer, 'install', '--root', root, '--release', releasePath, '--manifest', manifestPath, '--public-key', publicKeyPath, '--uninstall-key', registration.uninstallKey, '--shortcut-path', registration.shortcutPath])

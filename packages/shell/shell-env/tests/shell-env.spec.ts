@@ -77,7 +77,7 @@ describe('ShellEnvRegistry', () => {
 
     vi.stubEnv('AGENTRANS_HOME', undefined)
     const fromDefault = new ShellEnvRegistry(new Context())
-    expect(fromDefault.collect(execution()).AGENTRANS_HOME).toBe(join(homedir(), '.dsh'))
+    expect(fromDefault.collect(execution()).AGENTRANS_HOME).toBe(join(homedir(), '.agentrans'))
   })
 
   it('collects declared contributor variables and omits unavailable values', () => {

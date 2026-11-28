@@ -14,7 +14,7 @@ export interface GeneratedVersion {
   readonly version: string
   readonly publishTimestamp: number
   readonly source: Readonly<Record<string, string>>
-  readonly engines?: { readonly dsh: string }
+  readonly engines?: { readonly agentrans: string }
 }
 
 /** One generated plugin, in the field order of the format. */
@@ -135,7 +135,7 @@ function releaseOf(
   const range = dshRange(manifest)
   const release = {
     name,
-    version: { version, publishTimestamp, source, ...typeof range === 'string' ? { engines: { dsh: range } } : {} },
+    version: { version, publishTimestamp, source, ...typeof range === 'string' ? { engines: { agentrans: range } } : {} },
   }
   const problem = range instanceof Error ? range.message : invalid([entryOf(name, [release])])?.replace('$.plugins[0]', 'entry')
   if (problem === undefined) return release

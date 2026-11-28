@@ -7,7 +7,9 @@ import { globSync, readFileSync } from 'node:fs'
 import { resolve, sep } from 'node:path'
 
 const ROOT = resolve(import.meta.dirname, '..')
-const AGENTRANS_PACKAGE_NAME = /^@agentrans\/cli(?:-|$)/
+const AGENTRANS_PACKAGE_NAME = /^@agentrans\//
+// Rescoped vendor libraries and the documentation site share the scope but keep their own licensing.
+const OTHER_FAMILY_DIRECTORY = /^(?:vendor|website)\//
 
 /** Result of checking every DSH package reachable through the root workspace list. */
 export interface DshPackageLicenseReport {
@@ -61,11 +63,11 @@ export function inspectDshPackageLicenses(root: string): DshPackageLicenseReport
   for (const file of workspaceManifestPaths(root)) {
     const manifest = readManifest(root, file)
     const name = manifest.name
-    if (typeof name !== 'string' || !AGENTRANS_PACKAGE_NAME.test(name)) continue
+    const normalizedFile = file.split(sep).join('/')
+    if (typeof name !== 'string' || !AGENTRANS_PACKAGE_NAME.test(name) || OTHER_FAMILY_DIRECTORY.test(normalizedFile)) continue
 
     packageCount++
     if (manifest.license !== 'MIT') {
-      const normalizedFile = file.split(sep).join('/')
       failures.push(
         `${normalizedFile}: ${name} must declare "license": "MIT"; found ${printable(manifest.license)}.`,
       )

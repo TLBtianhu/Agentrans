@@ -23,6 +23,8 @@ import {
 import { isExperimentalPackageName } from './experimental-package-policy.ts'
 // The independently published entry package owns platform-engine dependencies.
 const EXTERNAL_KIT_PACKAGES = new Set(['@deepseek-ai/libreoffice-kit'])
+/** Scopes whose names the workspace owns: an unlisted name in either is an unknown workspace package. */
+const WORKSPACE_SCOPES = ['@agentrans/', '@deepseek-ai/'] as const
 const PROFILE_SOURCE = 'packages/util/official-bundles/src/bundles.ts'
 const PRESET_PATTERN = 'packages/bundle/web-app/presets/*.patch.yml'
 const RUNTIME_SECTIONS = ['dependencies', 'optionalDependencies', 'peerDependencies'] as const
@@ -143,7 +145,7 @@ export function verifyDefaultProductIsolation(root: string): ProductIsolationRes
     const pkg = packages.get(packageName)
     if (pkg !== undefined) add(pkg, origin)
     else if (EXTERNAL_KIT_PACKAGES.has(packageName)) return
-    else if (packageName.startsWith('@agentrans/')) failures.push(`${origin}: unknown workspace package ${name}`)
+    else if (WORKSPACE_SCOPES.some(scope => packageName.startsWith(scope))) failures.push(`${origin}: unknown workspace package ${name}`)
   }
   const dependency = (name: string, range: string, owner: Package, origin: string): void => {
     reference(name, origin, owner)
