@@ -16,21 +16,22 @@ interface Profile {
 // mapped @typescript-eslint/* to typescript/* and four extension rules to their
 // Oxlint core equivalents. These fingerprints pin the resulting repository
 // snapshot; they do not re-evaluate that deleted baseline or track its preset.
+// The rename to Agentrans changed only the util-crypto name in one diagnostic message.
 const profiles = {
   source: {
     count: 89,
     indexes: [0, 1, 4, 5],
-    sha256: '3e8b8455827254d6da59afb803d30f062b9fe1264b4df75ce4c8cd6e742b93dd',
+    sha256: '276325a04c5bc33b2ffd7faacc6bd122adc80589e3487dc7b23cd81fd22f85dc',
   },
   example: {
     count: 88,
     indexes: [0, 1, 2, 4, 5],
-    sha256: 'e2b944c028ef1971302d47b2eb0e95c05e740623c7cbaebb4b1312dbf73bf156',
+    sha256: 'fa2d0fe9fea65e94bfa1bec80050d8497ace8902aa89b720084296d8a05b4620',
   },
   test: {
     count: 84,
     indexes: [0, 3, 4, 5],
-    sha256: '7e4e1ed0cfca06ac94eeb26081195b5f753e7527775d5f5b95ccfefac9d2b137',
+    sha256: 'a5927aa4a4e0ba66ab4e17f5902e5cc267f43cafc4a5902e898f4cc420ce1d6b',
   },
 } as const satisfies Record<string, Profile>
 

@@ -510,7 +510,8 @@ function compatibilityOf(
   name: string, version: MarketVersion, exemptions: Readonly<Record<string, readonly string[]>>, runtimeVersion: string,
 ): MarketCompatibility {
   // A catalog published before the rename still names the range under `dsh`.
-  const declared = version.engines.agentrans ?? version.engines.agentrans
+  /* eslint-disable-next-line typescript/no-deprecated -- read the retired engine name of an older catalog */
+  const declared = version.engines.agentrans ?? version.engines.dsh
   const manifest = { name, version: version.version, ...declared === undefined ? {} : { engines: { agentrans: declared } } }
   const issue = evaluatePluginCompatibility(manifest, exemptions, runtimeVersion)
   if (issue === undefined) return { compatible: true }

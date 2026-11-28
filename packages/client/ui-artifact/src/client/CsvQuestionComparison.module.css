@@ -3,7 +3,7 @@
 .review {
   box-sizing: border-box;
   padding: 8px 12px;
-  border: 1px solid var(--dsw-alias-border-l2);
+  border: 0.5px solid var(--dsw-alias-border-l2);
   border-radius: var(--dsw-radius-xs);
 }
 
@@ -132,7 +132,7 @@
 .readings > div {
   min-width: 0;
   padding: 8px 12px;
-  border: 1px solid var(--dsw-alias-border-l2);
+  border: 0.5px solid var(--dsw-alias-border-l2);
   border-radius: var(--dsw-radius-xs);
   overflow-wrap: anywhere;
 }
@@ -148,7 +148,7 @@
 
 .changes li {
   padding: 2px 6px;
-  border: 1px solid var(--dsw-alias-border-l2);
+  border: 0.5px solid var(--dsw-alias-border-l2);
   border-radius: var(--dsw-radius-xs);
   overflow-wrap: anywhere;
 }

@@ -1,6 +1,6 @@
 /** Runtime relocation, verification, self-test, and activation gate. */
 import { readFile, stat, writeFile } from 'node:fs/promises'
-import { join, relative } from 'node:path'
+import { join, relative, win32 } from 'node:path'
 import type { AssetRecord } from './manifest.ts'
 import type { ProductLayout } from './layout.ts'
 
@@ -45,8 +45,9 @@ async function fileExists(path: string): Promise<boolean> {
  * @returns Configuration whose home and executable point at the current runtime.
  */
 export function relocatePyvenv(source: string, runtimeRoot: string): string {
-  const scripts = join(runtimeRoot, 'Scripts')
-  const executable = join(scripts, 'python.exe')
+  // pyvenv.cfg describes a Windows Python, so its paths use Windows separators wherever this runs.
+  const scripts = win32.join(runtimeRoot, 'Scripts')
+  const executable = win32.join(scripts, 'python.exe')
   const sourceLines = source.split(/\r?\n/)
   const hasHome = sourceLines.some(line => /^home\s*=/.test(line))
   const hasExecutable = sourceLines.some(line => /^executable\s*=/.test(line))

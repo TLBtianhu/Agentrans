@@ -8,6 +8,8 @@ import Loader from '@agentrans/cordis-plugin-loader'
 import SessionProjectionRegistry from '@agentrans/session-projection'
 import AgentPresets from '../src/index.ts'
 import type { Context } from '@agentrans/cordis'
+import SystemPrompt from '@agentrans/system-prompt'
+import ToolRuntime from '@agentrans/tools'
 
 const contexts: Context[] = []
 afterEach(async () => { for (const ctx of contexts.splice(0)) await ctx.fiber.dispose() })
@@ -247,6 +249,8 @@ it('keeps its own instance off the generated Settings pages', () => omitsGenerat
   await ctx.plugin(Loader)
   await ctx.plugin(SessionProjectionRegistry)
   await ctx.plugin(AgentRegistry)
+  await ctx.plugin(SystemPrompt, { personaPrefix: '' })
+  await ctx.plugin(ToolRuntime)
   return ctx.plugin(AgentPresets, { default: 'standard' })
 }))
 

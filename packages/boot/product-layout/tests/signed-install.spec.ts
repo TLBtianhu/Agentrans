@@ -27,6 +27,9 @@ async function tempRoot(): Promise<string> {
   return root
 }
 
+/** The installer extracts with Windows' bundled tar.exe; other hosts run the same arguments through their tar. */
+const systemTar = process.platform === 'win32' ? 'tar.exe' : 'tar'
+
 async function archive(root: string, version: string): Promise<string> {
   const payload = join(root, `payload-${version}`)
   await mkdir(payload, { recursive: true })
@@ -55,7 +58,7 @@ describe('signed release installation', () => {
       },
       registrationReader: async () => ({ registry: 'missing', shortcut: 'missing' }),
       runner: async (file, args) => {
-        if (file === 'tar.exe') await execFileAsync(file, [...args])
+        if (file === 'tar.exe') await execFileAsync(systemTar, [...args])
       },
     })
     expect(result.install.manifest.appVersion).toBe('0.1.0')
@@ -94,7 +97,7 @@ describe('signed release installation', () => {
         registrationReader: async () => ({ registry: 'missing', shortcut: 'missing' }),
         runner: async (file, args) => {
           if (file === 'reg.exe') throw new Error('registry failed')
-          await execFileAsync(file, [...args])
+          await execFileAsync(systemTar, [...args])
         },
       })
     } catch (error) {
@@ -132,7 +135,7 @@ describe('signed release installation', () => {
         if (inspections++ > 0) throw refusal
         return { registry: 'missing', shortcut: 'missing' }
       },
-      runner: async (file, args) => { if (file === 'tar.exe') await execFileAsync(file, [...args]) },
+      runner: async (file, args) => { if (file === 'tar.exe') await execFileAsync(systemTar, [...args]) },
     })
     await expect(attempt).rejects.toBeInstanceOf(SignedReleaseInstallError)
     await expect(attempt).rejects.toMatchObject({ registrationError: refusal,

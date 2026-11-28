@@ -102,9 +102,9 @@ describe('RepositoryCleaner', () => {
 
     await new RepositoryCleaner(root).clean()
 
-    expect(readdirSync(join(hoisted, '@agentrans'))).toEqual(['dsh-live'])
+    expect(readdirSync(join(hoisted, '@agentrans'))).toEqual(['live'])
     expect(readdirSync(hoisted)).toEqual(['@agentrans'])
-    expect(readdirSync(join(root, 'node_modules/@deepseek-ai'))).toEqual([])
+    expect(readdirSync(join(root, 'node_modules/@agentrans'))).toEqual([])
     expect(existsSync(join(hoisted, '@agentrans/live/package.json'))).toBe(true)
   })
 

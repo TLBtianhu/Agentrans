@@ -55,7 +55,8 @@ describe.each(['none', 'zstd'] as const)('fork delivery persistence (%s)', (comp
           const restored = Session.fromRestore(child.id, stored.events, handle.header, handle.inheritedEventCount, stored.eventState)
           expect(restored.snapshotEvents()).toEqual(child.snapshotEvents())
           expect(restored.inheritedEventCount).toBe(child.inheritedEventCount)
-          expect(restored.header.parentSession).toBe(kind === 'subagent' || kind === 'legacy' ? source.id : undefined)
+          // Every fork records its direct source; a nested fork names the fork it came from.
+          expect(restored.header.parentSession).toBe(kind === 'nested' ? ordinary.id : source.id)
         } finally { await handle.close() }
       } finally {
         expect(await readFile(path)).toEqual(bytes)

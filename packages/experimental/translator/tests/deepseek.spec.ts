@@ -88,7 +88,8 @@ describe('native Flash translation', () => {
       for await (const _chunk of b.ctx.llm.stream({ provider: 'deepseek-official', model: 'deepseek-flash',
         reasoningEffort: ReasoningEffortId('off'), messages: history, sessionId: session.id })) { /* Native main request control. */ }
       expect(b.requests[0]!.body).toHaveProperty('dsh_session_log')
-      expect(b.requests[0]!.sessionHeader).toBe(true)
+      // No request carries the retired harness session header; the session-log field marks the main request.
+      expect(b.requests[0]!.sessionHeader).toBe(false)
       const accepted = session.snapshotEvents().filter(event => event.type === 'session-log-deepseek/delivery-accepted')
       expect(accepted).toHaveLength(1)
       expect(await b.translate(provider)).toBe('翻译结果')

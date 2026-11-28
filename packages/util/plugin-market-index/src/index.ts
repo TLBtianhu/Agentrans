@@ -205,16 +205,23 @@ function source(value: unknown, path: string): MarketSource {
   }
 }
 
+function engineRange(member: unknown, at: string): string {
+  const range = stringAt(member, at)
+  if (range.startsWith('workspace:')) fail(at, 'must not be a workspace: range')
+  if (semver.validRange(range) === null) fail(at, 'must be a SemVer range')
+  return range
+}
+
 function engines(value: unknown, path: string): MarketEngines {
   const object = objectAt(value, path)
-  const dsh = optional(object, 'dsh', path, (member, at) => {
-    const range = stringAt(member, at)
-    if (range.startsWith('workspace:')) fail(at, 'must not be a workspace: range')
-    if (semver.validRange(range) === null) fail(at, 'must be a SemVer range')
-    return range
-  })
-  /* eslint-disable-next-line typescript/no-deprecated -- a catalog published before the rename still names the engine `dsh` */
-  return dsh === undefined ? {} : { dsh }
+  const agentrans = optional(object, 'agentrans', path, engineRange)
+  // A catalog published before the rename still names the engine `dsh`.
+  const dsh = optional(object, 'dsh', path, engineRange)
+  return {
+    ...agentrans === undefined ? {} : { agentrans },
+    /* eslint-disable-next-line typescript/no-deprecated -- read the retired engine name of an older catalog */
+    ...dsh === undefined ? {} : { dsh },
+  }
 }
 
 function icon(value: unknown, path: string, indexUrl: URL): string {

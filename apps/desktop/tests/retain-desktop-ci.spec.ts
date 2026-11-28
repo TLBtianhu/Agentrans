@@ -27,7 +27,7 @@ describe('CI package retention', () => {
     const root = await fixture()
     await mkdir(join(root, 'targets', 'win-x64', 'unsigned-artifacts'), { recursive: true })
     await expect(retainDesktopCi({
-      AGENTRANS_DESKTOP_TARGET: 'win-x64', PACKAGE_SIGNING: 'unsigned', AGENTRANS_DESKTOP_PACKAGE_CACHE_DIR: root, RUNNER_TEMP: root,
+      AGENTRANS_DESKTOP_TARGET_PLATFORM: 'win32', PACKAGE_SIGNING: 'unsigned', AGENTRANS_DESKTOP_PACKAGE_CACHE_DIR: root, RUNNER_TEMP: root,
     }, { artifacts: join(root, 'targets', 'win-x64', 'unsigned-artifacts'), retained: join(root, 'retained') })).rejects.toThrow(/contains no artifacts/u)
   })
 
@@ -42,7 +42,7 @@ describe('CI package retention', () => {
     const summary = join(root, 'summary')
     await writeFile(summary, '')
     const retained = await retainDesktopCi({
-      AGENTRANS_DESKTOP_TARGET: 'win-x64',
+      AGENTRANS_DESKTOP_TARGET_PLATFORM: 'win32',
       PACKAGE_SIGNING: 'signed',
       AGENTRANS_DESKTOP_PACKAGE_CACHE_DIR: root,
       RUNNER_TEMP: join(root, 'runner-temp'),

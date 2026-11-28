@@ -200,6 +200,8 @@ export default defineConfig({
   resolve: { alias: testingAliases },
   test: {
     ...localWorkerBudget,
+    // Scene export suites import gitignored generated programs; a clean tree generates them once.
+    globalSetup: ['./scripts/test-scene-bundles.ts'],
     setupFiles: [
       './scripts/test-proxy-environment.ts', './scripts/test-dom-environment.ts', './scripts/test-official-listing-guard.ts',
     './scripts/test-scene-theme.ts',

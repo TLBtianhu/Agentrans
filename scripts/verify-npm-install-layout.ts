@@ -1,6 +1,6 @@
 /** Verify npm's physical package placement for two incompatible DSH releases. */
 
-import { readFileSync } from 'node:fs'
+import { globSync, readFileSync } from 'node:fs'
 import { posix, resolve } from 'node:path'
 import {
   buildRegistryIndex,
@@ -15,6 +15,9 @@ const CORDIS_PACKAGE = '@agentrans/cordis'
 const NESTED_AGENTRANS_ALIAS = 'dsh-previous'
 const NESTED_AGENTRANS_PATH = `node_modules/${NESTED_AGENTRANS_ALIAS}`
 const DEPENDENCY_FIELDS = ['dependencies', 'optionalDependencies', 'peerDependencies'] as const
+/** Rescoped vendor libraries share the product scope but publish their own versions. */
+const VENDOR_PACKAGES = new Set(globSync('vendor/*/package.json', { cwd: resolve(import.meta.dirname, '..') })
+  .map(file => (JSON.parse(readFileSync(resolve(import.meta.dirname, '..', file), 'utf8')) as { name: string }).name))
 
 /**
  * Resolution work accepted from the dual-release graph, in
@@ -70,7 +73,7 @@ export interface DshInstallLayoutSummary {
 }
 
 function isDshPackage(name: string): boolean {
-  return name === AGENTRANS_PACKAGE || name.startsWith(`${AGENTRANS_PACKAGE}-`)
+  return name.startsWith('@agentrans/') && !VENDOR_PACKAGES.has(name)
 }
 
 function cloneForVersion(manifest: object, version: string): MutableRegistryManifest {

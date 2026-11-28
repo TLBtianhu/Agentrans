@@ -13,6 +13,8 @@ import { createScope } from '@agentrans/scope'
 import AgentPresets from '@agentrans/agent-preset-registry'
 import { PluginPackages } from '@agentrans/app-boot'
 import DeepSeekLlmApiExtensionRegistry from '@agentrans/deepseek-llm-api-extensions'
+import SystemPrompt from '@agentrans/system-prompt'
+import ToolRuntime from '@agentrans/tools'
 import * as PluginInventory from '../src/index.ts'
 
 const contexts: Context[] = []
@@ -50,6 +52,8 @@ async function harness(
   ctx.loader.builtins.include = Include
   await ctx.plugin(SessionProjectionRegistry)
   await ctx.plugin(AgentRegistry)
+  await ctx.plugin(SystemPrompt, { personaPrefix: '' })
+  await ctx.plugin(ToolRuntime)
   await ctx.plugin(AgentPresets, { default: 'fixture' })
   await ctx.plugin(DeepSeekLlmApiExtensionRegistry)
   const inventory = enabled === undefined

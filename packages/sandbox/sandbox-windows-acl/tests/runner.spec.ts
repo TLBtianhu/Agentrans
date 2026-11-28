@@ -16,6 +16,11 @@ import { resolvePwshPath } from '@agentrans/pwsh-local'
 import { AclWriteGrant, tempWriteSid, workspaceWriteSid } from '../src/index.ts'
 
 const isWin32 = process.platform === 'win32'
+
+// An elevated (High integrity) token holds WRITE_DAC and backup rights through Administrators, so the
+// standard-user denials these cases build cannot occur there; hosted CI runners run elevated.
+const elevated = isWin32 && (spawnSync('whoami', ['/groups'], { encoding: 'utf8' }).stdout ?? '').includes('S-1-16-12288')
+const itStandardUser = it.skipIf(elevated)
 const runnerEntry = fileURLToPath(new URL('../src/runner.ts', import.meta.url))
 
 // Functional probe, not where.exe: spawnSync never throws on a missing
@@ -526,7 +531,7 @@ describe.skipIf(!isWin32 || !pwshAvailable())('windows-acl runner', () => {
     }
   }, 30_000)
 
-  it('a FullControl open inside a granted root still works for files (the deny inherits to containers only)', () => {
+  itStandardUser('a FullControl open inside a granted root still works for files (the deny inherits to containers only)', () => {
     // The ambient-delete deny is 0x40, a member of FILE_ALL_ACCESS: inheriting
     // it onto files would deny every GENERIC_ALL/FullControl open by the user,
     // Administrators, SYSTEM, or the DSH host. Directories inside a granted
